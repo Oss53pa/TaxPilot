@@ -5,7 +5,7 @@ interface DeterminationResultatFiscalProps {
   modeEdition?: boolean
 }
 
-const DeterminationResultatFiscal: React.FC<DeterminationResultatFiscalProps> = ({ modeEdition = false }) => {
+const DeterminationResultatFiscal: React.FC<DeterminationResultatFiscalProps> = ({ modeEdition: _modeEdition = false }) => {
   return (
     <Box>
       <Typography variant="h5" sx={{ mb: 3, fontWeight: 700, color: '#191919' }}>

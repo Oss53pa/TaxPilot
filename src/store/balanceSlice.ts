@@ -132,7 +132,7 @@ const balanceSlice = createSlice({
     clearBalanceError: (state) => {
       state.error = null
     },
-    resetBalanceState: (state) => {
+    resetBalanceState: (_state) => {
       return { ...initialState }
     },
   },

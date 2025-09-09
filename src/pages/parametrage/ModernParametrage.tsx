@@ -253,15 +253,15 @@ const ModernParametrage: React.FC = () => {
     modifiedBy: 'Admin'
   })
 
-  useEffect(() => {
-    // Calculer le temps écoulé
-    const timer = setInterval(() => {
-      const elapsed = Math.floor((new Date().getTime() - configStartTime.getTime()) / 1000)
-      setElapsedTime(elapsed)
-    }, 1000)
-    
-    return () => clearInterval(timer)
-  }, [configStartTime])
+  // useEffect(() => {
+  //   // Calculer le temps écoulé - désactivé temporairement
+  //   const timer = setInterval(() => {
+  //     const elapsed = Math.floor((new Date().getTime() - configStartTime.getTime()) / 1000)
+  //     setElapsedTime(elapsed)
+  //   }, 1000)
+  //   
+  //   return () => clearInterval(timer)
+  // }, [configStartTime])
 
   // Auto-save temporairement désactivé pour déboguer
   // useEffect(() => {
@@ -288,18 +288,20 @@ const ModernParametrage: React.FC = () => {
     return 'simplifie'
   }, [companyConfig.revenue, companyConfig.totalAssets, companyConfig.employees])
   
-  // Use useCallback to avoid recreating the function on every render
-  const updateLiasseTypeIfNeeded = useCallback(() => {
-    const newLiasseType = calculatedLiasseType;
-    if (newLiasseType !== companyConfig.liasseType) {
-      setCompanyConfig(prev => ({ ...prev, liasseType: newLiasseType }))
-    }
-  }, [calculatedLiasseType, companyConfig.liasseType])
+  // Désactivé temporairement pour éviter la boucle infinie
+  // const updateLiasseTypeIfNeeded = useCallback(() => {
+  //   const newLiasseType = calculatedLiasseType;
+  //   setCompanyConfig(prev => {
+  //     if (newLiasseType !== prev.liasseType) {
+  //       return { ...prev, liasseType: newLiasseType }
+  //     }
+  //     return prev
+  //   })
+  // }, [calculatedLiasseType])
   
-  useEffect(() => {
-    // Only update when the specific values that affect liasse type change
-    updateLiasseTypeIfNeeded()
-  }, [companyConfig.revenue, companyConfig.totalAssets, companyConfig.employees]) // Only depend on the actual values, not calculatedLiasseType or the entire config
+  // useEffect(() => {
+  //   updateLiasseTypeIfNeeded()
+  // }, [updateLiasseTypeIfNeeded])
 
   // Données de référence
   const legalForms = [

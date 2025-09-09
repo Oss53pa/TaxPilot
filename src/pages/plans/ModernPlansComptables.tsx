@@ -1,5 +1,5 @@
 /**
- * Module Plans Comptables Complet - Gestion des plans SYSCOHADA
+ * Module Plans Comptables Complet - Plan SYSCOHADA Révisé 9 Classes
  * Conforme aux exigences EX-PLAN-001 à EX-PLAN-010
  */
 
@@ -65,6 +65,7 @@ import {
 } from '@mui/material'
 import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView'
 import { TreeItem } from '@mui/x-tree-view/TreeItem'
+import { PLAN_SYSCOHADA_REVISE, SYSCOHADA_REVISE_CLASSES, CompteComptable, getSYSCOHADAAccountsByClass } from '../../data/SYSCOHADARevisePlan'
 import {
   AccountTree as TreeIcon,
   ExpandMore as ExpandMoreIcon,
@@ -102,6 +103,8 @@ import {
   ContentCopy as CopyIcon,
   NavigateNext as NextIcon,
   AccountTree,
+  ArrowForward,
+  PictureAsPdf,
 } from '@mui/icons-material'
 
 // EX-PLAN-001: Plans comptables OHADA par pays et secteur
@@ -209,8 +212,8 @@ const ModernPlansComptables: React.FC = () => {
       version: '2024.1',
       effectiveDate: '2024-01-01',
       status: 'active',
-      accounts: [],
-      totalAccounts: 847,
+      accounts: PLAN_SYSCOHADA_REVISE,
+      totalAccounts: PLAN_SYSCOHADA_REVISE.length,
       lastUpdate: '2024-01-15',
       compliance: 100
     },
@@ -223,8 +226,8 @@ const ModernPlansComptables: React.FC = () => {
       version: '2024.1',
       effectiveDate: '2024-01-01',
       status: 'active',
-      accounts: [],
-      totalAccounts: 852,
+      accounts: PLAN_SYSCOHADA_REVISE,
+      totalAccounts: PLAN_SYSCOHADA_REVISE.length,
       lastUpdate: '2024-01-20',
       compliance: 100
     },
@@ -238,8 +241,8 @@ const ModernPlansComptables: React.FC = () => {
       version: '2024.1',
       effectiveDate: '2024-01-01',
       status: 'active',
-      accounts: [],
-      totalAccounts: 1203,
+      accounts: PLAN_SYSCOHADA_REVISE,
+      totalAccounts: PLAN_SYSCOHADA_REVISE.length,
       lastUpdate: '2024-02-01',
       compliance: 98
     },
@@ -253,15 +256,92 @@ const ModernPlansComptables: React.FC = () => {
       version: '2024.1',
       effectiveDate: '2024-01-01',
       status: 'active',
-      accounts: [],
-      totalAccounts: 956,
+      accounts: PLAN_SYSCOHADA_REVISE,
+      totalAccounts: PLAN_SYSCOHADA_REVISE.length,
       lastUpdate: '2024-02-15',
       compliance: 97
     }
   ]
 
-  // Comptes SYSCOHADA avec structure hiérarchique complète
-  const syscohadaAccounts: Account[] = [
+  // Conversion du plan SYSCOHADA vers la structure hiérarchique
+  const buildSYSCOHADAHierarchy = (): Account[] => {
+    const hierarchy: Account[] = []
+    
+    // Construire la hiérarchie des 9 classes
+    Object.entries(SYSCOHADA_REVISE_CLASSES).forEach(([classeNum, classeInfo]) => {
+      const comptes = getSYSCOHADAAccountsByClass(parseInt(classeNum))
+      
+      const classeAccount: Account = {
+        code: classeNum,
+        name: classeInfo.libelle,
+        type: getAccountType(parseInt(classeNum)),
+        nature: getAccountNature(parseInt(classeNum)),
+        level: 1,
+        isSystem: true,
+        isActive: true,
+        isSelectable: false,
+        children: comptes.map(compte => ({
+          code: compte.numero,
+          name: compte.libelle,
+          type: mapNatureToType(compte.nature),
+          nature: compte.sens.toLowerCase() as 'debit' | 'credit',
+          level: compte.numero.length === 2 ? 2 : 3,
+          parent: classeNum,
+          isSystem: true,
+          isActive: true,
+          isSelectable: true,
+          children: []
+        }))
+      }
+      
+      hierarchy.push(classeAccount)
+    })
+    
+    return hierarchy
+  }
+  
+  const getAccountType = (classe: number): string => {
+    switch (classe) {
+      case 1: return 'equity'
+      case 2: return 'assets'
+      case 3: return 'inventory' 
+      case 4: return 'thirdparty'
+      case 5: return 'treasury'
+      case 6: return 'expense'
+      case 7: return 'revenue'
+      case 8: return 'exceptional'
+      case 9: return 'special'
+      default: return 'other'
+    }
+  }
+  
+  const getAccountNature = (classe: number): 'debit' | 'credit' => {
+    switch (classe) {
+      case 1: return 'credit' // Ressources durables
+      case 2: case 3: case 4: case 5: return 'debit' // Actifs
+      case 6: case 8: return 'debit' // Charges
+      case 7: return 'credit' // Produits
+      case 9: return 'debit' // Spéciaux
+      default: return 'debit'
+    }
+  }
+  
+  const mapNatureToType = (nature: string): string => {
+    switch (nature) {
+      case 'ACTIF': return 'assets'
+      case 'PASSIF': return 'equity'
+      case 'CHARGE': return 'expense'
+      case 'PRODUIT': return 'revenue'
+      case 'SPECIAL': return 'special'
+      default: return 'other'
+    }
+  }
+
+  // Comptes SYSCOHADA avec structure hiérarchique complète  
+  const syscohadaAccounts: Account[] = buildSYSCOHADAHierarchy()
+  
+  // Ancien mock remplacé par le vrai plan SYSCOHADA
+  const oldMockAccounts: Account[] = [
     {
       code: '1',
       name: 'COMPTES DE RESSOURCES DURABLES',
@@ -782,6 +862,7 @@ const ModernPlansComptables: React.FC = () => {
       <TreeItem
         key={account.code}
         nodeId={account.code}
+        itemId={account.code}
         label={
           <Box sx={{ display: 'flex', alignItems: 'center', py: 0.5 }}>
             <Chip
@@ -1328,7 +1409,7 @@ const ModernPlansComptables: React.FC = () => {
                   <Grid item xs={12} md={4}>
                     <Paper sx={{ p: 3, textAlign: 'center', cursor: 'pointer' }}
                            onClick={() => exportPlan('excel')}>
-                      <ExcelIcon sx={{ fontSize: 48, color: '#107C41', mb: 2 }} />
+                      <DocumentIcon sx={{ fontSize: 48, color: '#107C41', mb: 2 }} />
                       <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
                         Excel
                       </Typography>
@@ -1352,7 +1433,7 @@ const ModernPlansComptables: React.FC = () => {
                   <Grid item xs={12} md={4}>
                     <Paper sx={{ p: 3, textAlign: 'center', cursor: 'pointer' }}
                            onClick={() => exportPlan('xml')}>
-                      <Code sx={{ fontSize: 48, color: '#FF6600', mb: 2 }} />
+                      <TreeIcon sx={{ fontSize: 48, color: '#FF6600', mb: 2 }} />
                       <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
                         XML/JSON
                       </Typography>

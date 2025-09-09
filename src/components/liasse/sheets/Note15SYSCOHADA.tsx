@@ -1,0 +1,226 @@
+/**
+ * Note 15 SYSCOHADA - Plus ou Moins-Values sur Cessions
+ * Avec système de commentaires intégré
+ */
+
+import React, { useState } from 'react'
+import {
+  Box,
+  Grid,
+  Card,
+  CardContent,
+  Typography,
+  TextField,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Button,
+  Chip,
+  Stack
+} from '@mui/material'
+import {
+  TrendingUp,
+  TrendingDown,
+  Calculate,
+  Comment,
+  Add,
+  Save
+} from '@mui/icons-material'
+
+const Note15SYSCOHADA: React.FC = () => {
+  const [typeCommentaire, setTypeCommentaire] = useState('')
+  const [commentaire, setCommentaire] = useState('')
+  const [commentaires, setCommentaires] = useState<Array<{
+    id: string; type: string; contenu: string; date: Date
+  }>>([])
+
+  const typesCommentaires = [
+    'Justification cession',
+    'Méthode évaluation',
+    'Impact fiscal',
+    'Politique cession',
+    'Autre observation'
+  ]
+
+  // Données des cessions
+  const cessions = [
+    {
+      nature: 'Terrain industriel Zone 3',
+      date_acquisition: '2018-03-15',
+      date_cession: '2024-09-30',
+      valeur_origine: 5000000,
+      amortissements: 0,
+      vnc: 5000000,
+      prix_cession: 7500000,
+      plus_moins_value: 2500000,
+      regime_fiscal: 'Exonéré (réinvestissement)'
+    },
+    {
+      nature: 'Véhicule utilitaire',
+      date_acquisition: '2020-01-10',
+      date_cession: '2024-11-15',
+      valeur_origine: 2500000,
+      amortissements: 1875000,
+      vnc: 625000,
+      prix_cession: 800000,
+      plus_moins_value: 175000,
+      regime_fiscal: 'Imposable'
+    }
+  ]
+
+  const ajouterCommentaire = () => {
+    if (typeCommentaire && commentaire.trim()) {
+      setCommentaires([...commentaires, {
+        id: Date.now().toString(),
+        type: typeCommentaire,
+        contenu: commentaire,
+        date: new Date()
+      }])
+      setCommentaire('')
+      setTypeCommentaire('')
+    }
+  }
+
+  return (
+    <Box sx={{ p: 3 }}>
+      <Typography variant="h4" sx={{ fontWeight: 700, mb: 3, color: 'primary.main' }}>
+        💰 Note 15 - Plus ou Moins-Values sur Cessions
+      </Typography>
+
+      {/* Tableau des cessions */}
+      <Card sx={{ mb: 3 }}>
+        <CardContent>
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+            📋 Détail des Cessions d'Immobilisations
+          </Typography>
+          
+          <TableContainer component={Paper} variant="outlined">
+            <Table size="small">
+              <TableHead>
+                <TableRow sx={{ bgcolor: 'primary.light' }}>
+                  <TableCell sx={{ fontWeight: 600, color: 'white' }}>Nature Bien</TableCell>
+                  <TableCell sx={{ textAlign: 'center', fontWeight: 600, color: 'white' }}>Date Cession</TableCell>
+                  <TableCell sx={{ textAlign: 'right', fontWeight: 600, color: 'white' }}>Valeur Origine</TableCell>
+                  <TableCell sx={{ textAlign: 'right', fontWeight: 600, color: 'white' }}>VNC</TableCell>
+                  <TableCell sx={{ textAlign: 'right', fontWeight: 600, color: 'white' }}>Prix Cession</TableCell>
+                  <TableCell sx={{ textAlign: 'right', fontWeight: 600, color: 'white' }}>+/- Value</TableCell>
+                  <TableCell sx={{ textAlign: 'center', fontWeight: 600, color: 'white' }}>Régime Fiscal</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {cessions.map((cession, index) => (
+                  <TableRow key={index}>
+                    <TableCell>
+                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                        {cession.nature}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        Acquis le {new Date(cession.date_acquisition).toLocaleDateString('fr-FR')}
+                      </Typography>
+                    </TableCell>
+                    <TableCell sx={{ textAlign: 'center' }}>
+                      {new Date(cession.date_cession).toLocaleDateString('fr-FR')}
+                    </TableCell>
+                    <TableCell sx={{ textAlign: 'right', fontFamily: 'monospace' }}>
+                      {new Intl.NumberFormat('fr-FR').format(cession.valeur_origine)}
+                    </TableCell>
+                    <TableCell sx={{ textAlign: 'right', fontFamily: 'monospace' }}>
+                      {new Intl.NumberFormat('fr-FR').format(cession.vnc)}
+                    </TableCell>
+                    <TableCell sx={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 600 }}>
+                      {new Intl.NumberFormat('fr-FR').format(cession.prix_cession)}
+                    </TableCell>
+                    <TableCell sx={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 600 }}>
+                      <Typography 
+                        variant="body2" 
+                        sx={{ 
+                          color: cession.plus_moins_value > 0 ? 'success.main' : 'error.main',
+                          fontWeight: 700
+                        }}
+                      >
+                        {cession.plus_moins_value > 0 ? '+' : ''}{new Intl.NumberFormat('fr-FR').format(cession.plus_moins_value)}
+                      </Typography>
+                    </TableCell>
+                    <TableCell sx={{ textAlign: 'center' }}>
+                      <Chip 
+                        label={cession.regime_fiscal}
+                        color={cession.regime_fiscal.includes('Exonéré') ? 'success' : 'warning'}
+                        size="small"
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </CardContent>
+      </Card>
+
+      {/* Section commentaires */}
+      <Card>
+        <CardContent>
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+            💬 Commentaires et Justifications
+          </Typography>
+
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={6}>
+              <FormControl fullWidth sx={{ mb: 2 }}>
+                <InputLabel>Type de commentaire</InputLabel>
+                <Select
+                  value={typeCommentaire}
+                  onChange={(e) => setTypeCommentaire(e.target.value)}
+                >
+                  {typesCommentaires.map((type) => (
+                    <MenuItem key={type} value={type}>{type}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <TextField
+                fullWidth
+                multiline
+                rows={4}
+                label="Commentaire"
+                value={commentaire}
+                onChange={(e) => setCommentaire(e.target.value)}
+                sx={{ mb: 2 }}
+              />
+
+              <Button 
+                variant="contained" 
+                startIcon={<Add />}
+                onClick={ajouterCommentaire}
+                disabled={!typeCommentaire || !commentaire.trim()}
+              >
+                Ajouter
+              </Button>
+            </Grid>
+
+            <Grid item xs={12} md={6}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
+                Commentaires sauvegardés
+              </Typography>
+              {commentaires.map((comm) => (
+                <Paper key={comm.id} sx={{ p: 2, mb: 1 }}>
+                  <Chip label={comm.type} size="small" sx={{ mb: 1 }} />
+                  <Typography variant="body2">{comm.contenu}</Typography>
+                </Paper>
+              ))}
+            </Grid>
+          </Grid>
+        </CardContent>
+      </Card>
+    </Box>
+  )
+}
+
+export default Note15SYSCOHADA

@@ -1,0 +1,123 @@
+src/components/liasse/sheets/CouvertureSYSCOHADA.tsx(96,18): error TS2304: Cannot find name 'AccountBalance'.
+src/components/liasse/sheets/FicheR4SYSCOHADA.tsx(288,10): error TS2339: Property 'variation' does not exist on type '{ montantDebut: number; dotations: number; reprises: number; montantFin: number; }'.
+src/components/liasse/sheets/FicheR4SYSCOHADA.tsx(394,29): error TS2339: Property 'variation' does not exist on type '{ montantDebut: number; dotations: number; reprises: number; montantFin: number; }'.
+src/components/liasse/sheets/FicheR4SYSCOHADA.tsx(394,102): error TS2339: Property 'variation' does not exist on type '{ montantDebut: number; dotations: number; reprises: number; montantFin: number; }'.
+src/components/liasse/sheets/FicheR4SYSCOHADA.tsx(397,37): error TS2339: Property 'variation' does not exist on type '{ montantDebut: number; dotations: number; reprises: number; montantFin: number; }'.
+src/components/liasse/sheets/FicheR4SYSCOHADA.tsx(397,75): error TS2339: Property 'variation' does not exist on type '{ montantDebut: number; dotations: number; reprises: number; montantFin: number; }'.
+src/components/liasse/sheets/FicheR4SYSCOHADA.tsx(400,31): error TS2339: Property 'variation' does not exist on type '{ montantDebut: number; dotations: number; reprises: number; montantFin: number; }'.
+src/components/liasse/sheets/FicheR4SYSCOHADA.tsx(400,88): error TS2339: Property 'variation' does not exist on type '{ montantDebut: number; dotations: number; reprises: number; montantFin: number; }'.
+src/components/liasse/sheets/FicheR4SYSCOHADA.tsx(774,27): error TS2339: Property 'variation' does not exist on type '{ montantDebut: number; dotations: number; reprises: number; montantFin: number; }'.
+src/components/liasse/sheets/FicheR4SYSCOHADA.tsx(775,58): error TS2339: Property 'variation' does not exist on type '{ montantDebut: number; dotations: number; reprises: number; montantFin: number; }'.
+src/components/liasse/sheets/FicheR4SYSCOHADA.tsx(776,29): error TS2339: Property 'variation' does not exist on type '{ montantDebut: number; dotations: number; reprises: number; montantFin: number; }'.
+src/components/liasse/sheets/FicheR4SYSCOHADA.tsx(776,86): error TS2339: Property 'variation' does not exist on type '{ montantDebut: number; dotations: number; reprises: number; montantFin: number; }'.
+src/components/liasse/sheets/Note17SYSCOHADA.tsx(34,3): error TS2305: Module '"@mui/material"' has no exported member 'PieChart'.
+src/components/liasse/sheets/Note17SYSCOHADA.tsx(245,10): error TS2339: Property 'evolution' does not exist on type '{ montantN: number; montantN1: number; }'.
+src/components/liasse/sheets/Note17SYSCOHADA.tsx(296,27): error TS2339: Property 'evolution' does not exist on type '{ montantN: number; montantN1: number; }'.
+src/components/liasse/sheets/Note17SYSCOHADA.tsx(299,35): error TS2339: Property 'evolution' does not exist on type '{ montantN: number; montantN1: number; }'.
+src/components/liasse/sheets/Note17SYSCOHADA.tsx(302,29): error TS2339: Property 'evolution' does not exist on type '{ montantN: number; montantN1: number; }'.
+src/components/liasse/sheets/Note17SYSCOHADA.tsx(302,76): error TS2339: Property 'evolution' does not exist on type '{ montantN: number; montantN1: number; }'.
+src/components/liasse/sheets/Note17SYSCOHADA.tsx(517,29): error TS2339: Property 'evolution' does not exist on type '{ montantN: number; montantN1: number; }'.
+src/components/liasse/sheets/Note17SYSCOHADA.tsx(520,37): error TS2339: Property 'evolution' does not exist on type '{ montantN: number; montantN1: number; }'.
+src/components/liasse/sheets/Note17SYSCOHADA.tsx(523,31): error TS2339: Property 'evolution' does not exist on type '{ montantN: number; montantN1: number; }'.
+src/components/liasse/sheets/Note17SYSCOHADA.tsx(523,78): error TS2339: Property 'evolution' does not exist on type '{ montantN: number; montantN1: number; }'.
+src/components/liasse/sheets/Note17SYSCOHADA.tsx(686,27): error TS2339: Property 'evolution' does not exist on type '{ montantN: number; montantN1: number; }'.
+src/components/liasse/sheets/Note17SYSCOHADA.tsx(687,58): error TS2339: Property 'evolution' does not exist on type '{ montantN: number; montantN1: number; }'.
+src/components/liasse/sheets/Note17SYSCOHADA.tsx(688,29): error TS2339: Property 'evolution' does not exist on type '{ montantN: number; montantN1: number; }'.
+src/components/liasse/sheets/Note17SYSCOHADA.tsx(688,76): error TS2339: Property 'evolution' does not exist on type '{ montantN: number; montantN1: number; }'.
+src/components/liasse/sheets/Note19SYSCOHADA.tsx(329,10): error TS2339: Property 'evolution' does not exist on type '{ montantN: number; montantN1: number; }'.
+src/components/liasse/sheets/Note19SYSCOHADA.tsx(330,10): error TS2339: Property 'pourcentageCA' does not exist on type '{ montantN: number; montantN1: number; }'.
+src/components/liasse/sheets/Note19SYSCOHADA.tsx(500,29): error TS2339: Property 'evolution' does not exist on type '{ montantN: number; montantN1: number; }'.
+src/components/liasse/sheets/Note19SYSCOHADA.tsx(500,100): error TS2339: Property 'evolution' does not exist on type '{ montantN: number; montantN1: number; }'.
+src/components/liasse/sheets/Note19SYSCOHADA.tsx(503,37): error TS2339: Property 'evolution' does not exist on type '{ montantN: number; montantN1: number; }'.
+src/components/liasse/sheets/Note19SYSCOHADA.tsx(506,31): error TS2339: Property 'evolution' does not exist on type '{ montantN: number; montantN1: number; }'.
+src/components/liasse/sheets/Note19SYSCOHADA.tsx(506,78): error TS2339: Property 'evolution' does not exist on type '{ montantN: number; montantN1: number; }'.
+src/components/liasse/sheets/Note19SYSCOHADA.tsx(511,41): error TS2339: Property 'pourcentageCA' does not exist on type '{ montantN: number; montantN1: number; }'.
+src/components/liasse/sheets/Note19SYSCOHADA.tsx(726,45): error TS2339: Property 'pourcentageCA' does not exist on type '{ montantN: number; montantN1: number; }'.
+src/components/liasse/sheets/Note19SYSCOHADA.tsx(786,86): error TS2339: Property 'evolution' does not exist on type '{ montantN: number; montantN1: number; }'.
+src/components/liasse/sheets/Note19SYSCOHADA.tsx(787,45): error TS2339: Property 'evolution' does not exist on type '{ montantN: number; montantN1: number; }'.
+src/components/liasse/sheets/Note19SYSCOHADA.tsx(872,41): error TS2339: Property 'pourcentageCA' does not exist on type '{ montantN: number; montantN1: number; }'.
+src/components/liasse/sheets/Note19SYSCOHADA.tsx(882,27): error TS2339: Property 'evolution' does not exist on type '{ montantN: number; montantN1: number; }'.
+src/components/liasse/sheets/Note19SYSCOHADA.tsx(883,58): error TS2339: Property 'evolution' does not exist on type '{ montantN: number; montantN1: number; }'.
+src/components/liasse/sheets/Note19SYSCOHADA.tsx(884,29): error TS2339: Property 'evolution' does not exist on type '{ montantN: number; montantN1: number; }'.
+src/components/liasse/sheets/Note19SYSCOHADA.tsx(884,76): error TS2339: Property 'evolution' does not exist on type '{ montantN: number; montantN1: number; }'.
+src/components/liasse/sheets/Note5SYSCOHADA.tsx(237,43): error TS2345: Argument of type 'string | 0' is not assignable to parameter of type 'string'.
+  Type 'number' is not assignable to type 'string'.
+src/components/liasse/sheets/Note5SYSCOHADA.tsx(237,82): error TS2345: Argument of type 'string | 0' is not assignable to parameter of type 'string'.
+  Type 'number' is not assignable to type 'string'.
+src/components/liasse/sheets/Note8SYSCOHADA.tsx(280,10): error TS2339: Property 'valeurNette' does not exist on type '{ valeurComptable: number; valeurMarche: number; provisions: number; }'.
+src/components/liasse/sheets/Note8SYSCOHADA.tsx(353,90): error TS2339: Property 'valeurNette' does not exist on type '{ valeurComptable: number; valeurMarche: number; provisions: number; }'.
+src/components/liasse/sheets/Note8SYSCOHADA.tsx(678,42): error TS2339: Property 'valeurNette' does not exist on type '{ valeurComptable: number; valeurMarche: number; provisions: number; }'.
+src/components/liasse/sheets/RecevabiliteSYSCOHADA.tsx(203,13): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(props: { component: ElementType<any, keyof IntrinsicElements>; } & ChipOwnProps & CommonProps & Omit<any, "children" | ... 15 more ... | "skipFocusWhenDisabled">): Element', gave the following error.
+    Type '"large"' is not assignable to type 'OverridableStringUnion<"small" | "medium", ChipPropsSizeOverrides>'.
+  Overload 2 of 2, '(props: DefaultComponentProps<ChipTypeMap<{}, "div">>): Element', gave the following error.
+    Type '"large"' is not assignable to type 'OverridableStringUnion<"small" | "medium", ChipPropsSizeOverrides>'.
+src/components/Onboarding/OnboardingWizard.tsx(38,32): error TS2307: Cannot find module './steps/EntrepriseInfoForm' or its corresponding type declarations.
+src/components/Onboarding/OnboardingWizard.tsx(39,32): error TS2307: Cannot find module './steps/FiscalSettingsForm' or its corresponding type declarations.
+src/components/Onboarding/OnboardingWizard.tsx(40,35): error TS2307: Cannot find module './steps/PlanComptableSelector' or its corresponding type declarations.
+src/components/Onboarding/OnboardingWizard.tsx(41,30): error TS2307: Cannot find module './steps/DataImportWizard' or its corresponding type declarations.
+src/components/Onboarding/OnboardingWizard.tsx(42,27): error TS2307: Cannot find module './steps/UserSetupForm' or its corresponding type declarations.
+src/components/Onboarding/OnboardingWizard.tsx(43,34): error TS2307: Cannot find module './steps/ConfigurationSummary' or its corresponding type declarations.
+src/components/Onboarding/OnboardingWizard.tsx(160,7): error TS2448: Block-scoped variable 'saveOnboardingProgress' used before its declaration.
+src/components/Parametrage/EntrepriseSettings.tsx(117,5): error TS2322: Type 'Resolver<{ email?: string; raison_sociale?: string; forme_juridique?: string; numero_contribuable?: string; adresse_ligne1?: string; ville?: string; pays?: string; nom_dirigeant?: string; fonction_dirigeant?: string; regime_imposition?: string; secteur_activite?: string; chiffre_affaires_annuel?: number; devise_prin...' is not assignable to type 'Resolver<EntrepriseFormData, any, EntrepriseFormData>'.
+  Types of parameters 'options' and 'options' are incompatible.
+    Type 'ResolverOptions<EntrepriseFormData>' is not assignable to type 'ResolverOptions<{ email?: string; raison_sociale?: string; forme_juridique?: string; numero_contribuable?: string; adresse_ligne1?: string; ville?: string; pays?: string; nom_dirigeant?: string; fonction_dirigeant?: string; regime_imposition?: string; secteur_activite?: string; chiffre_affaires_annuel?: number; devi...'.
+      Types of property 'names' are incompatible.
+        Type 'string[]' is not assignable to type 'OptionalKeys<{ raison_sociale: string; forme_juridique: string; numero_contribuable: string; email: string; adresse_ligne1: string; ville: string; pays: string; nom_dirigeant: string; fonction_dirigeant: string; regime_imposition: string; secteur_activite: string; chiffre_affaires_annuel: number; devise_principale: ...'.
+          Type 'string' is not assignable to type 'OptionalKeys<{ raison_sociale: string; forme_juridique: string; numero_contribuable: string; email: string; adresse_ligne1: string; ville: string; pays: string; nom_dirigeant: string; fonction_dirigeant: string; regime_imposition: string; secteur_activite: string; chiffre_affaires_annuel: number; devise_principale: ...'.
+src/components/Parametrage/EntrepriseSettings.tsx(182,36): error TS2345: Argument of type '(data: EntrepriseFormData) => Promise<void>' is not assignable to parameter of type 'SubmitHandler<TFieldValues>'.
+  Types of parameters 'data' and 'data' are incompatible.
+    Type 'TFieldValues' is not assignable to type 'EntrepriseFormData'.
+      Type 'FieldValues' is missing the following properties from type 'EntrepriseFormData': raison_sociale, forme_juridique, numero_contribuable, adresse_ligne1, and 10 more.
+src/components/Parametrage/EntrepriseSettings.tsx(579,41): error TS2304: Cannot find name 'CircularProgress'.
+src/components/shared/LayoutWithNavbar.tsx(154,33): error TS2339: Property 'name' does not exist on type 'User'.
+src/components/shared/Sidebar.tsx(274,16): error TS2339: Property 'entreprise_courante' does not exist on type 'User'.
+src/components/shared/Sidebar.tsx(277,21): error TS2339: Property 'entreprise_courante' does not exist on type 'User'.
+src/components/shared/Sidebar.tsx(280,21): error TS2339: Property 'role' does not exist on type 'User'.
+src/pages/compliance/ModernCompliance.tsx(902,74): error TS2304: Cannot find name 'DeleteIcon'.
+src/pages/consolidation/ModernConsolidation.tsx(385,9): error TS2322: Type '{ children: Element[]; key: string; nodeId: string; label: Element; }' is not assignable to type 'IntrinsicAttributes & TreeItemProps & RefAttributes<HTMLLIElement>'.
+  Property 'nodeId' does not exist on type 'IntrinsicAttributes & TreeItemProps & RefAttributes<HTMLLIElement>'.
+src/pages/consolidation/ModernConsolidation.tsx(640,19): error TS2322: Type '{ children: Element[]; defaultCollapseIcon: Element; defaultExpandIcon: Element; expanded: string[]; onNodeToggle: (event: SyntheticEvent<Element, Event>, nodeIds: string[]) => void; sx: { ...; }; }' is not assignable to type 'IntrinsicAttributes & SimpleTreeViewProps<undefined> & RefAttributes<HTMLUListElement>'.
+  Property 'defaultCollapseIcon' does not exist on type 'IntrinsicAttributes & SimpleTreeViewProps<undefined> & RefAttributes<HTMLUListElement>'.
+src/pages/consolidation/ModernConsolidation.tsx(1071,29): error TS2304: Cannot find name 'Checkbox'.
+src/pages/import/ModernImportBalance.tsx(1186,65): error TS2304: Cannot find name 'AccountTree'.
+src/pages/integrations/ModernIntegrations.tsx(616,27): error TS2304: Cannot find name 'People'.
+src/pages/integrations/ModernIntegrations.tsx(617,31): error TS2304: Cannot find name 'AccountBalance'.
+src/pages/integrations/ModernIntegrations.tsx(618,27): error TS2304: Cannot find name 'Receipt'.
+src/pages/integrations/ModernIntegrations.tsx(619,31): error TS2304: Cannot find name 'AttachMoney'.
+src/pages/liasse/ModernLiasse.tsx(739,31): error TS2322: Type '{ variant: "determinate"; value: number; size: string; sx: { height: number; borderRadius: number; backgroundColor: string; '& .MuiLinearProgress-bar': { backgroundColor: string; borderRadius: number; }; }; }' is not assignable to type 'IntrinsicAttributes & LinearProgressProps'.
+  Property 'size' does not exist on type 'IntrinsicAttributes & LinearProgressProps'.
+src/pages/LiasseComplete.tsx(474,31): error TS2322: Type '{ modeEdition: boolean; }' is not assignable to type 'IntrinsicAttributes'.
+  Property 'modeEdition' does not exist on type 'IntrinsicAttributes'.
+src/pages/Liasses.tsx(463,49): error TS2322: Type '{ children: Element; severity: "warning"; size: string; }' is not assignable to type 'IntrinsicAttributes & AlertProps'.
+  Property 'size' does not exist on type 'IntrinsicAttributes & AlertProps'.
+src/pages/Login.tsx(57,5): error TS2322: Type 'Resolver<{ username?: string; password?: string; }>' is not assignable to type 'Resolver<LoginFormData, any, LoginFormData>'.
+  Types of parameters 'options' and 'options' are incompatible.
+    Type 'ResolverOptions<LoginFormData>' is not assignable to type 'ResolverOptions<{ username?: string; password?: string; }>'.
+      Type '{ username?: string; password?: string; }' is not assignable to type 'LoginFormData'.
+        Property 'username' is optional in type '{ username?: string; password?: string; }' but required in type 'LoginFormData'.
+src/pages/Login.tsx(118,56): error TS2345: Argument of type '(data: LoginFormData) => Promise<void>' is not assignable to parameter of type 'SubmitHandler<TFieldValues>'.
+  Types of parameters 'data' and 'data' are incompatible.
+    Type 'TFieldValues' is not assignable to type 'LoginFormData'.
+      Type 'FieldValues' is missing the following properties from type 'LoginFormData': username, password
+src/pages/plans/ModernPlansComptables.tsx(215,7): error TS2322: Type 'CompteComptable[]' is not assignable to type 'Account[]'.
+  Type 'CompteComptable' is missing the following properties from type 'Account': code, name, type, level, and 3 more.
+src/pages/plans/ModernPlansComptables.tsx(229,7): error TS2322: Type 'CompteComptable[]' is not assignable to type 'Account[]'.
+  Type 'CompteComptable' is missing the following properties from type 'Account': code, name, type, level, and 3 more.
+src/pages/plans/ModernPlansComptables.tsx(244,7): error TS2322: Type 'CompteComptable[]' is not assignable to type 'Account[]'.
+  Type 'CompteComptable' is missing the following properties from type 'Account': code, name, type, level, and 3 more.
+src/pages/plans/ModernPlansComptables.tsx(259,7): error TS2322: Type 'CompteComptable[]' is not assignable to type 'Account[]'.
+  Type 'CompteComptable' is missing the following properties from type 'Account': code, name, type, level, and 3 more.
+src/pages/plans/ModernPlansComptables.tsx(277,9): error TS2322: Type 'string' is not assignable to type '"asset" | "liability" | "income" | "expense" | "equity"'.
+src/pages/plans/ModernPlansComptables.tsx(283,9): error TS2322: Type '{ code: string; name: string; type: string; nature: "credit" | "debit"; level: number; parent: string; isSystem: true; isActive: true; isSelectable: true; children: any[]; }[]' is not assignable to type 'Account[]'.
+  Type '{ code: string; name: string; type: string; nature: "debit" | "credit"; level: number; parent: string; isSystem: true; isActive: true; isSelectable: true; children: any[]; }' is not assignable to type 'Account'.
+    Types of property 'type' are incompatible.
+      Type 'string' is not assignable to type '"asset" | "liability" | "income" | "expense" | "equity"'.
+src/pages/plans/ModernPlansComptables.tsx(864,9): error TS2322: Type '{ children: Element[]; key: string; nodeId: string; itemId: string; label: Element; }' is not assignable to type 'IntrinsicAttributes & TreeItemProps & RefAttributes<HTMLLIElement>'.
+  Property 'nodeId' does not exist on type 'IntrinsicAttributes & TreeItemProps & RefAttributes<HTMLLIElement>'.
+src/pages/plans/ModernPlansComptables.tsx(1241,21): error TS2322: Type '{ children: Element[]; defaultCollapseIcon: Element; defaultExpandIcon: Element; expanded: string[]; onNodeToggle: (event: SyntheticEvent<Element, Event>, nodeIds: string[]) => void; }' is not assignable to type 'IntrinsicAttributes & SimpleTreeViewProps<undefined> & RefAttributes<HTMLUListElement>'.
+  Property 'defaultCollapseIcon' does not exist on type 'IntrinsicAttributes & SimpleTreeViewProps<undefined> & RefAttributes<HTMLUListElement>'.
+src/services/ratiosService.ts(42,9): error TS2393: Duplicate function implementation.
+src/services/ratiosService.ts(75,9): error TS2393: Duplicate function implementation.
+src/store/__tests__/authStore.test.ts(107,30): error TS2345: Argument of type '{ id: number; username: string; email: string; first_name: string; last_name: string; }' is not assignable to parameter of type 'User'.
+  Type '{ id: number; username: string; email: string; first_name: string; last_name: string; }' is missing the following properties from type 'User': is_staff, is_superuser

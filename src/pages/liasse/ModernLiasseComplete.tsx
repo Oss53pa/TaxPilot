@@ -43,6 +43,7 @@ import {
   Breadcrumbs,
   Link,
 } from '@mui/material'
+import '../../styles/liasse-fixes.css'
 import {
   Assignment as AssignmentIcon,
   AccountBalance as BalanceIcon,
@@ -112,6 +113,8 @@ import SupplementTVA from '../../components/liasse/sheets/SupplementTVA'
 import SupplementImpotSociete from '../../components/liasse/sheets/SupplementImpotSociete'
 import SupplementAvantagesFiscaux from '../../components/liasse/sheets/SupplementAvantagesFiscaux'
 import FicheRenseignements from '../../components/liasse/sheets/FicheRenseignements'
+import TablesCalculImpots from '../../components/liasse/sheets/TablesCalculImpots'
+import TableauxSupplementaires from '../../components/liasse/sheets/TableauxSupplementaires'
 import { LIASSE_SHEETS, SHEET_CATEGORIES, SheetConfig } from '../../config/liasseFiscaleSheets'
 
 const DRAWER_WIDTH = 380
@@ -430,6 +433,14 @@ const ModernLiasseComplete: React.FC = () => {
                              contenuPrevu={['Informations statistiques', 'Données fiscales spécialisées', 'Reporting administratif']} 
                              priorite="moyenne" />
       
+      // Tables de calcul des impôts
+      case 'tables_calcul_impots':
+        return <TablesCalculImpots />
+      
+      // Tableaux supplémentaires
+      case 'tableaux_supplementaires':
+        return <TableauxSupplementaires />
+      
       // Fiche de renseignements
       case 'fiche_renseignements':
         return <FicheRenseignements />
@@ -551,7 +562,9 @@ const ModernLiasseComplete: React.FC = () => {
                   <ListItemText
                     primary={
                       <Stack direction="row" alignItems="center" spacing={1}>
-                        <Typography variant="subtitle2">{category.label}</Typography>
+                        <Typography variant="subtitle2" sx={{ color: 'white', fontWeight: 600 }}>
+                          {category.label}
+                        </Typography>
                         <Chip
                           label={`${categorySheets.length}`}
                           size="small"
@@ -599,7 +612,7 @@ const ModernLiasseComplete: React.FC = () => {
                             borderLeft: `3px solid ${isSelected ? category.color : 'transparent'}`,
                             backgroundColor: isSelected
                               ? alpha(theme.palette.primary.main, 0.08)
-                              : 'transparent',
+                              : 'rgba(255, 255, 255, 0.05)',
                             '&:hover': {
                               backgroundColor: alpha(theme.palette.primary.main, 0.04),
                             },
@@ -611,7 +624,7 @@ const ModernLiasseComplete: React.FC = () => {
                           <ListItemText
                             primary={
                               <Stack direction="row" alignItems="center" spacing={1}>
-                                <Typography variant="body2">
+                                <Typography variant="body2" sx={{ color: 'white', fontWeight: 500 }}>
                                   {sheet.title}
                                 </Typography>
                                 {sheet.required && (

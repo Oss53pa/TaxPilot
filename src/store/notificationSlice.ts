@@ -115,7 +115,7 @@ const notificationSlice = createSlice({
       const cutoffDate = new Date()
       cutoffDate.setDate(cutoffDate.getDate() - action.payload)
       
-      const beforeCount = state.notifications.length
+      const _beforeCount = state.notifications.length
       state.notifications = state.notifications.filter(
         n => new Date(n.created_at) > cutoffDate
       )
@@ -123,7 +123,7 @@ const notificationSlice = createSlice({
       // Recalculer le nombre de non lues
       state.unreadCount = state.notifications.filter(n => !n.lue).length
     },
-    resetNotificationState: (state) => {
+    resetNotificationState: (_state) => {
       return { ...initialState }
     },
   },

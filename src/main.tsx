@@ -6,7 +6,7 @@ import { ThemeProvider, CssBaseline } from '@mui/material'
 import { Provider } from 'react-redux'
 import App from './App.tsx'
 import { store } from './store/index.ts'
-import { theme } from './utils/theme.ts'
+import fiscasyncTheme from './theme/fiscasyncTheme.ts'
 import './index.css'
 
 // Configuration du client React Query
@@ -28,9 +28,14 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <Provider store={store}>
       <QueryClientProvider client={queryClient}>
-        <ThemeProvider theme={theme}>
+        <ThemeProvider theme={fiscasyncTheme}>
           <CssBaseline />
-          <BrowserRouter>
+          <BrowserRouter
+            future={{
+              v7_startTransition: true,
+              v7_relativeSplatPath: true
+            }}
+          >
             <App />
           </BrowserRouter>
         </ThemeProvider>

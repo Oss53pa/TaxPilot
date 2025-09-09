@@ -57,13 +57,25 @@ import {
   type LiasseComponentConfig 
 } from '../config/liasseComponents'
 
+// Import modal validation
+import ValidationModal from '../components/liasse/modals/ValidationModal'
+
 const DRAWER_WIDTH = 280
-const PRIMARY_COLOR = '#191919'
+// Palette FiscaSync
+const PRIMARY_COLOR = '#373B4D'        // Bleu foncé principal  
+const SECONDARY_COLOR = '#949597'      // Gris moyen
+const BACKGROUND_COLOR = '#ECECEF'     // Fond global clair
+const SURFACE_COLOR = '#ECEDEF'        // Fond des cartes
+const ACCENT_COLOR = '#BDBFB7'         // Accent pour encadrés
+const TEXT_PRIMARY = '#373B4D'         // Texte principal
+const TEXT_SECONDARY = '#949597'       // Texte secondaire
 
 const LiasseCompleteFinal: React.FC = () => {
   const [selectedOnglet, setSelectedOnglet] = useState('couverture')
   const [drawerOpen, setDrawerOpen] = useState(true)
   const [modeEdition, setModeEdition] = useState(false)
+  const [validationModalOpen, setValidationModalOpen] = useState(false)
+  const [validationEnCours, setValidationEnCours] = useState(false)
 
   // Utiliser la configuration centralisée
   const ongletsLiasse = LIASSE_COMPONENTS.filter(comp => comp.isVisible)
@@ -140,7 +152,7 @@ const LiasseCompleteFinal: React.FC = () => {
 
         {/* Barre de progression globale */}
         <Box sx={{ p: 2, backgroundColor: 'background.paper' }}>
-          <Typography variant="body2" color="text.secondary" gutterBottom>
+          <Typography variant="body2" sx={{ color: TEXT_SECONDARY }} gutterBottom>
             Complétude globale
           </Typography>
           <LinearProgress 
@@ -166,9 +178,11 @@ const LiasseCompleteFinal: React.FC = () => {
                   px: 2, 
                   py: 1, 
                   display: 'block',
-                  backgroundColor: 'grey.100',
-                  color: 'text.secondary',
-                  fontWeight: 600
+                  backgroundColor: ACCENT_COLOR,
+                  color: TEXT_PRIMARY,
+                  fontWeight: 700,
+                  fontSize: '0.75rem',
+                  letterSpacing: 1
                 }}
               >
                 {category}
@@ -207,28 +221,11 @@ const LiasseCompleteFinal: React.FC = () => {
                     </ListItemIcon>
                     <ListItemText 
                       primary={onglet.label}
-                      secondary={
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
-                          <LinearProgress 
-                            variant="determinate" 
-                            value={onglet.completude}
-                            sx={{ 
-                              flexGrow: 1, 
-                              height: 4, 
-                              borderRadius: 2,
-                              backgroundColor: 'grey.300',
-                              '& .MuiLinearProgress-bar': {
-                                backgroundColor: getStatusColor(onglet.status) + '.main'
-                              }
-                            }}
-                          />
-                          <Typography variant="caption" sx={{ minWidth: 35 }}>
-                            {onglet.completude}%
-                          </Typography>
-                        </Box>
-                      }
+                      secondary={`${onglet.completude}% - ${onglet.description}`}
                       primaryTypographyProps={{
                         fontSize: '0.9rem',
+                        color: TEXT_PRIMARY,
+                        fontWeight: 500
                       }}
                     />
                   </ListItemButton>

@@ -87,6 +87,7 @@ import {
 // Import des composants de tableaux
 import BilanActif from '../../components/liasse/sheets/BilanActif'
 import { LIASSE_SHEETS, SHEET_CATEGORIES, SheetConfig } from '../../config/liasseFiscaleSheets'
+import '../../styles/liasse-fixes.css'
 
 const DRAWER_WIDTH = 360
 
@@ -365,6 +366,7 @@ const ModernLiasse: React.FC = () => {
     if (entry.isHeader) {
       return {
         backgroundColor: alpha(theme.palette.primary.main, 0.1),
+        color: theme.palette.text.primary,
         fontWeight: 700,
         fontSize: '1.1rem'
       }
@@ -372,6 +374,7 @@ const ModernLiasse: React.FC = () => {
     if (entry.isSubHeader) {
       return {
         backgroundColor: alpha(theme.palette.primary.main, 0.05),
+        color: theme.palette.text.primary,
         fontWeight: 600,
         fontStyle: 'italic'
       }
@@ -379,12 +382,15 @@ const ModernLiasse: React.FC = () => {
     if (entry.isTotal) {
       return {
         backgroundColor: alpha(theme.palette.success.main, 0.1),
+        color: theme.palette.text.primary,
         fontWeight: 700,
         borderTop: `2px solid ${theme.palette.success.main}`,
         borderBottom: `2px solid ${theme.palette.success.main}`
       }
     }
-    return {}
+    return {
+      color: theme.palette.text.primary
+    }
   }
 
   const toggleCategory = (category: string) => {
@@ -414,7 +420,7 @@ const ModernLiasse: React.FC = () => {
       </Alert>
 
       <TableContainer component={Paper} elevation={0} sx={{ border: `2px solid ${theme.palette.primary.main}` }}>
-        <Table size="small">
+        <Table size="small" className="liasse-table">
           <TableHead>
             <TableRow sx={{ backgroundColor: theme.palette.primary.main }}>
               <TableCell sx={{ color: 'white', fontWeight: 700, width: '60px' }}>Réf</TableCell>
@@ -437,16 +443,20 @@ const ModernLiasse: React.FC = () => {
           <TableBody>
             {bilanActifData.map((entry, index) => (
               <TableRow key={index} sx={getRowStyle(entry)}>
-                <TableCell sx={{ fontWeight: entry.isHeader || entry.isTotal ? 700 : 400 }}>
+                <TableCell sx={{ 
+                  fontWeight: entry.isHeader || entry.isTotal ? 700 : 400,
+                  color: 'inherit'
+                }}>
                   {entry.ref}
                 </TableCell>
                 <TableCell sx={{ 
                   fontWeight: entry.isHeader || entry.isTotal ? 700 : entry.isSubHeader ? 600 : 400,
                   pl: (entry.level || 0) * 3 + 1,
+                  color: 'inherit'
                 }}>
                   {entry.label}
                 </TableCell>
-                <TableCell align="center">
+                <TableCell align="center" sx={{ color: 'inherit' }}>
                   {entry.note && (
                     <Chip 
                       label={entry.note} 
@@ -456,7 +466,7 @@ const ModernLiasse: React.FC = () => {
                     />
                   )}
                 </TableCell>
-                <TableCell align="right" sx={{ fontFamily: 'monospace' }}>
+                <TableCell align="right" sx={{ fontFamily: 'monospace', color: 'inherit' }}>
                   {editMode && entry.exerciceN !== null && !entry.isHeader && !entry.isSubHeader && !entry.isTotal ? (
                     <TextField
                       size="small"
@@ -476,7 +486,7 @@ const ModernLiasse: React.FC = () => {
                     formatAmount(entry.exerciceN)
                   )}
                 </TableCell>
-                <TableCell align="right" sx={{ fontFamily: 'monospace' }}>
+                <TableCell align="right" sx={{ fontFamily: 'monospace', color: 'inherit' }}>
                   {formatAmount(entry.exerciceN1)}
                 </TableCell>
               </TableRow>
@@ -688,7 +698,8 @@ const ModernLiasse: React.FC = () => {
                       fontWeight: 600,
                       fontSize: '0.875rem',
                       textTransform: 'uppercase',
-                      letterSpacing: '0.5px'
+                      letterSpacing: '0.5px',
+                      color: 'white'
                     }}
                   />
                   {isExpanded ? <CollapseIcon /> : <ExpandIcon />}
@@ -717,6 +728,9 @@ const ModernLiasse: React.FC = () => {
                       </ListItemIcon>
                       <ListItemText 
                         primary={section.title}
+                        primaryTypographyProps={{
+                          sx: { color: 'white', fontWeight: 500 }
+                        }}
                         secondary={
                           <Box sx={{ mt: 0.5 }}>
                             <LinearProgress 

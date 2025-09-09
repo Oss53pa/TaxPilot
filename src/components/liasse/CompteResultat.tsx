@@ -15,15 +15,14 @@ import {
   Box,
   TextField,
   Grid,
-  Chip,
-  Tooltip,
+  // Tooltip,
 } from '@mui/material'
 
 interface CompteResultatProps {
   modeEdition?: boolean
 }
 
-const CompteResultat: React.FC<CompteResultatProps> = ({ modeEdition = false }) => {
+const CompteResultat: React.FC<CompteResultatProps> = ({ modeEdition: _modeEdition = false }) => {
   // Structure du Compte de Résultat SYSCOHADA
   const lignesCompteResultat = [
     // PRODUITS
@@ -437,7 +436,7 @@ const CompteResultat: React.FC<CompteResultatProps> = ({ modeEdition = false }) 
                       )}
                     </TableCell>
                     <TableCell align="right" sx={{ fontFamily: 'monospace' }}>
-                      {modeEdition && ligne.exerciceN !== null && !ligne.isSubTotal && !ligne.isTotalGeneral ? (
+                      {_modeEdition && ligne.exerciceN !== null && !ligne.isSubTotal && !ligne.isTotalGeneral ? (
                         <TextField
                           size="small"
                           type="number"

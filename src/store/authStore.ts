@@ -24,7 +24,7 @@ interface AuthState {
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set, get) => ({
+    (set, _get) => ({
       user: null,
       isAuthenticated: false,
       isLoading: false,
@@ -34,9 +34,10 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true, error: null })
         
         try {
+          // Utiliser le service d'authentification
           const response = await authService.login({ username, password })
           
-          if (response.success && response.data) {
+          if (response.success && response.data.user) {
             set({
               user: response.data.user,
               isAuthenticated: true,
@@ -44,7 +45,7 @@ export const useAuthStore = create<AuthState>()(
               error: null,
             })
           } else {
-            throw new Error(response.message || 'Échec de la connexion')
+            throw new Error(response.message || 'Échec de l\'authentification')
           }
         } catch (error: any) {
           set({

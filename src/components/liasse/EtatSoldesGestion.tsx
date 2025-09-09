@@ -9,7 +9,7 @@ interface EtatSoldesGestionProps {
   modeEdition?: boolean
 }
 
-const EtatSoldesGestion: React.FC<EtatSoldesGestionProps> = ({ modeEdition = false }) => {
+const EtatSoldesGestion: React.FC<EtatSoldesGestionProps> = ({ modeEdition: _modeEdition = false }) => {
   return (
     <Box>
       <Typography variant="h5" sx={{ mb: 3, fontWeight: 700, color: '#191919' }}>

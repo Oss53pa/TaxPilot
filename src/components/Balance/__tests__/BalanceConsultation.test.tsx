@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ThemeProvider, createTheme } from '@mui/material/styles'
 import { Provider } from 'react-redux'
@@ -20,12 +20,26 @@ const mockStore = configureStore({
   preloadedState: {
     balance: {
       balances: [],
-      currentBalance: null,
+      selectedBalance: null,
+      filters: {},
+      pagination: {
+        page: 1,
+        limit: 50,
+        total: 0,
+      },
+      sortBy: {
+        field: 'compte.numero_compte',
+        direction: 'asc' as const,
+      },
       isLoading: false,
+      isImporting: false,
       error: null,
-      importProgress: 0,
-      validationResults: [],
-      lastImport: null,
+      importProgress: {
+        status: 'idle' as const,
+        progress: 0,
+        message: '',
+        errors: [],
+      },
     }
   }
 })

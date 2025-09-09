@@ -46,6 +46,26 @@ export const LIASSE_SHEETS: SheetConfig[] = [
     description: 'Page de couverture de la liasse fiscale'
   },
   {
+    id: 'tables_calcul_impots',
+    name: 'TABLES_CALCUL_IMPOTS',
+    title: 'Tables de Calcul des Impôts',
+    category: 'supplements',
+    order: 2,
+    required: true,
+    hasComments: true,
+    description: 'Calculs automatiques IS, TVA, taxes diverses selon pays OHADA'
+  },
+  {
+    id: 'tableaux_supplementaires', 
+    name: 'TABLEAUX_SUPPLEMENTAIRES',
+    title: 'Tableaux Supplémentaires',
+    category: 'supplements',
+    order: 3,
+    required: true,
+    hasComments: true,
+    description: 'Effectif, filiales, engagements hors bilan'
+  },
+  {
     id: 'garde',
     name: 'GARDE',
     title: 'Page de Garde',

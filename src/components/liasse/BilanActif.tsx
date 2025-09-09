@@ -17,7 +17,7 @@ import {
   Chip,
   Tooltip,
 } from '@mui/material'
-import { Notes, Info } from '@mui/icons-material'
+// import { Notes, Info } from '@mui/icons-material'
 
 interface BilanActifProps {
   modeEdition?: boolean

@@ -1,6 +1,5 @@
 /**
- * Module Audit Professionnel - Contrôle et validation SYSCOHADA
- * Interface moderne pour audit comptable et fiscal
+ * Module Audit & Contrôle - Sessions d'audit et rapports de corrections
  */
 
 import React, { useState, useEffect } from 'react'
@@ -39,7 +38,6 @@ import {
   Tabs,
   Tab,
   Alert,
-  AlertTitle,
   Skeleton,
   useTheme,
   alpha,
@@ -52,26 +50,15 @@ import {
   CheckCircle as CheckIcon,
   Error as ErrorIcon,
   Visibility as ViewIcon,
-  Edit as EditIcon,
   GetApp as ExportIcon,
+  Download as DownloadIcon,
   Add as AddIcon,
-  Search as SearchIcon,
   FilterList as FilterIcon,
   Assessment as AssessmentIcon,
   TrendingUp as TrendingUpIcon,
   Balance as BalanceIcon,
   AccountBalance as AccountIcon,
 } from '@mui/icons-material'
-
-interface AuditRule {
-  id: string
-  code: string
-  title: string
-  description: string
-  category: 'balance' | 'legal' | 'fiscal' | 'coherence'
-  severity: 'critical' | 'major' | 'minor' | 'info'
-  status: 'active' | 'inactive'
-}
 
 interface AuditResult {
   id: string
@@ -83,6 +70,46 @@ interface AuditResult {
   affectedAccounts?: string[]
   amount?: number
   date: string
+  correctionSuggestions?: CorrectionSuggestion[]
+}
+
+interface CorrectionSuggestion {
+  id: string
+  type: 'journal_entry' | 'account_reclassification' | 'balance_adjustment'
+  description: string
+  journalEntry?: {
+    date: string
+    reference: string
+    description: string
+    lines: {
+      account: string
+      accountName: string
+      debit?: number
+      credit?: number
+    }[]
+  }
+  impact: {
+    beforeValue: number
+    afterValue: number
+    difference: number
+  }
+  confidence: number
+  priority: 'high' | 'medium' | 'low'
+}
+
+interface CorrectionReport {
+  id: string
+  generatedDate: string
+  auditSession: string
+  totalIssues: number
+  totalCorrections: number
+  totalAmount: number
+  issues: AuditResult[]
+  summary: {
+    critical: number
+    major: number
+    minor: number
+  }
 }
 
 interface AuditSession {
@@ -109,54 +136,6 @@ const ModernAudit: React.FC = () => {
     const timer = setTimeout(() => setLoading(false), 1500)
     return () => clearTimeout(timer)
   }, [])
-
-  const auditRules: AuditRule[] = [
-    {
-      id: '1',
-      code: 'BAL001',
-      title: 'Équilibre débit/crédit',
-      description: 'Vérifier que le total des débits égale le total des crédits',
-      category: 'balance',
-      severity: 'critical',
-      status: 'active'
-    },
-    {
-      id: '2',
-      code: 'LEG001',
-      title: 'Plan comptable SYSCOHADA',
-      description: 'Conformité des comptes avec le plan SYSCOHADA',
-      category: 'legal',
-      severity: 'major',
-      status: 'active'
-    },
-    {
-      id: '3',
-      code: 'FIS001',
-      title: 'Cohérence TVA',
-      description: 'Vérifier la cohérence entre TVA collectée et déductible',
-      category: 'fiscal',
-      severity: 'major',
-      status: 'active'
-    },
-    {
-      id: '4',
-      code: 'COH001',
-      title: 'Cohérence actif/passif',
-      description: 'Vérifier la cohérence entre actif et passif du bilan',
-      category: 'coherence',
-      severity: 'critical',
-      status: 'active'
-    },
-    {
-      id: '5',
-      code: 'BAL002',
-      title: 'Soldes débiteurs/créditeurs',
-      description: 'Vérifier que les comptes ont le bon signe selon leur nature',
-      category: 'balance',
-      severity: 'major',
-      status: 'active'
-    }
-  ]
 
   const auditSessions: AuditSession[] = [
     {
@@ -212,7 +191,40 @@ const ModernAudit: React.FC = () => {
       details: 'Différence de 15 000 FCFA détectée',
       amount: 15000,
       affectedAccounts: ['101000', '401000'],
-      date: '2024-12-15 14:35'
+      date: '2024-12-15 14:35',
+      correctionSuggestions: [
+        {
+          id: 'corr-001',
+          type: 'journal_entry',
+          description: 'Écriture de régularisation pour équilibrer le bilan',
+          journalEntry: {
+            date: '2024-12-15',
+            reference: 'OD-2024-001',
+            description: 'Régularisation écart actif/passif',
+            lines: [
+              {
+                account: '658000',
+                accountName: 'Charges diverses de gestion courante',
+                debit: 15000,
+                credit: 0
+              },
+              {
+                account: '471000',
+                accountName: "Compte d'attente",
+                debit: 0,
+                credit: 15000
+              }
+            ]
+          },
+          impact: {
+            beforeValue: -15000,
+            afterValue: 0,
+            difference: 15000
+          },
+          confidence: 95,
+          priority: 'high'
+        }
+      ]
     },
     {
       id: '3',
@@ -221,37 +233,36 @@ const ModernAudit: React.FC = () => {
       status: 'warning',
       message: 'TVA déductible élevée ce mois',
       details: 'Ratio TVA déductible/CA supérieur à la normale',
-      date: '2024-12-15 14:38'
+      date: '2024-12-15 14:38',
+      correctionSuggestions: [
+        {
+          id: 'corr-002',
+          type: 'account_reclassification',
+          description: 'Vérifier et reclasser certaines opérations TVA',
+          impact: {
+            beforeValue: 45000,
+            afterValue: 42000,
+            difference: -3000
+          },
+          confidence: 78,
+          priority: 'medium'
+        }
+      ]
     }
   ]
 
-  const getCategoryIcon = (category: string) => {
-    switch (category) {
-      case 'balance': return <BalanceIcon />
-      case 'legal': return <SecurityIcon />
-      case 'fiscal': return <AccountIcon />
-      case 'coherence': return <AssessmentIcon />
-      default: return <CheckIcon />
-    }
-  }
-
-  const getCategoryColor = (category: string) => {
-    switch (category) {
-      case 'balance': return theme.palette.primary.main
-      case 'legal': return theme.palette.success.main
-      case 'fiscal': return theme.palette.warning.main
-      case 'coherence': return theme.palette.info.main
-      default: return theme.palette.grey[500]
-    }
-  }
-
-  const getSeverityColor = (severity: string) => {
-    switch (severity) {
-      case 'critical': return theme.palette.error.main
-      case 'major': return theme.palette.warning.main
-      case 'minor': return theme.palette.info.main
-      case 'info': return theme.palette.grey[500]
-      default: return theme.palette.grey[500]
+  const correctionReport: CorrectionReport = {
+    id: 'CORR-2024-001',
+    generatedDate: '2024-12-15 15:00',
+    auditSession: 'Audit Décembre 2024',
+    totalIssues: 2,
+    totalCorrections: 3,
+    totalAmount: 15000,
+    issues: auditResults.filter(r => r.status !== 'passed'),
+    summary: {
+      critical: 1,
+      major: 0,
+      minor: 1
     }
   }
 
@@ -277,7 +288,6 @@ const ModernAudit: React.FC = () => {
 
   const handleNewAudit = () => {
     if (newAuditName.trim()) {
-      // Simuler le démarrage d'un nouvel audit
       console.log('Démarrage audit:', newAuditName)
       setAuditDialogOpen(false)
       setNewAuditName('')
@@ -458,12 +468,12 @@ const ModernAudit: React.FC = () => {
         </Grid>
       </Grid>
 
-      {/* Onglets principaux */}
+      {/* Onglets principaux - SEULEMENT 3 onglets */}
       <Card elevation={0} sx={{ border: `1px solid ${alpha(theme.palette.divider, 0.08)}` }}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Tabs value={activeTab} onChange={(_, newValue) => setActiveTab(newValue)}>
             <Tab label="Sessions d'audit" />
-            <Tab label="Règles de contrôle" />
+            <Tab label="Rapport de Corrections" />
             <Tab label="Résultats détaillés" />
           </Tabs>
         </Box>
@@ -471,7 +481,7 @@ const ModernAudit: React.FC = () => {
         <TabPanel value={activeTab} index={0}>
           {/* Sessions d'audit */}
           <CardContent sx={{ p: 3 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'between', mb: 3 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
               <Typography variant="h6" sx={{ fontWeight: 600 }}>
                 Historique des audits
               </Typography>
@@ -584,121 +594,182 @@ const ModernAudit: React.FC = () => {
         </TabPanel>
 
         <TabPanel value={activeTab} index={1}>
-          {/* Règles de contrôle */}
+          {/* Rapport de Corrections */}
           <CardContent sx={{ p: 3 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-              <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                Règles de contrôle SYSCOHADA
-              </Typography>
+              <Box>
+                <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                  📋 Rapport de Corrections à Effectuer
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Référence: {correctionReport.id} | Généré le {correctionReport.generatedDate}
+                </Typography>
+              </Box>
               <Stack direction="row" spacing={2}>
-                <Button startIcon={<FilterIcon />} variant="outlined" size="small">
-                  Filtrer
-                </Button>
-                <Button startIcon={<AddIcon />} variant="contained" size="small">
-                  Nouvelle règle
+                <Button 
+                  startIcon={<DownloadIcon />} 
+                  variant="contained" 
+                  size="small"
+                  sx={{ 
+                    bgcolor: '#373B4D',
+                    '&:hover': { bgcolor: '#4A4F65' }
+                  }}
+                >
+                  Imprimer Rapport
                 </Button>
               </Stack>
             </Box>
 
-            <TableContainer component={Paper} elevation={0} sx={{ border: `1px solid ${alpha(theme.palette.divider, 0.08)}` }}>
-              <Table>
-                <TableHead>
-                  <TableRow sx={{ backgroundColor: alpha(theme.palette.primary.main, 0.02) }}>
-                    <TableCell sx={{ fontWeight: 600 }}>Code</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>Règle</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>Catégorie</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>Criticité</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>Statut</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>Actions</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {loading ? (
-                    Array.from({ length: 5 }).map((_, index) => (
-                      <TableRow key={index}>
-                        {Array.from({ length: 6 }).map((_, cellIndex) => (
-                          <TableCell key={cellIndex}>
-                            <Skeleton variant="text" height={20} />
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    ))
-                  ) : (
-                    auditRules.map((rule) => (
-                      <TableRow key={rule.id} hover>
-                        <TableCell>
-                          <Typography variant="body2" sx={{ fontFamily: 'monospace', fontWeight: 600 }}>
-                            {rule.code}
+            {/* Résumé du rapport */}
+            <Grid container spacing={3} sx={{ mb: 4 }}>
+              <Grid item xs={12} md={3}>
+                <Paper sx={{ p: 2, textAlign: 'center', bgcolor: '#FFEBEE' }}>
+                  <Typography variant="h5" sx={{ fontWeight: 700, color: '#D32F2F' }}>
+                    {correctionReport.totalIssues}
+                  </Typography>
+                  <Typography variant="caption">Problèmes détectés</Typography>
+                </Paper>
+              </Grid>
+              <Grid item xs={12} md={3}>
+                <Paper sx={{ p: 2, textAlign: 'center', bgcolor: '#E3F2FD' }}>
+                  <Typography variant="h5" sx={{ fontWeight: 700, color: '#1976D2' }}>
+                    {correctionReport.totalCorrections}
+                  </Typography>
+                  <Typography variant="caption">Corrections proposées</Typography>
+                </Paper>
+              </Grid>
+              <Grid item xs={12} md={3}>
+                <Paper sx={{ p: 2, textAlign: 'center', bgcolor: '#FFF3E0' }}>
+                  <Typography variant="h5" sx={{ fontWeight: 700, color: '#F57C00' }}>
+                    {correctionReport.totalAmount.toLocaleString()}
+                  </Typography>
+                  <Typography variant="caption">Montant total FCFA</Typography>
+                </Paper>
+              </Grid>
+              <Grid item xs={12} md={3}>
+                <Paper sx={{ p: 2, textAlign: 'center', bgcolor: '#E8F5E8' }}>
+                  <Typography variant="h5" sx={{ fontWeight: 700, color: '#388E3C' }}>
+                    {Math.round(correctionReport.totalCorrections / correctionReport.totalIssues * 100)}%
+                  </Typography>
+                  <Typography variant="caption">Taux de résolution</Typography>
+                </Paper>
+              </Grid>
+            </Grid>
+
+            {/* Détail des corrections */}
+            <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+              🔧 Détail des Corrections Proposées
+            </Typography>
+
+            {correctionReport.issues.map((issue, index) => (
+              <Paper key={issue.id} sx={{ p: 3, mb: 3, border: '1px solid', borderColor: 'divider' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                  {getStatusIcon(issue.status)}
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    {issue.ruleName}
+                  </Typography>
+                  <Chip
+                    label={issue.status === 'failed' ? 'Critique' : 'Avertissement'}
+                    size="small"
+                    color={issue.status === 'failed' ? 'error' : 'warning'}
+                  />
+                </Box>
+
+                <Typography variant="body2" sx={{ mb: 2 }}>
+                  {issue.message}
+                </Typography>
+                
+                {issue.details && (
+                  <Alert severity={issue.status === 'failed' ? 'error' : 'warning'} sx={{ mb: 2 }}>
+                    {issue.details}
+                    {issue.amount && (
+                      <Typography variant="body2" sx={{ mt: 1, fontWeight: 600 }}>
+                        Montant impacté: {issue.amount.toLocaleString()} FCFA
+                      </Typography>
+                    )}
+                  </Alert>
+                )}
+
+                {/* Suggestions de correction */}
+                {issue.correctionSuggestions && issue.correctionSuggestions.length > 0 && (
+                  <Box sx={{ mt: 2 }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>
+                      💡 Suggestions de Correction:
+                    </Typography>
+                    
+                    {issue.correctionSuggestions.map((suggestion, suggIndex) => (
+                      <Paper key={suggestion.id} sx={{ p: 2, mb: 2, bgcolor: 'grey.50' }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                            {suggestion.description}
                           </Typography>
-                        </TableCell>
-                        <TableCell>
+                          <Box sx={{ display: 'flex', gap: 1 }}>
+                            <Chip 
+                              label={`Confiance: ${suggestion.confidence}%`} 
+                              size="small" 
+                              color={suggestion.confidence > 90 ? 'success' : suggestion.confidence > 70 ? 'warning' : 'error'}
+                            />
+                            <Chip 
+                              label={suggestion.priority} 
+                              size="small" 
+                              color={suggestion.priority === 'high' ? 'error' : suggestion.priority === 'medium' ? 'warning' : 'info'}
+                            />
+                          </Box>
+                        </Box>
+
+                        {suggestion.journalEntry && (
                           <Box>
-                            <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
-                              {rule.title}
+                            <Typography variant="caption" sx={{ fontWeight: 600, display: 'block', mb: 1 }}>
+                              Écriture proposée:
                             </Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              {rule.description}
-                            </Typography>
+                            <TableContainer component={Paper} elevation={0} sx={{ maxHeight: 200 }}>
+                              <Table size="small">
+                                <TableHead>
+                                  <TableRow>
+                                    <TableCell sx={{ fontWeight: 600 }}>Compte</TableCell>
+                                    <TableCell sx={{ fontWeight: 600 }}>Libellé</TableCell>
+                                    <TableCell align="right" sx={{ fontWeight: 600 }}>Débit</TableCell>
+                                    <TableCell align="right" sx={{ fontWeight: 600 }}>Crédit</TableCell>
+                                  </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                  {suggestion.journalEntry.lines.map((line, lineIndex) => (
+                                    <TableRow key={lineIndex}>
+                                      <TableCell sx={{ fontFamily: 'monospace' }}>{line.account}</TableCell>
+                                      <TableCell>{line.accountName}</TableCell>
+                                      <TableCell align="right">
+                                        {line.debit ? line.debit.toLocaleString() : '-'}
+                                      </TableCell>
+                                      <TableCell align="right">
+                                        {line.credit ? line.credit.toLocaleString() : '-'}
+                                      </TableCell>
+                                    </TableRow>
+                                  ))}
+                                </TableBody>
+                              </Table>
+                            </TableContainer>
                           </Box>
-                        </TableCell>
-                        <TableCell>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Avatar
-                              sx={{
-                                width: 24,
-                                height: 24,
-                                backgroundColor: alpha(getCategoryColor(rule.category), 0.1),
-                                color: getCategoryColor(rule.category),
-                                '& .MuiSvgIcon-root': { fontSize: '0.875rem' }
-                              }}
-                            >
-                              {getCategoryIcon(rule.category)}
-                            </Avatar>
-                            <Typography variant="caption" sx={{ textTransform: 'capitalize' }}>
-                              {rule.category === 'balance' ? 'Balance' :
-                               rule.category === 'legal' ? 'Légal' :
-                               rule.category === 'fiscal' ? 'Fiscal' : 'Cohérence'}
-                            </Typography>
-                          </Box>
-                        </TableCell>
-                        <TableCell>
-                          <Chip
-                            label={
-                              rule.severity === 'critical' ? 'Critique' :
-                              rule.severity === 'major' ? 'Majeure' :
-                              rule.severity === 'minor' ? 'Mineure' : 'Info'
-                            }
-                            size="small"
-                            sx={{
-                              backgroundColor: alpha(getSeverityColor(rule.severity), 0.1),
-                              color: getSeverityColor(rule.severity),
-                              fontWeight: 600,
-                            }}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Chip
-                            label={rule.status === 'active' ? 'Actif' : 'Inactif'}
-                            size="small"
-                            color={rule.status === 'active' ? 'success' : 'default'}
-                          />
-                        </TableCell>
-                        <TableCell>
+                        )}
+
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
+                          <Typography variant="caption" color="text.secondary">
+                            Impact: {suggestion.impact.beforeValue.toLocaleString()} → {suggestion.impact.afterValue.toLocaleString()} FCFA
+                          </Typography>
                           <Stack direction="row" spacing={1}>
-                            <IconButton size="small">
-                              <EditIcon fontSize="small" />
-                            </IconButton>
-                            <IconButton size="small">
-                              <ViewIcon fontSize="small" />
-                            </IconButton>
+                            <Button size="small" variant="outlined">
+                              Appliquer
+                            </Button>
+                            <Button size="small" variant="text">
+                              Ignorer
+                            </Button>
                           </Stack>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
+                        </Box>
+                      </Paper>
+                    ))}
+                  </Box>
+                )}
+              </Paper>
+            ))}
           </CardContent>
         </TabPanel>
 
@@ -753,7 +824,7 @@ const ModernAudit: React.FC = () => {
                         }
                         secondary={
                           <Box>
-                            <Typography variant="body2" sx={{ mb: 1 }}>
+                            <Typography variant="body2" component="div" sx={{ mb: 1 }}>
                               {result.message}
                             </Typography>
                             {result.details && (
@@ -786,7 +857,7 @@ const ModernAudit: React.FC = () => {
                                 </Stack>
                               </Box>
                             )}
-                            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+                            <Typography variant="caption" color="text.secondary" component="div" sx={{ display: 'block', mt: 1 }}>
                               {result.date}
                             </Typography>
                           </Box>

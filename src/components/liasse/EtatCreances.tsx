@@ -5,7 +5,7 @@ interface EtatCreancesProps {
   modeEdition?: boolean
 }
 
-const EtatCreances: React.FC<EtatCreancesProps> = ({ modeEdition = false }) => {
+const EtatCreances: React.FC<EtatCreancesProps> = ({ modeEdition: _modeEdition = false }) => {
   return (
     <Box>
       <Typography variant="h5" sx={{ mb: 3, fontWeight: 700, color: '#191919' }}>

@@ -18,6 +18,7 @@ import {
 import {
   Business as BusinessIcon,
   Description as DocumentIcon,
+  AccountBalance,
   CalendarToday as CalendarIcon,
   AccountBalance as TaxIcon,
 } from '@mui/icons-material'

@@ -9,7 +9,7 @@ interface JournalGeneralProps {
   modeEdition?: boolean
 }
 
-const JournalGeneral: React.FC<JournalGeneralProps> = ({ modeEdition = false }) => {
+const JournalGeneral: React.FC<JournalGeneralProps> = ({ modeEdition: _modeEdition = false }) => {
   return (
     <Box>
       <Typography variant="h5" sx={{ mb: 3, fontWeight: 700, color: '#191919' }}>

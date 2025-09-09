@@ -5,7 +5,7 @@ interface EtatDettesProps {
   modeEdition?: boolean
 }
 
-const EtatDettes: React.FC<EtatDettesProps> = ({ modeEdition = false }) => {
+const EtatDettes: React.FC<EtatDettesProps> = ({ modeEdition: _modeEdition = false }) => {
   return (
     <Box>
       <Typography variant="h5" sx={{ mb: 3, fontWeight: 700, color: '#191919' }}>

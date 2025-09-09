@@ -3,6 +3,7 @@
  */
 
 import React, { useState } from 'react'
+import '../../styles/liasse-fixes.css'
 import {
   Box,
   Drawer,
@@ -20,6 +21,7 @@ import {
   ListItemText,
   useTheme,
   useMediaQuery,
+  Divider
 } from '@mui/material'
 import {
   Menu as MenuIcon,
@@ -36,6 +38,7 @@ import {
 } from '@mui/icons-material'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
+import NotificationCenter from '../notifications/NotificationCenter'
 
 const DRAWER_WIDTH = 280
 
@@ -74,16 +77,26 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   const menuItems = [
     { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
-    { text: 'Paramétrage', icon: <Settings />, path: '/parametrage' },
-    { text: 'Balance', icon: <AccountBalance />, path: '/balance' },
-    { text: 'Liasses Fiscales', icon: <Assignment />, path: '/liasses' },
-    { text: 'Liasse Complète', icon: <Assignment />, path: '/liasse-complete' },
-    { text: 'Audit Intelligent', icon: <Security />, path: '/audit' },
+    
+    // ÉTAPE 1: CONFIGURATION
+    { text: 'Configuration', icon: <Settings />, path: '/parametrage', divider: 'Configuration' },
+    { text: 'Plans Comptables', icon: <AccountBalance />, path: '/plans-comptables' },
+    { text: 'Points de Contrôle IA', icon: <Security />, path: '/control-points' },
+    
+    // ÉTAPE 2: IMPORT & CONTRÔLE  
+    { text: 'Import Balance', icon: <CloudUpload />, path: '/import-balance', divider: 'Import & Contrôle' },
+    { text: 'Consultation Balance', icon: <AccountBalance />, path: '/balance' },
+    { text: 'Audit & Corrections', icon: <Security />, path: '/audit' },
+    
+    // ÉTAPE 3: PRODUCTION LIASSE
+    { text: 'Liasses SYSCOHADA', icon: <Assignment />, path: '/direct-liasse', divider: 'Production Liasse' },
     { text: 'Génération Auto', icon: <Description />, path: '/generation' },
+    { text: 'Contrôle de Liasse', icon: <Security />, path: '/validation-liasse' },
     { text: 'Templates Export', icon: <CloudUpload />, path: '/templates' },
-    { text: 'Télédéclaration', icon: <Analytics />, path: '/teledeclaration' },
-    { text: '🧪 Test UI', icon: <Settings />, path: '/test' },
-    { text: '🐛 Debug Boutons', icon: <Settings />, path: '/debug' },
+    
+    // ÉTAPE 4: FINALISATION
+    { text: 'Télédéclaration', icon: <Analytics />, path: '/teledeclaration', divider: 'Finalisation' },
+    { text: 'Reporting', icon: <Analytics />, path: '/reporting' },
   ]
 
   const drawerContent = (
@@ -94,19 +107,76 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         </Typography>
       </Toolbar>
       <List>
-        {menuItems.map((item) => (
-          <ListItem key={item.text} disablePadding>
-            <ListItemButton
-              selected={location.pathname.startsWith(item.path)}
-              onClick={() => {
-                navigate(item.path)
-                if (isMobile) setMobileOpen(false)
-              }}
-            >
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.text} />
-            </ListItemButton>
-          </ListItem>
+        {menuItems.map((item, index) => (
+          <React.Fragment key={item.text}>
+            {/* Afficher le divider de section si défini */}
+            {item.divider && index > 0 && (
+              <>
+                <Divider sx={{ my: 1, borderColor: '#949597', opacity: 0.4 }} />
+                <ListItem sx={{ py: 1, px: 2 }}>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      fontWeight: 700,
+                      color: '#FFFFFF',  // Blanc pur pour maximum de contraste
+                      textTransform: 'uppercase',
+                      letterSpacing: 1.5,
+                      fontSize: '0.7rem',
+                      opacity: 0.9,
+                      background: 'rgba(148, 149, 151, 0.2)',  // Fond léger pour lisibilité
+                      px: 1,
+                      py: 0.5,
+                      borderRadius: 1,
+                      width: '100%',
+                      textAlign: 'center'
+                    }}
+                  >
+                    {item.divider}
+                  </Typography>
+                </ListItem>
+              </>
+            )}
+            
+            <ListItem disablePadding>
+              <ListItemButton
+                selected={location.pathname.startsWith(item.path)}
+                onClick={() => {
+                  navigate(item.path)
+                  if (isMobile) setMobileOpen(false)
+                }}
+                sx={{ 
+                  borderRadius: 1, 
+                  mx: 1,
+                  color: '#FFFFFF',  // Force blanc pour tous les textes
+                  '&:hover': {
+                    backgroundColor: '#949597',
+                    color: '#FFFFFF'
+                  },
+                  '&.Mui-selected': {
+                    backgroundColor: '#949597',
+                    color: '#FFFFFF',
+                    fontWeight: 600,
+                    '& .MuiListItemIcon-root': { color: '#FFFFFF' },
+                    '& .MuiListItemText-primary': { color: '#FFFFFF', fontWeight: 600 }
+                  },
+                  '& .MuiListItemIcon-root': { color: '#FFFFFF' },
+                  '& .MuiListItemText-primary': { color: '#FFFFFF' }
+                }}
+              >
+                <ListItemIcon sx={{ color: '#FFFFFF' }}>{item.icon}</ListItemIcon>
+                <ListItemText 
+                  primary={item.text}
+                  sx={{ 
+                    '& .MuiTypography-root': { 
+                      color: '#FFFFFF',
+                      fontSize: '0.875rem',
+                      fontWeight: 500
+                    }
+                  }}
+                />
+              </ListItemButton>
+            </ListItem>
+          </React.Fragment>
         ))}
       </List>
     </Box>
@@ -143,6 +213,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           >
             FiscaSync
           </Typography>
+
+          {/* Centre de notifications */}
+          <NotificationCenter />
 
           {/* Menu utilisateur */}
           <IconButton
@@ -211,6 +284,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             '& .MuiDrawer-paper': {
               boxSizing: 'border-box',
               width: DRAWER_WIDTH,
+              backgroundColor: '#2c2c2c',
             },
           }}
         >
@@ -226,6 +300,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               boxSizing: 'border-box',
               width: DRAWER_WIDTH,
               position: 'relative',
+              backgroundColor: '#2c2c2c',
               height: '100vh',
             },
           }}

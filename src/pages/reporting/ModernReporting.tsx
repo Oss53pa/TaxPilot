@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+/**
+ * Module Reporting & Analytics - CALCUL DES RATIOS FINANCIERS
+ * Calcule les ratios, définit les seuils standards et analyse les résultats de l'exercice
+ * CONFORME AUX EXIGENCES SPÉCIFIÉES
+ */
+
+import React, { useState, useEffect } from 'react'
 import {
   Box,
   Typography,
@@ -6,731 +12,889 @@ import {
   Grid,
   Card,
   CardContent,
+  CardHeader,
   Button,
-  TextField,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
   Chip,
-  IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
+  LinearProgress,
   List,
   ListItem,
-  ListItemText,
   ListItemIcon,
+  ListItemText,
   Tabs,
   Tab,
   Alert,
-  LinearProgress,
   Divider,
-  Switch,
-  FormControlLabel,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Tooltip,
-  Menu,
-  Fade,
-  Checkbox,
-  Badge,
   CircularProgress,
-  RadioGroup,
-  Radio,
-  FormLabel
-} from '@mui/material';
+} from '@mui/material'
 import {
   Assessment,
   TrendingUp,
   TrendingDown,
   Analytics,
-  PieChart,
-  BarChart,
-  ShowChart,
-  Timeline,
-  DataUsage,
-  Speed,
-  Download,
-  Print,
-  Send,
-  Schedule,
-  Refresh,
-  FilterList,
-  DateRange,
-  CompareArrows,
   Dashboard,
-  AccountBalance,
-  Receipt,
-  Business,
-  AttachMoney,
-  Warning,
+  Settings,
   CheckCircle,
+  Warning,
   Error as ErrorIcon,
   Info,
-  Settings,
-  Visibility,
-  ExpandMore,
-  Search,
-  Add,
-  Edit,
-  Delete,
-  Favorite,
-  Share,
-  CloudDownload,
-  TableChart,
-  InsertChart,
-  BubbleChart,
-  ScatterPlot,
-  AutoGraph,
-  QueryStats,
-  Leaderboard
-} from '@mui/icons-material';
+  Refresh,
+  GetApp,
+  AccountBalance,
+  AttachMoney,
+  Schedule,
+  Speed,
+} from '@mui/icons-material'
 import {
-  LineChart, Line, BarChart as RechartsBarChart, Bar, PieChart as RechartsPieChart, 
-  Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, 
-  Legend, ResponsiveContainer, Area, AreaChart, ComposedChart,
-  RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
-  Treemap, Sankey
-} from 'recharts';
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RechartsTooltip,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  Legend,
+  PieChart,
+  Pie,
+  Cell
+} from 'recharts'
 
-// EX-REPORT-001 à 010: Module Reporting & Tableaux de bord Complet
-// Visualisations interactives avec KPIs temps réel et analyse prédictive
-
-interface Report {
-  id: string;
-  name: string;
-  type: 'dashboard' | 'financial' | 'fiscal' | 'operational' | 'compliance' | 'custom';
-  category: string;
-  description: string;
-  frequency: 'realtime' | 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'annual';
-  status: 'active' | 'scheduled' | 'draft' | 'archived';
-  lastGenerated: Date;
-  nextScheduled?: Date;
-  owner: string;
-  recipients: string[];
-  format: 'interactive' | 'pdf' | 'excel' | 'powerpoint';
-  isPublic: boolean;
-  isFavorite: boolean;
-  metrics: Metric[];
-  visualizations: Visualization[];
-  filters: ReportFilter[];
-  schedule?: ReportSchedule;
-  permissions: Permission[];
-  tags: string[];
-}
-
-interface Metric {
-  id: string;
-  name: string;
-  value: number | string;
-  previousValue?: number | string;
-  change?: number;
-  changeType: 'increase' | 'decrease' | 'stable';
-  unit?: string;
-  target?: number;
-  status: 'good' | 'warning' | 'critical';
-  sparklineData?: number[];
-  description?: string;
-}
-
-interface Visualization {
-  id: string;
-  type: 'line' | 'bar' | 'pie' | 'area' | 'scatter' | 'radar' | 'treemap' | 'sankey' | 'gauge';
-  title: string;
-  data: any[];
-  config: VisualizationConfig;
-  size: 'small' | 'medium' | 'large' | 'full';
-  position: { x: number; y: number; w: number; h: number };
-}
-
-interface VisualizationConfig {
-  colors?: string[];
-  showLegend?: boolean;
-  showGrid?: boolean;
-  showTooltip?: boolean;
-  animate?: boolean;
-  dataKeys?: string[];
-  xAxisKey?: string;
-  yAxisKey?: string;
-}
-
-interface ReportFilter {
-  id: string;
-  field: string;
-  operator: 'equals' | 'contains' | 'between' | 'greaterThan' | 'lessThan';
-  value: any;
-  label: string;
-  isActive: boolean;
-}
-
-interface ReportSchedule {
-  frequency: string;
-  time?: string;
-  dayOfWeek?: number;
-  dayOfMonth?: number;
-  recipients: string[];
-  format: string;
-  enabled: boolean;
-}
-
-interface Permission {
-  userId: string;
-  role: 'viewer' | 'editor' | 'admin';
-  canEdit: boolean;
-  canDelete: boolean;
-  canShare: boolean;
+interface RatioFinancier {
+  code: string
+  nom: string
+  valeur: number
+  seuilMin: number
+  seuilOptimal: number
+  unite: string
+  categorie: 'LIQUIDITE' | 'STRUCTURE' | 'RENTABILITE' | 'GESTION' | 'ACTIVITE'
+  description: string
+  interpretation: string
+  statut: 'EXCELLENT' | 'BON' | 'MOYEN' | 'FAIBLE' | 'CRITIQUE'
 }
 
 const ModernReporting: React.FC = () => {
-  const [activeTab, setActiveTab] = useState(0);
-  const [reports, setReports] = useState<Report[]>([]);
-  const [selectedReport, setSelectedReport] = useState<Report | null>(null);
-  const [selectedPeriod, setSelectedPeriod] = useState('month');
-  const [selectedYear, setSelectedYear] = useState(2024);
-  const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
-  const [isVisualizationDialogOpen, setIsVisualizationDialogOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState('all');
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [realTimeData, setRealTimeData] = useState<any[]>([]);
-  
-  // EX-REPORT-001: Tableaux de bord temps réel
-  const [lastRefresh, setLastRefresh] = useState(new Date());
-  const refreshInterval = useRef<NodeJS.Timeout | null>(null);
+  const [activeTab, setActiveTab] = useState(0)
+  const [loading, setLoading] = useState(true)
+  const [ratios, setRatios] = useState<RatioFinancier[]>([])
+  const [analyseExercice, setAnalyseExercice] = useState<any>(null)
+  const [lastRefresh, setLastRefresh] = useState(new Date())
+  const [selectedTemplate, setSelectedTemplate] = useState('')
+  const [isGenerating, setIsGenerating] = useState(false)
 
-  // Données de démonstration pour les graphiques
-  const mockChartData = {
-    revenue: [
-      { month: 'Jan', current: 4000, previous: 3200, target: 4200 },
-      { month: 'Fév', current: 3800, previous: 3500, target: 4200 },
-      { month: 'Mar', current: 5000, previous: 4100, target: 4500 },
-      { month: 'Avr', current: 4780, previous: 3900, target: 4500 },
-      { month: 'Mai', current: 5890, previous: 4800, target: 5000 },
-      { month: 'Jun', current: 6390, previous: 5200, target: 5500 },
-      { month: 'Jui', current: 6490, previous: 5500, target: 6000 },
-      { month: 'Aoû', current: 7200, previous: 5800, target: 6500 },
-      { month: 'Sep', current: 7890, previous: 6200, target: 7000 },
-      { month: 'Oct', current: 8100, previous: 6800, target: 7500 },
-      { month: 'Nov', current: 8590, previous: 7200, target: 8000 },
-      { month: 'Déc', current: 9200, previous: 7800, target: 8500 }
-    ],
-    expenses: [
-      { category: 'Salaires', value: 35, color: '#1976d2' },
-      { category: 'Locaux', value: 20, color: '#dc004e' },
-      { category: 'Marketing', value: 15, color: '#ff9800' },
-      { category: 'IT', value: 12, color: '#4caf50' },
-      { category: 'Administratif', value: 10, color: '#9c27b0' },
-      { category: 'Autres', value: 8, color: '#607d8b' }
-    ],
-    performance: [
-      { subject: 'Ventes', A: 120, B: 110, fullMark: 150 },
-      { subject: 'Marketing', A: 98, B: 130, fullMark: 150 },
-      { subject: 'Finance', A: 86, B: 100, fullMark: 150 },
-      { subject: 'RH', A: 99, B: 100, fullMark: 150 },
-      { subject: 'IT', A: 85, B: 90, fullMark: 150 },
-      { subject: 'Ops', A: 115, B: 95, fullMark: 150 }
-    ]
-  };
-
-  // Initialisation
   useEffect(() => {
-    initializeReports();
-    startRealTimeRefresh();
-    
-    return () => {
-      if (refreshInterval.current) {
-        clearInterval(refreshInterval.current);
-      }
-    };
-  }, []);
+    loadRatiosFinanciers()
+    generateAnalyseExercice()
+    setLoading(false)
+  }, [])
 
-  const initializeReports = () => {
-    const mockReports: Report[] = [
+  const loadRatiosFinanciers = () => {
+    // DONNÉES FINANCIÈRES DE BASE (à remplacer par API)
+    const donneesFinancieres = {
+      // BILAN
+      totalActif: 4200000,
+      immobilisationsNettes: 2200000,
+      stocksMarchandises: 650000,
+      creancesClients: 450000,
+      disponibilites: 320000,
+      totalPassif: 4200000,
+      capitauxPropres: 1500000,
+      dettesLT: 1300000,
+      dettesCT: 800000,
+      
+      // COMPTE DE RÉSULTAT
+      chiffreAffaires: 2850000,
+      resultatExploitation: 425000,
+      resultatNet: 285000,
+      chargesFinancieres: 75000,
+      
+      // RATIOS DE BASE
+      exercicePrecedent: {
+        chiffreAffaires: 2530000,
+        resultatNet: 275000
+      }
+    }
+
+    // CALCUL DES RATIOS FINANCIERS SYSCOHADA STANDARDS
+    const ratiosCalcules: RatioFinancier[] = [
+      // === RATIOS DE LIQUIDITÉ ===
       {
-        id: 'report-1',
-        name: 'Tableau de Bord Financier',
-        type: 'financial',
-        category: 'Finance',
-        description: 'Vue d\'ensemble des performances financières',
-        frequency: 'realtime',
-        status: 'active',
-        lastGenerated: new Date(),
-        owner: 'Directeur Financier',
-        recipients: ['direction@entreprise.com'],
-        format: 'interactive',
-        isPublic: false,
-        isFavorite: true,
-        metrics: [
-          {
-            id: 'metric-1',
-            name: 'Chiffre d\'Affaires',
-            value: 9200000,
-            previousValue: 7800000,
-            change: 17.9,
-            changeType: 'increase',
-            unit: 'XOF',
-            target: 8500000,
-            status: 'good',
-            sparklineData: [4000, 3800, 5000, 4780, 5890, 6390, 6490, 7200, 7890, 8100, 8590, 9200]
-          },
-          {
-            id: 'metric-2',
-            name: 'Marge Brute',
-            value: 42.5,
-            previousValue: 39.8,
-            change: 6.8,
-            changeType: 'increase',
-            unit: '%',
-            target: 40,
-            status: 'good'
-          },
-          {
-            id: 'metric-3',
-            name: 'Trésorerie',
-            value: 2450000,
-            previousValue: 2100000,
-            change: 16.7,
-            changeType: 'increase',
-            unit: 'XOF',
-            target: 2000000,
-            status: 'good'
-          },
-          {
-            id: 'metric-4',
-            name: 'Dette',
-            value: 850000,
-            previousValue: 920000,
-            change: -7.6,
-            changeType: 'decrease',
-            unit: 'XOF',
-            status: 'good'
-          }
-        ],
-        visualizations: [],
-        filters: [],
-        permissions: [],
-        tags: ['finance', 'kpi', 'direction']
+        code: 'LIQ_GEN',
+        nom: 'Liquidité Générale',
+        valeur: (donneesFinancieres.totalActif - donneesFinancieres.immobilisationsNettes) / donneesFinancieres.dettesCT,
+        seuilMin: 1.0,
+        seuilOptimal: 2.0,
+        unite: '',
+        categorie: 'LIQUIDITE',
+        description: 'Capacité à honorer les dettes à court terme',
+        interpretation: '',
+        statut: 'BON'
       },
       {
-        id: 'report-2',
-        name: 'Rapport Fiscal Trimestriel',
-        type: 'fiscal',
-        category: 'Fiscalité',
-        description: 'Analyse des obligations fiscales et conformité',
-        frequency: 'quarterly',
-        status: 'scheduled',
-        lastGenerated: new Date('2024-10-01'),
-        nextScheduled: new Date('2025-01-01'),
-        owner: 'Responsable Fiscal',
-        recipients: ['fiscal@entreprise.com'],
-        format: 'pdf',
-        isPublic: false,
-        isFavorite: false,
-        metrics: [],
-        visualizations: [],
-        filters: [],
-        permissions: [],
-        tags: ['fiscal', 'compliance', 'trimestriel']
+        code: 'LIQ_RED',
+        nom: 'Liquidité Réduite',
+        valeur: (donneesFinancieres.creancesClients + donneesFinancieres.disponibilites) / donneesFinancieres.dettesCT,
+        seuilMin: 0.7,
+        seuilOptimal: 1.0,
+        unite: '',
+        categorie: 'LIQUIDITE',
+        description: 'Liquidité sans les stocks',
+        interpretation: '',
+        statut: 'BON'
+      },
+      {
+        code: 'LIQ_IMM',
+        nom: 'Liquidité Immédiate',
+        valeur: donneesFinancieres.disponibilites / donneesFinancieres.dettesCT,
+        seuilMin: 0.2,
+        seuilOptimal: 0.3,
+        unite: '',
+        categorie: 'LIQUIDITE',
+        description: 'Capacité de paiement immédiat',
+        interpretation: '',
+        statut: 'BON'
+      },
+
+      // === RATIOS DE STRUCTURE FINANCIÈRE ===
+      {
+        code: 'AUT_FIN',
+        nom: 'Autonomie Financière',
+        valeur: (donneesFinancieres.capitauxPropres / donneesFinancieres.totalPassif) * 100,
+        seuilMin: 20,
+        seuilOptimal: 40,
+        unite: '%',
+        categorie: 'STRUCTURE',
+        description: 'Indépendance financière de l\'entreprise',
+        interpretation: '',
+        statut: 'BON'
+      },
+      {
+        code: 'END_TOT',
+        nom: 'Endettement Total',
+        valeur: ((donneesFinancieres.dettesLT + donneesFinancieres.dettesCT) / donneesFinancieres.totalPassif) * 100,
+        seuilMin: 30,
+        seuilOptimal: 60,
+        unite: '%',
+        categorie: 'STRUCTURE',
+        description: 'Niveau d\'endettement global',
+        interpretation: '',
+        statut: 'BON'
+      },
+      {
+        code: 'CAP_FIN',
+        nom: 'Capacité de Financement',
+        valeur: (donneesFinancieres.capitauxPropres + donneesFinancieres.dettesLT - donneesFinancieres.immobilisationsNettes) / 1000,
+        seuilMin: 200,
+        seuilOptimal: 500,
+        unite: 'k XOF',
+        categorie: 'STRUCTURE',
+        description: 'Fonds de roulement fonctionnel',
+        interpretation: '',
+        statut: 'BON'
+      },
+
+      // === RATIOS DE RENTABILITÉ ===
+      {
+        code: 'RENT_COM',
+        nom: 'Rentabilité Commerciale',
+        valeur: (donneesFinancieres.resultatExploitation / donneesFinancieres.chiffreAffaires) * 100,
+        seuilMin: 5,
+        seuilOptimal: 15,
+        unite: '%',
+        categorie: 'RENTABILITE',
+        description: 'Rentabilité de l\'activité commerciale',
+        interpretation: '',
+        statut: 'EXCELLENT'
+      },
+      {
+        code: 'RENT_NET',
+        nom: 'Rentabilité Nette',
+        valeur: (donneesFinancieres.resultatNet / donneesFinancieres.chiffreAffaires) * 100,
+        seuilMin: 3,
+        seuilOptimal: 8,
+        unite: '%',
+        categorie: 'RENTABILITE', 
+        description: 'Rentabilité après toutes charges',
+        interpretation: '',
+        statut: 'EXCELLENT'
+      },
+      {
+        code: 'RENT_ACT',
+        nom: 'Rentabilité des Actifs (ROA)',
+        valeur: (donneesFinancieres.resultatNet / donneesFinancieres.totalActif) * 100,
+        seuilMin: 2,
+        seuilOptimal: 6,
+        unite: '%',
+        categorie: 'RENTABILITE',
+        description: 'Efficacité d\'utilisation des actifs',
+        interpretation: '',
+        statut: 'EXCELLENT'
+      },
+
+      // === RATIOS DE GESTION ===
+      {
+        code: 'ROT_STO',
+        nom: 'Rotation des Stocks',
+        valeur: donneesFinancieres.chiffreAffaires / donneesFinancieres.stocksMarchandises,
+        seuilMin: 4,
+        seuilOptimal: 12,
+        unite: 'fois/an',
+        categorie: 'GESTION',
+        description: 'Efficacité de la gestion des stocks',
+        interpretation: '',
+        statut: 'BON'
+      },
+      {
+        code: 'DEL_CLI',
+        nom: 'Délai Clients',
+        valeur: (donneesFinancieres.creancesClients / donneesFinancieres.chiffreAffaires) * 365,
+        seuilMin: 30,
+        seuilOptimal: 45,
+        unite: 'jours',
+        categorie: 'GESTION',
+        description: 'Délai moyen de recouvrement clients',
+        interpretation: '',
+        statut: 'MOYEN'
+      },
+
+      // === RATIOS D'ACTIVITÉ ===
+      {
+        code: 'CROIS_CA',
+        nom: 'Croissance CA',
+        valeur: ((donneesFinancieres.chiffreAffaires - donneesFinancieres.exercicePrecedent.chiffreAffaires) / donneesFinancieres.exercicePrecedent.chiffreAffaires) * 100,
+        seuilMin: 0,
+        seuilOptimal: 10,
+        unite: '%',
+        categorie: 'ACTIVITE',
+        description: 'Évolution du chiffre d\'affaires',
+        interpretation: '',
+        statut: 'EXCELLENT'
       }
-    ];
+    ]
 
-    setReports(mockReports);
-  };
+    // ATTRIBUTION AUTOMATIQUE DES STATUTS ET INTERPRÉTATIONS
+    ratiosCalcules.forEach(ratio => {
+      const { valeur, seuilMin, seuilOptimal, categorie, nom } = ratio
+      
+      // Déterminer le statut selon les seuils
+      if (nom.includes('Endettement') || nom.includes('Délai')) {
+        // Ratios inversés (plus bas = mieux)
+        if (valeur <= seuilOptimal) {
+          ratio.statut = 'EXCELLENT'
+          ratio.interpretation = `Excellent niveau pour ${categorie.toLowerCase()}`
+        } else if (valeur <= seuilMin) {
+          ratio.statut = 'BON'
+          ratio.interpretation = `Bon niveau, dans la norme`
+        } else if (valeur <= seuilMin * 1.5) {
+          ratio.statut = 'MOYEN'
+          ratio.interpretation = `Niveau moyen, amélioration recommandée`
+        } else {
+          ratio.statut = 'CRITIQUE'
+          ratio.interpretation = `Niveau critique, action immédiate requise`
+        }
+      } else {
+        // Ratios normaux (plus haut = mieux)
+        if (valeur >= seuilOptimal) {
+          ratio.statut = 'EXCELLENT'
+          ratio.interpretation = `Excellent niveau pour ${categorie.toLowerCase()}`
+        } else if (valeur >= seuilMin) {
+          ratio.statut = 'BON'
+          ratio.interpretation = `Bon niveau, dans la norme`
+        } else if (valeur >= seuilMin * 0.7) {
+          ratio.statut = 'MOYEN'
+          ratio.interpretation = `Niveau moyen, amélioration possible`
+        } else {
+          ratio.statut = 'CRITIQUE'
+          ratio.interpretation = `Niveau critique, action corrective nécessaire`
+        }
+      }
+    })
 
-  // EX-REPORT-002: Refresh temps réel toutes les 30 secondes
-  const startRealTimeRefresh = () => {
-    refreshInterval.current = setInterval(() => {
-      refreshData();
-    }, 30000); // 30 secondes
-  };
+    setRatios(ratiosCalcules)
+  }
 
-  const refreshData = () => {
-    setIsRefreshing(true);
-    setLastRefresh(new Date());
+  const generateAnalyseExercice = () => {
+    const analyse = {
+      scoreGlobal: 78,
+      niveauPerformance: 'BON',
+      synthese: {
+        pointsForts: [
+          'Rentabilité commerciale excellente (14.9%)',
+          'Liquidité générale satisfaisante (2.5)',
+          'Croissance CA positive (+12.6%)',
+          'Structure financière équilibrée'
+        ],
+        pointsFaibles: [
+          'Délai de recouvrement clients élevé (58 jours)',
+          'Rotation stocks peut être améliorée',
+          'Endettement court terme à surveiller'
+        ],
+        recommandations: [
+          'Mettre en place un plan de recouvrement clients actif',
+          'Optimiser la gestion des stocks (politique just-in-time)',
+          'Négocier des délais fournisseurs pour améliorer le BFR',
+          'Considérer un rééchelonnement partiel des dettes CT'
+        ]
+      },
+      alertes: [
+        {
+          niveau: 'WARNING',
+          message: 'Délai clients supérieur à la norme sectorielle (45j)',
+          action: 'Revoir politique de crédit client'
+        },
+        {
+          niveau: 'INFO',
+          message: 'Performance globale en amélioration vs exercice précédent',
+          action: 'Maintenir la dynamique positive'
+        }
+      ]
+    }
+    setAnalyseExercice(analyse)
+  }
+
+  const genererRapport = async (templateId: string) => {
+    setIsGenerating(true)
+    setSelectedTemplate(templateId)
     
-    // Simulation de mise à jour des données
+    // Simulation génération rapport
     setTimeout(() => {
-      // Mise à jour des métriques avec variations aléatoires
-      setReports(prev => prev.map(report => ({
-        ...report,
-        metrics: report.metrics.map(metric => ({
-          ...metric,
-          value: typeof metric.value === 'number' 
-            ? metric.value * (1 + (Math.random() - 0.5) * 0.1)
-            : metric.value,
-          change: metric.change ? metric.change * (1 + (Math.random() - 0.5) * 0.2) : undefined
-        }))
-      })));
-      setIsRefreshing(false);
-    }, 1000);
-  };
+      setIsGenerating(false)
+      alert(`Rapport généré avec succès !`)
+    }, 3000)
+  }
 
-  // EX-REPORT-003: Export multi-format
-  const exportReport = (report: Report, format: 'pdf' | 'excel' | 'powerpoint') => {
-    console.log(`Export du rapport ${report.name} au format ${format}`);
-    // Simulation de l'export
-  };
-
-  // EX-REPORT-004: Analyse prédictive
-  const generatePredictiveAnalysis = (data: any[]) => {
-    // Simulation d'analyse prédictive simple
-    const lastValue = data[data.length - 1];
-    const trend = data[data.length - 1] > data[data.length - 2] ? 'increase' : 'decrease';
-    const prediction = lastValue * (trend === 'increase' ? 1.05 : 0.95);
-    
-    return {
-      nextPeriodPrediction: prediction,
-      trend,
-      confidence: 75 + Math.random() * 20
-    };
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'good': return '#4caf50';
-      case 'warning': return '#ff9800';
-      case 'critical': return '#f44336';
-      default: return '#9e9e9e';
+  const getStatutColor = (statut: string) => {
+    switch (statut) {
+      case 'EXCELLENT': return '#4caf50'
+      case 'BON': return '#8bc34a'  
+      case 'MOYEN': return '#ff9800'
+      case 'FAIBLE': return '#f44336'
+      case 'CRITIQUE': return '#d32f2f'
+      default: return '#757575'
     }
-  };
+  }
 
-  const formatValue = (value: number | string, unit?: string) => {
-    if (typeof value === 'number') {
-      if (unit === 'XOF' || unit === 'EUR' || unit === 'USD') {
-        return new Intl.NumberFormat('fr-FR', {
-          style: 'currency',
-          currency: unit === 'XOF' ? 'XOF' : unit,
-          minimumFractionDigits: 0
-        }).format(value);
-      }
-      if (unit === '%') {
-        return `${value.toFixed(1)}%`;
-      }
-      return value.toLocaleString('fr-FR');
+  const getCategorieColor = (categorie: string) => {
+    switch (categorie) {
+      case 'LIQUIDITE': return '#2196f3'
+      case 'STRUCTURE': return '#9c27b0'
+      case 'RENTABILITE': return '#4caf50'  
+      case 'GESTION': return '#ff9800'
+      case 'ACTIVITE': return '#00bcd4'
+      default: return '#757575'
     }
-    return value;
-  };
+  }
 
   const renderDashboardTab = () => (
     <Box>
-      {/* En-tête avec métriques clés */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        {reports[0]?.metrics.slice(0, 4).map((metric) => (
-          <Grid item xs={12} sm={6} md={3} key={metric.id}>
-            <Card>
-              <CardContent>
-                <Typography color="textSecondary" gutterBottom variant="body2">
-                  {metric.name}
-                </Typography>
-                <Typography variant="h5" component="div" sx={{ mb: 1 }}>
-                  {formatValue(metric.value, metric.unit)}
-                </Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  {metric.changeType === 'increase' ? (
-                    <TrendingUp color="success" fontSize="small" />
-                  ) : (
-                    <TrendingDown color="error" fontSize="small" />
-                  )}
-                  <Typography
-                    variant="body2"
-                    color={metric.changeType === 'increase' ? 'success.main' : 'error.main'}
-                  >
-                    {metric.change && metric.change > 0 ? '+' : ''}{metric.change?.toFixed(1)}%
+      {/* ANALYSE GLOBALE DE L'EXERCICE */}
+      <Card sx={{ mb: 4, borderLeft: '4px solid', borderColor: analyseExercice?.scoreGlobal >= 80 ? 'success.main' : analyseExercice?.scoreGlobal >= 60 ? 'warning.main' : 'error.main' }}>
+        <CardContent sx={{ p: 3 }}>
+          <Typography variant="h5" sx={{ mb: 3, fontWeight: 600 }}>
+            📊 Analyse des Résultats de l'Exercice 2024
+          </Typography>
+          
+          <Grid container spacing={3} alignItems="center">
+            <Grid item xs={12} md={3}>
+              <Box sx={{ textAlign: 'center' }}>
+                <CircularProgress
+                  variant="determinate"
+                  value={analyseExercice?.scoreGlobal || 0}
+                  size={120}
+                  thickness={6}
+                  sx={{ color: analyseExercice?.scoreGlobal >= 80 ? 'success.main' : analyseExercice?.scoreGlobal >= 60 ? 'warning.main' : 'error.main' }}
+                />
+                <Box sx={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  textAlign: 'center'
+                }}>
+                  <Typography variant="h3" sx={{ fontWeight: 'bold' }}>
+                    {analyseExercice?.scoreGlobal}%
                   </Typography>
-                  {metric.target && (
-                    <Typography variant="caption" color="text.secondary">
-                      Cible: {formatValue(metric.target, metric.unit)}
-                    </Typography>
-                  )}
+                  <Typography variant="caption" color="text.secondary">
+                    PERFORMANCE
+                  </Typography>
                 </Box>
-                {metric.sparklineData && (
-                  <Box sx={{ mt: 2, height: 40 }}>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={metric.sparklineData.map((v, i) => ({ value: v, index: i }))}>
-                        <Line 
-                          type="monotone" 
-                          dataKey="value" 
-                          stroke="#1976d2" 
-                          strokeWidth={2}
-                          dot={false}
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </Box>
-                )}
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
-
-      {/* Graphiques principaux */}
-      <Grid container spacing={3}>
-        {/* Graphique des revenus */}
-        <Grid item xs={12} lg={8}>
-          <Paper sx={{ p: 3 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-              <Typography variant="h6">
-                Évolution du Chiffre d'Affaires
-              </Typography>
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                <Chip 
-                  label="Actuel" 
-                  size="small" 
-                  sx={{ backgroundColor: '#1976d2', color: 'white' }}
-                />
-                <Chip 
-                  label="Précédent" 
-                  size="small" 
-                  sx={{ backgroundColor: '#dc004e', color: 'white' }}
-                />
-                <Chip 
-                  label="Cible" 
-                  size="small" 
-                  sx={{ backgroundColor: '#4caf50', color: 'white' }}
-                />
               </Box>
-            </Box>
-            <ResponsiveContainer width="100%" height={300}>
-              <ComposedChart data={mockChartData.revenue}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <RechartsTooltip />
-                <Legend />
-                <Bar dataKey="current" fill="#1976d2" name="Actuel" />
-                <Line type="monotone" dataKey="previous" stroke="#dc004e" name="Précédent" />
-                <Line type="monotone" dataKey="target" stroke="#4caf50" strokeDasharray="5 5" name="Cible" />
-              </ComposedChart>
-            </ResponsiveContainer>
-          </Paper>
-        </Grid>
+            </Grid>
+            
+            <Grid item xs={12} md={9}>
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={6}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1, color: 'success.main' }}>
+                    ✅ Points Forts Identifiés
+                  </Typography>
+                  <List dense>
+                    {analyseExercice?.synthese.pointsForts.map((point: string, index: number) => (
+                      <ListItem key={index} sx={{ py: 0 }}>
+                        <ListItemIcon sx={{ minWidth: 24 }}>
+                          <CheckCircle color="success" fontSize="small" />
+                        </ListItemIcon>
+                        <ListItemText 
+                          primary={point}
+                          primaryTypographyProps={{ variant: 'body2' }}
+                        />
+                      </ListItem>
+                    ))}
+                  </List>
+                </Grid>
+                
+                <Grid item xs={12} md={6}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1, color: 'warning.main' }}>
+                    ⚠️ Points d'Amélioration
+                  </Typography>
+                  <List dense>
+                    {analyseExercice?.synthese.pointsFaibles.map((point: string, index: number) => (
+                      <ListItem key={index} sx={{ py: 0 }}>
+                        <ListItemIcon sx={{ minWidth: 24 }}>
+                          <Warning color="warning" fontSize="small" />
+                        </ListItemIcon>
+                        <ListItemText 
+                          primary={point}
+                          primaryTypographyProps={{ variant: 'body2' }}
+                        />
+                      </ListItem>
+                    ))}
+                  </List>
+                </Grid>
+              </Grid>
+            </Grid>
+          </Grid>
+        </CardContent>
+      </Card>
 
-        {/* Graphique des dépenses */}
-        <Grid item xs={12} lg={4}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Répartition des Dépenses
-            </Typography>
-            <ResponsiveContainer width="100%" height={300}>
-              <RechartsPieChart>
-                <Pie
-                  data={mockChartData.expenses}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {mockChartData.expenses.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <RechartsTooltip />
-              </RechartsPieChart>
-            </ResponsiveContainer>
-          </Paper>
-        </Grid>
+      {/* RATIOS FINANCIERS PAR CATÉGORIE */}
+      <Typography variant="h5" sx={{ mb: 3, fontWeight: 600 }}>
+        💼 Ratios Financiers SYSCOHADA avec Seuils Standards
+      </Typography>
 
-        {/* Graphique radar de performance */}
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Performance par Département
-            </Typography>
-            <ResponsiveContainer width="100%" height={300}>
-              <RadarChart data={mockChartData.performance}>
-                <PolarGrid />
-                <PolarAngleAxis dataKey="subject" />
-                <PolarRadiusAxis angle={90} domain={[0, 150]} />
-                <Radar name="2024" dataKey="A" stroke="#1976d2" fill="#1976d2" fillOpacity={0.6} />
-                <Radar name="2023" dataKey="B" stroke="#dc004e" fill="#dc004e" fillOpacity={0.6} />
-                <Legend />
-              </RadarChart>
-            </ResponsiveContainer>
-          </Paper>
-        </Grid>
+      {['LIQUIDITE', 'STRUCTURE', 'RENTABILITE', 'GESTION', 'ACTIVITE'].map(categorie => {
+        const ratiosCategorie = ratios.filter(r => r.categorie === categorie)
+        if (ratiosCategorie.length === 0) return null
 
-        {/* Analyse prédictive */}
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Analyse Prédictive
-            </Typography>
-            <Box sx={{ mt: 2 }}>
-              <Alert severity="info" sx={{ mb: 2 }}>
-                <strong>Prévision Q1 2025:</strong> Croissance estimée de 8-12% basée sur les tendances actuelles
-              </Alert>
-              
-              <List>
-                <ListItem>
-                  <ListItemIcon>
-                    <TrendingUp color="success" />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary="Chiffre d'Affaires"
-                    secondary="Prévision: +10.5% (Confiance: 85%)"
-                  />
-                </ListItem>
-                <ListItem>
-                  <ListItemIcon>
-                    <TrendingDown color="warning" />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary="Coûts Opérationnels"
-                    secondary="Prévision: +3.2% (Confiance: 78%)"
-                  />
-                </ListItem>
-                <ListItem>
-                  <ListItemIcon>
-                    <TrendingUp color="success" />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary="Marge Nette"
-                    secondary="Prévision: +2.1 points (Confiance: 72%)"
-                  />
-                </ListItem>
-              </List>
-            </Box>
-          </Paper>
-        </Grid>
-      </Grid>
-    </Box>
-  );
+        return (
+          <Card key={categorie} sx={{ mb: 3 }}>
+            <CardHeader
+              title={
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Box sx={{ 
+                    width: 12, 
+                    height: 12, 
+                    borderRadius: '50%', 
+                    bgcolor: getCategorieColor(categorie) 
+                  }} />
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    {categorie.charAt(0) + categorie.slice(1).toLowerCase()}
+                  </Typography>
+                </Box>
+              }
+              sx={{ pb: 1 }}
+            />
+            <CardContent sx={{ pt: 0 }}>
+              <TableContainer>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow sx={{ bgcolor: 'grey.50' }}>
+                      <TableCell sx={{ fontWeight: 600 }}>Ratio</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 600 }}>Valeur</TableCell>
+                      <TableCell align="center" sx={{ fontWeight: 600 }}>Seuil Min</TableCell>
+                      <TableCell align="center" sx={{ fontWeight: 600 }}>Optimal</TableCell>
+                      <TableCell align="center" sx={{ fontWeight: 600 }}>Statut</TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>Interprétation</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {ratiosCategorie.map((ratio, index) => (
+                      <TableRow key={index} hover>
+                        <TableCell>
+                          <Box>
+                            <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                              {ratio.nom}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              {ratio.description}
+                            </Typography>
+                          </Box>
+                        </TableCell>
+                        <TableCell align="right">
+                          <Typography variant="h6" sx={{ 
+                            fontWeight: 600,
+                            color: getStatutColor(ratio.statut)
+                          }}>
+                            {ratio.valeur.toFixed(ratio.unite === '%' ? 1 : 2)}{ratio.unite}
+                          </Typography>
+                        </TableCell>
+                        <TableCell align="center">
+                          <Typography variant="body2" color="text.secondary">
+                            {ratio.seuilMin}{ratio.unite}
+                          </Typography>
+                        </TableCell>
+                        <TableCell align="center">
+                          <Typography variant="body2" color="primary.main" sx={{ fontWeight: 500 }}>
+                            {ratio.seuilOptimal}{ratio.unite}
+                          </Typography>
+                        </TableCell>
+                        <TableCell align="center">
+                          <Chip
+                            label={ratio.statut}
+                            size="small"
+                            sx={{
+                              bgcolor: getStatutColor(ratio.statut),
+                              color: 'white',
+                              fontWeight: 600,
+                              fontSize: '0.7rem'
+                            }}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="body2" color="text.secondary">
+                            {ratio.interpretation}
+                          </Typography>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </CardContent>
+          </Card>
+        )
+      })}
 
-  const renderReportsTab = () => (
-    <Box>
-      {/* Barre de recherche et filtres */}
-      <Box sx={{ mb: 3, display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
-        <TextField
-          placeholder="Rechercher des rapports..."
-          variant="outlined"
-          size="small"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          InputProps={{
-            startAdornment: <Search sx={{ mr: 1, color: 'text.secondary' }} />
-          }}
-          sx={{ minWidth: 300 }}
+      {/* RECOMMANDATIONS STRATÉGIQUES */}
+      <Card sx={{ mb: 3 }}>
+        <CardHeader
+          title="🎯 Recommandations Stratégiques"
+          sx={{ color: 'primary.main' }}
         />
-        
-        <FormControl size="small" sx={{ minWidth: 150 }}>
-          <InputLabel>Type</InputLabel>
-          <Select
-            value={filterType}
-            onChange={(e) => setFilterType(e.target.value)}
-            label="Type"
-          >
-            <MenuItem value="all">Tous</MenuItem>
-            <MenuItem value="dashboard">Tableaux de bord</MenuItem>
-            <MenuItem value="financial">Financier</MenuItem>
-            <MenuItem value="fiscal">Fiscal</MenuItem>
-            <MenuItem value="operational">Opérationnel</MenuItem>
-          </Select>
-        </FormControl>
+        <CardContent>
+          <List>
+            {analyseExercice?.synthese.recommandations.map((reco: string, index: number) => (
+              <ListItem key={index}>
+                <ListItemIcon>
+                  <TrendingUp color="primary" />
+                </ListItemIcon>
+                <ListItemText 
+                  primary={reco}
+                  primaryTypographyProps={{ variant: 'body2' }}
+                />
+              </ListItem>
+            ))}
+          </List>
+        </CardContent>
+      </Card>
 
-        <Button
-          variant="contained"
-          startIcon={<Add />}
-          onClick={() => setIsReportDialogOpen(true)}
-          sx={{ ml: 'auto' }}
+      {/* ALERTES */}
+      {analyseExercice?.alertes.map((alerte: any, index: number) => (
+        <Alert 
+          key={index}
+          severity={alerte.niveau === 'WARNING' ? 'warning' : 'info'}
+          sx={{ mb: 2 }}
+          action={
+            <Button color="inherit" size="small">
+              {alerte.action}
+            </Button>
+          }
         >
-          Nouveau Rapport
-        </Button>
-      </Box>
+          {alerte.message}
+        </Alert>
+      ))}
+    </Box>
+  )
 
-      {/* Liste des rapports */}
-      <Grid container spacing={3}>
-        {reports.map((report) => (
-          <Grid item xs={12} md={6} lg={4} key={report.id}>
-            <Card
-              sx={{
+  const renderReportsTab = () => {
+    
+    const templatesRapports = [
+      {
+        id: 'rapport_ratios_complet',
+        nom: 'Rapport de Ratios Complet',
+        description: 'Analyse exhaustive de tous les ratios financiers avec benchmarks sectoriels',
+        dureeGeneration: '2-3 minutes',
+        pages: 15,
+        sections: ['Synthèse exécutive', 'Ratios de liquidité', 'Structure financière', 'Rentabilité', 'Gestion', 'Recommandations'],
+        formats: ['PDF', 'Excel', 'Word']
+      },
+      {
+        id: 'diagnostic_financier',
+        nom: 'Diagnostic Financier Stratégique', 
+        description: 'Analyse approfondie de la santé financière avec plan d\'action',
+        dureeGeneration: '3-4 minutes',
+        pages: 25,
+        sections: ['Diagnostic global', 'Forces et faiblesses', 'Analyse des risques', 'Projections', 'Plan d\'action'],
+        formats: ['PDF', 'PowerPoint']
+      },
+      {
+        id: 'rapport_creances',
+        nom: 'Analyse des Créances et Recouvrement',
+        description: 'Étude détaillée du poste clients et optimisation du BFR',
+        dureeGeneration: '1-2 minutes', 
+        pages: 8,
+        sections: ['Évolution créances', 'Délais par client', 'Provisions', 'Actions recommandées'],
+        formats: ['PDF', 'Excel']
+      },
+      {
+        id: 'tableau_bord_direction',
+        nom: 'Tableau de Bord Direction',
+        description: 'KPIs essentiels et indicateurs de pilotage pour la direction',
+        dureeGeneration: '1 minute',
+        pages: 5,
+        sections: ['KPIs synthétiques', 'Alertes', 'Tendances', 'Objectifs'],
+        formats: ['PDF', 'PowerPoint', 'Excel']
+      },
+      {
+        id: 'analyse_rentabilite',
+        nom: 'Analyse de Rentabilité par Activité',
+        description: 'Décomposition de la rentabilité et centres de profit',
+        dureeGeneration: '3-5 minutes',
+        pages: 20,
+        sections: ['Rentabilité globale', 'Par centre de profit', 'Marges détaillées', 'Optimisations'],
+        formats: ['PDF', 'Excel']
+      }
+    ]
+
+    const rapportsRecents = [
+      {
+        nom: 'Rapport Ratios Q4-2024',
+        date: '2024-12-20',
+        statut: 'Généré',
+        taille: '2.4 MB',
+        telechargements: 12
+      },
+      {
+        nom: 'Diagnostic Financier 2024',
+        date: '2024-12-15', 
+        statut: 'Généré',
+        taille: '5.1 MB',
+        telechargements: 8
+      },
+      {
+        nom: 'Tableau de Bord Nov-2024',
+        date: '2024-12-01',
+        statut: 'Archivé', 
+        taille: '1.2 MB',
+        telechargements: 25
+      }
+    ]
+
+
+    return (
+      <Box>
+        <Typography variant="h5" sx={{ mb: 3, fontWeight: 600 }}>
+          📄 Génération de Rapports d'Analyse Financière
+        </Typography>
+
+        {/* TEMPLATES DE RAPPORTS DISPONIBLES */}
+        <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+          Modèles de Rapports Disponibles
+        </Typography>
+        
+        <Grid container spacing={3} sx={{ mb: 4 }}>
+          {templatesRapports.map((template) => (
+            <Grid item xs={12} md={6} key={template.id}>
+              <Card sx={{ 
                 height: '100%',
+                border: selectedTemplate === template.id ? '2px solid' : '1px solid',
+                borderColor: selectedTemplate === template.id ? 'primary.main' : 'divider',
                 cursor: 'pointer',
-                transition: 'all 0.2s',
-                '&:hover': {
+                '&:hover': { 
+                  borderColor: 'primary.main',
                   transform: 'translateY(-2px)',
-                  boxShadow: (theme) => theme.shadows[8]
+                  transition: 'all 0.2s'
                 }
-              }}
-              onClick={() => setSelectedReport(report)}
-            >
-              <CardContent>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-                  <Box sx={{ flexGrow: 1 }}>
-                    <Typography variant="h6" gutterBottom>
-                      {report.name}
+              }}>
+                <CardContent sx={{ p: 3 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                    <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                      {template.nom}
                     </Typography>
+                    <Chip 
+                      label={`${template.pages} pages`}
+                      size="small"
+                      color="primary"
+                    />
+                  </Box>
+                  
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    {template.description}
+                  </Typography>
+                  
+                  <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
+                    ⏱️ Durée génération : {template.dureeGeneration}
+                  </Typography>
+                  
+                  <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+                    Sections incluses :
+                  </Typography>
+                  <Box sx={{ mb: 2 }}>
+                    {template.sections.map((section, index) => (
+                      <Chip 
+                        key={index}
+                        label={section}
+                        size="small"
+                        variant="outlined"
+                        sx={{ mr: 0.5, mb: 0.5 }}
+                      />
+                    ))}
+                  </Box>
+                  
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Box>
+                      <Typography variant="caption" color="text.secondary">
+                        Formats : {template.formats.join(', ')}
+                      </Typography>
+                    </Box>
+                    <Button
+                      variant="contained"
+                      size="small"
+                      onClick={() => genererRapport(template.id)}
+                      disabled={isGenerating}
+                      startIcon={isGenerating && selectedTemplate === template.id ? <CircularProgress size={16} /> : <Assessment />}
+                    >
+                      {isGenerating && selectedTemplate === template.id ? 'Génération...' : 'Générer'}
+                    </Button>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+
+        {/* RAPPORTS RÉCENTS */}
+        <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+          📁 Rapports Récents
+        </Typography>
+        
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow sx={{ bgcolor: 'grey.50' }}>
+                <TableCell sx={{ fontWeight: 600 }}>Nom du Rapport</TableCell>
+                <TableCell sx={{ fontWeight: 600 }}>Date Génération</TableCell>
+                <TableCell sx={{ fontWeight: 600 }}>Statut</TableCell>
+                <TableCell sx={{ fontWeight: 600 }}>Taille</TableCell>
+                <TableCell sx={{ fontWeight: 600 }}>Téléchargements</TableCell>
+                <TableCell sx={{ fontWeight: 600 }}>Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {rapportsRecents.map((rapport, index) => (
+                <TableRow key={index} hover>
+                  <TableCell>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      {rapport.nom}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body2">
+                      {new Date(rapport.date).toLocaleDateString('fr-FR')}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Chip
+                      label={rapport.statut}
+                      size="small"
+                      color={rapport.statut === 'Généré' ? 'success' : 'default'}
+                    />
+                  </TableCell>
+                  <TableCell>
                     <Typography variant="body2" color="text.secondary">
-                      {report.description}
+                      {rapport.taille}
                     </Typography>
-                  </Box>
-                  <Box sx={{ display: 'flex', gap: 0.5 }}>
-                    {report.isFavorite && (
-                      <IconButton size="small">
-                        <Favorite color="error" fontSize="small" />
-                      </IconButton>
-                    )}
-                    <IconButton size="small">
-                      <Share fontSize="small" />
-                    </IconButton>
-                  </Box>
-                </Box>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body2">
+                      {rapport.telechargements} fois
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      size="small"
+                      startIcon={<GetApp />}
+                      variant="outlined"
+                    >
+                      Télécharger
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
 
-                <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
-                  <Chip
-                    label={report.type}
-                    size="small"
-                    variant="outlined"
-                  />
-                  <Chip
-                    label={report.frequency}
-                    size="small"
-                    color={report.frequency === 'realtime' ? 'success' : 'default'}
-                  />
-                </Box>
-
-                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
-                  Dernière génération: {report.lastGenerated.toLocaleString()}
+        {/* FONCTIONNALITÉS AVANCÉES */}
+        <Grid container spacing={3} sx={{ mt: 4 }}>
+          <Grid item xs={12} md={4}>
+            <Card>
+              <CardContent sx={{ textAlign: 'center', p: 3 }}>
+                <Schedule sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
+                <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                  Rapports Automatisés
                 </Typography>
-
-                <Box sx={{ display: 'flex', gap: 1 }}>
-                  <Button
-                    size="small"
-                    startIcon={<Visibility />}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      // Voir le rapport
-                    }}
-                  >
-                    Voir
-                  </Button>
-                  <Button
-                    size="small"
-                    startIcon={<Download />}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      exportReport(report, 'pdf');
-                    }}
-                  >
-                    Export
-                  </Button>
-                </Box>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                  Planification automatique mensuelle/trimestrielle
+                </Typography>
+                <Button variant="outlined" size="small">
+                  Configurer
+                </Button>
               </CardContent>
             </Card>
           </Grid>
-        ))}
-      </Grid>
-    </Box>
-  );
+          
+          <Grid item xs={12} md={4}>
+            <Card>
+              <CardContent sx={{ textAlign: 'center', p: 3 }}>
+                <Analytics sx={{ fontSize: 48, color: 'success.main', mb: 2 }} />
+                <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                  IA Prédictive
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                  Projections et analyse prédictive avancée
+                </Typography>
+                <Button variant="outlined" size="small">
+                  Activer IA
+                </Button>
+              </CardContent>
+            </Card>
+          </Grid>
+          
+          <Grid item xs={12} md={4}>
+            <Card>
+              <CardContent sx={{ textAlign: 'center', p: 3 }}>
+                <Speed sx={{ fontSize: 48, color: 'warning.main', mb: 2 }} />
+                <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                  Benchmarking
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                  Comparaison avec standards sectoriels
+                </Typography>
+                <Button variant="outlined" size="small">
+                  Comparer
+                </Button>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+
+        {/* ALERTES DE GÉNÉRATION */}
+        {isGenerating && (
+          <Alert severity="info" sx={{ mt: 3 }}>
+            <strong>Génération en cours...</strong> 
+            Analyse des données financières et calcul des ratios. 
+            Veuillez patienter pendant la création du rapport.
+          </Alert>
+        )}
+      </Box>
+    )
+  }
 
   return (
     <Box sx={{ p: 3 }}>
@@ -742,27 +906,34 @@ const ModernReporting: React.FC = () => {
               Reporting & Analytics
             </Typography>
             <Typography variant="body1" color="text.secondary">
-              Tableaux de bord interactifs et rapports automatisés avec analyse prédictive
+              Calcul des ratios financiers, seuils standards et interprétation des résultats
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <Typography variant="caption" color="text.secondary">
               Dernière actualisation: {lastRefresh.toLocaleTimeString()}
             </Typography>
-            <IconButton 
-              onClick={refreshData}
-              disabled={isRefreshing}
+            <Button
+              variant="outlined"
+              startIcon={<Refresh />}
+              onClick={() => {
+                setLoading(true)
+                setTimeout(() => {
+                  loadRatiosFinanciers()
+                  generateAnalyseExercice()
+                  setLastRefresh(new Date())
+                  setLoading(false)
+                }, 1000)
+              }}
             >
-              {isRefreshing ? <CircularProgress size={24} /> : <Refresh />}
-            </IconButton>
+              Actualiser
+            </Button>
           </Box>
         </Box>
         
-        {/* Alerte de performance */}
         <Alert severity="info" sx={{ mt: 2 }}>
-          <strong>EX-REPORT-001 :</strong> Tableaux de bord temps réel avec actualisation automatique • 
-          Export multi-format (PDF, Excel, PowerPoint) • 
-          Analyse prédictive basée sur l'IA
+          <strong>Module Reporting Financier :</strong> Calcul automatique des ratios SYSCOHADA • 
+          Seuils standards définis • Interprétation des résultats • Recommandations stratégiques
         </Alert>
       </Box>
 
@@ -770,7 +941,7 @@ const ModernReporting: React.FC = () => {
       <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
         <Tabs value={activeTab} onChange={(_, newValue) => setActiveTab(newValue)}>
           <Tab 
-            label="Dashboard" 
+            label="Dashboard Financier" 
             icon={<Dashboard />} 
             iconPosition="start"
           />
@@ -779,24 +950,25 @@ const ModernReporting: React.FC = () => {
             icon={<Assessment />} 
             iconPosition="start"
           />
-          <Tab 
-            label="Analytics" 
-            icon={<Analytics />} 
-            iconPosition="start"
-          />
-          <Tab 
-            label="Configuration" 
-            icon={<Settings />} 
-            iconPosition="start"
-          />
         </Tabs>
       </Box>
 
       {/* Contenu */}
-      {activeTab === 0 && renderDashboardTab()}
-      {activeTab === 1 && renderReportsTab()}
+      {loading ? (
+        <Box sx={{ textAlign: 'center', py: 4 }}>
+          <CircularProgress size={40} />
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+            Calcul des ratios financiers en cours...
+          </Typography>
+        </Box>
+      ) : (
+        <>
+          {activeTab === 0 && renderDashboardTab()}
+          {activeTab === 1 && renderReportsTab()}
+        </>
+      )}
     </Box>
-  );
-};
+  )
+}
 
-export default ModernReporting;
+export default ModernReporting

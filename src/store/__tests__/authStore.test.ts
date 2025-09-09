@@ -43,12 +43,19 @@ describe('AuthStore', () => {
       username: 'testuser',
       email: 'test@example.com',
       first_name: 'Test',
-      last_name: 'User'
+      last_name: 'User',
+      is_staff: false,
+      is_superuser: false
     }
 
     const mockResponse = {
       success: true,
-      data: { user: mockUser }
+      message: 'Login successful',
+      data: {
+        access: 'mock-access-token',
+        refresh: 'mock-refresh-token',
+        user: mockUser
+      }
     }
 
     vi.mocked(authService.login).mockResolvedValue(mockResponse)
@@ -125,7 +132,9 @@ describe('AuthStore', () => {
       username: 'testuser',
       email: 'test@example.com',
       first_name: 'Test',
-      last_name: 'User'
+      last_name: 'User',
+      is_staff: false,
+      is_superuser: false
     }
 
     vi.mocked(authService.isAuthenticated).mockReturnValue(true)
@@ -181,7 +190,9 @@ describe('AuthStore', () => {
       username: 'testuser', 
       email: 'test@example.com',
       first_name: 'Test',
-      last_name: 'User'
+      last_name: 'User',
+      is_staff: false,
+      is_superuser: false
     }
 
     const { result } = renderHook(() => useAuthStore())

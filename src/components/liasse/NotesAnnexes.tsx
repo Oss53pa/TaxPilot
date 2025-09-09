@@ -9,7 +9,7 @@ interface NotesAnnexesProps {
   modeEdition?: boolean
 }
 
-const NotesAnnexes: React.FC<NotesAnnexesProps> = ({ modeEdition = false }) => {
+const NotesAnnexes: React.FC<NotesAnnexesProps> = ({ modeEdition: _modeEdition = false }) => {
   const notes = [
     {
       numero: '1',

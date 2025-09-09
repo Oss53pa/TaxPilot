@@ -3,7 +3,7 @@
  * avec champ de commentaires intégré
  */
 
-import React, { useState, useCallback, useEffect, useMemo, memo } from 'react'
+import React, { useState, useCallback, useEffect, memo } from 'react'
 import {
   Box,
   Paper,
@@ -81,7 +81,7 @@ interface LiasseTableauGeneriqueProps {
 
 const LiasseTableauGenerique: React.FC<LiasseTableauGeneriqueProps> = ({
   title,
-  sheetId,
+  sheetId: _sheetId,
   columns,
   rows,
   onCellChange,

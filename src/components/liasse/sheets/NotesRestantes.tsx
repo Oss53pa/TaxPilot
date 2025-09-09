@@ -2,7 +2,7 @@
  * Composant générique pour toutes les notes restantes (4, 7, 9-10, 12-13, 15-16, 18, 20-35)
  */
 
-import React from 'react'
+import React, { useState } from 'react'
 import {
   Box,
   Paper,
@@ -17,8 +17,17 @@ import {
   Chip,
   useTheme,
   alpha,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  TextField,
+  Button,
+  Divider,
+  Stack,
+  IconButton
 } from '@mui/material'
-import { Construction, Schedule, CheckCircle } from '@mui/icons-material'
+import { Construction, Schedule, CheckCircle, Add, Edit, Save, Comment } from '@mui/icons-material'
 import CommentairesSection from '../shared/CommentairesSection'
 
 interface NoteRestanteProps {
@@ -39,6 +48,21 @@ const NotesRestantes: React.FC<NoteRestanteProps> = ({
   datePrevisionnelle
 }) => {
   const theme = useTheme()
+  const [typeNoteSelectionne, setTypeNoteSelectionne] = useState('')
+  const [commentaireNote, setCommentaireNote] = useState('')
+  const [notesPersonnalisees, setNotesPersonnalisees] = useState<Array<{id: string, titre: string, contenu: string, date: Date}>>([])
+  
+  // Types de notes disponibles
+  const typesNotesDisponibles = [
+    'Note méthodologique',
+    'Principe comptable',
+    'Changement de méthode',
+    'Évènement post-clôture',
+    'Engagements hors bilan',
+    'Information sectorielle',
+    'Partie liée',
+    'Autre information'
+  ]
 
   const getPrioriteColor = (priorite: string) => {
     switch (priorite) {
@@ -67,25 +91,113 @@ const NotesRestantes: React.FC<NoteRestanteProps> = ({
       </Alert>
 
       <Grid container spacing={3}>
-        {/* Description */}
+        {/* Section principale avec sélecteur */}
         <Grid item xs={12} md={8}>
           <Card>
             <CardContent>
               <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
-                Description
+                📝 Saisie de la Note {numeroNote}
               </Typography>
-              <Typography variant="body1" sx={{ mb: 3 }}>
-                {description}
-              </Typography>
+              
+              {/* Sélecteur de type de note */}
+              <FormControl fullWidth sx={{ mb: 3 }}>
+                <InputLabel>Type de note</InputLabel>
+                <Select
+                  value={typeNoteSelectionne}
+                  onChange={(e) => setTypeNoteSelectionne(e.target.value)}
+                  label="Type de note"
+                >
+                  {typesNotesDisponibles.map((type) => (
+                    <MenuItem key={type} value={type}>
+                      {type}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
 
+              {/* Champ commentaires/contenu */}
+              <TextField
+                fullWidth
+                multiline
+                rows={6}
+                label="Commentaires et observations"
+                placeholder="Saisissez ici le contenu de la note, les commentaires, observations ou explications nécessaires..."
+                value={commentaireNote}
+                onChange={(e) => setCommentaireNote(e.target.value)}
+                sx={{ mb: 3 }}
+                variant="outlined"
+              />
+              
+              <Stack direction="row" spacing={2}>
+                <Button 
+                  variant="contained" 
+                  startIcon={<Save />}
+                  onClick={() => {
+                    if (typeNoteSelectionne && commentaireNote.trim()) {
+                      const nouvelleNote = {
+                        id: Date.now().toString(),
+                        titre: typeNoteSelectionne,
+                        contenu: commentaireNote,
+                        date: new Date()
+                      }
+                      setNotesPersonnalisees([...notesPersonnalisees, nouvelleNote])
+                      setCommentaireNote('')
+                    }
+                  }}
+                  disabled={!typeNoteSelectionne || !commentaireNote.trim()}
+                >
+                  Ajouter Note
+                </Button>
+                
+                <Button variant="outlined" startIcon={<Comment />}>
+                  Modèles de Notes
+                </Button>
+              </Stack>
+            </CardContent>
+          </Card>
+          
+          {/* Notes personnalisées ajoutées */}
+          {notesPersonnalisees.length > 0 && (
+            <Card sx={{ mt: 3 }}>
+              <CardContent>
+                <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+                  📄 Notes ajoutées ({notesPersonnalisees.length})
+                </Typography>
+                {notesPersonnalisees.map((note) => (
+                  <Box key={note.id} sx={{ mb: 2, p: 2, border: '1px solid #e0e0e0', borderRadius: 1 }}>
+                    <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 1 }}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                        {note.titre}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {note.date.toLocaleDateString('fr-FR')}
+                      </Typography>
+                    </Stack>
+                    <Typography variant="body2">
+                      {note.contenu}
+                    </Typography>
+                  </Box>
+                ))}
+              </CardContent>
+            </Card>
+          )}
+          
+          {/* Contenu prévu (informatif) */}
+          <Card sx={{ mt: 3 }}>
+            <CardContent>
               <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
-                Contenu prévu
+                💡 Contenu suggéré pour cette note
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                {description}
               </Typography>
               <List>
                 {contenuPrevu.map((item, index) => (
                   <ListItem key={index} sx={{ pl: 0 }}>
                     <CheckCircle sx={{ mr: 2, color: 'success.main', fontSize: '1rem' }} />
-                    <ListItemText primary={item} />
+                    <ListItemText 
+                      primary={<Typography variant="body2">{item}</Typography>}
+                    />
                   </ListItem>
                 ))}
               </List>

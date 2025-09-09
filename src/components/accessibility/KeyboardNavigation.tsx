@@ -171,7 +171,7 @@ const KeyboardNavigation: React.FC = () => {
     });
     
     // Links
-    document.querySelectorAll('a').forEach((link, index) => {
+    document.querySelectorAll('a').forEach((link, _index) => {
       if (!link.getAttribute('aria-label')) {
         link.setAttribute('aria-label', link.textContent || 'Lien');
       }
@@ -236,21 +236,24 @@ const KeyboardNavigation: React.FC = () => {
         const firstElement = focusableElements[0] as HTMLElement;
         const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
         
-        dialog.addEventListener('keydown', (e) => {
-          if (e.key === 'Tab') {
-            if (e.shiftKey) {
+        const keydownHandler = (e: Event) => {
+          const keyboardEvent = e as KeyboardEvent;
+          if (keyboardEvent.key === 'Tab') {
+            if (keyboardEvent.shiftKey) {
               if (document.activeElement === firstElement) {
-                e.preventDefault();
+                keyboardEvent.preventDefault();
                 lastElement.focus();
               }
             } else {
               if (document.activeElement === lastElement) {
-                e.preventDefault();
+                keyboardEvent.preventDefault();
                 firstElement.focus();
               }
             }
           }
-        });
+        };
+        
+        dialog.addEventListener('keydown', keydownHandler);
       }
     });
   };
@@ -302,12 +305,13 @@ const KeyboardNavigation: React.FC = () => {
     
     if (currentTable || currentGrid) {
       const container = currentTable || currentGrid;
-      const cells = Array.from(container.querySelectorAll('td, th, [role="gridcell"]'));
-      const currentIndex = cells.indexOf(activeElement);
-      
-      if (currentIndex >= 0) {
-        let nextIndex = currentIndex;
-        const columnsCount = container.querySelectorAll('tr')[0]?.children.length || 1;
+      if (container) {
+        const cells = Array.from(container.querySelectorAll('td, th, [role="gridcell"]'));
+        const currentIndex = cells.indexOf(activeElement);
+        
+        if (currentIndex >= 0) {
+          let nextIndex = currentIndex;
+          const columnsCount = container.querySelectorAll('tr')[0]?.children.length || 1;
         
         switch (direction) {
           case 'ArrowUp':
@@ -324,8 +328,9 @@ const KeyboardNavigation: React.FC = () => {
             break;
         }
         
-        if (nextIndex !== currentIndex) {
-          (cells[nextIndex] as HTMLElement).focus();
+          if (nextIndex !== currentIndex) {
+            (cells[nextIndex] as HTMLElement).focus();
+          }
         }
       }
     }

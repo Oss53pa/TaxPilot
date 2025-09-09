@@ -2,7 +2,7 @@
  * Composant TAFIRE - Tableau Financier des Ressources et Emplois SYSCOHADA
  */
 
-import React from 'react'
+import React, { useState } from 'react'
 import {
   Table,
   TableBody,
@@ -15,308 +15,583 @@ import {
   Box,
   Grid,
   Alert,
+  TextField,
+  Card,
+  CardContent,
+  Divider,
+  Chip,
 } from '@mui/material'
+import {
+  TableChart,
+  TrendingUp,
+  TrendingDown,
+  AccountBalance,
+  SwapVert,
+} from '@mui/icons-material'
 
 interface TafireProps {
   modeEdition?: boolean
 }
 
+interface TafireItem {
+  code: string
+  libelle: string
+  exerciceN: number | null
+  exerciceN1: number | null
+  isHeader?: boolean
+  isSubHeader?: boolean
+  isTotal?: boolean
+  isTotalGeneral?: boolean
+  level?: number
+}
+
 const Tafire: React.FC<TafireProps> = ({ modeEdition = false }) => {
-  // Structure du TAFIRE
-  const emplois = [
+  // Structure complète du TAFIRE
+  const [emploisData, setEmploisData] = useState<TafireItem[]>([
+    // EN-TÊTE EMPLOIS
     {
+      code: 'EMP',
       libelle: 'EMPLOIS',
       exerciceN: null,
       exerciceN1: null,
       isHeader: true,
+      level: 0,
     },
+    
+    // EMPLOIS ÉCONOMIQUES
     {
-      libelle: 'Emplois économiques à financer',
+      code: 'EMP_ECO',
+      libelle: 'I - EMPLOIS ÉCONOMIQUES',
       exerciceN: null,
       exerciceN1: null,
       isSubHeader: true,
+      level: 1,
     },
     {
-      libelle: 'Investissements',
-      exerciceN: 25000000,
-      exerciceN1: 18000000,
+      code: 'E01',
+      libelle: 'Acquisitions d\'immobilisations corporelles',
+      exerciceN: 15000000,
+      exerciceN1: 12000000,
+      level: 2,
     },
     {
-      libelle: 'Variation du BFE',
+      code: 'E02',
+      libelle: 'Acquisitions d\'immobilisations incorporelles',
+      exerciceN: 2500000,
+      exerciceN1: 1800000,
+      level: 2,
+    },
+    {
+      code: 'E03',
+      libelle: 'Acquisitions d\'immobilisations financières',
+      exerciceN: 5000000,
+      exerciceN1: 3200000,
+      level: 2,
+    },
+    {
+      code: 'E04',
+      libelle: 'Variation du Besoin de Financement d\'Exploitation (+)',
       exerciceN: 8500000,
       exerciceN1: 5200000,
+      level: 2,
     },
     {
-      libelle: 'TOTAL EMPLOIS ÉCONOMIQUES',
+      code: 'E05',
+      libelle: 'Variation du Besoin Hors Activité Ordinaire (+)',
+      exerciceN: 2500000,
+      exerciceN1: 1800000,
+      level: 2,
+    },
+    {
+      code: 'E_TOT_ECO',
+      libelle: 'TOTAL I - EMPLOIS ÉCONOMIQUES',
       exerciceN: 33500000,
-      exerciceN1: 23200000,
+      exerciceN1: 24000000,
       isTotal: true,
+      level: 1,
     },
+    
+    // EMPLOIS FINANCIERS
     {
-      libelle: 'Emplois financiers',
+      code: 'EMP_FIN',
+      libelle: 'II - EMPLOIS FINANCIERS',
       exerciceN: null,
       exerciceN1: null,
       isSubHeader: true,
+      level: 1,
     },
     {
-      libelle: 'Remboursements d\'emprunts',
+      code: 'E06',
+      libelle: 'Charges financières',
+      exerciceN: 3500000,
+      exerciceN1: 2800000,
+      level: 2,
+    },
+    {
+      code: 'E07',
+      libelle: 'Remboursements d\'emprunts et dettes financières',
       exerciceN: 12000000,
       exerciceN1: 10000000,
+      level: 2,
     },
     {
-      libelle: 'Distributions de dividendes',
+      code: 'E08',
+      libelle: 'Distributions mise en paiement',
       exerciceN: 5000000,
       exerciceN1: 4000000,
+      level: 2,
     },
     {
-      libelle: 'TOTAL EMPLOIS FINANCIERS',
-      exerciceN: 17000000,
-      exerciceN1: 14000000,
+      code: 'E_TOT_FIN',
+      libelle: 'TOTAL II - EMPLOIS FINANCIERS',
+      exerciceN: 20500000,
+      exerciceN1: 16800000,
       isTotal: true,
+      level: 1,
     },
+    
+    // TOTAL GÉNÉRAL EMPLOIS
     {
+      code: 'E_TOT_GEN',
       libelle: 'TOTAL GÉNÉRAL EMPLOIS',
-      exerciceN: 50500000,
-      exerciceN1: 37200000,
+      exerciceN: 54000000,
+      exerciceN1: 40800000,
       isTotalGeneral: true,
+      level: 0,
     },
-  ]
+  ])
 
-  const ressources = [
+  const [ressourcesData, setRessourcesData] = useState<TafireItem[]>([
+    // EN-TÊTE RESSOURCES
     {
+      code: 'RES',
       libelle: 'RESSOURCES',
       exerciceN: null,
       exerciceN1: null,
       isHeader: true,
+      level: 0,
     },
+    
+    // RESSOURCES INTERNES
     {
-      libelle: 'Ressources économiques',
+      code: 'RES_INT',
+      libelle: 'I - RESSOURCES INTERNES',
       exerciceN: null,
       exerciceN1: null,
       isSubHeader: true,
+      level: 1,
     },
     {
-      libelle: 'Capacité d\'autofinancement (CAF)',
-      exerciceN: 21000000,
-      exerciceN1: 18000000,
+      code: 'R01',
+      libelle: 'Capacité d\'Autofinancement Globale (CAFG)',
+      exerciceN: 28000000,
+      exerciceN1: 24500000,
+      level: 2,
     },
     {
-      libelle: 'Cessions d\'immobilisations',
-      exerciceN: 2500000,
-      exerciceN1: 1800000,
+      code: 'R02',
+      libelle: 'Cessions et réductions d\'immobilisations',
+      exerciceN: 3500000,
+      exerciceN1: 2800000,
+      level: 2,
     },
     {
-      libelle: 'TOTAL RESSOURCES ÉCONOMIQUES',
-      exerciceN: 23500000,
-      exerciceN1: 19800000,
+      code: 'R03',
+      libelle: 'Cessions d\'immobilisations financières',
+      exerciceN: 1200000,
+      exerciceN1: 800000,
+      level: 2,
+    },
+    {
+      code: 'R_TOT_INT',
+      libelle: 'TOTAL I - RESSOURCES INTERNES',
+      exerciceN: 32700000,
+      exerciceN1: 28100000,
       isTotal: true,
+      level: 1,
     },
+    
+    // RESSOURCES EXTERNES
     {
-      libelle: 'Ressources financières',
+      code: 'RES_EXT',
+      libelle: 'II - RESSOURCES EXTERNES',
       exerciceN: null,
       exerciceN1: null,
       isSubHeader: true,
+      level: 1,
     },
     {
-      libelle: 'Augmentation de capital',
+      code: 'R04',
+      libelle: 'Augmentations de capital par apports nouveaux',
       exerciceN: 10000000,
       exerciceN1: 5000000,
+      level: 2,
     },
     {
+      code: 'R05',
+      libelle: 'Subventions d\'investissement reçues',
+      exerciceN: 2500000,
+      exerciceN1: 1200000,
+      level: 2,
+    },
+    {
+      code: 'R06',
       libelle: 'Emprunts nouveaux',
-      exerciceN: 15000000,
-      exerciceN1: 12000000,
+      exerciceN: 8000000,
+      exerciceN1: 6000000,
+      level: 2,
     },
     {
-      libelle: 'Subventions d\'investissement',
-      exerciceN: 2000000,
-      exerciceN1: 400000,
+      code: 'R07',
+      libelle: 'Autres dettes financières',
+      exerciceN: 800000,
+      exerciceN1: 500000,
+      level: 2,
     },
     {
-      libelle: 'TOTAL RESSOURCES FINANCIÈRES',
-      exerciceN: 27000000,
-      exerciceN1: 17400000,
+      code: 'R_TOT_EXT',
+      libelle: 'TOTAL II - RESSOURCES EXTERNES',
+      exerciceN: 21300000,
+      exerciceN1: 12700000,
       isTotal: true,
+      level: 1,
     },
+    
+    // TOTAL GÉNÉRAL RESSOURCES
     {
+      code: 'R_TOT_GEN',
       libelle: 'TOTAL GÉNÉRAL RESSOURCES',
-      exerciceN: 50500000,
-      exerciceN1: 37200000,
+      exerciceN: 54000000,
+      exerciceN1: 40800000,
       isTotalGeneral: true,
+      level: 0,
     },
-  ]
+  ])
 
-  const formatMontant = (montant: number | null) => {
-    if (montant === null) return ''
-    if (montant === 0) return '-'
-    return new Intl.NumberFormat('fr-FR').format(montant)
+  const updateEmplois = (code: string, field: 'exerciceN' | 'exerciceN1', value: number) => {
+    if (!modeEdition) return
+    
+    setEmploisData(prev => prev.map(item => {
+      if (item.code === code) {
+        return { ...item, [field]: value }
+      }
+      return item
+    }))
   }
 
-  const getRowStyle = (ligne: any) => {
-    if (ligne.isTotalGeneral) {
-      return { 
-        backgroundColor: '#2196f3', 
-        color: 'white',
-        fontWeight: 700,
+  const updateRessources = (code: string, field: 'exerciceN' | 'exerciceN1', value: number) => {
+    if (!modeEdition) return
+    
+    setRessourcesData(prev => prev.map(item => {
+      if (item.code === code) {
+        return { ...item, [field]: value }
+      }
+      return item
+    }))
+  }
+
+  // Calcul automatique des totaux
+  React.useEffect(() => {
+    // Recalcul des totaux emplois
+    setEmploisData(prev => prev.map(item => {
+      if (item.code === 'E_TOT_ECO') {
+        const sousTotal = prev.filter(p => 
+          ['E01', 'E02', 'E03', 'E04', 'E05'].includes(p.code)
+        ).reduce((sum, p) => sum + (p.exerciceN || 0), 0)
+        const sousTotalN1 = prev.filter(p => 
+          ['E01', 'E02', 'E03', 'E04', 'E05'].includes(p.code)
+        ).reduce((sum, p) => sum + (p.exerciceN1 || 0), 0)
+        return { ...item, exerciceN: sousTotal, exerciceN1: sousTotalN1 }
+      }
+      if (item.code === 'E_TOT_FIN') {
+        const sousTotal = prev.filter(p => 
+          ['E06', 'E07', 'E08'].includes(p.code)
+        ).reduce((sum, p) => sum + (p.exerciceN || 0), 0)
+        const sousTotalN1 = prev.filter(p => 
+          ['E06', 'E07', 'E08'].includes(p.code)
+        ).reduce((sum, p) => sum + (p.exerciceN1 || 0), 0)
+        return { ...item, exerciceN: sousTotal, exerciceN1: sousTotalN1 }
+      }
+      if (item.code === 'E_TOT_GEN') {
+        const ecoTotal = prev.find(p => p.code === 'E_TOT_ECO')
+        const finTotal = prev.find(p => p.code === 'E_TOT_FIN')
+        return {
+          ...item,
+          exerciceN: (ecoTotal?.exerciceN || 0) + (finTotal?.exerciceN || 0),
+          exerciceN1: (ecoTotal?.exerciceN1 || 0) + (finTotal?.exerciceN1 || 0)
+        }
+      }
+      return item
+    }))
+
+    // Recalcul des totaux ressources
+    setRessourcesData(prev => prev.map(item => {
+      if (item.code === 'R_TOT_INT') {
+        const sousTotal = prev.filter(p => 
+          ['R01', 'R02', 'R03'].includes(p.code)
+        ).reduce((sum, p) => sum + (p.exerciceN || 0), 0)
+        const sousTotalN1 = prev.filter(p => 
+          ['R01', 'R02', 'R03'].includes(p.code)
+        ).reduce((sum, p) => sum + (p.exerciceN1 || 0), 0)
+        return { ...item, exerciceN: sousTotal, exerciceN1: sousTotalN1 }
+      }
+      if (item.code === 'R_TOT_EXT') {
+        const sousTotal = prev.filter(p => 
+          ['R04', 'R05', 'R06', 'R07'].includes(p.code)
+        ).reduce((sum, p) => sum + (p.exerciceN || 0), 0)
+        const sousTotalN1 = prev.filter(p => 
+          ['R04', 'R05', 'R06', 'R07'].includes(p.code)
+        ).reduce((sum, p) => sum + (p.exerciceN1 || 0), 0)
+        return { ...item, exerciceN: sousTotal, exerciceN1: sousTotalN1 }
+      }
+      if (item.code === 'R_TOT_GEN') {
+        const intTotal = prev.find(p => p.code === 'R_TOT_INT')
+        const extTotal = prev.find(p => p.code === 'R_TOT_EXT')
+        return {
+          ...item,
+          exerciceN: (intTotal?.exerciceN || 0) + (extTotal?.exerciceN || 0),
+          exerciceN1: (intTotal?.exerciceN1 || 0) + (extTotal?.exerciceN1 || 0)
+        }
+      }
+      return item
+    }))
+  }, [emploisData, ressourcesData])
+
+  const formatNumber = (value: number | null) => {
+    if (value === null) return ''
+    return new Intl.NumberFormat('fr-FR').format(value)
+  }
+
+  const getRowStyle = (item: TafireItem) => {
+    if (item.isTotalGeneral) {
+      return {
+        backgroundColor: 'primary.main',
+        '& .MuiTableCell-root': { color: 'white', fontWeight: 700, fontSize: '1.1rem' }
       }
     }
-    if (ligne.isTotal) {
-      return { 
-        backgroundColor: '#e3f2fd',
-        fontWeight: 700,
+    if (item.isTotal) {
+      return {
+        backgroundColor: 'secondary.light',
+        '& .MuiTableCell-root': { fontWeight: 600 }
       }
     }
-    if (ligne.isHeader) {
-      return { 
-        backgroundColor: '#1976d2',
-        color: 'white',
-        fontWeight: 700,
+    if (item.isSubHeader) {
+      return {
+        backgroundColor: 'grey.200',
+        '& .MuiTableCell-root': { fontWeight: 600, fontStyle: 'italic' }
       }
     }
-    if (ligne.isSubHeader) {
-      return { 
-        backgroundColor: '#f5f5f5',
-        fontWeight: 600,
-        fontStyle: 'italic',
+    if (item.isHeader) {
+      return {
+        backgroundColor: 'info.main',
+        '& .MuiTableCell-root': { color: 'white', fontWeight: 700, fontSize: '1.2rem' }
       }
     }
     return {}
   }
 
+  const totalEmplois = emploisData.find(item => item.code === 'E_TOT_GEN')
+  const totalRessources = ressourcesData.find(item => item.code === 'R_TOT_GEN')
+  const equilibre = (totalRessources?.exerciceN || 0) - (totalEmplois?.exerciceN || 0)
+
+  const renderTableau = (data: TafireItem[], titre: string, updateFunction: any, icon: React.ReactElement) => (
+    <Card>
+      <CardContent>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+          {icon}
+          <Typography variant="h6" sx={{ ml: 1, fontWeight: 600 }}>
+            {titre}
+          </Typography>
+        </Box>
+        <TableContainer>
+          <Table size="small">
+            <TableHead>
+              <TableRow sx={{ backgroundColor: 'grey.100' }}>
+                <TableCell sx={{ fontWeight: 600, minWidth: 300 }}>Postes</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 600, minWidth: 120 }}>Exercice N</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 600, minWidth: 120 }}>Exercice N-1</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {data.map((item, index) => (
+                <TableRow key={index} sx={getRowStyle(item)}>
+                  <TableCell sx={{ paddingLeft: `${(item.level || 0) * 20 + 16}px` }}>
+                    {item.libelle}
+                  </TableCell>
+                  <TableCell align="right">
+                    {item.exerciceN !== null ? (
+                      modeEdition && !item.isHeader && !item.isSubHeader && !item.isTotal && !item.isTotalGeneral ? (
+                        <TextField
+                          type="number"
+                          value={item.exerciceN || 0}
+                          onChange={(e) => updateFunction(item.code, 'exerciceN', Number(e.target.value))}
+                          size="small"
+                          sx={{ width: 100 }}
+                          inputProps={{ style: { textAlign: 'right' } }}
+                        />
+                      ) : (
+                        formatNumber(item.exerciceN)
+                      )
+                    ) : (
+                      ''
+                    )}
+                  </TableCell>
+                  <TableCell align="right">
+                    {item.exerciceN1 !== null ? (
+                      modeEdition && !item.isHeader && !item.isSubHeader && !item.isTotal && !item.isTotalGeneral ? (
+                        <TextField
+                          type="number"
+                          value={item.exerciceN1 || 0}
+                          onChange={(e) => updateFunction(item.code, 'exerciceN1', Number(e.target.value))}
+                          size="small"
+                          sx={{ width: 100 }}
+                          inputProps={{ style: { textAlign: 'right' } }}
+                        />
+                      ) : (
+                        formatNumber(item.exerciceN1)
+                      )
+                    ) : (
+                      ''
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </CardContent>
+    </Card>
+  )
+
   return (
     <Box>
-      <Typography variant="h5" sx={{ mb: 3, fontWeight: 700, color: 'info.main' }}>
-        TAFIRE - Tableau Financier des Ressources et Emplois
-      </Typography>
-
-      <Alert severity="info" sx={{ mb: 3 }}>
-        Le TAFIRE présente l'équilibre entre les emplois et les ressources de l'exercice, 
-        permettant d'analyser la politique d'investissement et de financement de l'entreprise.
-      </Alert>
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+        <TableChart sx={{ mr: 2, color: 'primary.main', fontSize: 32 }} />
+        <Box>
+          <Typography variant="h5" sx={{ fontWeight: 700, color: 'primary.main' }}>
+            TAFIRE - Tableau Financier des Ressources et Emplois
+          </Typography>
+          <Typography variant="subtitle2" color="text.secondary">
+            SYSCOHADA - Vision financière des flux
+          </Typography>
+        </Box>
+      </Box>
       
+      <Alert severity="info" sx={{ mb: 3 }}>
+        Le TAFIRE explique les variations du patrimoine de l'entreprise au cours de l'exercice 
+        en mettant en évidence l'équilibre emplois-ressources.
+      </Alert>
+
+      {/* Indicateurs d'équilibre */}
+      <Grid container spacing={2} sx={{ mb: 3 }}>
+        <Grid item xs={12} md={4}>
+          <Card>
+            <CardContent sx={{ textAlign: 'center', p: 2 }}>
+              <TrendingDown sx={{ color: 'error.main', fontSize: 32, mb: 1 }} />
+              <Typography variant="caption" color="text.secondary">Total Emplois</Typography>
+              <Typography variant="h6" color="error.main">
+                {formatNumber(totalEmplois?.exerciceN || 0)} FCFA
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <Card>
+            <CardContent sx={{ textAlign: 'center', p: 2 }}>
+              <TrendingUp sx={{ color: 'success.main', fontSize: 32, mb: 1 }} />
+              <Typography variant="caption" color="text.secondary">Total Ressources</Typography>
+              <Typography variant="h6" color="success.main">
+                {formatNumber(totalRessources?.exerciceN || 0)} FCFA
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <Card>
+            <CardContent sx={{ textAlign: 'center', p: 2 }}>
+              <SwapVert sx={{ color: equilibre === 0 ? 'success.main' : 'warning.main', fontSize: 32, mb: 1 }} />
+              <Typography variant="caption" color="text.secondary">Équilibre</Typography>
+              <Typography variant="h6" color={equilibre === 0 ? 'success.main' : 'warning.main'}>
+                {equilibre === 0 ? 'Équilibré' : `${formatNumber(Math.abs(equilibre))} FCFA`}
+              </Typography>
+              {equilibre !== 0 && (
+                <Chip 
+                  label={equilibre > 0 ? 'Excédent ressources' : 'Excédent emplois'} 
+                  color={equilibre > 0 ? 'success' : 'error'} 
+                  size="small" 
+                />
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+
       <Grid container spacing={3}>
-        {/* Emplois */}
-        <Grid item xs={12} md={6}>
-          <TableContainer component={Paper} sx={{ border: '2px solid #2196f3' }}>
-            <Table size="small">
-              <TableHead>
-                <TableRow sx={{ backgroundColor: '#2196f3' }}>
-                  <TableCell sx={{ color: 'white', fontWeight: 700 }}>EMPLOIS</TableCell>
-                  <TableCell sx={{ color: 'white', fontWeight: 700, width: '120px' }} align="right">
-                    Exercice N
-                  </TableCell>
-                  <TableCell sx={{ color: 'white', fontWeight: 700, width: '120px' }} align="right">
-                    Exercice N-1
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {emplois.map((ligne, index) => (
-                  <TableRow 
-                    key={index}
-                    sx={getRowStyle(ligne)}
-                  >
-                    <TableCell sx={{ 
-                      fontWeight: ligne.isTotal || ligne.isTotalGeneral ? 700 : 
-                                  ligne.isSubHeader ? 600 : 400,
-                      pl: ligne.isSubHeader ? 2 : ligne.isTotal ? 1 : ligne.isTotalGeneral ? 0 : 3,
-                    }}>
-                      {ligne.libelle}
-                    </TableCell>
-                    <TableCell align="right" sx={{ fontFamily: 'monospace' }}>
-                      {formatMontant(ligne.exerciceN)}
-                    </TableCell>
-                    <TableCell align="right" sx={{ fontFamily: 'monospace' }}>
-                      {formatMontant(ligne.exerciceN1)}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+        {/* Colonne Emplois */}
+        <Grid item xs={12} lg={6}>
+          {renderTableau(
+            emploisData, 
+            'EMPLOIS', 
+            updateEmplois, 
+            <TrendingDown color="error" />
+          )}
         </Grid>
-
-        {/* Ressources */}
-        <Grid item xs={12} md={6}>
-          <TableContainer component={Paper} sx={{ border: '2px solid #4caf50' }}>
-            <Table size="small">
-              <TableHead>
-                <TableRow sx={{ backgroundColor: '#4caf50' }}>
-                  <TableCell sx={{ color: 'white', fontWeight: 700 }}>RESSOURCES</TableCell>
-                  <TableCell sx={{ color: 'white', fontWeight: 700, width: '120px' }} align="right">
-                    Exercice N
-                  </TableCell>
-                  <TableCell sx={{ color: 'white', fontWeight: 700, width: '120px' }} align="right">
-                    Exercice N-1
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {ressources.map((ligne, index) => (
-                  <TableRow 
-                    key={index}
-                    sx={{
-                      ...getRowStyle(ligne),
-                      backgroundColor: ligne.isHeader ? '#4caf50' : 
-                                      ligne.isTotalGeneral ? '#4caf50' :
-                                      ligne.isTotal ? '#e8f5e9' : 
-                                      getRowStyle(ligne).backgroundColor
-                    }}
-                  >
-                    <TableCell sx={{ 
-                      fontWeight: ligne.isTotal || ligne.isTotalGeneral ? 700 : 
-                                  ligne.isSubHeader ? 600 : 400,
-                      pl: ligne.isSubHeader ? 2 : ligne.isTotal ? 1 : ligne.isTotalGeneral ? 0 : 3,
-                    }}>
-                      {ligne.libelle}
-                    </TableCell>
-                    <TableCell align="right" sx={{ fontFamily: 'monospace' }}>
-                      {formatMontant(ligne.exerciceN)}
-                    </TableCell>
-                    <TableCell align="right" sx={{ fontFamily: 'monospace' }}>
-                      {formatMontant(ligne.exerciceN1)}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+        
+        {/* Colonne Ressources */}
+        <Grid item xs={12} lg={6}>
+          {renderTableau(
+            ressourcesData, 
+            'RESSOURCES', 
+            updateRessources, 
+            <TrendingUp color="success" />
+          )}
         </Grid>
       </Grid>
 
-      {/* Analyse */}
-      <Grid container spacing={3} sx={{ mt: 2 }}>
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 2, backgroundColor: 'info.light' }}>
-            <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
-              Analyse des Emplois
-            </Typography>
-            <Typography variant="body2">
-              • Investissements: 25 000 000 FCFA (+38.9%)<br />
-              • BFE: 8 500 000 FCFA (+63.5%)<br />
-              • Remboursements: 12 000 000 FCFA (+20%)
-            </Typography>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 2, backgroundColor: 'success.light' }}>
-            <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
-              Analyse des Ressources
-            </Typography>
-            <Typography variant="body2">
-              • CAF: 21 000 000 FCFA (+16.7%)<br />
-              • Capital: 10 000 000 FCFA (+100%)<br />
-              • Emprunts: 15 000 000 FCFA (+25%)
-            </Typography>
-          </Paper>
-        </Grid>
-      </Grid>
+      {/* Note d'équilibre */}
+      {equilibre !== 0 && (
+        <Alert severity="warning" sx={{ mt: 3 }}>
+          Attention : Le tableau n'est pas équilibré. Vérifiez les montants saisis.
+          {equilibre > 0 
+            ? ` Excédent de ressources : ${formatNumber(equilibre)} FCFA`
+            : ` Excédent d'emplois : ${formatNumber(-equilibre)} FCFA`
+          }
+        </Alert>
+      )}
 
-      {/* Équilibre */}
-      <Box sx={{ mt: 3, p: 2, backgroundColor: 'success.main', color: 'white', borderRadius: 1 }}>
-        <Typography variant="h6" sx={{ fontWeight: 700, textAlign: 'center' }}>
-          ✓ ÉQUILIBRE VÉRIFIÉ : EMPLOIS = RESSOURCES = 50 500 000 FCFA
+      {/* Notes explicatives */}
+      <Box sx={{ mt: 3 }}>
+        <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+          Notes explicatives
         </Typography>
+        <Grid container spacing={2}>
+          <Grid item xs={12} md={6}>
+            <Paper sx={{ p: 2 }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, color: 'error.main' }}>
+                EMPLOIS (Utilisations de fonds)
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                - Investissements et acquisitions d'actifs<br/>
+                - Remboursements d'emprunts<br/>
+                - Distributions aux actionnaires<br/>
+                - Augmentation du besoin de financement
+              </Typography>
+            </Paper>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <Paper sx={{ p: 2 }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, color: 'success.main' }}>
+                RESSOURCES (Origines de fonds)
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                - Capacité d'autofinancement<br/>
+                - Cessions d'actifs<br/>
+                - Nouveaux emprunts et financements<br/>
+                - Augmentations de capital
+              </Typography>
+            </Paper>
+          </Grid>
+        </Grid>
       </Box>
     </Box>
   )

@@ -9,7 +9,7 @@ interface GrandLivreProps {
   modeEdition?: boolean
 }
 
-const GrandLivre: React.FC<GrandLivreProps> = ({ modeEdition = false }) => {
+const GrandLivre: React.FC<GrandLivreProps> = ({ modeEdition: _modeEdition = false }) => {
   return (
     <Box>
       <Typography variant="h5" sx={{ mb: 3, fontWeight: 700, color: '#191919' }}>

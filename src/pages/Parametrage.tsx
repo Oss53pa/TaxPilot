@@ -6,7 +6,6 @@ import React from 'react'
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom'
 import {
   Box,
-  Container,
   Typography,
   Tabs,
   Tab,
@@ -23,6 +22,8 @@ import {
 import EntrepriseSettings from '@/components/Parametrage/EntrepriseSettings'
 import UserManagement from '@/components/Parametrage/UserManagement'
 import PlanComptableSettings from '@/components/Parametrage/PlanComptableSettings'
+import SecuritySettings from '@/components/Parametrage/SecuritySettings'
+import NotificationSettings from '@/components/Parametrage/NotificationSettings'
 
 interface TabPanelProps {
   children?: React.ReactNode
@@ -81,7 +82,7 @@ const Parametrage: React.FC = () => {
   }, [location.pathname])
 
   return (
-    <Container maxWidth="lg">
+    <Box sx={{ width: '100%', height: '100%', px: 3, py: 2 }}>
       <Box sx={{ mb: 4 }}>
         <Typography variant="h4" sx={{ fontWeight: 600, mb: 1 }}>
           Paramétrage
@@ -161,28 +162,14 @@ const Parametrage: React.FC = () => {
         </TabPanel>
         
         <TabPanel value={activeTab} index={3}>
-          <Box sx={{ p: 3 }}>
-            <Typography variant="h6" sx={{ mb: 2 }}>
-              Paramètres de Sécurité
-            </Typography>
-            <Typography color="text.secondary">
-              Configuration de la sécurité et des accès (À implémenter)
-            </Typography>
-          </Box>
+          <SecuritySettings />
         </TabPanel>
         
         <TabPanel value={activeTab} index={4}>
-          <Box sx={{ p: 3 }}>
-            <Typography variant="h6" sx={{ mb: 2 }}>
-              Paramètres de Notifications
-            </Typography>
-            <Typography color="text.secondary">
-              Configuration des notifications et alertes (À implémenter)
-            </Typography>
-          </Box>
+          <NotificationSettings />
         </TabPanel>
       </Paper>
-    </Container>
+    </Box>
   )
 }
 

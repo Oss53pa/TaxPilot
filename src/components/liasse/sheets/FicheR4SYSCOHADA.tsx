@@ -279,13 +279,18 @@ const FicheR4SYSCOHADA: React.FC = () => {
     }
   })
 
+  const montantDebut = provisions.reduce((sum, p) => sum + p.montantDebut, 0)
+  const dotations = provisions.reduce((sum, p) => sum + p.dotations, 0)
+  const reprises = provisions.reduce((sum, p) => sum + p.reprises, 0)
+  const montantFin = provisions.reduce((sum, p) => sum + p.montantFin, 0)
+  
   const totaux = {
-    montantDebut: provisions.reduce((sum, p) => sum + p.montantDebut, 0),
-    dotations: provisions.reduce((sum, p) => sum + p.dotations, 0),
-    reprises: provisions.reduce((sum, p) => sum + p.reprises, 0),
-    montantFin: provisions.reduce((sum, p) => sum + p.montantFin, 0),
+    montantDebut,
+    dotations,
+    reprises,
+    montantFin,
+    variation: montantFin - montantDebut,
   }
-  totaux.variation = totaux.montantFin - totaux.montantDebut
 
   const getProbabilityColor = (probability: number) => {
     if (probability >= 80) return 'error'

@@ -2,6 +2,11 @@ import React, { Suspense } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { CircularProgress, Box } from '@mui/material'
 import ModernLayout from './components/shared/Layout'
+import './styles/liasse-fixes.css'
+import './styles/sidebar-fix.css'
+import './styles/wcag-conformity.css'
+import './styles/liasse-text-fix.css'
+import './styles/sidebar-ultimate-fix.css'
 
 // Composant de loading pour le lazy loading
 const PageLoader = () => (
@@ -18,11 +23,15 @@ const PageLoader = () => (
 // Lazy loading des pages principales
 const ModernDashboard = React.lazy(() => import('@/pages/dashboard/ModernDashboard'))
 
-// Modules de base
-const ModernParametrage = React.lazy(() => import('@/pages/parametrage/ModernParametrage'))
+// Accès direct aux liasses pour contourner les problèmes
+const DirectLiasseAccess = React.lazy(() => import('@/pages/DirectLiasseAccess'))
+
+// Modules de base 
+const Parametrage = React.lazy(() => import('@/pages/Parametrage'))
 const ModernImportBalance = React.lazy(() => import('@/pages/import/ModernImportBalance'))
 const ModernBalance = React.lazy(() => import('@/pages/balance/ModernBalance'))
-const ModernPlansComptables = React.lazy(() => import('@/pages/plans/ModernPlansComptables'))
+// const ModernPlansComptables = React.lazy(() => import('@/pages/plans/ModernPlansComptables'))
+const PlanSYSCOHADARevise = React.lazy(() => import('@/pages/plans/PlanSYSCOHADARevise'))
 
 // Modules de production (Critical - chargés en priorité)
 const ModernLiasseComplete = React.lazy(() => import('@/pages/liasse/ModernLiasseComplete'))
@@ -33,6 +42,8 @@ const ModernGeneration = React.lazy(() => import('@/pages/generation/ModernGener
 
 // Modules de conformité
 const ModernAudit = React.lazy(() => import('@/pages/audit/ModernAudit'))
+const ControlPointsManager = React.lazy(() => import('@/pages/audit/ControlPointsManager'))
+const LiasseControlInterface = React.lazy(() => import('@/pages/validation/LiasseControlInterface'))
 const ModernTeledeclaration = React.lazy(() => import('@/pages/teledeclaration/ModernTeledeclaration'))
 const ModernCompliance = React.lazy(() => import('@/pages/compliance/ModernCompliance'))
 const ModernFiscalCalendar = React.lazy(() => import('@/pages/calendar/ModernFiscalCalendar'))
@@ -51,6 +62,7 @@ const ModernSecurity = React.lazy(() => import('@/pages/security/ModernSecurity'
 // Authentification
 import Login from './pages/auth/Login'
 import { useAuthStore } from './store/authStore'
+import OnboardingTour from './components/onboarding/OnboardingTour'
 
 // Composants de test
 import TestComponents from './components/shared/TestComponents'
@@ -71,16 +83,19 @@ function App() {
   return (
     // ThemeProvider et CssBaseline déjà fournis par main.tsx
     <ModernLayout>
+      <OnboardingTour />
       <Suspense fallback={<PageLoader />}>
         <Routes>
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/" element={<Navigate to="/direct-liasse" replace />} />
           <Route path="/dashboard" element={<ModernDashboard />} />
+          <Route path="/direct-liasse" element={<DirectLiasseAccess />} />
           
           {/* Modules de base */}
-          <Route path="/parametrage" element={<ModernParametrage />} />
+          <Route path="/parametrage/*" element={<Parametrage />} />
           <Route path="/import-balance" element={<ModernImportBalance />} />
           <Route path="/balance" element={<ModernBalance />} />
-          <Route path="/plans-comptables" element={<ModernPlansComptables />} />
+          <Route path="/plans-comptables" element={<PlanSYSCOHADARevise />} />
+          <Route path="/plan-syscohada" element={<PlanSYSCOHADARevise />} />
           
           {/* Modules de production */}
           <Route path="/liasse" element={<ModernLiasseComplete />} />
@@ -91,6 +106,8 @@ function App() {
           
           {/* Modules de conformité */}
           <Route path="/audit" element={<ModernAudit />} />
+          <Route path="/control-points" element={<ControlPointsManager />} />
+          <Route path="/validation-liasse" element={<LiasseControlInterface />} />
           <Route path="/teledeclaration" element={<ModernTeledeclaration />} />
           <Route path="/compliance" element={<ModernCompliance />} />
           <Route path="/calendar" element={<ModernFiscalCalendar />} />

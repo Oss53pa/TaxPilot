@@ -1,0 +1,59 @@
+/* CORRECTION TEXTE LIASSE - TEXTE BLANC → NOIR */
+
+/* Cibler uniquement les composants de liasse, pas les headers ni sidebars */
+.liasse-content,
+.liasse-sheet,
+.liasse-table,
+.MuiTableContainer-root:not(.MuiDrawer-paper *),
+.MuiTable-root:not(.MuiDrawer-paper *),
+.MuiCard-root:not(.MuiDrawer-paper *),
+.MuiPaper-root:not(.MuiDrawer-paper *):not(.MuiAppBar-root):not([data-testid*="sidebar"]) {
+  /* Tous les textes blancs deviennent noirs */
+  color: #000000 !important;
+}
+
+/* Texte dans les tableaux de liasse */
+.MuiTableCell-root:not(.MuiDrawer-paper *) {
+  color: #000000 !important;
+}
+
+.MuiTableCell-root:not(.MuiDrawer-paper *) .MuiTypography-root {
+  color: #000000 !important;
+}
+
+/* Texte dans les cartes de liasse */
+.MuiCard-root:not(.MuiDrawer-paper *) .MuiTypography-root {
+  color: #000000 !important;
+}
+
+.MuiCard-root:not(.MuiDrawer-paper *) .MuiCardContent-root * {
+  color: #000000 !important;
+}
+
+/* Texte dans les conteneurs de liasse */
+.MuiBox-root:not(.MuiDrawer-paper *):not(.MuiAppBar-root *) .MuiTypography-root {
+  color: #000000 !important;
+}
+
+/* Correction spécifique pour tous les éléments avec color: white */
+*:not(.MuiDrawer-paper):not(.MuiDrawer-paper *):not(.MuiAppBar-root):not(.MuiAppBar-root *) {
+  color: #000000 !important;
+}
+
+/* Forcer le texte noir sur les pages de contenu principal */
+main *:not(.MuiDrawer-paper *):not(.MuiAppBar-root *),
+.MuiContainer-root *:not(.MuiDrawer-paper *):not(.MuiAppBar-root *),
+[role="main"] *:not(.MuiDrawer-paper *):not(.MuiAppBar-root *) {
+  color: #000000 !important;
+}
+
+/* Exception pour garder les couleurs des chips et badges */
+.MuiChip-root:not(.MuiDrawer-paper *),
+.MuiBadge-root:not(.MuiDrawer-paper *) {
+  color: inherit !important;
+}
+
+/* Exception pour les icônes (garder leur couleur) */
+.MuiSvgIcon-root:not(.MuiDrawer-paper *) {
+  color: inherit !important;
+}

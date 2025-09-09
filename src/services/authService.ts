@@ -57,7 +57,7 @@ class AuthService {
   }
 
   // Vérification de permissions
-  hasPermission(permission: string): boolean {
+  hasPermission(_permission: string): boolean {
     const user = this.getCurrentUser()
     if (!user) return false
 
@@ -70,7 +70,7 @@ class AuthService {
     return false
   }
 
-  canAccessEntreprise(entrepriseId: string): boolean {
+  canAccessEntreprise(_entrepriseId: string): boolean {
     const user = this.getCurrentUser()
     if (!user) return false
 

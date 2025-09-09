@@ -9,7 +9,7 @@ interface BalanceGeneraleProps {
   modeEdition?: boolean
 }
 
-const BalanceGenerale: React.FC<BalanceGeneraleProps> = ({ modeEdition = false }) => {
+const BalanceGenerale: React.FC<BalanceGeneraleProps> = ({ modeEdition: _modeEdition = false }) => {
   return (
     <Box>
       <Typography variant="h5" sx={{ mb: 3, fontWeight: 700, color: '#191919' }}>

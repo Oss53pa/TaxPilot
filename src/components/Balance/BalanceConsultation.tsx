@@ -512,7 +512,7 @@ const BalanceConsultation: React.FC = () => {
             count={filteredBalances.length}
             rowsPerPage={rowsPerPage}
             page={page}
-            onPageChange={(e, newPage) => setPage(newPage)}
+            onPageChange={(_e, newPage) => setPage(newPage)}
             onRowsPerPageChange={(e) => {
               setRowsPerPage(parseInt(e.target.value, 10))
               setPage(0)

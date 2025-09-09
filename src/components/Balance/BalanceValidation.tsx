@@ -12,7 +12,6 @@ import {
   Typography,
   Alert,
   Grid,
-  Paper,
   List,
   ListItem,
   ListItemIcon,

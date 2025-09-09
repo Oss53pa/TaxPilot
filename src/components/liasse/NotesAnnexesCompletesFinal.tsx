@@ -22,6 +22,11 @@ import {
   Divider,
   Chip,
   Alert,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Stack,
 } from '@mui/material'
 import { 
   NavigateNext, 
@@ -30,17 +35,40 @@ import {
   Save,
   FirstPage,
   LastPage,
+  Comment,
+  Add,
 } from '@mui/icons-material'
 
 const PRIMARY_COLOR = '#191919'
 
 interface NotesAnnexesCompletesFinalProps {
   modeEdition?: boolean
+  noteFixe?: number  // Pour afficher une note spécifique sans navigation
 }
 
-const NotesAnnexesCompletesFinal: React.FC<NotesAnnexesCompletesFinalProps> = ({ modeEdition = false }) => {
-  const [currentNoteIndex, setCurrentNoteIndex] = useState(0)
+const NotesAnnexesCompletesFinal: React.FC<NotesAnnexesCompletesFinalProps> = ({ modeEdition = false, noteFixe }) => {
+  const [currentNoteIndex, setCurrentNoteIndex] = useState(noteFixe !== undefined ? noteFixe : 0)
   const [editMode, setEditMode] = useState(false)
+  
+  // Si une note fixe est spécifiée, on ne permet pas de changer
+  const navigationDisabled = noteFixe !== undefined
+  
+  // Système de commentaires
+  const [typeCommentaire, setTypeCommentaire] = useState('')
+  const [commentaire, setCommentaire] = useState('')
+  const [commentairesParNote, setCommentairesParNote] = useState<{[key: number]: Array<{
+    id: string; type: string; contenu: string; date: Date
+  }>}>({})
+  
+  const typesCommentaires = [
+    'Explication méthodologique',
+    'Justification montant',
+    'Changement vs N-1',
+    'Événement particulier',
+    'Contrôle effectué',
+    'Source information',
+    'Autre observation'
+  ]
 
   // Toutes les 35 notes SYSCOHADA développées complètement
   const notesCompletes = [
@@ -584,8 +612,178 @@ const NotesAnnexesCompletesFinal: React.FC<NotesAnnexesCompletesFinalProps> = ({
           'Matériel informatique': '1 000 000 FCFA'
         }
       }
+    },
+    
+    // NOTES 21-35 AJOUTÉES
+    {
+      numero: 'NOTE ANNEXE N° 21',
+      titre: 'EFFECTIF DU PERSONNEL ET FRAIS DE PERSONNEL',
+      tableau: {
+        titre: 'Évolution de l\'effectif',
+        colonnes: ['Catégorie', 'Effectif début', 'Embauches', 'Départs', 'Effectif fin', 'Masse salariale'],
+        lignes: [
+          ['Cadres supérieurs', '5', '1', '0', '6', '24 000 000'],
+          ['Cadres moyens', '12', '2', '1', '13', '32 000 000'],
+          ['Employés', '25', '5', '2', '28', '28 000 000'],
+          ['Ouvriers', '18', '3', '1', '20', '18 000 000'],
+          ['TOTAL', '60', '11', '4', '67', '102 000 000']
+        ]
+      }
+    },
+    {
+      numero: 'NOTE ANNEXE N° 22',
+      titre: 'RÉMUNÉRATION DES DIRIGEANTS ET MANDATAIRES SOCIAUX',
+      contenu: {
+        'Gérant majoritaire': '12 000 000 FCFA (charges sociales incluses)',
+        'Directeur général': '8 400 000 FCFA',
+        'Commissaires aux comptes': '2 500 000 FCFA',
+        'Jetons de présence conseil': '800 000 FCFA'
+      }
+    },
+    {
+      numero: 'NOTE ANNEXE N° 23',
+      titre: 'RÉPARTITION DU CAPITAL ET DROITS DE VOTE',
+      tableau: {
+        titre: 'Actionnariat au 31/12/N',
+        colonnes: ['Actionnaire', 'Nb actions', '% Capital', '% Droits vote'],
+        lignes: [
+          ['M. FONDATEUR', '2500', '50%', '50%'],
+          ['Mme ASSOCIEE', '1500', '30%', '30%'],
+          ['INVESTISSEUR SA', '1000', '20%', '20%'],
+          ['TOTAL', '5000', '100%', '100%']
+        ]
+      }
+    },
+    {
+      numero: 'NOTE ANNEXE N° 24',
+      titre: 'VENTILATION DU CHIFFRE D\'AFFAIRES',
+      tableau: {
+        titre: 'CA par secteur géographique et activité',
+        colonnes: ['Secteur', 'CA N', 'CA N-1', 'Évolution'],
+        lignes: [
+          ['Cameroun', '85 000 000', '75 000 000', '+13,3%'],
+          ['Tchad', '12 000 000', '10 000 000', '+20,0%'],
+          ['RCA', '8 000 000', '7 000 000', '+14,3%'],
+          ['TOTAL', '105 000 000', '92 000 000', '+14,1%']
+        ]
+      }
+    },
+    {
+      numero: 'NOTE ANNEXE N° 25',
+      titre: 'TRANSACTIONS AVEC LES PARTIES LIÉES',
+      contenu: {
+        'Prêts accordés dirigeants': '1 500 000 FCFA à 3% l\'an',
+        'Garanties données': '5 000 000 FCFA pour filiale',
+        'Ventes société mère': '8 500 000 FCFA',
+        'Achats société sœur': '3 200 000 FCFA'
+      }
+    },
+    {
+      numero: 'NOTE ANNEXE N° 26',
+      titre: 'ENGAGEMENTS FINANCIERS DONNÉS ET REÇUS',
+      tableau: {
+        titre: 'Détail des engagements',
+        colonnes: ['Nature', 'Montant', 'Échéance', 'Bénéficiaire'],
+        lignes: [
+          ['Garantie bancaire', '5 000 000', '2025-12-31', 'BANK A'],
+          ['Aval commercial', '2 000 000', '2025-06-30', 'FOURNISSEUR X'],
+          ['Nantissement stocks', '8 000 000', '2026-12-31', 'BANK B']
+        ]
+      }
+    },
+    {
+      numero: 'NOTE ANNEXE N° 27',
+      titre: 'CRÉDIT-BAIL ET CONTRATS ASSIMILÉS',
+      contenu: {
+        'Véhicules en crédit-bail': '3 contrats - 4 500 000 FCFA',
+        'Matériel informatique': '2 contrats - 1 800 000 FCFA',
+        'Redevances annuelles': '1 200 000 FCFA'
+      }
+    },
+    {
+      numero: 'NOTE ANNEXE N° 28',
+      titre: 'TABLEAU DES ÉCHÉANCES DES CRÉANCES ET DETTES',
+      tableau: {
+        titre: 'Échéances au 31/12/N',
+        colonnes: ['Éléments', 'Montant total', '< 1 an', '1 à 5 ans', '> 5 ans'],
+        lignes: [
+          ['Créances clients', '33 200 000', '32 400 000', '800 000', '0'],
+          ['Autres créances', '9 200 000', '8 400 000', '800 000', '0'],
+          ['Dettes fournisseurs', '15 800 000', '15 800 000', '0', '0'],
+          ['Emprunts', '25 000 000', '5 000 000', '15 000 000', '5 000 000']
+        ]
+      }
+    },
+    {
+      numero: 'NOTE ANNEXE N° 29',
+      titre: 'VENTILATION CHARGES ET PRODUITS PAR DESTINATION',
+      contenu: {
+        'Charges production': '65 000 000 FCFA',
+        'Charges commerciales': '25 000 000 FCFA',
+        'Charges administratives': '15 000 000 FCFA'
+      }
+    },
+    {
+      numero: 'NOTE ANNEXE N° 30',
+      titre: 'PRODUITS À RECEVOIR ET CHARGES À PAYER',
+      tableau: {
+        titre: 'Charges et produits d\'ajustement',
+        colonnes: ['Nature', 'Charges à payer', 'Produits à recevoir'],
+        lignes: [
+          ['Intérêts courus', '200 000', '150 000'],
+          ['Commissions', '300 000', '450 000'],
+          ['Honoraires', '500 000', '0'],
+          ['TOTAL', '1 000 000', '600 000']
+        ]
+      }
+    },
+    {
+      numero: 'NOTE ANNEXE N° 31',
+      titre: 'CHARGES ET PRODUITS CONSTATÉS D\'AVANCE',
+      contenu: {
+        'Charges constatées d\'avance': '800 000 FCFA (assurances, loyers)',
+        'Produits constatés d\'avance': '400 000 FCFA (abonnements)'
+      }
+    },
+    {
+      numero: 'NOTE ANNEXE N° 32',
+      titre: 'CONVERSION DES DEVISES',
+      contenu: {
+        'Méthode': 'Cours de clôture pour les créances/dettes',
+        'Écarts de change': 'Comptabilisés en charges/produits',
+        'Provisions pour risques': '200 000 FCFA'
+      }
+    },
+    {
+      numero: 'NOTE ANNEXE N° 33',
+      titre: 'ÉVÉNEMENTS POSTÉRIEURS À LA CLÔTURE',
+      contenu: {
+        'Aucun événement significatif': 'Survenu entre le 31/12/N et la date d\'arrêté des comptes',
+        'Date d\'arrêté': '15 mars N+1 par le conseil d\'administration'
+      }
+    },
+    {
+      numero: 'NOTE ANNEXE N° 34',
+      titre: 'FILIALES ET PARTICIPATIONS',
+      tableau: {
+        titre: 'Détail des participations',
+        colonnes: ['Société', 'Capital', '% détenu', 'Valeur comptable', 'Résultat N'],
+        lignes: [
+          ['FILIALE BENIN SARL', '25 000 000', '75%', '18 750 000', '2 100 000'],
+          ['FILIALE TOGO SA', '50 000 000', '60%', '30 000 000', '3 200 000']
+        ]
+      }
+    },
+    {
+      numero: 'NOTE ANNEXE N° 35',
+      titre: 'INFORMATIONS DIVERSES',
+      contenu: {
+        'Honoraires CAC': '2 500 000 FCFA',
+        'Litiges en cours': 'Aucun litige significatif',
+        'Engagements retraite': 'Régime par répartition uniquement',
+        'Politique environnementale': 'Respect normes ISO 14001'
+      }
     }
-    // Les 15 notes restantes seraient développées de la même manière...
   ]
 
   const currentNote = notesCompletes[currentNoteIndex]
@@ -739,48 +937,50 @@ const NotesAnnexesCompletesFinal: React.FC<NotesAnnexesCompletesFinalProps> = ({
         </Box>
       </Box>
 
-      {/* Navigation entre les notes */}
-      <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3, gap: 1 }}>
-        <IconButton 
-          onClick={goToFirstNote} 
-          disabled={currentNoteIndex === 0}
-          sx={{ color: PRIMARY_COLOR }}
-        >
-          <FirstPage />
-        </IconButton>
-        <IconButton 
-          onClick={previousNote} 
-          disabled={currentNoteIndex === 0}
-          sx={{ color: PRIMARY_COLOR }}
-        >
-          <NavigateBefore />
-        </IconButton>
-        
-        <Chip 
-          label={`${currentNoteIndex + 1} / ${notesCompletes.length}`}
-          sx={{ 
-            backgroundColor: PRIMARY_COLOR,
-            color: 'white',
-            fontWeight: 600,
-            minWidth: 80
-          }}
-        />
-        
-        <IconButton 
-          onClick={nextNote} 
-          disabled={currentNoteIndex === notesCompletes.length - 1}
-          sx={{ color: PRIMARY_COLOR }}
-        >
-          <NavigateNext />
-        </IconButton>
-        <IconButton 
-          onClick={goToLastNote} 
-          disabled={currentNoteIndex === notesCompletes.length - 1}
-          sx={{ color: PRIMARY_COLOR }}
-        >
-          <LastPage />
-        </IconButton>
-      </Box>
+      {/* Navigation uniquement si pas de note fixe */}
+      {!navigationDisabled && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3, gap: 1 }}>
+          <IconButton 
+            onClick={goToFirstNote} 
+            disabled={currentNoteIndex === 0}
+            sx={{ color: PRIMARY_COLOR }}
+          >
+            <FirstPage />
+          </IconButton>
+          <IconButton 
+            onClick={previousNote} 
+            disabled={currentNoteIndex === 0}
+            sx={{ color: PRIMARY_COLOR }}
+          >
+            <NavigateBefore />
+          </IconButton>
+          
+          <Chip 
+            label={`${currentNoteIndex + 1} / ${notesCompletes.length}`}
+            sx={{ 
+              backgroundColor: PRIMARY_COLOR,
+              color: 'white',
+              fontWeight: 600,
+              minWidth: 80
+            }}
+          />
+          
+          <IconButton 
+            onClick={nextNote} 
+            disabled={currentNoteIndex === notesCompletes.length - 1}
+            sx={{ color: PRIMARY_COLOR }}
+          >
+            <NavigateNext />
+          </IconButton>
+          <IconButton 
+            onClick={goToLastNote} 
+            disabled={currentNoteIndex === notesCompletes.length - 1}
+            sx={{ color: PRIMARY_COLOR }}
+          >
+            <LastPage />
+          </IconButton>
+        </Box>
+      )}
 
       {/* Contenu de la note courante */}
       <Paper sx={{ p: 3, backgroundColor: 'white', minHeight: '500px' }}>
@@ -789,27 +989,122 @@ const NotesAnnexesCompletesFinal: React.FC<NotesAnnexesCompletesFinalProps> = ({
         {currentNote.details && renderContenu(currentNote.details)}
       </Paper>
 
-      {/* Navigation en bas de page */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
-        <Button
-          variant="outlined"
-          startIcon={<NavigateBefore />}
-          onClick={previousNote}
-          disabled={currentNoteIndex === 0}
-        >
-          Note précédente
-        </Button>
-        
-        <Button
-          variant="contained"
-          endIcon={<NavigateNext />}
-          onClick={nextNote}
-          disabled={currentNoteIndex === notesCompletes.length - 1}
-          sx={{ backgroundColor: PRIMARY_COLOR }}
-        >
-          Note suivante
-        </Button>
-      </Box>
+      {/* Section Commentaires pour chaque note */}
+      <Card sx={{ mt: 3, bgcolor: '#f8f9fa' }}>
+        <CardContent>
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Comment color="primary" />
+            💬 Commentaires - {currentNote.numero}
+          </Typography>
+          
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={6}>
+              <Stack spacing={2}>
+                <FormControl fullWidth>
+                  <InputLabel>Type de commentaire</InputLabel>
+                  <Select
+                    value={typeCommentaire}
+                    onChange={(e) => setTypeCommentaire(e.target.value)}
+                    label="Type de commentaire"
+                  >
+                    {typesCommentaires.map((type) => (
+                      <MenuItem key={type} value={type}>{type}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+
+                <TextField
+                  fullWidth
+                  multiline
+                  rows={4}
+                  label="Commentaire détaillé"
+                  placeholder="Ajoutez vos observations, justifications ou explications sur cette note annexe..."
+                  value={commentaire}
+                  onChange={(e) => setCommentaire(e.target.value)}
+                />
+
+                <Button 
+                  variant="contained" 
+                  startIcon={<Add />}
+                  onClick={() => {
+                    if (typeCommentaire && commentaire.trim()) {
+                      const nouveauComm = {
+                        id: Date.now().toString(),
+                        type: typeCommentaire,
+                        contenu: commentaire,
+                        date: new Date()
+                      }
+                      const nouveauxCommentaires = {...commentairesParNote}
+                      if (!nouveauxCommentaires[currentNoteIndex]) {
+                        nouveauxCommentaires[currentNoteIndex] = []
+                      }
+                      nouveauxCommentaires[currentNoteIndex].push(nouveauComm)
+                      setCommentairesParNote(nouveauxCommentaires)
+                      setCommentaire('')
+                      setTypeCommentaire('')
+                    }
+                  }}
+                  disabled={!typeCommentaire || !commentaire.trim()}
+                >
+                  Ajouter Commentaire
+                </Button>
+              </Stack>
+            </Grid>
+
+            <Grid item xs={12} md={6}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
+                📝 Commentaires pour cette note ({(commentairesParNote[currentNoteIndex] || []).length})
+              </Typography>
+              
+              {(commentairesParNote[currentNoteIndex] || []).length === 0 ? (
+                <Alert severity="info">
+                  Aucun commentaire ajouté pour cette note
+                </Alert>
+              ) : (
+                <Stack spacing={1}>
+                  {(commentairesParNote[currentNoteIndex] || []).map((comm) => (
+                    <Paper key={comm.id} sx={{ p: 2, border: '1px solid #e0e0e0' }}>
+                      <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 1 }}>
+                        <Chip label={comm.type} size="small" color="primary" />
+                        <Typography variant="caption" color="text.secondary">
+                          {comm.date.toLocaleDateString('fr-FR')}
+                        </Typography>
+                      </Stack>
+                      <Typography variant="body2">
+                        {comm.contenu}
+                      </Typography>
+                    </Paper>
+                  ))}
+                </Stack>
+              )}
+            </Grid>
+          </Grid>
+        </CardContent>
+      </Card>
+
+      {/* Navigation en bas uniquement si navigation libre */}
+      {!navigationDisabled && (
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
+          <Button
+            variant="outlined"
+            startIcon={<NavigateBefore />}
+            onClick={previousNote}
+            disabled={currentNoteIndex === 0}
+          >
+            Note précédente
+          </Button>
+          
+          <Button
+            variant="contained"
+            endIcon={<NavigateNext />}
+            onClick={nextNote}
+            disabled={currentNoteIndex === notesCompletes.length - 1}
+            sx={{ backgroundColor: PRIMARY_COLOR }}
+          >
+            Note suivante
+          </Button>
+        </Box>
+      )}
     </Box>
   )
 }

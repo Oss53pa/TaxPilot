@@ -152,7 +152,7 @@ const auditSlice = createSlice({
     },
 
     // Actions utilitaires
-    resetAuditState: (state) => {
+    resetAuditState: (_state) => {
       return { ...initialState }
     },
   },

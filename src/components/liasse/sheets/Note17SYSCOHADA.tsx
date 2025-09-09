@@ -31,8 +31,20 @@ import {
   Tooltip,
   Tabs,
   Tab,
-  PieChart,
 } from '@mui/material'
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  Legend,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RechartsTooltip,
+} from 'recharts'
 import {
   MonetizationOn as RevenueIcon,
   Save as SaveIcon,
