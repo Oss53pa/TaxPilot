@@ -141,15 +141,9 @@ const BalanceImport: React.FC = () => {
         : f
     ))
 
-    // Ajouter des données factices à la balance
-    const mockBalanceData = [
-      { id: '1', compte: '101000', libelle_compte: 'Capital social', debit: 0, credit: 50000000, solde: -50000000, exercice: '2024', created_at: new Date().toISOString(), updated_at: new Date().toISOString(), is_active: true },
-      { id: '2', compte: '211000', libelle_compte: 'Terrains', debit: 25000000, credit: 0, solde: 25000000, exercice: '2024', created_at: new Date().toISOString(), updated_at: new Date().toISOString(), is_active: true },
-    ]
-    
-    mockBalanceData.forEach(balance => {
-      dispatch(addBalance(balance))
-    })
+    // TODO: Implémenter l'appel API réel pour importer la balance
+    // Les données seront traitées via l'API backend et ajoutées au store
+    console.log('Import terminé - Les données seront récupérées via l\'API')
 
     dispatch(setImporting(false))
     setTimeout(() => dispatch(resetImportProgress()), 3000)

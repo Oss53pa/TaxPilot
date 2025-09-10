@@ -53,74 +53,13 @@ import { useAppSelector } from '@/store'
 import { Balance } from '@/types'
 
 // Données factices pour la démonstration
-const mockBalanceData: Balance[] = [
-  {
-    id: '1',
-    exercice: '2024',
-    compte: '101000',
-    debit: 0,
-    credit: 50000000,
-    solde: -50000000,
-    libelle_compte: 'Capital social',
-    created_at: '2024-08-31T08:00:00Z',
-    updated_at: '2024-08-31T08:00:00Z',
-    is_active: true,
-  },
-  {
-    id: '2',
-    exercice: '2024',
-    compte: '164000',
-    debit: 15000000,
-    credit: 0,
-    solde: 15000000,
-    libelle_compte: 'Emprunts auprès des établissements de crédit',
-    created_at: '2024-08-31T08:00:00Z',
-    updated_at: '2024-08-31T08:00:00Z',
-    is_active: true,
-  },
-  {
-    id: '3',
-    exercice: '2024',
-    compte: '211000',
-    debit: 25000000,
-    credit: 0,
-    solde: 25000000,
-    libelle_compte: 'Terrains',
-    created_at: '2024-08-31T08:00:00Z',
-    updated_at: '2024-08-31T08:00:00Z',
-    is_active: true,
-  },
-  {
-    id: '4',
-    exercice: '2024',
-    compte: '411000',
-    debit: 8500000,
-    credit: 0,
-    solde: 8500000,
-    libelle_compte: 'Clients',
-    created_at: '2024-08-31T08:00:00Z',
-    updated_at: '2024-08-31T08:00:00Z',
-    is_active: true,
-  },
-  {
-    id: '5',
-    exercice: '2024',
-    compte: '521000',
-    debit: 1500000,
-    credit: 0,
-    solde: 1500000,
-    libelle_compte: 'Banques, établissements financiers et assimilés',
-    created_at: '2024-08-31T08:00:00Z',
-    updated_at: '2024-08-31T08:00:00Z',
-    is_active: true,
-  },
-]
+// Données mockées supprimées - utilisation exclusive de l'API
 
 const BalanceConsultation: React.FC = () => {
   const { balances: storeBalances } = useAppSelector(state => state.balance)
   
-  // Utiliser les données du store si disponibles, sinon les données factices
-  const balanceData = storeBalances.length > 0 ? storeBalances : mockBalanceData
+  // Utiliser uniquement les données du store (API Backend)
+  const balanceData = storeBalances
   
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(25)
