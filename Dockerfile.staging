@@ -1,0 +1,81 @@
+FROM node:18-alpine as base
+
+# Métadonnées
+LABEL maintainer="FiscaSync Team <devops@fiscasync.com>"
+LABEL version="1.0.0-staging"
+LABEL description="FiscaSync Frontend - Staging Environment"
+
+WORKDIR /app
+
+# Installation des dépendances système
+RUN apk add --no-cache \
+    git \
+    curl \
+    ca-certificates
+
+# Variables d'environnement
+ENV NODE_ENV=staging
+ENV VITE_ENVIRONMENT=staging
+
+# Copie des fichiers de dépendances
+COPY package*.json ./
+
+# Installation des dépendances
+RUN npm ci --only=production --silent
+
+# Build stage
+FROM base as builder
+
+# Installation des dev dependencies pour le build
+RUN npm ci --silent
+
+# Copie du code source
+COPY . .
+
+# Variables de build pour staging
+ENV VITE_API_BASE_URL=https://staging-api.fiscasync.com
+ENV VITE_ENVIRONMENT=staging
+ENV VITE_SENTRY_DSN=${SENTRY_DSN}
+ENV VITE_GOOGLE_ANALYTICS_ID=${GA_ID}
+
+# Build de l'application
+RUN npm run build
+
+# Verification du build
+RUN ls -la dist/ && \
+    [ -f dist/index.html ] || (echo "Build failed: index.html not found" && exit 1)
+
+# Production stage
+FROM nginx:alpine as staging
+
+# Installation des outils de debugging
+RUN apk add --no-cache curl htop
+
+# Configuration Nginx pour staging
+COPY nginx.staging.conf /etc/nginx/conf.d/default.conf
+
+# Copie des fichiers buildés
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+# Création de l'utilisateur non-root
+RUN addgroup -g 1001 -S fiscasync && \
+    adduser -S fiscasync -G fiscasync
+
+# Configuration des permissions
+RUN chown -R fiscasync:fiscasync /usr/share/nginx/html && \
+    chown -R fiscasync:fiscasync /var/cache/nginx && \
+    chown -R fiscasync:fiscasync /var/log/nginx && \
+    chown -R fiscasync:fiscasync /etc/nginx/conf.d
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+    CMD curl -f http://localhost/ || exit 1
+
+# Exposition du port
+EXPOSE 80
+
+# Utilisateur non-root
+USER fiscasync
+
+# Commande de démarrage
+CMD ["nginx", "-g", "daemon off;"]
