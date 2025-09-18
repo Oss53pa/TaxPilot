@@ -1,59 +1,60 @@
 /**
  * Service d'authentification pour FiscaSync
+ * CONNEXION RÉELLE AU BACKEND DJANGO
  */
 
-import { apiService, type AuthResponse } from './api'
+import { apiClient, type AuthResponse, type User, type LoginCredentials } from './apiClient'
 
-export interface User {
-  id: number
-  username: string
-  email: string
-  first_name: string
-  last_name: string
-  is_staff: boolean
-  is_superuser: boolean
-  last_login?: string
-  date_joined?: string
-}
-
-export interface LoginCredentials {
-  username: string
-  password: string
-}
+// Exports des types depuis apiClient pour compatibilité
+export type { User, LoginCredentials, AuthResponse }
 
 class AuthService {
-  // Authentification
+  // Authentification - CONNEXION RÉELLE AU BACKEND
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
     try {
-      const response = await apiService.login(credentials.username, credentials.password)
+      console.log('🔐 Logging in to backend...', credentials.username)
+      const response = await apiClient.login(credentials)
+      console.log('✅ Login successful:', response.success)
       return response
     } catch (error) {
+      console.error('❌ Login failed:', error)
       throw error
     }
   }
 
   async logout(): Promise<void> {
     try {
+      console.log('🚪 Logging out...')
       // TODO: Appeler l'endpoint de logout côté serveur si nécessaire
-      apiService.logout()
+      apiClient.logout()
+      console.log('✅ Logout successful')
     } catch (error) {
-      console.error('Erreur lors de la déconnexion:', error)
+      console.error('❌ Logout error:', error)
       // Forcer la déconnexion locale même si l'API échoue
-      apiService.logout()
+      apiClient.logout()
     }
   }
 
   async refreshToken(): Promise<string | null> {
-    return apiService.refreshToken()
+    console.log('🔄 Refreshing token...')
+    try {
+      // Le refreshToken est géré automatiquement par apiClient
+      const token = apiClient.getAccessToken()
+      console.log('✅ Token refresh handled automatically')
+      return token
+    } catch (error) {
+      console.error('❌ Token refresh failed:', error)
+      return null
+    }
   }
 
-  // État de l'authentification
+  // État de l'authentification - CONNEXION RÉELLE AU BACKEND
   isAuthenticated(): boolean {
-    return apiService.isAuthenticated()
+    return apiClient.isAuthenticated()
   }
 
   getCurrentUser(): User | null {
-    return apiService.getCurrentUser()
+    return apiClient.getCurrentUser()
   }
 
   // Vérification de permissions
@@ -113,13 +114,47 @@ class AuthService {
     return user.username.substring(0, 2).toUpperCase()
   }
 
-  // Utilitaires
+  // Utilitaires - CONNEXION RÉELLE AU BACKEND
   async checkHealth(): Promise<boolean> {
     try {
-      await apiService.healthCheck()
+      console.log('🏥 Checking backend health...')
+      await apiClient.get('/api/v1/core/health/')
+      console.log('✅ Backend is healthy')
       return true
     } catch (error) {
+      console.error('❌ Backend health check failed:', error)
       return false
+    }
+  }
+
+  // Nouvelles méthodes pour l'API backend
+  async getCurrentUserFromAPI(): Promise<User | null> {
+    try {
+      console.log('👤 Fetching current user from backend...')
+      const response = await apiClient.get<{ success: boolean; data: User }>('/api/v1/core/auth/me/')
+      if (response.success) {
+        console.log('✅ User fetched from backend:', response.data.username)
+        return response.data
+      }
+      return null
+    } catch (error) {
+      console.error('❌ Failed to fetch user from backend:', error)
+      return null
+    }
+  }
+
+  async updateProfile(updates: Partial<User>): Promise<User | null> {
+    try {
+      console.log('👤 Updating user profile...', updates)
+      const response = await apiClient.patch<{ success: boolean; data: User }>('/api/v1/core/auth/me/', updates)
+      if (response.success) {
+        console.log('✅ Profile updated successfully')
+        return response.data
+      }
+      return null
+    } catch (error) {
+      console.error('❌ Failed to update profile:', error)
+      throw error
     }
   }
 }

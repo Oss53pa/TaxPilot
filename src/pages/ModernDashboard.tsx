@@ -2,7 +2,7 @@
  * Dashboard moderne inspiré du design Homies Lab
  */
 
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   Box,
   Grid,
@@ -22,6 +22,7 @@ import {
   Chip,
   IconButton,
   Divider,
+  CircularProgress,
 } from '@mui/material'
 import {
   TrendingUp,
@@ -32,95 +33,142 @@ import {
   Visibility,
   CheckCircle,
   Schedule,
+  Business,
+  Assignment,
 } from '@mui/icons-material'
 import { useAuthStore } from '@/store/authStore'
+import { entrepriseService } from '@/services/entrepriseService'
+import { reportingService } from '@/services/reportingService'
+import { auditService } from '@/services/auditService'
+import { generationService } from '@/services/generationService'
 
 const ModernDashboard: React.FC = () => {
   const { user } = useAuthStore()
+  const [dashboardStats, setDashboardStats] = useState<any>(null)
+  const [auditSessions, setAuditSessions] = useState<any[]>([])
+  const [recentGenerations, setRecentGenerations] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
 
-  // Données style Homies Lab
+  useEffect(() => {
+    loadDashboardData()
+  }, [])
+
+  const loadDashboardData = async () => {
+    try {
+      setLoading(true)
+
+      // Charger les stats du dashboard
+      const [statsResponse, auditsResponse, generationsResponse] = await Promise.all([
+        entrepriseService.getDashboardStats(),
+        auditService.getAuditSessions({ page_size: 5 }),
+        generationService.getLiasseGenerations({ page_size: 5 })
+      ])
+
+      setDashboardStats(statsResponse)
+      setAuditSessions(auditsResponse.results || [])
+      setRecentGenerations(generationsResponse.results || [])
+    } catch (error) {
+      console.error('❌ Error loading dashboard data:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const statsCards = [
     {
-      number: '432',
+      number: dashboardStats?.total_entreprises || '0',
       label: 'Entreprises',
-      icon: <Group />,
+      icon: <Business />,
       color: '#6366f1',
     },
     {
-      number: '24',
-      label: 'Payrolls',
-      icon: <Receipt />,
+      number: dashboardStats?.entreprises_actives || '0',
+      label: 'Entreprises Actives',
+      icon: <Group />,
       color: '#10b981',
     },
     {
-      number: '8%',
-      label: 'Turnover Rate', 
+      number: dashboardStats?.groupes || '0',
+      label: 'Groupes',
       icon: <TrendingUp />,
       color: '#f59e0b',
     },
     {
-      number: '24',
-      label: 'Job Applicants',
+      number: dashboardStats?.nouveaux_ce_mois || '0',
+      label: 'Nouveaux ce mois',
       icon: <Assessment />,
       color: '#8b5cf6',
     },
   ]
 
-  const employmentStatus = {
-    percentComplete: 70.32,
+  const enterpriseStatus = {
+    percentComplete: dashboardStats ? Math.round((dashboardStats.entreprises_actives / dashboardStats.total_entreprises) * 100) : 0,
     data: [
-      { type: 'Contract', count: 450, color: '#fbbf24' },
-      { type: 'Probation', count: 180, color: '#1f2937' },
+      { type: 'Actives', count: dashboardStats?.entreprises_actives || 0, color: '#10b981' },
+      { type: 'Inactives', count: (dashboardStats?.total_entreprises || 0) - (dashboardStats?.entreprises_actives || 0), color: '#6b7280' },
     ]
   }
 
-  const upcomingTasks = [
-    {
-      id: 1,
-      title: 'Interview Candidate UI/UX Designer',
-      description: 'Product Discussion',
-      avatar: '/avatar1.jpg',
-      status: 'pending',
-      priority: 'high'
-    },
-    {
-      id: 2,
-      title: 'Retro Day Celebration - HR Department',
-      description: 'Management Day',
-      avatar: '/avatar2.jpg',
-      status: 'in-progress',
-      priority: 'medium'
-    },
-    {
-      id: 3,
-      title: 'List Employee',
-      description: '',
-      avatar: '/avatar3.jpg',
-      status: 'completed',
-      priority: 'low'
-    },
-  ]
+  const recentActivities = [
+    ...auditSessions.map(audit => ({
+      id: `audit-${audit.id}`,
+      title: `Audit ${audit.type_audit}`,
+      description: audit.entreprise_detail?.raison_sociale || 'Audit en cours',
+      status: audit.statut.toLowerCase(),
+      type: 'audit',
+      progression: audit.progression
+    })),
+    ...recentGenerations.map(generation => ({
+      id: `generation-${generation.id}`,
+      title: `Génération ${generation.type_liasse}`,
+      description: generation.entreprise_detail?.raison_sociale || 'Génération en cours',
+      status: generation.statut.toLowerCase(),
+      type: 'generation',
+      progression: generation.progression
+    }))
+  ].slice(0, 6)
 
-  const recentEmployees = [
-    {
-      id: 1,
-      name: 'Novita Maharny',
-      email: 'novitamarr@email.com',
-      role: 'UI Designer',
-      status: 'Active',
-      department: 'Team Product',
-      action: '...'
-    },
-    {
-      id: 2,
-      name: 'Indah Edwards', 
-      email: 'indah.edwards@email.com',
-      role: 'UI Researcher',
-      status: 'Active',
-      department: 'Public Product',
-      action: '...'
-    },
-  ]
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'termine':
+      case 'terminee':
+      case 'completed':
+        return 'success'
+      case 'en_cours':
+      case 'en_preparation':
+      case 'in-progress':
+        return 'warning'
+      case 'erreur':
+      case 'error':
+        return 'error'
+      default:
+        return 'default'
+    }
+  }
+
+  const getStatusLabel = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'termine':
+      case 'terminee':
+        return 'Terminé'
+      case 'en_cours':
+        return 'En cours'
+      case 'en_preparation':
+        return 'En préparation'
+      case 'erreur':
+        return 'Erreur'
+      default:
+        return status
+    }
+  }
+
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+        <CircularProgress />
+      </Box>
+    )
+  }
 
   return (
     <Box sx={{ backgroundColor: '#f8fafc', minHeight: '100vh', p: 3 }}>
@@ -130,7 +178,12 @@ const ModernDashboard: React.FC = () => {
           Good Morning, {user?.first_name || user?.username}
         </Typography>
         <Typography variant="body1" sx={{ color: '#6b7280', fontWeight: 400 }}>
-          It's Wednesday, 11 November 2024
+          {new Date().toLocaleDateString('fr-FR', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          })}
         </Typography>
       </Box>
 
@@ -185,7 +238,7 @@ const ModernDashboard: React.FC = () => {
             <CardContent sx={{ p: 3 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
                 <Typography variant="h6" sx={{ fontWeight: 600, color: '#191919' }}>
-                  Employment Status
+                  Statut Entreprises
                 </Typography>
                 <IconButton size="small">
                   <MoreVert />
@@ -198,7 +251,7 @@ const ModernDashboard: React.FC = () => {
                     width: 120,
                     height: 120,
                     borderRadius: '50%',
-                    background: `conic-gradient(#fbbf24 ${employmentStatus.percentComplete * 3.6}deg, #e5e7eb 0deg)`,
+                    background: `conic-gradient(#10b981 ${enterpriseStatus.percentComplete * 3.6}deg, #e5e7eb 0deg)`,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -218,17 +271,17 @@ const ModernDashboard: React.FC = () => {
                     }}
                   >
                     <Typography variant="h5" sx={{ fontWeight: 700, color: '#191919' }}>
-                      {employmentStatus.percentComplete}%
+                      {enterpriseStatus.percentComplete}%
                     </Typography>
                     <Typography variant="caption" sx={{ color: '#6b7280' }}>
-                      Employment
+                      Actives
                     </Typography>
                   </Box>
                 </Box>
               </Box>
 
               <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
-                {employmentStatus.data.map((item, index) => (
+                {enterpriseStatus.data.map((item, index) => (
                   <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <Box
                       sx={{
@@ -254,7 +307,7 @@ const ModernDashboard: React.FC = () => {
             <CardContent sx={{ p: 3, pb: 1 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                 <Typography variant="h6" sx={{ fontWeight: 600, color: '#191919' }}>
-                  Schedule
+                  Activités Récentes
                 </Typography>
                 <IconButton size="small">
                   <MoreVert />
@@ -263,41 +316,52 @@ const ModernDashboard: React.FC = () => {
 
               <Box sx={{ mb: 2 }}>
                 <Button variant="contained" size="small" sx={{ mr: 1 }}>
-                  Meetings
+                  Audits
                 </Button>
                 <Button variant="outlined" size="small" sx={{ mr: 1 }}>
-                  Tasks
+                  Générations
                 </Button>
                 <Button variant="text" size="small">
-                  Events
+                  Tous
                 </Button>
               </Box>
 
               <Box sx={{ maxHeight: '180px', overflow: 'auto' }}>
-                {upcomingTasks.map((task) => (
-                  <Box key={task.id} sx={{ mb: 2, p: 2, backgroundColor: '#f9fafb', borderRadius: 2 }}>
+                {recentActivities.length > 0 ? recentActivities.map((activity) => (
+                  <Box key={activity.id} sx={{ mb: 2, p: 2, backgroundColor: '#f9fafb', borderRadius: 2 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.light' }}>
-                        {task.title.charAt(0)}
+                      <Avatar sx={{ width: 32, height: 32, bgcolor: activity.type === 'audit' ? 'warning.light' : 'primary.light' }}>
+                        {activity.type === 'audit' ? <Assessment /> : <Assignment />}
                       </Avatar>
                       <Box sx={{ flexGrow: 1 }}>
                         <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#191919' }}>
-                          {task.title}
+                          {activity.title}
                         </Typography>
-                        {task.description && (
+                        {activity.description && (
                           <Typography variant="caption" sx={{ color: '#6b7280' }}>
-                            {task.description}
+                            {activity.description}
                           </Typography>
+                        )}
+                        {activity.progression !== undefined && (
+                          <LinearProgress
+                            variant="determinate"
+                            value={activity.progression}
+                            sx={{ mt: 1, height: 4, borderRadius: 2 }}
+                          />
                         )}
                       </Box>
                       <Chip
                         size="small"
-                        label={task.status}
-                        color={task.status === 'completed' ? 'success' : 'warning'}
+                        label={getStatusLabel(activity.status)}
+                        color={getStatusColor(activity.status)}
                       />
                     </Box>
                   </Box>
-                ))}
+                )) : (
+                  <Typography variant="body2" sx={{ color: '#6b7280', textAlign: 'center', py: 4 }}>
+                    Aucune activité récente
+                  </Typography>
+                )}
               </Box>
             </CardContent>
           </Card>
@@ -309,10 +373,10 @@ const ModernDashboard: React.FC = () => {
             <CardContent sx={{ p: 3 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
                 <Typography variant="h6" sx={{ fontWeight: 600, color: '#191919' }}>
-                  List Employee
+                  Statistiques par Secteur
                 </Typography>
                 <Button variant="outlined" size="small">
-                  View All
+                  Voir Tout
                 </Button>
               </Box>
 
@@ -321,76 +385,61 @@ const ModernDashboard: React.FC = () => {
                   <TableHead>
                     <TableRow>
                       <TableCell sx={{ fontWeight: 600, color: '#374151', fontSize: '0.875rem' }}>
-                        EMPLOYEE ID
+                        SECTEUR
                       </TableCell>
                       <TableCell sx={{ fontWeight: 600, color: '#374151', fontSize: '0.875rem' }}>
-                        ROLE
+                        NOMBRE
                       </TableCell>
                       <TableCell sx={{ fontWeight: 600, color: '#374151', fontSize: '0.875rem' }}>
-                        EMAIL
+                        POURCENTAGE
                       </TableCell>
                       <TableCell sx={{ fontWeight: 600, color: '#374151', fontSize: '0.875rem' }}>
-                        STATUS
-                      </TableCell>
-                      <TableCell sx={{ fontWeight: 600, color: '#374151', fontSize: '0.875rem' }}>
-                        DATE
-                      </TableCell>
-                      <TableCell sx={{ fontWeight: 600, color: '#374151', fontSize: '0.875rem' }}>
-                        DEPARTMENT
-                      </TableCell>
-                      <TableCell sx={{ fontWeight: 600, color: '#374151', fontSize: '0.875rem' }}>
-                        ACTION
+                        ÉVOLUTION
                       </TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {recentEmployees.map((employee) => (
-                      <TableRow key={employee.id} sx={{ '&:hover': { backgroundColor: '#f9fafb' } }}>
+                    {dashboardStats?.par_secteur?.map((secteur: any, index: number) => (
+                      <TableRow key={index} sx={{ '&:hover': { backgroundColor: '#f9fafb' } }}>
                         <TableCell>
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                            <Avatar sx={{ width: 32, height: 32 }}>
-                              {employee.name.charAt(0)}
+                            <Avatar sx={{ width: 32, height: 32, bgcolor: `hsl(${index * 60}, 70%, 50%)` }}>
+                              {secteur.secteur_activite.charAt(0)}
                             </Avatar>
                             <Typography variant="body2" sx={{ fontWeight: 500, color: '#191919' }}>
-                              {employee.name}
+                              {secteur.secteur_activite}
                             </Typography>
                           </Box>
                         </TableCell>
                         <TableCell>
                           <Typography variant="body2" sx={{ color: '#6b7280' }}>
-                            {employee.role}
+                            {secteur.count}
                           </Typography>
                         </TableCell>
                         <TableCell>
                           <Typography variant="body2" sx={{ color: '#6b7280' }}>
-                            {employee.email}
+                            {dashboardStats.total_entreprises > 0 ?
+                              Math.round((secteur.count / dashboardStats.total_entreprises) * 100) : 0}%
                           </Typography>
                         </TableCell>
                         <TableCell>
                           <Chip
-                            label={employee.status}
+                            label="Stable"
                             color="success"
                             size="small"
                             sx={{ fontSize: '0.75rem' }}
                           />
                         </TableCell>
-                        <TableCell>
-                          <Typography variant="body2" sx={{ color: '#6b7280' }}>
-                            11 Nov 2024
+                      </TableRow>
+                    )) || (
+                      <TableRow>
+                        <TableCell colSpan={4}>
+                          <Typography variant="body2" sx={{ color: '#6b7280', textAlign: 'center', py: 4 }}>
+                            Aucune donnée disponible
                           </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Typography variant="body2" sx={{ color: '#6b7280' }}>
-                            {employee.department}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <IconButton size="small">
-                            <MoreVert sx={{ fontSize: '18px' }} />
-                          </IconButton>
                         </TableCell>
                       </TableRow>
-                    ))}
+                    )}
                   </TableBody>
                 </Table>
               </TableContainer>

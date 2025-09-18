@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
+import { generationService, templatesService } from '@/services';
 import {
   Box,
   Typography,
@@ -114,6 +115,7 @@ const ModernDocuments: React.FC = () => {
   const [templates, setTemplates] = useState<DocumentTemplate[]>([]);
   const [jobs, setJobs] = useState<GenerationJob[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<DocumentTemplate | null>(null);
+  const [backendLoading, setBackendLoading] = useState(true);
   const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
   const [isGenerationDialogOpen, setIsGenerationDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -136,6 +138,73 @@ const ModernDocuments: React.FC = () => {
       authority: ''
     }
   });
+
+  // Charger les données depuis le backend
+  useEffect(() => {
+    loadBackendData();
+  }, []);
+
+  const loadBackendData = async () => {
+    setBackendLoading(true);
+    try {
+      console.log('📤 Loading documents data from backend...');
+
+      // Charger les templates
+      const templatesRes = await templatesService.getTemplates({ page_size: 100 });
+      const backendTemplates = (templatesRes.results || []).map((t: any) => ({
+        id: t.id,
+        name: t.nom || t.name || 'Template',
+        type: t.type_document || 'report',
+        format: t.format || 'pdf',
+        category: t.categorie || 'SYSCOHADA',
+        jurisdiction: t.juridiction || 'OHADA',
+        frequency: t.frequence || 'monthly',
+        status: t.actif ? 'active' : 'draft',
+        lastModified: new Date(t.date_modification || Date.now()),
+        version: t.version || '1.0',
+        size: t.taille || '0 KB',
+        description: t.description || '',
+        tags: t.tags || [],
+        isCustom: t.personnalise || false,
+        compliance: {
+          required: t.obligatoire || false,
+          deadline: t.date_limite ? new Date(t.date_limite) : undefined,
+          authority: t.autorite || ''
+        }
+      }));
+
+      // Charger les jobs de génération
+      const jobsRes = await generationService.getLiasseGenerations({ page_size: 50 });
+      const backendJobs = (jobsRes.results || []).map((j: any) => ({
+        id: j.id,
+        templateId: j.template_id || '',
+        templateName: j.type_liasse || 'Document',
+        status: j.statut === 'TERMINE' ? 'completed' : j.statut === 'EN_COURS' ? 'processing' : j.statut === 'ERREUR' ? 'failed' : 'pending',
+        progress: j.progression || 0,
+        startTime: new Date(j.date_creation || Date.now()),
+        endTime: j.date_fin ? new Date(j.date_fin) : undefined,
+        parameters: j.parametres || {},
+        outputPath: j.fichier_url || j.fichier_genere,
+        error: j.erreur_message,
+        priority: 'normal'
+      }));
+
+      setTemplates(backendTemplates);
+      setJobs(backendJobs);
+
+      console.log('✅ Documents backend data loaded:', {
+        templates: backendTemplates.length,
+        jobs: backendJobs.length
+      });
+    } catch (error) {
+      console.error('❌ Error loading documents data:', error);
+      // Utiliser des données par défaut en cas d'erreur
+      setTemplates([]);
+      setJobs([]);
+    } finally {
+      setBackendLoading(false);
+    }
+  };
 
   // EX-ECRIT-001: Génération de documents en moins de 5 minutes
   const [generationTimer, setGenerationTimer] = useState<NodeJS.Timeout | null>(null);

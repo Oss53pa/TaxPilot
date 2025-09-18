@@ -2,7 +2,9 @@
  * Composant de paramétrage de l'entreprise
  */
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { entrepriseService } from '@/services'
+import { useBackendData } from '@/hooks/useBackendData'
 import {
   Box,
   Grid,
@@ -108,30 +110,69 @@ const pays_ohada = [
 const EntrepriseSettings: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [success, setSuccess] = useState(false)
+  const [entrepriseId, setEntrepriseId] = useState<string | null>(null)
+
+  // Récupérer les données de l'entreprise depuis le backend
+  const { data: entreprises, loading: loadingEntreprises } = useBackendData({
+    service: 'entrepriseService',
+    method: 'getEntreprises',
+    params: { page_size: 10 },
+    defaultData: []
+  })
 
   const {
     control,
     handleSubmit,
     watch,
+    reset,
     formState: { errors, isDirty },
   } = useForm<EntrepriseFormData>({
     resolver: yupResolver(entrepriseSchema),
     defaultValues: {
-      raison_sociale: 'SARL DEMO FISCASYNC',
+      raison_sociale: '',
       forme_juridique: 'SARL',
-      numero_contribuable: 'M051234567890',
-      email: 'contact@demo-fiscasync.com',
-      adresse_ligne1: '123 Avenue de l\'Indépendance',
-      ville: 'Dakar',
+      numero_contribuable: '',
+      email: '',
+      adresse_ligne1: '',
+      ville: '',
       pays: 'SN',
-      nom_dirigeant: 'Jean Dupont',
-      fonction_dirigeant: 'Gérant',
+      nom_dirigeant: '',
+      fonction_dirigeant: '',
       regime_imposition: 'REEL_NORMAL',
       secteur_activite: 'SERVICES',
-      chiffre_affaires_annuel: 150000000,
+      chiffre_affaires_annuel: 0,
       devise_principale: 'XOF',
     },
   })
+
+  // Charger les données de l'entreprise quand elles sont disponibles
+  useEffect(() => {
+    if (entreprises && entreprises.length > 0) {
+      const entreprise = entreprises[0]
+      setEntrepriseId(entreprise.id)
+
+      console.log('📤 Loading entreprise data from backend:', entreprise)
+
+      // Remplir le formulaire avec les données du backend
+      reset({
+        raison_sociale: entreprise.raison_sociale || '',
+        forme_juridique: entreprise.forme_juridique || 'SARL',
+        numero_contribuable: entreprise.numero_contribuable || '',
+        email: entreprise.email || '',
+        adresse_ligne1: entreprise.adresse_ligne1 || entreprise.adresse || '',
+        ville: entreprise.ville || '',
+        pays: entreprise.pays || 'SN',
+        nom_dirigeant: entreprise.nom_dirigeant || '',
+        fonction_dirigeant: entreprise.fonction_dirigeant || '',
+        regime_imposition: entreprise.regime_imposition || 'REEL_NORMAL',
+        secteur_activite: entreprise.secteur_activite || 'SERVICES',
+        chiffre_affaires_annuel: entreprise.chiffre_affaires_annuel || 0,
+        devise_principale: entreprise.devise_principale || 'XOF',
+        rccm: entreprise.rccm,
+        ifu: entreprise.ifu,
+      })
+    }
+  }, [entreprises, reset])
 
   const chiffre_affaires = watch('chiffre_affaires_annuel')
   const secteur = watch('secteur_activite')
@@ -161,12 +202,23 @@ const EntrepriseSettings: React.FC = () => {
   const onSubmit = async (data: EntrepriseFormData) => {
     try {
       setIsLoading(true)
-      // Simulation d'appel API
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      console.log('📤 Saving entreprise data to backend...')
+
+      if (entrepriseId) {
+        // Mise à jour de l'entreprise existante
+        await entrepriseService.updateEntreprise(entrepriseId, data)
+        console.log('✅ Entreprise updated successfully')
+      } else {
+        // Création d'une nouvelle entreprise
+        const newEntreprise = await entrepriseService.createEntreprise(data)
+        setEntrepriseId(newEntreprise.id)
+        console.log('✅ Entreprise created successfully')
+      }
+
       setSuccess(true)
       setTimeout(() => setSuccess(false), 3000)
     } catch (error) {
-      console.error('Erreur lors de la sauvegarde:', error)
+      console.error('❌ Error saving entreprise:', error)
     } finally {
       setIsLoading(false)
     }
@@ -174,7 +226,13 @@ const EntrepriseSettings: React.FC = () => {
 
   return (
     <Box sx={{ p: 3 }}>
-      {success && (
+      {loadingEntreprises && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+          <CircularProgress />
+        </Box>
+      )}
+
+      {!loadingEntreprises && success && (
         <Alert severity="success" sx={{ mb: 3 }}>
           Paramètres de l'entreprise sauvegardés avec succès !
         </Alert>

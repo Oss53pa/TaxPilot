@@ -2,7 +2,7 @@
  * Service pour la gestion des entreprises
  */
 
-import { apiService } from './api'
+import { apiClient } from './apiClient'
 
 export interface Entreprise {
   id: string
@@ -97,40 +97,45 @@ class EntrepriseService {
     secteur_activite?: string
     pays?: string
   }): Promise<{ results: Entreprise[]; count: number; next?: string; previous?: string }> {
-    return apiService.get(this.baseUrl + '/', params)
+    console.log('🔄 Fetching entreprises from backend...', params)
+    return apiClient.get(this.baseUrl + '/', params)
   }
 
   async getEntreprise(id: string): Promise<Entreprise> {
-    return apiService.get(`${this.baseUrl}/${id}/`)
+    console.log(`🔄 Fetching entreprise ${id} from backend...`)
+    return apiClient.get(`${this.baseUrl}/${id}/`)
   }
 
   async createEntreprise(data: Partial<Entreprise>): Promise<Entreprise> {
-    return apiService.post(this.baseUrl + '/', data)
+    console.log('📤 Creating entreprise in backend...', data)
+    return apiClient.post(this.baseUrl + '/', data)
   }
 
   async updateEntreprise(id: string, data: Partial<Entreprise>): Promise<Entreprise> {
-    return apiService.patch(`${this.baseUrl}/${id}/`, data)
+    console.log(`📤 Updating entreprise ${id} in backend...`, data)
+    return apiClient.patch(`${this.baseUrl}/${id}/`, data)
   }
 
   async deleteEntreprise(id: string): Promise<void> {
-    return apiService.delete(`${this.baseUrl}/${id}/`)
+    console.log(`🗑️ Deleting entreprise ${id} from backend...`)
+    return apiClient.delete(`${this.baseUrl}/${id}/`)
   }
 
   // Actions spécifiques
   async getConfiguration(id: string) {
-    return apiService.get(`${this.baseUrl}/${id}/configuration/`)
+    return apiClient.get(`${this.baseUrl}/${id}/configuration/`)
   }
 
   async updateConfiguration(id: string, config: any) {
-    return apiService.patch(`${this.baseUrl}/${id}/configuration/`, config)
+    return apiClient.patch(`${this.baseUrl}/${id}/configuration/`, config)
   }
 
   async getStats(id: string): Promise<EntrepriseStats> {
-    return apiService.get(`${this.baseUrl}/${id}/stats/`)
+    return apiClient.get(`${this.baseUrl}/${id}/stats/`)
   }
 
   async detectLiasseType(id: string) {
-    return apiService.post(`${this.baseUrl}/${id}/detect_liasse_type/`)
+    return apiClient.post(`${this.baseUrl}/${id}/detect_liasse_type/`)
   }
 
   async searchAdvanced(params: {
@@ -139,11 +144,11 @@ class EntrepriseService {
     ville?: string
     membre_groupe?: boolean
   }): Promise<Entreprise[]> {
-    return apiService.get(`${this.baseUrl}/search_advanced/`, params)
+    return apiClient.get(`${this.baseUrl}/search_advanced/`, params)
   }
 
   async getDashboardStats(): Promise<DashboardStats> {
-    return apiService.get(`${this.baseUrl}/dashboard_stats/`)
+    return apiClient.get(`${this.baseUrl}/dashboard_stats/`)
   }
 
   // Types de liasse
@@ -154,13 +159,13 @@ class EntrepriseService {
   }): Promise<TypeLiasse[]> {
     const baseUrl = '/api/v1/parametrage/api/types-liasse'
     if (params && Object.keys(params).length > 0) {
-      return apiService.get(`${baseUrl}/by_criteria/`, params)
+      return apiClient.get(`${baseUrl}/by_criteria/`, params)
     }
-    return apiService.get(`${baseUrl}/`)
+    return apiClient.get(`${baseUrl}/`)
   }
 
   async getTypesLiasseSyscohada(): Promise<TypeLiasse[]> {
-    return apiService.get('/api/v1/parametrage/api/types-liasse/officiel_syscohada/')
+    return apiClient.get('/api/v1/parametrage/api/types-liasse/officiel_syscohada/')
   }
 }
 

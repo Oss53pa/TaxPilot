@@ -3,6 +3,7 @@
  */
 
 import React, { useState, useCallback } from 'react'
+import { balanceService } from '@/services'
 import {
   Box,
   Card,
@@ -89,10 +90,58 @@ const BalanceImport: React.FC = () => {
     multiple: true,
   })
 
+  const processImport = async (fileData: ImportFile) => {
+    dispatch(setImporting(true))
+
+    try {
+      // Préparation du FormData pour l'upload
+      const formData = new FormData()
+      formData.append('file', fileData.file)
+      formData.append('format', fileData.file.name.split('.').pop() || 'xlsx')
+
+      console.log('📤 Importing balance file to backend...')
+
+      // Import via le backend
+      const response = await balanceService.importBalance(formData)
+
+      if (response) {
+        // Mettre à jour le status
+        setFiles(prev => prev.map(f =>
+          f.id === fileData.id
+            ? { ...f, status: 'completed', progress: 100 }
+            : f
+        ))
+
+        // Ajouter la balance importée au store
+        if (response.id) {
+          dispatch(addBalance(response))
+        }
+
+        dispatch(setImportProgress({
+          stage: 'Import terminé',
+          progress: 100
+        }))
+      }
+    } catch (error) {
+      console.error('❌ Error importing balance:', error)
+      setFiles(prev => prev.map(f =>
+        f.id === fileData.id
+          ? {
+              ...f,
+              status: 'error',
+              errors: [`Erreur d'import: ${error}`]
+            }
+          : f
+      ))
+    } finally {
+      dispatch(setImporting(false))
+    }
+  }
+
+  // Fonction de simulation pour fallback
   const simulateImport = async (fileData: ImportFile) => {
     dispatch(setImporting(true))
-    
-    // Simulation du processus d'import
+
     const stages = [
       'Lecture du fichier...',
       'Analyse de la structure...',

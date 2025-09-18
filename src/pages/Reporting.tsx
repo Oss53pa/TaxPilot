@@ -2,7 +2,7 @@
  * Page du module de reporting et tableaux de bord
  */
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   Box,
   Grid,
@@ -41,98 +41,104 @@ import {
   Dashboard as DashboardIcon,
   Star,
 } from '@mui/icons-material'
+import { reportingService } from '@/services/reportingService'
 
 const Reporting: React.FC = () => {
   const [tabValue, setTabValue] = useState(0)
+  const [loading, setLoading] = useState(true)
+  const [dashboardStats, setDashboardStats] = useState<any>(null)
+  const [reports, setReports] = useState<any[]>([])
+  const [reportTemplates, setReportTemplates] = useState<any[]>([])
 
-  // Données KPI de démo
+  useEffect(() => {
+    loadReportingData()
+  }, [])
+
+  const loadReportingData = async () => {
+    try {
+      setLoading(true)
+      console.log('🔄 Loading reporting data from backend...')
+
+      const [statsResponse, reportsResponse, templatesResponse] = await Promise.all([
+        reportingService.getDashboardStats(),
+        reportingService.getReports({ page_size: 10 }),
+        reportingService.getReportTemplates({ page: 1 })
+      ])
+
+      setDashboardStats(statsResponse)
+      setReports(reportsResponse.results || [])
+      setReportTemplates(templatesResponse.results || [])
+
+      console.log('✅ Reporting data loaded successfully')
+    } catch (error) {
+      console.error('❌ Error loading reporting data:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // KPIs basés sur les données backend
   const kpisDashboard = [
     {
-      nom: 'Chiffre d\'Affaires',
-      valeur: '125.5M',
-      evolution: 12.5,
-      tendance: 'up',
+      nom: 'Total Entreprises',
+      valeur: dashboardStats?.entreprises_total || '0',
+      evolution: dashboardStats?.croissance_mensuelle || 0,
+      tendance: (dashboardStats?.croissance_mensuelle || 0) >= 0 ? 'up' : 'down',
       couleur: 'success.main',
     },
     {
-      nom: 'Résultat Net',
-      valeur: '8.7M',
-      evolution: -3.2,
+      nom: 'Liasses ce mois',
+      valeur: dashboardStats?.liasses_ce_mois || '0',
+      evolution: 8.5,
+      tendance: 'up',
+      couleur: 'primary.main',
+    },
+    {
+      nom: 'Audits en cours',
+      valeur: dashboardStats?.audits_en_cours || '0',
+      evolution: -2.1,
       tendance: 'down',
       couleur: 'warning.main',
     },
     {
-      nom: 'Trésorerie',
-      valeur: '15.2M',
-      evolution: 25.8,
-      tendance: 'up',
+      nom: 'Revenus mensuels',
+      valeur: dashboardStats?.revenue_mensuel ? `${(dashboardStats.revenue_mensuel / 1000000).toFixed(1)}M` : '0M',
+      evolution: dashboardStats?.croissance_mensuelle || 0,
+      tendance: (dashboardStats?.croissance_mensuelle || 0) >= 0 ? 'up' : 'down',
       couleur: 'info.main',
     },
-    {
-      nom: 'Ratio Liquidité',
-      valeur: '1.45',
-      evolution: 5.1,
-      tendance: 'up',
-      couleur: 'primary.main',
-    },
   ]
 
-  const tableauxBord = [
-    {
-      id: '1',
-      nom: 'Dashboard Financier',
-      type: 'FINANCIER',
-      description: 'Vue d\'ensemble de la situation financière',
-      nbWidgets: 8,
-      derniereMAJ: '2024-03-20',
-      estFavori: true,
-    },
-    {
-      id: '2',
-      nom: 'Suivi Fiscal',
-      type: 'FISCAL',
-      description: 'Suivi des obligations et échéances fiscales',
-      nbWidgets: 6,
-      derniereMAJ: '2024-03-18',
-      estFavori: false,
-    },
-    {
-      id: '3',
-      nom: 'Analytique Avancé',
-      type: 'ANALYTIQUE',
-      description: 'Analyses approfondies et ratios',
-      nbWidgets: 12,
-      derniereMAJ: '2024-03-19',
-      estFavori: true,
-    },
-  ]
+  // Tableaux de bord basés sur les templates backend
+  const tableauxBord = reportTemplates.slice(0, 6).map(template => ({
+    id: template.id,
+    nom: template.nom,
+    type: template.type_rapport?.toUpperCase() || 'GENERAL',
+    description: template.description,
+    nbWidgets: template.sections?.length || 0,
+    derniereMAJ: new Date(template.updated_at || template.created_at).toLocaleDateString('fr-FR'),
+    estFavori: template.is_public,
+  }))
 
-  const rapportsPersonnalises = [
-    {
-      id: '1',
-      nom: 'Situation Financière T1',
-      type: 'PDF',
-      statut: 'Généré',
-      dateMaj: '2024-03-15',
-      taille: '2.3 MB',
-    },
-    {
-      id: '2',
-      nom: 'Analyse CA Mensuelle',
-      type: 'EXCEL',
-      statut: 'En cours',
-      dateMaj: '2024-03-20',
-      taille: '-',
-    },
-    {
-      id: '3',
-      nom: 'Ratios Financiers',
-      type: 'PDF',
-      statut: 'Généré',
-      dateMaj: '2024-03-10',
-      taille: '1.8 MB',
-    },
-  ]
+  // Rapports personnalisés basés sur les données backend
+  const rapportsPersonnalises = reports.slice(0, 10).map(report => ({
+    id: report.id,
+    nom: report.nom,
+    type: report.format?.toUpperCase() || 'PDF',
+    statut: getStatutLabel(report.statut),
+    dateMaj: new Date(report.updated_at).toLocaleDateString('fr-FR'),
+    taille: report.taille_fichier ? `${(report.taille_fichier / (1024*1024)).toFixed(1)} MB` : '-',
+  }))
+
+  function getStatutLabel(statut: string) {
+    switch (statut?.toLowerCase()) {
+      case 'termine': return 'Généré'
+      case 'en_cours': return 'En cours'
+      case 'en_preparation': return 'En préparation'
+      case 'erreur': return 'Erreur'
+      default: return statut || 'En attente'
+    }
+  }
 
   const getTendanceIcon = (tendance: string) => {
     return tendance === 'up' ? <TrendingUp color="success" /> : <TrendingDown color="error" />
@@ -156,11 +162,27 @@ const Reporting: React.FC = () => {
         </Typography>
         
         <Box sx={{ display: 'flex', gap: 2 }}>
-          <Button variant="contained" startIcon={<Add />}>
-            Nouveau Tableau
+          <Button
+            variant="contained"
+            startIcon={<Add />}
+            onClick={() => console.log('🔄 Creating new report template...')}
+          >
+            Nouveau Rapport
           </Button>
-          <Button variant="outlined" startIcon={<GetApp />}>
+          <Button
+            variant="outlined"
+            startIcon={<GetApp />}
+            onClick={() => console.log('📥 Exporting reports...')}
+          >
             Exporter
+          </Button>
+          <Button
+            variant="outlined"
+            startIcon={<Refresh />}
+            onClick={loadReportingData}
+            disabled={loading}
+          >
+            Actualiser
           </Button>
         </Box>
       </Box>

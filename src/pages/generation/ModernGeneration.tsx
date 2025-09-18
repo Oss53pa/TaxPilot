@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react'
+import { generationService, templatesService, entrepriseService } from '@/services'
 import {
   Box,
   Grid,
@@ -115,12 +116,76 @@ const ModernGeneration: React.FC = () => {
   const [generationParams, setGenerationParams] = useState<Record<string, any>>({})
   const [previewDialog, setPreviewDialog] = useState(false)
 
+  // Données du backend
+  const [generationTemplates, setGenerationTemplates] = useState<GenerationTemplate[]>([])
+  const [companies, setCompanies] = useState<CompanyData[]>([])
+  const [generationTasks, setGenerationTasks] = useState<GenerationTask[]>([])
+
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 1500)
-    return () => clearTimeout(timer)
+    loadBackendData()
   }, [])
 
-  const generationTemplates: GenerationTemplate[] = [
+  const loadBackendData = async () => {
+    setLoading(true)
+    try {
+      console.log('📤 Loading generation data from backend...')
+
+      // Charger les templates
+      const templatesRes = await templatesService.getTemplates({ page_size: 100 })
+      const templates = (templatesRes.results || []).map((t: any) => ({
+        id: t.id,
+        name: t.nom || t.name || 'Template',
+        description: t.description || '',
+        category: t.type_document || 'liasse',
+        format: t.format || 'pdf',
+        status: t.actif ? 'active' : 'draft',
+        lastModified: t.date_modification || new Date().toISOString(),
+        version: t.version || '1.0'
+      }))
+
+      // Charger les entreprises
+      const entreprisesRes = await entrepriseService.getEntreprises({ page_size: 100 })
+      const entreprises = (entreprisesRes.results || []).map((e: any) => ({
+        id: e.id,
+        name: e.raison_sociale || e.nom || 'Entreprise',
+        siret: e.numero_contribuable || '',
+        address: e.adresse || '',
+        exercice: new Date().getFullYear().toString(),
+        regime: e.regime_imposition || 'Réel normal'
+      }))
+
+      // Charger les tâches de génération
+      const generationsRes = await generationService.getLiasseGenerations({ page_size: 20 })
+      const tasks = (generationsRes.results || []).map((g: any) => ({
+        id: g.id,
+        templateId: g.template_id || '1',
+        templateName: g.type_liasse || 'Liasse fiscale',
+        status: g.statut === 'TERMINE' ? 'completed' : g.statut === 'EN_COURS' ? 'running' : g.statut === 'ERREUR' ? 'error' : 'pending',
+        progress: g.progression || 0,
+        createdAt: g.date_creation || new Date().toISOString(),
+        completedAt: g.date_fin,
+        outputFile: g.fichier_genere || g.fichier_url,
+        parameters: g.parametres || {}
+      }))
+
+      setGenerationTemplates(templates.length > 0 ? templates : getDefaultTemplates())
+      setCompanies(entreprises.length > 0 ? entreprises : getDefaultCompanies())
+      setGenerationTasks(tasks)
+
+      console.log('✅ Generation data loaded:', { templates: templates.length, entreprises: entreprises.length, tasks: tasks.length })
+    } catch (error) {
+      console.error('❌ Error loading generation data:', error)
+      // Utiliser les données par défaut en cas d'erreur
+      setGenerationTemplates(getDefaultTemplates())
+      setCompanies(getDefaultCompanies())
+      setGenerationTasks([])
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Données par défaut si le backend ne répond pas
+  const getDefaultTemplates = (): GenerationTemplate[] => [
     {
       id: '1',
       name: 'Liasse fiscale complète SYSCOHADA',
@@ -128,7 +193,7 @@ const ModernGeneration: React.FC = () => {
       category: 'liasse',
       format: 'pdf',
       status: 'active',
-      lastModified: '2024-12-01',
+      lastModified: new Date().toISOString(),
       version: '2.1'
     },
     {
@@ -138,91 +203,95 @@ const ModernGeneration: React.FC = () => {
       category: 'report',
       format: 'excel',
       status: 'active',
-      lastModified: '2024-11-28',
+      lastModified: new Date().toISOString(),
       version: '1.5'
-    },
-    {
-      id: '3',
-      name: 'Compte de résultat',
-      description: 'État de résultat par nature selon SYSCOHADA',
-      category: 'report',
-      format: 'pdf',
-      status: 'active',
-      lastModified: '2024-11-25',
-      version: '1.8'
-    },
-    {
-      id: '4',
-      name: 'Déclaration TVA',
-      description: 'Formulaire de déclaration TVA mensuelle/trimestrielle',
-      category: 'declaration',
-      format: 'pdf',
-      status: 'active',
-      lastModified: '2024-12-10',
-      version: '3.2'
-    },
-    {
-      id: '5',
-      name: 'TAFIRE (Tableau financier)',
-      description: 'Tableau des flux de trésorerie SYSCOHADA',
-      category: 'report',
-      format: 'excel',
-      status: 'active',
-      lastModified: '2024-11-30',
-      version: '2.0'
     }
   ]
 
-  const companies: CompanyData[] = [
+  const getDefaultCompanies = (): CompanyData[] => [
     {
       id: '1',
-      name: 'SARL TECH SOLUTIONS',
-      siret: '123456789',
+      name: 'Entreprise Demo',
+      siret: '000000000',
       address: 'Abidjan, Côte d\'Ivoire',
-      exercice: '2024',
+      exercice: new Date().getFullYear().toString(),
       regime: 'Réel normal'
-    },
-    {
-      id: '2',
-      name: 'SA COMMERCE PLUS',
-      siret: '987654321',
-      address: 'Dakar, Sénégal',
-      exercice: '2024',
-      regime: 'Réel simplifié'
     }
   ]
 
-  const generationTasks: GenerationTask[] = [
-    {
-      id: '1',
-      templateId: '1',
-      templateName: 'Liasse fiscale complète SYSCOHADA',
-      status: 'completed',
-      progress: 100,
-      createdAt: '2024-12-15 14:30',
-      completedAt: '2024-12-15 14:45',
-      outputFile: 'liasse_2024_tech_solutions.pdf',
-      parameters: { company: 'SARL TECH SOLUTIONS', exercice: '2024' }
-    },
-    {
-      id: '2',
-      templateId: '4',
-      templateName: 'Déclaration TVA',
-      status: 'running',
-      progress: 65,
-      createdAt: '2024-12-16 09:15',
-      parameters: { company: 'SA COMMERCE PLUS', periode: 'Q4 2024' }
-    },
-    {
-      id: '3',
-      templateId: '2',
-      templateName: 'Bilan comptable',
-      status: 'error',
-      progress: 0,
-      createdAt: '2024-12-16 10:30',
-      parameters: { company: 'SARL TECH SOLUTIONS', exercice: '2024' }
+  // Fonction pour générer un document
+  const generateDocument = async () => {
+    if (!selectedTemplate || !selectedCompany) {
+      console.error('Template ou entreprise non sélectionné')
+      return
     }
-  ]
+
+    try {
+      console.log('📤 Generating document via backend...')
+
+      const params = {
+        template_id: selectedTemplate,
+        entreprise_id: selectedCompany,
+        exercice: generationParams.exercice || new Date().getFullYear(),
+        ...generationParams
+      }
+
+      const response = await generationService.generateLiasse(params)
+
+      if (response?.id) {
+        // Ajouter la nouvelle tâche à la liste
+        const newTask: GenerationTask = {
+          id: response.id,
+          templateId: selectedTemplate,
+          templateName: generationTemplates.find(t => t.id === selectedTemplate)?.name || 'Document',
+          status: 'running',
+          progress: 0,
+          createdAt: new Date().toISOString(),
+          parameters: params
+        }
+
+        setGenerationTasks(prev => [newTask, ...prev])
+
+        // Vérifier le statut périodiquement
+        checkGenerationStatus(response.id)
+      }
+
+      console.log('✅ Document generation started')
+    } catch (error) {
+      console.error('❌ Error generating document:', error)
+    }
+  }
+
+  // Vérifier le statut d'une génération
+  const checkGenerationStatus = async (taskId: string) => {
+    const interval = setInterval(async () => {
+      try {
+        const status = await generationService.getGenerationStatus(taskId)
+
+        if (status) {
+          setGenerationTasks(prev => prev.map(task =>
+            task.id === taskId
+              ? {
+                  ...task,
+                  status: status.statut === 'TERMINE' ? 'completed' : status.statut === 'ERREUR' ? 'error' : 'running',
+                  progress: status.progression || task.progress,
+                  completedAt: status.date_fin,
+                  outputFile: status.fichier_url
+                }
+              : task
+          ))
+
+          // Arrêter la vérification si terminé ou en erreur
+          if (status.statut === 'TERMINE' || status.statut === 'ERREUR') {
+            clearInterval(interval)
+          }
+        }
+      } catch (error) {
+        console.error('❌ Error checking generation status:', error)
+        clearInterval(interval)
+      }
+    }, 3000) // Vérifier toutes les 3 secondes
+  }
 
   const steps = [
     'Sélection du modèle',

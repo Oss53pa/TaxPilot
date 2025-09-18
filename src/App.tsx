@@ -2,11 +2,17 @@ import React, { Suspense } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { CircularProgress, Box } from '@mui/material'
 import ModernLayout from './components/shared/Layout'
+import ErrorBoundary from './components/ui/ErrorBoundary'
 import './styles/liasse-fixes.css'
 import './styles/sidebar-fix.css'
 import './styles/wcag-conformity.css'
 import './styles/liasse-text-fix.css'
 import './styles/sidebar-ultimate-fix.css'
+
+// INTÉGRATION BACKEND GLOBALE - Active automatiquement pour TOUS les composants
+import { initializeBackendConnections } from './config/globalBackendIntegration'
+import { LiasseDataProvider } from './components/liasse/DataProvider'
+import { UniversalBackendProvider } from './components/UniversalBackendWrapper'
 
 // Composant de loading pour le lazy loading
 const PageLoader = () => (
@@ -20,20 +26,19 @@ const PageLoader = () => (
   </Box>
 )
 
-// Lazy loading des pages principales
+// Lazy loading des pages principales avec connexion backend automatique
 const ModernDashboard = React.lazy(() => import('@/pages/dashboard/ModernDashboard'))
 
-// Accès direct aux liasses pour contourner les problèmes
+// Accès direct aux liasses
 const DirectLiasseAccess = React.lazy(() => import('@/pages/DirectLiasseAccess'))
 
-// Modules de base 
+// Modules de base
 const Parametrage = React.lazy(() => import('@/pages/Parametrage'))
 const ModernImportBalance = React.lazy(() => import('@/pages/import/ModernImportBalance'))
 const ModernBalance = React.lazy(() => import('@/pages/balance/ModernBalance'))
-// const ModernPlansComptables = React.lazy(() => import('@/pages/plans/ModernPlansComptables'))
 const PlanSYSCOHADARevise = React.lazy(() => import('@/pages/plans/PlanSYSCOHADARevise'))
 
-// Modules de production (Critical - chargés en priorité)
+// Modules de production
 const ModernLiasseComplete = React.lazy(() => import('@/pages/liasse/ModernLiasseComplete'))
 const ModernLiasseProduction = React.lazy(() => import('@/pages/liasse/ModernLiasseProduction'))
 const LiasseCompleteFinal = React.lazy(() => import('@/pages/LiasseCompleteFinal'))
@@ -74,7 +79,13 @@ function App() {
   React.useEffect(() => {
     // Vérifier l'authentification au démarrage
     checkAuth()
-  }, [checkAuth])
+
+    // INITIALISER LES CONNEXIONS BACKEND GLOBALES
+    if (isAuthenticated) {
+      console.log('🚀 Initializing global backend connections...')
+      initializeBackendConnections()
+    }
+  }, [checkAuth, isAuthenticated])
 
   if (!isAuthenticated) {
     return <Login />
@@ -82,55 +93,59 @@ function App() {
 
   return (
     // ThemeProvider et CssBaseline déjà fournis par main.tsx
-    <ModernLayout>
-      <OnboardingTour />
-      <Suspense fallback={<PageLoader />}>
-        <Routes>
-          <Route path="/" element={<Navigate to="/direct-liasse" replace />} />
-          <Route path="/dashboard" element={<ModernDashboard />} />
-          <Route path="/direct-liasse" element={<DirectLiasseAccess />} />
-          
-          {/* Modules de base */}
-          <Route path="/parametrage/*" element={<Parametrage />} />
-          <Route path="/import-balance" element={<ModernImportBalance />} />
-          <Route path="/balance" element={<ModernBalance />} />
-          <Route path="/plans-comptables" element={<PlanSYSCOHADARevise />} />
-          <Route path="/plan-syscohada" element={<PlanSYSCOHADARevise />} />
-          
-          {/* Modules de production */}
-          <Route path="/liasse" element={<ModernLiasseComplete />} />
-          <Route path="/production-liasse" element={<ModernLiasseProduction />} />
-          <Route path="/liasse-complete-final" element={<LiasseCompleteFinal />} />
-          <Route path="/documents" element={<ModernDocuments />} />
-          <Route path="/generation" element={<ModernGeneration />} />
-          
-          {/* Modules de conformité */}
-          <Route path="/audit" element={<ModernAudit />} />
-          <Route path="/control-points" element={<ControlPointsManager />} />
-          <Route path="/validation-liasse" element={<LiasseControlInterface />} />
-          <Route path="/teledeclaration" element={<ModernTeledeclaration />} />
-          <Route path="/compliance" element={<ModernCompliance />} />
-          <Route path="/calendar" element={<ModernFiscalCalendar />} />
-          
-          {/* Modules avancés */}
-          <Route path="/templates" element={<ModernTemplates />} />
-          <Route path="/consolidation" element={<ModernConsolidation />} />
-          <Route path="/reporting" element={<ModernReporting />} />
-          <Route path="/veille" element={<ModernVeilleReglementaire />} />
-          
-          {/* Modules collaboration et intégration */}
-          <Route path="/collaboration" element={<ModernCollaboration />} />
-          <Route path="/integrations" element={<ModernIntegrations />} />
-          <Route path="/security" element={<ModernSecurity />} />
-          
-          {/* Pages de test */}
-          <Route path="/test" element={<TestComponents />} />
-          <Route path="/debug" element={<ButtonTest />} />
-          
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
-        </Routes>
-      </Suspense>
-      </ModernLayout>
+    <ErrorBoundary>
+      <UniversalBackendProvider>
+        <ModernLayout>
+          <OnboardingTour />
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
+            <Route path="/" element={<Navigate to="/direct-liasse" replace />} />
+            <Route path="/dashboard" element={<ModernDashboard />} />
+            <Route path="/direct-liasse" element={<DirectLiasseAccess />} />
+
+            {/* Modules de base */}
+            <Route path="/parametrage/*" element={<Parametrage />} />
+            <Route path="/import-balance" element={<ModernImportBalance />} />
+            <Route path="/balance" element={<ModernBalance />} />
+            <Route path="/plans-comptables" element={<PlanSYSCOHADARevise />} />
+            <Route path="/plan-syscohada" element={<PlanSYSCOHADARevise />} />
+
+            {/* Modules de production - AVEC DONNÉES BACKEND */}
+            <Route path="/liasse" element={<LiasseDataProvider><ModernLiasseComplete /></LiasseDataProvider>} />
+            <Route path="/production-liasse" element={<LiasseDataProvider><ModernLiasseProduction /></LiasseDataProvider>} />
+            <Route path="/liasse-complete-final" element={<LiasseDataProvider><LiasseCompleteFinal /></LiasseDataProvider>} />
+            <Route path="/documents" element={<ModernDocuments />} />
+            <Route path="/generation" element={<ModernGeneration />} />
+
+            {/* Modules de conformité */}
+            <Route path="/audit" element={<ModernAudit />} />
+            <Route path="/control-points" element={<ControlPointsManager />} />
+            <Route path="/validation-liasse" element={<LiasseControlInterface />} />
+            <Route path="/teledeclaration" element={<ModernTeledeclaration />} />
+            <Route path="/compliance" element={<ModernCompliance />} />
+            <Route path="/calendar" element={<ModernFiscalCalendar />} />
+
+            {/* Modules avancés */}
+            <Route path="/templates" element={<ModernTemplates />} />
+            <Route path="/consolidation" element={<ModernConsolidation />} />
+            <Route path="/reporting" element={<ModernReporting />} />
+            <Route path="/veille" element={<ModernVeilleReglementaire />} />
+
+            {/* Modules collaboration et intégration */}
+            <Route path="/collaboration" element={<ModernCollaboration />} />
+            <Route path="/integrations" element={<ModernIntegrations />} />
+            <Route path="/security" element={<ModernSecurity />} />
+
+            {/* Pages de test */}
+            <Route path="/test" element={<TestComponents />} />
+            <Route path="/debug" element={<ButtonTest />} />
+
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          </Routes>
+            </Suspense>
+          </ModernLayout>
+      </UniversalBackendProvider>
+    </ErrorBoundary>
   )
 }
 

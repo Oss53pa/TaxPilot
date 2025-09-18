@@ -2,7 +2,7 @@
  * Page du module d'audit intelligent
  */
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   Box,
   Grid,
@@ -39,46 +39,123 @@ import {
   Refresh,
   GetApp,
 } from '@mui/icons-material'
+import { auditService } from '@/services/auditService'
+import { entrepriseService } from '@/services/entrepriseService'
 
 const Audit: React.FC = () => {
   const [auditEnCours, setAuditEnCours] = useState(false)
   const [progressionAudit, setProgressionAudit] = useState(0)
+  const [loading, setLoading] = useState(true)
+  const [auditSessions, setAuditSessions] = useState<any[]>([])
+  const [anomalies, setAnomalies] = useState<any[]>([])
+  const [stats, setStats] = useState<any>(null)
+  const [entreprises, setEntreprises] = useState<any[]>([])
+  const [selectedSession, setSelectedSession] = useState<any>(null)
 
-  // Données fictives pour la démo
-  const statsAudit = {
-    scoreGlobal: 87,
-    anomaliesCritiques: 2,
-    anomaliesErreurs: 5,
-    anomaliesAvertissements: 12,
-    correctifsProposés: 8,
+  useEffect(() => {
+    loadAuditData()
+  }, [])
+
+  const loadAuditData = async () => {
+    try {
+      setLoading(true)
+      console.log('🔄 Loading audit data from backend...')
+
+      const [sessionsResponse, statsResponse, entreprisesResponse] = await Promise.all([
+        auditService.getAuditSessions({ page_size: 10 }),
+        auditService.getAuditStats(),
+        entrepriseService.getEntreprises({ page_size: 100 })
+      ])
+
+      setAuditSessions(sessionsResponse.results || [])
+      setStats(statsResponse)
+      setEntreprises(entreprisesResponse.results || [])
+
+      // Si on a une session, charger ses anomalies
+      if (sessionsResponse.results?.[0]) {
+        const anomaliesResponse = await auditService.getAuditAnomalies(sessionsResponse.results[0].id)
+        setAnomalies(anomaliesResponse.results || [])
+        setSelectedSession(sessionsResponse.results[0])
+      }
+
+      console.log('✅ Audit data loaded successfully')
+    } catch (error) {
+      console.error('❌ Error loading audit data:', error)
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const dernieresAnomalies = [
-    {
-      id: '1',
-      titre: 'Déséquilibre compte 411000',
-      type: 'DESEQUILIBRE',
-      severite: 'CRITIQUE',
-      montantImpact: 15000,
-      scoreConfiance: 95,
-    },
-    {
-      id: '2', 
-      titre: 'Variation anormale CA (+150%)',
-      type: 'VARIATION_ANORMALE',
-      severite: 'ERREUR',
-      montantImpact: 450000,
-      scoreConfiance: 88,
-    },
-    {
-      id: '3',
-      titre: 'Compte 445710 non mouvementé',
-      type: 'COMPLETUDE',
-      severite: 'AVERTISSEMENT', 
-      montantImpact: 0,
-      scoreConfiance: 76,
-    },
-  ]
+  // Stats calculées depuis les données backend
+  const statsAudit = {
+    scoreGlobal: selectedSession?.resultats?.score_global || 0,
+    anomaliesCritiques: anomalies.filter(a => a.type === 'ERREUR').length,
+    anomaliesErreurs: selectedSession?.resultats?.nb_erreurs || 0,
+    anomaliesAvertissements: selectedSession?.resultats?.nb_warnings || 0,
+    correctifsProposés: anomalies.filter(a => a.suggestion).length,
+  }
+
+  // Anomalies depuis le backend
+  const dernieresAnomalies = anomalies.slice(0, 10).map(anomalie => ({
+    id: anomalie.id,
+    titre: anomalie.titre,
+    type: anomalie.categorie,
+    severite: mapTypeToSeverite(anomalie.type),
+    montantImpact: anomalie.impact_fiscal || 0,
+    scoreConfiance: Math.round(Math.random() * 20 + 80), // Score simulé pour l'instant
+    description: anomalie.description,
+    suggestion: anomalie.suggestion
+  }))
+
+  function mapTypeToSeverite(type: string) {
+    switch (type) {
+      case 'ERREUR': return 'CRITIQUE'
+      case 'WARNING': return 'ERREUR'
+      case 'INFO': return 'AVERTISSEMENT'
+      default: return 'AVERTISSEMENT'
+    }
+  }
+
+  const lancerAudit = async () => {
+    if (!entreprises[0]) {
+      console.error('Aucune entreprise disponible pour l\'audit')
+      return
+    }
+
+    setAuditEnCours(true)
+    setProgressionAudit(0)
+
+    try {
+      console.log('🚀 Starting new audit session...')
+
+      // Créer une nouvelle session d'audit
+      const newSession = await auditService.startAudit({
+        entreprise_id: entreprises[0].id,
+        exercice_id: '1', // ID d'exercice par défaut
+        liasse_id: '1', // ID de liasse par défaut
+        type_audit: 'COMPLET',
+        niveau: 'STANDARD'
+      })
+
+      setSelectedSession(newSession)
+
+      // Simuler la progression
+      const interval = setInterval(() => {
+        setProgressionAudit(prev => {
+          if (prev >= 100) {
+            clearInterval(interval)
+            setAuditEnCours(false)
+            loadAuditData() // Recharger les données
+            return 100
+          }
+          return prev + 10
+        })
+      }, 500)
+    } catch (error) {
+      console.error('❌ Error starting audit:', error)
+      setAuditEnCours(false)
+    }
+  }
 
   const getSeveriteColor = (severite: string) => {
     switch (severite) {
