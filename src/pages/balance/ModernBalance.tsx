@@ -91,6 +91,36 @@ interface BalanceStats {
   balanceCheck: boolean
 }
 
+const StatCard: React.FC<{
+  title: string;
+  value: string | number;
+  color: string;
+  icon: React.ReactElement;
+  subtitle?: string;
+  theme: any;
+}> = ({ title, value, color, icon, subtitle, theme }) => (
+  <Card elevation={0} sx={{ border: `1px solid ${alpha(theme.palette.divider, 0.08)}`, height: '100%' }}>
+    <CardContent sx={{ p: 3 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+        <Avatar sx={{ backgroundColor: alpha(color, 0.1), color, width: 48, height: 48 }}>
+          {icon}
+        </Avatar>
+      </Box>
+      <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
+        {typeof value === 'number' ? value.toLocaleString() : value}
+      </Typography>
+      <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+        {title}
+      </Typography>
+      {subtitle && (
+        <Typography variant="body2" color="text.secondary">
+          {subtitle}
+        </Typography>
+      )}
+    </CardContent>
+  </Card>
+)
+
 const ModernBalance: React.FC = () => {
   const theme = useTheme()
   const [loading, setLoading] = useState(true)
@@ -374,30 +404,6 @@ const ModernBalance: React.FC = () => {
     setAnchorEl(null)
   }
 
-  const StatCard: React.FC<{ title: string; value: string | number; color: string; icon: React.ReactElement; subtitle?: string }> = 
-    ({ title, value, color, icon, subtitle }) => (
-    <Card elevation={0} sx={{ border: `1px solid ${alpha(theme.palette.divider, 0.08)}`, height: '100%' }}>
-      <CardContent sx={{ p: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-          <Avatar sx={{ backgroundColor: alpha(color, 0.1), color, width: 48, height: 48 }}>
-            {icon}
-          </Avatar>
-        </Box>
-        <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
-          {typeof value === 'number' ? value.toLocaleString() : value}
-        </Typography>
-        <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-          {title}
-        </Typography>
-        {subtitle && (
-          <Typography variant="body2" color="text.secondary">
-            {subtitle}
-          </Typography>
-        )}
-      </CardContent>
-    </Card>
-  )
-
   return (
     <Box sx={{ p: 3, backgroundColor: 'background.default', minHeight: '100vh' }}>
       {/* Header */}
@@ -435,6 +441,7 @@ const ModernBalance: React.FC = () => {
             color={theme.palette.primary.main}
             icon={<BalanceIcon />}
             subtitle="Comptes actifs"
+            theme={theme}
           />
         </Grid>
         <Grid item xs={12} sm={6} lg={3}>
@@ -444,6 +451,7 @@ const ModernBalance: React.FC = () => {
             color={theme.palette.success.main}
             icon={<ValidatedIcon />}
             subtitle={`${((balanceStats.validatedAccounts / balanceStats.totalAccounts) * 100).toFixed(1)}% du total`}
+            theme={theme}
           />
         </Grid>
         <Grid item xs={12} sm={6} lg={3}>
@@ -452,6 +460,7 @@ const ModernBalance: React.FC = () => {
             value={`${formatAmount(balanceStats.totalDebit)} FCFA`}
             color={theme.palette.error.main}
             icon={<TrendingDownIcon />}
+            theme={theme}
           />
         </Grid>
         <Grid item xs={12} sm={6} lg={3}>
@@ -460,6 +469,7 @@ const ModernBalance: React.FC = () => {
             value={`${formatAmount(balanceStats.totalCredit)} FCFA`}
             color={theme.palette.success.main}
             icon={<TrendingUpIcon />}
+            theme={theme}
           />
         </Grid>
       </Grid>

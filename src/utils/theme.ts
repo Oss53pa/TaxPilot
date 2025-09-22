@@ -10,7 +10,7 @@ export const theme = createTheme({
   ...paletteConfig,
   typography: {
     fontFamily: [
-      'Quicksand',
+      'Jura',
       'Roboto',
       '-apple-system',
       'BlinkMacSystemFont',
@@ -81,9 +81,22 @@ export const theme = createTheme({
         },
         contained: {
           boxShadow: '0 4px 14px 0 rgba(0, 0, 0, 0.1)',
+          color: '#ffffff',
           '&:hover': {
             boxShadow: '0 6px 20px 0 rgba(0, 0, 0, 0.15)',
             transform: 'translateY(-2px)',
+          },
+        },
+        containedPrimary: {
+          color: '#ffffff !important',
+          '&:hover': {
+            color: '#ffffff !important',
+          },
+        },
+        containedSecondary: {
+          color: '#ffffff !important',
+          '&:hover': {
+            color: '#ffffff !important',
           },
         },
         outlined: {

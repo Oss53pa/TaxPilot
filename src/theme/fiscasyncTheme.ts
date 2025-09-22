@@ -59,6 +59,7 @@ export const fiscasyncTheme = createTheme({
   
   typography: {
     fontFamily: [
+      'Jura',
       '-apple-system',
       'BlinkMacSystemFont',
       '"Segoe UI"',
@@ -218,14 +219,21 @@ export const fiscasyncTheme = createTheme({
       styleOverrides: {
         containedPrimary: {
           backgroundColor: fiscasyncPalette.primary,
-          color: fiscasyncPalette.white,
+          color: '#ffffff !important',
           borderRadius: '8px',
           textTransform: 'none',
           fontWeight: 600,
           boxShadow: '0 2px 8px rgba(55, 59, 77, 0.2)',
           '&:hover': {
             backgroundColor: '#4A4F65',
+            color: '#ffffff !important',
             boxShadow: '0 4px 12px rgba(55, 59, 77, 0.3)',
+          },
+        },
+        containedSecondary: {
+          color: '#ffffff !important',
+          '&:hover': {
+            color: '#ffffff !important',
           },
         },
         outlined: {

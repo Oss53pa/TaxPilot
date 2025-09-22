@@ -8,6 +8,7 @@ import App from './App.tsx'
 import { store } from './store/index.ts'
 import fiscasyncTheme from './theme/fiscasyncTheme.ts'
 import './index.css'
+import './styles/contrast-fix.css'
 
 // Configuration du client React Query
 const queryClient = new QueryClient({
