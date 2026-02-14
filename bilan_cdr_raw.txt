@@ -1,0 +1,1592 @@
+=== PAGE 973 ===
+973
+SYSCOHADA PRESENTATION DES ETATS FINANCIERS ANNUELS DU SYSTEME NORMAL
+SECTION 1 : 
+Règles générales de présentation du Bilan
+SECTION 2 :
+Modèles de Bilan du Système Normal
+Bilan du Système Normal   
+Titre IX
+Chapitre 3
+PLAN COMPTABLE GENERAL 
+OHADA
+
+=== PAGE 974 ===
+974
+SYSCOHADA PRESENTATION DES ETATS FINANCIERS ANNUELS DU SYSTEME NORMAL
+1.1. Principes
+Le B
+à une date donnée. Le Système comptable OHADA 
+préconise un bilan avant répartition du résultat et opte pour un classement fonctionnel des 
+postes du bilan. Le b
+investissement, la fonction financement et la fonction exploitation. 
+Le bilan est construit en 6 grandes masses :
+les capitaux propres et ressources assimilées (passif) versus actif immobilisé (actif) ;
+(actif) ;
+la trésorerie - passif (passif) versus la trésorerie - actif (actif).
+SECTION 1 : Règles générales de présentation
+Fonction 
+investissement
+Actif ou emplois
+Passif ou ressources
+Actif immobilisé
+(Emplois stables)
+Capitaux propres et dettes 
+financières              
+(ressources stables)
+Immobilisations 
+Immobilisations corporelles
+Immobilisations financières
+Capitaux propres
+Dettes financières et 
+ressources assimilées
+Actif circulant
+Passif circulant
+Passif circulant H.A.O.
+Passif 
+Fonction 
+financement
+Fonction 
+exploitation
+Fonction 
+exploitation
+Actif circulant H.A.O.
+Trésorerie-actif
+Trésorerie-passif
+Ecart de conversion-actif
+Ecart de conversion-passif
+
+=== PAGE 975 ===
+ 
+ 
+975 
+ 
+SYSCOHADA PRESENTATION DES ETATS FINANCIERS ANNUELS DU SYSTEME NORMAL 
+1.2. Description des postes 
+1.2.1. Postes du haut de bilan    
+Le « haut de Bilan  »  désigne  les éléments  du cycle financement et investissement. Il est 
+composé d'éléments considérés comme stables (immobilisations, capitaux  propres..). Plus 
+précisément, le haut de Bilan correspond à l'actif, aux investissements réalisés 
+(immobilisations incorporelles, corporelles et financières) et reflète, au passif, les moyens de 
+financement des investissements : le recours aux actionnaires et aux prêteurs.   
+1.2.2. Postes du bas de Bilan 
+Le « bas de Bilan » désigne les  éléments de l'actif  circulant et de la trésorerie-
+ainsi que ceux du passif circulant et de la trésorerie-
+ 
+1.2.2.1. Postes du 
+ 
+ 
+Les  postes  liés  aux  opérations  peu  fréquentes  et  non  récurrentes,  lesquels représentent 
+ 
+-actif. 
+1.2.2.2. Postes du bas du passif 
+Les postes liés direc
+ 
+Les postes liés aux opérations peu fréquentes et non récurrentes qui représentent les dettes 
+hors activité ordinaire. 
+- passif. 
+1.3. Analyse de la structure  financière  
+1.3.1. Objectif 
+onnelle retenue par le Système comptable OHADA permet : 
+ d'apprécier la structure financière de l'entité, dans une optique de continuité de  
+ 
+
+=== PAGE 976 ===
+976
+SYSCOHADA PRESENTATION DES ETATS FINANCIERS ANNUELS DU SYSTEME NORMAL
+d'évaluer les besoins financiers stables et circulants et le type de ressources dont 
+dispose l'entité ;
+de déterminer l'équilibre financier en comparant les différentes masses du bilan 
+classées par fonctions et en observant le degré de couverture des emplois par les 
+ressources.
+1.3.2. Retraitement spécifique
+La structure du bilan du Système comptable OHADA étant par définition fonctionnelle, le 
+seul retraitem
+Les écartsde conversion-actif :
+Les écarts de conversion  
+actif doivent être éliminés afin de ramener les
+créances et les dettes concernées à leur valeur initiale.
+les écarts de conversion-passif :
+Les écarts de conversion  
+passif doivent être éliminés afin de ramener les créances et les 
+dettes concernées  à leur valeur initiale.
+concernent :
+Un compte d'actif : éliminer  des comptes de
+régularisation (au pied de l actif) et rajouter au compte 
+d'actif auquel il appartient.
+Exemple
+Un compte de passif: éliminer des comptes de
+régularisation (au pied de l actif) et soustraire du compte de
+passif auquel il appartient.
+Exemple : Fournisseurs, emprunt
+concernent :
+Un compte d'actif : éliminer  des comptes de
+régularisation (au pied du passif) et soustraire du compte 
+d'actif auquel il appartient.
+Exemple : créances clients, 
+Un compte de passif: éliminer des comptes de
+régularisation (au pied du passif) et rajouter au compte de
+passif auquel il appartient.
+Exemple : Fournisseurs, emprunt
+
+=== PAGE 977 ===
+977
+SYSCOHADA PRESENTATION DES ETATS FINANCIERS ANNUELS DU SYSTEME NORMAL
+1.3.3. Les grands équilibres financiers du Bilan
+ilan permet de mettre en évidence les  grands équilibres financiers par le calcul 
+de quatre (4) notions fondamentales :
+le Fonds de Roulement (F.R) ;
+le Besoin de Financement Hors Activité Ordinaire (BF.HAO) ;
+la trésorerie nette.
+1.3.3.1. Présentation schématique
+ACTIF
+PASSIF
+Actif immobilisé
+Capitaux propres et dettes 
+financières (ressources 
+stables)
+Fonds de roulement (FR)
+Actif circulant 
+Passif circulant 
+Besoin de financement 
+Actif circulant H.A.O
+Passif circulant H.A.O
+Besoin de financement 
+H.A.O (BF H.A.O)
+Trésorerie - actif
+Trésorerie - passif
+Trésorerie Nette = (Trésorerie actif) (Trésorerie passif)
+Trésorerie nette = FR BFG (BFE + BF H.A.O)
+
+=== PAGE 978 ===
+ 
+ 
+978 
+ 
+SYSCOHADA PRESENTATION DES ETATS FINANCIERS ANNUELS DU SYSTEME NORMAL 
+1.3.3.2. Fonds de roulement 
+A. Définition 
+investissements.  Il  correspond  aussi  à  la  
+ressources  stables.    
+B. Formule de calcul  
+ Par le haut du Bilan : 
+ 
+ 
+ Par le bas du Bilan : 
+ 
+ 
+signification relative. Pour déterminer si son niveau est satisfaisant, il faut le comparer au 
+BFG. 
+1.3.3.3. Le Besoin de Financement Global (BFG) 
+A. Définition 
+onds nécessaire pour le financement du décalage entre les dépenses (achats) et les 
+recettes (ventes). 
+                                Délai de stockage 
+        Délai de crédits-clients 
+ 
+Opérations     Achat  
+ 
+ 
+ 
+ Vente  
+                               temps 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+   
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+     Dépenses  
+ 
+ 
+ 
+   Recettes 
+ 
+ 
+ 
+      Délai de crédit-  
+  Décalage à financer 
+= Besoin de 
+ 
+                Fournisseurs 
+ 
+ 
+ 
+ 
+ 
+ financement 
+ 
+Fonds  de roulement  (FR)  = Ressources  stables  (capitaux  propres + dettes 
+financières)  Actif immobilisé en valeur nette 
+Fonds  de roulement  (FR)  = (Actif circulant + Trésorerie-Actif)                     
+- (Passif circulant + Trésorerie-Passif) 
+Flux 
+ 
+
+=== PAGE 979 ===
+979
+SYSCOHADA PRESENTATION DES ETATS FINANCIERS ANNUELS DU SYSTEME NORMAL
+B. Formule de calcul 
+Le BFE représente la composante la plus importante du BFG. Supposé directement lié au 
+un autre.
+1.3.3.4. La trésorerie nette (TN)
+A. Définition
+rie et le passif de trésorerie.
+B. Formule de calcul 
+Si FR > BFG => le FR finance en totalité le BFG et il existe un excédent de ressources 
+qui se retrouve en trésorerie ;
+financée par crédit bancaire courant.
+BESOIN DE FINANCEMENT GLOBAL (BFG) = (Actif circulant Passif circulant)
+                     
+BFG
+BF H.A.O = Actif circulant HAO passif circulant H.A.O
+                                                                                                                  ou
+Trésorerie Nette
+Trésorerie-actif Trésorerie-passif
+FR - BFG
+
+=== PAGE 980 ===
+
+=== PAGE 981 ===
+981
+SYSCOHADA PRESENTATION DES ETATS FINANCIERS ANNUELS DU SYSTEME NORMAL
+REF
+ACTIF
+Note
+EXERCICE au 31/12/ N
+EXERCICE 
+AU         
+31/12/N-1
+BRUT
+AMORT 
+et 
+DEPREC.
+NET
+NET
+AD
+IMMOBILISATIONS INCORPORELLES
+3
+AE
+Frais de développement et de prospection
+AF
+Brevets, licences, logiciels, et  droits similaires
+AG
+Fonds commercial et droit au bail
+AH
+Autres immobilisations incorporelles
+AI
+IMMOBILISATIONS CORPORELLES
+3
+AJ
+Terrains (1)                                                                
+AK
+Bâtiments                                                                  
+AL
+Aménagements, agencements et installations
+AM
+Matériel, mobilier et actifs biologiques
+AN
+Matériel de transport
+AP
+Avances et acomptes versés sur 
+immobilisations
+3
+AQ
+IMMOBILISATIONS FINANCIERES
+4
+AR
+Titres de participation
+AS
+Autres immobilisations financières
+AZ
+TOTAL ACTIF IMMOBILISE
+BA
+ACTIF CIRCULANT HAO
+5
+BB
+STOCKS ET ENCOURS
+6
+BG
+CREANCES ET EMPLOIS ASSIMILES
+BH
+Fournisseurs avances versées
+17
+BI
+Clients
+7
+BJ
+Autres créances
+8
+BK
+TOTAL ACTIF CIRCULANT
+BQ
+Titres de placement
+9
+BR
+Valeurs à encaisser 
+10
+BS
+Banques, chèques postaux, caisse et assimilés
+11
+BT
+TOTAL TRESORERIE-ACTIF
+BU
+Ecart de conversion-Actif
+12
+BZ
+TOTAL GENERAL
+SECTION 2 : MODELE 2 (BILAN ACTIF)
+Désignation entité:.............................................                                 Exercice clos le 31-12-.........................
+:....................................                                         Durée (en mois)......................
+BILAN AU 31 DECEMBRE N
+
+=== PAGE 982 ===
+982
+SYSCOHADA PRESENTATION DES ETATS FINANCIERS ANNUELS DU SYSTEME NORMAL
+REF
+PASSIF
+Note
+EXERCICE AU  
+31/12/N
+EXERCICE AU   
+31/12/N-1
+NET
+NET
+CA
+Capital 
+13
+CB
+Apporteurs capital non appelé          (-)
+13
+CD
+Primes liées au capital social
+14
+CE
+Ecarts de réévaluation
+3e
+CF
+Réserves indisponibles
+14
+CG
+Réserves libres
+14
+CH
+Report à nouveau                         (+ ou -) 
+14
+CJ
+Résultat net de l'exercice (bénéfice + ou perte -)
+CL
+Subventions d'investissement
+15
+CM
+Provisions réglementées
+15
+CP
+TOTAL CAPITAUX PROPRES ET 
+RESSOURCES ASSIMILEES
+DA
+Emprunts et dettes financières diverses
+16
+DB
+Dettes de location acquisition
+16
+DC
+Provisions pour risques et charges
+16
+DD
+TOTAL DETTES FINANCIERES ET 
+RESSOURCES ASSIMILEES
+DF
+TOTAL RESSOURCES STABLES
+DH
+Dettes circulantes HAO
+5
+DI
+Clients, avances reçues
+7
+DJ
+Fournisseurs d'exploitation
+17
+DK
+Dettes fiscales et sociales
+18
+DM
+Autres dettes
+19
+DN
+Provisions pour risques à court terme
+19
+DP
+TOTAL PASSIF CIRCULANT
+DQ
+Banques, crédits d'escompte 
+20
+DR
+Banques, établissements financiers et crédits de 
+trésorerie
+20
+DT
+TOTAL TRESORERIE-PASSIF 
+DV
+Ecart de conversion-Passif
+12
+DZ
+TOTAL GENERAL
+SECTION 2 : MODELE 2 (BILAN PASSIF)
+Désignation entité:.............................................                                 Exercice clos le 31-12-.........................
+:....................................                                         Durée (en mois)......................
+BILAN AU 31 DECEMBRE N
+
+=== PAGE 983 ===
+983
+SYSCOHADA PRESENTATION DES ETATS FINANCIERS ANNUELS DU SYSTEME NORMAL
+SECTION 1 : 
+Règles générales de présentation du Compte de résultat
+SECTION 2 :
+Modèle de Compte de résultat du Système Normal
+Compte de résultat du 
+Système Normal         
+Titre IX
+Chapitre 4
+PLAN COMPTABLE GENERAL 
+OHADA
+
+=== PAGE 984 ===
+984
+SYSCOHADA PRESENTATION DES ETATS FINANCIERS ANNUELS DU SYSTEME NORMAL
+Le Compte de résultat recense, pour une période donnée toutes les ressources produites par 
+:
+Activité ordinaire (exploitation, financier) ;
+Activité HAO.
+La différence entre ces produits et ces charges donne le ré
+; par exemple, 
+: les charges induites 
+Les charges et produits HAO correspondent à des flux non récurrents, ayant un caractère 
+accidentel ou extraordinaire.
+Pour faciliter la lecture du compte de résultat et une analyse de 
+Plan Comptable OHADA (en abrégé PCGO)  préconise la présentation 
+résultat en liste
+en cascade, de façon 
+claire, les soldes intermédiaires de gestion retenus par le Plan comptable OHADA  qui 
+sont :
+SECTION 1 : Règles générales de présentation
+Marge commerciale
+Valeur ajoutée
+E
+R
+Résultat financier
+Résultat HAO
+Résultat net
+Résultat des activités 
+ordinaires (AO)
+
+=== PAGE 985 ===
+ 
+ 
+985 
+ 
+SYSCOHADA PRESENTATION DES ETATS FINANCIERS ANNUELS DU SYSTEME NORMAL 
+SOLDES INTERMEDIAIRES DE 
+GESTION 
+INTERPRETATIONS 
+MARGE COMMERCIALE 
+Ce solde permet de calculer la performance des entités 
+commerciales. Elle représente le supplément de valeur apportée par 
+ 
+VALEUR AJOUTEE 
+ et mesure son poids économique. En 
+effet, la valeur ajoutée  
+professionnelles courantes.  
+EXCEDENT BRUT 
+ 
+avoir rémunéré le facteur travail. Il mesure la performance 
+distribution. Il constitue un bon critère de la performance 
+ 
+ 
+industrielle et commerciale, sans tenir compte de sa politique de 
+financement. Il représente la ressource nette dégagée par la totalité 
+ 
+RESULTAT FINANCIER 
+Le résultat financier met en évidence les choix effectués en matière 
+de financement (activité d'endettement et de placement) et l'impact 
+du mode de financement sur le résultat de l'entité. 
+RESULTAT DES ACTIVITES 
+ORDINAIRES  
+ltat courant, c'est-à-dire 
+ 
+RESULTAT H.A.O 
+Le résultat H.A.O est le résultat des opérations peu fréquentes et 
+ 
+ 
+te le revenu qui revient aux 
+associés. En principe, une partie de ce résultat est distribuée aux 
+associés et une autre est réservée à la constitution de 
+. 
+ 
+ 
+
+=== PAGE 986 ===
+986
+SYSCOHADA PRESENTATION DES ETATS FINANCIERS ANNUELS DU SYSTEME NORMAL
+REF
+LIBELLES
+NOTE
+EXERCICE 
+AU          
+31/12/N
+EXERCICE 
+AU   
+31/12/N-1
+NET
+NET
+TA
+Ventes de marchandises
+A
++
+21
+RA
+Achats de marchandises
+-  
+22
+RB
+Variation de stocks de marchandises                                                    -/+  
+6
+XA
+MARGE  COMMERCIALE  (Somme TA à RB)
+TB
+Ventes de produits fabriqués
+B
++
+21
+TC
+Travaux, services vendus
+C
++
+21
+TD
+Produits accessoires
+D
++
+21
+XB
+        CHIFFRE D'AFFAIRES (A + B + C + D)
+TE
+Production stockée (ou déstockage)
+-/+  
+6
+TF
+Production immobilisée
+21
+TG
+21
+TH
+Autres produits
++
+21
+TI
+Transferts de charges d'exploitation 
++
+12
+RC
+Achats de matières premières et fournitures liées
+-
+22
+RD
+Variation de stocks de matières premières et fournitures liées  
+-/+  
+6
+RE
+Autres achats
+-
+22
+RF
+Variation de stocks
+                     
+-/+  
+6
+RG
+Transports
+-
+23
+RH
+Services extérieurs
+-
+24
+RI
+Impôts et taxes
+-
+25
+RJ
+Autres charges
+-
+26
+XC
+             VALEUR AJOUTEE    (XB +RA+RB) + (somme 
+TE à RJ)
+RK
+Charges de personnel
+-
+27
+XD
+    EXCEDENT BRUT D'EXPLOITATION (XC+RK)
+28
+TJ
+Rep
+et dépréciations
++
+28
+RL
+Dotations aux amortissements, aux provisions et dépréciations
+-
+3C&28
+XE
+   RESULTAT D'EXPLOITATION (XD+TJ+ RL)
+TK
+Revenus financiers et assimilés
++
+29
+TL
+Reprises de provisions  et dépréciations financières
++
+28
+TM
+Transferts de charges financières
++
+12
+RM
+Frais financiers et charges assimilées
+-
+29
+RN
+Dotations aux provisions et aux dépréciations financières
+-
+3C&28
+XF
+RESULTAT  FINANCIER  (somme TK à RN)
+XG
+RESULTAT  DES ACTIVITES ORDINAIRES (XE+XF)
+TN
+Produits des cessions d'immobilisations
++
+3D
+TO
+Autres Produits HAO  
++
+30
+RO
+Valeurs comptables des cessions d'immobilisations
+-
+3D
+RP
+Autres Charges HAO  
+-
+30
+XH
+RESULTAT HORS ACTIVITES ORDINAIRES (somme 
+TN à RP)
+RQ
+Participation des travailleurs
+-
+30
+RS
+Impôts sur le résultat
+-
+XI
+RESULTAT NET (XG+XH+RQ+RS)
+SECTION 2 : MODELE DE COMPTE DE RESULTAT
+Désignation entité:.............................................                                 Exercice clos le 31-12-.........................
+:....................................                                        Durée (en mois)......................
+COMPTE DE RESULTAT AU 31 DECEMBRE N
+
+=== PAGE 987 ===
+987
+SYSCOHADA PRESENTATION DES ETATS FINANCIERS ANNUELS DU SYSTEME NORMAL
+SECTION 1 : 
+Règles générales de présentation du Tableau des flux de trésorerie
+SECTION 2 :
+Modèle de Tableau des flux de trésorerie 
+Tableau des flux de 
+trésorerie         
+Titre IX
+Chapitre 5
+PLAN COMPTABLE GENERAL 
+OHADA
+
+=== PAGE 988 ===
+988
+SYSCOHADA PRESENTATION DES ETATS FINANCIERS ANNUELS DU SYSTEME NORMAL
+1.1. Règles générales
+Le Tableau des flux de trésorerie doit présenter les entrées et les sorties de trésorerie et 
+d'équivalents de trésorerie classées en trois catégories :
+flux de trésorerie des activités opérationnelles ;
+flux de trésorerie des activités d'investissement ; 
+et flux de trésorerie des activités de financement.
+1.2. Flux de trésorerie provenant des activités opérationnelles
+Les flux des activités opérationnelles sont les flux des principales activités génératrices de 
+d'investissement ou de financement.
+SECTION 1 : Règles générales de présentation
+Flux de trésorerie provenant du 
+financement par les capitaux propres
+Trésorerie provenant du financement 
+par les capitaux étrangers
+Flux de trésorerie provenant des activités de financement 
+              Variation de la trésorerie nette de la période
+Trésorerie nette au 31 Décembre
+(D)
+(G =  F + A)
+Trésorerie nette au 1er janvier
+Flux de trésorerie provenant des activités opérationnelles
+Flux de trésorerie provenant des 
+(A)
+(B)
+(C)
+(F = B + C + D)
+
+=== PAGE 989 ===
+989
+SYSCOHADA PRESENTATION DES ETATS FINANCIERS ANNUELS DU SYSTEME NORMAL
+1.2.1. 
+:
+1.2.1.1. Formule de calcul
++
+-
+(compte 754)
+=
++
+Revenus financiers
++
+Gains de change
++
+Transferts de charges financières
++
+Produits HAO
++
+Transferts de charges HAO
+-
+Frais financiers
+-
+Pertes de change
+-
+Participation
+-
+Impôt sur les résultats
+=
+1.2.1.2. Analyse
+résiduel de trésorerie effective ou potentielle 
+         C.A.F.G. = E.B.E. (cf. Compte de résultat)
+- Charges « décaissables
++ Produits « encaissables »
+
+=== PAGE 990 ===
+ 
+ 
+990 
+ 
+SYSCOHADA PRESENTATION DES ETATS FINANCIERS ANNUELS DU SYSTEME NORMAL 
+ (CAFG) 
+La CAFG calculée est la capacité globale, compte tenu non seulement du circuit 
+s financières et hors activités ordinaires (H.A.O.), et 
+après impôts sur les bénéfices. 
+La CAFG représente la trésorerie potentielle globale, disponible sur une certaine période, dont 
+ : 
+ à renouveler ses investissements (maintien de son capital technique) ; 
+ à réaliser, au-delà, des investissements de croissance. 
+La CAFG est donc le principal indicateur du potentiel de financement de la croissance de 
+ 
+1.2.1.3. Passage de la CAFG au flux de trésorerie provenant des activités opérationnelles 
+La CAFG  diffère de la trésorerie générée par les activités opérationnelles au cours de 
+ : 
+ elle tient compte des variatio
+ ; 
+ elle est calculée à partir des produits et charges comptabilisés, et non à partir des 
+ 
+Par conséquent, des corrections sont nécessaires pour passer de la CAFG aux flux de 
+trésorerie. 
+ 
+encaissements et les décaissements liés aux produits encaissables et charges décaissables de 
+ : 
+ 
+Encaissements 
+Produits (N) + Créances (N  1)  Créances (N) 
+ 
+                                                                                      Variation des créances 
+Décaissements 
+Achats (N) + Dettes (N  1)  Dettes N. 
+ 
+
+=== PAGE 991 ===
+ 
+ 
+991 
+ 
+SYSCOHADA PRESENTATION DES ETATS FINANCIERS ANNUELS DU SYSTEME NORMAL 
+                                                                                                   Variation des dettes 
+Par ailleurs, dans le compte de résultat figure dans les charges le montant des achats 
+consommés qui tient compte de la variation des stocks. Or, ce sont les achats de marchandises 
+et de matières premières qui génèrent des dettes vis-à-vis des fournisseurs. 
+Pour reconstituer le montant des marchandises et matières premières achetées, il faut éliminer 
+la variation des stocks. 
+ = Achats consommés  
+ 
+En résumé, le passage de la CAFG aux flux de trésorerie des activités opérationnelles 
+nécessite la prise en compte de la variation des créances et des dettes et la neutralisation de la 
+variation des stocks.  
+Capacité d'Autofinancement Globale (CAFG) 
+- 
+ctif circulant HAO (exercices N-N-1) (1)  
+- 
+Variation des stocks et en-cours (exercices N-N-1)  (a) 
+- 
+Variation des créances et emplois assimilés et des intérêts 
+courus des immobilisations financiers  (exercices N-N-1)(a) et 
+(1) 
++ 
+Variation du passif circulant et des intérêts des emprunts et 
+dettes financières courus (exercices N-N-1) (b) et (1) 
+= 
+Flux de trésorerie provenant des activités opérationnelles 
+ 
+(a) Si les stocks ou les créances augmentent, la variation est négative. Elle est positive dans le 
+cas contraire. 
+(b) Si les dettes augmentent, la variation est positive. Elle est négative dans le cas contraire. 
+(1) 
+ion par exemple : 
+ des variations liées aux dettes et créances sur cession et acquisition ou production 
+les encaissements liés 
+ ; 
+ des variations liées aux dettes et créances rattachées aux opérations de financement 
+(variation de créances liée aux subvention
+ ; 
+ de la variation des ecarts de conversion  
+ 
+
+=== PAGE 992 ===
+ 
+ 
+992 
+ 
+SYSCOHADA PRESENTATION DES ETATS FINANCIERS ANNUELS DU SYSTEME NORMAL 
+ de la variation des apporteurs sur le capital ; 
+ de la variation des apporteurs restant dû sur capital appelé ; 
+ de la variation du versement restant à effectuer sur titre de placement non libérés ; 
+  
+, toutes les dettes et créances relatives à la variation du 
+besoin de financement lié aux activités opérationnelles qui sont rattachables à un 
+compte de charge ou de produit retenu pour le calcul de la capacité d'autofinancement 
+globale. 
+On constate que le retraitement fait intervenir les variations des stocks, des créances et des 
+dettes liées aux activités opérationnelles (créances et dettes exclusivement liées à des produits 
+encaissables et charges décaissables retenus pour le calcul de la CAFG), c'est-à-dire les 
+composantes de la variation du besoin de financement lié aux activités opérationnelles. On 
+peut donc déduire que : 
+Capacité d'Autofinancement Globale (CAFG) 
+- 
+Variation du besoin de financement lié aux activités 
+opérationnelles (2) 
+= 
+Flux de trésorerie provenant des activités opérationnelles 
+ 
+ 
+(2) Une augmentation du besoin de financement lié aux activités opérationnelles  traduit une 
+variation négative de la trésorerie. Dans le cas inverse, une partie de la trésorerie qui avait été 
+investie  dans le besoin de financement lié aux activités opérationnelles est récupérée, la 
+variation est positive. 
+              
+                                    : Le montant des flux des activités opérationnelles permet de mesurer la 
+capacité à investir. Ce montant peut être rapporté au chiffre d'affaires. Ce taux exprime la              
+ ce taux est élevé, plus l'entité dispose de marges 
+disponibles pour investir. 
+ 
+1.3. Flux de trésorerie provenant des activités d'investissement 
+Les activités d'investissement correspondent à l'acquisition et la sortie d'actifs à long terme et 
+aux autres placements qui ne sont pas inclus dans les équivalents de trésorerie. 
+Sont considérés comme flux provenant des activités d
+ les décaissements 
+et encaissements liés aux acquisitions et aux cessions 
+corporelles et financières. 
+Interprétation      
+
+=== PAGE 993 ===
+ 
+ 
+993 
+ 
+SYSCOHADA PRESENTATION DES ETATS FINANCIERS ANNUELS DU SYSTEME NORMAL 
+EXEMPLES : 
+ 
+incorporelles 
+(marques, brevets, etc.), corporelles (terrains, constructions, matériel et outillage, etc.) 
+y compris les immobilisations produites par l
+ et les frais de développement 
+ ; 
+ entrées de trésorerie découlant de la cession des immobilisations incorporelles et 
+corporelles ; 
+ 
+de participations et autres titres à long terme, dépôts et cautionnements, prêts ou 
+avances à long terme consentis à des tiers etc.) ; 
+ entrées de trésorerie découlant de la cession et du remboursement des immobilisations 
+financières. 
+Par contre, les variations 
+ ne 
+figurent pas dans le tableau des flux.  
+EXEMPLES : 
+ 
+ ; 
+ « acquisition 
+contrat de location 
+acquisition. 
+En résumé, les flux de trésorerie provenant des activités d'investissement peuvent être 
+synthétisés de la façon suivante : 
+       Décaissements liés aux acquisitions d'immobilisations incorporelles, 
+corporelles et financières (1) 
++ 
+Encaissements liés aux c
+corporelles et financières (2) 
+= 
+Flux de trésorerie provenant des activités d'investissement  
+ 
+(1) 
+ 
+incorporelles, corporelles et financières.  
+
+=== PAGE 994 ===
+994
+SYSCOHADA PRESENTATION DES ETATS FINANCIERS ANNUELS DU SYSTEME NORMAL
+Pour reconstituer,
+faut utiliser la relation suivante par exemple :
+(2)
+= prix de cession des immobilisations -
+variation des créances sur cessions 
+(exercices N-N-1).
+Remarque : dans la conception du Tableau des flux de trésorerie du Système comptable 
+OHADA, la variation du besoin de financement global (BFG) est décomposée en deux 
+parties :
+variation du besoin de financement lié aux activités opérationnelles ;
+variation du besoin de financement lié aux
+.
+                                     : Le montant des flux de trésorerie des activités d'investissement 
+indique le besoin net de l'entité en matière d'investissement. Il peut être rapporté au chiffre 
+Une entité dont les investissements sont élevés et les cessions faibles ou nulles est dans une 
+stratégie de croissance. 
+Interprétation  
+= Variation des immobilisations corporelles nettes 
+(exercices N-N-1)
+   + Dotations aux amortissements (exercice N)
+   + Dotations aux dépréciations (exercice N) 
+   + Valeur comptable nette  des immobilisations  
+corporelles cédées (exercice N)
+    + Avances et acomptes sur immobilisations 
+xercice et 
+non livrées
+- Ecart et provision spéciale de réévaluation de 
+(exercice N) 
+- Coûts 
+relatifs 
+au 
+démantèlement, 
+à 
+remise 
+en 
+état 
+du 
+site 
+imputés 
+aux 
+ercice en cours
+-  Avances et acomptes, sur immobilisations 
+payés au cours des exercices précédents e du
+
+=== PAGE 995 ===
+ 
+ 
+995 
+ 
+SYSCOHADA PRESENTATION DES ETATS FINANCIERS ANNUELS DU SYSTEME NORMAL 
+Une entité dont les investissements sont élevés mais qui a cédé des immobilisations est plutôt 
+dans une stratégie de croissance et de reconfiguration de son outil de travail. Une entité qui 
+investit peu et cède des immobilisations est dans une stratégie de recentrage. 
+1.4. Flux de trésorerie provenant des activités de financement 
+Les flux des activités de financement sont ceux provenant des activités qui résultent des 
+changements dans l'importance et la composition des capitaux propres et des emprunts de 
+l'entité. 
+Sont considérés comme flux provenant des activités de financement, tous les décaissements et 
+encaissements résultant des changements dans le montant et la composition des capitaux 
+propres et des emprunts de l
+. 
+EXEMPLES : 
+ entrées de trésorerie provenant des augmentations de capital en numéraire ; 
+ entrées de trésorerie provenant de nouveaux emprunts ; 
+ entrées de trésorerie provenant des 
+ ; 
+ sorties de trésorerie liées aux distributions de dividendes ; 
+ 
+ ; 
+ sorties de trésorerie liées au remboursement de la dette de location-acquisition lorsque 
+-acquisition. 
+ Remarque : 
+constitue une transaction sans effet de trésorerie, il est important de noter que le 
+remboursement de la dette relative à ce contrat doit figurer dans les flux provenant des 
+activités de financement. En effet, dans les décaissements relatifs aux loyers de location 
+acquisition, seule la quote-part du loyer liée aux intérêts (compte 672 Intérêts dans 
+loyers de location acquisition) est maintenue dans les flux provenant des activités 
+opérationnelles. La part du décaissement relative au remboursement de la dette (compte 
+17 Dettes de location acquisition) a été exclue des flux provenant des activités 
+opérationnelles et considérée alors comme un flux provenant des activités de 
+financement.  
+de trésorerie ne figurent pas dans le tableau des flux.  
+
+=== PAGE 996 ===
+ 
+ 
+996 
+ 
+SYSCOHADA PRESENTATION DES ETATS FINANCIERS ANNUELS DU SYSTEME NORMAL 
+EXEMPLES : 
+ conversion de dettes en capitaux propres ; 
+ augmentation du capital par incorporation de réserves. 
+En résumé, les flux de trésorerie provenant des activités de financement peuvent être 
+synthétisés de la façon suivante : 
+ 
+         Augmentations de capital par apports nouveaux 
++ 
+Subventions d'investissement reçues 
+- 
+Prélèvements sur le capital 
+- 
+Distribution de dividendes 
+= 
+Flux de trésorerie provenant des capitaux propres (1) 
+ 
+Emprunts 
++ 
+Autres dettes financières 
+- 
+Remboursements des emprunts et autres dettes financières 
+= 
+Trésorerie provenant des capitaux étrangers (2) 
+= 
+Flux de trésorerie provenant des activités de financement (3) = (1) + (2) 
+ 
+                                    
+                                  : Le montant des flux de trésorerie des activités de financement explique 
+la manière dont l'entité se finance, soit sous la forme de fonds propres, soit sous la forme de 
+dettes financières
+ liés au financement révèle la stratégie de 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Interprétation      
+
+=== PAGE 997 ===
+997
+SYSCOHADA PRESENTATION DES ETATS FINANCIERS ANNUELS DU SYSTEME NORMAL
+31-12-
+        Durée (en mois)
+TABLEAU DES FLUX DE TRESORERIE
+REF
+LIBELLES
+Note
+EXERCICE 
+N
+EXERCICE 
+N-1
+ZA
+Trésorerie nette au 1er janvier
+A
+(Trésorerie actif N-1 - Trésorerie passif N-1)
+Flux de trésorerie provenant des activités opérationnelles
+FA
+  Capacité d'Autofinancement Globale (CAFG)
+FB
+-Actif circulant HAO (1)
+FC
+- Variation des stocks
+FD
+- Variation des créances 
+FE
++ Variation du passif circulant (1)
+Variation du BF lié aux activités opérationnelles
+(FB+FC+FD+FE)
+ZB
+Flux de trésorerie provenant des activités opérationnelles 
+(somme FA à FE)
+B
+Flux de trésorerie provenant 
+FF
+- Décaissements liés aux acquisitions d'immobilisations 
+incorporelles
+FG
+- Décaissements liés aux acquisitions d'immobilisations 
+corporelles
+FH
+- Décaissements liés aux acquisitions d'immobilisations 
+financières
+FI
++ Encaissements liés aux c
+incorporelles et corporelles 
+FJ
++ Encaissements liés aux c
+ZC
+Flux de trésorerie provenant des activités
+(somme FF à FJ)
+C
+Flux de trésorerie provenant du financement par les capitaux 
+propres
+FK
++ Augmentations de capital par apports nouveaux
+FL
++ Subventions d'investissement reçues
+FM
+- Prélèvements sur le capital 
+FN
+- Dividendes versés
+ZD
+Flux de trésorerie provenant des capitaux propres (somme 
+FK à FN)                                        
+D
+Trésorerie provenant du financement par les capitaux 
+étrangers
+FO
++ Emprunts
+FP
++ Autres dettes financières
+FQ
+- Remboursements des emprunts et autres dettes financières
+ZE
+Flux de trésorerie provenant des capitaux étrangers (somme 
+FO à FQ)
+E
+ZF
+Flux de trésorerie provenant des activités de financement 
+(D+E)
+F
+ZG
+VARIATION DE LA TRÉSORERIE NETTE DE LA 
+PÉRIODE (B+C+F)
+G
+ZH
+Trésorerie nette au 31 Décembre (G+A)
+H
+Contrôle : Trésorerie actif N - Trésorerie passif N = 
+[1] 
+des variations des créances et dettes
+(par 
+exemple variation
+ts reçues).
+SECTION 2 : MODELE DE TABLEAU DES FLUX DE TRESORERIE
+
+=== PAGE 998 ===
+998
+SYSCOHADA PRESENTATION DES ETATS FINANCIERS ANNUELS DU SYSTEME NORMAL
+SECTION 1 : 
+Règles générales de présentation du bilan
+SECTION 2 :
+Modèle de Notes annexes du Système Normal
+Notes annexes  du 
+Système Normal         
+Titre IX
+Chapitre 6
+PLAN COMPTABLE GENERAL 
+OHADA
+
+=== PAGE 999 ===
+ 
+ 
+999 
+ 
+SYSCOHADA PRESENTATION DES ETATS FINANCIERS ANNUELS DU SYSTEME NORMAL 
+ 
+ 
+ 
+ 
+ 
+1.1. Présentation des Notes annexes 
+Les Notes annexes font partie intégrante des états financiers. Les Notes annexes permettent de 
+compléter et de commenter l'information donnée par le Bilan, le Compte de résultat et le 
+Tableau des flux de trésorerie. Elle tient compte de toutes les informations utiles à la prise de 
+ 
+Toute information inscrite dans les Notes annexes ne peut pas se substituer à une inscription 
+dans le bilan et le compte de résultat. 
+Des informations déjà portées au Bilan ou au Compte de résultat n
+les Notes annexes. 
+information chiffrés des Notes annexes sont établis selon les mêmes principes 
+et dans les mêmes conditions que ceux du Bilan et du Compte de résultat. 
+Les Notes annexes doivent comporter obligatoirement une déclaration explicite de conformité 
+au Plan Comptable OHADA (PCGO). Les états financiers ne doivent être déclarés conformes 
+au Système 
+comptable OHADA. 
+1.2. Structure des Notes annexes  
+Chaque élément des états financiers de synthèse doit faire l'objet d'une référence croisée vers 
+l'information liée figurant dans les notes.  
+Les modéles de Notes ci-dessous non documentés ne doivent pas être joints aux états 
+financiers. Leur contenu peut être amélioré par les entités. 
+ 
+ 
+ 
+ 
+ 
+ 
+SECTION 1 : Règles générales de présentation 
+
+=== PAGE 1000 ===
+1000
+SYSCOHADA PRESENTATION DES ETATS FINANCIERS ANNUELS DU SYSTEME NORMAL
+NOTE 1
+DETTES GARANTIES PAR DES SURETES REELLES
+NOTE 2
+INFORMATIONS OBLIGATOIRES
+NOTE 3A
+IMMOBILISATION BRUTE
+NOTE 3B
+BIENS PRIS EN LOCATION ACQUISITION
+NOTE 3C
+IMMOBILISATIONS : AMORTISSEMENTS
+NOTE 3D
+IMMOBILISATIONS : PLUS-VALUES ET MOINS VALUE DE CESSION
+NOTE 3E
+INFORMATIONS SUR LES REEVALUATIONS EFFECTUEES PAR L'ENTITE
+NOTE 3F
+NOTE 4
+IMMOBILISATIONS FINANCIERES
+NOTE 5
+ACTIF CIRCULANT HAO
+NOTE 6
+STOCKS ET ENCOURS
+NOTE 7
+CLIENTS PRODUITS A RECEVOIR
+NOTE 8
+AUTRES CREANCES
+NOTE 9
+TITRES DE PLACEMENT
+NOTE 10
+VALEURS A ENCAISSER
+NOTE 11
+DISPONIBILITES
+NOTE 12
+ECARTS DE CONVERSION
+NOTE 13
+CAPITAL : VALEUR NOMINALE DES ACTIONS OU PARTS
+NOTE 14
+PRIMES ET RESERVES
+NOTE 15A
+SUBVENTIONS ET PROVISIONS REGLEMENTEES
+NOTE 15B
+AUTRES FONDS PROPRES
+NOTE 16A
+DETTES FINANCIERES ET RESSOURCES ASSIMILEES
+NOTE 16B
+ENGAGEMENTS DE RETRAITE ET AVANTAGES ASSIMILES
+(METHODE ACTUARIELLE)
+NOTE 16B bis
+ENGAGEMENTS DE RETRAITE ET AVANTAGES ASSIMILES                      
+(METHODE ACTUARIELLE)
+NOTE 16C
+ACTIFS ET PASSIFS EVENTUELS
+NOTE 17
+FOURNISSEURS D'EXPLOITATION
+NOTE 18
+DETTES  FISCALES ET SOCIALES
+NOTE 19
+AUTRES DETTES ET PROVISIONS POUR RISQUES A COURT TERME
+NOTE 20
+BANQUES, CREDIT D'ESCOMPTE ET DE TRESORERIE
+NOTE 21
+CHIFFRE D'AFFAIRES  ET AUTRES PRODUITS
+NOTE 22
+ACHATS
+NOTE 23
+TRANSPORTS
+NOTE 24
+SERVICES EXTERIEURS
+NOTE 25
+IMPOTS ET TAXES
+NOTE 26
+AUTRES CHARGES
+NOTE 27A
+CHARGES DE PERSONNEL
+NOTE 27B
+EFFECTIFS, MASSE SALARIALE ET PERSONNEL EXTERIEUR
+NOTE 28
+PROVISIONS  ET DEPRECIATIONS INSCRITES AU BILAN
+NOTE 29
+CHARGES ET REVENUS FINANCIERS
+NOTE 30
+AUTRES  CHARGES ET PRODUITS HAO
+NOTE 31
+REPARTITION DU RESULTAT ET AUTRES ELEMENTS CARACTERISTIQUES 
+DES CINQ DERNIERS EXERCICES
+NOTE 32
+PRODUCTION DE L'EXERCICE
+NOTE 33
+ACHATS DESTINES A LA PRODUCTION
+NOTE 34
+FICHE DE SYNTHESE DES PRINCIPAUX INDICATEURS FINANCIERS
+NOTE 35
+LISTE DES INFORMATIONS SOCIALES, ENVIRONNEMENTALES ET 
+SOCIETALES A FOURNIR
+NOTE 36
+TABLES DES CODES
+NOTES
+INTITULES
+
+=== PAGE 1001 ===
+1001
+SYSCOHADA PRESENTATION DES ETATS FINANCIERS ANNUELS DU SYSTEME NORMAL
+31-12-
+NOTE 1 
+DETTES GARANTIES PAR DES SURETES REELLES 
+LIBELLES
+Note
+Montant 
+brut
+SURETES REELLES
+Hypothèques
+Nantissements
+Gages/
+autres
+Dettes financières et ressources 
+assimilées :
+Emprunts obligataires convertibles 
+Autres emprunts obligataires
+Emprunts et dettes des établissements de 
+crédit 
+Autres dettes financières
+SOUS TOTAL (1)
+Dettes de location-acquisition :
+Dettes de crédit-bail immobilier
+Dettes de crédit-bail mobilier
+Dettes sur contrats de location-vente
+Dettes sur contrats de location-acquisition
+SOUS TOTAL (2)
+Dettes du passif circulant :
+Fournisseurs et comptes rattachés
+Clients
+Personnel
+Sécurité sociale et organismes sociaux
+Etat
+Organismes internationaux
+Associés et groupe
+Créditeurs divers
+SOUS TOTAL (3)
+TOTAL (1) + (2) + (3)
+ENGAGEMENTS FINANCIERS
+Engagements 
+donnés
+Engagements 
+reçus
+Engagements consentis à des entités liées
+Primes de remboursement non échues
+Avals, cautions, garanties
+hypothèques, nantissements, gages, autres
+Effets escomptés non échus
+Créances commerciales et professionnelles cédées
+Abandons de créances conditionnels
+TOTAL
+Commentaire :  
+Indiquer la raison d'être des suretés.
+NOTE 1 : DETTES GARANTIES PAR DES SURETES REELLES
+
+=== PAGE 1002 ===
+1002
+SYSCOHADA PRESENTATION DES ETATS FINANCIERS ANNUELS DU SYSTEME NORMAL
+le 31-12-
+     
+NOTE 2
+INFORMATIONS OBLIGATOIRES
+A - DECLARATION DE CONFORMITE AU SYSCOHADA
+B - REGLES ET METHODES COMPTABLES
+C- DEROGATION AUX POSTULATS ET CONVENTIONS COMPTABLES
+D - INFORMATIONS COMPLEMENTAIRES RELATIVES AU BILAN, AU COMPTE DE 
+RESULTAT ET AU TABLEAU DES FLUX DE TRESORERIE
+NOTE 2 : INFORMATIONS OBLIGATOIRES
+
+=== PAGE 1003 ===
+
+=== PAGE 1004 ===
+
+=== PAGE 1005 ===
+
+=== PAGE 1006 ===
+
+=== PAGE 1007 ===
+1007
+SYSCOHADA PRESENTATION DES ETATS FINANCIERS ANNUELS DU SYSTEME NORMAL
+-12-
+  
+NOTE 3E
+INFORMATIONS SUR LES REEVALUATIONS EFFECTUEES PAR L'ENTITE
+Nature et date des réévaluations :
+Eléments réévalués par postes du bilan
+Montants coûts 
+historiques
+Amortissements supplémentaires
+Méthode de réévaluation utilisée :
+Traitement fiscal de l'écart de réévaluation et des 
+amortissements supplémentaires :
+Montant de l'écart incorporé au 
+capital :
+NOTE 3E : INFORMATIONS SUR LES REEVALUATIONS EFFECTUEES 
+PAR L'ENTITE
+
+=== PAGE 1008 ===
+1008
+SYSCOHADA PRESENTATION DES ETATS FINANCIERS ANNUELS DU SYSTEME NORMAL
+Libellés
+Année 
+N
+Année 
+N-1
+Variation 
+en %
+Créances à un 
+an au plus
+Créances à 
+plus d'un 
+an et à 
+deux ans 
+au plus
+Créances 
+à plus de 
+deux ans
+Titres de participation
+Prêts et créances
+Prêt au personnel
+Créances sur  l'état
+Titres immobilisés
+Dépôts et cautionnements
+Intérêts courus
+TOTAL BRUT
+Dépréciations  titres de 
+participation
+Dépréciations autres 
+immobilisations
+TOTAL NET DE 
+DEPRECIATION
+Liste des filiales et participations :
+Dénomination sociale
+Localisation 
+(ville / pays)
+Valeur 
+d'acquisition
+% Détenu
+Montant 
+des 
+capitaux 
+propres 
+filiale
+Résultat 
+dernier 
+exercice 
+filiale 
+Commentaire :  
+Justifier toute  variation significative.
+Commenter toutes les créances anciennes.
+Pour les créances relatives à la concession, faire un descriptif de l'accord. 
+Indiquer :
+-
+la nature de la créance ;
+-
+la durée de la concession ;
+-
+l'échéance.
+Indiquer le nombre et la date d'acquisition des actions ou parts propres.
+Dépréciation : indiquer les évènements et les circonstances qui ont motivé la 
+dépréciation ou la reprise.
+NOTE 4: IMMOBILISATIONS FINANCIERES
+Désignation entité:.............................................                                 Exercice clos le 31-12-.........................
+:.................................                                       Durée (en mois)......................
+NOTE 4
+IMMOBILISATIONS FINANCIERES
+
+=== PAGE 1009 ===
+1009
+SYSCOHADA PRESENTATION DES ETATS FINANCIERS ANNUELS DU SYSTEME NORMAL
+-12-
+NOTE 5
+ACTIF CIRCULANT HAO
+Libellés
+Année N
+Année N-1
+Variation en 
+%
+Créances sur cessions d'immobilisations
+Autres créances hors activités ordinaires
+TOTAL BRUT
+Dépréciations des créances HAO
+TOTAL NET DE DEPRECIATION
+Commentaire: 
+Commenter toute  variation significative.
+Dépréciation : indiquer les évènements et les circonstances qui ont motivé la
+           dépréciation ou la reprise.
+DETTES  CIRCULANTES HAO
+Libellés
+Année N
+Année N-1
+Variation en 
+%
+Fournisseurs d'investissements
+Fournisseurs d'investissements effets à payer
+Versements restant à effectuer sur titres de 
+participation et titres immobilisés non libérés
+Autres dettes hors activités ordinaires
+TOTAL 
+Commentaire : 
+Indiquer la date de cession et la nature de l'immobilisation achetée et/ou cédée.
+Expliciter toute variation significative.
+NOTE 5: ACTIF CIRCULANT HAO
+
+=== PAGE 1010 ===
+1010
+SYSCOHADA PRESENTATION DES ETATS FINANCIERS ANNUELS DU SYSTEME NORMAL
+-12-
+NOTE 6
+STOCKS ET EN COURS (1)
+Libellés
+Année N
+Année N-1
+Variation 
+en %
+Marchandises
+Matières premières et fournitures liées
+Autres approvisionnements
+Produits en cours
+Services en cours
+Produits finis
+Produits intermédiaires
+Stocks en cours de route, en consignation ou en dépôt
+TOTAL BRUT STOCKS ET EN COURS
+Dépréciations des stocks
+TOTAL NET DE DEPRECIATION
+(1)    Les stocks H.A.O. seront inscrits dans l'actif circulant H.A.O. que lorsque leur montant 
+total est significatif (supérieur à 5 % du total de l'actif circulant).
+Commentaire : 
+Indiquer la date de prise d'inventaire et décrire brièvement la 
+procédure, les méthodes comptables adoptées pour évaluer le 
+stock.
+Commenter toute variation significative des stocks.
+Indiquer le détail des stocks dépréciés et les évènements et circonstances qui ont 
+conduit à la dépréciation et à la reprise.
+NOTE 6 : STOCKS ET EN COURS

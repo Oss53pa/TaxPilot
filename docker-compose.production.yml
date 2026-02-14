@@ -1,0 +1,338 @@
+version: '3.8'
+
+# ============================================================================
+# FiscaSync - Docker Compose Production Configuration
+# ============================================================================
+
+services:
+  # ==========================================================================
+  # PostgreSQL Database
+  # ==========================================================================
+  postgres:
+    image: postgres:15-alpine
+    container_name: fiscasync_postgres_prod
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-fiscasync_prod}
+      POSTGRES_USER: ${POSTGRES_USER:-fiscasync_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=fr_FR.UTF-8"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backups/db:/backups
+    ports:
+      - "127.0.0.1:5432:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-fiscasync_user}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - fiscasync_network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ==========================================================================
+  # Redis Cache & Message Broker
+  # ==========================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: fiscasync_redis_prod
+    command: >
+      redis-server
+      --appendonly yes
+      --requirepass ${REDIS_PASSWORD:?REDIS_PASSWORD must be set}
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    ports:
+      - "127.0.0.1:6379:6379"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    networks:
+      - fiscasync_network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ==========================================================================
+  # Django Backend API
+  # ==========================================================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.production
+      args:
+        BUILD_DATE: ${BUILD_DATE:-unknown}
+        VCS_REF: ${VCS_REF:-unknown}
+    container_name: fiscasync_backend_prod
+    env_file:
+      - ./backend/.env.production
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.settings.production
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-fiscasync_user}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-fiscasync_prod}
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379
+      - CELERY_BROKER_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
+    volumes:
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+      - ./logs/backend:/app/logs
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8000:8000"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - fiscasync_network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+    command: >
+      sh -c "python manage.py migrate --noinput &&
+             python manage.py collectstatic --noinput &&
+             gunicorn config.wsgi:application
+             --bind 0.0.0.0:8000
+             --workers 4
+             --threads 2
+             --worker-class gthread
+             --worker-tmp-dir /dev/shm
+             --timeout 300
+             --graceful-timeout 30
+             --keep-alive 5
+             --max-requests 1000
+             --max-requests-jitter 50
+             --access-logfile /app/logs/gunicorn-access.log
+             --error-logfile /app/logs/gunicorn-error.log
+             --log-level info"
+
+  # ==========================================================================
+  # Celery Worker (Async Tasks)
+  # ==========================================================================
+  celery_worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.production
+    container_name: fiscasync_celery_worker_prod
+    env_file:
+      - ./backend/.env.production
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.settings.production
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-fiscasync_user}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-fiscasync_prod}
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379
+      - CELERY_BROKER_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
+    volumes:
+      - media_volume:/app/media
+      - ./logs/celery:/app/logs
+    depends_on:
+      - redis
+      - postgres
+      - backend
+    restart: unless-stopped
+    networks:
+      - fiscasync_network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+    command: >
+      celery -A config worker
+      --loglevel=info
+      --concurrency=4
+      --max-tasks-per-child=1000
+      --time-limit=3600
+      --soft-time-limit=3300
+      --logfile=/app/logs/celery-worker.log
+
+  # ==========================================================================
+  # Celery Beat (Scheduled Tasks)
+  # ==========================================================================
+  celery_beat:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.production
+    container_name: fiscasync_celery_beat_prod
+    env_file:
+      - ./backend/.env.production
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.settings.production
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-fiscasync_user}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-fiscasync_prod}
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379
+      - CELERY_BROKER_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
+    volumes:
+      - ./logs/celery:/app/logs
+    depends_on:
+      - redis
+      - postgres
+      - backend
+    restart: unless-stopped
+    networks:
+      - fiscasync_network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    command: >
+      celery -A config beat
+      --loglevel=info
+      --logfile=/app/logs/celery-beat.log
+
+  # ==========================================================================
+  # Celery Flower (Monitoring)
+  # ==========================================================================
+  flower:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.production
+    container_name: fiscasync_flower_prod
+    env_file:
+      - ./backend/.env.production
+    environment:
+      - CELERY_BROKER_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
+      - FLOWER_PORT=5555
+      - FLOWER_BASIC_AUTH=${FLOWER_USER:-admin}:${FLOWER_PASSWORD:?FLOWER_PASSWORD must be set}
+    ports:
+      - "127.0.0.1:5555:5555"
+    depends_on:
+      - redis
+      - celery_worker
+    restart: unless-stopped
+    networks:
+      - fiscasync_network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    command: >
+      celery -A config flower
+      --port=5555
+      --basic_auth=${FLOWER_USER:-admin}:${FLOWER_PASSWORD}
+
+  # ==========================================================================
+  # React Frontend
+  # ==========================================================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.production
+      args:
+        VITE_API_URL: ${VITE_API_URL:-https://api.fiscasync.com}
+        VITE_SENTRY_DSN: ${VITE_SENTRY_DSN:-}
+    container_name: fiscasync_frontend_prod
+    restart: unless-stopped
+    networks:
+      - fiscasync_network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ==========================================================================
+  # Nginx Reverse Proxy
+  # ==========================================================================
+  nginx:
+    image: nginx:alpine
+    container_name: fiscasync_nginx_prod
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - static_volume:/var/www/static:ro
+      - media_volume:/var/www/media:ro
+      - ./logs/nginx:/var/log/nginx
+    depends_on:
+      - backend
+      - frontend
+    restart: unless-stopped
+    networks:
+      - fiscasync_network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  # ==========================================================================
+  # Backup Service (Automatic backups)
+  # ==========================================================================
+  backup:
+    build:
+      context: ./scripts/backup
+      dockerfile: Dockerfile
+    container_name: fiscasync_backup
+    env_file:
+      - ./backend/.env.production
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_DB=${POSTGRES_DB:-fiscasync_prod}
+      - POSTGRES_USER=${POSTGRES_USER:-fiscasync_user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - BACKUP_RETENTION_DAYS=${BACKUP_RETENTION_DAYS:-30}
+      - S3_BUCKET=${S3_BACKUP_BUCKET:-}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-}
+    volumes:
+      - ./backups:/backups
+      - media_volume:/app/media:ro
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    networks:
+      - fiscasync_network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+# ============================================================================
+# Networks
+# ============================================================================
+networks:
+  fiscasync_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+
+# ============================================================================
+# Volumes
+# ============================================================================
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  static_volume:
+    driver: local
+  media_volume:
+    driver: local

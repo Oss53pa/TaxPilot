@@ -1,0 +1,14 @@
+/* Contrast fix - minimal rules only */
+/* Sidebar/drawer/appbar styling is handled by Layout.tsx MUI sx props */
+
+/* Buttons with dark backgrounds need white text */
+.MuiButton-containedPrimary,
+.MuiButton-containedSecondary {
+  color: #ffffff !important;
+}
+
+/* Chips with dark backgrounds */
+.MuiChip-colorPrimary,
+.MuiChip-colorSecondary {
+  color: #ffffff !important;
+}

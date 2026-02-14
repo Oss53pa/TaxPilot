@@ -1,0 +1,30 @@
+/**
+ * Corrections de styles pour la liasse fiscale
+ * Uniquement pour les tableaux de liasse - PAS de règles sidebar/drawer
+ */
+
+/* Correction pour les tableaux de liasse */
+.liasse-table .MuiTableCell-root {
+  color: inherit !important;
+}
+
+/* En-têtes avec arrière-plans colorés */
+.liasse-table .MuiTableHead-root .MuiTableCell-root {
+  color: white !important;
+}
+
+/* Lignes de données */
+.liasse-table .MuiTableRow-root .MuiTableCell-root {
+  color: rgba(0, 0, 0, 0.87) !important;
+}
+
+/* Chips dans les tableaux */
+.liasse-table .MuiChip-root {
+  color: inherit;
+}
+
+/* Navigation interne des liasses */
+.liasse-sidebar .MuiListItemText-primary,
+.liasse-sidebar .MuiListItemText-secondary {
+  color: inherit !important;
+}
