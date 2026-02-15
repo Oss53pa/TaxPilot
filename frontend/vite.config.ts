@@ -36,75 +36,21 @@ export default defineConfig({
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
-        manualChunks: {
-          // Chunks par fonctionnalité métier
-          'liasse-core': [
-            './src/pages/liasse/ModernLiasseComplete',
-            './src/pages/liasse/ModernLiasseProduction',
-            './src/pages/LiasseCompleteFinal',
-            './src/components/liasse/LiasseTableauGenerique',
-          ],
-          'liasse-sheets': [
-            './src/components/liasse/sheets/BilanActifSYSCOHADA',
-            './src/components/liasse/sheets/BilanPassifSYSCOHADA',
-            './src/components/liasse/BilanActif',
-            './src/components/liasse/CompteResultat',
-          ],
-          'balance-module': [
-            './src/pages/balance/ModernBalance',
-            './src/pages/import/ModernImportBalance',
-            './src/components/Balance/BalanceConsultation',
-            './src/components/Balance/BalanceImport',
-          ],
-          'audit-compliance': [
-            './src/pages/audit/ModernAudit',
-            './src/pages/compliance/ModernCompliance',
-            './src/pages/teledeclaration/ModernTeledeclaration',
-          ],
-          'advanced-modules': [
-            './src/pages/consolidation/ModernConsolidation',
-            './src/pages/templates/ModernTemplates',
-            './src/pages/reporting/ModernReporting',
-          ],
-          'syscohada-plan': [
-            './src/data/syscohada/plan/index',
-            './src/data/syscohada/plan/classe1',
-            './src/data/syscohada/plan/classe2',
-            './src/data/syscohada/plan/classe3',
-            './src/data/syscohada/plan/classe4',
-            './src/data/syscohada/plan/classe5',
-            './src/data/syscohada/plan/classe6',
-            './src/data/syscohada/plan/classe7',
-            './src/data/syscohada/plan/classe8',
-            './src/data/syscohada/plan/classe9',
-          ],
-          'syscohada-reference': [
-            './src/data/syscohada/types',
-            './src/services/syscohadaReferenceService',
-            './src/pages/plans/OperationsSpecifiques',
-          ],
-          // Vendors
-          'mui-vendor': [
-            '@mui/material',
-            '@mui/icons-material',
-            '@mui/lab',
-            '@mui/x-data-grid',
-          ],
-          'react-vendor': [
-            'react',
-            'react-dom',
-            'react-router-dom',
-          ],
-          'form-vendor': [
-            'react-hook-form',
-            '@hookform/resolvers',
-            'yup',
-          ],
-          'utils-vendor': [
-            'axios',
-            'zustand',
-            'dayjs',
-          ],
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('@mui/') || id.includes('@emotion/')) {
+              return 'mui-vendor';
+            }
+            if (id.includes('react-dom') || id.includes('react-router') || id.includes('/react/')) {
+              return 'react-vendor';
+            }
+            if (id.includes('react-hook-form') || id.includes('@hookform') || id.includes('/yup/')) {
+              return 'form-vendor';
+            }
+            if (id.includes('/axios/') || id.includes('/zustand/') || id.includes('/dayjs/')) {
+              return 'utils-vendor';
+            }
+          }
         },
       },
     },
