@@ -25,7 +25,7 @@ import {
   Tab,
   Typography,
   IconButton,
-  Tooltip,
+  // Tooltip,
   Table,
   TableBody,
   TableCell,
@@ -139,6 +139,7 @@ const MODES_ACQUISITION = [
   'Augmentation de capital',
   'Autre'
 ]
+void MODES_ACQUISITION;
 
 interface TabPanelProps {
   children?: React.ReactNode
@@ -205,7 +206,7 @@ const EntrepriseSettings: React.FC = () => {
     handleSubmit,
     watch,
     reset,
-    formState: { errors, isDirty },
+    formState: { errors },
   } = useForm<EntrepriseFormData>({
     resolver: yupResolver(entrepriseSchema) as any,
     defaultValues: {

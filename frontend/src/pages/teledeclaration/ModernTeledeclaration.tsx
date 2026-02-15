@@ -677,7 +677,7 @@ const ModernTeledeclaration: React.FC = () => {
                 </Typography>
 
                 <List disablePadding>
-                  {transmissionSteps.map((step, index) => (
+                  {transmissionSteps.map((step, _index) => (
                     <ListItem key={step.id} sx={{ px: 0, py: 1, alignItems: 'flex-start' }}>
                       <ListItemIcon sx={{ minWidth: 32, mt: 0.5 }}>
                         <Avatar

@@ -20,7 +20,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Paper,
+  // Paper,
   TablePagination,
   Menu,
   MenuItem,
@@ -38,7 +38,7 @@ import {
   Stack,
   Divider,
   Tooltip,
-  Avatar,
+  // Avatar,
 } from '@mui/material'
 import {
   Search as SearchIcon,
@@ -59,6 +59,7 @@ import {
   Refresh as RefreshIcon,
   Close as CloseIcon,
 } from '@mui/icons-material'
+import { StatCard } from '@/components/shared/StatCard'
 import { balanceService } from '@/services/balanceService'
 import { entrepriseService } from '@/services/entrepriseService'
 import { MOCK_BALANCE } from '../../data/mockBalance'
@@ -87,38 +88,6 @@ interface BalanceStats {
   totalCredit: number
   balanceCheck: boolean
 }
-
-const StatCard: React.FC<{
-  title: string;
-  value: string | number;
-  color: string;
-  icon: React.ReactElement;
-  subtitle?: string;
-  theme: any;
-}> = ({ title, value, color, icon, subtitle, theme }) => (
-  <Card elevation={0} sx={{ border: `1px solid ${alpha(theme.palette.divider, 0.08)}`, height: '100%' }}>
-    <CardContent sx={{ p: 3 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-        <Box sx={{ flex: 1 }}>
-          <Typography variant="h4" sx={{ fontWeight: 700, mb: 0.5 }}>
-            {typeof value === 'number' ? value.toLocaleString() : value}
-          </Typography>
-          <Typography variant="body2" sx={{ fontWeight: 600 }}>
-            {title}
-          </Typography>
-          {subtitle && (
-            <Typography variant="caption" color="text.secondary">
-              {subtitle}
-            </Typography>
-          )}
-        </Box>
-        <Avatar sx={{ backgroundColor: alpha(color, 0.1), color, width: 48, height: 48 }}>
-          {icon}
-        </Avatar>
-      </Box>
-    </CardContent>
-  </Card>
-)
 
 const ModernBalance: React.FC = () => {
   const theme = useTheme()
@@ -223,7 +192,7 @@ const ModernBalance: React.FC = () => {
       ])
 
       const balancesResponse = balancesRaw as Record<string, any>
-      const _entreprises = entreprisesResponse.results || []
+      void entreprisesResponse
       const balances = balancesResponse.results || []
 
       // Si on a des balances, récupérer les données détaillées
@@ -415,7 +384,6 @@ const ModernBalance: React.FC = () => {
             color={theme.palette.primary.main}
             icon={<BalanceIcon />}
             subtitle="Comptes actifs"
-            theme={theme}
           />
         </Grid>
         <Grid item xs={12} sm={6} lg={3}>
@@ -425,7 +393,6 @@ const ModernBalance: React.FC = () => {
             color={theme.palette.success.main}
             icon={<ValidatedIcon />}
             subtitle={`${((balanceStats.validatedAccounts / balanceStats.totalAccounts) * 100).toFixed(1)}% du total`}
-            theme={theme}
           />
         </Grid>
         <Grid item xs={12} sm={6} lg={3}>
@@ -434,7 +401,6 @@ const ModernBalance: React.FC = () => {
             value={`${formatAmount(balanceStats.totalDebit)}`}
             color={theme.palette.error.main}
             icon={<TrendingDownIcon />}
-            theme={theme}
           />
         </Grid>
         <Grid item xs={12} sm={6} lg={3}>
@@ -443,7 +409,6 @@ const ModernBalance: React.FC = () => {
             value={`${formatAmount(balanceStats.totalCredit)}`}
             color={theme.palette.success.main}
             icon={<TrendingUpIcon />}
-            theme={theme}
           />
         </Grid>
       </Grid>

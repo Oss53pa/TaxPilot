@@ -294,7 +294,7 @@ const ModernCompliance: React.FC = () => {
     }
   ]
 
-  const _regulations: Regulation[] = [
+  const regulations: Regulation[] = [
     {
       id: '1',
       code: 'OHADA-2024-001',
@@ -356,6 +356,8 @@ const ModernCompliance: React.FC = () => {
       status: 'open'
     }
   ]
+
+  void regulations;
 
   const regulatoryUpdates: RegulatoryUpdate[] = [
     {

@@ -58,8 +58,8 @@ const ModernDashboard = () => {
       ])
 
       setDashboardStats(statsResponse)
-      setAuditSessions(auditsResponse.results || [])
-      setRecentGenerations(generationsResponse.results || [])
+      setAuditSessions((auditsResponse as any).results || [])
+      setRecentGenerations((generationsResponse as any).results || [])
     } catch (error) {
       console.error('❌ Error loading dashboard data:', error)
     } finally {

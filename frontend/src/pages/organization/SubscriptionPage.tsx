@@ -31,7 +31,7 @@ import {
   TrendingUp as TrendingUpIcon,
   Warning as WarningIcon,
   Description as DescriptionIcon,
-  People as PeopleIcon,
+  // People as PeopleIcon,
   Storage as StorageIcon,
 } from '@mui/icons-material'
 import organizationService, { Organization, Subscription } from '../../services/organizationService'

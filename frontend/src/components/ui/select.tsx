@@ -28,5 +28,5 @@ export const SelectContent = ({ children }: { children: React.ReactNode }) => <>
 export const SelectItem = ({ value, children }: { value: string; children: React.ReactNode }) => (
   <MenuItem value={value}>{children}</MenuItem>
 )
-export const SelectTrigger = ({ children }: { children: React.ReactNode }) => <>{children}</>
+export const SelectTrigger = ({ children }: { children: React.ReactNode; className?: string }) => <>{children}</>
 export const SelectValue = ({ placeholder }: { placeholder?: string }) => <span>{placeholder}</span>

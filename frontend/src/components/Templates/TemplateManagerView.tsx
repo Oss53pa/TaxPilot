@@ -156,7 +156,7 @@ export default function TemplateManagerView() {
 
   const createTemplate = async () => {
     try {
-      const created = await templatesService.createTemplate(newTemplate)
+      const created = await templatesService.createTemplate(newTemplate as any)
       toast({
         title: "Template créé",
         description: `Le template "${created.nom}" a été créé avec succès`
@@ -549,7 +549,7 @@ export default function TemplateManagerView() {
                       )}
                       {instance.statut === 'TERMINE' && instance.fichier_genere && (
                         <Button
-                          size="sm"
+                          size="small"
                           variant="outlined"
                           onClick={() => downloadInstance(instance.id)}
                         >

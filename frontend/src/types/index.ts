@@ -145,7 +145,7 @@ export interface LiasseFiscale extends BaseEntity {
   exercice: string
   type_liasse: TypeLiasse
   statut: 'BROUILLON' | 'VALIDEE' | 'DECLAREE' | 'ARCHIVEE'
-  donnees_json: Record<string, any>
+  donnees_json: Record<string, unknown>
   date_generation?: string
   date_validation?: string
   date_declaration?: string
@@ -176,7 +176,7 @@ export interface Template extends BaseEntity {
   type_template: 'EXCEL' | 'WORD' | 'PDF' | 'XML'
   type_liasse: TypeLiasse
   fichier_modele: string
-  mapping_json: Record<string, any>
+  mapping_json: Record<string, unknown>
   is_official: boolean
   description?: string
 }
@@ -253,7 +253,7 @@ export interface EntrepriseFormData {
 }
 
 // Types pour les API
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean
   data?: T
   message?: string
@@ -303,7 +303,7 @@ export interface ConfigurationOnboarding extends BaseEntity {
   pourcentage_completion: number
   configuration_terminee: boolean
   date_completion?: string
-  tests_validation: Record<string, any>
+  tests_validation: Record<string, boolean>
   derniere_validation?: string
 }
 
@@ -316,7 +316,7 @@ export interface Notification extends BaseEntity {
   lue: boolean
   date_lecture?: string
   action_url?: string
-  donnees_supplementaires?: Record<string, any>
+  donnees_supplementaires?: Record<string, unknown>
 }
 
 // Types pour les graphiques et dashboards
@@ -342,6 +342,6 @@ export interface ChartData {
 export interface TaxPilotError {
   code: string
   message: string
-  details?: Record<string, any>
+  details?: Record<string, unknown>
   timestamp: string
 }

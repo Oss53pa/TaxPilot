@@ -49,9 +49,9 @@ export const useAuthStore = create<AuthState>()(
           } else {
             throw new Error(response.message || 'Échec de l\'authentification')
           }
-        } catch (error: any) {
+        } catch (error) {
           set({
-            error: error.message || 'Erreur de connexion',
+            error: error instanceof Error ? error.message : 'Erreur de connexion',
             isLoading: false,
             isAuthenticated: false,
           })
@@ -90,9 +90,9 @@ export const useAuthStore = create<AuthState>()(
           }
 
           return response
-        } catch (error: any) {
+        } catch (error) {
           set({
-            error: error.message || 'Erreur lors de l\'inscription',
+            error: error instanceof Error ? error.message : 'Erreur lors de l\'inscription',
             isLoading: false,
             isAuthenticated: false,
           })

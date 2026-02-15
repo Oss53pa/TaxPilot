@@ -23,7 +23,7 @@ import {
 import {
   ExpandMore as ExpandMoreIcon,
   RestartAlt as ResetIcon,
-  Save as SaveIcon,
+  // Save as SaveIcon,
   Warning as WarningIcon,
 } from '@mui/icons-material'
 import { TAUX_FISCAUX_CI } from '@/config/taux-fiscaux-ci'

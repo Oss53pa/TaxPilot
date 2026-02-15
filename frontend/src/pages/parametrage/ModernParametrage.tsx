@@ -4,6 +4,9 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react'
+import { TabPanel } from '@/components/shared/TabPanel'
+import { logger } from '@/utils/logger'
+import { LEGAL_FORMS, SECTORS, TAX_REGIMES, OHADA_COUNTRIES } from '@/data/referenceData'
 import {
   Box,
   Grid,
@@ -89,6 +92,7 @@ import {
   TextFields as TextFieldsIcon,
   FormatSize as FormatSizeIcon,
   Notifications as NotificationsIcon,
+  Cloud as CloudIcon,
 } from '@mui/icons-material'
 
 // Structure entreprise avec tous les paramètres requis
@@ -220,7 +224,7 @@ const ModernParametrage: React.FC = () => {
   // }, [autoSaveEnabled, handleAutoSave])
 
   // EX-PARAM-003: Détection automatique du type de liasse
-  const _calculatedLiasseType = useMemo(() => {
+  const calculatedLiasseType = useMemo(() => {
     const { revenue, totalAssets, employees } = companyConfig
     
     // Seuils SYSCOHADA
@@ -231,7 +235,8 @@ const ModernParametrage: React.FC = () => {
     }
     return 'simplifie'
   }, [companyConfig.revenue, companyConfig.totalAssets, companyConfig.employees])
-  
+  void calculatedLiasseType;
+
   // Désactivé temporairement pour éviter la boucle infinie
   // const updateLiasseTypeIfNeeded = useCallback(() => {
   //   const newLiasseType = calculatedLiasseType;
@@ -247,52 +252,12 @@ const ModernParametrage: React.FC = () => {
   //   updateLiasseTypeIfNeeded()
   // }, [updateLiasseTypeIfNeeded])
 
-  // Données de référence
-  const legalForms = [
-    'SA - Société Anonyme',
-    'SARL - Société à Responsabilité Limitée',
-    'SAS - Société par Actions Simplifiée',
-    'SNC - Société en Nom Collectif',
-    'SCS - Société en Commandite Simple',
-    'GIE - Groupement d\'Intérêt Économique',
-    'Entreprise Individuelle',
-    'Coopérative'
-  ]
-
-  const sectors = [
-    { code: 'A', name: 'Agriculture, sylviculture et pêche' },
-    { code: 'B', name: 'Industries extractives' },
-    { code: 'C', name: 'Industrie manufacturière' },
-    { code: 'D', name: 'Production et distribution d\'électricité' },
-    { code: 'E', name: 'Production et distribution d\'eau' },
-    { code: 'F', name: 'Construction' },
-    { code: 'G', name: 'Commerce' },
-    { code: 'H', name: 'Transports et entreposage' },
-    { code: 'I', name: 'Hébergement et restauration' },
-    { code: 'J', name: 'Information et communication' },
-    { code: 'K', name: 'Activités financières et d\'assurance' },
-    { code: 'L', name: 'Activités immobilières' },
-    { code: 'M', name: 'Activités spécialisées' },
-    { code: 'N', name: 'Activités de services administratifs' }
-  ]
-
-  const taxRegimes = [
-    'Réel normal',
-    'Réel simplifié',
-    'Micro-entreprise',
-    'Forfait'
-  ]
-
-  const countries = [
-    { code: 'CI', name: 'Côte d\'Ivoire', flag: '🇨🇮' },
-    { code: 'SN', name: 'Sénégal', flag: '🇸🇳' },
-    { code: 'BF', name: 'Burkina Faso', flag: '🇧🇫' },
-    { code: 'ML', name: 'Mali', flag: '🇲🇱' },
-    { code: 'TG', name: 'Togo', flag: '🇹🇬' },
-    { code: 'BJ', name: 'Bénin', flag: '🇧🇯' },
-    { code: 'NE', name: 'Niger', flag: '🇳🇪' },
-    { code: 'GW', name: 'Guinée-Bissau', flag: '🇬🇼' }
-  ]
+  // Données de référence importées de @/data/referenceData
+  const legalForms = LEGAL_FORMS
+  const sectors = SECTORS
+  const taxRegimes = TAX_REGIMES
+  const countries = OHADA_COUNTRIES.map(c => ({ ...c, flag: '' }))
+  void [legalForms, sectors, taxRegimes, countries] // used in JSX below
 
   // Configuration des thèmes
   const themes: Array<{ id: string; name: string; subtitle: string; current?: boolean; colors: { primary: string; secondary: string; background: string; surface: string } }> = [
@@ -387,7 +352,7 @@ const ModernParametrage: React.FC = () => {
     }
   ]
 
-  const configHistory: Array<{ id: string; timestamp: string; user: string; module: string; field: string; oldValue: any; newValue: any; reason?: string }> = [
+  const configHistory: Array<{ id: string; timestamp: string; user: string; module: string; field: string; oldValue: string | number; newValue: string | number; reason?: string }> = [
     {
       id: '1',
       timestamp: '2024-12-16 14:25',
@@ -411,11 +376,11 @@ const ModernParametrage: React.FC = () => {
   ]
 
   // EX-PARAM-002: Validation en temps réel
-  const validateField = (field: string, value: any): ValidationResult => {
+  const validateField = (field: string, value: string | number): ValidationResult => {
     switch (field) {
       case 'email': {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-        if (!emailRegex.test(value)) {
+        if (!emailRegex.test(String(value))) {
           return {
             field,
             valid: false,
@@ -428,7 +393,7 @@ const ModernParametrage: React.FC = () => {
       }
         
       case 'registrationNumber':
-        if (!value || value.length < 10) {
+        if (!value || String(value).length < 10) {
           return {
             field,
             valid: false,
@@ -440,7 +405,7 @@ const ModernParametrage: React.FC = () => {
         break
         
       case 'revenue':
-        if (value < 0) {
+        if (Number(value) < 0) {
           return {
             field,
             valid: false,
@@ -448,7 +413,7 @@ const ModernParametrage: React.FC = () => {
             severity: 'error'
           }
         }
-        if (value > 10000000000) {
+        if (Number(value) > 10000000000) {
           return {
             field,
             valid: false,
@@ -513,7 +478,7 @@ const ModernParametrage: React.FC = () => {
           // Valider la configuration importée
           validateAllFields()
         } catch (error) {
-          console.error('Erreur import:', error)
+          logger.error('Erreur import:', error)
         }
       }
       reader.readAsText(file)
@@ -600,16 +565,17 @@ const ModernParametrage: React.FC = () => {
   const handleAutoSave = useCallback(() => {
     if (autoSaveEnabled) {
       // Sauvegarder la configuration
-      console.log('Auto-save:', companyConfig)
+      logger.debug('Auto-save:', companyConfig)
       setLastSaveTime(new Date())
     }
   }, [autoSaveEnabled, companyConfig])
 
-  const _updateProgress = () => {
+  const updateProgress = () => {
     const totalSteps = 6
     const progress = ((wizardStep + 1) / totalSteps) * 100
     setConfigProgress(progress)
   }
+  void updateProgress;
 
   const formatTime = (seconds: number): string => {
     const hours = Math.floor(seconds / 3600)
@@ -621,16 +587,6 @@ const ModernParametrage: React.FC = () => {
     }
     return `${minutes}m ${secs}s`
   }
-
-  const TabPanel: React.FC<{ children: React.ReactNode; value: number; index: number }> = ({
-    children,
-    value,
-    index,
-  }) => (
-    <Box role="tabpanel" hidden={value !== index} sx={{ pt: 3 }}>
-      {value === index && children}
-    </Box>
-  )
 
   return (
     <Box sx={{ p: 3, backgroundColor: 'background.default', minHeight: '100vh' }}>

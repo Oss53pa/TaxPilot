@@ -730,7 +730,7 @@ export default function TemplateVariablesEditor() {
                         defaultLanguage="javascript"
                         theme="vs-light"
                         value={formulaEditor.expression}
-                        onChange={(value) => setFormulaEditor({
+                        onChange={(value: any) => setFormulaEditor({
                           ...formulaEditor,
                           expression: value || ''
                         })}
@@ -875,7 +875,7 @@ export default function TemplateVariablesEditor() {
                         defaultLanguage="css"
                         theme="vs-light"
                         value={selectedTemplate?.style_css || ''}
-                        onChange={(_value) => {
+                        onChange={(_value: any) => {
                           // Mettre à jour le style CSS
                         }}
                         options={{

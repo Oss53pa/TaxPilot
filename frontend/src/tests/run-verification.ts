@@ -175,7 +175,7 @@ class TestLiasseService {
 
   genActif(): any[] {
     const rows: any[] = []
-    const reciprocal = ['DH', 'DL', 'DQ', 'DR']
+    void ['DH', 'DL', 'DQ', 'DR']
     Object.entries(SYSCOHADA_MAPPING.actif).forEach(([ref, m]) => {
       const brut = this.calcActifBrut(m.comptes)
       const amortProv = this.calcAmortProv(m.amortComptes || [])

@@ -6,7 +6,7 @@
 import { AuditContext, ResultatControle, NiveauControle } from '@/types/audit.types'
 import { BalanceEntry } from '@/services/liasseDataService'
 import { controlRegistry } from '../controlRegistry'
-import { TAUX_FISCAUX_CI, getTauxFiscaux } from '@/config/taux-fiscaux-ci'
+import { getTauxFiscaux } from '@/config/taux-fiscaux-ci'
 
 const NIVEAU: NiveauControle = 7
 

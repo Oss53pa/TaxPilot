@@ -29,12 +29,8 @@ import {
 import { useAppSelector, useAppDispatch } from '@/store'
 import { markAsRead, markAllAsRead, clearOldNotifications } from '@/store/notificationSlice'
 import { Notification } from '@/types'
-import dayjs from 'dayjs'
-import relativeTime from 'dayjs/plugin/relativeTime'
-import 'dayjs/locale/fr'
-
-dayjs.extend(relativeTime)
-dayjs.locale('fr')
+import { formatDistanceToNow } from 'date-fns'
+import { fr } from 'date-fns/locale'
 
 interface NotificationCenterProps {
   open: boolean
@@ -138,7 +134,7 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({ open, onClose }
               {notification.message}
             </Typography>
             <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-              {dayjs(notification.created_at).fromNow()}
+              {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true, locale: fr })}
             </Typography>
           </Box>
         }

@@ -159,7 +159,7 @@ class DocumentationJuridiqueService {
 
   async downloadDocument(id: string): Promise<Blob> {
     console.log('📥 Downloading document...', id)
-    return apiClient.get(`${this.baseUrl}/documents/${id}/download/`, {}, { responseType: 'blob' })
+    return apiClient.get(`${this.baseUrl}/documents/${id}/download/`, { responseType: 'blob' })
   }
 
   async getDocumentPreview(id: string): Promise<DocumentPreview> {

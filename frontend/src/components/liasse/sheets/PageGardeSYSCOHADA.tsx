@@ -257,7 +257,7 @@ const PageGardeSYSCOHADA: React.FC<PageGardeSYSCOHADAProps> = ({ variant = 'defa
   const ville = ent?.ville || ''
   const pays = paysOhadaMap[ent?.pays || ''] || ent?.pays || ''
   const telephone = ent?.telephone || ''
-  const email = ent?.email || ''
+  void (ent?.email || '')
   const dateDebut = ent?.exercice_debut || `${new Date().getFullYear()}-01-01`
   const dateFin = ent?.exercice_fin || `${new Date().getFullYear()}-12-31`
   const exerciceComptable = dateDebut.substring(0, 4)

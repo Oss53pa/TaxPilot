@@ -34,7 +34,7 @@ import {
   Clock,
   RefreshCw,
   FileSpreadsheet,
-  FilePdf,
+  FileText as FilePdf,
   FileJson,
   Mail,
   Save,

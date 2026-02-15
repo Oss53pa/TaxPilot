@@ -344,6 +344,7 @@ export class LiasseDataService {
    * Pour les comptes réciproques (42x, 48x, 52x) côté ACTIF:
    * Ne prend que les soldes débiteurs individuels
    */
+  // @ts-expect-error kept for future use
   private calculateActifReciprocal(comptes: string[]): number {
     let total = 0
     comptes.forEach(prefix => {

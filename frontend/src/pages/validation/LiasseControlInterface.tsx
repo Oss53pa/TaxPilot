@@ -19,7 +19,7 @@ import {
   TableHead,
   TableRow,
   Chip,
-  Alert,
+  // Alert,
   LinearProgress,
   Divider,
   List,
@@ -41,7 +41,7 @@ import {
   Visibility as PreviewIcon,
   Send as SubmitIcon,
   Comment as CommentIcon,
-  History as HistoryIcon,
+  // History as HistoryIcon,
 } from '@mui/icons-material'
 
 interface ValidationResult {
@@ -69,7 +69,6 @@ const LiasseControlInterface: React.FC = () => {
   const [selectedLiasse, setSelectedLiasse] = useState<ValidationResult | null>(null)
   const [validationDialog, setValidationDialog] = useState(false)
   const [preComments, setPreComments] = useState<PreComment[]>([])
-  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     // Données de démonstration

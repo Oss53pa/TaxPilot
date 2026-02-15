@@ -1,12 +1,14 @@
 /**
  * Badge component using Material-UI
  */
+import React from 'react'
 import { Chip, ChipProps } from '@mui/material'
 
 type CustomVariant = 'default' | 'secondary' | 'destructive' | 'outlined' | 'filled'
 
-interface CustomBadgeProps extends Omit<ChipProps, 'variant'> {
+interface CustomBadgeProps extends Omit<ChipProps, 'variant' | 'children'> {
   variant?: CustomVariant
+  children?: React.ReactNode
 }
 
 export const Badge = ({ children, variant = 'default', ...props }: CustomBadgeProps) => {

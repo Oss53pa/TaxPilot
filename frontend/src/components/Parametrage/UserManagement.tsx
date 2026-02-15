@@ -39,7 +39,7 @@ import {
   AdminPanelSettings,
 } from '@mui/icons-material'
 import { UtilisateurEntreprise } from '@/types'
-import dayjs from 'dayjs'
+import { format } from 'date-fns'
 
 // Données factices pour la démo
 const mockUsers: UtilisateurEntreprise[] = [
@@ -278,7 +278,7 @@ const UserManagement: React.FC = () => {
                     <TableCell>
                       <Typography variant="body2">
                         {user.derniere_connexion 
-                          ? dayjs(user.derniere_connexion).format('DD/MM/YYYY HH:mm')
+                          ? format(new Date(user.derniere_connexion), 'dd/MM/yyyy HH:mm')
                           : 'Jamais'
                         }
                       </Typography>

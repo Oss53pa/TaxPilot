@@ -22,7 +22,7 @@ import {
   Paper,
   Alert,
   LinearProgress,
-  Tooltip,
+  // Tooltip,
   Badge,
 } from '@mui/material'
 import {
@@ -212,7 +212,7 @@ const LiasseComplete: React.FC = () => {
       case 'complete': return <CheckCircle fontSize="small" />
       case 'partial': return <Warning fontSize="small" />
       case 'empty': return <Error fontSize="small" />
-      default: return null
+      default: return undefined
     }
   }
 

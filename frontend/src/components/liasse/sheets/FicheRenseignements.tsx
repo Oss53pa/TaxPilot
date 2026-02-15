@@ -12,7 +12,7 @@ import {
   Card,
   CardContent,
   useTheme,
-  Chip,
+  // Chip,
   Divider,
   Stack,
   Alert,
@@ -20,9 +20,7 @@ import {
 import {
   Business,
   Person,
-  AccountBalance,
   Assessment,
-  Security,
   Lock as LockIcon,
 } from '@mui/icons-material'
 import type { Entreprise } from '@/types'
@@ -60,12 +58,7 @@ const regimesMap: Record<string, string> = {
 }
 
 /** Formate une date ISO (YYYY-MM-DD) en DD/MM/YYYY */
-function formatDateFR(isoDate?: string): string {
-  if (!isoDate) return ''
-  const parts = isoDate.split('-')
-  if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`
-  return isoDate
-}
+// formatDateFR removed - unused
 
 interface FicheRenseignementsProps {
   entreprise?: Entreprise

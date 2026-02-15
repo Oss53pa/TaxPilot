@@ -101,7 +101,7 @@ interface AbattementEligible {
 export default function TaxOptimizationView() {
   const [, setLoading] = useState(true)
   const [regimes, setRegimes] = useState<RegimeFiscal[]>([])
-  const [currentRegime, setCurrentRegime] = useState<RegimeFiscal | null>(null)
+  const [currentRegime, _setCurrentRegime] = useState<RegimeFiscal | null>(null)
   const [optimalRegime, setOptimalRegime] = useState<RegimeFiscal | null>(null)
   const [suggestions, setSuggestions] = useState<OptimizationSuggestion[]>([])
   const [abattements, setAbattements] = useState<AbattementEligible[]>([])

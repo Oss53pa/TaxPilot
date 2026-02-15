@@ -3,10 +3,13 @@
  */
 
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios'
+import { STORAGE_KEYS } from '@/constants/storage'
+import { API_TIMEOUTS } from '@/constants/api'
+import { logger } from '@/utils/logger'
 
 // Configuration de base - CONNEXION RÉELLE AU BACKEND
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
-console.log('🔧 API_BASE_URL:', API_BASE_URL, '(from env:', import.meta.env.VITE_API_BASE_URL, ')')
+logger.debug('API_BASE_URL:', API_BASE_URL)
 
 // Types pour l'authentification
 export interface LoginCredentials {
@@ -107,10 +110,10 @@ export interface SignupResponse {
   }
 }
 
-// Clés de stockage
-const TOKEN_KEY = 'fiscasync_access_token'
-const REFRESH_TOKEN_KEY = 'fiscasync_refresh_token'
-const USER_KEY = 'fiscasync_user'
+// Clés de stockage centralisées
+const TOKEN_KEY = STORAGE_KEYS.ACCESS_TOKEN
+const REFRESH_TOKEN_KEY = STORAGE_KEYS.REFRESH_TOKEN
+const USER_KEY = STORAGE_KEYS.USER
 
 /**
  * Classe singleton pour gérer toutes les connexions API
@@ -126,7 +129,7 @@ class ApiClient {
   constructor() {
     this.api = axios.create({
       baseURL: API_BASE_URL,
-      timeout: 30000,
+      timeout: API_TIMEOUTS.DEFAULT,
       headers: {
         'Content-Type': 'application/json',
       },
@@ -166,11 +169,11 @@ class ApiClient {
           config.headers['X-CSRFToken'] = csrfToken
         }
 
-        console.log(`🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`)
+        logger.debug(`API Request: ${config.method?.toUpperCase()} ${config.url}`)
         return config
       },
       (error) => {
-        console.error('❌ Request Error:', error)
+        logger.error('Request Error:', error)
         return Promise.reject(error)
       }
     )
@@ -178,13 +181,13 @@ class ApiClient {
     // Response interceptor - Gère le refresh token automatiquement
     this.api.interceptors.response.use(
       (response) => {
-        console.log(`✅ API Response: ${response.status} ${response.config.url}`)
+        logger.debug(`API Response: ${response.status} ${response.config.url}`)
         return response
       },
       async (error: AxiosError) => {
-        const originalRequest = error.config as any
+        const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean }
 
-        console.error(`❌ API Error: ${error.response?.status} ${originalRequest?.url}`)
+        logger.error(`API Error: ${error.response?.status} ${originalRequest?.url}`)
 
         if (error.response?.status === 401 && !originalRequest._retry) {
           if (this.isRefreshing) {
@@ -322,7 +325,7 @@ class ApiClient {
         throw new Error('Réponse invalide du serveur')
       }
     } catch (error) {
-      console.error('Login error:', error)
+      logger.error('Login error:', error)
       throw error
     }
   }
@@ -332,7 +335,7 @@ class ApiClient {
    */
   public async signup(signupData: SignupData): Promise<SignupResponse> {
     try {
-      console.log('📝 Signing up new organization...', signupData.name)
+      logger.info('Signing up new organization...', signupData.name)
 
       const response = await this.api.post<SignupResponse>('/api/v1/auth/signup/', signupData)
 
@@ -356,33 +359,35 @@ class ApiClient {
 
         // Sauvegarder l'organisation dans sessionStorage
         if (response.data.organization) {
-          sessionStorage.setItem('fiscasync_organization', JSON.stringify(response.data.organization))
+          sessionStorage.setItem(STORAGE_KEYS.ORGANIZATION, JSON.stringify(response.data.organization))
         }
 
-        console.log('✅ Signup successful:', response.data.organization?.name)
+        logger.info('Signup successful:', response.data.organization?.name)
         return response.data
       } else {
         throw new Error('Réponse invalide du serveur')
       }
-    } catch (error: any) {
-      console.error('❌ Signup error:', error)
+    } catch (error) {
+      logger.error('Signup error:', error)
 
       // Extraire les messages d'erreur du backend
-      if (error.response?.data?.error) {
-        throw new Error(error.response.data.error)
-      }
-      if (error.response?.data?.details) {
-        // Format Django REST errors
-        const details = error.response.data.details
-        const errorMessages = Object.entries(details)
-          .map(([field, messages]: [string, any]) => {
-            if (Array.isArray(messages)) {
-              return `${field}: ${messages.join(', ')}`
-            }
-            return `${field}: ${messages}`
-          })
-          .join('\n')
-        throw new Error(errorMessages)
+      if (error instanceof AxiosError && error.response?.data) {
+        const data = error.response.data as Record<string, unknown>
+        if (data.error) {
+          throw new Error(String(data.error))
+        }
+        if (data.details) {
+          const details = data.details as Record<string, string | string[]>
+          const errorMessages = Object.entries(details)
+            .map(([field, messages]) => {
+              if (Array.isArray(messages)) {
+                return `${field}: ${messages.join(', ')}`
+              }
+              return `${field}: ${messages}`
+            })
+            .join('\n')
+          throw new Error(errorMessages)
+        }
       }
 
       throw error
@@ -422,15 +427,15 @@ class ApiClient {
     // Nettoyer sessionStorage
     sessionStorage.removeItem(REFRESH_TOKEN_KEY)
     sessionStorage.removeItem(USER_KEY)
-    sessionStorage.removeItem('fiscasync_organization')
+    sessionStorage.removeItem(STORAGE_KEYS.ORGANIZATION)
 
     // Nettoyer localStorage (ancien système)
     localStorage.removeItem(TOKEN_KEY)
     localStorage.removeItem(REFRESH_TOKEN_KEY)
     localStorage.removeItem(USER_KEY)
-    localStorage.removeItem('fiscasync_organization')
+    localStorage.removeItem(STORAGE_KEYS.ORGANIZATION)
 
-    console.log('✅ Logout complet - Tous les tokens supprimés')
+    logger.info('Logout complet - Tous les tokens supprimés')
   }
 
   /**
@@ -452,7 +457,7 @@ class ApiClient {
   /**
    * GET request
    */
-  public async get<T>(url: string, params?: any): Promise<T> {
+  public async get<T>(url: string, params?: Record<string, any>): Promise<T> {
     const response = await this.api.get<T>(url, { params })
     return response.data
   }
@@ -460,7 +465,7 @@ class ApiClient {
   /**
    * POST request
    */
-  public async post<T>(url: string, data?: any): Promise<T> {
+  public async post<T>(url: string, data?: unknown): Promise<T> {
     const response = await this.api.post<T>(url, data)
     return response.data
   }
@@ -468,7 +473,7 @@ class ApiClient {
   /**
    * PUT request
    */
-  public async put<T>(url: string, data?: any): Promise<T> {
+  public async put<T>(url: string, data?: unknown): Promise<T> {
     const response = await this.api.put<T>(url, data)
     return response.data
   }
@@ -476,7 +481,7 @@ class ApiClient {
   /**
    * PATCH request
    */
-  public async patch<T>(url: string, data?: any): Promise<T> {
+  public async patch<T>(url: string, data?: unknown): Promise<T> {
     const response = await this.api.patch<T>(url, data)
     return response.data
   }
@@ -492,7 +497,7 @@ class ApiClient {
   /**
    * Upload de fichier
    */
-  public async upload<T>(url: string, file: File, additionalData?: any): Promise<T> {
+  public async upload<T>(url: string, file: File, additionalData?: Record<string, any>): Promise<T> {
     const formData = new FormData()
     formData.append('file', file)
 

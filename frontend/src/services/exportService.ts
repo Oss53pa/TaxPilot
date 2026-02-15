@@ -6,7 +6,7 @@
 import * as XLSX from 'xlsx'
 import { saveAs } from 'file-saver'
 import { arrondiFCFA } from '@/config/taux-fiscaux-ci'
-import { liasseDataService, SYSCOHADA_MAPPING } from './liasseDataService'
+import { liasseDataService } from './liasseDataService'
 import type { TypeLiasse } from '../types'
 
 // ============================================================

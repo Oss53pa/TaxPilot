@@ -56,8 +56,8 @@ import {
   NotificationsActive as NotificationIcon,
   Warning as WarningIcon,
   Error as ErrorIcon,
-  CheckCircle as CheckIcon,
-  Schedule as ScheduleIcon,
+  // CheckCircle as CheckIcon,
+  // Schedule as ScheduleIcon,
   AttachMoney as MoneyIcon,
   Assessment as AssessmentIcon,
   Public as GlobalIcon,
@@ -135,7 +135,7 @@ const ModernFiscalCalendar: React.FC = () => {
   const [selectedMonth, setSelectedMonth] = useState(new Date())
   const [deadlineDialogOpen, setDeadlineDialogOpen] = useState(false)
   const [penaltyDialogOpen, setPenaltyDialogOpen] = useState(false)
-  const [selectedDeadline, setSelectedDeadline] = useState<FiscalDeadline | null>(null)
+  const [, setSelectedDeadline] = useState<FiscalDeadline | null>(null)
   const [notifications, setNotifications] = useState(true)
 
   useEffect(() => {
@@ -332,16 +332,6 @@ const ModernFiscalCalendar: React.FC = () => {
       case 'pending': return theme.palette.warning.main
       case 'overdue': return theme.palette.error.main
       case 'upcoming': return theme.palette.info.main
-      default: return theme.palette.grey[500]
-    }
-  }
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'critical': return theme.palette.error.main
-      case 'high': return theme.palette.warning.main
-      case 'medium': return theme.palette.info.main
-      case 'low': return theme.palette.grey[500]
       default: return theme.palette.grey[500]
     }
   }

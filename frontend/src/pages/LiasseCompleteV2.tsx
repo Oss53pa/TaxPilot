@@ -331,7 +331,7 @@ const LiasseCompleteV2: React.FC = () => {
       case 'complete': return <CheckCircle fontSize="small" />
       case 'partial': return <Warning fontSize="small" />
       case 'empty': return <Error fontSize="small" />
-      default: return null
+      default: return undefined
     }
   }
 

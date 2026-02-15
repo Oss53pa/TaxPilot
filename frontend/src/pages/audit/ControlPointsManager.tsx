@@ -65,6 +65,7 @@ interface ControlPoint {
 }
 
 interface AlgorithmIA {
+  id?: number
   code: string
   nom: string
   description: string

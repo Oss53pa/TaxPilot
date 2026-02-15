@@ -136,7 +136,7 @@ const ModernDocuments: React.FC = () => {
       console.log('📤 Loading documents data from backend...');
 
       // Charger les templates
-      const templatesRes = await templatesService.getTemplates({ page_size: 100 });
+      const templatesRes = await templatesService.getTemplates({ page_size: 100 }) as any;
       const backendTemplates = (templatesRes.results || []).map((t: any) => ({
         id: t.id,
         name: t.nom || t.name || 'Template',
@@ -160,7 +160,7 @@ const ModernDocuments: React.FC = () => {
       }));
 
       // Charger les jobs de génération
-      const jobsRes = await generationService.getLiasseGenerations({ page_size: 50 });
+      const jobsRes = await generationService.getLiasseGenerations({ page_size: 50 }) as any;
       const backendJobs = (jobsRes.results || []).map((j: any) => ({
         id: j.id,
         templateId: j.template_id || '',

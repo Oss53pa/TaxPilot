@@ -23,7 +23,7 @@ import {
   Select,
   MenuItem,
   Avatar,
-  Divider,
+  // Divider,
   IconButton,
   Tooltip,
   Alert,
@@ -31,7 +31,7 @@ import {
 import {
   Description,
   Add,
-  Edit,
+  // Edit,
   GetApp,
   Visibility,
   StarBorder,

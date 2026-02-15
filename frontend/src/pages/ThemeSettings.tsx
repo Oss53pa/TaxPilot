@@ -36,7 +36,7 @@ import { entrepriseService } from '@/services'
 const ThemeSettings: React.FC = () => {
   const [themes, setThemes] = React.useState<ThemeConfiguration[]>([])
   const [predefinedThemes, setPredefinedThemes] = React.useState<PredefinedTheme[]>([])
-  const [activeTheme, setActiveTheme] = React.useState<ThemeConfiguration | null>(null)
+  const [, setActiveTheme] = React.useState<ThemeConfiguration | null>(null)
   const [selectedTheme, setSelectedTheme] = React.useState<number | null>(null)
   const [isDarkMode, setIsDarkMode] = React.useState(false)
   const [loading, setLoading] = React.useState(true)
@@ -61,13 +61,13 @@ const ThemeSettings: React.FC = () => {
           return
         }
 
-        setEntrepriseId(entreprise.id!)
+        setEntrepriseId(Number(entreprise.id!))
 
         // Charger les thèmes et thèmes prédéfinis en parallèle
         const [themesResult, predefinedResult, activeResult] = await Promise.all([
-          themeService.getThemes(entreprise.id!),
+          themeService.getThemes(Number(entreprise.id!)),
           themeService.getPredefinedThemes(),
-          themeService.getActiveTheme(entreprise.id!)
+          themeService.getActiveTheme(Number(entreprise.id!))
         ])
 
         setThemes(themesResult)

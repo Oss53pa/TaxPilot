@@ -386,7 +386,7 @@ const ModernImportBalance: React.FC = () => {
 
   // EX-IMPORT-004: Identifier les comptes non mappés
   const identifyUnmappedAccounts = (accounts: BalanceAccount[]): BalanceAccount[] => {
-    return accounts.filter(acc => !acc.mappedAccount || acc.mappingConfidence < 50)
+    return accounts.filter(acc => !acc.mappedAccount || (acc.mappingConfidence ?? 0) < 50)
   }
 
   // EX-IMPORT-005: Mapping intelligent basé sur l'historique et l'IA
@@ -394,7 +394,7 @@ const ModernImportBalance: React.FC = () => {
     const suggestions: MappingSuggestion[] = []
     
     accounts.forEach(account => {
-      if (!account.mappedAccount || account.mappingConfidence < 80) {
+      if (!account.mappedAccount || (account.mappingConfidence ?? 0) < 80) {
         // Recherche dans l'historique
         const historyMatch = mappingHistory.find(h => 
           h.source === account.accountNumber || 
@@ -544,7 +544,7 @@ const ModernImportBalance: React.FC = () => {
         averageMappingConfidence: 
           accounts.reduce((sum, a) => sum + (a.mappingConfidence || 0), 0) / accounts.length,
         autoMappedPercentage: 
-          (accounts.filter(a => a.mappingConfidence > 80).length / accounts.length) * 100,
+          (accounts.filter(a => (a.mappingConfidence ?? 0) > 80).length / accounts.length) * 100,
         manualCorrections: 0
       }
     }

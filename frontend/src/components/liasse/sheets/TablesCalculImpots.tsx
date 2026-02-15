@@ -37,7 +37,7 @@ import {
   Save as SaveIcon,
   Print as PrintIcon
 } from '@mui/icons-material'
-import { TAUX_FISCAUX_CI, arrondiFCFA, getTauxFiscaux } from '@/config/taux-fiscaux-ci'
+import { arrondiFCFA, getTauxFiscaux } from '@/config/taux-fiscaux-ci'
 
 interface LigneCalculImpot {
   code: string

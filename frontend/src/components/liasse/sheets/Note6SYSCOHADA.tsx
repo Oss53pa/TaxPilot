@@ -332,7 +332,7 @@ const Note6SYSCOHADA: React.FC = () => {
             </TableHead>
             <TableBody>
               {immobilisations.map(immo => {
-                const _category = CATEGORIES_IMMOBILISATIONS.find(cat => cat.id === immo.categorie)
+                void CATEGORIES_IMMOBILISATIONS.find(cat => cat.id === immo.categorie)
                 return (
                   <TableRow key={immo.id}>
                     <TableCell>

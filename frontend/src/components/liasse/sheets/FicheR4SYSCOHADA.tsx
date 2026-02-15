@@ -444,7 +444,7 @@ const FicheR4SYSCOHADA: React.FC = () => {
             </TableHead>
             <TableBody>
               {provisions.map(provision => {
-                const _category = CATEGORIES_PROVISIONS.find(cat => cat.id === provision.categorie)
+                const _ = CATEGORIES_PROVISIONS.find(cat => cat.id === provision.categorie); void _
                 return (
                   <TableRow key={provision.id}>
                     <TableCell>

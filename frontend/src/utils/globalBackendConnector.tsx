@@ -149,7 +149,7 @@ export function withGlobalBackend<P extends object>(
 
     // Si le composant a une propriété spéciale pour désactiver le loading
     if ((props as any).skipBackendLoading) {
-      return <Component {...props} ref={ref} />
+      return <Component {...(props as any)} ref={ref} />
     }
 
     // Afficher un loader pendant le chargement initial

@@ -18,7 +18,7 @@ import {
   Paper,
   Card,
   CardContent,
-  Chip,
+  // Chip,
   Alert,
   Stack,
   useTheme,
@@ -124,7 +124,7 @@ const FluxTresorerie: React.FC<FluxTresorerieProps> = ({ modeEdition: _modeEditi
   const fluxOpe = rows.find(r => r.ref === 'FG')?.montant || 0
   const fluxInv = rows.find(r => r.ref === 'FK')?.montant || 0
   const fluxFin = rows.find(r => r.ref === 'FP')?.montant || 0
-  const variation = rows.find(r => r.ref === 'FQ')?.montant || 0
+  void (rows.find(r => r.ref === 'FQ')?.montant || 0)
 
   // Cohérence FA = XI
   const resultatCdR = useMemo(() => {

@@ -150,7 +150,7 @@ const CalculTVADialog: React.FC<CalculTVADialogProps> = ({
       }
 
       const calculResult = await taxService.calculateTVA(data as any)
-      setResult(calculResult as TVACalculResult)
+      setResult(calculResult as unknown as TVACalculResult)
 
       if (onCalculComplete) {
         onCalculComplete(calculResult)

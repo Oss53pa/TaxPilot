@@ -31,6 +31,6 @@ export const TabsList = ({ children, ...props }: { children: React.ReactNode } &
 export const TabsTrigger = ({ value, children }: { value: string; children: React.ReactNode }) => (
   <Tab label={children} value={value} />
 )
-export const TabsContent = ({ value: _value, children }: { value: string; children: React.ReactNode }) => (
-  <Box>{children}</Box>
+export const TabsContent = ({ value: _value, children, className, ...props }: { value: string; children: React.ReactNode; className?: string } & React.HTMLAttributes<HTMLDivElement>) => (
+  <Box className={className} {...props}>{children}</Box>
 )

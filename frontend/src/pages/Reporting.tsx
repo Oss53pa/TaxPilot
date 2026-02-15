@@ -13,14 +13,14 @@ import {
   Button,
   Tab,
   Tabs,
-  Paper,
+  // Paper,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  LinearProgress,
+  // LinearProgress,
   Avatar,
   Divider,
   IconButton,
@@ -64,8 +64,8 @@ const Reporting = () => {
       ])
 
       setDashboardStats(statsResponse)
-      setReports(reportsResponse.results || [])
-      setReportTemplates(templatesResponse.results || [])
+      setReports((reportsResponse as any).results || [])
+      setReportTemplates((templatesResponse as any).results || [])
 
       console.log('✅ Reporting data loaded successfully')
     } catch (error) {

@@ -24,7 +24,7 @@ import {
   Phone,
   Email,
   CalendarToday,
-  Group,
+  // Group,
   Assessment,
   Lock as LockIcon,
 } from '@mui/icons-material'

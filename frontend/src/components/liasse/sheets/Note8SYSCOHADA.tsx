@@ -397,7 +397,7 @@ const Note8SYSCOHADA: React.FC = () => {
             </TableHead>
             <TableBody>
               {stocks.map(stock => {
-                const _category = CATEGORIES_STOCKS.find(cat => cat.id === stock.categorie)
+                void CATEGORIES_STOCKS.find(cat => cat.id === stock.categorie)
                 const needsProvision = stock.valeurMarche < stock.valeurComptable
                 
                 return (

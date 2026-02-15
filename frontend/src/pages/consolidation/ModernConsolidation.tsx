@@ -149,7 +149,7 @@ const ModernConsolidation: React.FC = () => {
     defaultData: []
   })
 
-  const { data: balancesBackend, loading: loadingBalances } = useBackendData({
+  const { loading: loadingBalances } = useBackendData({
     service: 'balanceService',
     method: 'getBalances',
     params: { page_size: 100, with_details: true },

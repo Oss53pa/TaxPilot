@@ -73,7 +73,7 @@ const LiasseCompleteFinal: React.FC = () => {
       case 'complete': return <CheckCircle fontSize="small" />
       case 'partial': return <Warning fontSize="small" />
       case 'empty': return <Error fontSize="small" />
-      default: return null
+      default: return undefined
     }
   }
 
@@ -83,7 +83,7 @@ const LiasseCompleteFinal: React.FC = () => {
   // Utiliser les fonctions utilitaires
   const completudeGlobale = getGlobalCompletude()
   const ongletsByCategory = getComponentsByCategory()
-  const _statusStats = getStatusStats()
+  void getStatusStats()
 
   return (
     <Box sx={{ display: 'flex', height: '100vh', backgroundColor: '#f5f5f5' }}>

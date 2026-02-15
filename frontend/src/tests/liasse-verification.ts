@@ -7,7 +7,7 @@
  * Usage : importer et appeler runFullVerification() depuis la console ou un composant.
  */
 
-import { LiasseDataService, SYSCOHADA_MAPPING, type BalanceEntry } from '../services/liasseDataService'
+import { LiasseDataService, type BalanceEntry } from '../services/liasseDataService'
 
 // ══════════════════════════════════════════════
 // 1. Balance fictive de test (30+ comptes)

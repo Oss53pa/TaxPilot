@@ -189,7 +189,7 @@ export default function TaxComplianceCalendar() {
     }
   }
 
-  const _createObligation = async (obligation: Partial<ObligationFiscale>) => {
+  const createObligation = async (obligation: Partial<ObligationFiscale>) => {
     try {
       const entrepriseId = localStorage.getItem('entreprise_id') || '1'
       await taxService.createObligation({
@@ -213,6 +213,8 @@ export default function TaxComplianceCalendar() {
       })
     }
   }
+
+  void createObligation;
 
   const exportCalendar = async () => {
     try {
