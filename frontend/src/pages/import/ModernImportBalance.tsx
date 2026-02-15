@@ -8,8 +8,9 @@ import { balanceService } from '@/services'
 import { useBackendData } from '@/hooks/useBackendData'
 import { importBalanceFile } from '@/services/balanceParserService'
 import type { ImportPipelineResult } from '@/services/balanceParserService'
-import { saveImportedBalance, saveImportRecord } from '@/services/balanceStorageService'
+import { saveImportedBalance, saveImportedBalanceN1, saveImportRecord } from '@/services/balanceStorageService'
 import { liasseDataService } from '@/services/liasseDataService'
+import { downloadBalanceTemplate } from '@/services/balanceTemplateService'
 import {
   Box,
   Grid,
@@ -61,7 +62,6 @@ import {
   CheckCircle as CheckIcon,
   Error as ErrorIcon,
   Warning as WarningIcon,
-  CompareArrows as CompareIcon,
   Save as SaveIcon,
   Edit as EditIcon,
   TrendingUp as TrendingUpIcon,
@@ -189,6 +189,9 @@ const ModernImportBalance: React.FC = () => {
     tolerance: 0.01 // 1 centime de tolérance
   })
   
+  // Parsed N-1 entries from the same file
+  const [parsedEntriesN1, setParsedEntriesN1] = useState<import('@/services/liasseDataService').BalanceEntry[]>([])
+
   // État erreurs/warnings visibles
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [warningMessages, setWarningMessages] = useState<string[]>([])
@@ -312,6 +315,7 @@ const ModernImportBalance: React.FC = () => {
       }))
 
       setImportedData(accounts)
+      setParsedEntriesN1(result.entriesN1)
       if (result.warnings.length > 0) setWarningMessages(result.warnings)
       if (result.errors.length > 0) setErrorMessage(result.errors.join(' | '))
 
@@ -862,6 +866,17 @@ const ModernImportBalance: React.FC = () => {
                   </Stack>
                 </Box>
 
+                {/* Bouton télécharger le modèle — EN DEHORS du dropzone */}
+                <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
+                  <Button
+                    variant="outlined"
+                    startIcon={<DownloadIcon />}
+                    onClick={() => downloadBalanceTemplate()}
+                  >
+                    Télécharger le modèle Excel
+                  </Button>
+                </Box>
+
                 {selectedFile && (
                   <Alert severity="success" sx={{ mt: 3 }}>
                     <AlertTitle>Fichier sélectionné</AlertTitle>
@@ -869,17 +884,9 @@ const ModernImportBalance: React.FC = () => {
                   </Alert>
                 )}
 
-                {/* Import depuis balance N-1 */}
-                <Divider sx={{ my: 3 }}>ou</Divider>
-                
-                <Button
-                  fullWidth
-                  variant="outlined"
-                  startIcon={<CompareIcon />}
-                  size="large"
-                >
-                  Importer depuis la balance N-1
-                </Button>
+                <Alert severity="info" sx={{ mt: 3 }}>
+                  Le fichier peut contenir les colonnes N et N-1 ensemble. Les colonnes N-1 (ex: "Débit N-1", "Crédit N-1") seront détectées automatiquement.
+                </Alert>
               </CardContent>
             )}
 
@@ -1248,9 +1255,19 @@ const ModernImportBalance: React.FC = () => {
                     </TableContainer>
                   ) : (
                     <Alert severity="info">
-                      Aucune donnée N-1 disponible pour la comparaison.
-                      <Button size="small" sx={{ mt: 1 }}>
-                        Importer balance N-1
+                      Aucune donnée N-1 disponible. Importez un fichier contenant les colonnes N-1 (ex: "Débit N-1", "Crédit N-1").
+                      <Button
+                        size="small"
+                        sx={{ mt: 1 }}
+                        onClick={() => {
+                          setImportStep(0)
+                          setImportedData([])
+                          setParsedEntriesN1([])
+                          setSelectedFile(null)
+                          setFileStructure(null)
+                        }}
+                      >
+                        Nouvel import
                       </Button>
                     </Alert>
                   )}
@@ -1397,11 +1414,21 @@ const ModernImportBalance: React.FC = () => {
                                 solde_credit: acc.creditClosing || 0,
                               }))
 
-                              // Save to localStorage
+                              // Save N balance
                               saveImportedBalance(
                                 entries,
                                 importReport?.fileName || 'Import balance',
                               )
+                              liasseDataService.loadBalance(entries)
+
+                              // Save N-1 if detected in the same file
+                              if (parsedEntriesN1.length > 0) {
+                                saveImportedBalanceN1(
+                                  parsedEntriesN1,
+                                  importReport?.fileName || 'Import balance',
+                                )
+                                liasseDataService.loadBalanceN1(parsedEntriesN1)
+                              }
 
                               // Save import record
                               saveImportRecord(
@@ -1413,9 +1440,6 @@ const ModernImportBalance: React.FC = () => {
                                 importReport?.warnings || 0,
                               )
 
-                              // Load into liasseDataService immediately
-                              liasseDataService.loadBalance(entries)
-
                               // Redirect
                               window.location.href = '/balance'
                             } catch (error: any) {
@@ -1424,7 +1448,7 @@ const ModernImportBalance: React.FC = () => {
                             }
                           }}
                         >
-                          Valider l'import
+                          Valider l'import{parsedEntriesN1.length > 0 ? ' (N + N-1)' : ''}
                         </Button>
                         <Button
                           variant="outlined"

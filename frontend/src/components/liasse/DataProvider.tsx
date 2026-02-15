@@ -6,12 +6,18 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react'
 import { MOCK_BALANCE } from '../../data/mockBalance'
 import { liasseDataService } from '../../services/liasseDataService'
-import { getLatestBalance } from '../../services/balanceStorageService'
+import { getLatestBalance, getLatestBalanceN1 } from '../../services/balanceStorageService'
 
 // Charger la balance importée si disponible, sinon fallback sur MOCK
 const storedBalance = getLatestBalance()
 const initialBalance = storedBalance?.entries?.length ? storedBalance.entries : MOCK_BALANCE
 liasseDataService.loadBalance(initialBalance)
+
+// Charger la balance N-1 si disponible
+const storedN1 = getLatestBalanceN1()
+if (storedN1?.entries?.length) {
+  liasseDataService.loadBalanceN1(storedN1.entries)
+}
 
 interface LiasseData {
   entreprise: any

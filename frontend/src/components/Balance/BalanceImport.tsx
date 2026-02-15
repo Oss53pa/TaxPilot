@@ -39,6 +39,7 @@ import {
   Delete,
   Visibility,
   GetApp,
+  FileDownload,
 } from '@mui/icons-material'
 import { useDropzone } from 'react-dropzone'
 import { useAppSelector, useAppDispatch } from '@/store'
@@ -48,8 +49,9 @@ import {
   resetImportProgress,
 } from '@/store/balanceSlice'
 import { importBalanceFile } from '@/services/balanceParserService'
-import { saveImportedBalance, saveImportRecord } from '@/services/balanceStorageService'
+import { saveImportedBalance, saveImportedBalanceN1, saveImportRecord } from '@/services/balanceStorageService'
 import { liasseDataService } from '@/services/liasseDataService'
+import { downloadBalanceTemplate } from '@/services/balanceTemplateService'
 
 interface ImportFile {
   file: File
@@ -116,8 +118,15 @@ const BalanceImport: React.FC = () => {
 
       updateProgress(80, 'Sauvegarde...')
 
-      // Save to localStorage
+      // Save N balance
       saveImportedBalance(entries, fileData.file.name)
+      liasseDataService.loadBalance(entries)
+
+      // Save N-1 if detected in the same file
+      if (result.entriesN1.length > 0) {
+        saveImportedBalanceN1(result.entriesN1, fileData.file.name)
+        liasseDataService.loadBalanceN1(result.entriesN1)
+      }
 
       const totalDebit = entries.reduce((s, e) => s + e.solde_debit, 0)
       const totalCredit = entries.reduce((s, e) => s + e.solde_credit, 0)
@@ -129,9 +138,6 @@ const BalanceImport: React.FC = () => {
         result.errors.length,
         result.warnings.length,
       )
-
-      // Load into liasseDataService
-      liasseDataService.loadBalance(entries)
 
       updateProgress(100, 'Import terminé avec succès !')
 
@@ -249,6 +255,18 @@ const BalanceImport: React.FC = () => {
             <Chip label="CSV (.csv)" size="small" variant="outlined" />
             <Chip label="XML (.xml)" size="small" variant="outlined" />
             <Chip label="API Direct" size="small" variant="outlined" />
+          </Box>
+
+          {/* Bouton télécharger le modèle */}
+          <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
+            <Button
+              size="small"
+              startIcon={<FileDownload />}
+              onClick={() => downloadBalanceTemplate()}
+              sx={{ textTransform: 'none' }}
+            >
+              Télécharger le modèle Excel
+            </Button>
           </Box>
         </CardContent>
       </Card>

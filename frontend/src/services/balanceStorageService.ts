@@ -131,3 +131,33 @@ export function saveImportRecord(
 export function getImportHistory(): ImportRecord[] {
   return getItem<ImportRecord[]>('history') || []
 }
+
+// ────────── Balance N-1 ──────────
+
+export function saveImportedBalanceN1(
+  entries: BalanceEntry[],
+  fileName: string,
+  exercice?: string
+): StoredBalance {
+  const totalDebit = entries.reduce((s, e) => s + e.solde_debit, 0)
+  const totalCredit = entries.reduce((s, e) => s + e.solde_credit, 0)
+
+  const balance: StoredBalance = {
+    id: Date.now().toString(36) + Math.random().toString(36).substring(2, 6),
+    fileName,
+    importDate: new Date().toISOString(),
+    exercice: exercice || String(new Date().getFullYear() - 1),
+    entries,
+    totalDebit,
+    totalCredit,
+    ecart: Math.abs(totalDebit - totalCredit),
+    accountCount: entries.length,
+  }
+
+  setItem('latest_n1', balance)
+  return balance
+}
+
+export function getLatestBalanceN1(): StoredBalance | null {
+  return getItem<StoredBalance>('latest_n1')
+}
