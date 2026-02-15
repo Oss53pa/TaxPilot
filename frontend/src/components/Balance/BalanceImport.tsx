@@ -11,6 +11,7 @@ import {
   Button,
   Typography,
   Alert,
+  AlertTitle,
   LinearProgress,
   Chip,
   Paper,
@@ -46,6 +47,9 @@ import {
   setImportProgress,
   resetImportProgress,
 } from '@/store/balanceSlice'
+import { importBalanceFile } from '@/services/balanceParserService'
+import { saveImportedBalance, saveImportRecord } from '@/services/balanceStorageService'
+import { liasseDataService } from '@/services/liasseDataService'
 
 interface ImportFile {
   file: File
@@ -59,10 +63,11 @@ interface ImportFile {
 const BalanceImport: React.FC = () => {
   const dispatch = useAppDispatch()
   const { isImporting, importProgress } = useAppSelector(state => state.balance)
-  
+
   const [files, setFiles] = useState<ImportFile[]>([])
   const [previewDialog, setPreviewDialog] = useState(false)
   const [selectedFilePreview, setSelectedFilePreview] = useState<ImportFile | null>(null)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const newFiles: ImportFile[] = acceptedFiles.map(file => ({
@@ -72,8 +77,9 @@ const BalanceImport: React.FC = () => {
       progress: 0,
       errors: [],
     }))
-    
+
     setFiles(prev => [...prev, ...newFiles])
+    setErrorMessage(null)
   }, [])
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -82,70 +88,96 @@ const BalanceImport: React.FC = () => {
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
       'application/vnd.ms-excel': ['.xls'],
       'text/csv': ['.csv'],
-      'application/xml': ['.xml'],
     },
     maxSize: 50 * 1024 * 1024, // 50MB
     multiple: true,
   })
 
-  // Fonction de simulation pour fallback
-  const simulateImport = async (fileData: ImportFile) => {
+  // Import réel côté client avec xlsx
+  const importFile = async (fileData: ImportFile) => {
     dispatch(setImporting(true))
+    setErrorMessage(null)
 
-    const stages = [
-      'Lecture du fichier...',
-      'Analyse de la structure...',
-      'Validation des données...',
-      'Mapping des comptes...',
-      'Import en base...',
-      'Validation finale...',
-    ]
-
-    for (let i = 0; i < stages.length; i++) {
-      await new Promise(resolve => setTimeout(resolve, 800))
-      
-      const progress = ((i + 1) / stages.length) * 100
-      dispatch(setImportProgress({
-        status: 'processing',
-        progress,
-        message: stages[i],
-      }))
-      
-      setFiles(prev => prev.map(f => 
-        f.id === fileData.id 
-          ? { ...f, status: 'processing', progress }
-          : f
+    const updateProgress = (progress: number, message: string) => {
+      dispatch(setImportProgress({ status: 'processing', progress, message }))
+      setFiles(prev => prev.map(f =>
+        f.id === fileData.id ? { ...f, status: 'processing', progress } : f
       ))
     }
 
-    // Finalisation
-    dispatch(setImportProgress({
-      status: 'completed',
-      progress: 100,
-      message: 'Import terminé avec succès !',
-    }))
-    
-    setFiles(prev => prev.map(f => 
-      f.id === fileData.id 
-        ? { 
-            ...f, 
-            status: 'completed', 
-            progress: 100,
-            preview: [
-              { compte: '101000', libelle: 'Capital social', debit: 0, credit: 50000000 },
-              { compte: '211000', libelle: 'Terrains', debit: 25000000, credit: 0 },
-              { compte: '411000', libelle: 'Clients', debit: 15000000, credit: 0 },
-            ]
-          }
-        : f
-    ))
+    try {
+      updateProgress(10, 'Lecture du fichier...')
 
-    // TODO: Implémenter l'appel API réel pour importer la balance
-    // Les données seront traitées via l'API backend et ajoutées au store
-    console.log('Import terminé - Les données seront récupérées via l\'API')
+      const result = await importBalanceFile(fileData.file)
 
-    dispatch(setImporting(false))
-    setTimeout(() => dispatch(resetImportProgress()), 3000)
+      updateProgress(60, 'Analyse des données...')
+
+      const entries = result.entries
+
+      updateProgress(80, 'Sauvegarde...')
+
+      // Save to localStorage
+      saveImportedBalance(entries, fileData.file.name)
+
+      const totalDebit = entries.reduce((s, e) => s + e.solde_debit, 0)
+      const totalCredit = entries.reduce((s, e) => s + e.solde_credit, 0)
+      saveImportRecord(
+        fileData.file.name,
+        entries.length,
+        totalDebit,
+        totalCredit,
+        result.errors.length,
+        result.warnings.length,
+      )
+
+      // Load into liasseDataService
+      liasseDataService.loadBalance(entries)
+
+      updateProgress(100, 'Import terminé avec succès !')
+
+      // Build preview from real data
+      const preview = entries.slice(0, 10).map(e => ({
+        compte: e.compte,
+        libelle: e.intitule,
+        debit: e.solde_debit,
+        credit: e.solde_credit,
+      }))
+
+      dispatch(setImportProgress({
+        status: 'completed',
+        progress: 100,
+        message: `Import terminé : ${entries.length} comptes importés.`,
+      }))
+
+      setFiles(prev => prev.map(f =>
+        f.id === fileData.id
+          ? { ...f, status: 'completed', progress: 100, preview }
+          : f
+      ))
+
+      if (result.warnings.length > 0) {
+        setErrorMessage(result.warnings.join(' | '))
+      }
+    } catch (error: any) {
+      console.error('Erreur import:', error)
+      const message = error?.message || 'Erreur inconnue lors de l\'import.'
+      setErrorMessage(message)
+
+      dispatch(setImportProgress({
+        status: 'error',
+        progress: 0,
+        message,
+      }))
+
+      setFiles(prev => prev.map(f =>
+        f.id === fileData.id
+          ? { ...f, status: 'error', progress: 0, errors: [message] }
+          : f
+      ))
+    } finally {
+      dispatch(setImporting(false))
+      setTimeout(() => dispatch(resetImportProgress()), 5000)
+    }
   }
 
   const removeFile = (fileId: string) => {
@@ -204,7 +236,7 @@ const BalanceImport: React.FC = () => {
               }
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              Formats supportés : Excel (.xlsx, .xls), CSV (.csv), XML (.xml)
+              Formats supportés : Excel (.xlsx, .xls), CSV (.csv)
             </Typography>
             <Typography variant="caption" color="text.secondary">
               Taille maximale : 50 MB par fichier
@@ -282,7 +314,7 @@ const BalanceImport: React.FC = () => {
                       <Button
                         size="small"
                         variant="contained"
-                        onClick={() => simulateImport(fileData)}
+                        onClick={() => importFile(fileData)}
                         disabled={isImporting}
                       >
                         Lancer Import
@@ -313,6 +345,14 @@ const BalanceImport: React.FC = () => {
             </List>
           </CardContent>
         </Card>
+      )}
+
+      {/* Erreur visible */}
+      {errorMessage && (
+        <Alert severity="error" sx={{ mt: 2 }} onClose={() => setErrorMessage(null)}>
+          <AlertTitle>Erreur</AlertTitle>
+          {errorMessage}
+        </Alert>
       )}
 
       {/* Aide et instructions */}

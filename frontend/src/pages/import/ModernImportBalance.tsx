@@ -6,6 +6,10 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { balanceService } from '@/services'
 import { useBackendData } from '@/hooks/useBackendData'
+import { importBalanceFile } from '@/services/balanceParserService'
+import type { ImportPipelineResult } from '@/services/balanceParserService'
+import { saveImportedBalance, saveImportRecord } from '@/services/balanceStorageService'
+import { liasseDataService } from '@/services/liasseDataService'
 import {
   Box,
   Grid,
@@ -185,6 +189,10 @@ const ModernImportBalance: React.FC = () => {
     tolerance: 0.01 // 1 centime de tolérance
   })
   
+  // État erreurs/warnings visibles
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [warningMessages, setWarningMessages] = useState<string[]>([])
+
   // État pour la comparaison N-1
   const [comparisonData, setComparisonData] = useState<Comparison[]>([])
   const [previousYearData] = useState<BalanceAccount[]>([])
@@ -255,263 +263,95 @@ const ModernImportBalance: React.FC = () => {
     multiple: false
   })
 
-  // EX-IMPORT-002: Détection automatique de la structure
+  // EX-IMPORT-002: Détection automatique de la structure (100% client-side)
   const detectFileStructure = async (file: File) => {
     setLoading(true)
     setImportStartTime(new Date())
+    setErrorMessage(null)
+    setWarningMessages([])
 
     try {
-      // Utiliser le backend pour analyser la structure du fichier
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('detect_structure', 'true')
+      const result: ImportPipelineResult = await importBalanceFile(file, {
+        separator: importConfig.separator,
+        encoding: importConfig.encoding,
+      })
 
-      console.log('📤 Analyzing file structure with backend...')
-      const structureResponse = await (balanceService as any).analyzeFile(formData)
-
-      if (structureResponse?.structure) {
-        setFileStructure(structureResponse.structure)
-
-        // Passer à l'étape suivante si confiance élevée
-        if (structureResponse.structure.detectionConfidence > 90) {
-          setImportStep(1)
-          processFile(file, structureResponse.structure)
-        }
-      } else {
-        // Fallback: structure par défaut
-        const structure: FileStructure = {
-          headers: ['N° Compte', 'Libellé', 'Débit', 'Crédit', 'Solde débiteur', 'Solde créditeur'],
-          detectedColumns: {
-            accountNumber: 0,
-            accountName: 1,
-            debit: [2, 4],
-            credit: [3, 5]
-          },
-          sampleData: [],
-          encoding: 'UTF-8',
-          separator: ';',
-          hasHeaders: true,
-          rowCount: 0,
-          detectionConfidence: 75
-        }
-        setFileStructure(structure)
-        setImportStep(1)
-        processFile(file, structure)
-      }
-    } catch (error) {
-      console.error('❌ Error detecting file structure:', error)
-      // Structure par défaut en cas d'erreur
+      // Build FileStructure from detection result
+      const det = result.detection
       const structure: FileStructure = {
-        headers: ['N° Compte', 'Libellé', 'Débit', 'Crédit', 'Solde débiteur', 'Solde créditeur'],
+        headers: det.headers,
         detectedColumns: {
-          accountNumber: 0,
-          accountName: 1,
-          debit: [2, 4],
-          credit: [3, 5]
+          accountNumber: det.mapping?.compte,
+          accountName: det.mapping?.libelle ?? undefined,
+          debit: det.mapping?.debit !== undefined ? [det.mapping.debit] : [],
+          credit: det.mapping?.credit !== undefined ? [det.mapping.credit] : [],
         },
-        sampleData: [],
-        encoding: 'UTF-8',
-        separator: ';',
+        sampleData: det.sampleData,
+        encoding: importConfig.encoding || 'UTF-8',
+        separator: importConfig.separator,
         hasHeaders: true,
-        rowCount: 0,
-        detectionConfidence: 50
+        rowCount: det.rowCount,
+        detectionConfidence: det.confidence,
       }
       setFileStructure(structure)
+
+      // Convert parsed entries to BalanceAccount for display
+      const accounts: BalanceAccount[] = result.entries.map(entry => ({
+        accountNumber: entry.compte,
+        accountName: entry.intitule,
+        debitOpening: 0,
+        creditOpening: 0,
+        debitMovements: entry.debit,
+        creditMovements: entry.credit,
+        debitClosing: entry.solde_debit,
+        creditClosing: entry.solde_credit,
+        detectedType: detectAccountType(entry.compte),
+        mappedAccount: entry.compte.substring(0, 3),
+        mappingConfidence: 80,
+        status: 'valid' as const,
+      }))
+
+      setImportedData(accounts)
+      if (result.warnings.length > 0) setWarningMessages(result.warnings)
+      if (result.errors.length > 0) setErrorMessage(result.errors.join(' | '))
+
+      validateBalance(accounts)
+      generateMappingSuggestions(accounts)
+
+      if (previousYearData.length > 0) {
+        compareWithPreviousYear(accounts)
+      }
+
+      const endTime = performance.now()
+      setProcessingTime(endTime)
+      generateImportReport(accounts, file.name, endTime)
+
+      setImportStep(2)
+    } catch (error: any) {
+      console.error('Erreur parsing fichier:', error)
+      setErrorMessage(error?.message || 'Erreur inconnue lors du parsing du fichier.')
     } finally {
       setLoading(false)
     }
   }
 
-  // EX-IMPORT-009: Traiter jusqu'à 100 000 lignes en moins de 30 secondes
+  /** Detect SYSCOHADA account type from account number prefix */
+  const detectAccountType = (compte: string): BalanceAccount['detectedType'] => {
+    const c = compte[0]
+    if (c === '1') return 'equity'
+    if (c === '2') return 'asset'
+    if (c === '3') return 'asset'
+    if (c === '4') return compte.startsWith('40') ? 'liability' : 'asset'
+    if (c === '5') return 'asset'
+    if (c === '6') return 'expense'
+    if (c === '7') return 'income'
+    return undefined
+  }
+
+  // Re-process file from step 1 (re-parse with potentially updated config)
   const processFile = async (file: File, _structure: FileStructure) => {
-    setLoading(true)
-    const startTime = performance.now()
-
-    try {
-      // Importer le fichier via le backend
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('format', importConfig.format)
-      formData.append('separator', importConfig.separator || ';')
-      formData.append('encoding', importConfig.encoding || 'UTF-8')
-      formData.append('date_format', importConfig.dateFormat || 'DD/MM/YYYY')
-      formData.append('decimal_separator', importConfig.decimalSeparator || ',')
-      formData.append('thousands_separator', importConfig.thousandsSeparator || ' ')
-
-      console.log('📤 Importing balance file via backend...')
-      const importResponse = await (balanceService as any).importBalance(formData)
-
-      if (importResponse?.accounts) {
-        // Convertir les données du backend au format attendu
-        const accounts: BalanceAccount[] = importResponse.accounts.map((acc: any) => ({
-          accountNumber: acc.numero_compte || acc.account_number,
-          accountName: acc.libelle_compte || acc.account_name,
-          debitOpening: acc.solde_debit_ouverture || 0,
-          creditOpening: acc.solde_credit_ouverture || 0,
-          debitMovements: acc.mouvements_debit || 0,
-          creditMovements: acc.mouvements_credit || 0,
-          debitClosing: acc.solde_debit || acc.debit_closing || 0,
-          creditClosing: acc.solde_credit || acc.credit_closing || 0,
-          detectedType: acc.type_compte || 'asset',
-          mappedAccount: acc.compte_syscohada || undefined,
-          mappingConfidence: acc.confidence_mapping || 0,
-          status: acc.status || 'valid',
-          errors: acc.errors || []
-        }))
-
-        setImportedData(accounts)
-
-        // Validation et analyses
-        validateBalance(accounts)
-        generateMappingSuggestions(accounts)
-
-        if (previousYearData.length > 0) {
-          compareWithPreviousYear(accounts)
-        }
-      } else {
-        // Fallback: données mockées si le backend ne répond pas
-        const accounts: BalanceAccount[] = [
-          {
-            accountNumber: '101000',
-            accountName: 'Capital social',
-            debitOpening: 0,
-            creditOpening: 10000000,
-            debitMovements: 0,
-            creditMovements: 2000000,
-            debitClosing: 0,
-            creditClosing: 12000000,
-            detectedType: 'equity',
-            mappedAccount: '101',
-            mappingConfidence: 98,
-            status: 'valid'
-          },
-        {
-          accountNumber: '201000',
-          accountName: 'Frais d\'établissement',
-          debitOpening: 500000,
-          creditOpening: 0,
-          debitMovements: 100000,
-          creditMovements: 0,
-          debitClosing: 600000,
-          creditClosing: 0,
-          detectedType: 'asset',
-          mappedAccount: '201',
-          mappingConfidence: 85,
-          status: 'valid'
-        },
-        {
-          accountNumber: '401000',
-          accountName: 'Fournisseurs d\'exploitation',
-          debitOpening: 0,
-          creditOpening: 3000000,
-          debitMovements: 5000000,
-          creditMovements: 8000000,
-          debitClosing: 0,
-          creditClosing: 6000000,
-          detectedType: 'liability',
-          mappedAccount: '401',
-          mappingConfidence: 95,
-          status: 'valid'
-        },
-        {
-          accountNumber: '411000',
-          accountName: 'Clients',
-          debitOpening: 5000000,
-          creditOpening: 0,
-          debitMovements: 12000000,
-          creditMovements: 7000000,
-          debitClosing: 10000000,
-          creditClosing: 0,
-          detectedType: 'asset',
-          mappedAccount: '411',
-          mappingConfidence: 97,
-          status: 'valid'
-        },
-        {
-          accountNumber: '512000',
-          accountName: 'Banques locales',
-          debitOpening: 2000000,
-          creditOpening: 0,
-          debitMovements: 15000000,
-          creditMovements: 14000000,
-          debitClosing: 3000000,
-          creditClosing: 0,
-          detectedType: 'asset',
-          mappedAccount: '512',
-          mappingConfidence: 92,
-          status: 'valid'
-        },
-        {
-          accountNumber: '601000',
-          accountName: 'Achats de marchandises',
-          debitOpening: 0,
-          creditOpening: 0,
-          debitMovements: 8000000,
-          creditMovements: 0,
-          debitClosing: 8000000,
-          creditClosing: 0,
-          detectedType: 'expense',
-          mappedAccount: '601',
-          mappingConfidence: 88,
-          status: 'valid'
-        },
-        {
-          accountNumber: '701000',
-          accountName: 'Ventes de marchandises',
-          debitOpening: 0,
-          creditOpening: 0,
-          debitMovements: 0,
-          creditMovements: 25000000,
-          debitClosing: 0,
-          creditClosing: 25000000,
-          detectedType: 'income',
-          mappedAccount: '701',
-          mappingConfidence: 94,
-          status: 'valid'
-        },
-        // Compte non mappé pour test
-        {
-          accountNumber: '999999',
-          accountName: 'Compte divers',
-          debitOpening: 100000,
-          creditOpening: 0,
-          debitMovements: 50000,
-          creditMovements: 30000,
-          debitClosing: 120000,
-          creditClosing: 0,
-          detectedType: undefined,
-          mappedAccount: undefined,
-          mappingConfidence: 0,
-          status: 'warning',
-          errors: ['Compte non reconnu dans le plan SYSCOHADA']
-          }
-        ]
-
-        setImportedData(accounts)
-        validateBalance(accounts)
-        generateMappingSuggestions(accounts)
-
-        if (previousYearData.length > 0) {
-          compareWithPreviousYear(accounts)
-        }
-      }
-
-      const endTime = performance.now()
-      const processingTime = endTime - startTime
-      setProcessingTime(processingTime)
-
-      // Générer le rapport
-      generateImportReport(importedData.length > 0 ? importedData : [], file.name, processingTime)
-
-      setImportStep(2)
-    } catch (error) {
-      console.error('❌ Error processing file:', error)
-      // En cas d'erreur, utiliser des données par défaut
-      const accounts: BalanceAccount[] = []
-      setImportedData(accounts)
-    } finally {
-      setLoading(false)
-    }
+    // Re-run the full pipeline with current config
+    await detectFileStructure(file)
   }
 
   // EX-IMPORT-003: Validation équilibre avec tolérance
@@ -872,6 +712,20 @@ const ModernImportBalance: React.FC = () => {
           </Grid>
         )}
       </Box>
+
+      {/* Erreurs et avertissements visibles */}
+      {errorMessage && (
+        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setErrorMessage(null)}>
+          <AlertTitle>Erreur d'import</AlertTitle>
+          {errorMessage}
+        </Alert>
+      )}
+      {warningMessages.length > 0 && (
+        <Alert severity="warning" sx={{ mb: 2 }} onClose={() => setWarningMessages([])}>
+          <AlertTitle>Avertissements ({warningMessages.length})</AlertTitle>
+          {warningMessages.map((w, i) => <div key={i}>{w}</div>)}
+        </Alert>
+      )}
 
       {/* Assistant d'import avec étapes */}
       <Grid container spacing={3}>
@@ -1531,29 +1385,42 @@ const ModernImportBalance: React.FC = () => {
                           variant="contained"
                           startIcon={<SaveIcon />}
                           fullWidth
-                          onClick={async () => {
+                          onClick={() => {
                             try {
-                              console.log('📤 Validating import in backend...')
-                              // Créer une nouvelle balance dans le backend
-                              const balanceData = {
-                                nom: importReport?.fileName || 'Import balance',
-                                exercice: String(new Date().getFullYear()),
-                                comptes: importedData.map(acc => ({
-                                  numero_compte: acc.accountNumber,
-                                  libelle_compte: acc.accountName,
-                                  solde_debit: acc.debitClosing || 0,
-                                  solde_credit: acc.creditClosing || 0,
-                                  compte_syscohada: acc.mappedAccount
-                                }))
-                              }
+                              // Convert to BalanceEntry[] for liasseDataService
+                              const entries = importedData.map(acc => ({
+                                compte: acc.accountNumber,
+                                intitule: acc.accountName,
+                                debit: acc.debitMovements || 0,
+                                credit: acc.creditMovements || 0,
+                                solde_debit: acc.debitClosing || 0,
+                                solde_credit: acc.creditClosing || 0,
+                              }))
 
-                              const response = await balanceService.createBalance(balanceData as any)
-                              console.log('✅ Balance imported successfully:', response)
+                              // Save to localStorage
+                              saveImportedBalance(
+                                entries,
+                                importReport?.fileName || 'Import balance',
+                              )
 
-                              // Rediriger vers la page des balances
+                              // Save import record
+                              saveImportRecord(
+                                importReport?.fileName || 'Import balance',
+                                entries.length,
+                                importReport?.debitTotal || 0,
+                                importReport?.creditTotal || 0,
+                                importReport?.errors || 0,
+                                importReport?.warnings || 0,
+                              )
+
+                              // Load into liasseDataService immediately
+                              liasseDataService.loadBalance(entries)
+
+                              // Redirect
                               window.location.href = '/balance'
-                            } catch (error) {
-                              console.error('❌ Error validating import:', error)
+                            } catch (error: any) {
+                              console.error('Erreur validation import:', error)
+                              setErrorMessage(error?.message || 'Erreur lors de la sauvegarde.')
                             }
                           }}
                         >

@@ -6,10 +6,12 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react'
 import { MOCK_BALANCE } from '../../data/mockBalance'
 import { liasseDataService } from '../../services/liasseDataService'
+import { getLatestBalance } from '../../services/balanceStorageService'
 
-// Charger la balance mock IMMÉDIATEMENT au niveau module
-// pour que liasseDataService ait les données AVANT le premier render des feuilles
-liasseDataService.loadBalance(MOCK_BALANCE)
+// Charger la balance importée si disponible, sinon fallback sur MOCK
+const storedBalance = getLatestBalance()
+const initialBalance = storedBalance?.entries?.length ? storedBalance.entries : MOCK_BALANCE
+liasseDataService.loadBalance(initialBalance)
 
 interface LiasseData {
   entreprise: any
@@ -54,7 +56,7 @@ export const LiasseDataProvider: React.FC<LiasseDataProviderProps> = ({
   const [data] = useState<LiasseData>({
     entreprise: { nom: 'FISCASYNC DEMO SARL', siret: '85412369700015', regime_imposition: 'REEL_NORMAL' },
     exercice: { annee: 2024 },
-    balance: MOCK_BALANCE,
+    balance: initialBalance,
     comptes: [],
     ecritures: [],
     loading: false,
