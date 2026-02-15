@@ -7,6 +7,7 @@
 
 import * as React from 'react'
 import * as services from '@/services'
+import { logger } from '@/utils/logger'
 
 // Flag global : true = Supabase, false = localStorage demo
 // Set to true once VITE_SUPABASE_URL is configured in .env
@@ -26,12 +27,12 @@ export const getBackendData = async (dataType: string, params?: any): Promise<an
   const cached = dataCache.get(cacheKey)
 
   if (cached && Date.now() - cached.timestamp < cacheTimeout) {
-    console.log(`📦 Using cached data for ${dataType}`)
+    logger.debug(`Using cached data for ${dataType}`)
     return cached.data
   }
 
   try {
-    console.log(`🔄 Fetching ${dataType} from backend...`)
+    logger.debug(`Fetching ${dataType} from backend...`)
     let data: any = null
 
     switch (dataType) {
@@ -41,7 +42,7 @@ export const getBackendData = async (dataType: string, params?: any): Promise<an
           const entreprisesRes = await services.entrepriseService.getEntreprises(params)
           data = entreprisesRes.results || entreprisesRes || []
         } catch (_e) {
-          console.log('Error fetching entreprises, using empty array')
+          logger.debug('Error fetching entreprises, using empty array')
           data = []
         }
         break
@@ -128,7 +129,7 @@ export const getBackendData = async (dataType: string, params?: any): Promise<an
           const plansRes = await services.accountingService.getPlansComptables(params) as any
           data = plansRes.results || plansRes || []
         } catch (_e) {
-          console.log('Error fetching plansComptables, using empty array')
+          logger.debug('Error fetching plansComptables, using empty array')
           data = []
         }
         break
@@ -164,7 +165,7 @@ export const getBackendData = async (dataType: string, params?: any): Promise<an
         try {
           data = await services.reportingService.getDashboardStats(params)
         } catch (_e) {
-          console.log('Error fetching dashboardStats, using default')
+          logger.debug('Error fetching dashboardStats, using default')
           data = {
             entreprises_total: 0,
             liasses_ce_mois: 0,
@@ -190,7 +191,7 @@ export const getBackendData = async (dataType: string, params?: any): Promise<an
         try {
           data = await services.entrepriseService.getTypesLiasse(params) || []
         } catch (_e) {
-          console.log('Error fetching typesLiasse, using empty array')
+          logger.debug('Error fetching typesLiasse, using empty array')
           data = []
         }
         break
@@ -202,17 +203,17 @@ export const getBackendData = async (dataType: string, params?: any): Promise<an
         break
 
       default:
-        console.warn(`Unknown data type: ${dataType}`)
+        logger.warn(`Unknown data type: ${dataType}`)
         return null
     }
 
     // Mettre en cache
     dataCache.set(cacheKey, { data, timestamp: Date.now() })
-    console.log(`✅ Fetched ${dataType} successfully`)
+    logger.debug(`Fetched ${dataType} successfully`)
     return data
 
   } catch (error) {
-    console.error(`❌ Error fetching ${dataType}:`, error)
+    logger.error(`Error fetching ${dataType}:`, error)
     return null // Retourner null pour utiliser les données mockées comme fallback
   }
 }
@@ -274,7 +275,7 @@ export const useBackendDataGlobal = (dataType: string, params?: any, defaultData
 
 // Fonction pour initialiser automatiquement toutes les connexions au démarrage
 export const initializeBackendConnections = async () => {
-  console.log('🚀 Initializing global backend connections...')
+  logger.debug('Initializing global backend connections...')
 
   try {
     // Précharger les données essentielles
@@ -285,9 +286,9 @@ export const initializeBackendConnections = async () => {
       getBackendData('typesLiasse')
     ])
 
-    console.log('✅ Backend connections initialized successfully')
+    logger.debug('Backend connections initialized successfully')
   } catch (error) {
-    console.error('❌ Error initializing backend connections:', error)
+    logger.error('Error initializing backend connections:', error)
   }
 }
 

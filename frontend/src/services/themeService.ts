@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Service pour la gestion des thèmes via l'API
  */
@@ -61,7 +62,7 @@ class ThemeService {
       const data = await apiClient.get<{ results?: ThemeConfiguration[] } | ThemeConfiguration[]>(`${this.baseUrl}/?entreprise=${entrepriseId}`)
       return Array.isArray(data) ? data : (data.results || [])
     } catch (error) {
-      console.error('Erreur lors de la récupération des thèmes:', error)
+      logger.error('Erreur lors de la récupération des thèmes:', error)
       throw error
     }
   }
@@ -75,7 +76,7 @@ class ThemeService {
       if (error?.response?.status === 404) {
         return null
       }
-      console.error('Erreur lors de la récupération du thème actif:', error)
+      logger.error('Erreur lors de la récupération du thème actif:', error)
       throw error
     }
   }
@@ -86,7 +87,7 @@ class ThemeService {
       const data = await apiClient.post<ThemeConfiguration>(this.baseUrl + '/', theme)
       return data
     } catch (error) {
-      console.error('Erreur lors de la création du thème:', error)
+      logger.error('Erreur lors de la création du thème:', error)
       throw error
     }
   }
@@ -97,7 +98,7 @@ class ThemeService {
       const data = await apiClient.patch<ThemeConfiguration>(`${this.baseUrl}/${id}/`, theme)
       return data
     } catch (error) {
-      console.error('Erreur lors de la mise à jour du thème:', error)
+      logger.error('Erreur lors de la mise à jour du thème:', error)
       throw error
     }
   }
@@ -108,7 +109,7 @@ class ThemeService {
       const data = await apiClient.post<ThemeConfiguration>(`${this.baseUrl}/${id}/activate/`)
       return data
     } catch (error) {
-      console.error('Erreur lors de l\'activation du thème:', error)
+      logger.error('Erreur lors de l\'activation du thème:', error)
       throw error
     }
   }
@@ -118,7 +119,7 @@ class ThemeService {
     try {
       await apiClient.delete<void>(`${this.baseUrl}/${id}/`)
     } catch (error) {
-      console.error('Erreur lors de la suppression du thème:', error)
+      logger.error('Erreur lors de la suppression du thème:', error)
       throw error
     }
   }
@@ -129,7 +130,7 @@ class ThemeService {
       const data = await apiClient.get<PredefinedTheme[]>(`${this.baseUrl}/predefined_themes/`)
       return data
     } catch (error) {
-      console.error('Erreur lors de la récupération des thèmes prédéfinis:', error)
+      logger.error('Erreur lors de la récupération des thèmes prédéfinis:', error)
       throw error
     }
   }
@@ -140,7 +141,7 @@ class ThemeService {
       const data = await apiClient.get<FontChoice[]>(`${this.baseUrl}/available_fonts/`)
       return data
     } catch (error) {
-      console.error('Erreur lors de la récupération des polices:', error)
+      logger.error('Erreur lors de la récupération des polices:', error)
       throw error
     }
   }

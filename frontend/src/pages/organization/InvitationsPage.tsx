@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Page de gestion des invitations (envoyées et reçues)
  */
@@ -36,31 +37,10 @@ import {
 } from '@mui/icons-material'
 import organizationService, { Invitation } from '../../services/organizationService'
 import InviteMemberDialog from '../../components/organization/InviteMemberDialog'
+import { TabPanel } from '@/components/shared/TabPanel'
 
 interface InvitationsPageProps {
   organizationSlug: string
-}
-
-interface TabPanelProps {
-  children?: React.ReactNode
-  index: number
-  value: number
-}
-
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`invitations-tabpanel-${index}`}
-      aria-labelledby={`invitations-tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box sx={{ pt: 3 }}>{children}</Box>}
-    </div>
-  )
 }
 
 const InvitationsPage: React.FC<InvitationsPageProps> = ({ organizationSlug }) => {
@@ -93,7 +73,7 @@ const InvitationsPage: React.FC<InvitationsPageProps> = ({ organizationSlug }) =
       const pending = await organizationService.getPendingInvitations()
       setReceivedInvitations(pending)
     } catch (err: any) {
-      console.error('Error loading invitations:', err)
+      logger.error('Error loading invitations:', err)
       setError(err.message || 'Erreur lors du chargement des invitations')
     } finally {
       setLoading(false)
@@ -110,7 +90,7 @@ const InvitationsPage: React.FC<InvitationsPageProps> = ({ organizationSlug }) =
       setSuccess('Invitation acceptée avec succès!')
       loadInvitations()
     } catch (err: any) {
-      console.error('Error accepting invitation:', err)
+      logger.error('Error accepting invitation:', err)
       setError(err.message || 'Erreur lors de l\'acceptation de l\'invitation')
     } finally {
       setAcceptingInvitation(null)
@@ -131,7 +111,7 @@ const InvitationsPage: React.FC<InvitationsPageProps> = ({ organizationSlug }) =
       setSuccess('Invitation annulée avec succès!')
       loadInvitations()
     } catch (err: any) {
-      console.error('Error cancelling invitation:', err)
+      logger.error('Error cancelling invitation:', err)
       setError(err.message || 'Erreur lors de l\'annulation de l\'invitation')
     } finally {
       setCancellingInvitation(null)
@@ -148,7 +128,7 @@ const InvitationsPage: React.FC<InvitationsPageProps> = ({ organizationSlug }) =
       setSuccess('Invitation renvoyée avec succès!')
       loadInvitations()
     } catch (err: any) {
-      console.error('Error resending invitation:', err)
+      logger.error('Error resending invitation:', err)
       setError(err.message || 'Erreur lors du renvoi de l\'invitation')
     } finally {
       setResendingInvitation(null)

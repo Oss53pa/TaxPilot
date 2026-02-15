@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Service de Calcul des Ratios Financiers SYSCOHADA
  * Calculs basés sur la balance et liasse fiscale réelle
@@ -67,7 +68,7 @@ export class RatiosService {
       return { ratios, kpis, situationFinanciere };
       
     } catch (error) {
-      console.error('Erreur calcul ratios:', error);
+      logger.error('Erreur calcul ratios:', error);
       // Retourner des données par défaut en cas d'erreur
       return this.obtenirDonneesParDefaut();
     }
@@ -95,7 +96,7 @@ export class RatiosService {
         }
       );
 
-      console.log('📊 Ratios calculés depuis la balance:', data);
+      logger.debug('Ratios calculés depuis la balance:', data);
 
       return {
         ratios: data.ratios || [],
@@ -104,7 +105,7 @@ export class RatiosService {
       };
 
     } catch (error) {
-      console.error('❌ Erreur calcul ratios depuis API:', error);
+      logger.error('Erreur calcul ratios depuis API:', error);
       // Retourner des données par défaut en cas d'erreur
       return this.obtenirDonneesParDefaut();
     }

@@ -88,7 +88,7 @@ const ModernDashboard: React.FC = () => {
       display: 'flex',
       flexDirection: 'column',
       minHeight: '85vh',
-      bgcolor: '#ffffff',
+      bgcolor: 'background.paper',
       position: 'relative',
     }}>
       {/* Header bar */}
@@ -103,13 +103,13 @@ const ModernDashboard: React.FC = () => {
         <Box>
           <Typography
             variant="subtitle1"
-            sx={{ fontWeight: 700, color: '#171717', letterSpacing: 0.5, lineHeight: 1.2 }}
+            sx={{ fontWeight: 700, color: 'text.primary', letterSpacing: 0.5, lineHeight: 1.2 }}
           >
             {entrepriseNom}
           </Typography>
           <Typography
             variant="caption"
-            sx={{ color: '#a3a3a3', letterSpacing: 0.3 }}
+            sx={{ color: 'text.disabled', letterSpacing: 0.3 }}
           >
             Exercice {exercice}
           </Typography>
@@ -117,14 +117,14 @@ const ModernDashboard: React.FC = () => {
 
         <Stack direction="row" spacing={2} alignItems="center">
           <Stack direction="row" spacing={0.5} alignItems="center">
-            <NotifIcon sx={{ fontSize: 18, color: '#a3a3a3' }} />
+            <NotifIcon sx={{ fontSize: 18, color: 'text.disabled' }} />
             <Chip
               label="3"
               size="small"
               sx={{
                 height: 20,
                 fontSize: '0.7rem',
-                bgcolor: '#ef4444',
+                bgcolor: 'error.main',
                 color: '#fff',
                 fontWeight: 600,
                 '& .MuiChip-label': { px: 0.8 },
@@ -134,18 +134,18 @@ const ModernDashboard: React.FC = () => {
 
           <Typography
             variant="body2"
-            sx={{ color: '#171717', fontWeight: 600, fontSize: '0.85rem' }}
+            sx={{ color: 'text.primary', fontWeight: 600, fontSize: '0.85rem' }}
           >
             {user?.username || 'Admin'}
           </Typography>
 
           <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.5 }}>
-            <Typography variant="caption" sx={{ color: '#a3a3a3' }}>
+            <Typography variant="caption" sx={{ color: 'text.disabled' }}>
               Clôture:
             </Typography>
             <Typography
               variant="h6"
-              sx={{ fontWeight: 700, color: '#171717', lineHeight: 1 }}
+              sx={{ fontWeight: 700, color: 'text.primary', lineHeight: 1 }}
             >
               J-{daysUntilClose}
             </Typography>
@@ -157,13 +157,13 @@ const ModernDashboard: React.FC = () => {
             endIcon={<ArrowIcon />}
             onClick={() => navigate('/dashboard')}
             sx={{
-              bgcolor: '#171717',
+              bgcolor: 'text.primary',
               color: '#fff',
               borderRadius: 3,
               textTransform: 'none',
               fontWeight: 600,
               px: 2,
-              '&:hover': { bgcolor: '#262626' },
+              '&:hover': { bgcolor: 'grey.900' },
             }}
           >
             Accéder
@@ -186,7 +186,7 @@ const ModernDashboard: React.FC = () => {
             fontFamily: "'Grand Hotel', cursive",
             fontSize: { xs: '3rem', md: '4.5rem' },
             fontWeight: 400,
-            color: '#171717',
+            color: 'text.primary',
             lineHeight: 1.2,
             mb: 0,
           }}
@@ -197,7 +197,7 @@ const ModernDashboard: React.FC = () => {
         <Typography
           variant="body1"
           sx={{
-            color: '#a3a3a3',
+            color: 'text.disabled',
             fontSize: '1.1rem',
             letterSpacing: 1,
             mb: 4,
@@ -215,7 +215,7 @@ const ModernDashboard: React.FC = () => {
               sx={{
                 width: '1px',
                 height: 60,
-                bgcolor: '#e5e5e5',
+                bgcolor: 'grey.300',
                 alignSelf: 'center',
                 display: { xs: 'none', sm: 'block' },
               }}
@@ -232,11 +232,11 @@ const ModernDashboard: React.FC = () => {
             <Box key={stat.label} sx={{ textAlign: 'center', px: { xs: 2, sm: 5, md: 7 } }}>
               <Typography
                 variant="h3"
-                sx={{ fontWeight: 300, color: '#171717', fontSize: { xs: '2.5rem', md: '3rem' } }}
+                sx={{ fontWeight: 300, color: 'text.primary', fontSize: { xs: '2.5rem', md: '3rem' } }}
               >
                 {stat.value}
               </Typography>
-              <Typography variant="body2" sx={{ color: '#a3a3a3', mt: 0.5 }}>
+              <Typography variant="body2" sx={{ color: 'text.disabled', mt: 0.5 }}>
                 {stat.label}
               </Typography>
             </Box>
@@ -276,7 +276,7 @@ const ModernDashboard: React.FC = () => {
                 fontSize: '0.85rem',
                 '&:hover': {
                   borderColor: '#a3a3a3',
-                  bgcolor: '#fafafa',
+                  bgcolor: 'grey.50',
                 },
               }}
             >

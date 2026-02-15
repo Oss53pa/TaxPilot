@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Service pour la gestion comptable et plan de comptes
  * CONNEXION RÉELLE AU BACKEND DJANGO
@@ -141,32 +142,32 @@ class AccountingService {
     is_officiel?: boolean
     page?: number
   }) {
-    console.log('🔄 Fetching plans comptables from backend...', params)
+    logger.debug('Fetching plans comptables from backend...', params)
     return apiClient.get(`${this.baseUrl}/plans/`, params)
   }
 
   async getPlanComptable(id: string): Promise<PlanComptable> {
-    console.log(`🔄 Fetching plan comptable ${id} from backend...`)
+    logger.debug(`Fetching plan comptable ${id} from backend...`)
     return apiClient.get(`${this.baseUrl}/plans/${id}/`)
   }
 
   async createPlanComptable(plan: Partial<PlanComptable>): Promise<PlanComptable> {
-    console.log('📤 Creating plan comptable in backend...', plan)
+    logger.debug('Creating plan comptable in backend...', plan)
     return apiClient.post(`${this.baseUrl}/plans/`, plan)
   }
 
   async updatePlanComptable(id: string, plan: Partial<PlanComptable>): Promise<PlanComptable> {
-    console.log(`📤 Updating plan comptable ${id} in backend...`)
+    logger.debug(`Updating plan comptable ${id} in backend...`)
     return apiClient.patch(`${this.baseUrl}/plans/${id}/`, plan)
   }
 
   async deletePlanComptable(id: string): Promise<void> {
-    console.log(`🗑️ Deleting plan comptable ${id} from backend...`)
+    logger.debug(`Deleting plan comptable ${id} from backend...`)
     return apiClient.delete(`${this.baseUrl}/plans/${id}/`)
   }
 
   async duplicatePlanComptable(id: string, newName: string): Promise<PlanComptable> {
-    console.log(`📋 Duplicating plan comptable ${id} as ${newName}...`)
+    logger.debug(`Duplicating plan comptable ${id} as ${newName}...`)
     return apiClient.post(`${this.baseUrl}/plans/${id}/duplicate/`, { nom: newName })
   }
 
@@ -181,37 +182,37 @@ class AccountingService {
     page?: number
     page_size?: number
   }) {
-    console.log('🔄 Fetching comptes from backend...', params)
+    logger.debug('Fetching comptes from backend...', params)
     return apiClient.get(`${this.baseUrl}/comptes/`, params)
   }
 
   async getCompte(id: string): Promise<CompteComplet> {
-    console.log(`🔄 Fetching compte ${id} from backend...`)
+    logger.debug(`Fetching compte ${id} from backend...`)
     return apiClient.get(`${this.baseUrl}/comptes/${id}/`)
   }
 
   async createCompte(compte: Partial<CompteComplet>): Promise<CompteComplet> {
-    console.log('📤 Creating compte in backend...', compte)
+    logger.debug('Creating compte in backend...', compte)
     return apiClient.post(`${this.baseUrl}/comptes/`, compte)
   }
 
   async updateCompte(id: string, compte: Partial<CompteComplet>): Promise<CompteComplet> {
-    console.log(`📤 Updating compte ${id} in backend...`)
+    logger.debug(`Updating compte ${id} in backend...`)
     return apiClient.patch(`${this.baseUrl}/comptes/${id}/`, compte)
   }
 
   async deleteCompte(id: string): Promise<void> {
-    console.log(`🗑️ Deleting compte ${id} from backend...`)
+    logger.debug(`Deleting compte ${id} from backend...`)
     return apiClient.delete(`${this.baseUrl}/comptes/${id}/`)
   }
 
   async getCompteHierarchy(plan_id: string) {
-    console.log(`🌳 Getting compte hierarchy for plan ${plan_id}...`)
+    logger.debug(`Getting compte hierarchy for plan ${plan_id}...`)
     return apiClient.get(`${this.baseUrl}/plans/${plan_id}/hierarchy/`)
   }
 
   async searchComptes(query: string, plan_id?: string) {
-    console.log(`🔍 Searching comptes: ${query}...`)
+    logger.debug(`Searching comptes: ${query}...`)
     return apiClient.get(`${this.baseUrl}/comptes/search/`, { q: query, plan_comptable: plan_id })
   }
 
@@ -225,42 +226,42 @@ class AccountingService {
     compte?: string
     page?: number
   }) {
-    console.log('🔄 Fetching écritures from backend...', params)
+    logger.debug('Fetching écritures from backend...', params)
     return apiClient.get(`${this.baseUrl}/ecritures/`, params)
   }
 
   async getEcriture(id: string): Promise<EcritureComptable> {
-    console.log(`🔄 Fetching écriture ${id} from backend...`)
+    logger.debug(`Fetching écriture ${id} from backend...`)
     return apiClient.get(`${this.baseUrl}/ecritures/${id}/`)
   }
 
   async createEcriture(ecriture: Partial<EcritureComptable>): Promise<EcritureComptable> {
-    console.log('📤 Creating écriture in backend...', ecriture)
+    logger.debug('Creating écriture in backend...', ecriture)
     return apiClient.post(`${this.baseUrl}/ecritures/`, ecriture)
   }
 
   async updateEcriture(id: string, ecriture: Partial<EcritureComptable>): Promise<EcritureComptable> {
-    console.log(`📤 Updating écriture ${id} in backend...`)
+    logger.debug(`Updating écriture ${id} in backend...`)
     return apiClient.patch(`${this.baseUrl}/ecritures/${id}/`, ecriture)
   }
 
   async deleteEcriture(id: string): Promise<void> {
-    console.log(`🗑️ Deleting écriture ${id} from backend...`)
+    logger.debug(`Deleting écriture ${id} from backend...`)
     return apiClient.delete(`${this.baseUrl}/ecritures/${id}/`)
   }
 
   async validateEcriture(id: string): Promise<EcritureComptable> {
-    console.log(`✅ Validating écriture ${id} on backend...`)
+    logger.debug(`Validating écriture ${id} on backend...`)
     return apiClient.post(`${this.baseUrl}/ecritures/${id}/validate/`)
   }
 
   async unvalidateEcriture(id: string): Promise<EcritureComptable> {
-    console.log(`❌ Unvalidating écriture ${id} on backend...`)
+    logger.debug(`Unvalidating écriture ${id} on backend...`)
     return apiClient.post(`${this.baseUrl}/ecritures/${id}/unvalidate/`)
   }
 
   async duplicateEcriture(id: string): Promise<EcritureComptable> {
-    console.log(`📋 Duplicating écriture ${id}...`)
+    logger.debug(`Duplicating écriture ${id}...`)
     return apiClient.post(`${this.baseUrl}/ecritures/${id}/duplicate/`)
   }
 
@@ -270,27 +271,27 @@ class AccountingService {
     is_actif?: boolean
     page?: number
   }) {
-    console.log('🔄 Fetching journaux from backend...', params)
+    logger.debug('Fetching journaux from backend...', params)
     return apiClient.get(`${this.baseUrl}/journaux/`, params)
   }
 
   async getJournal(id: string): Promise<Journal> {
-    console.log(`🔄 Fetching journal ${id} from backend...`)
+    logger.debug(`Fetching journal ${id} from backend...`)
     return apiClient.get(`${this.baseUrl}/journaux/${id}/`)
   }
 
   async createJournal(journal: Partial<Journal>): Promise<Journal> {
-    console.log('📤 Creating journal in backend...', journal)
+    logger.debug('Creating journal in backend...', journal)
     return apiClient.post(`${this.baseUrl}/journaux/`, journal)
   }
 
   async updateJournal(id: string, journal: Partial<Journal>): Promise<Journal> {
-    console.log(`📤 Updating journal ${id} in backend...`)
+    logger.debug(`Updating journal ${id} in backend...`)
     return apiClient.patch(`${this.baseUrl}/journaux/${id}/`, journal)
   }
 
   async deleteJournal(id: string): Promise<void> {
-    console.log(`🗑️ Deleting journal ${id} from backend...`)
+    logger.debug(`Deleting journal ${id} from backend...`)
     return apiClient.delete(`${this.baseUrl}/journaux/${id}/`)
   }
 
@@ -302,7 +303,7 @@ class AccountingService {
     comptes_fin?: string
     niveau_detail?: number
   }): Promise<Balance> {
-    console.log('📊 Getting balance from backend...', params)
+    logger.debug('Getting balance from backend...', params)
     return apiClient.get(`${this.baseUrl}/balance/`, params)
   }
 
@@ -312,7 +313,7 @@ class AccountingService {
     periode_fin: string
     inclure_ods?: boolean
   }): Promise<GrandLivre> {
-    console.log(`📖 Getting grand livre for compte ${params.compte}...`)
+    logger.debug(`Getting grand livre for compte ${params.compte}...`)
     return apiClient.get(`${this.baseUrl}/grand-livre/`, params)
   }
 
@@ -322,7 +323,7 @@ class AccountingService {
     periode_fin: string
     page?: number
   }) {
-    console.log(`📑 Getting journal général for ${params.journal}...`)
+    logger.debug(`Getting journal général for ${params.journal}...`)
     return apiClient.get(`${this.baseUrl}/journal-general/`, params)
   }
 
@@ -331,7 +332,7 @@ class AccountingService {
     type_tiers: 'CLIENT' | 'FOURNISSEUR'
     date_arret?: string
   }) {
-    console.log('📊 Getting balance auxiliaire from backend...', params)
+    logger.debug('Getting balance auxiliaire from backend...', params)
     return apiClient.get(`${this.baseUrl}/balance-auxiliaire/`, params)
   }
 
@@ -341,7 +342,7 @@ class AccountingService {
     format: 'CSV' | 'EXCEL' | 'FEC'
     mapping?: any
   }) {
-    console.log('📤 Importing écritures to backend...', options)
+    logger.debug('Importing écritures to backend...', options)
     return apiClient.upload(`${this.baseUrl}/import/ecritures/`, file, options)
   }
 
@@ -349,7 +350,7 @@ class AccountingService {
     format: 'CSV' | 'EXCEL'
     replace_existing: boolean
   }) {
-    console.log('📤 Importing plan comptable to backend...', options)
+    logger.debug('Importing plan comptable to backend...', options)
     return apiClient.upload(`${this.baseUrl}/import/plan/`, file, options)
   }
 
@@ -358,7 +359,7 @@ class AccountingService {
     format: 'EXCEL' | 'CSV' | 'PDF'
     date_arret?: string
   }): Promise<Blob> {
-    console.log('📥 Exporting balance from backend...', params)
+    logger.debug('Exporting balance from backend...', params)
     const response = await apiClient.client.get(`${this.baseUrl}/export/balance/`, {
       params,
       responseType: 'blob'
@@ -372,7 +373,7 @@ class AccountingService {
     periode_fin: string
     format: 'EXCEL' | 'CSV' | 'PDF'
   }): Promise<Blob> {
-    console.log('📥 Exporting grand livre from backend...', params)
+    logger.debug('Exporting grand livre from backend...', params)
     const response = await apiClient.client.get(`${this.baseUrl}/export/grand-livre/`, {
       params,
       responseType: 'blob'
@@ -381,7 +382,7 @@ class AccountingService {
   }
 
   async exportFEC(exercice: string): Promise<Blob> {
-    console.log(`📥 Exporting FEC for exercice ${exercice}...`)
+    logger.debug(`Exporting FEC for exercice ${exercice}...`)
     const response = await apiClient.client.get(`${this.baseUrl}/export/fec/`, {
       params: { exercice },
       responseType: 'blob'
@@ -391,12 +392,12 @@ class AccountingService {
 
   // Validation et contrôles - CONNEXION RÉELLE AU BACKEND
   async validateBalance(exercice: string) {
-    console.log(`🔍 Validating balance for exercice ${exercice}...`)
+    logger.debug(`Validating balance for exercice ${exercice}...`)
     return apiClient.post(`${this.baseUrl}/validate/balance/`, { exercice })
   }
 
   async validateEcrituresLot(ecriture_ids: string[]) {
-    console.log(`✅ Batch validating ${ecriture_ids.length} écritures...`)
+    logger.debug(`Batch validating ${ecriture_ids.length} écritures...`)
     return apiClient.post(`${this.baseUrl}/validate/ecritures-lot/`, { ecriture_ids })
   }
 
@@ -405,7 +406,7 @@ class AccountingService {
     type_anomalie?: string
     severite?: string
   }) {
-    console.log('🔍 Getting anomalies comptables from backend...', params)
+    logger.debug('Getting anomalies comptables from backend...', params)
     return apiClient.get(`${this.baseUrl}/anomalies/`, params)
   }
 
@@ -414,28 +415,28 @@ class AccountingService {
     generer_reports: boolean
     valider_toutes_ecritures: boolean
   }) {
-    console.log(`🔒 Starting clôture for exercice ${exercice}...`)
+    logger.debug(`Starting clôture for exercice ${exercice}...`)
     return apiClient.post(`${this.baseUrl}/cloture/start/`, { exercice, ...options })
   }
 
   async getClotureStatus(exercice: string) {
-    console.log(`🔄 Getting clôture status for exercice ${exercice}...`)
+    logger.debug(`Getting clôture status for exercice ${exercice}...`)
     return apiClient.get(`${this.baseUrl}/cloture/status/`, { exercice })
   }
 
   async cancelCloture(exercice: string) {
-    console.log(`❌ Cancelling clôture for exercice ${exercice}...`)
+    logger.debug(`Cancelling clôture for exercice ${exercice}...`)
     return apiClient.post(`${this.baseUrl}/cloture/cancel/`, { exercice })
   }
 
   // Validation et Mapping - CONNEXION RÉELLE AU BACKEND
   async validatePlanComptable(entrepriseId: string) {
-    console.log(`🔍 Validating plan comptable for entreprise ${entrepriseId}...`)
+    logger.debug(`Validating plan comptable for entreprise ${entrepriseId}...`)
     return apiClient.post(`${this.baseUrl}/validation_plan_comptable/`, { entreprise_id: entrepriseId })
   }
 
   async mappingAutomatique(entrepriseId: string) {
-    console.log(`🤖 Running automatic mapping for entreprise ${entrepriseId}...`)
+    logger.debug(`Running automatic mapping for entreprise ${entrepriseId}...`)
     return apiClient.post(`${this.baseUrl}/mapping_automatique/`, { entreprise_id: entrepriseId })
   }
 
@@ -445,7 +446,7 @@ class AccountingService {
     forme_juridique: string
     is_groupe: boolean
   }) {
-    console.log('🔍 Determining type liasse...', params)
+    logger.debug('Determining type liasse...', params)
     return apiClient.post(`${this.baseUrl}/determiner_type_liasse/`, params)
   }
 }

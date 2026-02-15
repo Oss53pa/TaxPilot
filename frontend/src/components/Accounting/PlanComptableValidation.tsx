@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Composant de Validation du Plan Comptable
  * Vérifie la conformité du plan comptable avec SYSCOHADA/référentiels
@@ -104,7 +105,7 @@ const PlanComptableValidation: React.FC<PlanComptableValidationProps> = ({
         onValidationComplete(data as ValidationResult)
       }
     } catch (err: any) {
-      console.error('Validation failed:', err)
+      logger.error('Validation failed:', err)
       setError(err.message || 'Erreur lors de la validation du plan comptable')
       setResult(null)
     } finally {

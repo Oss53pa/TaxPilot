@@ -9,9 +9,6 @@ import {
   Box,
   Paper,
   Typography,
-  IconButton,
-  Tooltip,
-  // Button,
   Stack,
   Table,
   TableBody,
@@ -30,11 +27,11 @@ import {
   Business as BusinessIcon,
   AccountBox as PersonIcon,
   Gavel as AuditIcon,
-  Print as PrintIcon,
-  GetApp as ExportIcon,
   Lock as LockIcon,
 } from '@mui/icons-material'
 import type { Entreprise, DirigeantEntry, CommissaireEntry } from '@/types'
+import { formatNumber, formatDateFR } from '@/utils/formatting'
+import { SheetHeader } from '@/components/liasse/common/SheetHeader'
 
 interface FicheR2SYSCOHADAProps {
   entreprise?: Entreprise
@@ -46,21 +43,6 @@ const FicheR2SYSCOHADA: React.FC<FicheR2SYSCOHADAProps> = ({ entreprise }) => {
 
   const dirigeants: DirigeantEntry[] = ent?.dirigeants || []
   const commissaires: CommissaireEntry[] = ent?.commissaires_comptes || []
-
-  const formatNumber = (value: number) => {
-    return new Intl.NumberFormat('fr-FR', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value)
-  }
-
-  /** Formate une date ISO (YYYY-MM-DD) en DD/MM/YYYY */
-  const formatDateFR = (isoDate?: string): string => {
-    if (!isoDate) return '-'
-    const parts = isoDate.split('-')
-    if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`
-    return isoDate
-  }
 
   // Calculs totaux
   const totalRemunerationsDirigeants = dirigeants.reduce((sum, d) => sum + (d.remunerations || 0), 0)
@@ -78,28 +60,7 @@ const FicheR2SYSCOHADA: React.FC<FicheR2SYSCOHADAProps> = ({ entreprise }) => {
     >
       {/* En-tête */}
       <Box sx={{ mb: 3 }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-          <Stack direction="row" spacing={2} alignItems="center">
-            <BusinessIcon color="primary" sx={{ fontSize: 28 }} />
-            <Typography variant="h5" sx={{ fontWeight: 600, color: theme.palette.primary.main }}>
-              FICHE R2 - DIRIGEANTS ET COMMISSAIRES AUX COMPTES (en FCFA)
-            </Typography>
-          </Stack>
-
-          <Stack direction="row" spacing={1}>
-            <Tooltip title="Imprimer">
-              <IconButton size="small">
-                <PrintIcon />
-              </IconButton>
-            </Tooltip>
-
-            <Tooltip title="Exporter">
-              <IconButton size="small">
-                <ExportIcon />
-              </IconButton>
-            </Tooltip>
-          </Stack>
-        </Stack>
+        <SheetHeader title="FICHE R2 - DIRIGEANTS ET COMMISSAIRES AUX COMPTES (en FCFA)" icon={<BusinessIcon />} />
 
         <Alert severity="info" icon={<LockIcon />} sx={{ mb: 2 }}>
           Toutes les données sont automatiquement issues du paramétrage.
@@ -152,7 +113,7 @@ const FicheR2SYSCOHADA: React.FC<FicheR2SYSCOHADAProps> = ({ entreprise }) => {
             <TableContainer>
               <Table size="small">
                 <TableHead>
-                  <TableRow sx={{ bgcolor: '#f5f5f5' }}>
+                  <TableRow sx={{ bgcolor: 'grey.100' }}>
                     <TableCell sx={{ fontWeight: 600 }}>Qualité</TableCell>
                     <TableCell sx={{ fontWeight: 600 }}>Nom et Prénoms</TableCell>
                     <TableCell sx={{ fontWeight: 600 }}>Adresse</TableCell>
@@ -228,7 +189,7 @@ const FicheR2SYSCOHADA: React.FC<FicheR2SYSCOHADAProps> = ({ entreprise }) => {
             <TableContainer>
               <Table size="small">
                 <TableHead>
-                  <TableRow sx={{ bgcolor: '#f5f5f5' }}>
+                  <TableRow sx={{ bgcolor: 'grey.100' }}>
                     <TableCell sx={{ fontWeight: 600 }}>Nom et Prénoms</TableCell>
                     <TableCell sx={{ fontWeight: 600 }}>Cabinet / Adresse</TableCell>
                     <TableCell sx={{ fontWeight: 600 }}>Contact</TableCell>

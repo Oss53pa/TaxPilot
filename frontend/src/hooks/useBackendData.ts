@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Hook personnalisé pour charger les données du backend
  * Remplace automatiquement les données mockées par les vraies données
@@ -35,17 +36,17 @@ export const useBackendData = <T = any>({
         throw new Error(`Service ${service}.${method} not found`)
       }
 
-      console.log(`🔄 Loading data from ${service}.${method}...`, params)
+      logger.debug(`🔄 Loading data from ${service}.${method}...`, params)
       const response = await serviceInstance[method](params)
 
       // Handle paginated responses
       const result = response?.results !== undefined ? response.results : response
       setData(result)
 
-      console.log(`✅ Data loaded from ${service}.${method}`)
+      logger.debug(`✅ Data loaded from ${service}.${method}`)
       return result
     } catch (err) {
-      console.error(`❌ Error loading from ${service}.${method}:`, err)
+      logger.error(`❌ Error loading from ${service}.${method}:`, err)
       setError(err as Error)
 
       // Use default data if provided

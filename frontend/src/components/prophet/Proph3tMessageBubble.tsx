@@ -65,7 +65,7 @@ function AccountCardView({ data }: { data: AccountCard }) {
   }
 
   return (
-    <Box sx={{ mt: 1, p: 1.5, borderRadius: 2, border: '1px solid #e5e5e5', bgcolor: '#fafafa' }}>
+    <Box sx={{ mt: 1, p: 1.5, borderRadius: 2, border: '1px solid #e5e5e5', bgcolor: 'grey.50' }}>
       <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap', mb: 1 }}>
         <Chip label={compte.nature} size="small" sx={{ bgcolor: natureColor[compte.nature] || '#737373', color: '#fff', fontWeight: 600, fontSize: '0.7rem', height: 22 }} />
         <Chip label={compte.sens} size="small" variant="outlined" sx={{ fontSize: '0.7rem', height: 22 }} />
@@ -73,7 +73,7 @@ function AccountCardView({ data }: { data: AccountCard }) {
       </Box>
       {children && children.length > 0 && (
         <Box sx={{ mt: 1 }}>
-          <Typography variant="caption" sx={{ color: '#737373', fontWeight: 600 }}>
+          <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
             Sous-comptes ({children.length})
           </Typography>
           {children.slice(0, 8).map(c => (
@@ -82,7 +82,7 @@ function AccountCardView({ data }: { data: AccountCard }) {
             </Typography>
           ))}
           {children.length > 8 && (
-            <Typography variant="caption" sx={{ color: '#737373', pl: 1 }}>
+            <Typography variant="caption" sx={{ color: 'text.secondary', pl: 1 }}>
               ... et {children.length - 8} autres
             </Typography>
           )}
@@ -98,10 +98,10 @@ function FonctionnementCardView({ data }: { data: FonctionnementCard }) {
   const { debit, credit } = fonc.fonctionnement
 
   return (
-    <Box sx={{ mt: 1, p: 1.5, borderRadius: 2, border: '1px solid #e5e5e5', bgcolor: '#fafafa' }}>
+    <Box sx={{ mt: 1, p: 1.5, borderRadius: 2, border: '1px solid #e5e5e5', bgcolor: 'grey.50' }}>
       <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1.5 }}>
         <Box>
-          <Typography variant="caption" sx={{ fontWeight: 700, color: '#dc2626', display: 'block', mb: 0.5 }}>
+          <Typography variant="caption" sx={{ fontWeight: 700, color: 'error.main', display: 'block', mb: 0.5 }}>
             DEBIT
           </Typography>
           {debit.length > 0 ? debit.map((d, i) => (
@@ -109,11 +109,11 @@ function FonctionnementCardView({ data }: { data: FonctionnementCard }) {
               • {d.description}
             </Typography>
           )) : (
-            <Typography variant="caption" sx={{ color: '#a3a3a3' }}>—</Typography>
+            <Typography variant="caption" sx={{ color: 'text.disabled' }}>—</Typography>
           )}
         </Box>
         <Box>
-          <Typography variant="caption" sx={{ fontWeight: 700, color: '#16a34a', display: 'block', mb: 0.5 }}>
+          <Typography variant="caption" sx={{ fontWeight: 700, color: 'success.main', display: 'block', mb: 0.5 }}>
             CREDIT
           </Typography>
           {credit.length > 0 ? credit.map((c, i) => (
@@ -121,18 +121,18 @@ function FonctionnementCardView({ data }: { data: FonctionnementCard }) {
               • {c.description}
             </Typography>
           )) : (
-            <Typography variant="caption" sx={{ color: '#a3a3a3' }}>—</Typography>
+            <Typography variant="caption" sx={{ color: 'text.disabled' }}>—</Typography>
           )}
         </Box>
       </Box>
 
       {fonc.exclusions.length > 0 && (
         <Box sx={{ mt: 1.5, pt: 1, borderTop: '1px solid #e5e5e5' }}>
-          <Typography variant="caption" sx={{ fontWeight: 600, color: '#d97706' }}>
+          <Typography variant="caption" sx={{ fontWeight: 600, color: 'warning.main' }}>
             Exclusions
           </Typography>
           {fonc.exclusions.map((ex, i) => (
-            <Typography key={i} variant="caption" sx={{ display: 'block', color: '#737373', lineHeight: 1.5 }}>
+            <Typography key={i} variant="caption" sx={{ display: 'block', color: 'text.secondary', lineHeight: 1.5 }}>
               → {ex.description} (voir {ex.compteCorrige})
             </Typography>
           ))}
@@ -147,10 +147,10 @@ function ChapitreCardView({ data }: { data: ChapitreCard }) {
   const { chapitre } = data
 
   return (
-    <Box sx={{ mt: 1, p: 1.5, borderRadius: 2, border: '1px solid #e5e5e5', bgcolor: '#fafafa' }}>
+    <Box sx={{ mt: 1, p: 1.5, borderRadius: 2, border: '1px solid #e5e5e5', bgcolor: 'grey.50' }}>
       {chapitre.sections.slice(0, 3).map((section, i) => (
         <Box key={i} sx={{ mb: 1 }}>
-          <Typography variant="caption" sx={{ fontWeight: 600, color: '#171717', display: 'block' }}>
+          <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.primary', display: 'block' }}>
             {section.titre}
           </Typography>
           <Typography variant="caption" sx={{ color: '#404040', lineHeight: 1.5, display: 'block' }}>
@@ -158,12 +158,12 @@ function ChapitreCardView({ data }: { data: ChapitreCard }) {
           </Typography>
           {section.ecritures && section.ecritures.slice(0, 1).map((ecr, j) => (
             <Box key={j} sx={{ mt: 0.5, ml: 1 }}>
-              <Typography variant="caption" sx={{ fontWeight: 500, color: '#737373', fontSize: '0.7rem' }}>
+              <Typography variant="caption" sx={{ fontWeight: 500, color: 'text.secondary', fontSize: '0.7rem' }}>
                 {ecr.description}
               </Typography>
               <Table size="small" sx={{ mt: 0.3, '& td, & th': { py: 0.2, px: 0.5, fontSize: '0.7rem', border: 'none' } }}>
                 <TableHead>
-                  <TableRow sx={{ '& th': { fontWeight: 600, color: '#737373' } }}>
+                  <TableRow sx={{ '& th': { fontWeight: 600, color: 'text.secondary' } }}>
                     <TableCell></TableCell>
                     <TableCell>Compte</TableCell>
                     <TableCell>Libelle</TableCell>
@@ -186,7 +186,7 @@ function ChapitreCardView({ data }: { data: ChapitreCard }) {
         </Box>
       ))}
       {chapitre.sections.length > 3 && (
-        <Typography variant="caption" sx={{ color: '#737373' }}>
+        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
           ... et {chapitre.sections.length - 3} autres sections
         </Typography>
       )}
@@ -210,17 +210,17 @@ function SearchResultsCardView({ data, onSelect }: { data: SearchResultCard; onS
             px: 1,
             borderRadius: 1,
             cursor: 'pointer',
-            '&:hover': { bgcolor: '#f5f5f5' },
+            '&:hover': { bgcolor: 'grey.100' },
           }}
         >
-          <Typography variant="caption" sx={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 600, color: '#171717', minWidth: 48 }}>
+          <Typography variant="caption" sx={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 600, color: 'text.primary', minWidth: 48 }}>
             {r.numero}
           </Typography>
           <Typography variant="caption" sx={{ color: '#404040', flex: 1 }}>
             {r.libelle}
           </Typography>
           {r.detail && (
-            <Typography variant="caption" sx={{ color: '#a3a3a3', fontSize: '0.65rem' }}>
+            <Typography variant="caption" sx={{ color: 'text.disabled', fontSize: '0.65rem' }}>
               {r.detail}
             </Typography>
           )}
@@ -233,8 +233,8 @@ function SearchResultsCardView({ data, onSelect }: { data: SearchResultCard; onS
 // ── Stats card ───────────────────────────────────────────────────────
 function StatsCardView({ data }: { data: StatsCard }) {
   return (
-    <Box sx={{ mt: 1, p: 1.5, borderRadius: 2, border: '1px solid #e5e5e5', bgcolor: '#fafafa' }}>
-      <Typography variant="caption" sx={{ fontWeight: 600, color: '#171717', display: 'block', mb: 0.5 }}>
+    <Box sx={{ mt: 1, p: 1.5, borderRadius: 2, border: '1px solid #e5e5e5', bgcolor: 'grey.50' }}>
+      <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.primary', display: 'block', mb: 0.5 }}>
         Repartition par classe
       </Typography>
       {Object.entries(data.parClasse).map(([cls, count]) => (
@@ -242,10 +242,10 @@ function StatsCardView({ data }: { data: StatsCard }) {
           <Typography variant="caption" sx={{ minWidth: 60, fontWeight: 500, color: '#404040' }}>
             Classe {cls}
           </Typography>
-          <Box sx={{ flex: 1, height: 6, bgcolor: '#e5e5e5', borderRadius: 3, overflow: 'hidden' }}>
-            <Box sx={{ height: '100%', width: `${(count / data.total) * 100 * 3}%`, bgcolor: '#171717', borderRadius: 3, maxWidth: '100%' }} />
+          <Box sx={{ flex: 1, height: 6, bgcolor: 'grey.300', borderRadius: 3, overflow: 'hidden' }}>
+            <Box sx={{ height: '100%', width: `${(count / data.total) * 100 * 3}%`, bgcolor: 'text.primary', borderRadius: 3, maxWidth: '100%' }} />
           </Box>
-          <Typography variant="caption" sx={{ color: '#737373', minWidth: 28, textAlign: 'right' }}>
+          <Typography variant="caption" sx={{ color: 'text.secondary', minWidth: 28, textAlign: 'right' }}>
             {count}
           </Typography>
         </Box>
@@ -257,8 +257,8 @@ function StatsCardView({ data }: { data: StatsCard }) {
 // ── Fiscal Info card ─────────────────────────────────────────────────
 function FiscalInfoCardView({ data }: { data: FiscalInfoCard }) {
   return (
-    <Box sx={{ mt: 1, p: 1.5, borderRadius: 2, border: '1px solid #e5e5e5', bgcolor: '#fafafa' }}>
-      <Typography variant="caption" sx={{ fontWeight: 700, color: '#dc2626', display: 'block', mb: 0.75, textTransform: 'uppercase', fontSize: '0.65rem', letterSpacing: 0.5 }}>
+    <Box sx={{ mt: 1, p: 1.5, borderRadius: 2, border: '1px solid #e5e5e5', bgcolor: 'grey.50' }}>
+      <Typography variant="caption" sx={{ fontWeight: 700, color: 'error.main', display: 'block', mb: 0.75, textTransform: 'uppercase', fontSize: '0.65rem', letterSpacing: 0.5 }}>
         {data.category}
       </Typography>
       {data.items.map((item, i) => (
@@ -266,14 +266,14 @@ function FiscalInfoCardView({ data }: { data: FiscalInfoCard }) {
           <Typography variant="caption" sx={{ color: '#404040' }}>
             {item.label}
           </Typography>
-          <Typography variant="caption" sx={{ fontWeight: 700, color: '#171717', fontFamily: "'JetBrains Mono', monospace" }}>
+          <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.primary', fontFamily: "'JetBrains Mono', monospace" }}>
             {item.value}
           </Typography>
         </Box>
       ))}
       {data.calculation && (
         <Box sx={{ mt: 1, pt: 1, borderTop: '1px solid #e5e5e5' }}>
-          <Typography variant="caption" sx={{ fontWeight: 600, color: '#737373', display: 'block', mb: 0.3 }}>
+          <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.secondary', display: 'block', mb: 0.3 }}>
             Detail du calcul
           </Typography>
           {data.calculation.steps.map((step, i) => (
@@ -281,7 +281,7 @@ function FiscalInfoCardView({ data }: { data: FiscalInfoCard }) {
               {i + 1}. {step}
             </Typography>
           ))}
-          <Typography variant="caption" sx={{ display: 'block', fontWeight: 700, color: '#16a34a', mt: 0.5, pl: 1 }}>
+          <Typography variant="caption" sx={{ display: 'block', fontWeight: 700, color: 'success.main', mt: 0.5, pl: 1 }}>
             = {data.calculation.result}
           </Typography>
         </Box>
@@ -300,7 +300,7 @@ function LiasseSheetCardView({ data }: { data: LiasseSheetCard }) {
   return (
     <Box sx={{ mt: 1 }}>
       {data.sheets.map((sheet, i) => (
-        <Box key={i} sx={{ p: 1.5, borderRadius: 2, border: '1px solid #e5e5e5', bgcolor: '#fafafa', mb: i < data.sheets.length - 1 ? 1 : 0 }}>
+        <Box key={i} sx={{ p: 1.5, borderRadius: 2, border: '1px solid #e5e5e5', bgcolor: 'grey.50', mb: i < data.sheets.length - 1 ? 1 : 0 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.5, flexWrap: 'wrap' }}>
             <Chip
               label={sheet.category}
@@ -318,11 +318,11 @@ function LiasseSheetCardView({ data }: { data: LiasseSheetCard }) {
               }}
             />
           </Box>
-          <Typography variant="caption" sx={{ fontWeight: 600, color: '#171717', display: 'block' }}>
+          <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.primary', display: 'block' }}>
             {sheet.name} — {sheet.title}
           </Typography>
           {sheet.description && (
-            <Typography variant="caption" sx={{ color: '#737373', display: 'block', mt: 0.25 }}>
+            <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mt: 0.25 }}>
               {sheet.description}
             </Typography>
           )}
@@ -357,17 +357,17 @@ function AuditControlCardView({ data }: { data: AuditControlCard }) {
   return (
     <Box sx={{ mt: 1 }}>
       {data.summary && (
-        <Typography variant="caption" sx={{ color: '#737373', display: 'block', mb: 0.75, fontStyle: 'italic' }}>
+        <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 0.75, fontStyle: 'italic' }}>
           {data.summary}
         </Typography>
       )}
       {data.controls.map((ctrl, i) => (
-        <Box key={i} sx={{ p: 1.5, borderRadius: 2, border: '1px solid #e5e5e5', bgcolor: '#fafafa', mb: i < data.controls.length - 1 ? 0.75 : 0 }}>
+        <Box key={i} sx={{ p: 1.5, borderRadius: 2, border: '1px solid #e5e5e5', bgcolor: 'grey.50', mb: i < data.controls.length - 1 ? 0.75 : 0 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.5, flexWrap: 'wrap' }}>
             <Chip
               label={ctrl.ref}
               size="small"
-              sx={{ bgcolor: '#171717', color: '#fff', fontWeight: 700, fontSize: '0.65rem', height: 22, fontFamily: "'JetBrains Mono', monospace" }}
+              sx={{ bgcolor: 'text.primary', color: '#fff', fontWeight: 700, fontSize: '0.65rem', height: 22, fontFamily: "'JetBrains Mono', monospace" }}
             />
             <Chip
               label={ctrl.severite}
@@ -378,13 +378,13 @@ function AuditControlCardView({ data }: { data: AuditControlCard }) {
               label={`Niveau ${ctrl.niveau}`}
               size="small"
               variant="outlined"
-              sx={{ fontSize: '0.6rem', height: 20, color: '#737373' }}
+              sx={{ fontSize: '0.6rem', height: 20, color: 'text.secondary' }}
             />
           </Box>
-          <Typography variant="caption" sx={{ fontWeight: 600, color: '#171717', display: 'block' }}>
+          <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.primary', display: 'block' }}>
             {ctrl.nom}
           </Typography>
-          <Typography variant="caption" sx={{ color: '#737373', display: 'block', mt: 0.25 }}>
+          <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mt: 0.25 }}>
             {ctrl.description.slice(0, 150)}{ctrl.description.length > 150 ? '...' : ''}
           </Typography>
         </Box>
@@ -404,21 +404,21 @@ const TREND_ARROWS: Record<string, string> = {
 
 function PredictionCardView({ data }: { data: PredictionCard }) {
   return (
-    <Box sx={{ mt: 1, p: 1.5, borderRadius: 2, border: '1px solid #e5e5e5', bgcolor: '#fafafa' }}>
-      <Typography variant="caption" sx={{ fontWeight: 700, color: '#171717', display: 'block', mb: 1, fontSize: '0.75rem' }}>
+    <Box sx={{ mt: 1, p: 1.5, borderRadius: 2, border: '1px solid #e5e5e5', bgcolor: 'grey.50' }}>
+      <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.primary', display: 'block', mb: 1, fontSize: '0.75rem' }}>
         {data.title}
       </Typography>
 
       {/* Indicators grid */}
       <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0.75 }}>
         {data.indicators.map((ind, i) => (
-          <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 0.75, p: 0.75, borderRadius: 1, bgcolor: '#fff', border: '1px solid #f0f0f0' }}>
+          <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 0.75, p: 0.75, borderRadius: 1, bgcolor: 'background.paper', border: '1px solid #f0f0f0' }}>
             <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: STATUS_COLORS[ind.status] || '#737373', flexShrink: 0 }} />
             <Box sx={{ flex: 1, minWidth: 0 }}>
-              <Typography variant="caption" sx={{ color: '#737373', display: 'block', fontSize: '0.6rem', lineHeight: 1.2 }}>
+              <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', fontSize: '0.6rem', lineHeight: 1.2 }}>
                 {ind.label}
               </Typography>
-              <Typography variant="caption" sx={{ fontWeight: 700, color: '#171717', display: 'block', fontSize: '0.7rem', fontFamily: "'JetBrains Mono', monospace" }}>
+              <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.primary', display: 'block', fontSize: '0.7rem', fontFamily: "'JetBrains Mono', monospace" }}>
                 {ind.value}
                 {ind.trend && (
                   <span style={{ color: ind.trend === 'up' ? '#16a34a' : ind.trend === 'down' ? '#dc2626' : '#737373', marginLeft: 4 }}>
@@ -443,7 +443,7 @@ function PredictionCardView({ data }: { data: PredictionCard }) {
       {/* Recommendations */}
       {data.recommendations && data.recommendations.length > 0 && (
         <Box sx={{ mt: 0.75, pt: 0.75, borderTop: '1px solid #f0f0f0' }}>
-          <Typography variant="caption" sx={{ fontWeight: 600, color: '#737373', display: 'block', mb: 0.25, fontSize: '0.6rem' }}>
+          <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.secondary', display: 'block', mb: 0.25, fontSize: '0.6rem' }}>
             RECOMMANDATIONS
           </Typography>
           {data.recommendations.map((rec, i) => (
@@ -492,7 +492,7 @@ export function TypingIndicator() {
       <Box
         sx={{
           maxWidth: '85%',
-          bgcolor: '#fff',
+          bgcolor: 'background.paper',
           border: '1px solid #e5e5e5',
           borderRadius: '12px 12px 12px 4px',
           px: 2,
@@ -509,7 +509,7 @@ export function TypingIndicator() {
               width: 6,
               height: 6,
               borderRadius: '50%',
-              bgcolor: '#a3a3a3',
+              bgcolor: 'text.disabled',
               animation: 'prophet-bounce 1.2s ease-in-out infinite',
               animationDelay: `${i * 0.15}s`,
               '@keyframes prophet-bounce': {
@@ -576,7 +576,7 @@ export default function Proph3tMessageBubble({ message, onSuggestionClick }: Pro
                   cursor: 'pointer',
                   borderColor: '#d4d4d4',
                   color: '#525252',
-                  '&:hover': { bgcolor: '#f5f5f5', borderColor: '#171717' },
+                  '&:hover': { bgcolor: 'grey.100', borderColor: '#171717' },
                 }}
               />
             ))}

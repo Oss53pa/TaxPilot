@@ -23,15 +23,15 @@ const DirectLiasseAccess: React.FC = () => {
         sx={{ 
           p: 3, 
           mb: 3, 
-          bgcolor: '#e5e5e5',  // Encadré important
+          bgcolor: 'grey.300',  // Encadré important
           borderRadius: 2,
           boxShadow: '0 4px 12px rgba(55, 59, 77, 0.15)'
         }}
       >
-        <Typography variant="subtitle1" gutterBottom sx={{ color: '#171717', fontWeight: 600 }}>
+        <Typography variant="subtitle1" gutterBottom sx={{ color: 'text.primary', fontWeight: 600 }}>
           📋 Processus de production de liasse fiscale SYSCOHADA
         </Typography>
-        <Typography variant="body2" sx={{ color: '#171717', lineHeight: 1.6 }}>
+        <Typography variant="body2" sx={{ color: 'text.primary', lineHeight: 1.6 }}>
           <strong>1️⃣ Importer la balance</strong> → <strong>2️⃣ Audit automatique</strong> → <strong>3️⃣ Corrections IA</strong> → 
           <strong>4️⃣ Validation</strong> → <strong>5️⃣ Génération liasse</strong> → <strong>6️⃣ Notes annexes</strong> → 
           <strong>7️⃣ Validation hiérarchique</strong> → <strong>8️⃣ Télédéclaration</strong>
@@ -44,7 +44,7 @@ const DirectLiasseAccess: React.FC = () => {
             sx={{ 
               p: 3, 
               cursor: 'pointer',
-              bgcolor: '#f5f5f5',  // Section/carte
+              bgcolor: 'grey.100',  // Section/carte
               borderRadius: 2,
               border: '1px solid #e5e5e550',
               transition: 'all 0.3s ease',
@@ -55,19 +55,19 @@ const DirectLiasseAccess: React.FC = () => {
             }}
             onClick={() => navigate('/liasse-complete-final')}
           >
-            <Typography variant="h6" gutterBottom sx={{ color: '#171717' }}>
+            <Typography variant="h6" gutterBottom sx={{ color: 'text.primary' }}>
               📋 Liasse Complète
             </Typography>
-            <Typography variant="body2" sx={{ color: '#737373', mb: 2 }}>
+            <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
               Interface complète de génération des liasses fiscales SYSCOHADA avec tous les tableaux.
             </Typography>
             <Button 
               variant="contained" 
               sx={{ 
                 mt: 1,
-                bgcolor: '#171717',
+                bgcolor: 'text.primary',
                 color: 'white',
-                '&:hover': { bgcolor: '#262626' }
+                '&:hover': { bgcolor: 'grey.900' }
               }}
               onClick={(e) => {
                 e.stopPropagation()
@@ -84,7 +84,7 @@ const DirectLiasseAccess: React.FC = () => {
             sx={{ 
               p: 3, 
               cursor: 'pointer',
-              bgcolor: '#f5f5f5',
+              bgcolor: 'grey.100',
               borderRadius: 2,
               border: '1px solid #e5e5e550',
               transition: 'all 0.3s ease',
@@ -95,19 +95,19 @@ const DirectLiasseAccess: React.FC = () => {
             }}
             onClick={() => navigate('/production-liasse')}
           >
-            <Typography variant="h6" gutterBottom sx={{ color: '#171717' }}>
+            <Typography variant="h6" gutterBottom sx={{ color: 'text.primary' }}>
               🏭 Production de Liasse
             </Typography>
-            <Typography variant="body2" sx={{ color: '#737373', mb: 2 }}>
+            <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
               Module avancé de production et génération automatique des états financiers.
             </Typography>
             <Button 
               variant="contained" 
               sx={{ 
                 mt: 1,
-                bgcolor: '#171717',
+                bgcolor: 'text.primary',
                 color: 'white',
-                '&:hover': { bgcolor: '#262626' }
+                '&:hover': { bgcolor: 'grey.900' }
               }}
               onClick={(e) => {
                 e.stopPropagation()
@@ -124,7 +124,7 @@ const DirectLiasseAccess: React.FC = () => {
             sx={{ 
               p: 3, 
               cursor: 'pointer',
-              bgcolor: '#f5f5f5',
+              bgcolor: 'grey.100',
               borderRadius: 2,
               border: '1px solid #e5e5e550',
               transition: 'all 0.3s ease',
@@ -135,19 +135,19 @@ const DirectLiasseAccess: React.FC = () => {
             }}
             onClick={() => navigate('/liasse')}
           >
-            <Typography variant="h6" gutterBottom sx={{ color: '#171717' }}>
+            <Typography variant="h6" gutterBottom sx={{ color: 'text.primary' }}>
               ⚡ Liasse Moderne
             </Typography>
-            <Typography variant="body2" sx={{ color: '#737373', mb: 2 }}>
+            <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
               Interface moderne et optimisée pour la création de liasses OHADA.
             </Typography>
             <Button 
               variant="contained" 
               sx={{ 
                 mt: 1,
-                bgcolor: '#171717',
+                bgcolor: 'text.primary',
                 color: 'white',
-                '&:hover': { bgcolor: '#262626' }
+                '&:hover': { bgcolor: 'grey.900' }
               }}
               onClick={(e) => {
                 e.stopPropagation()
@@ -186,11 +186,11 @@ const DirectLiasseAccess: React.FC = () => {
               onClick={() => navigate('/import-balance')}
               sx={{ 
                 py: 2,
-                bgcolor: '#171717',
+                bgcolor: 'text.primary',
                 color: 'white',
                 borderRadius: 2,
                 '&:hover': { 
-                  bgcolor: '#262626',
+                  bgcolor: 'grey.900',
                   boxShadow: '0 4px 12px rgba(55, 59, 77, 0.3)'
                 }
               }}
@@ -206,11 +206,11 @@ const DirectLiasseAccess: React.FC = () => {
               onClick={() => navigate('/audit')}
               sx={{ 
                 py: 2,
-                bgcolor: '#171717',
+                bgcolor: 'text.primary',
                 color: 'white',
                 borderRadius: 2,
                 '&:hover': { 
-                  bgcolor: '#262626',
+                  bgcolor: 'grey.900',
                   boxShadow: '0 4px 12px rgba(55, 59, 77, 0.3)'
                 }
               }}
@@ -226,11 +226,11 @@ const DirectLiasseAccess: React.FC = () => {
               onClick={() => navigate('/generation')}
               sx={{ 
                 py: 2,
-                bgcolor: '#171717',
+                bgcolor: 'text.primary',
                 color: 'white',
                 borderRadius: 2,
                 '&:hover': { 
-                  bgcolor: '#262626',
+                  bgcolor: 'grey.900',
                   boxShadow: '0 4px 12px rgba(55, 59, 77, 0.3)'
                 }
               }}
@@ -246,11 +246,11 @@ const DirectLiasseAccess: React.FC = () => {
               onClick={() => navigate('/teledeclaration')}
               sx={{ 
                 py: 2,
-                bgcolor: '#171717',
+                bgcolor: 'text.primary',
                 color: 'white',
                 borderRadius: 2,
                 '&:hover': { 
-                  bgcolor: '#262626',
+                  bgcolor: 'grey.900',
                   boxShadow: '0 4px 12px rgba(55, 59, 77, 0.3)'
                 }
               }}
@@ -268,11 +268,11 @@ const DirectLiasseAccess: React.FC = () => {
           sx={{ 
             mr: 2,
             borderColor: '#737373',
-            color: '#737373',
+            color: 'text.secondary',
             borderRadius: 2,
             '&:hover': {
               borderColor: '#171717',
-              color: '#171717',
+              color: 'text.primary',
               bgcolor: '#fafafa15'
             }
           }}
@@ -284,11 +284,11 @@ const DirectLiasseAccess: React.FC = () => {
           onClick={() => navigate('/balance')}
           sx={{
             borderColor: '#737373',
-            color: '#737373', 
+            color: 'text.secondary', 
             borderRadius: 2,
             '&:hover': {
               borderColor: '#171717',
-              color: '#171717',
+              color: 'text.primary',
               bgcolor: '#fafafa15'
             }
           }}

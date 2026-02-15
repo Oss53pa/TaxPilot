@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Composant de Soumission de Déclaration Fiscale
  * Workflow complet : validation → soumission → génération PDF
@@ -137,7 +138,7 @@ const DeclarationSubmission: React.FC<DeclarationSubmissionProps> = ({
         setActiveStep(1) // Passer à confirmation
       }
     } catch (err: any) {
-      console.error('Validation failed:', err)
+      logger.error('Validation failed:', err)
       setError(err.message || 'Erreur lors de la validation')
     } finally {
       setValidating(false)
@@ -167,7 +168,7 @@ const DeclarationSubmission: React.FC<DeclarationSubmissionProps> = ({
         onSubmissionComplete()
       }
     } catch (err: any) {
-      console.error('Submission failed:', err)
+      logger.error('Submission failed:', err)
       setError(err.message || 'Erreur lors de la soumission')
     } finally {
       setSubmitting(false)
@@ -192,7 +193,7 @@ const DeclarationSubmission: React.FC<DeclarationSubmissionProps> = ({
 
       setPdfGenerated(true)
     } catch (err: any) {
-      console.error('PDF generation failed:', err)
+      logger.error('PDF generation failed:', err)
       setError('Erreur lors de la génération du PDF')
     } finally {
       setGeneratingPDF(false)

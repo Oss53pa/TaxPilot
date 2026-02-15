@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Module de Consolidation - Gestion des comptes consolidés SYSCOHADA
  * Conforme aux exigences EX-CONSO-001 à EX-CONSO-010
@@ -179,7 +180,7 @@ const ModernConsolidation: React.FC = () => {
   // Fusionner les données backend avec le format attendu
   const entities: Entity[] = React.useMemo(() => {
     if (entreprisesBackend && entreprisesBackend.length > 0) {
-      console.log('📤 Using backend entreprises for consolidation:', entreprisesBackend)
+      logger.debug('📤 Using backend entreprises for consolidation:', entreprisesBackend)
       return entreprisesBackend.map((ent: any, index: number) => ({
         id: ent.id || String(index + 1),
         name: ent.raison_sociale || ent.name || 'Entité ' + (index + 1),
@@ -297,7 +298,7 @@ const ModernConsolidation: React.FC = () => {
   // Générer les opérations intra-groupe basées sur les écritures comptables
   const intraGroupOperations: IntraGroupOperation[] = React.useMemo(() => {
     if (journauxBackend && journauxBackend.length > 0 && entities.length > 1) {
-      console.log('📤 Generating intra-group operations from backend journaux')
+      logger.debug('📤 Generating intra-group operations from backend journaux')
       // Générer des opérations basées sur les écritures
       return [
         {
@@ -387,7 +388,7 @@ const ModernConsolidation: React.FC = () => {
   // EX-CONSO-004 : Ajustements de consolidation basés sur les comptes
   const consolidationAdjustments: ConsolidationAdjustment[] = React.useMemo(() => {
     if (comptesBackend && comptesBackend.length > 0 && entities.length > 1) {
-      console.log('📤 Generating consolidation adjustments from backend comptes')
+      logger.debug('📤 Generating consolidation adjustments from backend comptes')
       const adjustments: ConsolidationAdjustment[] = []
 
       // Rechercher l'écart d'acquisition (compte 207)

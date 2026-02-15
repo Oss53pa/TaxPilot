@@ -196,7 +196,7 @@ const FicheR1SYSCOHADA: React.FC<FicheR1SYSCOHADAProps> = ({ entreprise }) => {
       {/* Section 1: Identification */}
       <Box sx={{ mb: 3 }}>
         <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
-          <Typography variant="h6" sx={{ color: '#171717', fontWeight: 600 }}>
+          <Typography variant="h6" sx={{ color: 'text.primary', fontWeight: 600 }}>
             1. IDENTIFICATION DE L'ENTREPRISE
           </Typography>
           <Chip label="Auto" size="small" icon={<LockIcon />} color="default" />
@@ -244,7 +244,7 @@ const FicheR1SYSCOHADA: React.FC<FicheR1SYSCOHADAProps> = ({ entreprise }) => {
       {/* Section 2: Coordonnées */}
       <Box sx={{ mb: 3 }}>
         <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
-          <Typography variant="h6" sx={{ color: '#171717', fontWeight: 600 }}>
+          <Typography variant="h6" sx={{ color: 'text.primary', fontWeight: 600 }}>
             2. COORDONNÉES
           </Typography>
           <Chip label="Auto" size="small" icon={<LockIcon />} color="default" />
@@ -300,7 +300,7 @@ const FicheR1SYSCOHADA: React.FC<FicheR1SYSCOHADAProps> = ({ entreprise }) => {
       {/* Section 3: Activité & Exercice */}
       <Box sx={{ mb: 3 }}>
         <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
-          <Typography variant="h6" sx={{ color: '#171717', fontWeight: 600 }}>
+          <Typography variant="h6" sx={{ color: 'text.primary', fontWeight: 600 }}>
             3. ACTIVITÉ ET EXERCICE
           </Typography>
           <Chip label="Auto" size="small" icon={<LockIcon />} color="default" />
@@ -344,7 +344,7 @@ const FicheR1SYSCOHADA: React.FC<FicheR1SYSCOHADAProps> = ({ entreprise }) => {
       {/* Section 4: Régime fiscal */}
       <Box sx={{ mb: 3 }}>
         <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
-          <Typography variant="h6" sx={{ color: '#171717', fontWeight: 600 }}>
+          <Typography variant="h6" sx={{ color: 'text.primary', fontWeight: 600 }}>
             4. RÉGIME FISCAL
           </Typography>
           <Chip label="Auto" size="small" icon={<LockIcon />} color="default" />
@@ -367,7 +367,7 @@ const FicheR1SYSCOHADA: React.FC<FicheR1SYSCOHADAProps> = ({ entreprise }) => {
       {/* Section 5: Effectifs et masse salariale */}
       <Box sx={{ mb: 3 }}>
         <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
-          <Typography variant="h6" sx={{ color: '#171717', fontWeight: 600 }}>
+          <Typography variant="h6" sx={{ color: 'text.primary', fontWeight: 600 }}>
             5. EFFECTIFS ET MASSE SALARIALE
           </Typography>
           <Chip label="Auto" size="small" icon={<LockIcon />} color="default" />
@@ -401,7 +401,7 @@ const FicheR1SYSCOHADA: React.FC<FicheR1SYSCOHADAProps> = ({ entreprise }) => {
       {/* Section 6: Appartenance à un groupe */}
       <Box sx={{ mb: 3 }}>
         <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
-          <Typography variant="h6" sx={{ color: '#171717', fontWeight: 600 }}>
+          <Typography variant="h6" sx={{ color: 'text.primary', fontWeight: 600 }}>
             6. APPARTENANCE À UN GROUPE
           </Typography>
           <Chip label="Auto" size="small" icon={<LockIcon />} color="default" />
@@ -433,7 +433,7 @@ const FicheR1SYSCOHADA: React.FC<FicheR1SYSCOHADAProps> = ({ entreprise }) => {
       {/* Section 7: CAC et Expert comptable */}
       <Box sx={{ mb: 3 }}>
         <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
-          <Typography variant="h6" sx={{ color: '#171717', fontWeight: 600 }}>
+          <Typography variant="h6" sx={{ color: 'text.primary', fontWeight: 600 }}>
             7. COMMISSAIRE AUX COMPTES ET EXPERT COMPTABLE
           </Typography>
           <Chip label="Auto" size="small" icon={<LockIcon />} color="default" />

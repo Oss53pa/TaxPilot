@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Composant État Annexé - SYSCOHADA
  */
@@ -30,23 +31,10 @@ import {
   AccountBalance,
 } from '@mui/icons-material'
 import EditableToolbar from './shared/EditableToolbar'
+import { TabPanel } from '@/components/shared/TabPanel'
 
 interface EtatAnnexeProps {
   modeEdition?: boolean
-}
-
-interface TabPanelProps {
-  children?: React.ReactNode
-  index: number
-  value: number
-}
-
-const TabPanel: React.FC<TabPanelProps> = ({ children, value, index }) => {
-  return (
-    <div hidden={value !== index}>
-      {value === index && <Box sx={{ pt: 3 }}>{children}</Box>}
-    </div>
-  )
 }
 
 const EtatAnnexe: React.FC<EtatAnnexeProps> = () => {
@@ -249,7 +237,7 @@ const EtatAnnexe: React.FC<EtatAnnexeProps> = () => {
           isEditMode={modeEdition}
           onToggleEdit={() => setModeEdition(!modeEdition)}
           hasChanges={hasChanges}
-          onSave={() => { console.log('Sauvegarde état annexé'); setHasChanges(false) }}
+          onSave={() => { logger.debug('Sauvegarde état annexé'); setHasChanges(false) }}
         />
       </Stack>
       

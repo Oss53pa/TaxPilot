@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Page de Couverture - Liasse Fiscale SYSCOHADA
  */
@@ -66,7 +67,7 @@ const CouvertureSYSCOHADA: React.FC = () => {
           isEditMode={isEditMode}
           onToggleEdit={() => setIsEditMode(!isEditMode)}
           hasChanges={hasChanges}
-          onSave={() => { console.log('Sauvegarde couverture', coverData); setHasChanges(false) }}
+          onSave={() => { logger.debug('Sauvegarde couverture', coverData); setHasChanges(false) }}
         />
       </Stack>
 

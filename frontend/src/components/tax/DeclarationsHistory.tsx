@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Composant Historique des Déclarations Fiscales
  * Affichage, filtrage, et gestion des déclarations
@@ -127,7 +128,7 @@ const DeclarationsHistory: React.FC<DeclarationsHistoryProps> = ({
       // Calculer stats
       calculateStats(response.results || [])
     } catch (err: any) {
-      console.error('Failed to load declarations:', err)
+      logger.error('Failed to load declarations:', err)
       setError(err.message || 'Erreur lors du chargement des déclarations')
     } finally {
       setLoading(false)
@@ -165,7 +166,7 @@ const DeclarationsHistory: React.FC<DeclarationsHistoryProps> = ({
       link.click()
       window.URL.revokeObjectURL(url)
     } catch (err: any) {
-      console.error('PDF download failed:', err)
+      logger.error('PDF download failed:', err)
       setError('Erreur lors du téléchargement du PDF')
     }
   }

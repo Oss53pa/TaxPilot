@@ -192,7 +192,7 @@ const SupplementAvantagesFiscaux: React.FC = () => {
           <TableContainer>
             <Table>
               <TableHead>
-                <TableRow sx={{ bgcolor: '#f5f5f5' }}>
+                <TableRow sx={{ bgcolor: 'grey.100' }}>
                   <TableCell sx={{ fontWeight: 600 }}>Nature du crédit</TableCell>
                   <TableCell align="right" sx={{ fontWeight: 600 }}>Base de calcul</TableCell>
                   <TableCell align="center" sx={{ fontWeight: 600 }}>Taux</TableCell>
@@ -243,7 +243,7 @@ const SupplementAvantagesFiscaux: React.FC = () => {
           <TableContainer>
             <Table>
               <TableHead>
-                <TableRow sx={{ bgcolor: '#f5f5f5' }}>
+                <TableRow sx={{ bgcolor: 'grey.100' }}>
                   <TableCell sx={{ fontWeight: 600 }}>Nature de l'exonération</TableCell>
                   <TableCell align="right" sx={{ fontWeight: 600 }}>Base exonérée</TableCell>
                   <TableCell align="center" sx={{ fontWeight: 600 }}>Taux normal</TableCell>
@@ -292,7 +292,7 @@ const SupplementAvantagesFiscaux: React.FC = () => {
           <TableContainer>
             <Table>
               <TableHead>
-                <TableRow sx={{ bgcolor: '#f5f5f5' }}>
+                <TableRow sx={{ bgcolor: 'grey.100' }}>
                   <TableCell sx={{ fontWeight: 600 }}>Nature de la réduction</TableCell>
                   <TableCell align="right" sx={{ fontWeight: 600 }}>Base de calcul</TableCell>
                   <TableCell align="center" sx={{ fontWeight: 600 }}>Taux</TableCell>

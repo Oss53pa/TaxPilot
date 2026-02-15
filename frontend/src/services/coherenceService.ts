@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Service de contrôle de cohérence comptable SYSCOHADA
  * Vérifie la cohérence entre états de synthèse et notes annexes
@@ -360,7 +361,7 @@ class CoherenceService {
       }
 
     } catch (error) {
-      console.error('Erreur lors des contrôles de cohérence:', error)
+      logger.error('Erreur lors des contrôles de cohérence:', error)
       return {
         nombreControles: 0,
         controlesConformes: 0,

@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Composant pour l'édition des variables et formules de templates
  * Utilise les APIs du module Templates Engine
@@ -173,7 +174,7 @@ export default function TemplateVariablesEditor() {
         setSelectedTemplate(data[0])
       }
     } catch (error) {
-      console.error('Erreur lors du chargement des templates:', error)
+      logger.error('Erreur lors du chargement des templates:', error)
       toast({
         title: "Erreur",
         description: "Impossible de charger les templates",
@@ -211,7 +212,7 @@ export default function TemplateVariablesEditor() {
       setFormulas(formulasFromVars)
 
     } catch (error) {
-      console.error('Erreur lors du chargement des détails:', error)
+      logger.error('Erreur lors du chargement des détails:', error)
       toast({
         title: "Erreur",
         description: "Impossible de charger les détails du template",
@@ -250,7 +251,7 @@ export default function TemplateVariablesEditor() {
       })
       loadTemplateDetails()
     } catch (error) {
-      console.error('Erreur lors de l\'ajout:', error)
+      logger.error('Erreur lors de l\'ajout:', error)
       toast({
         title: "Erreur",
         description: "Impossible d'ajouter la variable",
@@ -276,7 +277,7 @@ export default function TemplateVariablesEditor() {
 
       loadTemplateDetails()
     } catch (error) {
-      console.error('Erreur lors de la mise à jour:', error)
+      logger.error('Erreur lors de la mise à jour:', error)
       toast({
         title: "Erreur",
         description: "Impossible de mettre à jour la variable",
@@ -301,7 +302,7 @@ export default function TemplateVariablesEditor() {
 
       loadTemplateDetails()
     } catch (error) {
-      console.error('Erreur lors de la suppression:', error)
+      logger.error('Erreur lors de la suppression:', error)
       toast({
         title: "Erreur",
         description: "Impossible de supprimer la variable",
@@ -323,7 +324,7 @@ export default function TemplateVariablesEditor() {
 
       loadTemplateDetails()
     } catch (error) {
-      console.error('Erreur lors du réordonnancement:', error)
+      logger.error('Erreur lors du réordonnancement:', error)
       toast({
         title: "Erreur",
         description: "Impossible de réordonner les sections",
@@ -359,7 +360,7 @@ export default function TemplateVariablesEditor() {
         })
       }
     } catch (error) {
-      console.error('Erreur lors de la validation:', error)
+      logger.error('Erreur lors de la validation:', error)
       toast({
         title: "Erreur",
         description: "Impossible de valider la formule",
@@ -384,7 +385,7 @@ export default function TemplateVariablesEditor() {
 
       setShowTestDialog(true)
     } catch (error) {
-      console.error('Erreur lors du test:', error)
+      logger.error('Erreur lors du test:', error)
       toast({
         title: "Erreur",
         description: "Impossible de tester le template",

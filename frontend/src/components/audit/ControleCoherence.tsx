@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Composant de contrôle de cohérence entre états de synthèse et notes annexes
  */
@@ -119,7 +120,7 @@ const ControleCoherenceComponent: React.FC = () => {
       const resultats = await coherenceService.lancerControlesCoherence(donneesTest)
       setResultats(resultats)
     } catch (error) {
-      console.error('Erreur lors des contrôles:', error)
+      logger.error('Erreur lors des contrôles:', error)
     } finally {
       setLoading(false)
     }

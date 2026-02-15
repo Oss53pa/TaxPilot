@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Page du module de reporting et tableaux de bord
  */
@@ -55,7 +56,7 @@ const Reporting = () => {
   const loadReportingData = async () => {
     try {
       setLoading(true)
-      console.log('🔄 Loading reporting data from backend...')
+      logger.debug('🔄 Loading reporting data from backend...')
 
       const [statsResponse, reportsResponse, templatesResponse] = await Promise.all([
         reportingService.getDashboardStats(),
@@ -67,9 +68,9 @@ const Reporting = () => {
       setReports((reportsResponse as any).results || [])
       setReportTemplates((templatesResponse as any).results || [])
 
-      console.log('✅ Reporting data loaded successfully')
+      logger.debug('✅ Reporting data loaded successfully')
     } catch (error) {
-      console.error('❌ Error loading reporting data:', error)
+      logger.error('❌ Error loading reporting data:', error)
     } finally {
       setLoading(false)
     }
@@ -163,14 +164,14 @@ const Reporting = () => {
           <Button
             variant="contained"
             startIcon={<Add />}
-            onClick={() => console.log('🔄 Creating new report template...')}
+            onClick={() => logger.debug('🔄 Creating new report template...')}
           >
             Nouveau Rapport
           </Button>
           <Button
             variant="outlined"
             startIcon={<GetApp />}
-            onClick={() => console.log('📥 Exporting reports...')}
+            onClick={() => logger.debug('📥 Exporting reports...')}
           >
             Exporter
           </Button>

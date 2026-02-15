@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Service pour la gestion des sauvegardes via l'API
  */
@@ -116,7 +117,7 @@ class BackupService {
       const data = await apiClient.get<{ results?: BackupConfiguration[] } | BackupConfiguration[]>(`${this.configUrl}/?entreprise=${entrepriseId}`)
       return Array.isArray(data) ? data : (data.results || [])
     } catch (error) {
-      console.error('Erreur lors de la récupération des configurations:', error)
+      logger.error('Erreur lors de la récupération des configurations:', error)
       throw error
     }
   }
@@ -127,7 +128,7 @@ class BackupService {
       const data = await apiClient.post<BackupConfiguration>(this.configUrl + '/', config)
       return data
     } catch (error) {
-      console.error('Erreur lors de la création de la configuration:', error)
+      logger.error('Erreur lors de la création de la configuration:', error)
       throw error
     }
   }
@@ -138,7 +139,7 @@ class BackupService {
       const data = await apiClient.patch<BackupConfiguration>(`${this.configUrl}/${id}/`, config)
       return data
     } catch (error) {
-      console.error('Erreur lors de la mise à jour de la configuration:', error)
+      logger.error('Erreur lors de la mise à jour de la configuration:', error)
       throw error
     }
   }
@@ -148,7 +149,7 @@ class BackupService {
     try {
       await apiClient.delete(`${this.configUrl}/${id}/`)
     } catch (error) {
-      console.error('Erreur lors de la suppression de la configuration:', error)
+      logger.error('Erreur lors de la suppression de la configuration:', error)
       throw error
     }
   }
@@ -159,7 +160,7 @@ class BackupService {
       const data = await apiClient.post<{ message: string; backup_id: number; statut: string }>(`${this.configUrl}/${configId}/execute_backup/`)
       return data
     } catch (error) {
-      console.error('Erreur lors de l\'exécution de la sauvegarde:', error)
+      logger.error('Erreur lors de l\'exécution de la sauvegarde:', error)
       throw error
     }
   }
@@ -170,7 +171,7 @@ class BackupService {
       const data = await apiClient.get<StorageType[]>(`${this.configUrl}/storage_types/`)
       return data
     } catch (error) {
-      console.error('Erreur lors de la récupération des types de stockage:', error)
+      logger.error('Erreur lors de la récupération des types de stockage:', error)
       throw error
     }
   }
@@ -181,7 +182,7 @@ class BackupService {
       const data = await apiClient.get<BackupStats>(`${this.configUrl}/backup_stats/?entreprise=${entrepriseId}`)
       return data
     } catch (error) {
-      console.error('Erreur lors de la récupération des statistiques:', error)
+      logger.error('Erreur lors de la récupération des statistiques:', error)
       throw error
     }
   }
@@ -198,7 +199,7 @@ class BackupService {
       const data = await apiClient.get<{ results?: BackupHistory[] } | BackupHistory[]>(url)
       return Array.isArray(data) ? data : (data.results || [])
     } catch (error) {
-      console.error('Erreur lors de la récupération de l\'historique:', error)
+      logger.error('Erreur lors de la récupération de l\'historique:', error)
       throw error
     }
   }
@@ -209,7 +210,7 @@ class BackupService {
       const data = await apiClient.get<BackupHistory[]>(`${this.historyUrl}/recent/?entreprise=${entrepriseId}&limit=${limit}`)
       return data
     } catch (error) {
-      console.error('Erreur lors de la récupération de l\'historique récent:', error)
+      logger.error('Erreur lors de la récupération de l\'historique récent:', error)
       throw error
     }
   }
@@ -222,7 +223,7 @@ class BackupService {
       const data = await apiClient.get<{ results?: RestoreOperation[] } | RestoreOperation[]>(`${this.restoreUrl}/?entreprise=${entrepriseId}`)
       return Array.isArray(data) ? data : (data.results || [])
     } catch (error) {
-      console.error('Erreur lors de la récupération des restaurations:', error)
+      logger.error('Erreur lors de la récupération des restaurations:', error)
       throw error
     }
   }
@@ -233,7 +234,7 @@ class BackupService {
       const data = await apiClient.post<RestoreOperation>(this.restoreUrl + '/', restore)
       return data
     } catch (error) {
-      console.error('Erreur lors de la création de la restauration:', error)
+      logger.error('Erreur lors de la création de la restauration:', error)
       throw error
     }
   }
@@ -244,7 +245,7 @@ class BackupService {
       const data = await apiClient.post<RestoreOperation>(`${this.restoreUrl}/${restoreId}/start_restore/`)
       return data
     } catch (error) {
-      console.error('Erreur lors du démarrage de la restauration:', error)
+      logger.error('Erreur lors du démarrage de la restauration:', error)
       throw error
     }
   }
@@ -255,7 +256,7 @@ class BackupService {
       const data = await apiClient.post<RestoreOperation>(`${this.restoreUrl}/${restoreId}/cancel_restore/`)
       return data
     } catch (error) {
-      console.error('Erreur lors de l\'annulation de la restauration:', error)
+      logger.error('Erreur lors de l\'annulation de la restauration:', error)
       throw error
     }
   }

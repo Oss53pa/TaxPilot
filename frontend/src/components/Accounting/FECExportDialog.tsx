@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Dialog d'export FEC (Fichier des Écritures Comptables)
  * Format standardisé obligatoire pour l'administration fiscale
@@ -114,7 +115,7 @@ const FECExportDialog: React.FC<FECExportDialogProps> = ({
         resetState()
       }, 2000)
     } catch (err: any) {
-      console.error('FEC export failed:', err)
+      logger.error('FEC export failed:', err)
       setError(err.message || 'Erreur lors de l\'export du FEC')
     } finally {
       setExporting(false)

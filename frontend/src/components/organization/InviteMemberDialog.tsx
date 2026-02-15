@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Dialog réutilisable pour inviter un nouveau membre à une organisation
  */
@@ -74,7 +75,7 @@ const InviteMemberDialog: React.FC<InviteMemberDialogProps> = ({
       // Close dialog
       onClose()
     } catch (err: any) {
-      console.error('Error sending invitation:', err)
+      logger.error('Error sending invitation:', err)
       setError(err.message || 'Erreur lors de l\'envoi de l\'invitation')
     } finally {
       setLoading(false)

@@ -263,7 +263,7 @@ const AppDashboard: React.FC = () => {
           py: 1.5,
           mb: 2.5,
           borderRadius: 4,
-          bgcolor: '#fef2f2',
+          bgcolor: 'error.50',
           border: '1px solid #fecaca',
         }}
       >
@@ -350,7 +350,7 @@ const AppDashboard: React.FC = () => {
                 <Chip
                   label="67% complété"
                   size="small"
-                  sx={{ bgcolor: '#fffbeb', color: '#92400e', fontWeight: 600, fontSize: '0.75rem', border: '1px solid #fde68a' }}
+                  sx={{ bgcolor: 'warning.50', color: '#92400e', fontWeight: 600, fontSize: '0.75rem', border: '1px solid #fde68a' }}
                 />
               </Stack>
 
@@ -535,7 +535,7 @@ const AppDashboard: React.FC = () => {
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
-                  <Box sx={{ p: 1.5, borderRadius: 3, bgcolor: '#f0fdf4', textAlign: 'center', border: '1px solid #bbf7d0' }}>
+                  <Box sx={{ p: 1.5, borderRadius: 3, bgcolor: 'success.50', textAlign: 'center', border: '1px solid #bbf7d0' }}>
                     <Typography variant="caption" sx={{ color: '#166534', fontSize: '0.7rem', display: 'block' }}>
                       Chiffre d'Affaires
                     </Typography>
@@ -546,7 +546,7 @@ const AppDashboard: React.FC = () => {
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
-                  <Box sx={{ p: 1.5, borderRadius: 3, bgcolor: '#eff6ff', textAlign: 'center', border: '1px solid #bfdbfe' }}>
+                  <Box sx={{ p: 1.5, borderRadius: 3, bgcolor: 'info.50', textAlign: 'center', border: '1px solid #bfdbfe' }}>
                     <Typography variant="caption" sx={{ color: '#1e40af', fontSize: '0.7rem', display: 'block' }}>
                       Résultat Net
                     </Typography>

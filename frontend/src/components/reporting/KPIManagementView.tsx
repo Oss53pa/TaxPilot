@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Composant pour gérer les KPIs et indicateurs de performance
  * Utilise les APIs du module Reporting
@@ -170,7 +171,7 @@ export default function KPIManagementView() {
 
       setKpis(kpisWithHistory)
     } catch (error) {
-      console.error('Erreur lors du chargement des KPIs:', error)
+      logger.error('Erreur lors du chargement des KPIs:', error)
       toast({
         title: "Erreur",
         description: "Impossible de charger les KPIs",
@@ -190,7 +191,7 @@ export default function KPIManagementView() {
       }) as any
       setAlertes(data.results || data)
     } catch (error) {
-      console.error('Erreur lors du chargement des alertes:', error)
+      logger.error('Erreur lors du chargement des alertes:', error)
     }
   }
 
@@ -223,7 +224,7 @@ export default function KPIManagementView() {
         periodicite_calcul: 'MENSUEL'
       })
     } catch (error) {
-      console.error('Erreur lors de la création du KPI:', error)
+      logger.error('Erreur lors de la création du KPI:', error)
       toast({
         title: "Erreur",
         description: "Impossible de créer le KPI",
@@ -241,7 +242,7 @@ export default function KPIManagementView() {
       })
       loadKPIs()
     } catch (error) {
-      console.error('Erreur lors de la suppression:', error)
+      logger.error('Erreur lors de la suppression:', error)
       toast({
         title: "Erreur",
         description: "Impossible de supprimer le KPI",
@@ -263,7 +264,7 @@ export default function KPIManagementView() {
         loadKPIs()
       }, 2000)
     } catch (error) {
-      console.error('Erreur lors du recalcul:', error)
+      logger.error('Erreur lors du recalcul:', error)
       toast({
         title: "Erreur",
         description: "Impossible de recalculer le KPI",
@@ -291,7 +292,7 @@ export default function KPIManagementView() {
       // Vérifier le statut
       checkExportStatus(exportData.id)
     } catch (error) {
-      console.error('Erreur lors de l\'export:', error)
+      logger.error('Erreur lors de l\'export:', error)
       toast({
         title: "Erreur",
         description: "Impossible d'exporter les KPIs",
@@ -335,7 +336,7 @@ export default function KPIManagementView() {
       })
       loadAlertes()
     } catch (error) {
-      console.error('Erreur lors de la résolution:', error)
+      logger.error('Erreur lors de la résolution:', error)
       toast({
         title: "Erreur",
         description: "Impossible de résoudre l'alerte",

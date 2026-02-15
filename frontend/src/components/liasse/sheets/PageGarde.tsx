@@ -4,6 +4,7 @@
  */
 
 import React from 'react'
+import { formatDateFR } from '@/utils/formatting'
 import {
   Box,
   Paper,
@@ -64,13 +65,7 @@ const paysOhadaMap: Record<string, string> = {
   TG: 'Togo',
 }
 
-/** Formate une date ISO (YYYY-MM-DD) en DD/MM/YYYY */
-function formatDateFR(isoDate?: string): string {
-  if (!isoDate) return ''
-  const parts = isoDate.split('-')
-  if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`
-  return isoDate
-}
+// formatDateFR imported from '@/utils/formatting' (using '' as default for empty fields)
 
 /** Calcule la durée en mois entre deux dates ISO */
 function calcDureeMois(debut?: string, fin?: string): number {
@@ -100,8 +95,8 @@ const PageGarde: React.FC<PageGardeProps> = ({ entreprise }) => {
   const telephone = ent?.telephone || ''
   const email = ent?.email || ''
   const siteWeb = ent?.site_web || ''
-  const dateDebut = formatDateFR(ent?.exercice_debut) || '01/01/' + new Date().getFullYear()
-  const dateFin = formatDateFR(ent?.exercice_fin) || '31/12/' + new Date().getFullYear()
+  const dateDebut = formatDateFR(ent?.exercice_debut, '') || '01/01/' + new Date().getFullYear()
+  const dateFin = formatDateFR(ent?.exercice_fin, '') || '31/12/' + new Date().getFullYear()
   const duree = calcDureeMois(ent?.exercice_debut, ent?.exercice_fin)
   const secteurActivite = ent?.secteur_activite || 'Non renseigné'
   const chiffreAffaires = ent?.chiffre_affaires_annuel || 0

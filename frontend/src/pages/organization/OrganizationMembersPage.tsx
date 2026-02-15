@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Page de gestion des membres d'une organisation
  * Permet de voir, ajouter, modifier et supprimer des membres
@@ -75,7 +76,7 @@ const OrganizationMembersPage: React.FC<OrganizationMembersPageProps> = ({ organ
       const data = await organizationService.getMembers(organizationSlug)
       setMembers(data)
     } catch (err: any) {
-      console.error('Error loading members:', err)
+      logger.error('Error loading members:', err)
       setError(err.message || 'Erreur lors du chargement des membres')
     } finally {
       setLoading(false)
@@ -106,7 +107,7 @@ const OrganizationMembersPage: React.FC<OrganizationMembersPageProps> = ({ organ
       // Recharger la liste
       setTimeout(() => loadMembers(), 1000)
     } catch (err: any) {
-      console.error('Error inviting member:', err)
+      logger.error('Error inviting member:', err)
       setError(err.message || 'Erreur lors de l\'envoi de l\'invitation')
     } finally {
       setInviting(false)
@@ -129,7 +130,7 @@ const OrganizationMembersPage: React.FC<OrganizationMembersPageProps> = ({ organ
       // Recharger la liste
       loadMembers()
     } catch (err: any) {
-      console.error('Error updating member role:', err)
+      logger.error('Error updating member role:', err)
       setError(err.message || 'Erreur lors de la mise à jour du rôle')
     } finally {
       setUpdating(false)
@@ -151,7 +152,7 @@ const OrganizationMembersPage: React.FC<OrganizationMembersPageProps> = ({ organ
       // Recharger la liste
       loadMembers()
     } catch (err: any) {
-      console.error('Error removing member:', err)
+      logger.error('Error removing member:', err)
       setError(err.message || 'Erreur lors de la suppression du membre')
     } finally {
       setDeleting(false)

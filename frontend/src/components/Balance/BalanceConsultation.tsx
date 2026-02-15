@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Composant de consultation de la balance
  */
@@ -138,7 +139,7 @@ const BalanceConsultation: React.FC = () => {
 
   const handleSaveEdit = useCallback(() => {
     // Ici vous pouvez ajouter la logique pour sauvegarder les modifications
-    console.log('Sauvegarde des modifications:', editedBalance)
+    logger.debug('Sauvegarde des modifications:', editedBalance)
     // TODO: Appeler l'API pour sauvegarder les modifications
     setEditModalOpen(false)
     setEditedBalance(null)

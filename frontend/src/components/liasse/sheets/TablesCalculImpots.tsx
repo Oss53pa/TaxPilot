@@ -424,7 +424,7 @@ const TablesCalculImpots: FC = () => {
         '🏛️ Impôt sur les Sociétés (IS)',
         impotSociete,
         '#2563eb',
-        <TaxIcon sx={{ color: '#2563eb' }} />
+        <TaxIcon sx={{ color: 'primary.main' }} />
       )}
 
       {/* Table TVA */}
@@ -432,7 +432,7 @@ const TablesCalculImpots: FC = () => {
         '🧾 Taxe sur la Valeur Ajoutée (TVA)',
         taxesTVA,
         '#16a34a',
-        <ReceiptIcon sx={{ color: '#16a34a' }} />
+        <ReceiptIcon sx={{ color: 'success.main' }} />
       )}
 
       {/* Autres taxes */}
@@ -440,7 +440,7 @@ const TablesCalculImpots: FC = () => {
         '📋 Autres Taxes et Contributions',
         autresTaxes,
         '#d97706',
-        <TrendIcon sx={{ color: '#d97706' }} />
+        <TrendIcon sx={{ color: 'warning.main' }} />
       )}
 
       {/* Récapitulatif fiscal */}

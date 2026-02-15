@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Service pour la gestion des types de liasses fiscales
  * CONNEXION RÉELLE AU BACKEND DJANGO
@@ -61,7 +62,7 @@ class TypeLiasseService {
     previous: string | null
     results: TypeLiasse[]
   }> {
-    console.log('🔄 Fetching types de liasse from backend...', filters)
+    logger.debug('Fetching types de liasse from backend...', filters)
     return apiClient.get(this.baseUrl, filters)
   }
 
@@ -69,7 +70,7 @@ class TypeLiasseService {
    * Récupérer tous les types (sans pagination)
    */
   async getAll(filters?: Omit<TypeLiasseFilters, 'page' | 'page_size'>): Promise<TypeLiasse[]> {
-    console.log('🔄 Fetching all types de liasse...')
+    logger.debug('Fetching all types de liasse...')
     const data = await apiClient.get<Record<string, any>>(this.baseUrl, { ...filters, page_size: 1000 })
     return data.results || []
   }
@@ -78,7 +79,7 @@ class TypeLiasseService {
    * Récupérer un type de liasse par ID
    */
   async getById(id: number): Promise<TypeLiasse> {
-    console.log(`🔄 Fetching type de liasse ${id}...`)
+    logger.debug(`Fetching type de liasse ${id}...`)
     return apiClient.get(`${this.baseUrl}/${id}/`)
   }
 
@@ -86,7 +87,7 @@ class TypeLiasseService {
    * Créer un nouveau type de liasse
    */
   async create(data: CreateTypeLiasse): Promise<TypeLiasse> {
-    console.log('📤 Creating type de liasse...', data)
+    logger.debug('Creating type de liasse...', data)
     return apiClient.post(this.baseUrl, data)
   }
 
@@ -94,7 +95,7 @@ class TypeLiasseService {
    * Mettre à jour un type de liasse
    */
   async update(id: number, data: Partial<CreateTypeLiasse>): Promise<TypeLiasse> {
-    console.log(`📤 Updating type de liasse ${id}...`, data)
+    logger.debug(`Updating type de liasse ${id}...`, data)
     return apiClient.patch(`${this.baseUrl}/${id}/`, data)
   }
 
@@ -102,7 +103,7 @@ class TypeLiasseService {
    * Supprimer un type de liasse
    */
   async delete(id: number): Promise<void> {
-    console.log(`🗑️ Deleting type de liasse ${id}...`)
+    logger.debug(`Deleting type de liasse ${id}...`)
     return apiClient.delete(`${this.baseUrl}/${id}/`)
   }
 
@@ -110,7 +111,7 @@ class TypeLiasseService {
    * Récupérer les types SYSCOHADA
    */
   async getSYSCOHADATypes(): Promise<TypeLiasse[]> {
-    console.log('🔄 Fetching SYSCOHADA types...')
+    logger.debug('Fetching SYSCOHADA types...')
     const data = await apiClient.get<Record<string, any>>(this.baseUrl, {
       norme_applicable: 'SYSCOHADA',
       page_size: 100
@@ -122,7 +123,7 @@ class TypeLiasseService {
    * Récupérer les types officiels
    */
   async getOfficiels(): Promise<TypeLiasse[]> {
-    console.log('🔄 Fetching official types de liasse...')
+    logger.debug('Fetching official types de liasse...')
     const data = await apiClient.get<Record<string, any>>(this.baseUrl, {
       est_officiel: true,
       page_size: 100
@@ -138,7 +139,7 @@ class TypeLiasseService {
     secteur?: string
     pays?: string
   }): Promise<TypeLiasse[]> {
-    console.log('🔄 Fetching applicable types for criteria...', params)
+    logger.debug('Fetching applicable types for criteria...', params)
 
     const allTypes = await this.getAll()
 

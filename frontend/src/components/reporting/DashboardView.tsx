@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Composant pour afficher le tableau de bord de reporting
  * Utilise les nouvelles APIs backend
@@ -69,7 +70,7 @@ export default function DashboardView() {
       const data = await reportingService.getDashboardStatistics(parseInt(entrepriseId))
       setDashboardData(data as any)
     } catch (error) {
-      console.error('Erreur lors du chargement du dashboard:', error)
+      logger.error('Erreur lors du chargement du dashboard:', error)
       toast({
         title: "Erreur",
         description: "Impossible de charger les données du tableau de bord",
@@ -99,7 +100,7 @@ export default function DashboardView() {
 
       setKpis(widgetData)
     } catch (error) {
-      console.error('Erreur lors du chargement des KPIs:', error)
+      logger.error('Erreur lors du chargement des KPIs:', error)
     }
   }
 
@@ -132,7 +133,7 @@ export default function DashboardView() {
       // Vérifier le statut de l'export périodiquement
       checkExportStatus(exportData.id as any)
     } catch (error) {
-      console.error('Erreur lors de l\'export:', error)
+      logger.error('Erreur lors de l\'export:', error)
       toast({
         title: "Erreur",
         description: "Impossible de lancer l'export",
@@ -164,7 +165,7 @@ export default function DashboardView() {
         }
       } catch (error) {
         clearInterval(interval)
-        console.error('Erreur lors de la vérification du statut:', error)
+        logger.error('Erreur lors de la vérification du statut:', error)
       }
     }, 2000) // Vérifier toutes les 2 secondes
   }

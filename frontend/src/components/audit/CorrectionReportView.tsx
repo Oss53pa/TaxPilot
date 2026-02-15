@@ -32,21 +32,21 @@ interface CorrectionReportViewProps {
 
 const evolutionIcon = (evolution: string) => {
   switch (evolution) {
-    case 'CORRIGE': return <CheckIcon sx={{ color: '#16a34a' }} fontSize="small" />
-    case 'AMELIORE': return <UpIcon sx={{ color: '#0ea5e9' }} fontSize="small" />
-    case 'INCHANGE': return <FlatIcon sx={{ color: '#737373' }} fontSize="small" />
-    case 'DEGRADE': return <DownIcon sx={{ color: '#dc2626' }} fontSize="small" />
+    case 'CORRIGE': return <CheckIcon color="success" fontSize="small" />
+    case 'AMELIORE': return <UpIcon color="info" fontSize="small" />
+    case 'INCHANGE': return <FlatIcon color="action" fontSize="small" />
+    case 'DEGRADE': return <DownIcon color="error" fontSize="small" />
     default: return null
   }
 }
 
-const evolutionColor = (evolution: string) => {
+const evolutionColor = (evolution: string): 'success.main' | 'info.main' | 'text.secondary' | 'error.main' => {
   switch (evolution) {
-    case 'CORRIGE': return '#16a34a'
-    case 'AMELIORE': return '#0ea5e9'
-    case 'INCHANGE': return '#737373'
-    case 'DEGRADE': return '#dc2626'
-    default: return '#737373'
+    case 'CORRIGE': return 'success.main'
+    case 'AMELIORE': return 'info.main'
+    case 'INCHANGE': return 'text.secondary'
+    case 'DEGRADE': return 'error.main'
+    default: return 'text.secondary'
   }
 }
 
@@ -69,48 +69,48 @@ const CorrectionReportView: React.FC<CorrectionReportViewProps> = ({ rapport }) 
       {/* Resume synthese */}
       <Grid container spacing={2} sx={{ mb: 4 }}>
         <Grid item xs={6} md={2}>
-          <Paper sx={{ p: 2, textAlign: 'center', bgcolor: '#fef2f2' }}>
-            <Typography variant="h5" fontWeight={700} color="#dc2626">
+          <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'error.50' }}>
+            <Typography variant="h5" fontWeight={700} color="error.main">
               {synthese.bloquantsAvant}
             </Typography>
             <Typography variant="caption">Bloquants avant</Typography>
           </Paper>
         </Grid>
         <Grid item xs={6} md={2}>
-          <Paper sx={{ p: 2, textAlign: 'center', bgcolor: synthese.bloquantsApres === 0 ? '#f0fdf4' : '#fef2f2' }}>
-            <Typography variant="h5" fontWeight={700} color={synthese.bloquantsApres === 0 ? '#16a34a' : '#dc2626'}>
+          <Paper sx={{ p: 2, textAlign: 'center', bgcolor: synthese.bloquantsApres === 0 ? 'success.50' : 'error.50' }}>
+            <Typography variant="h5" fontWeight={700} color={synthese.bloquantsApres === 0 ? 'success.main' : 'error.main'}>
               {synthese.bloquantsApres}
             </Typography>
             <Typography variant="caption">Bloquants apres</Typography>
           </Paper>
         </Grid>
         <Grid item xs={6} md={2}>
-          <Paper sx={{ p: 2, textAlign: 'center', bgcolor: '#fffbeb' }}>
-            <Typography variant="h5" fontWeight={700} color="#d97706">
+          <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'warning.50' }}>
+            <Typography variant="h5" fontWeight={700} color="warning.main">
               {synthese.majeursAvant}
             </Typography>
             <Typography variant="caption">Majeurs avant</Typography>
           </Paper>
         </Grid>
         <Grid item xs={6} md={2}>
-          <Paper sx={{ p: 2, textAlign: 'center', bgcolor: synthese.majeursApres < synthese.majeursAvant ? '#f0fdf4' : '#fffbeb' }}>
-            <Typography variant="h5" fontWeight={700} color={synthese.majeursApres < synthese.majeursAvant ? '#16a34a' : '#d97706'}>
+          <Paper sx={{ p: 2, textAlign: 'center', bgcolor: synthese.majeursApres < synthese.majeursAvant ? 'success.50' : 'warning.50' }}>
+            <Typography variant="h5" fontWeight={700} color={synthese.majeursApres < synthese.majeursAvant ? 'success.main' : 'warning.main'}>
               {synthese.majeursApres}
             </Typography>
             <Typography variant="caption">Majeurs apres</Typography>
           </Paper>
         </Grid>
         <Grid item xs={6} md={2}>
-          <Paper sx={{ p: 2, textAlign: 'center', bgcolor: '#eff6ff' }}>
-            <Typography variant="h5" fontWeight={700} color="#2563eb">
+          <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'info.50' }}>
+            <Typography variant="h5" fontWeight={700} color="info.main">
               {synthese.scoreAvant}%
             </Typography>
             <Typography variant="caption">Score avant</Typography>
           </Paper>
         </Grid>
         <Grid item xs={6} md={2}>
-          <Paper sx={{ p: 2, textAlign: 'center', bgcolor: synthese.scoreApres > synthese.scoreAvant ? '#f0fdf4' : '#eff6ff' }}>
-            <Typography variant="h5" fontWeight={700} color={synthese.scoreApres > synthese.scoreAvant ? '#16a34a' : '#2563eb'}>
+          <Paper sx={{ p: 2, textAlign: 'center', bgcolor: synthese.scoreApres > synthese.scoreAvant ? 'success.50' : 'info.50' }}>
+            <Typography variant="h5" fontWeight={700} color={synthese.scoreApres > synthese.scoreAvant ? 'success.main' : 'info.main'}>
               {synthese.scoreApres}%
             </Typography>
             <Typography variant="caption">Score apres</Typography>
@@ -150,11 +150,11 @@ const CorrectionReportView: React.FC<CorrectionReportViewProps> = ({ rapport }) 
                     <TableCell sx={{ fontFamily: 'monospace', fontWeight: 600 }}>{c.ref}</TableCell>
                     <TableCell>{c.nom}</TableCell>
                     <TableCell>
-                      <Chip label={c.severiteAvant} size="small" sx={{ bgcolor: '#f5f5f5', fontSize: '0.7rem' }} />
+                      <Chip label={c.severiteAvant} size="small" sx={{ bgcolor: 'grey.100', fontSize: '0.7rem' }} />
                     </TableCell>
                     <TableCell><ArrowIcon fontSize="small" color="action" /></TableCell>
                     <TableCell>
-                      <Chip label={c.severiteApres} size="small" sx={{ bgcolor: '#f5f5f5', fontSize: '0.7rem' }} />
+                      <Chip label={c.severiteApres} size="small" sx={{ bgcolor: 'grey.100', fontSize: '0.7rem' }} />
                     </TableCell>
                     <TableCell>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
@@ -196,7 +196,7 @@ const CorrectionReportView: React.FC<CorrectionReportViewProps> = ({ rapport }) 
                     <TableCell>{c.libelle}</TableCell>
                     <TableCell align="right">{c.soldeAvant.toLocaleString('fr-FR')}</TableCell>
                     <TableCell align="right">{c.soldeApres.toLocaleString('fr-FR')}</TableCell>
-                    <TableCell align="right" sx={{ color: c.ecart > 0 ? '#16a34a' : c.ecart < 0 ? '#dc2626' : 'text.secondary', fontWeight: 600 }}>
+                    <TableCell align="right" sx={{ color: c.ecart > 0 ? 'success.main' : c.ecart < 0 ? 'error.main' : 'text.secondary', fontWeight: 600 }}>
                       {c.ecart > 0 ? '+' : ''}{c.ecart.toLocaleString('fr-FR')}
                     </TableCell>
                   </TableRow>

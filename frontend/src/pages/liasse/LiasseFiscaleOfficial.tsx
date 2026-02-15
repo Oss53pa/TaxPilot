@@ -521,13 +521,13 @@ const LiasseFiscaleOfficial: React.FC = () => {
                   <Chip
                     label={`${counts.obligatoire} obligatoires`}
                     size="small"
-                    sx={{ bgcolor: '#ef4444', color: 'white', fontWeight: 600, fontSize: '0.7rem' }}
+                    sx={{ bgcolor: 'error.main', color: 'white', fontWeight: 600, fontSize: '0.7rem' }}
                   />
                   <Chip
                     label={`${counts.facultatif} facultatifs`}
                     size="small"
                     variant="outlined"
-                    sx={{ borderColor: '#3b82f6', color: '#3b82f6', fontWeight: 600, fontSize: '0.7rem' }}
+                    sx={{ borderColor: '#3b82f6', color: 'primary.main', fontWeight: 600, fontSize: '0.7rem' }}
                   />
                 </Box>
               )
@@ -581,7 +581,7 @@ const LiasseFiscaleOfficial: React.FC = () => {
                                 size="small"
                                 sx={{
                                   minWidth: 20, height: 18, fontSize: '0.7rem', fontWeight: 700,
-                                  bgcolor: '#ef4444', color: 'white',
+                                  bgcolor: 'error.main', color: 'white',
                                   '& .MuiChip-label': { px: 0.5 },
                                 }}
                               />
@@ -594,7 +594,7 @@ const LiasseFiscaleOfficial: React.FC = () => {
                                 variant="outlined"
                                 sx={{
                                   minWidth: 28, height: 18, fontSize: '0.6rem',
-                                  borderColor: '#3b82f6', color: '#3b82f6',
+                                  borderColor: '#3b82f6', color: 'primary.main',
                                   '& .MuiChip-label': { px: 0.5 },
                                 }}
                               />
@@ -622,7 +622,7 @@ const LiasseFiscaleOfficial: React.FC = () => {
               mb: 2,
               color: '#525252',
               fontWeight: 500,
-              '&:hover': { bgcolor: '#f5f5f5', color: '#171717' },
+              '&:hover': { bgcolor: 'grey.100', color: 'text.primary' },
             }}
           >
             Retour au menu principal
@@ -660,7 +660,7 @@ const LiasseFiscaleOfficial: React.FC = () => {
               <Chip
                 label={`Progression: ${selectedLiasse?.progress || 0}%`}
                 icon={<Speed sx={{ color: '#fff !important' }} />}
-                sx={{ bgcolor: '#171717', color: '#fff', fontWeight: 600 }}
+                sx={{ bgcolor: 'text.primary', color: '#fff', fontWeight: 600 }}
               />
               <Chip
                 label={selectedLiasse?.status || 'draft'}

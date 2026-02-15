@@ -12,7 +12,7 @@ interface GrandLivreProps {
 const GrandLivre: React.FC<GrandLivreProps> = ({ modeEdition: _modeEdition = false }) => {
   return (
     <Box>
-      <Typography variant="h5" sx={{ mb: 3, fontWeight: 700, color: '#171717' }}>
+      <Typography variant="h5" sx={{ mb: 3, fontWeight: 700, color: 'text.primary' }}>
         Grand Livre des Comptes
       </Typography>
       

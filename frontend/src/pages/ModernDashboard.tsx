@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Dashboard moderne inspiré du design Homies Lab
  */
@@ -61,7 +62,7 @@ const ModernDashboard = () => {
       setAuditSessions((auditsResponse as any).results || [])
       setRecentGenerations((generationsResponse as any).results || [])
     } catch (error) {
-      console.error('❌ Error loading dashboard data:', error)
+      logger.error('❌ Error loading dashboard data:', error)
     } finally {
       setLoading(false)
     }
@@ -78,13 +79,13 @@ const ModernDashboard = () => {
       number: dashboardStats?.entreprises_actives || '0',
       label: 'Entreprises Actives',
       icon: <Group />,
-      color: '#10b981',
+      color: 'success.main',
     },
     {
       number: dashboardStats?.groupes || '0',
       label: 'Groupes',
       icon: <TrendingUp />,
-      color: '#f59e0b',
+      color: 'warning.main',
     },
     {
       number: dashboardStats?.nouveaux_ce_mois || '0',
@@ -97,7 +98,7 @@ const ModernDashboard = () => {
   const enterpriseStatus = {
     percentComplete: dashboardStats ? Math.round((dashboardStats.entreprises_actives / dashboardStats.total_entreprises) * 100) : 0,
     data: [
-      { type: 'Actives', count: dashboardStats?.entreprises_actives || 0, color: '#10b981' },
+      { type: 'Actives', count: dashboardStats?.entreprises_actives || 0, color: 'success.main' },
       { type: 'Inactives', count: (dashboardStats?.total_entreprises || 0) - (dashboardStats?.entreprises_actives || 0), color: '#6b7280' },
     ]
   }
@@ -167,7 +168,7 @@ const ModernDashboard = () => {
     <Box sx={{ backgroundColor: '#f8fafc', minHeight: '100vh', p: 3 }}>
       {/* Header moderne */}
       <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" sx={{ fontWeight: 600, color: '#171717', mb: 0.5 }}>
+        <Typography variant="h4" sx={{ fontWeight: 600, color: 'text.primary', mb: 0.5 }}>
           Good Morning, {user?.first_name || user?.username}
         </Typography>
         <Typography variant="body1" sx={{ color: '#6b7280', fontWeight: 400 }}>
@@ -200,7 +201,7 @@ const ModernDashboard = () => {
                   <CardContent sx={{ p: 3 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                       <Box>
-                        <Typography variant="h4" sx={{ fontWeight: 700, color: '#171717', mb: 0.5 }}>
+                        <Typography variant="h4" sx={{ fontWeight: 700, color: 'text.primary', mb: 0.5 }}>
                           {stat.number}
                         </Typography>
                         <Typography variant="body2" sx={{ color: '#6b7280', fontWeight: 500 }}>
@@ -230,7 +231,7 @@ const ModernDashboard = () => {
           <Card sx={{ height: '300px' }}>
             <CardContent sx={{ p: 3 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                <Typography variant="h6" sx={{ fontWeight: 600, color: '#171717' }}>
+                <Typography variant="h6" sx={{ fontWeight: 600, color: 'text.primary' }}>
                   Statut Entreprises
                 </Typography>
                 <IconButton size="small">
@@ -263,7 +264,7 @@ const ModernDashboard = () => {
                       flexDirection: 'column',
                     }}
                   >
-                    <Typography variant="h5" sx={{ fontWeight: 700, color: '#171717' }}>
+                    <Typography variant="h5" sx={{ fontWeight: 700, color: 'text.primary' }}>
                       {enterpriseStatus.percentComplete}%
                     </Typography>
                     <Typography variant="caption" sx={{ color: '#6b7280' }}>
@@ -299,7 +300,7 @@ const ModernDashboard = () => {
           <Card sx={{ height: '300px' }}>
             <CardContent sx={{ p: 3, pb: 1 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="h6" sx={{ fontWeight: 600, color: '#171717' }}>
+                <Typography variant="h6" sx={{ fontWeight: 600, color: 'text.primary' }}>
                   Activités Récentes
                 </Typography>
                 <IconButton size="small">
@@ -327,7 +328,7 @@ const ModernDashboard = () => {
                         {activity.type === 'audit' ? <Assessment /> : <Assignment />}
                       </Avatar>
                       <Box sx={{ flexGrow: 1 }}>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#171717' }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary' }}>
                           {activity.title}
                         </Typography>
                         {activity.description && (
@@ -365,7 +366,7 @@ const ModernDashboard = () => {
           <Card>
             <CardContent sx={{ p: 3 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                <Typography variant="h6" sx={{ fontWeight: 600, color: '#171717' }}>
+                <Typography variant="h6" sx={{ fontWeight: 600, color: 'text.primary' }}>
                   Statistiques par Secteur
                 </Typography>
                 <Button variant="outlined" size="small">
@@ -399,7 +400,7 @@ const ModernDashboard = () => {
                             <Avatar sx={{ width: 32, height: 32, bgcolor: `hsl(${index * 60}, 70%, 50%)` }}>
                               {secteur.secteur_activite.charAt(0)}
                             </Avatar>
-                            <Typography variant="body2" sx={{ fontWeight: 500, color: '#171717' }}>
+                            <Typography variant="body2" sx={{ fontWeight: 500, color: 'text.primary' }}>
                               {secteur.secteur_activite}
                             </Typography>
                           </Box>

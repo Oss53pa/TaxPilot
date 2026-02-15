@@ -4,6 +4,7 @@
  */
 
 import { apiClient, type AuthResponse, type User, type LoginCredentials, type SignupData, type SignupResponse } from './apiClient'
+import { logger } from '@/utils/logger'
 
 // Exports des types depuis apiClient pour compatibilité
 export type { User, LoginCredentials, AuthResponse, SignupData, SignupResponse }
@@ -12,50 +13,50 @@ class AuthService {
   // Authentification - CONNEXION RÉELLE AU BACKEND
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
     try {
-      console.log('🔐 Logging in to backend...', credentials.username)
+      logger.debug('Logging in to backend...', credentials.username)
       const response = await apiClient.login(credentials)
-      console.log('✅ Login successful:', response.success)
+      logger.debug('Login successful:', response.success)
       return response
     } catch (error) {
-      console.error('❌ Login failed:', error)
+      logger.error('Login failed:', error)
       throw error
     }
   }
 
   async signup(signupData: SignupData): Promise<SignupResponse> {
     try {
-      console.log('📝 Signing up new organization...', signupData.name)
+      logger.debug('Signing up new organization...', signupData.name)
       const response = await apiClient.signup(signupData)
-      console.log('✅ Signup successful:', response.organization.name)
+      logger.debug('Signup successful:', response.organization.name)
       return response
     } catch (error) {
-      console.error('❌ Signup failed:', error)
+      logger.error('Signup failed:', error)
       throw error
     }
   }
 
   async logout(): Promise<void> {
     try {
-      console.log('🚪 Logging out...')
+      logger.debug('Logging out...')
       // TODO: Appeler l'endpoint de logout côté serveur si nécessaire
       apiClient.logout()
-      console.log('✅ Logout successful')
+      logger.debug('Logout successful')
     } catch (error) {
-      console.error('❌ Logout error:', error)
+      logger.error('Logout error:', error)
       // Forcer la déconnexion locale même si l'API échoue
       apiClient.logout()
     }
   }
 
   async refreshToken(): Promise<string | null> {
-    console.log('🔄 Refreshing token...')
+    logger.debug('Refreshing token...')
     try {
       // Le refreshToken est géré automatiquement par apiClient
       const token = apiClient.getAccessToken()
-      console.log('✅ Token refresh handled automatically')
+      logger.debug('Token refresh handled automatically')
       return token
     } catch (error) {
-      console.error('❌ Token refresh failed:', error)
+      logger.error('Token refresh failed:', error)
       return null
     }
   }
@@ -129,12 +130,12 @@ class AuthService {
   // Utilitaires - CONNEXION RÉELLE AU BACKEND
   async checkHealth(): Promise<boolean> {
     try {
-      console.log('🏥 Checking backend health...')
+      logger.debug('Checking backend health...')
       await apiClient.get('/api/v1/core/health/')
-      console.log('✅ Backend is healthy')
+      logger.debug('Backend is healthy')
       return true
     } catch (error) {
-      console.error('❌ Backend health check failed:', error)
+      logger.error('Backend health check failed:', error)
       return false
     }
   }
@@ -142,30 +143,30 @@ class AuthService {
   // Nouvelles méthodes pour l'API backend
   async getCurrentUserFromAPI(): Promise<User | null> {
     try {
-      console.log('👤 Fetching current user from backend...')
+      logger.debug('Fetching current user from backend...')
       const response = await apiClient.get<{ success: boolean; data: User }>('/api/v1/core/auth/me/')
       if (response.success) {
-        console.log('✅ User fetched from backend:', response.data.username)
+        logger.debug('User fetched from backend:', response.data.username)
         return response.data
       }
       return null
     } catch (error) {
-      console.error('❌ Failed to fetch user from backend:', error)
+      logger.error('Failed to fetch user from backend:', error)
       return null
     }
   }
 
   async updateProfile(updates: Partial<User>): Promise<User | null> {
     try {
-      console.log('👤 Updating user profile...', updates)
+      logger.debug('Updating user profile...', updates)
       const response = await apiClient.patch<{ success: boolean; data: User }>('/api/v1/core/auth/me/', updates)
       if (response.success) {
-        console.log('✅ Profile updated successfully')
+        logger.debug('Profile updated successfully')
         return response.data
       }
       return null
     } catch (error) {
-      console.error('❌ Failed to update profile:', error)
+      logger.error('Failed to update profile:', error)
       throw error
     }
   }

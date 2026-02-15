@@ -8,7 +8,7 @@ interface TableauPassageResultatProps {
 const TableauPassageResultat: FC<TableauPassageResultatProps> = ({ modeEdition: _modeEdition = false }) => {
   return (
     <Box>
-      <Typography variant="h5" sx={{ mb: 3, fontWeight: 700, color: '#171717' }}>
+      <Typography variant="h5" sx={{ mb: 3, fontWeight: 700, color: 'text.primary' }}>
         Tableau de Passage Résultat Comptable/Fiscal
       </Typography>
       <Alert severity="warning" sx={{ mb: 3 }}>Retraitements fiscaux à effectuer</Alert>

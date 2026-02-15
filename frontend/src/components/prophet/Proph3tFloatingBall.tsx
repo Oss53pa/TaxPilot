@@ -26,7 +26,7 @@ export default function Proph3tFloatingBall() {
           boxShadow: '0 4px 14px rgba(0,0,0,0.25)',
           transition: 'all 0.2s ease',
           '&:hover': {
-            bgcolor: '#262626',
+            bgcolor: 'grey.900',
             transform: 'scale(1.1)',
           },
           // Pulse glow animation when closed

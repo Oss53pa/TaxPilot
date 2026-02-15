@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Composant d'import de balance
  */
@@ -165,7 +166,7 @@ const BalanceImport: React.FC = () => {
         setErrorMessage(result.warnings.join(' | '))
       }
     } catch (error: any) {
-      console.error('Erreur import:', error)
+      logger.error('Erreur import:', error)
       const message = error?.message || 'Erreur inconnue lors de l\'import.'
       setErrorMessage(message)
 

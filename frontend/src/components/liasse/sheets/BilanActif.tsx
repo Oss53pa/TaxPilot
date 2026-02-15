@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Composant Bilan Actif - Reproduction exacte de l'onglet ACTIF du fichier Excel
  * Liasse Fiscale SYSCOHADA
@@ -217,22 +218,22 @@ const BilanActif: React.FC = () => {
 
   const handleSave = () => {
     // Logique de sauvegarde
-    console.log('Sauvegarde du Bilan Actif:', data)
+    logger.debug('Sauvegarde du Bilan Actif:', data)
   }
 
   // Formater les lignes pour l'affichage
   const displayRows = data.rows.map(row => ({
     ...row,
     poste: row.isHeader ? (
-      <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#2563eb' }}>
+      <Typography variant="subtitle1" sx={{ fontWeight: 700, color: 'primary.main' }}>
         {row.poste}
       </Typography>
     ) : row.isTotal ? (
-      <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#d97706' }}>
+      <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'warning.main' }}>
         {row.poste}
       </Typography>
     ) : row.isTotalGeneral ? (
-      <Typography variant="h6" sx={{ fontWeight: 700, color: '#dc2626' }}>
+      <Typography variant="h6" sx={{ fontWeight: 700, color: 'error.main' }}>
         {row.poste}
       </Typography>
     ) : (

@@ -130,16 +130,16 @@ useEffect(() => {
 
 const loadBackendData = async () => {
   try {
-    console.log('Loading ${componentName} data from backend...')
+    logger.debug('Loading ${componentName} data from backend...')
 
     ${Object.entries(config.dataToReplace).map(([state, method]) => `
     const ${state}Response = await ${method}()
     set${state.charAt(0).toUpperCase() + state.slice(1)}(${state}Response.results || [])
     `).join('\n')}
 
-    console.log('${componentName} backend data loaded')
+    logger.debug('${componentName} backend data loaded')
   } catch (error) {
-    console.error('Error loading ${componentName} data:', error)
+    logger.error('Error loading ${componentName} data:', error)
   }
 }
 `

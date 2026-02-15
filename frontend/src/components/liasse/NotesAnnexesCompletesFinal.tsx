@@ -1460,7 +1460,7 @@ const NotesAnnexesCompletesFinal: React.FC<NotesAnnexesCompletesFinalProps> = ({
       </Paper>
 
       {/* Section Commentaires pour chaque note */}
-      <Card sx={{ mt: 3, bgcolor: '#fafafa' }}>
+      <Card sx={{ mt: 3, bgcolor: 'grey.50' }}>
         <CardContent>
           <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
             <Comment color="primary" />

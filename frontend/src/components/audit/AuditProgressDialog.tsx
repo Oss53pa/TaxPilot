@@ -39,11 +39,11 @@ interface AuditProgressDialogProps {
 
 const severiteIcon = (sev: string) => {
   switch (sev) {
-    case 'BLOQUANT': return <ErrorIcon sx={{ color: '#dc2626' }} fontSize="small" />
-    case 'MAJEUR': return <WarningIcon sx={{ color: '#d97706' }} fontSize="small" />
-    case 'MINEUR': return <WarningIcon sx={{ color: '#fbbf24' }} fontSize="small" />
-    case 'INFO': return <InfoIcon sx={{ color: '#0ea5e9' }} fontSize="small" />
-    case 'OK': return <CheckIcon sx={{ color: '#16a34a' }} fontSize="small" />
+    case 'BLOQUANT': return <ErrorIcon sx={{ color: 'error.main' }} fontSize="small" />
+    case 'MAJEUR': return <WarningIcon sx={{ color: 'warning.main' }} fontSize="small" />
+    case 'MINEUR': return <WarningIcon sx={{ color: 'warning.light' }} fontSize="small" />
+    case 'INFO': return <InfoIcon sx={{ color: 'info.main' }} fontSize="small" />
+    case 'OK': return <CheckIcon sx={{ color: 'success.main' }} fontSize="small" />
     default: return <InfoIcon fontSize="small" />
   }
 }

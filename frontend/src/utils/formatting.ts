@@ -16,8 +16,8 @@ export const formatCurrency = (value: number, decimals = 0): string => {
 }
 
 /** Formate une date ISO (YYYY-MM-DD) en DD/MM/YYYY */
-export const formatDateFR = (isoDate?: string): string => {
-  if (!isoDate) return '-'
+export const formatDateFR = (isoDate?: string, defaultValue = '-'): string => {
+  if (!isoDate) return defaultValue
   const parts = isoDate.split('-')
   if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`
   return isoDate

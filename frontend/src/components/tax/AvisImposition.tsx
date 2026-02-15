@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Composant Avis d'Imposition
  * Affichage des avis d'imposition et suivi des paiements
@@ -146,7 +147,7 @@ const AvisImposition: React.FC<AvisImpositionProps> = ({
       setAvis(avisData)
       calculateStats(avisData)
     } catch (err: any) {
-      console.error('Failed to load avis:', err)
+      logger.error('Failed to load avis:', err)
       setError(err.message || 'Erreur lors du chargement des avis d\'imposition')
     } finally {
       setLoading(false)
@@ -174,7 +175,7 @@ const AvisImposition: React.FC<AvisImpositionProps> = ({
       link.click()
       window.URL.revokeObjectURL(url)
     } catch (err: any) {
-      console.error('PDF download failed:', err)
+      logger.error('PDF download failed:', err)
       setError('Erreur lors du téléchargement du PDF')
     }
   }

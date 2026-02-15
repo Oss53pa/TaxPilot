@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Dialog d'export batch de plusieurs liasses
  * Connecté au backend via generationService.exportBatch()
@@ -148,7 +149,7 @@ const BatchExportDialog: React.FC<BatchExportDialogProps> = ({
         resetState()
       }, 2000)
     } catch (err: any) {
-      console.error('Batch export failed:', err)
+      logger.error('Batch export failed:', err)
       setError(err.message || 'Erreur lors de l\'export batch')
       setExportProgress({
         status: 'ERROR',

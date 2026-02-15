@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Module Plans Comptables Complet - Plan SYSCOHADA Révisé 9 Classes
  * Conforme aux exigences EX-PLAN-001 à EX-PLAN-010
@@ -374,11 +375,11 @@ const ModernPlansComptables: React.FC = () => {
     }
   }
 
-  const exportToExcel = () => console.log('Exporting to Excel...')
-  const exportToPDF = () => console.log('Exporting to PDF...')
-  const exportToXML = () => console.log('Exporting to XML...')
-  const exportToJSON = () => console.log('Exporting to JSON...')
-  const exportToCSV = () => console.log('Exporting to CSV...')
+  const exportToExcel = () => logger.debug('Exporting to Excel...')
+  const exportToPDF = () => logger.debug('Exporting to PDF...')
+  const exportToXML = () => logger.debug('Exporting to XML...')
+  const exportToJSON = () => logger.debug('Exporting to JSON...')
+  const exportToCSV = () => logger.debug('Exporting to CSV...')
 
   // Filtrer les comptes selon la recherche
   const filterAccounts = (accounts: Account[], term: string): Account[] => {
@@ -955,7 +956,7 @@ const ModernPlansComptables: React.FC = () => {
                   <Grid item xs={12} md={4}>
                     <Paper sx={{ p: 3, textAlign: 'center', cursor: 'pointer' }}
                            onClick={() => exportPlan('excel')}>
-                      <DocumentIcon sx={{ fontSize: 48, color: '#22c55e', mb: 2 }} />
+                      <DocumentIcon sx={{ fontSize: 48, color: 'success.main', mb: 2 }} />
                       <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
                         Excel
                       </Typography>
@@ -967,7 +968,7 @@ const ModernPlansComptables: React.FC = () => {
                   <Grid item xs={12} md={4}>
                     <Paper sx={{ p: 3, textAlign: 'center', cursor: 'pointer' }}
                            onClick={() => exportPlan('pdf')}>
-                      <PictureAsPdf sx={{ fontSize: 48, color: '#ef4444', mb: 2 }} />
+                      <PictureAsPdf sx={{ fontSize: 48, color: 'error.main', mb: 2 }} />
                       <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
                         PDF
                       </Typography>
@@ -979,7 +980,7 @@ const ModernPlansComptables: React.FC = () => {
                   <Grid item xs={12} md={4}>
                     <Paper sx={{ p: 3, textAlign: 'center', cursor: 'pointer' }}
                            onClick={() => exportPlan('xml')}>
-                      <TreeIcon sx={{ fontSize: 48, color: '#f59e0b', mb: 2 }} />
+                      <TreeIcon sx={{ fontSize: 48, color: 'warning.main', mb: 2 }} />
                       <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
                         XML/JSON
                       </Typography>

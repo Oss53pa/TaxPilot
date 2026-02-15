@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Module Export vers Templates - Gestion avancée des modèles d'export
  * Conforme aux exigences EX-EXPORT-001 à EX-EXPORT-010
@@ -341,7 +342,7 @@ const ModernTemplates: React.FC = () => {
 
   const handleExport = () => {
     // Simuler l'export avec préservation des formules Excel (EX-EXPORT-002)
-    console.log('Export avec préservation des formules')
+    logger.debug('Export avec préservation des formules')
     setExportDialogOpen(false)
   }
 

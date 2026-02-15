@@ -46,22 +46,22 @@ interface AuditResultsViewProps {
   resultats: ResultatControle[]
 }
 
-const SEVERITE_COLORS: Record<Severite, string> = {
-  BLOQUANT: '#dc2626',
-  MAJEUR: '#d97706',
-  MINEUR: '#fbbf24',
-  INFO: '#0ea5e9',
-  OK: '#16a34a',
+const SEVERITE_MUI_COLOR: Record<Severite, 'error' | 'warning' | 'info' | 'success'> = {
+  BLOQUANT: 'error',
+  MAJEUR: 'warning',
+  MINEUR: 'warning',
+  INFO: 'info',
+  OK: 'success',
 }
 
 const severiteIcon = (sev: Severite, size: 'small' | 'medium' = 'small') => {
-  const props = { fontSize: size as any, sx: { color: SEVERITE_COLORS[sev] } }
+  const color = SEVERITE_MUI_COLOR[sev]
   switch (sev) {
-    case 'BLOQUANT': return <ErrorIcon {...props} />
-    case 'MAJEUR': return <WarningIcon {...props} />
-    case 'MINEUR': return <WarningIcon {...props} />
-    case 'INFO': return <InfoIcon {...props} />
-    case 'OK': return <CheckIcon {...props} />
+    case 'BLOQUANT': return <ErrorIcon fontSize={size} color={color} />
+    case 'MAJEUR': return <WarningIcon fontSize={size} color={color} />
+    case 'MINEUR': return <WarningIcon fontSize={size} color={color} />
+    case 'INFO': return <InfoIcon fontSize={size} color={color} />
+    case 'OK': return <CheckIcon fontSize={size} color={color} />
   }
 }
 
@@ -139,15 +139,10 @@ const AuditResultsView: React.FC<AuditResultsViewProps> = ({ resultats }) => {
                 key={sev}
                 label={`${sev} (${count})`}
                 size="small"
+                color={SEVERITE_MUI_COLOR[sev]}
+                variant={isActive ? 'filled' : 'outlined'}
                 onClick={() => setSeveriteFilter(isActive ? '' : sev)}
-                sx={{
-                  bgcolor: isActive ? SEVERITE_COLORS[sev] : SEVERITE_COLORS[sev] + '20',
-                  color: isActive ? '#fff' : SEVERITE_COLORS[sev],
-                  fontWeight: 600,
-                  fontSize: '0.7rem',
-                  cursor: 'pointer',
-                  '&:hover': { bgcolor: SEVERITE_COLORS[sev] + '40' },
-                }}
+                sx={{ fontWeight: 600, fontSize: '0.7rem', cursor: 'pointer' }}
               />
             )
           })}
@@ -191,7 +186,9 @@ const AuditResultsView: React.FC<AuditResultsViewProps> = ({ resultats }) => {
                       key={sev}
                       label={c}
                       size="small"
-                      sx={{ bgcolor: SEVERITE_COLORS[sev] + '20', color: SEVERITE_COLORS[sev], fontWeight: 600, height: 22, fontSize: '0.7rem' }}
+                      color={SEVERITE_MUI_COLOR[sev]}
+                      variant="outlined"
+                      sx={{ fontWeight: 600, height: 22, fontSize: '0.7rem' }}
                     />
                   )
                 })}
@@ -225,13 +222,9 @@ const AuditResultsView: React.FC<AuditResultsViewProps> = ({ resultats }) => {
                   <Chip
                     label={r.severite}
                     size="small"
-                    sx={{
-                      bgcolor: SEVERITE_COLORS[r.severite] + '15',
-                      color: SEVERITE_COLORS[r.severite],
-                      fontWeight: 600,
-                      height: 22,
-                      fontSize: '0.65rem',
-                    }}
+                    color={SEVERITE_MUI_COLOR[r.severite]}
+                    variant="outlined"
+                    sx={{ fontWeight: 600, height: 22, fontSize: '0.65rem' }}
                   />
                 </Box>
 

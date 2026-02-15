@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Composant de détail d'une Balance (entité complète)
  * Affiche les informations de la balance et permet la validation
@@ -54,7 +55,7 @@ const BalanceDetail: React.FC<BalanceDetailProps> = ({
       const data = await balanceService.getBalance(balanceId)
       setBalance(data)
     } catch (err: any) {
-      console.error('Failed to load balance:', err)
+      logger.error('Failed to load balance:', err)
       setError(err.message || 'Erreur lors du chargement de la balance')
     } finally {
       setLoading(false)

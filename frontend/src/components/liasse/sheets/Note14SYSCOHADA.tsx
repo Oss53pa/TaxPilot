@@ -32,8 +32,6 @@ import {
 import {
   AccountBalance as DebtIcon,
   Save as SaveIcon,
-  Print as PrintIcon,
-  GetApp as ExportIcon,
   Add as AddIcon,
   Delete as DeleteIcon,
   CalendarToday as MaturityIcon,
@@ -44,6 +42,9 @@ import {
   LocalAtm as BankIcon,
   Business as InstitutionIcon,
 } from '@mui/icons-material'
+import { formatCurrency } from '@/utils/formatting'
+import { TabPanel } from '@/components/shared/TabPanel'
+import { SheetHeader } from '@/components/liasse/common/SheetHeader'
 
 interface Emprunt {
   id: string
@@ -71,25 +72,6 @@ interface EcheancierEmprunt {
   interets: number
   annuite: number
   capitalFin: number
-}
-
-interface TabPanelProps {
-  children?: React.ReactNode
-  index: number
-  value: number
-}
-
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      {...other}
-    >
-      {value === index && <Box sx={{ pt: 2 }}>{children}</Box>}
-    </div>
-  )
 }
 
 const TYPES_PRETEURS = [
@@ -239,23 +221,11 @@ const Note14SYSCOHADA: React.FC = () => {
     setHasChanges(true)
   }
 
-  const formatNumber = (value: number) => {
-    return new Intl.NumberFormat('fr-FR', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value)
-  }
-
-  const formatCurrency = (value: number) => {
-    return formatNumber(value)
-  }
-
   const formatPercent = (value: number) => {
     return `${value.toFixed(2)}%`
   }
 
   const handleSave = () => {
-    console.log('Sauvegarde Note 14:', { emprunts, comment })
     setHasChanges(false)
   }
 
@@ -701,40 +671,20 @@ const Note14SYSCOHADA: React.FC = () => {
     >
       {/* En-tête */}
       <Box sx={{ mb: 3 }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-          <Stack direction="row" spacing={2} alignItems="center">
-            <DebtIcon color="primary" sx={{ fontSize: 28 }} />
-            <Typography variant="h5" sx={{ fontWeight: 600, color: theme.palette.primary.main }}>
-              NOTE 14 - EMPRUNTS ET DETTES FINANCIÈRES (en FCFA)
-            </Typography>
-          </Stack>
-          
-          <Stack direction="row" spacing={1}>
-            <Tooltip title="Imprimer">
-              <IconButton size="small">
-                <PrintIcon />
-              </IconButton>
-            </Tooltip>
-            
-            <Tooltip title="Exporter">
-              <IconButton size="small">
-                <ExportIcon />
-              </IconButton>
-            </Tooltip>
-            
-            {hasChanges && (
-              <Button
-                variant="contained"
-                size="small"
-                startIcon={<SaveIcon />}
-                onClick={handleSave}
-                color="success"
-              >
-                Enregistrer
-              </Button>
-            )}
-          </Stack>
-        </Stack>
+        <SheetHeader title="NOTE 14 - EMPRUNTS ET DETTES FINANCIÈRES (en FCFA)" icon={<DebtIcon />} />
+        {hasChanges && (
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
+            <Button
+              variant="contained"
+              size="small"
+              startIcon={<SaveIcon />}
+              onClick={handleSave}
+              color="success"
+            >
+              Enregistrer
+            </Button>
+          </Box>
+        )}
 
         {/* Indicateurs clés */}
         <Grid container spacing={2} sx={{ mb: 2 }}>

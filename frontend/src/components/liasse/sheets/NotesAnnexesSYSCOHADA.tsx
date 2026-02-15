@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Notes annexes principales - SYSCOHADA
  */
@@ -25,40 +26,16 @@ import {
   List,
   ListItem,
   ListItemText,
-  IconButton,
-  Tooltip,
 } from '@mui/material'
 import {
   ExpandMore as ExpandIcon,
   Note as NoteIcon,
   Save as SaveIcon,
-  Print as PrintIcon,
-  GetApp as ExportIcon,
   Assessment as ReportIcon,
   Info as InfoIcon,
 } from '@mui/icons-material'
-
-interface TabPanelProps {
-  children?: React.ReactNode
-  index: number
-  value: number
-}
-
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`notes-tabpanel-${index}`}
-      aria-labelledby={`notes-tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box sx={{ pt: 2 }}>{children}</Box>}
-    </div>
-  )
-}
+import { TabPanel } from '@/components/shared/TabPanel'
+import { SheetHeader } from '@/components/liasse/common/SheetHeader'
 
 // Structure des notes annexes SYSCOHADA
 const NOTES_STRUCTURE = [
@@ -157,7 +134,7 @@ const NotesAnnexesSYSCOHADA: React.FC = () => {
   }
 
   const handleSave = () => {
-    console.log('Sauvegarde Notes annexes:', notesContent)
+    logger.debug('Sauvegarde Notes annexes:', notesContent)
     setHasChanges(false)
   }
 
@@ -304,40 +281,20 @@ const NotesAnnexesSYSCOHADA: React.FC = () => {
     >
       {/* En-tête */}
       <Box sx={{ mb: 3 }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-          <Stack direction="row" spacing={2} alignItems="center">
-            <NoteIcon color="primary" sx={{ fontSize: 28 }} />
-            <Typography variant="h5" sx={{ fontWeight: 600, color: theme.palette.primary.main }}>
-              NOTES ANNEXES
-            </Typography>
-          </Stack>
-          
-          <Stack direction="row" spacing={1}>
-            <Tooltip title="Imprimer">
-              <IconButton size="small">
-                <PrintIcon />
-              </IconButton>
-            </Tooltip>
-            
-            <Tooltip title="Exporter">
-              <IconButton size="small">
-                <ExportIcon />
-              </IconButton>
-            </Tooltip>
-            
-            {hasChanges && (
-              <Button
-                variant="contained"
-                size="small"
-                startIcon={<SaveIcon />}
-                onClick={handleSave}
-                color="success"
-              >
-                Enregistrer
-              </Button>
-            )}
-          </Stack>
-        </Stack>
+        <SheetHeader title="NOTES ANNEXES" icon={<NoteIcon />} />
+        {hasChanges && (
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
+            <Button
+              variant="contained"
+              size="small"
+              startIcon={<SaveIcon />}
+              onClick={handleSave}
+              color="success"
+            >
+              Enregistrer
+            </Button>
+          </Box>
+        )}
 
         {/* Statistiques de completion */}
         <Grid container spacing={2} sx={{ mb: 2 }}>

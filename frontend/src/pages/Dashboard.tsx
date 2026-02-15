@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Page principale - Tableau de bord TaxPilot
  */
@@ -62,7 +63,7 @@ const Dashboard: React.FC = () => {
         if (error instanceof Error && error.name === 'AbortError') {
           return
         }
-        console.error('Erreur chargement données réelles:', error)
+        logger.error('Erreur chargement données réelles:', error)
       } finally {
         setChargementDonnees(false)
       }

@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Composant pour le calendrier de conformité fiscale
  * Utilise les APIs du module Tax pour les obligations et échéances
@@ -146,7 +147,7 @@ export default function TaxComplianceCalendar() {
       calculateStats(obligationsList, echeances)
 
     } catch (error) {
-      console.error('Erreur lors du chargement des obligations:', error)
+      logger.error('Erreur lors du chargement des obligations:', error)
       toast({
         title: "Erreur",
         description: "Impossible de charger le calendrier fiscal",
@@ -180,7 +181,7 @@ export default function TaxComplianceCalendar() {
       })
       loadObligations()
     } catch (error) {
-      console.error('Erreur lors de la mise à jour:', error)
+      logger.error('Erreur lors de la mise à jour:', error)
       toast({
         title: "Erreur",
         description: "Impossible de mettre à jour l'obligation",
@@ -205,7 +206,7 @@ export default function TaxComplianceCalendar() {
       setShowAddDialog(false)
       loadObligations()
     } catch (error) {
-      console.error('Erreur lors de la création:', error)
+      logger.error('Erreur lors de la création:', error)
       toast({
         title: "Erreur",
         description: "Impossible de créer l'obligation",
@@ -242,7 +243,7 @@ export default function TaxComplianceCalendar() {
         description: "Le calendrier a été exporté au format ICS"
       })
     } catch (error) {
-      console.error('Erreur lors de l\'export:', error)
+      logger.error('Erreur lors de l\'export:', error)
       toast({
         title: "Erreur",
         description: "Impossible d'exporter le calendrier",

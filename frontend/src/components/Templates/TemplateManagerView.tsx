@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Composant pour gérer les templates et modèles
  * Consomme les APIs du moteur de templates backend
@@ -134,7 +135,7 @@ export default function TemplateManagerView() {
       const data = await templatesService.getTemplates(params) as any
       setTemplates(data.results || data)
     } catch (error) {
-      console.error('Erreur lors du chargement des templates:', error)
+      logger.error('Erreur lors du chargement des templates:', error)
       toast({
         title: "Erreur",
         description: "Impossible de charger les templates",
@@ -150,7 +151,7 @@ export default function TemplateManagerView() {
       const data = await templatesService.getTemplateInstances() as any
       setInstances(data.results || data)
     } catch (error) {
-      console.error('Erreur lors du chargement des instances:', error)
+      logger.error('Erreur lors du chargement des instances:', error)
     }
   }
 
@@ -172,7 +173,7 @@ export default function TemplateManagerView() {
         is_public: false
       })
     } catch (error) {
-      console.error('Erreur lors de la création:', error)
+      logger.error('Erreur lors de la création:', error)
       toast({
         title: "Erreur",
         description: "Impossible de créer le template",
@@ -191,7 +192,7 @@ export default function TemplateManagerView() {
       })
       loadTemplates()
     } catch (error) {
-      console.error('Erreur lors de la duplication:', error)
+      logger.error('Erreur lors de la duplication:', error)
       toast({
         title: "Erreur",
         description: "Impossible de dupliquer le template",
@@ -221,7 +222,7 @@ export default function TemplateManagerView() {
       setShowGenerateDialog(false)
       loadInstances()
     } catch (error) {
-      console.error('Erreur lors de la génération:', error)
+      logger.error('Erreur lors de la génération:', error)
       toast({
         title: "Erreur",
         description: "Impossible de générer le document",
@@ -252,7 +253,7 @@ export default function TemplateManagerView() {
         }
       } catch (error) {
         clearInterval(interval)
-        console.error('Erreur lors de la vérification:', error)
+        logger.error('Erreur lors de la vérification:', error)
       }
     }, 2000)
   }
@@ -267,7 +268,7 @@ export default function TemplateManagerView() {
       setPreviewContent(preview.html || preview.content || 'Aperçu non disponible')
       setShowPreviewDialog(true)
     } catch (error) {
-      console.error('Erreur lors de l\'aperçu:', error)
+      logger.error('Erreur lors de l\'aperçu:', error)
       toast({
         title: "Erreur",
         description: "Impossible de générer l'aperçu",
@@ -291,7 +292,7 @@ export default function TemplateManagerView() {
         description: "Le template a été téléchargé"
       })
     } catch (error) {
-      console.error('Erreur lors du téléchargement:', error)
+      logger.error('Erreur lors du téléchargement:', error)
       toast({
         title: "Erreur",
         description: "Impossible de télécharger le template",
@@ -315,7 +316,7 @@ export default function TemplateManagerView() {
         description: "Le document a été téléchargé"
       })
     } catch (error) {
-      console.error('Erreur lors du téléchargement:', error)
+      logger.error('Erreur lors du téléchargement:', error)
       toast({
         title: "Erreur",
         description: "Impossible de télécharger le document",
@@ -333,7 +334,7 @@ export default function TemplateManagerView() {
       })
       loadTemplates()
     } catch (error) {
-      console.error('Erreur lors de la suppression:', error)
+      logger.error('Erreur lors de la suppression:', error)
       toast({
         title: "Erreur",
         description: "Impossible de supprimer le template",

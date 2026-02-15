@@ -4,6 +4,7 @@
  */
 
 import { apiClient } from './apiClient'
+import { logger } from '@/utils/logger'
 
 export interface Balance {
   id: string
@@ -91,27 +92,27 @@ class BalanceService {
     page_size?: number
     ordering?: string
   }) {
-    console.log('🔄 Fetching balances from backend...', params)
+    logger.debug('Fetching balances from backend...', params)
     return apiClient.get(`${this.baseUrl}/balances/`, params)
   }
 
   async getBalance(id: string): Promise<Balance> {
-    console.log(`🔄 Fetching balance ${id} from backend...`)
+    logger.debug(`Fetching balance ${id} from backend...`)
     return apiClient.get(`${this.baseUrl}/balances/${id}/`)
   }
 
   async createBalance(data: Partial<Balance>): Promise<Balance> {
-    console.log('📤 Creating balance in backend...', data)
+    logger.debug('Creating balance in backend...', data)
     return apiClient.post(`${this.baseUrl}/balances/`, data)
   }
 
   async updateBalance(id: string, data: Partial<Balance>): Promise<Balance> {
-    console.log(`📤 Updating balance ${id} in backend...`, data)
+    logger.debug(`Updating balance ${id} in backend...`, data)
     return apiClient.patch(`${this.baseUrl}/balances/${id}/`, data)
   }
 
   async deleteBalance(id: string): Promise<void> {
-    console.log(`🗑️ Deleting balance ${id} from backend...`)
+    logger.debug(`Deleting balance ${id} from backend...`)
     return apiClient.delete(`${this.baseUrl}/balances/${id}/`)
   }
 
@@ -121,12 +122,12 @@ class BalanceService {
     page?: number
     page_size?: number
   }) {
-    console.log(`🔄 Fetching balance lines for ${balanceId}...`, params)
+    logger.debug(`Fetching balance lines for ${balanceId}...`, params)
     return apiClient.get(`${this.baseUrl}/balances/${balanceId}/lignes/`, params)
   }
 
   async updateLigneBalance(balanceId: string, ligneId: string, data: Partial<LigneBalance>) {
-    console.log(`📤 Updating balance line ${ligneId}...`, data)
+    logger.debug(`Updating balance line ${ligneId}...`, data)
     return apiClient.patch(`${this.baseUrl}/balances/${balanceId}/lignes/${ligneId}/`, data)
   }
 
@@ -156,12 +157,12 @@ class BalanceService {
       formData.append('options', JSON.stringify(params.options))
     }
 
-    console.log('📤 Importing balance file to backend...', { entrepriseId, exerciceId, file: file.name })
+    logger.debug('Importing balance file to backend...', { entrepriseId, exerciceId, file: file.name })
     return apiClient.post(`${this.baseUrl}/imports/`, formData)
   }
 
   async getImportStatus(importId: string): Promise<ImportBalance> {
-    console.log(`🔄 Getting import status ${importId} from backend...`)
+    logger.debug(`Getting import status ${importId} from backend...`)
     return apiClient.get(`${this.baseUrl}/imports/${importId}/`)
   }
 
@@ -171,18 +172,18 @@ class BalanceService {
     statut?: string
     page?: number
   }) {
-    console.log('🔄 Getting import history from backend...', params)
+    logger.debug('Getting import history from backend...', params)
     return apiClient.get(`${this.baseUrl}/imports/`, params)
   }
 
   // Validation et contrôles - CONNEXION RÉELLE AU BACKEND
   async validateBalance(balanceId: string) {
-    console.log(`🔍 Validating balance ${balanceId} on backend...`)
+    logger.debug(`Validating balance ${balanceId} on backend...`)
     return apiClient.post(`${this.baseUrl}/balances/${balanceId}/valider/`)
   }
 
   async getValidationErrors(balanceId: string) {
-    console.log(`🔍 Getting validation errors for ${balanceId}...`)
+    logger.debug(`Getting validation errors for ${balanceId}...`)
     return apiClient.get(`${this.baseUrl}/balances/${balanceId}/validation-errors/`)
   }
 
@@ -193,13 +194,13 @@ class BalanceService {
     page?: number
     page_size?: number
   }) {
-    console.log('📋 Fetching validation history from backend...', params)
+    logger.debug('Fetching validation history from backend...', params)
     return apiClient.get(`${this.baseUrl}/validations/`, params)
   }
 
   // Export - CONNEXION RÉELLE AU BACKEND
   async exportBalance(balanceId: string, format: 'XLSX' | 'CSV' | 'PDF') {
-    console.log(`📥 Exporting balance ${balanceId} as ${format}...`)
+    logger.debug(`Exporting balance ${balanceId} as ${format}...`)
     return apiClient.get(`${this.baseUrl}/export-balance/`, {
       balance_id: balanceId,
       format
@@ -215,7 +216,7 @@ class BalanceService {
       includeGraphiques?: boolean
     }
   ): Promise<Blob> {
-    console.log(`📥 Exporting balance ${balanceId} with advanced options...`, options)
+    logger.debug(`Exporting balance ${balanceId} with advanced options...`, options)
 
     const params = {
       balance_id: balanceId,
@@ -244,7 +245,7 @@ class BalanceService {
 
   // Mapping intelligent (IA) - CONNEXION RÉELLE AU BACKEND
   async intelligentMapping(balanceId: string) {
-    console.log(`🤖 Starting intelligent mapping for balance ${balanceId}...`)
+    logger.debug(`Starting intelligent mapping for balance ${balanceId}...`)
     return apiClient.post(`${this.baseUrl}/mapping-intelligent/`, {
       balance_id: balanceId
     })
@@ -252,7 +253,7 @@ class BalanceService {
 
   // Comparaison - CONNEXION RÉELLE AU BACKEND
   async compareBalances(balance1Id: string, balance2Id: string) {
-    console.log(`📊 Comparing balances ${balance1Id} and ${balance2Id}...`)
+    logger.debug(`Comparing balances ${balance1Id} and ${balance2Id}...`)
     return apiClient.get(`${this.baseUrl}/balances/compare/`, {
       balance1: balance1Id,
       balance2: balance2Id
@@ -261,14 +262,14 @@ class BalanceService {
 
   // Statistiques - CONNEXION RÉELLE AU BACKEND
   async getBalanceStats(balanceId: string) {
-    console.log(`📊 Getting stats for balance ${balanceId}...`)
+    logger.debug(`Getting stats for balance ${balanceId}...`)
     return apiClient.get(`${this.baseUrl}/balances/${balanceId}/stats/`)
   }
 
   // ===== PLANS COMPTABLES D'ENTREPRISE =====
 
   async getPlansComptables(entrepriseId: number): Promise<any[]> {
-    console.log(`🔄 Fetching plans comptables for entreprise ${entrepriseId}...`)
+    logger.debug(`Fetching plans comptables for entreprise ${entrepriseId}...`)
     const data = await apiClient.get<Record<string, any>>(`${this.baseUrl}/plans-comptables`, { entreprise: entrepriseId })
     return data.results || []
   }
@@ -278,7 +279,7 @@ class BalanceService {
   }
 
   async createPlanComptable(data: any): Promise<any> {
-    console.log('📤 Creating plan comptable...', data)
+    logger.debug('Creating plan comptable...', data)
     return apiClient.post(`${this.baseUrl}/plans-comptables`, data)
   }
 
@@ -295,7 +296,7 @@ class BalanceService {
   }
 
   async createCompte(data: any): Promise<any> {
-    console.log('📤 Creating compte...', data)
+    logger.debug('Creating compte...', data)
     return apiClient.post(`${this.baseUrl}/comptes`, data)
   }
 
@@ -311,7 +312,7 @@ class BalanceService {
   }
 
   async createMapping(data: { compte_local: number; compte_reference: number }): Promise<any> {
-    console.log('📤 Creating mapping...', data)
+    logger.debug('Creating mapping...', data)
     return apiClient.post(`${this.baseUrl}/mappings`, data)
   }
 

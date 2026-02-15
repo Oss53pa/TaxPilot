@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Wrapper pour récupérer l'organization slug depuis l'URL ou le store
  */
@@ -39,7 +40,7 @@ const OrganizationWrapper: React.FC<OrganizationWrapperProps> = ({ children }) =
         }
       }
     } catch (err: any) {
-      console.error('Error loading organization:', err)
+      logger.error('Error loading organization:', err)
       setError(err.message || 'Erreur lors du chargement de l\'organisation')
     } finally {
       setLoading(false)

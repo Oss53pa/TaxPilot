@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Composant pour l'optimisation fiscale
  * Utilise les APIs du module Tax pour les simulations et optimisations
@@ -190,7 +191,7 @@ export default function TaxOptimizationView() {
       setFiscalPosition(position)
 
     } catch (error) {
-      console.error('Erreur lors du chargement:', error)
+      logger.error('Erreur lors du chargement:', error)
       toast({
         title: "Erreur",
         description: "Impossible de charger les données d'optimisation",
@@ -232,7 +233,7 @@ export default function TaxOptimizationView() {
         description: "Les résultats de la simulation sont disponibles"
       })
     } catch (error) {
-      console.error('Erreur lors de la simulation:', error)
+      logger.error('Erreur lors de la simulation:', error)
       toast({
         title: "Erreur",
         description: "Impossible d'effectuer la simulation",
@@ -256,7 +257,7 @@ export default function TaxOptimizationView() {
         description: "Les régimes ont été comparés avec succès"
       })
     } catch (error) {
-      console.error('Erreur lors de la comparaison:', error)
+      logger.error('Erreur lors de la comparaison:', error)
       toast({
         title: "Erreur",
         description: "Impossible de comparer les régimes",
@@ -275,7 +276,7 @@ export default function TaxOptimizationView() {
       // Recharger les données
       loadOptimizationData()
     } catch (error) {
-      console.error('Erreur lors de l\'application:', error)
+      logger.error('Erreur lors de l\'application:', error)
       toast({
         title: "Erreur",
         description: "Impossible d'appliquer l'optimisation",
@@ -304,7 +305,7 @@ export default function TaxOptimizationView() {
         description: "Le rapport d'optimisation a été téléchargé"
       })
     } catch (error) {
-      console.error('Erreur lors de l\'export:', error)
+      logger.error('Erreur lors de l\'export:', error)
       toast({
         title: "Erreur",
         description: "Impossible d'exporter le rapport",

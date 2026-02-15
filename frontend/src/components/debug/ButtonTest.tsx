@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Composant de test pour diagnostiquer les problèmes de boutons et modales
  */
@@ -22,7 +23,7 @@ const ButtonTest: React.FC = () => {
 
   const addDebugInfo = (info: string) => {
     setDebugInfo(prev => [...prev, `${new Date().toLocaleTimeString()}: ${info}`]);
-    console.log('DEBUG:', info);
+    logger.debug('DEBUG:', info);
   };
 
   const handleOpenModal = () => {

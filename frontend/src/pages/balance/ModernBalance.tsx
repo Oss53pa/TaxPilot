@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Module Balance Moderne - Gestion Comptable Professionnelle SYSCOHADA
  */
@@ -183,7 +184,7 @@ const ModernBalance: React.FC = () => {
   const loadBalanceData = async () => {
     try {
       setLoading(true)
-      console.log('🔄 Loading balance data from backend...')
+      logger.debug('🔄 Loading balance data from backend...')
 
       // Récupérer les entreprises et balances
       const [entreprisesResponse, balancesRaw] = await Promise.all([
@@ -210,9 +211,9 @@ const ModernBalance: React.FC = () => {
         setFilteredData(defaultData)
       }
 
-      console.log('✅ Balance data loaded successfully')
+      logger.debug('✅ Balance data loaded successfully')
     } catch (error) {
-      console.error('❌ Error loading balance data:', error)
+      logger.error('❌ Error loading balance data:', error)
       // En cas d'erreur, utiliser des données par défaut
       const defaultData = generateDefaultBalanceData()
       setBalanceData(defaultData)
@@ -334,7 +335,7 @@ const ModernBalance: React.FC = () => {
       )
       setBalanceData(updatedData)
       setFilteredData(updatedData)
-      console.log('Sauvegarde des modifications:', editedEntry)
+      logger.debug('Sauvegarde des modifications:', editedEntry)
       // TODO: Appeler l'API pour sauvegarder les modifications
     }
     setEditModalOpen(false)

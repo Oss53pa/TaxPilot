@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Service pour la gestion des plans comptables de référence
  * CONNEXION RÉELLE AU BACKEND DJANGO
@@ -119,7 +120,7 @@ class PlanComptableService {
     count: number
     results: PlanComptableReference[]
   }> {
-    console.log('🔄 Fetching plans comptables from backend...', filters)
+    logger.debug('Fetching plans comptables from backend...', filters)
     return apiClient.get(`${this.baseUrl}/plans-reference`, filters)
   }
 
@@ -127,7 +128,7 @@ class PlanComptableService {
    * Récupérer tous les plans (sans pagination)
    */
   async getAllPlans(filters?: Omit<PlanFilters, 'page' | 'page_size'>): Promise<PlanComptableReference[]> {
-    console.log('🔄 Fetching all plans comptables...')
+    logger.debug('Fetching all plans comptables...')
     const data = await apiClient.get<Record<string, any>>(`${this.baseUrl}/plans-reference`, { ...filters, page_size: 1000 })
     return data.results || []
   }
@@ -136,7 +137,7 @@ class PlanComptableService {
    * Récupérer un plan comptable par ID
    */
   async getPlanById(id: number): Promise<PlanComptableReference> {
-    console.log(`🔄 Fetching plan comptable ${id}...`)
+    logger.debug(`Fetching plan comptable ${id}...`)
     return apiClient.get(`${this.baseUrl}/plans-reference/${id}/`)
   }
 
@@ -144,7 +145,7 @@ class PlanComptableService {
    * Créer un nouveau plan comptable
    */
   async createPlan(data: Partial<PlanComptableReference>): Promise<PlanComptableReference> {
-    console.log('📤 Creating plan comptable...', data)
+    logger.debug('Creating plan comptable...', data)
     return apiClient.post(`${this.baseUrl}/plans-reference`, data)
   }
 
@@ -152,7 +153,7 @@ class PlanComptableService {
    * Mettre à jour un plan comptable
    */
   async updatePlan(id: number, data: Partial<PlanComptableReference>): Promise<PlanComptableReference> {
-    console.log(`📤 Updating plan comptable ${id}...`, data)
+    logger.debug(`Updating plan comptable ${id}...`, data)
     return apiClient.patch(`${this.baseUrl}/plans-reference/${id}/`, data)
   }
 
@@ -160,7 +161,7 @@ class PlanComptableService {
    * Supprimer un plan comptable
    */
   async deletePlan(id: number): Promise<void> {
-    console.log(`🗑️ Deleting plan comptable ${id}...`)
+    logger.debug(`Deleting plan comptable ${id}...`)
     return apiClient.delete(`${this.baseUrl}/plans-reference/${id}/`)
   }
 
@@ -168,7 +169,7 @@ class PlanComptableService {
    * Récupérer les plans SYSCOHADA actifs
    */
   async getSYSCOHADAPlans(): Promise<PlanComptableReference[]> {
-    console.log('🔄 Fetching SYSCOHADA plans...')
+    logger.debug('Fetching SYSCOHADA plans...')
     const data = await apiClient.get<Record<string, any>>(`${this.baseUrl}/plans-reference`, {
       type_plan: 'SYSCOHADA_GENERAL',
       est_actif: true,
@@ -186,7 +187,7 @@ class PlanComptableService {
     count: number
     results: CompteReference[]
   }> {
-    console.log('🔄 Fetching comptes de référence from backend...', filters)
+    logger.debug('Fetching comptes de référence from backend...', filters)
     return apiClient.get(`${this.baseUrl}/comptes-reference`, filters)
   }
 
@@ -194,7 +195,7 @@ class PlanComptableService {
    * Récupérer tous les comptes (sans pagination)
    */
   async getAllComptes(filters?: Omit<CompteFilters, 'page' | 'page_size'>): Promise<CompteReference[]> {
-    console.log('🔄 Fetching all comptes de référence...')
+    logger.debug('Fetching all comptes de référence...')
     const data = await apiClient.get<Record<string, any>>(`${this.baseUrl}/comptes-reference`, { ...filters, page_size: 10000 })
     return data.results || []
   }
@@ -203,7 +204,7 @@ class PlanComptableService {
    * Récupérer un compte de référence par ID
    */
   async getCompteById(id: number): Promise<CompteReference> {
-    console.log(`🔄 Fetching compte de référence ${id}...`)
+    logger.debug(`Fetching compte de référence ${id}...`)
     return apiClient.get(`${this.baseUrl}/comptes-reference/${id}/`)
   }
 
@@ -211,7 +212,7 @@ class PlanComptableService {
    * Créer un nouveau compte de référence
    */
   async createCompte(data: Partial<CompteReference>): Promise<CompteReference> {
-    console.log('📤 Creating compte de référence...', data)
+    logger.debug('Creating compte de référence...', data)
     return apiClient.post(`${this.baseUrl}/comptes-reference`, data)
   }
 
@@ -219,7 +220,7 @@ class PlanComptableService {
    * Mettre à jour un compte de référence
    */
   async updateCompte(id: number, data: Partial<CompteReference>): Promise<CompteReference> {
-    console.log(`📤 Updating compte de référence ${id}...`, data)
+    logger.debug(`Updating compte de référence ${id}...`, data)
     return apiClient.patch(`${this.baseUrl}/comptes-reference/${id}/`, data)
   }
 
@@ -227,7 +228,7 @@ class PlanComptableService {
    * Supprimer un compte de référence
    */
   async deleteCompte(id: number): Promise<void> {
-    console.log(`🗑️ Deleting compte de référence ${id}...`)
+    logger.debug(`Deleting compte de référence ${id}...`)
     return apiClient.delete(`${this.baseUrl}/comptes-reference/${id}/`)
   }
 
@@ -235,7 +236,7 @@ class PlanComptableService {
    * Récupérer les comptes d'un plan comptable
    */
   async getComptesByPlan(planId: number): Promise<CompteReference[]> {
-    console.log(`🔄 Fetching comptes for plan ${planId}...`)
+    logger.debug(`Fetching comptes for plan ${planId}...`)
     const data = await apiClient.get<Record<string, any>>(`${this.baseUrl}/comptes-reference`, {
       plan_comptable: planId,
       page_size: 10000
@@ -247,7 +248,7 @@ class PlanComptableService {
    * Récupérer les comptes par classe
    */
   async getComptesByClasse(planId: number, classe: string): Promise<CompteReference[]> {
-    console.log(`🔄 Fetching comptes classe ${classe} for plan ${planId}...`)
+    logger.debug(`Fetching comptes classe ${classe} for plan ${planId}...`)
     const data = await apiClient.get<Record<string, any>>(`${this.baseUrl}/comptes-reference`, {
       plan_comptable: planId,
       classe: classe,
@@ -260,7 +261,7 @@ class PlanComptableService {
    * Rechercher des comptes
    */
   async searchComptes(query: string, planId?: number): Promise<CompteReference[]> {
-    console.log(`🔍 Searching comptes: ${query}...`)
+    logger.debug(`Searching comptes: ${query}...`)
     const data = await apiClient.get<Record<string, any>>(`${this.baseUrl}/comptes-reference`, {
       search: query,
       ...(planId && { plan_comptable: planId }),
@@ -278,7 +279,7 @@ class PlanComptableService {
     count: number
     results: CorrespondanceComptable[]
   }> {
-    console.log('🔄 Fetching correspondances comptables...', filters)
+    logger.debug('Fetching correspondances comptables...', filters)
     return apiClient.get(`${this.baseUrl}/correspondances`, filters)
   }
 
@@ -289,7 +290,7 @@ class PlanComptableService {
     compte_local: number
     compte_syscohada: number
   }): Promise<CorrespondanceComptable> {
-    console.log('📤 Creating correspondance comptable...', data)
+    logger.debug('Creating correspondance comptable...', data)
     return apiClient.post(`${this.baseUrl}/correspondances`, data)
   }
 
@@ -297,7 +298,7 @@ class PlanComptableService {
    * Valider une correspondance
    */
   async validateCorrespondance(id: number): Promise<CorrespondanceComptable> {
-    console.log(`✅ Validating correspondance ${id}...`)
+    logger.debug(`Validating correspondance ${id}...`)
     return apiClient.patch(`${this.baseUrl}/correspondances/${id}/`, {
       date_validation: new Date().toISOString()
     })

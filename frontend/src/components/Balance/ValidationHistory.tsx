@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Historique des validations de balance
  * Connecté au backend via balanceService.getValidationHistory()
@@ -96,7 +97,7 @@ const ValidationHistory: React.FC = () => {
       setValidations((response as Record<string, any>).results || [])
       setTotalCount((response as Record<string, any>).count || 0)
     } catch (err: any) {
-      console.error('Failed to load validation history:', err)
+      logger.error('Failed to load validation history:', err)
       setError(err.message || 'Erreur lors du chargement de l\'historique')
       setValidations([])
       setTotalCount(0)

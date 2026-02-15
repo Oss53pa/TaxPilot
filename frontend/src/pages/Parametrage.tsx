@@ -34,27 +34,7 @@ import ThemeSettings from '@/pages/ThemeSettings'
 import RegionalSettings from '@/components/Parametrage/RegionalSettings'
 import BackupRestoreSettings from '@/components/Parametrage/BackupRestoreSettings'
 import DocumentationJuridique from '@/components/Parametrage/DocumentationJuridique'
-
-interface TabPanelProps {
-  children?: React.ReactNode
-  index: number
-  value: number
-}
-
-const TabPanel: React.FC<TabPanelProps> = ({ children, value, index }) => (
-  <div
-    role="tabpanel"
-    hidden={value !== index}
-    id={`parametrage-tabpanel-${index}`}
-    aria-labelledby={`parametrage-tab-${index}`}
-  >
-    {value === index && (
-      <Box sx={{ py: 3 }}>
-        {children}
-      </Box>
-    )}
-  </div>
-)
+import { TabPanel } from '@/components/shared/TabPanel'
 
 const Parametrage: React.FC = () => {
   const navigate = useNavigate()

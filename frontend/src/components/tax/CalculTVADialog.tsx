@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Dialog de Calcul Automatique de la TVA
  * Calcul intelligent de la TVA avec validation et détails
@@ -156,7 +157,7 @@ const CalculTVADialog: React.FC<CalculTVADialogProps> = ({
         onCalculComplete(calculResult)
       }
     } catch (err: any) {
-      console.error('TVA calculation failed:', err)
+      logger.error('TVA calculation failed:', err)
       setError(err.message || 'Erreur lors du calcul de la TVA')
       setResult(null)
     } finally {

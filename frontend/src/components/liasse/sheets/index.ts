@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Export centralisé de toutes les feuilles SYSCOHADA avec connexion backend automatique
  */
@@ -170,4 +171,4 @@ export default {
 // Export de la configuration
 export { SHEET_BACKEND_CONFIG } from './connectAllSheets'
 
-console.log('✅ Toutes les feuilles SYSCOHADA sont maintenant connectées au backend automatiquement!')
+logger.debug('✅ Toutes les feuilles SYSCOHADA sont maintenant connectées au backend automatiquement!')

@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Utilitaire pour connecter automatiquement les composants au backend
  * Remplace les données mockées par les appels API réels
@@ -115,23 +116,23 @@ export const replaceMockData = async (
   try {
     const mapping = SERVICE_MAPPINGS[serviceType]
     if (!mapping) {
-      console.warn(`Service mapping not found for ${serviceType}`)
+      logger.warn(`Service mapping not found for ${serviceType}`)
       return defaultData
     }
 
     const methodName = mapping.methods[method]
     if (!methodName) {
-      console.warn(`Method ${method} not found in ${serviceType}`)
+      logger.warn(`Method ${method} not found in ${serviceType}`)
       return defaultData
     }
 
-    console.log(`Fetching ${serviceType}.${method} from backend...`)
+    logger.debug(`Fetching ${serviceType}.${method} from backend...`)
     const response = await (mapping.service as any)[methodName](params)
 
     // Gérer les réponses paginées
     return response?.results !== undefined ? response.results : response
   } catch (error) {
-    console.error(`Error fetching ${serviceType}.${method}:`, error)
+    logger.error(`Error fetching ${serviceType}.${method}:`, error)
     return defaultData || []
   }
 }

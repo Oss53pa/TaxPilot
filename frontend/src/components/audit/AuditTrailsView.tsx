@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Composant Pistes d'Audit Immuables (Audit Trails)
  * Affichage et vérification de l'intégrité des logs d'audit
@@ -170,7 +171,7 @@ const AuditTrailsView: React.FC = () => {
       setLogs(response.results || [])
       setTotalPages(Math.ceil((response.count || 0) / pageSize))
     } catch (err: any) {
-      console.error('Failed to load audit logs:', err)
+      logger.error('Failed to load audit logs:', err)
       setError(err.message || 'Erreur lors du chargement des pistes d\'audit')
     } finally {
       setLoading(false)
@@ -187,7 +188,7 @@ const AuditTrailsView: React.FC = () => {
         latest_sequence: response.latest_sequence || 0,
       })
     } catch (err: any) {
-      console.error('Failed to load statistics:', err)
+      logger.error('Failed to load statistics:', err)
     }
   }
 
@@ -200,7 +201,7 @@ const AuditTrailsView: React.FC = () => {
       setVerificationResult(response as any)
       setVerificationDialogOpen(true)
     } catch (err: any) {
-      console.error('Chain verification failed:', err)
+      logger.error('Chain verification failed:', err)
       setError(err.message || 'Erreur lors de la vérification de l\'intégrité')
     } finally {
       setVerifying(false)
@@ -217,7 +218,7 @@ const AuditTrailsView: React.FC = () => {
       })
       setVerificationDialogOpen(true)
     } catch (err: any) {
-      console.error('Entry verification failed:', err)
+      logger.error('Entry verification failed:', err)
       setError(err.message || 'Erreur lors de la vérification')
     }
   }
@@ -238,7 +239,7 @@ const AuditTrailsView: React.FC = () => {
       setLogs(response.entries || [])
       setTotalPages(1)
     } catch (err: any) {
-      console.error('Correlation search failed:', err)
+      logger.error('Correlation search failed:', err)
       setError(err.message || 'Erreur lors de la recherche par corrélation')
     } finally {
       setLoading(false)

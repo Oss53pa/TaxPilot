@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Service pour la gestion des journaux comptables
  * CONNEXION RÉELLE AU BACKEND DJANGO
@@ -45,7 +46,7 @@ class JournalService {
   private baseUrl = '/api/v1/accounting/journaux'
 
   async list(filters?: JournalFilters): Promise<{ count: number; results: Journal[] }> {
-    console.log('🔄 Fetching journaux from backend...', filters)
+    logger.debug('Fetching journaux from backend...', filters)
     return apiClient.get(this.baseUrl, filters)
   }
 
@@ -59,7 +60,7 @@ class JournalService {
   }
 
   async create(data: CreateJournal): Promise<Journal> {
-    console.log('📤 Creating journal...', data)
+    logger.debug('Creating journal...', data)
     return apiClient.post(this.baseUrl, data)
   }
 

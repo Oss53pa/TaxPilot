@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Module Import Balance Complet - Import multi-formats avec mapping IA
  * Conforme aux exigences EX-IMPORT-001 à EX-IMPORT-010
@@ -226,13 +227,13 @@ const ModernImportBalance: React.FC = () => {
     // Charger l'historique de mapping depuis le backend
     const loadMappingHistory = async () => {
       try {
-        console.log('📤 Loading mapping history from backend...')
+        logger.debug('📤 Loading mapping history from backend...')
         const history = await (balanceService as any).getMappingHistory()
         if (history?.results) {
           setMappingHistory(history.results)
         }
       } catch (error) {
-        console.error('❌ Error loading mapping history:', error)
+        logger.error('❌ Error loading mapping history:', error)
         // Utiliser un historique par défaut
         setMappingHistory([
           { source: '10100000', target: '101', frequency: 15 },
@@ -332,7 +333,7 @@ const ModernImportBalance: React.FC = () => {
 
       setImportStep(2)
     } catch (error: any) {
-      console.error('Erreur parsing fichier:', error)
+      logger.error('Erreur parsing fichier:', error)
       setErrorMessage(error?.message || 'Erreur inconnue lors du parsing du fichier.')
     } finally {
       setLoading(false)
@@ -555,7 +556,7 @@ const ModernImportBalance: React.FC = () => {
   const handleApiImport = async () => {
     setLoading(true)
     try {
-      console.log('📤 Importing balance via API...')
+      logger.debug('📤 Importing balance via API...')
 
       // Récupérer les balances depuis le backend
       const balancesResponse = await balanceService.getBalances({
@@ -595,10 +596,10 @@ const ModernImportBalance: React.FC = () => {
           }
         }
       } else {
-        console.log('ℹ️ No balances found in backend')
+        logger.debug('ℹ️ No balances found in backend')
       }
     } catch (error) {
-      console.error('❌ Error importing via API:', error)
+      logger.error('❌ Error importing via API:', error)
     } finally {
       setLoading(false)
     }
@@ -1443,7 +1444,7 @@ const ModernImportBalance: React.FC = () => {
                               // Redirect
                               window.location.href = '/balance'
                             } catch (error: any) {
-                              console.error('Erreur validation import:', error)
+                              logger.error('Erreur validation import:', error)
                               setErrorMessage(error?.message || 'Erreur lors de la sauvegarde.')
                             }
                           }}

@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Note 1 - Référentiel comptable et présentation des comptes
  */
@@ -139,7 +140,7 @@ const Note1SYSCOHADA: React.FC = () => {
   }
 
   const handleSave = () => {
-    console.log('Sauvegarde Note 1:', data)
+    logger.debug('Sauvegarde Note 1:', data)
     setHasChanges(false)
   }
 

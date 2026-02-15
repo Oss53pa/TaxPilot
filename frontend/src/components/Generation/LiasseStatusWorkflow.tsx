@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Composant de gestion des transitions de statut d'une liasse
  * Connecté au backend via generationService.getTransitions() et transition()
@@ -85,7 +86,7 @@ const LiasseStatusWorkflow: React.FC<LiasseStatusWorkflowProps> = ({
 
       setAvailableActions(actions)
     } catch (err: any) {
-      console.error('Failed to load transitions:', err)
+      logger.error('Failed to load transitions:', err)
       setError('Impossible de charger les transitions disponibles')
       setAvailableActions([])
     } finally {
@@ -117,7 +118,7 @@ const LiasseStatusWorkflow: React.FC<LiasseStatusWorkflowProps> = ({
       setConfirmDialogOpen(false)
       setSelectedAction(null)
     } catch (err: any) {
-      console.error('Transition failed:', err)
+      logger.error('Transition failed:', err)
       setError(err.message || `Erreur lors de l'action "${action.label}"`)
     } finally {
       setExecuting(false)

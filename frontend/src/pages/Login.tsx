@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Page de connexion TaxPilot
  */
@@ -67,7 +68,7 @@ const Login = () => {
       await login(data.username, data.password)
     } catch (err: any) {
       // L'erreur est déjà gérée dans le store
-      console.error('Erreur de connexion:', err)
+      logger.error('Erreur de connexion:', err)
     }
   }
 

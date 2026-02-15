@@ -24,27 +24,7 @@ import BalanceImport from '@/components/Balance/BalanceImport'
 import BalanceConsultation from '@/components/Balance/BalanceConsultation'
 import BalanceValidation from '@/components/Balance/BalanceValidation'
 import ValidationHistory from '@/components/Balance/ValidationHistory'
-
-interface TabPanelProps {
-  children?: React.ReactNode
-  index: number
-  value: number
-}
-
-const TabPanel: React.FC<TabPanelProps> = ({ children, value, index }) => (
-  <div
-    role="tabpanel"
-    hidden={value !== index}
-    id={`balance-tabpanel-${index}`}
-    aria-labelledby={`balance-tab-${index}`}
-  >
-    {value === index && (
-      <Box sx={{ py: 3 }}>
-        {children}
-      </Box>
-    )}
-  </div>
-)
+import { TabPanel } from '@/components/shared/TabPanel'
 
 const Balance: React.FC = () => {
   const navigate = useNavigate()

@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Tableau de Flux de Trésorerie (TFT) SYSCOHADA — Méthode indirecte
  *
@@ -256,7 +257,7 @@ const TableauFluxTresorerieSYSCOHADA: FC = () => {
   }
 
   const handleSave = () => {
-    console.log('Sauvegarde du TFT:', mergedData)
+    logger.debug('Sauvegarde du TFT:', mergedData)
     setHasChanges(false)
   }
 
@@ -546,7 +547,7 @@ const TableauFluxTresorerieSYSCOHADA: FC = () => {
       <TableContainer sx={{ mb: 3 }}>
         <Table size="small" sx={{ minWidth: 700 }}>
           <TableHead>
-            <TableRow sx={{ bgcolor: '#f5f5f5' }}>
+            <TableRow sx={{ bgcolor: 'grey.100' }}>
               <TableCell sx={{ fontWeight: 600, fontSize: '0.875rem' }}>Réf</TableCell>
               <TableCell sx={{ fontWeight: 600, fontSize: '0.875rem' }}>LIBELLÉ</TableCell>
               <TableCell align="center" sx={{ fontWeight: 600, fontSize: '0.875rem' }}>Note</TableCell>

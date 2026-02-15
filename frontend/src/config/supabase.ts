@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Supabase Client — TaxPilot
  * Single instance used throughout the app
@@ -9,7 +10,7 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn(
+  logger.warn(
     '⚠️ Supabase credentials missing. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env'
   )
 }

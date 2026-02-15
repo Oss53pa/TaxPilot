@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 import React, { useState, useEffect } from 'react'
 import {
   Box,
@@ -204,7 +205,7 @@ const AuditHistory: React.FC = () => {
       setTotalCount(response.data.count || response.data.length)
       setTotalPages(Math.ceil((response.data.count || response.data.length) / pageSize))
     } catch (err: any) {
-      console.error('Error loading audit sessions:', err)
+      logger.error('Error loading audit sessions:', err)
       setError(err.response?.data?.detail || 'Erreur lors du chargement des sessions d\'audit')
     } finally {
       setLoading(false)
@@ -220,7 +221,7 @@ const AuditHistory: React.FC = () => {
       const response = await apiClient.get('/api/v1/audit/statistics/', { params }) as Record<string, any>
       setStatistics(response.data)
     } catch (err) {
-      console.error('Error loading statistics:', err)
+      logger.error('Error loading statistics:', err)
     }
   }
 
@@ -234,7 +235,7 @@ const AuditHistory: React.FC = () => {
       const response = await apiClient.get(`/api/v1/audit/sessions/${session.id}/anomalies/`) as Record<string, any>
       setSessionAnomalies(response.data.results || response.data)
     } catch (err) {
-      console.error('Error loading anomalies:', err)
+      logger.error('Error loading anomalies:', err)
     } finally {
       setAnomaliesLoading(false)
     }
@@ -258,7 +259,7 @@ const AuditHistory: React.FC = () => {
       link.click()
       link.remove()
     } catch (err) {
-      console.error('Error downloading report:', err)
+      logger.error('Error downloading report:', err)
       setError('Erreur lors du téléchargement du rapport')
     }
   }
@@ -292,7 +293,7 @@ const AuditHistory: React.FC = () => {
       }) as Record<string, any>
       setComparisonResult(response.data)
     } catch (err: any) {
-      console.error('Error comparing audits:', err)
+      logger.error('Error comparing audits:', err)
       setError(err.response?.data?.detail || 'Erreur lors de la comparaison des audits')
     } finally {
       setComparisonLoading(false)

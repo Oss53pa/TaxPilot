@@ -107,10 +107,10 @@ const ControlPointsManager: React.FC = () => {
 
   const getPorteeColor = (portee: string) => {
     switch (portee) {
-      case 'BALANCE': return { bgcolor: '#eff6ff', color: '#2563eb' } // Bleu
-      case 'LIASSE': return { bgcolor: '#f0fdf4', color: '#16a34a' }  // Vert
-      case 'BOTH': return { bgcolor: '#fffbeb', color: '#d97706' }    // Orange
-      default: return { bgcolor: '#fafafa', color: '#737373' }        // Gris
+      case 'BALANCE': return { bgcolor: 'info.50', color: 'primary.main' } // Bleu
+      case 'LIASSE': return { bgcolor: 'success.50', color: 'success.main' }  // Vert
+      case 'BOTH': return { bgcolor: 'warning.50', color: 'warning.main' }    // Orange
+      default: return { bgcolor: 'grey.50', color: 'text.secondary' }        // Gris
     }
   }
 
@@ -1267,11 +1267,11 @@ const ControlPointsManager: React.FC = () => {
 
   const severiteColor = (sev: string) => {
     switch (sev) {
-      case 'BLOQUANT': return { bgcolor: '#fef2f2', color: '#dc2626' }
-      case 'MAJEUR': return { bgcolor: '#fffbeb', color: '#d97706' }
-      case 'MINEUR': return { bgcolor: '#fefce8', color: '#d97706' }
-      case 'INFO': return { bgcolor: '#eff6ff', color: '#0ea5e9' }
-      default: return { bgcolor: '#f0fdf4', color: '#16a34a' }
+      case 'BLOQUANT': return { bgcolor: 'error.50', color: 'error.main' }
+      case 'MAJEUR': return { bgcolor: 'warning.50', color: 'warning.main' }
+      case 'MINEUR': return { bgcolor: '#fefce8', color: 'warning.main' }
+      case 'INFO': return { bgcolor: 'info.50', color: 'info.main' }
+      default: return { bgcolor: 'success.50', color: 'success.main' }
     }
   }
 
@@ -1281,7 +1281,7 @@ const ControlPointsManager: React.FC = () => {
         return (
           <Box>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-              <Typography variant="h6" sx={{ color: '#171717' }}>
+              <Typography variant="h6" sx={{ color: 'text.primary' }}>
                 Controles Moteur d'Audit ({registryControls.filter(c => c.actif).length} / {registryControls.length} actifs)
               </Typography>
               <FormControl size="small" sx={{ minWidth: 200 }}>
@@ -1299,40 +1299,40 @@ const ControlPointsManager: React.FC = () => {
               </FormControl>
             </Box>
 
-            <TableContainer component={Paper} sx={{ bgcolor: '#f5f5f5', '& .MuiTableHead-root': { bgcolor: '#e5e5e5' } }}>
+            <TableContainer component={Paper} sx={{ bgcolor: 'grey.100', '& .MuiTableHead-root': { bgcolor: 'grey.300' } }}>
               <Table size="small">
                 <TableHead>
                   <TableRow>
-                    <TableCell sx={{ color: '#171717', fontWeight: 600 }}>Ref</TableCell>
-                    <TableCell sx={{ color: '#171717', fontWeight: 600 }}>Controle</TableCell>
-                    <TableCell sx={{ color: '#171717', fontWeight: 600 }}>Niveau</TableCell>
-                    <TableCell sx={{ color: '#171717', fontWeight: 600 }}>Severite</TableCell>
-                    <TableCell sx={{ color: '#171717', fontWeight: 600 }}>Phase</TableCell>
-                    <TableCell sx={{ color: '#171717', fontWeight: 600 }}>Statut</TableCell>
+                    <TableCell sx={{ color: 'text.primary', fontWeight: 600 }}>Ref</TableCell>
+                    <TableCell sx={{ color: 'text.primary', fontWeight: 600 }}>Controle</TableCell>
+                    <TableCell sx={{ color: 'text.primary', fontWeight: 600 }}>Niveau</TableCell>
+                    <TableCell sx={{ color: 'text.primary', fontWeight: 600 }}>Severite</TableCell>
+                    <TableCell sx={{ color: 'text.primary', fontWeight: 600 }}>Phase</TableCell>
+                    <TableCell sx={{ color: 'text.primary', fontWeight: 600 }}>Statut</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {filteredRegistryControls.map((ctrl, index) => (
                     <TableRow key={ctrl.ref} sx={{ bgcolor: index % 2 === 0 ? '#fafafa' : '#f5f5f5' }}>
                       <TableCell>
-                        <Typography variant="body2" sx={{ fontFamily: 'monospace', fontWeight: 600, color: '#171717' }}>
+                        <Typography variant="body2" sx={{ fontFamily: 'monospace', fontWeight: 600, color: 'text.primary' }}>
                           {ctrl.ref}
                         </Typography>
                       </TableCell>
                       <TableCell>
-                        <Typography variant="body2" sx={{ color: '#171717', fontWeight: 500 }}>{ctrl.nom}</Typography>
+                        <Typography variant="body2" sx={{ color: 'text.primary', fontWeight: 500 }}>{ctrl.nom}</Typography>
                         {ctrl.description && (
-                          <Typography variant="caption" sx={{ color: '#737373' }}>{ctrl.description}</Typography>
+                          <Typography variant="caption" sx={{ color: 'text.secondary' }}>{ctrl.description}</Typography>
                         )}
                       </TableCell>
                       <TableCell>
-                        <Chip label={`N${ctrl.niveau}`} size="small" sx={{ bgcolor: '#e5e5e5', color: '#171717', fontWeight: 600 }} />
+                        <Chip label={`N${ctrl.niveau}`} size="small" sx={{ bgcolor: 'grey.300', color: 'text.primary', fontWeight: 600 }} />
                       </TableCell>
                       <TableCell>
                         <Chip label={ctrl.severiteDefaut} size="small" sx={severiteColor(ctrl.severiteDefaut)} />
                       </TableCell>
                       <TableCell>
-                        <Chip label={ctrl.phase || 'PHASE_1'} size="small" sx={{ bgcolor: '#eff6ff', color: '#2563eb', fontSize: '0.7rem' }} />
+                        <Chip label={ctrl.phase || 'PHASE_1'} size="small" sx={{ bgcolor: 'info.50', color: 'primary.main', fontSize: '0.7rem' }} />
                       </TableCell>
                       <TableCell>
                         <Switch
@@ -1353,7 +1353,7 @@ const ControlPointsManager: React.FC = () => {
         return (
           <Box>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
-              <Typography variant="h6" sx={{ color: '#171717' }}>
+              <Typography variant="h6" sx={{ color: 'text.primary' }}>
                 Regles de Controle SYSCOHADA ({controlPoints.filter(p => p.est_active).length} actives)
               </Typography>
               <Button
@@ -1361,8 +1361,8 @@ const ControlPointsManager: React.FC = () => {
                 startIcon={<AddIcon />}
                 onClick={handleCreatePoint}
                 sx={{ 
-                  bgcolor: '#171717',
-                  '&:hover': { bgcolor: '#262626' }
+                  bgcolor: 'text.primary',
+                  '&:hover': { bgcolor: 'grey.900' }
                 }}
               >
                 Nouvelle Règle
@@ -1372,20 +1372,20 @@ const ControlPointsManager: React.FC = () => {
             <TableContainer 
               component={Paper} 
               sx={{ 
-                bgcolor: '#f5f5f5',
-                '& .MuiTableHead-root': { bgcolor: '#e5e5e5' }
+                bgcolor: 'grey.100',
+                '& .MuiTableHead-root': { bgcolor: 'grey.300' }
               }}
             >
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell sx={{ color: '#171717', fontWeight: 600 }}>Code</TableCell>
-                    <TableCell sx={{ color: '#171717', fontWeight: 600 }}>Règle</TableCell>
-                    <TableCell sx={{ color: '#171717', fontWeight: 600 }}>Catégorie</TableCell>
-                    <TableCell sx={{ color: '#171717', fontWeight: 600 }}>Portée</TableCell>
-                    <TableCell sx={{ color: '#171717', fontWeight: 600 }}>Criticité</TableCell>
-                    <TableCell sx={{ color: '#171717', fontWeight: 600 }}>Statut</TableCell>
-                    <TableCell sx={{ color: '#171717', fontWeight: 600 }}>Actions</TableCell>
+                    <TableCell sx={{ color: 'text.primary', fontWeight: 600 }}>Code</TableCell>
+                    <TableCell sx={{ color: 'text.primary', fontWeight: 600 }}>Règle</TableCell>
+                    <TableCell sx={{ color: 'text.primary', fontWeight: 600 }}>Catégorie</TableCell>
+                    <TableCell sx={{ color: 'text.primary', fontWeight: 600 }}>Portée</TableCell>
+                    <TableCell sx={{ color: 'text.primary', fontWeight: 600 }}>Criticité</TableCell>
+                    <TableCell sx={{ color: 'text.primary', fontWeight: 600 }}>Statut</TableCell>
+                    <TableCell sx={{ color: 'text.primary', fontWeight: 600 }}>Actions</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -1398,16 +1398,16 @@ const ControlPointsManager: React.FC = () => {
                       }}
                     >
                       <TableCell>
-                        <Typography variant="body2" sx={{ fontFamily: 'monospace', color: '#171717', fontWeight: 600 }}>
+                        <Typography variant="body2" sx={{ fontFamily: 'monospace', color: 'text.primary', fontWeight: 600 }}>
                           {point.code}
                         </Typography>
                       </TableCell>
                       <TableCell>
                         <Box>
-                          <Typography variant="body2" sx={{ color: '#171717', fontWeight: 500 }}>
+                          <Typography variant="body2" sx={{ color: 'text.primary', fontWeight: 500 }}>
                             {point.nom}
                           </Typography>
-                          <Typography variant="caption" sx={{ color: '#737373' }}>
+                          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                             {point.description}
                           </Typography>
                         </Box>
@@ -1416,7 +1416,7 @@ const ControlPointsManager: React.FC = () => {
                         <Chip 
                           label={point.type_regle}
                           size="small"
-                          sx={{ bgcolor: '#e5e5e5', color: '#171717' }}
+                          sx={{ bgcolor: 'grey.300', color: 'text.primary' }}
                         />
                       </TableCell>
                       <TableCell>
@@ -1454,7 +1454,7 @@ const ControlPointsManager: React.FC = () => {
                             onClick={() => handleViewAlgorithm(point.algorithme)}
                             sx={{ 
                               fontSize: '0.75rem',
-                              color: '#171717',
+                              color: 'text.primary',
                               borderColor: '#e5e5e5',
                               '&:hover': { borderColor: '#171717' }
                             }}
@@ -1464,7 +1464,7 @@ const ControlPointsManager: React.FC = () => {
                           <IconButton 
                             size="small"
                             onClick={() => handleEditPoint(point)}
-                            sx={{ color: '#737373' }}
+                            sx={{ color: 'text.secondary' }}
                           >
                             <EditIcon fontSize="small" />
                           </IconButton>
@@ -1495,32 +1495,32 @@ const ControlPointsManager: React.FC = () => {
       case 2: // Algorithmes IA
         return (
           <Box>
-            <Typography variant="h6" gutterBottom sx={{ color: '#171717' }}>
+            <Typography variant="h6" gutterBottom sx={{ color: 'text.primary' }}>
               Algorithmes IA Disponibles
             </Typography>
             
             <Grid container spacing={3}>
               {algorithmes.map((algo) => (
                 <Grid item xs={12} md={6} key={algo.code}>
-                  <Card sx={{ bgcolor: '#f5f5f5' }}>
+                  <Card sx={{ bgcolor: 'grey.100' }}>
                     <CardContent>
                       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                        <AIIcon sx={{ color: '#171717', mr: 1 }} />
-                        <Typography variant="h6" sx={{ color: '#171717' }}>
+                        <AIIcon sx={{ color: 'text.primary', mr: 1 }} />
+                        <Typography variant="h6" sx={{ color: 'text.primary' }}>
                           {algo.nom}
                         </Typography>
                         <Chip 
                           label={algo.type}
                           size="small"
-                          sx={{ ml: 'auto', bgcolor: '#e5e5e5', color: '#171717' }}
+                          sx={{ ml: 'auto', bgcolor: 'grey.300', color: 'text.primary' }}
                         />
                       </Box>
                       
-                      <Typography variant="body2" sx={{ color: '#737373', mb: 2 }}>
+                      <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
                         {algo.description}
                       </Typography>
                       
-                      <Typography variant="caption" sx={{ color: '#737373' }}>
+                      <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                         Paramètres: {algo.parametres_disponibles.join(', ')}
                       </Typography>
                     </CardContent>
@@ -1538,11 +1538,11 @@ const ControlPointsManager: React.FC = () => {
 
   return (
     <Box sx={{ p: 3 }}>
-      <Typography variant="h4" gutterBottom sx={{ color: '#171717' }}>
+      <Typography variant="h4" gutterBottom sx={{ color: 'text.primary' }}>
         🤖 Points de Contrôle IA - OHADA/IFRS
       </Typography>
       
-      <Typography variant="h6" color="text.secondary" gutterBottom sx={{ color: '#737373' }}>
+      <Typography variant="h6" color="text.secondary" gutterBottom sx={{ color: 'text.secondary' }}>
         {registryControls.length} Controles Moteur + {controlPoints.length} Regles Legacy • {registryControls.filter(c => c.actif).length} Actifs • SYSCOHADA Revise
       </Typography>
 
@@ -1550,19 +1550,19 @@ const ControlPointsManager: React.FC = () => {
         sx={{ 
           p: 3, 
           mb: 3, 
-          bgcolor: '#e5e5e5',
+          bgcolor: 'grey.300',
           borderRadius: 2
         }}
       >
-        <Typography variant="subtitle1" gutterBottom sx={{ color: '#171717', fontWeight: 600 }}>
+        <Typography variant="subtitle1" gutterBottom sx={{ color: 'text.primary', fontWeight: 600 }}>
           🔍 Contrôles Exhaustifs OHADA/IFRS - Liste Complète Implémentée
         </Typography>
-        <Typography variant="body2" sx={{ color: '#171717' }}>
+        <Typography variant="body2" sx={{ color: 'text.primary' }}>
           ✅ Balance: Équilibre, Sens comptes, Cohérence • ✅ Liasse: Mapping, Cascade, TAFIRE • ✅ IA: Benford, Doublons, Outliers • ✅ IFRS: IAS 36
         </Typography>
       </Paper>
 
-      <Paper sx={{ bgcolor: '#f5f5f5' }}>
+      <Paper sx={{ bgcolor: 'grey.100' }}>
         <Tabs 
           value={activeTab} 
           onChange={(_e, newValue) => setActiveTab(newValue)}
@@ -1570,8 +1570,8 @@ const ControlPointsManager: React.FC = () => {
             borderBottom: 1, 
             borderColor: '#e5e5e5',
             '& .MuiTab-root': { 
-              color: '#737373',
-              '&.Mui-selected': { color: '#171717' }
+              color: 'text.secondary',
+              '&.Mui-selected': { color: 'text.primary' }
             }
           }}
         >
@@ -1592,10 +1592,10 @@ const ControlPointsManager: React.FC = () => {
         maxWidth="md"
         fullWidth
       >
-        <DialogTitle sx={{ bgcolor: '#171717', color: 'white' }}>
+        <DialogTitle sx={{ bgcolor: 'text.primary', color: 'white' }}>
           {editingPoint ? 'Modifier Règle de Contrôle' : 'Nouvelle Règle de Contrôle'}
         </DialogTitle>
-        <DialogContent sx={{ bgcolor: '#fafafa', mt: 2 }}>
+        <DialogContent sx={{ bgcolor: 'grey.50', mt: 2 }}>
           <Grid container spacing={3}>
             <Grid item xs={12} md={6}>
               <TextField
@@ -1649,18 +1649,18 @@ const ControlPointsManager: React.FC = () => {
           </Grid>
         </DialogContent>
         
-        <DialogActions sx={{ bgcolor: '#fafafa', p: 2 }}>
+        <DialogActions sx={{ bgcolor: 'grey.50', p: 2 }}>
           <Button 
             onClick={() => setDialogOpen(false)}
-            sx={{ color: '#737373' }}
+            sx={{ color: 'text.secondary' }}
           >
             Annuler
           </Button>
           <Button 
             variant="contained"
             sx={{ 
-              bgcolor: '#171717',
-              '&:hover': { bgcolor: '#262626' }
+              bgcolor: 'text.primary',
+              '&:hover': { bgcolor: 'grey.900' }
             }}
           >
             {editingPoint ? 'Modifier' : 'Créer'}
@@ -1675,7 +1675,7 @@ const ControlPointsManager: React.FC = () => {
         maxWidth="md" 
         fullWidth
       >
-        <DialogTitle sx={{ bgcolor: '#171717', color: 'white' }}>
+        <DialogTitle sx={{ bgcolor: 'text.primary', color: 'white' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <AIIcon />
             <Typography variant="h6" sx={{ fontWeight: 600 }}>
@@ -1695,24 +1695,24 @@ const ControlPointsManager: React.FC = () => {
           {selectedAlgorithm && (
             <Box>
               {/* Description détaillée */}
-              <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: '#171717' }}>
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'text.primary' }}>
                 📝 Description de l'Algorithme
               </Typography>
-              <Paper sx={{ p: 3, mb: 3, bgcolor: '#fafafa', border: '1px solid #e5e5e5' }}>
-                <Typography variant="body1" sx={{ lineHeight: 1.6, color: '#171717' }}>
+              <Paper sx={{ p: 3, mb: 3, bgcolor: 'grey.50', border: '1px solid #e5e5e5' }}>
+                <Typography variant="body1" sx={{ lineHeight: 1.6, color: 'text.primary' }}>
                   {selectedAlgorithm.detailDescription}
                 </Typography>
               </Paper>
 
               {/* Paramètres */}
-              <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: '#171717' }}>
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'text.primary' }}>
                 ⚙️ Paramètres de Configuration
               </Typography>
               {selectedAlgorithm.parametres && Object.entries(selectedAlgorithm.parametres).map(([key, param]) => (
                 <Paper key={key} sx={{ p: 2, mb: 2, border: '1px solid #e5e5e5' }}>
                   <Grid container spacing={2} alignItems="center">
                     <Grid item xs={3}>
-                      <Typography variant="subtitle2" sx={{ fontFamily: 'monospace', color: '#171717', fontWeight: 600 }}>
+                      <Typography variant="subtitle2" sx={{ fontFamily: 'monospace', color: 'text.primary', fontWeight: 600 }}>
                         {key}
                       </Typography>
                     </Grid>
@@ -1720,16 +1720,16 @@ const ControlPointsManager: React.FC = () => {
                       <Chip 
                         label={param.type} 
                         size="small" 
-                        sx={{ bgcolor: '#e5e5e5', color: '#171717' }} 
+                        sx={{ bgcolor: 'grey.300', color: 'text.primary' }} 
                       />
                     </Grid>
                     <Grid item xs={2}>
-                      <Typography variant="body2" sx={{ fontFamily: 'monospace', color: '#737373' }}>
+                      <Typography variant="body2" sx={{ fontFamily: 'monospace', color: 'text.secondary' }}>
                         {typeof param.default === 'object' ? JSON.stringify(param.default) : param.default.toString()}
                       </Typography>
                     </Grid>
                     <Grid item xs={5}>
-                      <Typography variant="caption" sx={{ color: '#737373' }}>
+                      <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                         {param.description}
                       </Typography>
                     </Grid>
@@ -1738,14 +1738,14 @@ const ControlPointsManager: React.FC = () => {
               ))}
 
               {/* Type et utilisation */}
-              <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: '#171717' }}>
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'text.primary' }}>
                 🤖 Type d'Intelligence Artificielle
               </Typography>
               <Paper sx={{ p: 3, bgcolor: getTypeColor(selectedAlgorithm.type) }}>
-                <Typography variant="body1" sx={{ fontWeight: 600, mb: 1, color: '#171717' }}>
+                <Typography variant="body1" sx={{ fontWeight: 600, mb: 1, color: 'text.primary' }}>
                   {getTypeLabel(selectedAlgorithm.type)}
                 </Typography>
-                <Typography variant="body2" sx={{ color: '#737373' }}>
+                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                   {getTypeDescription(selectedAlgorithm.type)}
                 </Typography>
               </Paper>
@@ -1756,7 +1756,7 @@ const ControlPointsManager: React.FC = () => {
           <Button onClick={() => setAlgorithmModalOpen(false)}>
             Fermer
           </Button>
-          <Button variant="contained" sx={{ bgcolor: '#171717' }}>
+          <Button variant="contained" sx={{ bgcolor: 'text.primary' }}>
             Configurer Paramètres
           </Button>
         </DialogActions>

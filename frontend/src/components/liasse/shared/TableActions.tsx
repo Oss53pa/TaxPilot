@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Table Actions - Composant de boutons d'actions pour les tableaux
  */
@@ -68,7 +69,7 @@ const TableActions: React.FC<TableActionsProps> = ({
   const handleSave = () => {
     if (onSave) {
       onSave()
-      console.log(`Tableau "${tableName}" sauvegardé`)
+      logger.debug(`Tableau "${tableName}" sauvegardé`)
     }
   }
 
@@ -78,7 +79,7 @@ const TableActions: React.FC<TableActionsProps> = ({
     } else {
       window.print()
     }
-    console.log(`Impression du tableau "${tableName}"`)
+    logger.debug(`Impression du tableau "${tableName}"`)
   }
 
   const handleExport = () => {
@@ -102,7 +103,7 @@ const TableActions: React.FC<TableActionsProps> = ({
       linkElement.setAttribute('download', exportFileDefaultName)
       linkElement.click()
     }
-    console.log(`Export du tableau "${tableName}"`)
+    logger.debug(`Export du tableau "${tableName}"`)
   }
 
   const handleImport = () => {
@@ -116,13 +117,13 @@ const TableActions: React.FC<TableActionsProps> = ({
       input.onchange = (e) => {
         const file = (e.target as HTMLInputElement).files?.[0]
         if (file) {
-          console.log(`Fichier sélectionné : ${file.name}`)
+          logger.debug(`Fichier sélectionné : ${file.name}`)
           alert(`Import de ${file.name} en cours...`)
         }
       }
       input.click()
     }
-    console.log(`Import dans le tableau "${tableName}"`)
+    logger.debug(`Import dans le tableau "${tableName}"`)
     handleClose()
   }
 
@@ -132,7 +133,7 @@ const TableActions: React.FC<TableActionsProps> = ({
     } else {
       window.location.reload()
     }
-    console.log(`Actualisation du tableau "${tableName}"`)
+    logger.debug(`Actualisation du tableau "${tableName}"`)
     handleClose()
   }
 
@@ -142,7 +143,7 @@ const TableActions: React.FC<TableActionsProps> = ({
     } else {
       alert(`Ajout d'une nouvelle ligne dans le tableau "${tableName}"`)
     }
-    console.log(`Ajout dans le tableau "${tableName}"`)
+    logger.debug(`Ajout dans le tableau "${tableName}"`)
   }
 
   const handleCalculate = () => {
@@ -151,7 +152,7 @@ const TableActions: React.FC<TableActionsProps> = ({
     } else {
       alert(`Recalcul des totaux pour le tableau "${tableName}"`)
     }
-    console.log(`Calculs du tableau "${tableName}"`)
+    logger.debug(`Calculs du tableau "${tableName}"`)
     handleClose()
   }
 

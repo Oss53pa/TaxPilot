@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Service pour la gestion des entreprises
  */
@@ -121,27 +122,27 @@ class EntrepriseService {
     secteur_activite?: string
     pays?: string
   }): Promise<{ results: Entreprise[]; count: number; next?: string; previous?: string }> {
-    console.log('🔄 Fetching entreprises from backend...', params)
+    logger.debug('Fetching entreprises from backend...', params)
     return apiClient.get(this.baseUrl + '/', params)
   }
 
   async getEntreprise(id: string): Promise<Entreprise> {
-    console.log(`🔄 Fetching entreprise ${id} from backend...`)
+    logger.debug(`Fetching entreprise ${id} from backend...`)
     return apiClient.get(`${this.baseUrl}/${id}/`)
   }
 
   async createEntreprise(data: Partial<Entreprise>): Promise<Entreprise> {
-    console.log('📤 Creating entreprise in backend...', data)
+    logger.debug('Creating entreprise in backend...', data)
     return apiClient.post(this.baseUrl + '/', data)
   }
 
   async updateEntreprise(id: string, data: Partial<Entreprise>): Promise<Entreprise> {
-    console.log(`📤 Updating entreprise ${id} in backend...`, data)
+    logger.debug(`Updating entreprise ${id} in backend...`, data)
     return apiClient.patch(`${this.baseUrl}/${id}/`, data)
   }
 
   async deleteEntreprise(id: string): Promise<void> {
-    console.log(`🗑️ Deleting entreprise ${id} from backend...`)
+    logger.debug(`Deleting entreprise ${id} from backend...`)
     return apiClient.delete(`${this.baseUrl}/${id}/`)
   }
 

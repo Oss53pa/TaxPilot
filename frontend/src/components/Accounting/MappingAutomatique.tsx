@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Composant Mapping Automatique des Comptes
  * Mapping intelligent vers référentiel SYSCOHADA/OHADA
@@ -119,7 +120,7 @@ const MappingAutomatique: React.FC<MappingAutomatiqueProps> = ({
       })
       setSelectedMappings(highConfidenceMappings)
     } catch (err: any) {
-      console.error('Mapping generation failed:', err)
+      logger.error('Mapping generation failed:', err)
       setError(err.message || 'Erreur lors de la génération du mapping')
       setResult(null)
     } finally {
@@ -174,7 +175,7 @@ const MappingAutomatique: React.FC<MappingAutomatiqueProps> = ({
       // Recharger après succès
       await handleGenerateMapping()
     } catch (err: any) {
-      console.error('Applying mappings failed:', err)
+      logger.error('Applying mappings failed:', err)
       setError(err.message || 'Erreur lors de l\'application des mappings')
     } finally {
       setApplying(false)

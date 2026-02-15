@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Bouton de validation de balance avec dialog de confirmation
  * Connecté au backend via balanceService.validateBalance()
@@ -81,7 +82,7 @@ const BalanceValidationButton: React.FC<BalanceValidationButtonProps> = ({
         handleCloseDialog()
       }, 2000)
     } catch (err: any) {
-      console.error('Validation failed:', err)
+      logger.error('Validation failed:', err)
       const errorMsg = err.message || 'Erreur lors de la validation de la balance'
       setError(errorMsg)
 

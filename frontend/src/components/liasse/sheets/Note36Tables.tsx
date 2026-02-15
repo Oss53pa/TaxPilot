@@ -33,27 +33,7 @@ import {
   Description as DescriptionIcon,
   Category as CategoryIcon,
 } from '@mui/icons-material'
-
-interface TabPanelProps {
-  children?: React.ReactNode
-  index: number
-  value: number
-}
-
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`tabpanel-${index}`}
-      aria-labelledby={`tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box sx={{ pt: 3 }}>{children}</Box>}
-    </div>
-  )
-}
+import { TabPanel } from '@/components/shared/TabPanel'
 
 interface Note36TablesProps {
   initialTab?: number

@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 import { useState, useCallback } from 'react'
 
 interface UseEditableTableReturn {
@@ -36,7 +37,7 @@ export function useEditableTable(): UseEditableTableReturn {
   }, [editedValues])
 
   const handleSave = useCallback(() => {
-    console.log('Sauvegarde des modifications:', editedValues)
+    logger.debug('Sauvegarde des modifications:', editedValues)
     setHasChanges(false)
   }, [editedValues])
 

@@ -107,7 +107,7 @@ function AccountDetailDrawer({
       PaperProps={{ sx: { width: { xs: '100%', md: 520 }, p: 0 } }}
     >
       {/* Header */}
-      <Box sx={{ p: 3, bgcolor: '#171717', color: '#fff' }}>
+      <Box sx={{ p: 3, bgcolor: 'text.primary', color: '#fff' }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <Box>
             <Typography variant="h5" sx={{ fontFamily: 'monospace', fontWeight: 700, mb: 0.5 }}>
@@ -146,7 +146,7 @@ function AccountDetailDrawer({
         {loading ? (
           <Box sx={{ textAlign: 'center', py: 4 }}>
             <CircularProgress size={32} />
-            <Typography variant="body2" sx={{ mt: 1, color: '#737373' }}>
+            <Typography variant="body2" sx={{ mt: 1, color: 'text.secondary' }}>
               Chargement du fonctionnement...
             </Typography>
           </Box>
@@ -156,10 +156,10 @@ function AccountDetailDrawer({
             {fonctionnement ? (
               <>
                 {/* Définition */}
-                <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1, color: '#171717' }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1, color: 'text.primary' }}>
                   Contenu / Définition
                 </Typography>
-                <Paper sx={{ p: 2, mb: 3, bgcolor: '#fafafa' }}>
+                <Paper sx={{ p: 2, mb: 3, bgcolor: 'grey.50' }}>
                   <Typography variant="body2">{fonctionnement.contenu}</Typography>
                 </Paper>
 
@@ -191,8 +191,8 @@ function AccountDetailDrawer({
                 {/* Fonctionnement débit/crédit */}
                 <Grid container spacing={2} sx={{ mb: 3 }}>
                   <Grid item xs={6}>
-                    <Paper sx={{ p: 2, bgcolor: '#fef2f2', border: '1px solid #fecaca' }}>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#dc2626', mb: 1 }}>
+                    <Paper sx={{ p: 2, bgcolor: 'error.50', border: '1px solid #fecaca' }}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'error.main', mb: 1 }}>
                         DEBIT
                       </Typography>
                       {fonctionnement.fonctionnement.debit.map((d, i) => (
@@ -200,7 +200,7 @@ function AccountDetailDrawer({
                           <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
                             {d.description}
                           </Typography>
-                          <Typography variant="caption" sx={{ color: '#737373' }}>
+                          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                             par le crédit de : {d.contrePartie.join(', ')}
                           </Typography>
                         </Box>
@@ -208,8 +208,8 @@ function AccountDetailDrawer({
                     </Paper>
                   </Grid>
                   <Grid item xs={6}>
-                    <Paper sx={{ p: 2, bgcolor: '#f0fdf4', border: '1px solid #bbf7d0' }}>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#16a34a', mb: 1 }}>
+                    <Paper sx={{ p: 2, bgcolor: 'success.50', border: '1px solid #bbf7d0' }}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'success.main', mb: 1 }}>
                         CREDIT
                       </Typography>
                       {fonctionnement.fonctionnement.credit.map((c, i) => (
@@ -217,7 +217,7 @@ function AccountDetailDrawer({
                           <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
                             {c.description}
                           </Typography>
-                          <Typography variant="caption" sx={{ color: '#737373' }}>
+                          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                             par le débit de : {c.contrePartie.join(', ')}
                           </Typography>
                         </Box>
@@ -232,13 +232,13 @@ function AccountDetailDrawer({
                     <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
                       Exclusions
                     </Typography>
-                    <Paper sx={{ p: 2, mb: 3, bgcolor: '#fffbeb', border: '1px solid #fde68a' }}>
+                    <Paper sx={{ p: 2, mb: 3, bgcolor: 'warning.50', border: '1px solid #fde68a' }}>
                       {fonctionnement.exclusions.map((exc, i) => (
                         <Box key={i} sx={{ mb: i < fonctionnement.exclusions.length - 1 ? 1 : 0 }}>
                           <Typography variant="body2">
                             {exc.description}
                           </Typography>
-                          <Typography variant="caption" sx={{ color: '#737373' }}>
+                          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                             <ArrowIcon sx={{ fontSize: 12, verticalAlign: 'middle', mr: 0.5 }} />
                             Utiliser : {exc.compteCorrige} - {exc.libelleCompteCorrige}
                           </Typography>
@@ -296,7 +296,7 @@ function AccountDetailDrawer({
             {chapitres.length > 0 ? (
               <List dense>
                 {chapitres.map(chap => (
-                  <ListItem key={chap.numero} sx={{ bgcolor: '#fafafa', borderRadius: 1, mb: 0.5 }}>
+                  <ListItem key={chap.numero} sx={{ bgcolor: 'grey.50', borderRadius: 1, mb: 0.5 }}>
                     <ListItemText
                       primary={
                         <Typography variant="body2" sx={{ fontWeight: 500 }}>
@@ -309,7 +309,7 @@ function AccountDetailDrawer({
                 ))}
               </List>
             ) : (
-              <Typography variant="body2" sx={{ color: '#737373', fontStyle: 'italic' }}>
+              <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
                 Aucun chapitre d'opérations lié à ce compte.
               </Typography>
             )}
@@ -354,10 +354,10 @@ const PlanSYSCOHADARevise = () => {
       <Box sx={{ mb: 4 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
           <Box>
-            <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, color: '#171717' }}>
+            <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, color: 'text.primary' }}>
               Plan Comptable SYSCOHADA Révisé
             </Typography>
-            <Typography variant="body1" sx={{ color: '#737373' }}>
+            <Typography variant="body1" sx={{ color: 'text.secondary' }}>
               Référentiel officiel OHADA 2017 - 9 Classes complètes - Cliquez sur un compte pour voir son fonctionnement
             </Typography>
           </Box>
@@ -366,7 +366,7 @@ const PlanSYSCOHADARevise = () => {
             <Button
               variant="outlined"
               startIcon={<DownloadIcon />}
-              sx={{ borderColor: '#e5e5e5', color: '#171717' }}
+              sx={{ borderColor: '#e5e5e5', color: 'text.primary' }}
             >
               Exporter
             </Button>
@@ -383,41 +383,41 @@ const PlanSYSCOHADARevise = () => {
         {/* Statistiques */}
         <Grid container spacing={3} sx={{ mb: 3 }}>
           <Grid item xs={12} sm={6} md={3}>
-            <Paper sx={{ p: 2, textAlign: 'center', bgcolor: '#f5f5f5' }}>
-              <Typography variant="h4" sx={{ fontWeight: 700, color: '#171717' }}>
+            <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'grey.100' }}>
+              <Typography variant="h4" sx={{ fontWeight: 700, color: 'text.primary' }}>
                 {Object.keys(SYSCOHADA_REVISE_CLASSES).length}
               </Typography>
-              <Typography variant="caption" sx={{ color: '#737373' }}>
+              <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                 Classes
               </Typography>
             </Paper>
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
-            <Paper sx={{ p: 2, textAlign: 'center', bgcolor: '#f5f5f5' }}>
-              <Typography variant="h4" sx={{ fontWeight: 700, color: '#22c55e' }}>
+            <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'grey.100' }}>
+              <Typography variant="h4" sx={{ fontWeight: 700, color: 'success.main' }}>
                 {PLAN_SYSCOHADA_REVISE.length}
               </Typography>
-              <Typography variant="caption" sx={{ color: '#737373' }}>
+              <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                 Comptes Total
               </Typography>
             </Paper>
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
-            <Paper sx={{ p: 2, textAlign: 'center', bgcolor: '#f5f5f5' }}>
-              <Typography variant="h4" sx={{ fontWeight: 700, color: '#f59e0b' }}>
+            <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'grey.100' }}>
+              <Typography variant="h4" sx={{ fontWeight: 700, color: 'warning.main' }}>
                 {PLAN_SYSCOHADA_REVISE.filter(c => c.utilisation === 'OBLIGATOIRE').length}
               </Typography>
-              <Typography variant="caption" sx={{ color: '#737373' }}>
+              <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                 Obligatoires
               </Typography>
             </Paper>
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
-            <Paper sx={{ p: 2, textAlign: 'center', bgcolor: '#f5f5f5' }}>
+            <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'grey.100' }}>
               <Typography variant="h4" sx={{ fontWeight: 700, color: '#525252' }}>
                 17
               </Typography>
-              <Typography variant="caption" sx={{ color: '#737373' }}>
+              <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                 Pays OHADA
               </Typography>
             </Paper>
@@ -438,7 +438,7 @@ const PlanSYSCOHADARevise = () => {
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <SearchIcon sx={{ color: '#737373' }} />
+                      <SearchIcon sx={{ color: 'text.secondary' }} />
                     </InputAdornment>
                   ),
                 }}
@@ -454,7 +454,7 @@ const PlanSYSCOHADARevise = () => {
                 fullWidth
                 variant="outlined"
                 onClick={() => setSelectedSector(selectedSector === 'TOUS' ? 'COMMERCE' : 'TOUS')}
-                sx={{ borderColor: '#e5e5e5', color: '#171717' }}
+                sx={{ borderColor: '#e5e5e5', color: 'text.primary' }}
               >
                 Secteur: {selectedSector}
               </Button>
@@ -473,7 +473,7 @@ const PlanSYSCOHADARevise = () => {
       {/* Plan comptable par classes */}
       <Card sx={{ border: '1px solid #e5e5e5' }}>
         <CardContent sx={{ p: 3 }}>
-          <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: '#171717' }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: 'text.primary' }}>
             Plan Comptable SYSCOHADA Révisé - 9 Classes
           </Typography>
 
@@ -508,19 +508,19 @@ const PlanSYSCOHADARevise = () => {
                     }
                   }}
                 >
-                  <AccountIcon sx={{ color: '#171717' }} />
+                  <AccountIcon sx={{ color: 'text.primary' }} />
                   <Box sx={{ flex: 1 }}>
-                    <Typography variant="h6" sx={{ fontWeight: 600, color: '#171717' }}>
+                    <Typography variant="h6" sx={{ fontWeight: 600, color: 'text.primary' }}>
                       Classe {classeNum} - {classeInfo.libelle}
                     </Typography>
-                    <Typography variant="body2" sx={{ color: '#737373' }}>
+                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                       {classeInfo.description}
                     </Typography>
                   </Box>
                   <Chip
                     label={`${comptes.length} comptes`}
                     size="small"
-                    sx={{ backgroundColor: '#FFFFFF', color: '#171717' }}
+                    sx={{ backgroundColor: '#FFFFFF', color: 'text.primary' }}
                   />
                 </AccordionSummary>
 
@@ -529,11 +529,11 @@ const PlanSYSCOHADARevise = () => {
                     <Table>
                       <TableHead>
                         <TableRow sx={{ backgroundColor: '#e5e5e5' }}>
-                          <TableCell sx={{ fontWeight: 600, color: '#171717' }}>N° Compte</TableCell>
-                          <TableCell sx={{ fontWeight: 600, color: '#171717' }}>Libellé</TableCell>
-                          <TableCell sx={{ fontWeight: 600, color: '#171717' }}>Nature</TableCell>
-                          <TableCell sx={{ fontWeight: 600, color: '#171717' }}>Utilisation</TableCell>
-                          <TableCell sx={{ fontWeight: 600, color: '#171717' }}>Secteurs</TableCell>
+                          <TableCell sx={{ fontWeight: 600, color: 'text.primary' }}>N° Compte</TableCell>
+                          <TableCell sx={{ fontWeight: 600, color: 'text.primary' }}>Libellé</TableCell>
+                          <TableCell sx={{ fontWeight: 600, color: 'text.primary' }}>Nature</TableCell>
+                          <TableCell sx={{ fontWeight: 600, color: 'text.primary' }}>Utilisation</TableCell>
+                          <TableCell sx={{ fontWeight: 600, color: 'text.primary' }}>Secteurs</TableCell>
                         </TableRow>
                       </TableHead>
                       <TableBody>
@@ -550,14 +550,14 @@ const PlanSYSCOHADARevise = () => {
                               <Typography variant="body2" sx={{
                                 fontFamily: 'monospace',
                                 fontWeight: 600,
-                                color: '#171717'
+                                color: 'text.primary'
                               }}>
                                 {compte.numero}
                               </Typography>
                             </TableCell>
                             <TableCell>
                               <Typography variant="body2" sx={{
-                                color: '#171717',
+                                color: 'text.primary',
                                 pl: compte.sousClasse ? (compte.numero.length - 2) * 1.5 : 0,
                               }}>
                                 {compte.libelle}
@@ -598,14 +598,14 @@ const PlanSYSCOHADARevise = () => {
                                       size="small"
                                       sx={{
                                         fontSize: '0.6rem',
-                                        bgcolor: '#fafafa',
-                                        color: '#171717'
+                                        bgcolor: 'grey.50',
+                                        color: 'text.primary'
                                       }}
                                     />
                                   ))}
                                 </Stack>
                               ) : (
-                                <Typography variant="caption" sx={{ color: '#737373' }}>
+                                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                                   Tous secteurs
                                 </Typography>
                               )}

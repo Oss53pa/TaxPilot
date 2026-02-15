@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
@@ -28,13 +29,13 @@ const queryClient = new QueryClient({
 // Global unhandled promise rejection handler
 // Prevents silent failures and logs errors for debugging
 window.addEventListener('unhandledrejection', (event) => {
-  console.error('🚨 Unhandled promise rejection:', event.reason)
+  logger.error('🚨 Unhandled promise rejection:', event.reason)
 
   // Log detailed error information for debugging
   if (event.reason instanceof Error) {
-    console.error('Error name:', event.reason.name)
-    console.error('Error message:', event.reason.message)
-    console.error('Error stack:', event.reason.stack)
+    logger.error('Error name:', event.reason.name)
+    logger.error('Error message:', event.reason.message)
+    logger.error('Error stack:', event.reason.stack)
   }
 
   // TODO: Send to error tracking service (Sentry, LogRocket, etc.)
@@ -48,7 +49,7 @@ window.addEventListener('unhandledrejection', (event) => {
 
 // Global error handler for synchronous errors
 window.addEventListener('error', (event) => {
-  console.error('🚨 Global error:', event.error || event.message)
+  logger.error('🚨 Global error:', event.error || event.message)
 
   // TODO: Send to error tracking service
   // if (window.Sentry) {

@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Page de configuration des thèmes et palettes de couleurs
  */
@@ -80,7 +81,7 @@ const ThemeSettings: React.FC = () => {
         }
 
       } catch (err: any) {
-        console.error('Erreur lors du chargement des thèmes:', err)
+        logger.error('Erreur lors du chargement des thèmes:', err)
         setError('Erreur lors du chargement des thèmes: ' + (err.message || 'Erreur inconnue'))
       } finally {
         setLoading(false)
@@ -109,7 +110,7 @@ const ThemeSettings: React.FC = () => {
       setSuccess('Thème appliqué avec succès!')
 
     } catch (err: any) {
-      console.error('Erreur lors de l\'application du thème:', err)
+      logger.error('Erreur lors de l\'application du thème:', err)
       setError('Erreur lors de l\'application du thème: ' + (err.message || 'Erreur inconnue'))
     } finally {
       setSaving(false)
@@ -144,7 +145,7 @@ const ThemeSettings: React.FC = () => {
       setSuccess('Thème créé avec succès!')
 
     } catch (err: any) {
-      console.error('Erreur lors de la création du thème:', err)
+      logger.error('Erreur lors de la création du thème:', err)
       setError('Erreur lors de la création du thème: ' + (err.message || 'Erreur inconnue'))
     } finally {
       setSaving(false)

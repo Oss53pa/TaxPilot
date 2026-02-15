@@ -8,7 +8,7 @@ interface TableauRepartitionVAProps {
 const TableauRepartitionVA: FC<TableauRepartitionVAProps> = ({ modeEdition: _modeEdition = false }) => {
   return (
     <Box>
-      <Typography variant="h5" sx={{ mb: 3, fontWeight: 700, color: '#171717' }}>
+      <Typography variant="h5" sx={{ mb: 3, fontWeight: 700, color: 'text.primary' }}>
         Tableau de Répartition de la Valeur Ajoutée
       </Typography>
       <Alert severity="info" sx={{ mb: 3 }}>Répartition de la VA entre les partenaires</Alert>

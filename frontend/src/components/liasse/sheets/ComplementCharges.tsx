@@ -108,7 +108,7 @@ const ComplementCharges: React.FC = () => {
       <TableContainer component={Paper} sx={{ mb: 3 }}>
         <Table>
           <TableHead>
-            <TableRow sx={{ bgcolor: '#f5f5f5' }}>
+            <TableRow sx={{ bgcolor: 'grey.100' }}>
               <TableCell sx={{ fontWeight: 600, minWidth: 300 }}>Nature des charges</TableCell>
               <TableCell align="right" sx={{ fontWeight: 600, minWidth: 130 }}>Exercice N</TableCell>
               <TableCell align="right" sx={{ fontWeight: 600, minWidth: 130 }}>Exercice N-1</TableCell>
@@ -120,7 +120,7 @@ const ComplementCharges: React.FC = () => {
             {donneesCharges.map((categorie, catIndex) => (
               <React.Fragment key={catIndex}>
                 {/* En-tête de catégorie */}
-                <TableRow sx={{ bgcolor: '#f5f5f5' }}>
+                <TableRow sx={{ bgcolor: 'grey.100' }}>
                   <TableCell sx={{ fontWeight: 700, fontSize: '1.1rem' }}>
                     {categorie.categorie}
                   </TableCell>
@@ -165,7 +165,7 @@ const ComplementCharges: React.FC = () => {
             ))}
             
             {/* Total général */}
-            <TableRow sx={{ bgcolor: '#f5f5f5' }}>
+            <TableRow sx={{ bgcolor: 'grey.100' }}>
               <TableCell sx={{ fontWeight: 700 }}>
                 TOTAL CHARGES D'EXPLOITATION
               </TableCell>

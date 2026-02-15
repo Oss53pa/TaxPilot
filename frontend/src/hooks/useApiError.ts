@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Hook pour la gestion centralisée des erreurs API
  */
@@ -22,7 +23,7 @@ interface UseApiErrorReturn {
 
 export const useApiError = (): UseApiErrorReturn => {
   const handleError = useCallback((error: unknown): ApiError => {
-    console.error('🚨 API Error:', error)
+    logger.error('🚨 API Error:', error)
 
     // Erreur Axios (réponse du serveur)
     if (error instanceof AxiosError) {

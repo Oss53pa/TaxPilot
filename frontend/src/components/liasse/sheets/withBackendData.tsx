@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * HOC pour connecter automatiquement les feuilles SYSCOHADA au backend
  */
@@ -48,7 +49,7 @@ export function withBackendData<P extends object>(
     useEffect(() => {
       const loadBackendData = async () => {
         try {
-          console.log('🔄 Loading backend data for SYSCOHADA sheet...')
+          logger.debug('🔄 Loading backend data for SYSCOHADA sheet...')
 
           // Si on a déjà les données du contexte
           if (liasseData && liasseData.comptes.length > 0) {
@@ -75,9 +76,9 @@ export function withBackendData<P extends object>(
           }
 
           setEnhancedData(data)
-          console.log('✅ Backend data loaded for SYSCOHADA sheet')
+          logger.debug('✅ Backend data loaded for SYSCOHADA sheet')
         } catch (error) {
-          console.error('❌ Error loading backend data:', error)
+          logger.error('❌ Error loading backend data:', error)
           setEnhancedData({
             entreprise: null,
             balance: null,

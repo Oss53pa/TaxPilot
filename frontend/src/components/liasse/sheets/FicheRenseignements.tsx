@@ -57,9 +57,6 @@ const regimesMap: Record<string, string> = {
   RME: 'Régime micro-entreprise',
 }
 
-/** Formate une date ISO (YYYY-MM-DD) en DD/MM/YYYY */
-// formatDateFR removed - unused
-
 interface FicheRenseignementsProps {
   entreprise?: Entreprise
 }

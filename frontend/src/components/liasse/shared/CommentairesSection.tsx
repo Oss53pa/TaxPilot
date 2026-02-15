@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Section Commentaires - Composant réutilisable pour les notes annexes
  */
@@ -71,7 +72,7 @@ const CommentairesSection: React.FC<CommentairesSectionProps> = ({
   const supprimerCommentaire = (id: string) => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer ce commentaire ?')) {
       setCommentaires(commentaires.filter(c => c.id !== id))
-      console.log(`Commentaire ${id} supprimé`)
+      logger.debug(`Commentaire ${id} supprimé`)
     }
   }
 
@@ -93,7 +94,7 @@ const CommentairesSection: React.FC<CommentairesSectionProps> = ({
     linkElement.setAttribute('download', exportFileDefaultName)
     linkElement.click()
     
-    console.log('Export des commentaires réussi')
+    logger.debug('Export des commentaires réussi')
   }
 
   const getTypeColor = (type: string) => {

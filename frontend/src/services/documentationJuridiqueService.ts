@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Service de gestion de la documentation juridique
  * Lois de Finances, Évolutions SYSCOHADA, Synthèses SYSCOHADA
@@ -90,12 +91,12 @@ class DocumentationJuridiqueService {
   // --- Lois de Finances ---
 
   async getLoisFinances(filters?: DocumentFilters): Promise<PaginatedResponse<DocumentJuridique>> {
-    console.log('🔄 Fetching lois de finances...', filters)
+    logger.debug('Fetching lois de finances...', filters)
     return apiClient.get(`${this.baseUrl}/lois-finances/`, filters)
   }
 
   async uploadLoiFinance(file: File, metadata: Partial<DocumentJuridique>): Promise<DocumentJuridique> {
-    console.log('📤 Uploading loi de finance...', metadata)
+    logger.debug('Uploading loi de finance...', metadata)
     const formData = new FormData()
     formData.append('file', file)
     Object.entries(metadata).forEach(([key, value]) => {
@@ -105,19 +106,19 @@ class DocumentationJuridiqueService {
   }
 
   async deleteLoiFinance(id: string): Promise<void> {
-    console.log('🗑️ Deleting loi de finance...', id)
+    logger.debug('Deleting loi de finance...', id)
     return apiClient.delete(`${this.baseUrl}/lois-finances/${id}/`)
   }
 
   // --- Évolutions SYSCOHADA ---
 
   async getEvolutionsSyscohada(filters?: DocumentFilters): Promise<PaginatedResponse<EvolutionSyscohada>> {
-    console.log('🔄 Fetching évolutions SYSCOHADA...', filters)
+    logger.debug('Fetching évolutions SYSCOHADA...', filters)
     return apiClient.get(`${this.baseUrl}/evolutions-syscohada/`, filters)
   }
 
   async uploadEvolutionSyscohada(file: File, metadata: Partial<EvolutionSyscohada>): Promise<EvolutionSyscohada> {
-    console.log('📤 Uploading évolution SYSCOHADA...', metadata)
+    logger.debug('Uploading évolution SYSCOHADA...', metadata)
     const formData = new FormData()
     formData.append('file', file)
     Object.entries(metadata).forEach(([key, value]) => {
@@ -127,43 +128,43 @@ class DocumentationJuridiqueService {
   }
 
   async deleteEvolutionSyscohada(id: string): Promise<void> {
-    console.log('🗑️ Deleting évolution SYSCOHADA...', id)
+    logger.debug('Deleting évolution SYSCOHADA...', id)
     return apiClient.delete(`${this.baseUrl}/evolutions-syscohada/${id}/`)
   }
 
   // --- Synthèses SYSCOHADA ---
 
   async getSynthesesSyscohada(filters?: DocumentFilters): Promise<PaginatedResponse<SyntheseSyscohada>> {
-    console.log('🔄 Fetching synthèses SYSCOHADA...', filters)
+    logger.debug('Fetching synthèses SYSCOHADA...', filters)
     return apiClient.get(`${this.baseUrl}/syntheses-syscohada/`, filters)
   }
 
   async genererSynthese(documentId: string): Promise<SyntheseSyscohada> {
-    console.log('🤖 Generating synthèse for document...', documentId)
+    logger.debug('Generating synthèse for document...', documentId)
     return apiClient.post(`${this.baseUrl}/syntheses-syscohada/generer/`, { documentId })
   }
 
   // --- Règles de validation ---
 
   async getReglesValidation(filters?: DocumentFilters): Promise<PaginatedResponse<RegleValidation>> {
-    console.log('🔄 Fetching règles de validation SYSCOHADA...', filters)
+    logger.debug('Fetching règles de validation SYSCOHADA...', filters)
     return apiClient.get(`${this.baseUrl}/regles-validation/`, filters)
   }
 
   async toggleRegle(id: string, actif: boolean): Promise<RegleValidation> {
-    console.log('🔄 Toggle règle...', id, actif)
+    logger.debug('Toggle règle...', id, actif)
     return apiClient.patch(`${this.baseUrl}/regles-validation/${id}/`, { actif })
   }
 
   // --- Commun ---
 
   async downloadDocument(id: string): Promise<Blob> {
-    console.log('📥 Downloading document...', id)
+    logger.debug('Downloading document...', id)
     return apiClient.get(`${this.baseUrl}/documents/${id}/download/`, { responseType: 'blob' })
   }
 
   async getDocumentPreview(id: string): Promise<DocumentPreview> {
-    console.log('👁️ Fetching document preview...', id)
+    logger.debug('Fetching document preview...', id)
     return apiClient.get(`${this.baseUrl}/documents/${id}/preview/`)
   }
 }

@@ -157,7 +157,7 @@ export default function Proph3tChatPanel({ open, onClose }: Props) {
           borderRadius: '16px',
           overflow: 'hidden',
           boxShadow: '0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08)',
-          bgcolor: '#fff',
+          bgcolor: 'background.paper',
           zIndex: 1400,
           border: '1px solid #e5e5e5',
         }}
@@ -165,7 +165,7 @@ export default function Proph3tChatPanel({ open, onClose }: Props) {
         {/* ── Header ──────────────────────────────────────────── */}
         <Box
           sx={{
-            bgcolor: '#171717',
+            bgcolor: 'text.primary',
             px: 2,
             py: 1.5,
             display: 'flex',
@@ -185,11 +185,11 @@ export default function Proph3tChatPanel({ open, onClose }: Props) {
             >
               Proph3t
             </Typography>
-            <Typography variant="caption" sx={{ color: '#a3a3a3' }}>
+            <Typography variant="caption" sx={{ color: 'text.disabled' }}>
               Assistant SYSCOHADA & Fiscal CI
             </Typography>
           </Box>
-          <IconButton onClick={onClose} size="small" sx={{ color: '#a3a3a3', '&:hover': { color: '#fff' } }}>
+          <IconButton onClick={onClose} size="small" sx={{ color: 'text.disabled', '&:hover': { color: '#fff' } }}>
             <CloseIcon fontSize="small" />
           </IconButton>
         </Box>
@@ -201,7 +201,7 @@ export default function Proph3tChatPanel({ open, onClose }: Props) {
             flex: 1,
             overflowY: 'auto',
             py: 2,
-            bgcolor: '#fafafa',
+            bgcolor: 'grey.50',
             '&::-webkit-scrollbar': { width: 4 },
             '&::-webkit-scrollbar-thumb': { bgcolor: '#d4d4d4', borderRadius: 2 },
           }}
@@ -226,7 +226,7 @@ export default function Proph3tChatPanel({ open, onClose }: Props) {
             overflowX: 'auto',
             flexShrink: 0,
             borderTop: '1px solid #f0f0f0',
-            bgcolor: '#fff',
+            bgcolor: 'background.paper',
             '&::-webkit-scrollbar': { height: 0 },
           }}
         >
@@ -244,7 +244,7 @@ export default function Proph3tChatPanel({ open, onClose }: Props) {
                 cursor: 'pointer',
                 borderColor: '#e5e5e5',
                 color: '#525252',
-                '&:hover': { bgcolor: '#f5f5f5', borderColor: '#171717' },
+                '&:hover': { bgcolor: 'grey.100', borderColor: '#171717' },
               }}
             />
           ))}
@@ -259,7 +259,7 @@ export default function Proph3tChatPanel({ open, onClose }: Props) {
             gap: 1,
             alignItems: 'flex-end',
             borderTop: '1px solid #e5e5e5',
-            bgcolor: '#fff',
+            bgcolor: 'background.paper',
             flexShrink: 0,
           }}
         >
@@ -279,7 +279,7 @@ export default function Proph3tChatPanel({ open, onClose }: Props) {
               '& .MuiOutlinedInput-root': {
                 borderRadius: '12px',
                 fontSize: '0.85rem',
-                bgcolor: '#fafafa',
+                bgcolor: 'grey.50',
                 '& fieldset': { borderColor: '#e5e5e5' },
                 '&:hover fieldset': { borderColor: '#a3a3a3' },
                 '&.Mui-focused fieldset': { borderColor: '#171717' },
@@ -290,13 +290,13 @@ export default function Proph3tChatPanel({ open, onClose }: Props) {
             onClick={() => sendMessage(input)}
             disabled={!input.trim() || typing}
             sx={{
-              bgcolor: '#171717',
+              bgcolor: 'text.primary',
               color: '#fff',
               width: 36,
               height: 36,
               flexShrink: 0,
-              '&:hover': { bgcolor: '#262626' },
-              '&.Mui-disabled': { bgcolor: '#e5e5e5', color: '#a3a3a3' },
+              '&:hover': { bgcolor: 'grey.900' },
+              '&.Mui-disabled': { bgcolor: 'grey.300', color: 'text.disabled' },
             }}
           >
             <SendIcon sx={{ fontSize: 18 }} />

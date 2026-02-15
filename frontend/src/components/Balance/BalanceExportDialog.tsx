@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Dialog d'export avancé de balance avec options
  * Connecté au backend via balanceService.exportBalanceAdvanced()
@@ -74,7 +75,7 @@ const BalanceExportDialog: React.FC<BalanceExportDialogProps> = ({
         setFormat('XLSX')
       }, 500)
     } catch (err: any) {
-      console.error('Export failed:', err)
+      logger.error('Export failed:', err)
       setError(err.message || 'Erreur lors de l\'export de la balance')
     } finally {
       setExporting(false)

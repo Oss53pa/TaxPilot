@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Composant de paramétrage de l'entreprise
  * Formulaire organisé en onglets (Tabs)
@@ -141,19 +142,7 @@ const MODES_ACQUISITION = [
 ]
 void MODES_ACQUISITION;
 
-interface TabPanelProps {
-  children?: React.ReactNode
-  index: number
-  value: number
-}
-
-function TabPanel({ children, value, index }: TabPanelProps) {
-  return (
-    <div role="tabpanel" hidden={value !== index}>
-      {value === index && <Box sx={{ pt: 3 }}>{children}</Box>}
-    </div>
-  )
-}
+import { TabPanel } from '@/components/shared/TabPanel'
 
 // Helpers pour créer des entrées vides
 function emptyDirigeant(): DirigeantEntry {
@@ -342,7 +331,7 @@ const EntrepriseSettings: React.FC = () => {
       setSuccess(true)
       setTimeout(() => setSuccess(false), 5000)
     } catch (error) {
-      console.error('Error saving entreprise:', error)
+      logger.error('Error saving entreprise:', error)
     } finally {
       setIsLoading(false)
     }
@@ -739,7 +728,7 @@ const EntrepriseSettings: React.FC = () => {
               <TableContainer component={Paper} variant="outlined" sx={{ mb: 4 }}>
                 <Table size="small">
                   <TableHead>
-                    <TableRow sx={{ bgcolor: '#f5f5f5' }}>
+                    <TableRow sx={{ bgcolor: 'grey.100' }}>
                       <TableCell sx={{ fontWeight: 600 }}>Qualité</TableCell>
                       <TableCell sx={{ fontWeight: 600 }}>Nom</TableCell>
                       <TableCell sx={{ fontWeight: 600 }}>Prénoms</TableCell>
@@ -794,7 +783,7 @@ const EntrepriseSettings: React.FC = () => {
               <TableContainer component={Paper} variant="outlined">
                 <Table size="small">
                   <TableHead>
-                    <TableRow sx={{ bgcolor: '#f5f5f5' }}>
+                    <TableRow sx={{ bgcolor: 'grey.100' }}>
                       <TableCell sx={{ fontWeight: 600 }}>Nom</TableCell>
                       <TableCell sx={{ fontWeight: 600 }}>Prénoms</TableCell>
                       <TableCell sx={{ fontWeight: 600 }}>Cabinet</TableCell>
@@ -843,7 +832,7 @@ const EntrepriseSettings: React.FC = () => {
               <TableContainer component={Paper} variant="outlined">
                 <Table size="small">
                   <TableHead>
-                    <TableRow sx={{ bgcolor: '#f5f5f5' }}>
+                    <TableRow sx={{ bgcolor: 'grey.100' }}>
                       <TableCell sx={{ fontWeight: 600 }}>Raison sociale</TableCell>
                       <TableCell sx={{ fontWeight: 600 }}>Forme jur.</TableCell>
                       <TableCell sx={{ fontWeight: 600 }}>N° RCCM</TableCell>

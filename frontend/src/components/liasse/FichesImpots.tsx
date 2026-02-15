@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Composant Fiches Impôts - SYSCOHADA
  */
@@ -34,23 +35,10 @@ import {
   MonetizationOn,
 } from '@mui/icons-material'
 import EditableToolbar from './shared/EditableToolbar'
+import { TabPanel } from '@/components/shared/TabPanel'
 
 interface FichesImpotsProps {
   modeEdition?: boolean
-}
-
-interface TabPanelProps {
-  children?: React.ReactNode
-  index: number
-  value: number
-}
-
-const TabPanel: React.FC<TabPanelProps> = ({ children, value, index }) => {
-  return (
-    <div hidden={value !== index}>
-      {value === index && <Box sx={{ pt: 3 }}>{children}</Box>}
-    </div>
-  )
 }
 
 const FichesImpots: React.FC<FichesImpotsProps> = () => {
@@ -163,7 +151,7 @@ const FichesImpots: React.FC<FichesImpotsProps> = () => {
           isEditMode={modeEdition}
           onToggleEdit={() => setModeEdition(!modeEdition)}
           hasChanges={hasChanges}
-          onSave={() => { console.log('Sauvegarde fiches impôts'); setHasChanges(false) }}
+          onSave={() => { logger.debug('Sauvegarde fiches impôts'); setHasChanges(false) }}
         />
       </Stack>
       

@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Composant pour gérer les déclarations fiscales
  * Consomme les APIs backend pour la gestion fiscale
@@ -107,7 +108,7 @@ export default function TaxDeclarationView() {
       }) as any
       setDeclarations(data.results || data)
     } catch (error) {
-      console.error('Erreur lors du chargement des déclarations:', error)
+      logger.error('Erreur lors du chargement des déclarations:', error)
       toast({
         title: "Erreur",
         description: "Impossible de charger les déclarations fiscales",
@@ -124,7 +125,7 @@ export default function TaxDeclarationView() {
       const data = await taxService.getObligationsEcheances(entrepriseId, 60) as any
       setObligations(data.results || data)
     } catch (error) {
-      console.error('Erreur lors du chargement des obligations:', error)
+      logger.error('Erreur lors du chargement des obligations:', error)
     }
   }
 
@@ -166,7 +167,7 @@ export default function TaxDeclarationView() {
         description: `Montant de l'impôt: ${result.resultat.montant_impot.toLocaleString('fr-FR')}`
       })
     } catch (error) {
-      console.error('Erreur lors du calcul:', error)
+      logger.error('Erreur lors du calcul:', error)
       toast({
         title: "Erreur",
         description: "Impossible d'effectuer le calcul fiscal",
@@ -184,7 +185,7 @@ export default function TaxDeclarationView() {
       })
       loadDeclarations()
     } catch (error) {
-      console.error('Erreur lors de la transmission:', error)
+      logger.error('Erreur lors de la transmission:', error)
       toast({
         title: "Erreur",
         description: "Impossible de transmettre la déclaration",
@@ -202,7 +203,7 @@ export default function TaxDeclarationView() {
       })
       loadDeclarations()
     } catch (error) {
-      console.error('Erreur lors de la validation:', error)
+      logger.error('Erreur lors de la validation:', error)
       toast({
         title: "Erreur de validation",
         description: "Veuillez corriger les erreurs avant de valider",
@@ -226,7 +227,7 @@ export default function TaxDeclarationView() {
         description: "Le PDF a été téléchargé"
       })
     } catch (error) {
-      console.error('Erreur lors du téléchargement:', error)
+      logger.error('Erreur lors du téléchargement:', error)
       toast({
         title: "Erreur",
         description: "Impossible de télécharger le PDF",

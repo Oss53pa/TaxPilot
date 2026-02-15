@@ -34,11 +34,12 @@ import {
   Tabs,
   Tab,
 } from '@mui/material'
+import { formatCurrency } from '@/utils/formatting'
+import { TabPanel } from '@/components/shared/TabPanel'
+import { SheetHeader } from '@/components/liasse/common/SheetHeader'
 import {
   BusinessCenter as ImmobilisationIcon,
   Save as SaveIcon,
-  Print as PrintIcon,
-  GetApp as ExportIcon,
   Add as AddIcon,
   Delete as DeleteIcon,
   Assessment as EvalIcon,
@@ -69,25 +70,6 @@ interface ImmobilisationCorporelle {
     plusMoinsValue: number
   }[]
   observations: string
-}
-
-interface TabPanelProps {
-  children?: React.ReactNode
-  index: number
-  value: number
-}
-
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      {...other}
-    >
-      {value === index && <Box sx={{ pt: 2 }}>{children}</Box>}
-    </div>
-  )
 }
 
 const CATEGORIES_IMMOBILISATIONS = [
@@ -195,19 +177,7 @@ const Note6SYSCOHADA: React.FC = () => {
     setHasChanges(true)
   }
 
-  const formatNumber = (value: number) => {
-    return new Intl.NumberFormat('fr-FR', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value)
-  }
-
-  const formatCurrency = (value: number) => {
-    return formatNumber(value)
-  }
-
   const handleSave = () => {
-    console.log('Sauvegarde Note 6:', { immobilisations, comment })
     setHasChanges(false)
   }
 
@@ -440,40 +410,14 @@ const Note6SYSCOHADA: React.FC = () => {
     >
       {/* En-tête */}
       <Box sx={{ mb: 3 }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-          <Stack direction="row" spacing={2} alignItems="center">
-            <ImmobilisationIcon color="primary" sx={{ fontSize: 28 }} />
-            <Typography variant="h5" sx={{ fontWeight: 600, color: theme.palette.primary.main }}>
-              NOTE 6 - IMMOBILISATIONS CORPORELLES (en FCFA)
-            </Typography>
+        <SheetHeader title="NOTE 6 - IMMOBILISATIONS CORPORELLES (en FCFA)" icon={<ImmobilisationIcon />} />
+        {hasChanges && (
+          <Stack direction="row" justifyContent="flex-end" sx={{ mb: 1 }}>
+            <Button variant="contained" size="small" startIcon={<SaveIcon />} onClick={handleSave} color="success">
+              Enregistrer
+            </Button>
           </Stack>
-          
-          <Stack direction="row" spacing={1}>
-            <Tooltip title="Imprimer">
-              <IconButton size="small">
-                <PrintIcon />
-              </IconButton>
-            </Tooltip>
-            
-            <Tooltip title="Exporter">
-              <IconButton size="small">
-                <ExportIcon />
-              </IconButton>
-            </Tooltip>
-            
-            {hasChanges && (
-              <Button
-                variant="contained"
-                size="small"
-                startIcon={<SaveIcon />}
-                onClick={handleSave}
-                color="success"
-              >
-                Enregistrer
-              </Button>
-            )}
-          </Stack>
-        </Stack>
+        )}
 
         <Alert severity="info" sx={{ mb: 2 }}>
           <Typography variant="body2">

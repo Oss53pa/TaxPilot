@@ -8,7 +8,7 @@ interface DeterminationResultatFiscalProps {
 const DeterminationResultatFiscal: React.FC<DeterminationResultatFiscalProps> = ({ modeEdition: _modeEdition = false }) => {
   return (
     <Box>
-      <Typography variant="h5" sx={{ mb: 3, fontWeight: 700, color: '#171717' }}>
+      <Typography variant="h5" sx={{ mb: 3, fontWeight: 700, color: 'text.primary' }}>
         Détermination du Résultat Fiscal
       </Typography>
       <Alert severity="error" sx={{ mb: 3 }}>Calcul du résultat imposable</Alert>

@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Service pour la gestion des paramètres régionaux via l'API
  */
@@ -73,7 +74,7 @@ class RegionalService {
       const results = Array.isArray(data) ? data : (data.results || [])
       return results.length > 0 ? results[0] : null
     } catch (error) {
-      console.error('Erreur lors de la récupération des paramètres régionaux:', error)
+      logger.error('Erreur lors de la récupération des paramètres régionaux:', error)
       throw error
     }
   }
@@ -84,7 +85,7 @@ class RegionalService {
       const data = await apiClient.post<RegionalSettings>(this.baseUrl + '/', settings)
       return data
     } catch (error) {
-      console.error('Erreur lors de la création des paramètres régionaux:', error)
+      logger.error('Erreur lors de la création des paramètres régionaux:', error)
       throw error
     }
   }
@@ -95,7 +96,7 @@ class RegionalService {
       const data = await apiClient.patch<RegionalSettings>(`${this.baseUrl}/${id}/`, settings)
       return data
     } catch (error) {
-      console.error('Erreur lors de la mise à jour des paramètres régionaux:', error)
+      logger.error('Erreur lors de la mise à jour des paramètres régionaux:', error)
       throw error
     }
   }
@@ -106,7 +107,7 @@ class RegionalService {
       const data = await apiClient.get<DefaultSettings>(`${this.baseUrl}/default_settings/?pays=${paysCode}`)
       return data
     } catch (error) {
-      console.error('Erreur lors de la récupération des paramètres par défaut:', error)
+      logger.error('Erreur lors de la récupération des paramètres par défaut:', error)
       throw error
     }
   }
@@ -117,7 +118,7 @@ class RegionalService {
       const data = await apiClient.get<TimezoneOption[]>(`${this.baseUrl}/timezones/`)
       return data
     } catch (error) {
-      console.error('Erreur lors de la récupération des fuseaux horaires:', error)
+      logger.error('Erreur lors de la récupération des fuseaux horaires:', error)
       throw error
     }
   }

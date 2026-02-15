@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Box,
@@ -393,7 +394,7 @@ const ModernVeilleReglementaire: React.FC = () => {
   const checkForUpdates = () => {
     setLastCheck(new Date());
     // Simulation de vérification de nouvelles réglementations
-    console.log('Vérification des mises à jour réglementaires...');
+    logger.debug('Vérification des mises à jour réglementaires...');
   };
 
   const getPriorityColor = (priority: string) => {

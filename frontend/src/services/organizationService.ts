@@ -4,6 +4,7 @@
  */
 
 import { apiClient } from './apiClient'
+import { logger } from '@/utils/logger'
 
 export interface Organization {
   id: string // UUID
@@ -224,7 +225,7 @@ class OrganizationService {
     previous: string | null
     results: Organization[]
   }> {
-    console.log('🔄 Fetching organizations from backend...', filters)
+    logger.debug('Fetching organizations from backend...', filters)
     return apiClient.get(this.baseUrl, filters)
   }
 
@@ -232,7 +233,7 @@ class OrganizationService {
    * Récupérer toutes les organisations (sans pagination)
    */
   async getAll(): Promise<Organization[]> {
-    console.log('🔄 Fetching all organizations from backend...')
+    logger.debug('Fetching all organizations from backend...')
     const data = await apiClient.get<Record<string, any>>(this.baseUrl, { page_size: 100 })
     return data.results || []
   }
@@ -241,7 +242,7 @@ class OrganizationService {
    * Récupérer une organisation par slug
    */
   async getBySlug(slug: string): Promise<Organization> {
-    console.log(`🔄 Fetching organization ${slug} from backend...`)
+    logger.debug(`Fetching organization ${slug} from backend...`)
     return apiClient.get(`${this.baseUrl}/${slug}/`)
   }
 
@@ -249,7 +250,7 @@ class OrganizationService {
    * Créer une nouvelle organisation
    */
   async create(data: CreateOrganization): Promise<Organization> {
-    console.log('📤 Creating organization in backend...', data)
+    logger.debug('Creating organization in backend...', data)
     return apiClient.post(this.baseUrl, data)
   }
 
@@ -257,7 +258,7 @@ class OrganizationService {
    * Mettre à jour une organisation
    */
   async update(slug: string, data: Partial<CreateOrganization>): Promise<Organization> {
-    console.log(`📤 Updating organization ${slug} in backend...`, data)
+    logger.debug(`Updating organization ${slug} in backend...`, data)
     return apiClient.patch(`${this.baseUrl}/${slug}/`, data)
   }
 
@@ -265,7 +266,7 @@ class OrganizationService {
    * Supprimer une organisation
    */
   async delete(slug: string): Promise<void> {
-    console.log(`🗑️ Deleting organization ${slug} from backend...`)
+    logger.debug(`Deleting organization ${slug} from backend...`)
     return apiClient.delete(`${this.baseUrl}/${slug}/`)
   }
 
@@ -273,7 +274,7 @@ class OrganizationService {
    * Incrémenter le compteur de liasses utilisées
    */
   async incrementLiasse(slug: string): Promise<Organization> {
-    console.log(`📈 Incrementing liasse count for organization ${slug}...`)
+    logger.debug(`Incrementing liasse count for organization ${slug}...`)
     return apiClient.post(`${this.baseUrl}/${slug}/increment_liasse/`)
   }
 
@@ -281,7 +282,7 @@ class OrganizationService {
    * Réinitialiser le quota annuel
    */
   async resetQuota(slug: string): Promise<{ message: string; liasses_used: number }> {
-    console.log(`🔄 Resetting quota for organization ${slug}...`)
+    logger.debug(`Resetting quota for organization ${slug}...`)
     return apiClient.post(`${this.baseUrl}/${slug}/reset_quota/`)
   }
 
@@ -289,7 +290,7 @@ class OrganizationService {
    * Récupérer les statistiques de l'organisation
    */
   async getStats(slug: string): Promise<OrganizationStats> {
-    console.log(`📊 Fetching stats for organization ${slug}...`)
+    logger.debug(`Fetching stats for organization ${slug}...`)
     return apiClient.get(`${this.baseUrl}/${slug}/stats/`)
   }
 
@@ -308,7 +309,7 @@ class OrganizationService {
       // Vérifier le quota
       return stats.liasses.used < stats.liasses.quota
     } catch (error) {
-      console.error('Error checking liasse quota:', error)
+      logger.error('Error checking liasse quota:', error)
       return false
     }
   }
@@ -318,12 +319,12 @@ class OrganizationService {
    * (Utilise le store si disponible, sinon récupère la première)
    */
   async getCurrent(): Promise<Organization | null> {
-    console.log('🔄 Fetching current organization...')
+    logger.debug('Fetching current organization...')
     try {
       const orgs = await this.getAll()
       return orgs.length > 0 ? orgs[0] : null
     } catch (error) {
-      console.error('Error fetching current organization:', error)
+      logger.error('Error fetching current organization:', error)
       return null
     }
   }
@@ -336,7 +337,7 @@ class OrganizationService {
       const org = await this.getBySlug(slug)
       return org.owner === userId
     } catch (error) {
-      console.error('Error checking ownership:', error)
+      logger.error('Error checking ownership:', error)
       return false
     }
   }
@@ -451,7 +452,7 @@ class OrganizationService {
    * Récupérer la liste des membres d'une organisation
    */
   async getMembers(organizationSlug?: string): Promise<OrganizationMember[]> {
-    console.log('🔄 Fetching organization members from backend...', organizationSlug)
+    logger.debug('Fetching organization members from backend...', organizationSlug)
     const params = organizationSlug ? { organization: organizationSlug } : undefined
     const data = await apiClient.get<Record<string, any>>('/api/v1/members/', params)
     return data.results || []
@@ -461,7 +462,7 @@ class OrganizationService {
    * Récupérer un membre spécifique
    */
   async getMember(id: string): Promise<OrganizationMember> {
-    console.log(`🔄 Fetching member ${id} from backend...`)
+    logger.debug(`Fetching member ${id} from backend...`)
     return apiClient.get(`/api/v1/members/${id}/`)
   }
 
@@ -473,7 +474,7 @@ class OrganizationService {
     user_email: string
     role: 'OWNER' | 'ADMIN' | 'MEMBER' | 'VIEWER'
   }): Promise<OrganizationMember> {
-    console.log('📤 Adding member to organization...', data)
+    logger.debug('Adding member to organization...', data)
     return apiClient.post('/api/v1/members/', data)
   }
 
@@ -481,7 +482,7 @@ class OrganizationService {
    * Mettre à jour le rôle d'un membre
    */
   async updateMemberRole(id: string, role: string): Promise<OrganizationMember> {
-    console.log(`📤 Updating member ${id} role to ${role}...`)
+    logger.debug(`Updating member ${id} role to ${role}...`)
     return apiClient.patch(`/api/v1/members/${id}/`, { role })
   }
 
@@ -489,7 +490,7 @@ class OrganizationService {
    * Retirer un membre d'une organisation
    */
   async removeMember(id: string): Promise<void> {
-    console.log(`🗑️ Removing member ${id} from organization...`)
+    logger.debug(`Removing member ${id} from organization...`)
     return apiClient.delete(`/api/v1/members/${id}/`)
   }
 
@@ -527,7 +528,7 @@ class OrganizationService {
    * Récupérer la liste des subscriptions
    */
   async getSubscriptions(organizationSlug?: string): Promise<Subscription[]> {
-    console.log('🔄 Fetching subscriptions from backend...', organizationSlug)
+    logger.debug('Fetching subscriptions from backend...', organizationSlug)
     const params = organizationSlug ? { organization: organizationSlug } : undefined
     const data = await apiClient.get<Record<string, any>>('/api/v1/subscriptions/', params)
     return data.results || []
@@ -537,7 +538,7 @@ class OrganizationService {
    * Récupérer une subscription spécifique
    */
   async getSubscription(id: string): Promise<Subscription> {
-    console.log(`🔄 Fetching subscription ${id} from backend...`)
+    logger.debug(`Fetching subscription ${id} from backend...`)
     return apiClient.get(`/api/v1/subscriptions/${id}/`)
   }
 
@@ -545,7 +546,7 @@ class OrganizationService {
    * Récupérer la subscription active d'une organisation
    */
   async getCurrentSubscription(organizationSlug: string): Promise<Subscription | null> {
-    console.log(`🔄 Fetching current subscription for organization ${organizationSlug}...`)
+    logger.debug(`Fetching current subscription for organization ${organizationSlug}...`)
     const data = await apiClient.get<Record<string, any>>('/api/v1/subscriptions/', {
       organization: organizationSlug,
       status: 'ACTIVE'
@@ -561,7 +562,7 @@ class OrganizationService {
     organization: string
     plan: 'STARTER' | 'BUSINESS' | 'ENTERPRISE'
   }): Promise<Subscription> {
-    console.log('📤 Creating subscription...', data)
+    logger.debug('Creating subscription...', data)
     return apiClient.post('/api/v1/subscriptions/', data)
   }
 
@@ -569,7 +570,7 @@ class OrganizationService {
    * Mettre à niveau une subscription
    */
   async upgradeSubscription(subscriptionId: string, newPlan: string): Promise<Subscription> {
-    console.log(`⬆️ Upgrading subscription ${subscriptionId} to ${newPlan}...`)
+    logger.debug(`Upgrading subscription ${subscriptionId} to ${newPlan}...`)
     return apiClient.patch(`/api/v1/subscriptions/${subscriptionId}/`, {
       plan: newPlan
     })
@@ -579,7 +580,7 @@ class OrganizationService {
    * Annuler une subscription
    */
   async cancelSubscription(subscriptionId: string): Promise<Subscription> {
-    console.log(`❌ Cancelling subscription ${subscriptionId}...`)
+    logger.debug(`Cancelling subscription ${subscriptionId}...`)
     return apiClient.patch(`/api/v1/subscriptions/${subscriptionId}/`, {
       status: 'CANCELLED'
     })
@@ -589,7 +590,7 @@ class OrganizationService {
    * Réactiver une subscription
    */
   async reactivateSubscription(subscriptionId: string): Promise<Subscription> {
-    console.log(`✅ Reactivating subscription ${subscriptionId}...`)
+    logger.debug(`Reactivating subscription ${subscriptionId}...`)
     return apiClient.patch(`/api/v1/subscriptions/${subscriptionId}/`, {
       status: 'ACTIVE'
     })
@@ -603,7 +604,7 @@ class OrganizationService {
    * Récupérer la liste des invitations
    */
   async getInvitations(organizationSlug?: string): Promise<Invitation[]> {
-    console.log('🔄 Fetching invitations from backend...', organizationSlug)
+    logger.debug('Fetching invitations from backend...', organizationSlug)
     const params = organizationSlug ? { organization: organizationSlug } : undefined
     const data = await apiClient.get<Record<string, any>>('/api/v1/invitations/', params)
     return data.results || []
@@ -613,7 +614,7 @@ class OrganizationService {
    * Récupérer une invitation spécifique
    */
   async getInvitation(id: string): Promise<Invitation> {
-    console.log(`🔄 Fetching invitation ${id} from backend...`)
+    logger.debug(`Fetching invitation ${id} from backend...`)
     return apiClient.get(`/api/v1/invitations/${id}/`)
   }
 
@@ -625,7 +626,7 @@ class OrganizationService {
     email: string
     role: 'ADMIN' | 'MEMBER' | 'VIEWER'
   }): Promise<Invitation> {
-    console.log('📤 Sending invitation...', data)
+    logger.debug('Sending invitation...', data)
     return apiClient.post('/api/v1/invitations/', data)
   }
 
@@ -633,7 +634,7 @@ class OrganizationService {
    * Renvoyer une invitation
    */
   async resendInvitation(id: string): Promise<Invitation> {
-    console.log(`📤 Resending invitation ${id}...`)
+    logger.debug(`Resending invitation ${id}...`)
     return apiClient.post(`/api/v1/invitations/${id}/resend/`)
   }
 
@@ -641,7 +642,7 @@ class OrganizationService {
    * Annuler une invitation
    */
   async cancelInvitation(id: string): Promise<void> {
-    console.log(`❌ Cancelling invitation ${id}...`)
+    logger.debug(`Cancelling invitation ${id}...`)
     return apiClient.delete(`/api/v1/invitations/${id}/`)
   }
 
@@ -649,7 +650,7 @@ class OrganizationService {
    * Accepter une invitation
    */
   async acceptInvitation(token: string): Promise<{ message: string; organization: Organization }> {
-    console.log('✅ Accepting invitation...')
+    logger.debug('Accepting invitation...')
     return apiClient.post('/api/v1/invitations/accept/', { token })
   }
 
@@ -657,7 +658,7 @@ class OrganizationService {
    * Récupérer les invitations en attente
    */
   async getPendingInvitations(): Promise<Invitation[]> {
-    console.log('🔄 Fetching pending invitations...')
+    logger.debug('Fetching pending invitations...')
     const data = await apiClient.get<Record<string, any>>('/api/v1/invitations/', {
       status: 'PENDING'
     })

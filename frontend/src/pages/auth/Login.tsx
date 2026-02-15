@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Page de connexion TaxPilot - Design élégant et cohérent
  */
@@ -89,7 +90,7 @@ const Login: React.FC = () => {
       await login(formData.username, formData.password)
       navigate('/dashboard')
     } catch (err) {
-      console.error('Erreur de connexion:', err)
+      logger.error('Erreur de connexion:', err)
     }
   }
 
@@ -110,7 +111,7 @@ const Login: React.FC = () => {
         navigate('/dashboard')
       }
     } catch (err) {
-      console.error('Erreur auto-login:', err)
+      logger.error('Erreur auto-login:', err)
     }
   }
 
@@ -145,7 +146,7 @@ const Login: React.FC = () => {
         <Grid container sx={{ minHeight: '100vh', alignItems: 'center' }}>
           {/* Section gauche - Branding et témoignages */}
           <Grid item xs={12} lg={7} sx={{ display: { xs: 'none', lg: 'block' } }}>
-            <Box sx={{ pr: 8, color: '#171717' }}>
+            <Box sx={{ pr: 8, color: 'text.primary' }}>
               {/* Logo et titre avec couleurs TaxPilot */}
               <Fade in timeout={800}>
                 <Box sx={{ mb: 6 }}>
@@ -164,16 +165,16 @@ const Login: React.FC = () => {
                     >
                       <AccountBalance sx={{ fontSize: 32, color: '#FFFFFF' }} />
                     </Box>
-                    <Typography variant="h3" sx={{ fontWeight: 900, letterSpacing: '-0.02em', color: '#171717' }}>
+                    <Typography variant="h3" sx={{ fontWeight: 900, letterSpacing: '-0.02em', color: 'text.primary' }}>
                       TaxPilot
                     </Typography>
                   </Stack>
                   
-                  <Typography variant="h4" sx={{ mb: 3, fontWeight: 300, color: '#171717' }}>
+                  <Typography variant="h4" sx={{ mb: 3, fontWeight: 300, color: 'text.primary' }}>
                     L'excellence comptable à portée de clic
                   </Typography>
                   
-                  <Typography variant="h6" sx={{ mb: 4, color: '#737373', lineHeight: 1.6 }}>
+                  <Typography variant="h6" sx={{ mb: 4, color: 'text.secondary', lineHeight: 1.6 }}>
                     Révolutionnez votre pratique comptable avec la solution SYSCOHADA 
                     la plus avancée d'Afrique. Intelligence artificielle, conformité garantie, 
                     et productivité maximale.
@@ -185,9 +186,9 @@ const Login: React.FC = () => {
               <Fade in timeout={1000}>
                 <Grid container spacing={3} sx={{ mb: 6 }}>
                   {[
-                    { value: '17', label: 'Pays OHADA', icon: <TrendingUp />, color: '#171717' },
-                    { value: '99.9%', label: 'Précision', icon: <Speed />, color: '#171717' },
-                    { value: '80%', label: 'Gain temps', icon: <Security />, color: '#171717' },
+                    { value: '17', label: 'Pays OHADA', icon: <TrendingUp />, color: 'text.primary' },
+                    { value: '99.9%', label: 'Précision', icon: <Speed />, color: 'text.primary' },
+                    { value: '80%', label: 'Gain temps', icon: <Security />, color: 'text.primary' },
                   ].map((stat, index) => (
                     <Grid item xs={4} key={index}>
                       <Paper
@@ -208,10 +209,10 @@ const Login: React.FC = () => {
                         <Box sx={{ color: stat.color, mb: 1 }}>
                           {stat.icon}
                         </Box>
-                        <Typography variant="h4" sx={{ fontWeight: 700, color: '#171717', mb: 1 }}>
+                        <Typography variant="h4" sx={{ fontWeight: 700, color: 'text.primary', mb: 1 }}>
                           {stat.value}
                         </Typography>
-                        <Typography variant="body2" sx={{ color: '#737373' }}>
+                        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                           {stat.label}
                         </Typography>
                       </Paper>
@@ -233,17 +234,17 @@ const Login: React.FC = () => {
                 >
                   <Box sx={{ display: 'flex', mb: 2 }}>
                     {[...Array(testimonials[currentTestimonial].rating)].map((_, i) => (
-                      <Star key={i} sx={{ color: '#171717', fontSize: 20 }} />
+                      <Star key={i} sx={{ color: 'text.primary', fontSize: 20 }} />
                     ))}
                   </Box>
-                  <Typography variant="body1" sx={{ mb: 3, fontStyle: 'italic', lineHeight: 1.6, color: '#171717' }}>
+                  <Typography variant="body1" sx={{ mb: 3, fontStyle: 'italic', lineHeight: 1.6, color: 'text.primary' }}>
                     "{testimonials[currentTestimonial].text}"
                   </Typography>
                   <Box>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#171717' }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary' }}>
                       {testimonials[currentTestimonial].author}
                     </Typography>
-                    <Typography variant="body2" sx={{ color: '#737373' }}>
+                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                       {testimonials[currentTestimonial].role}
                     </Typography>
                   </Box>
@@ -418,7 +419,7 @@ const Login: React.FC = () => {
                         fontWeight: 600,
                         textTransform: 'none',
                         borderColor: '#22c55e',
-                        color: '#22c55e',
+                        color: 'success.main',
                         mb: 4,
                         transition: 'all 0.3s ease',
                         '&:hover': {
@@ -443,18 +444,18 @@ const Login: React.FC = () => {
                       mb: 3,
                     }}
                   >
-                    <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, color: '#171717' }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, color: 'text.primary' }}>
                       🎯 Accès Démonstration
                     </Typography>
                     <Stack direction="row" justifyContent="space-around" alignItems="center">
                       <Box>
-                        <Typography variant="caption" sx={{ color: '#171717' }}>Utilisateur</Typography>
-                        <Typography variant="body2" sx={{ fontWeight: 600, color: '#171717' }}>admin</Typography>
+                        <Typography variant="caption" sx={{ color: 'text.primary' }}>Utilisateur</Typography>
+                        <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>admin</Typography>
                       </Box>
-                      <Box sx={{ color: '#737373' }}>→</Box>
+                      <Box sx={{ color: 'text.secondary' }}>→</Box>
                       <Box>
-                        <Typography variant="caption" sx={{ color: '#171717' }}>Mot de passe</Typography>
-                        <Typography variant="body2" sx={{ fontWeight: 600, color: '#171717' }}>admin123</Typography>
+                        <Typography variant="caption" sx={{ color: 'text.primary' }}>Mot de passe</Typography>
+                        <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>admin123</Typography>
                       </Box>
                     </Stack>
                   </Paper>
@@ -462,15 +463,15 @@ const Login: React.FC = () => {
                   {/* Footer sécurité avec couleurs TaxPilot */}
                   <Box sx={{ textAlign: 'center' }}>
                     <Stack direction="row" justifyContent="center" alignItems="center" spacing={1} sx={{ mb: 1 }}>
-                      <CheckCircle sx={{ fontSize: 16, color: '#22c55e' }} />
-                      <Typography variant="body2" sx={{ fontWeight: 500, color: '#22c55e' }}>
+                      <CheckCircle sx={{ fontSize: 16, color: 'success.main' }} />
+                      <Typography variant="body2" sx={{ fontWeight: 500, color: 'success.main' }}>
                         Connexion Sécurisée SSL
                       </Typography>
                     </Stack>
-                    <Typography variant="caption" sx={{ color: '#737373' }}>
+                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                       TaxPilot v1.0.0 - Conforme SYSCOHADA & RGPD
                     </Typography>
-                    <Typography variant="caption" sx={{ color: '#737373', display: 'block', mt: 0.5 }}>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mt: 0.5 }}>
                       © 2025 Atlas Studio. Tous droits réservés.
                     </Typography>
                   </Box>

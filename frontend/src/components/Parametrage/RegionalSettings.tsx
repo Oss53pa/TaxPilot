@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Composant de configuration des paramètres régionaux
  */
@@ -118,7 +119,7 @@ const RegionalSettings: React.FC = () => {
 
   const handleSave = () => {
     // Logique de sauvegarde
-    console.log('Saving regional settings:', config)
+    logger.debug('Saving regional settings:', config)
     setSaved(true)
     setTimeout(() => setSaved(false), 3000)
   }

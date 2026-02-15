@@ -384,7 +384,7 @@ const NotesAnnexesComplete: React.FC<NotesAnnexesCompleteProps> = ({ modeEdition
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h5" sx={{ fontWeight: 700, color: '#171717' }}>
+        <Typography variant="h5" sx={{ fontWeight: 700, color: 'text.primary' }}>
           NOTES ANNEXES AUX ÉTATS FINANCIERS
         </Typography>
         <Button
@@ -409,7 +409,7 @@ const NotesAnnexesComplete: React.FC<NotesAnnexesCompleteProps> = ({ modeEdition
             fontWeight: 500,
           },
           '& .Mui-selected': {
-            color: '#171717',
+            color: 'text.primary',
           },
         }}
       >

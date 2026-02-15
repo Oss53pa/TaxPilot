@@ -2,7 +2,8 @@
  * Supplément TVA - Déclaration détaillée de la TVA
  */
 
-import { useState, type FC, type ReactNode, type SyntheticEvent } from 'react'
+import { useState, type FC, type SyntheticEvent } from 'react'
+import { TabPanel } from '@/components/shared/TabPanel'
 import {
   Box,
   Paper,
@@ -24,27 +25,6 @@ import {
   Divider,
   Stack,
 } from '@mui/material'
-
-interface TabPanelProps {
-  children?: ReactNode
-  index: number
-  value: number
-}
-
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`tva-tabpanel-${index}`}
-      aria-labelledby={`tva-tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box>{children}</Box>}
-    </div>
-  )
-}
 
 const SupplementTVA: FC = () => {
   const theme = useTheme()
@@ -120,7 +100,7 @@ const SupplementTVA: FC = () => {
             <TableContainer>
               <Table>
                 <TableHead>
-                  <TableRow sx={{ bgcolor: '#f5f5f5' }}>
+                  <TableRow sx={{ bgcolor: 'grey.100' }}>
                     <TableCell sx={{ fontWeight: 600 }}>Opérations</TableCell>
                     <TableCell align="right" sx={{ fontWeight: 600 }}>Base HT</TableCell>
                     <TableCell align="center" sx={{ fontWeight: 600 }}>Taux</TableCell>
@@ -168,7 +148,7 @@ const SupplementTVA: FC = () => {
             <TableContainer>
               <Table>
                 <TableHead>
-                  <TableRow sx={{ bgcolor: '#f5f5f5' }}>
+                  <TableRow sx={{ bgcolor: 'grey.100' }}>
                     <TableCell sx={{ fontWeight: 600 }}>Opérations</TableCell>
                     <TableCell align="right" sx={{ fontWeight: 600 }}>Base HT</TableCell>
                     <TableCell align="center" sx={{ fontWeight: 600 }}>Taux</TableCell>
@@ -216,7 +196,7 @@ const SupplementTVA: FC = () => {
             <TableContainer>
               <Table size="small">
                 <TableHead>
-                  <TableRow sx={{ bgcolor: '#f5f5f5' }}>
+                  <TableRow sx={{ bgcolor: 'grey.100' }}>
                     <TableCell sx={{ fontWeight: 600 }}>Mois</TableCell>
                     <TableCell align="right" sx={{ fontWeight: 600 }}>TVA Collectée</TableCell>
                     <TableCell align="right" sx={{ fontWeight: 600 }}>TVA Déductible</TableCell>

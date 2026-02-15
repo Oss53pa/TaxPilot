@@ -62,10 +62,10 @@ const OperationsSpecifiques = () => {
     <Box sx={{ p: 3, backgroundColor: '#fafafa', minHeight: '100vh' }}>
       {/* Header */}
       <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, color: '#171717' }}>
+        <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, color: 'text.primary' }}>
           Opérations Spécifiques SYSCOHADA
         </Typography>
-        <Typography variant="body1" sx={{ color: '#737373' }}>
+        <Typography variant="body1" sx={{ color: 'text.secondary' }}>
           41 chapitres couvrant toutes les opérations comptables - Référentiel OHADA 2017
         </Typography>
       </Box>
@@ -73,27 +73,27 @@ const OperationsSpecifiques = () => {
       {/* Statistiques */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid item xs={12} sm={4}>
-          <Paper sx={{ p: 2, textAlign: 'center', bgcolor: '#f5f5f5' }}>
-            <Typography variant="h4" sx={{ fontWeight: 700, color: '#171717' }}>
+          <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'grey.100' }}>
+            <Typography variant="h4" sx={{ fontWeight: 700, color: 'text.primary' }}>
               41
             </Typography>
-            <Typography variant="caption" sx={{ color: '#737373' }}>Chapitres</Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>Chapitres</Typography>
           </Paper>
         </Grid>
         <Grid item xs={12} sm={4}>
-          <Paper sx={{ p: 2, textAlign: 'center', bgcolor: '#f5f5f5' }}>
-            <Typography variant="h4" sx={{ fontWeight: 700, color: '#22c55e' }}>
+          <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'grey.100' }}>
+            <Typography variant="h4" sx={{ fontWeight: 700, color: 'success.main' }}>
               {filteredChapitres.length}
             </Typography>
-            <Typography variant="caption" sx={{ color: '#737373' }}>Résultats</Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>Résultats</Typography>
           </Paper>
         </Grid>
         <Grid item xs={12} sm={4}>
-          <Paper sx={{ p: 2, textAlign: 'center', bgcolor: '#f5f5f5' }}>
-            <Typography variant="h4" sx={{ fontWeight: 700, color: '#f59e0b' }}>
+          <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'grey.100' }}>
+            <Typography variant="h4" sx={{ fontWeight: 700, color: 'warning.main' }}>
               9
             </Typography>
-            <Typography variant="caption" sx={{ color: '#737373' }}>Classes couvertes</Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>Classes couvertes</Typography>
           </Paper>
         </Grid>
       </Grid>
@@ -109,7 +109,7 @@ const OperationsSpecifiques = () => {
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <SearchIcon sx={{ color: '#737373' }} />
+                  <SearchIcon sx={{ color: 'text.secondary' }} />
                 </InputAdornment>
               ),
             }}
@@ -121,7 +121,7 @@ const OperationsSpecifiques = () => {
       {/* Liste des chapitres */}
       <Card sx={{ border: '1px solid #e5e5e5' }}>
         <CardContent sx={{ p: 3 }}>
-          <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: '#171717' }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: 'text.primary' }}>
             <BookIcon sx={{ fontSize: 20, verticalAlign: 'middle', mr: 1 }} />
             Chapitres d'Opérations Spécifiques
           </Typography>
@@ -141,7 +141,7 @@ const OperationsSpecifiques = () => {
               <AccordionSummary
                 expandIcon={<ExpandMoreIcon />}
                 sx={{
-                  bgcolor: '#f5f5f5',
+                  bgcolor: 'grey.100',
                   borderRadius: 1,
                   '& .MuiAccordionSummary-content': { alignItems: 'center', gap: 2 },
                 }}
@@ -152,12 +152,12 @@ const OperationsSpecifiques = () => {
                   sx={{
                     fontFamily: 'monospace',
                     fontWeight: 700,
-                    bgcolor: '#171717',
+                    bgcolor: 'text.primary',
                     color: '#fff',
                     minWidth: 60,
                   }}
                 />
-                <Typography variant="body1" sx={{ fontWeight: 500, color: '#171717' }}>
+                <Typography variant="body1" sx={{ fontWeight: 500, color: 'text.primary' }}>
                   {ch.titre}
                 </Typography>
               </AccordionSummary>
@@ -181,8 +181,8 @@ const OperationsSpecifiques = () => {
 
                     {/* Sections */}
                     {loadedChapitre.sections.map((section, idx) => (
-                      <Paper key={idx} sx={{ p: 2, mb: 2, bgcolor: '#fafafa' }}>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, color: '#171717' }}>
+                      <Paper key={idx} sx={{ p: 2, mb: 2, bgcolor: 'grey.50' }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, color: 'text.primary' }}>
                           {section.titre}
                         </Typography>
                         <Typography variant="body2" sx={{ mb: 2 }}>
@@ -193,8 +193,8 @@ const OperationsSpecifiques = () => {
                         {section.ecritures && section.ecritures.length > 0 && (
                           <>
                             {section.ecritures.map(ecriture => (
-                              <Paper key={ecriture.numero} sx={{ p: 2, mb: 1, bgcolor: '#fff', border: '1px solid #e5e5e5' }}>
-                                <Typography variant="caption" sx={{ fontWeight: 600, color: '#737373', display: 'block', mb: 1 }}>
+                              <Paper key={ecriture.numero} sx={{ p: 2, mb: 1, bgcolor: 'background.paper', border: '1px solid #e5e5e5' }}>
+                                <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.secondary', display: 'block', mb: 1 }}>
                                   Écriture {ecriture.numero} : {ecriture.description}
                                 </Typography>
                                 <Table size="small">
@@ -215,15 +215,15 @@ const OperationsSpecifiques = () => {
                                         <TableCell sx={{ py: 0.5, fontSize: '0.8rem' }}>
                                           {ligne.libelleCompte}
                                           {ligne.commentaire && (
-                                            <Typography variant="caption" sx={{ display: 'block', color: '#737373' }}>
+                                            <Typography variant="caption" sx={{ display: 'block', color: 'text.secondary' }}>
                                               {ligne.commentaire}
                                             </Typography>
                                           )}
                                         </TableCell>
-                                        <TableCell sx={{ py: 0.5, textAlign: 'right', color: '#dc2626', fontWeight: ligne.sens === 'D' ? 600 : 400 }}>
+                                        <TableCell sx={{ py: 0.5, textAlign: 'right', color: 'error.main', fontWeight: ligne.sens === 'D' ? 600 : 400 }}>
                                           {ligne.sens === 'D' && ligne.montant ? ligne.montant.toLocaleString('fr-FR') : ''}
                                         </TableCell>
-                                        <TableCell sx={{ py: 0.5, textAlign: 'right', color: '#16a34a', fontWeight: ligne.sens === 'C' ? 600 : 400 }}>
+                                        <TableCell sx={{ py: 0.5, textAlign: 'right', color: 'success.main', fontWeight: ligne.sens === 'C' ? 600 : 400 }}>
                                           {ligne.sens === 'C' && ligne.montant ? ligne.montant.toLocaleString('fr-FR') : ''}
                                         </TableCell>
                                       </TableRow>

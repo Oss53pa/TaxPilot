@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Dialog de validation complète d'une liasse fiscale
  * Connecté au backend via generationService.validateComplete()
@@ -102,7 +103,7 @@ const ValidationDialog: React.FC<ValidationDialogProps> = ({
         }, 2000)
       }
     } catch (err: any) {
-      console.error('Validation failed:', err)
+      logger.error('Validation failed:', err)
       setError(err.message || 'Erreur lors de la validation')
     } finally {
       setValidating(false)

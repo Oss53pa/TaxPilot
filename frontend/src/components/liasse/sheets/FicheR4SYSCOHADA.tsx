@@ -31,11 +31,12 @@ import {
   Tabs,
   Tab,
 } from '@mui/material'
+import { formatCurrency } from '@/utils/formatting'
+import { SheetHeader } from '@/components/liasse/common/SheetHeader'
+import { TabPanel } from '@/components/shared/TabPanel'
 import {
   AccountBalance as ProvisionIcon,
   Save as SaveIcon,
-  Print as PrintIcon,
-  GetApp as ExportIcon,
   Add as AddIcon,
   Delete as DeleteIcon,
   Warning as RiskIcon,
@@ -60,25 +61,6 @@ interface Provision {
   justification: string
   probabiliteRealisation: number
   observations: string
-}
-
-interface TabPanelProps {
-  children?: React.ReactNode
-  index: number
-  value: number
-}
-
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      {...other}
-    >
-      {value === index && <Box sx={{ pt: 2 }}>{children}</Box>}
-    </div>
-  )
 }
 
 const CATEGORIES_PROVISIONS = [
@@ -239,19 +221,7 @@ const FicheR4SYSCOHADA: React.FC = () => {
     setHasChanges(true)
   }
 
-  const formatNumber = (value: number) => {
-    return new Intl.NumberFormat('fr-FR', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value)
-  }
-
-  const formatCurrency = (value: number) => {
-    return formatNumber(value)
-  }
-
   const handleSave = () => {
-    console.log('Sauvegarde Fiche R4:', { provisions, comment })
     setHasChanges(false)
   }
 
@@ -311,7 +281,7 @@ const FicheR4SYSCOHADA: React.FC = () => {
         <TableContainer>
           <Table size="small">
             <TableHead>
-              <TableRow sx={{ bgcolor: '#f5f5f5' }}>
+              <TableRow sx={{ bgcolor: 'grey.100' }}>
                 <TableCell sx={{ fontWeight: 600 }}>Catégorie</TableCell>
                 <TableCell align="center" sx={{ fontWeight: 600 }}>Nombre</TableCell>
                 <TableCell align="right" sx={{ fontWeight: 600 }}>Montant début</TableCell>
@@ -431,7 +401,7 @@ const FicheR4SYSCOHADA: React.FC = () => {
         <TableContainer>
           <Table size="small">
             <TableHead>
-              <TableRow sx={{ bgcolor: '#f5f5f5' }}>
+              <TableRow sx={{ bgcolor: 'grey.100' }}>
                 <TableCell sx={{ fontWeight: 600 }}>Désignation</TableCell>
                 <TableCell sx={{ fontWeight: 600 }}>Catégorie/Nature</TableCell>
                 <TableCell align="right" sx={{ fontWeight: 600 }}>Montant début</TableCell>
@@ -699,27 +669,8 @@ const FicheR4SYSCOHADA: React.FC = () => {
     >
       {/* En-tête */}
       <Box sx={{ mb: 3 }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-          <Stack direction="row" spacing={2} alignItems="center">
-            <ProvisionIcon color="primary" sx={{ fontSize: 28 }} />
-            <Typography variant="h5" sx={{ fontWeight: 600, color: theme.palette.primary.main }}>
-              FICHE R4 - TABLEAU DES PROVISIONS (en FCFA)
-            </Typography>
-          </Stack>
-          
-          <Stack direction="row" spacing={1}>
-            <Tooltip title="Imprimer">
-              <IconButton size="small">
-                <PrintIcon />
-              </IconButton>
-            </Tooltip>
-            
-            <Tooltip title="Exporter">
-              <IconButton size="small">
-                <ExportIcon />
-              </IconButton>
-            </Tooltip>
-            
+        <SheetHeader title="FICHE R4 - TABLEAU DES PROVISIONS (en FCFA)" icon={<ProvisionIcon />} />
+        <Stack direction="row" justifyContent="flex-end" sx={{ mb: 1 }}>
             {hasChanges && (
               <Button
                 variant="contained"
@@ -731,7 +682,6 @@ const FicheR4SYSCOHADA: React.FC = () => {
                 Enregistrer
               </Button>
             )}
-          </Stack>
         </Stack>
 
         {/* Indicateurs de synthèse */}

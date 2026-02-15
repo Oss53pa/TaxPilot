@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Composant Grand Livre - Détail des mouvements par compte
  * Affiche tous les mouvements d'un ou plusieurs comptes sur une période
@@ -63,7 +64,7 @@ const GrandLivre: React.FC = () => {
       }) as Record<string, any>
       setComptes(response.results || [])
     } catch (err: any) {
-      console.error('Failed to load comptes:', err)
+      logger.error('Failed to load comptes:', err)
     } finally {
       setLoadingComptes(false)
     }
@@ -92,7 +93,7 @@ const GrandLivre: React.FC = () => {
 
       setGrandLivre(data)
     } catch (err: any) {
-      console.error('Failed to load grand livre:', err)
+      logger.error('Failed to load grand livre:', err)
       setError(err.message || 'Erreur lors du chargement du grand livre')
       setGrandLivre(null)
     } finally {
@@ -118,7 +119,7 @@ const GrandLivre: React.FC = () => {
       link.click()
       window.URL.revokeObjectURL(url)
     } catch (err: any) {
-      console.error('Export failed:', err)
+      logger.error('Export failed:', err)
       setError('Erreur lors de l\'export')
     }
   }

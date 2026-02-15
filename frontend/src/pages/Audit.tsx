@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Page du module d'audit intelligent
  */
@@ -55,7 +56,7 @@ const Audit: React.FC = () => {
   const loadAuditData = async () => {
     try {
       setLoading(true)
-      console.log('🔄 Loading audit data from backend...')
+      logger.debug('🔄 Loading audit data from backend...')
 
       const [sessionsRaw, statsRaw, entreprisesRaw] = await Promise.all([
         auditService.getAuditSessions({ page_size: 10 }),
@@ -77,9 +78,9 @@ const Audit: React.FC = () => {
         setSelectedSession(sessionsResponse.results[0])
       }
 
-      console.log('✅ Audit data loaded successfully')
+      logger.debug('✅ Audit data loaded successfully')
     } catch (error) {
-      console.error('❌ Error loading audit data:', error)
+      logger.error('❌ Error loading audit data:', error)
     } finally {
       setLoading(false)
     }
@@ -117,7 +118,7 @@ const Audit: React.FC = () => {
 
   const lancerAudit = async () => {
     if (!entreprises[0]) {
-      console.error('Aucune entreprise disponible pour l\'audit')
+      logger.error('Aucune entreprise disponible pour l\'audit')
       return
     }
 
@@ -125,7 +126,7 @@ const Audit: React.FC = () => {
     setProgressionAudit(0)
 
     try {
-      console.log('🚀 Starting new audit session...')
+      logger.debug('🚀 Starting new audit session...')
 
       // Créer une nouvelle session d'audit
       const newSession = await auditService.startAudit({
@@ -151,7 +152,7 @@ const Audit: React.FC = () => {
         })
       }, 500)
     } catch (error) {
-      console.error('❌ Error starting audit:', error)
+      logger.error('❌ Error starting audit:', error)
       setAuditEnCours(false)
     }
   }

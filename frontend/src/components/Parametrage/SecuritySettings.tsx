@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Composant de paramètres de sécurité
  */
@@ -65,7 +66,7 @@ const SecuritySettings: React.FC = () => {
 
   const handleSaveSettings = () => {
     // Logique de sauvegarde
-    console.log('Saving security settings:', settings)
+    logger.debug('Saving security settings:', settings)
   }
 
   const securityScore = 85 // Calcul du score de sécurité

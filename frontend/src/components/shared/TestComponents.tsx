@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Composants de test pour vérifier Material-UI
  */
@@ -107,7 +108,7 @@ const TestComponents: React.FC = () => {
               icon={<CheckCircle />}
               label="Succès"
               color="success"
-              onClick={() => console.log('Chip clicked')}
+              onClick={() => logger.debug('Chip clicked')}
             />
             <Chip
               icon={<Warning />}

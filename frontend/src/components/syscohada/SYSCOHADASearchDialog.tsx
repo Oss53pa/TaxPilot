@@ -59,9 +59,9 @@ export default function SYSCOHADASearchDialog({ open, onClose, onSelectAccount }
 
   const getIcon = (type: SearchResult['type']) => {
     switch (type) {
-      case 'compte': return <AccountIcon sx={{ color: '#171717' }} />
-      case 'fonctionnement': return <FuncIcon sx={{ color: '#f59e0b' }} />
-      case 'operation': return <BookIcon sx={{ color: '#22c55e' }} />
+      case 'compte': return <AccountIcon sx={{ color: 'text.primary' }} />
+      case 'fonctionnement': return <FuncIcon sx={{ color: 'warning.main' }} />
+      case 'operation': return <BookIcon sx={{ color: 'success.main' }} />
     }
   }
 
@@ -110,7 +110,7 @@ export default function SYSCOHADASearchDialog({ open, onClose, onSelectAccount }
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <SearchIcon sx={{ color: '#737373' }} />
+                <SearchIcon sx={{ color: 'text.secondary' }} />
               </InputAdornment>
             ),
             endAdornment: loading ? (
@@ -137,7 +137,7 @@ export default function SYSCOHADASearchDialog({ open, onClose, onSelectAccount }
                 sx={{
                   borderRadius: 1,
                   mb: 0.5,
-                  bgcolor: '#fafafa',
+                  bgcolor: 'grey.50',
                   '&:hover': { bgcolor: '#e0f2fe', cursor: 'pointer' },
                 }}
               >
@@ -168,13 +168,13 @@ export default function SYSCOHADASearchDialog({ open, onClose, onSelectAccount }
           </List>
         ) : query.length >= 2 && !loading ? (
           <Box sx={{ textAlign: 'center', py: 4 }}>
-            <Typography variant="body2" sx={{ color: '#737373' }}>
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
               Aucun résultat pour "{query}"
             </Typography>
           </Box>
         ) : query.length < 2 ? (
           <Box sx={{ textAlign: 'center', py: 4 }}>
-            <Typography variant="body2" sx={{ color: '#737373' }}>
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
               Tapez au moins 2 caractères pour rechercher dans le référentiel SYSCOHADA
             </Typography>
             <Stack direction="row" spacing={1} justifyContent="center" sx={{ mt: 2 }}>

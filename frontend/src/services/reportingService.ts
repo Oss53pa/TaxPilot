@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Service pour la génération de rapports et statistiques
  * CONNEXION RÉELLE AU BACKEND DJANGO
@@ -124,7 +125,7 @@ class ReportingService {
 
   // Génération de rapports - CONNEXION RÉELLE AU BACKEND
   async generateReport(request: ReportRequest): Promise<Report> {
-    console.log('📤 Starting report generation in backend...', request)
+    logger.debug('Starting report generation in backend...', request)
     return apiClient.post(`${this.baseUrl}/reports/`, request)
   }
 
@@ -138,27 +139,27 @@ class ReportingService {
     page?: number
     page_size?: number
   }) {
-    console.log('🔄 Fetching reports from backend...', params)
+    logger.debug('Fetching reports from backend...', params)
     return apiClient.get(`${this.baseUrl}/reports/`, params)
   }
 
   async getReport(id: string): Promise<Report> {
-    console.log(`🔄 Fetching report ${id} from backend...`)
+    logger.debug(`Fetching report ${id} from backend...`)
     return apiClient.get(`${this.baseUrl}/reports/${id}/`)
   }
 
   async getReportStatus(id: string): Promise<Report> {
-    console.log(`🔄 Getting report status ${id} from backend...`)
+    logger.debug(`Getting report status ${id} from backend...`)
     return apiClient.get(`${this.baseUrl}/reports/${id}/status/`)
   }
 
   async cancelReport(id: string): Promise<void> {
-    console.log(`🛑 Cancelling report ${id} on backend...`)
+    logger.debug(`Cancelling report ${id} on backend...`)
     return apiClient.post(`${this.baseUrl}/reports/${id}/cancel/`)
   }
 
   async downloadReport(id: string): Promise<Blob> {
-    console.log(`📥 Downloading report ${id} from backend...`)
+    logger.debug(`Downloading report ${id} from backend...`)
     const response = await apiClient.client.get(`${this.baseUrl}/reports/${id}/download/`, {
       responseType: 'blob'
     })
@@ -171,32 +172,32 @@ class ReportingService {
     is_public?: boolean
     page?: number
   }) {
-    console.log('🔄 Fetching report templates from backend...', params)
+    logger.debug('Fetching report templates from backend...', params)
     return apiClient.get(`${this.baseUrl}/templates/`, params)
   }
 
   async getReportTemplate(id: string): Promise<ReportTemplate> {
-    console.log(`🔄 Fetching report template ${id} from backend...`)
+    logger.debug(`Fetching report template ${id} from backend...`)
     return apiClient.get(`${this.baseUrl}/templates/${id}/`)
   }
 
   async createReportTemplate(template: Partial<ReportTemplate>): Promise<ReportTemplate> {
-    console.log('📤 Creating report template in backend...', template)
+    logger.debug('Creating report template in backend...', template)
     return apiClient.post(`${this.baseUrl}/templates/`, template)
   }
 
   async updateReportTemplate(id: string, template: Partial<ReportTemplate>): Promise<ReportTemplate> {
-    console.log(`📤 Updating report template ${id} in backend...`)
+    logger.debug(`Updating report template ${id} in backend...`)
     return apiClient.patch(`${this.baseUrl}/templates/${id}/`, template)
   }
 
   async deleteReportTemplate(id: string): Promise<void> {
-    console.log(`🗑️ Deleting report template ${id} from backend...`)
+    logger.debug(`Deleting report template ${id} from backend...`)
     return apiClient.delete(`${this.baseUrl}/templates/${id}/`)
   }
 
   async duplicateReportTemplate(id: string, newName: string): Promise<ReportTemplate> {
-    console.log(`📋 Duplicating report template ${id} as ${newName}...`)
+    logger.debug(`Duplicating report template ${id} as ${newName}...`)
     return apiClient.post(`${this.baseUrl}/templates/${id}/duplicate/`, { nom: newName })
   }
 
@@ -205,7 +206,7 @@ class ReportingService {
     periode?: string
     entreprise?: string
   }): Promise<DashboardStats> {
-    console.log('📊 Getting dashboard stats from backend...', params)
+    logger.debug('Getting dashboard stats from backend...', params)
     return apiClient.get(`${this.baseUrl}/reports/stats/`, params)
   }
 
@@ -214,7 +215,7 @@ class ReportingService {
     periode_fin?: string
     granularite?: 'HOUR' | 'DAY' | 'WEEK' | 'MONTH'
   }): Promise<AnalyticsData> {
-    console.log('📈 Getting analytics data from backend...', params)
+    logger.debug('Getting analytics data from backend...', params)
     return apiClient.get(`${this.baseUrl}/analytics/`, params)
   }
 
@@ -222,7 +223,7 @@ class ReportingService {
     module?: string
     periode?: string
   }) {
-    console.log('⚡ Getting performance metrics from backend...', params)
+    logger.debug('Getting performance metrics from backend...', params)
     return apiClient.get(`${this.baseUrl}/performance/`, params)
   }
 
@@ -231,7 +232,7 @@ class ReportingService {
     inclure_comparaison: boolean
     format: 'PDF' | 'EXCEL'
   }) {
-    console.log(`📊 Generating financial report for entreprise ${entreprise_id}...`)
+    logger.debug(`Generating financial report for entreprise ${entreprise_id}...`)
     return apiClient.post(`${this.baseUrl}/predefined/financial/`, {
       entreprise_id,
       exercice_id,
@@ -243,7 +244,7 @@ class ReportingService {
     type_impot: string[]
     format: 'PDF' | 'EXCEL'
   }) {
-    console.log(`🧾 Generating tax report for entreprise ${entreprise_id}...`)
+    logger.debug(`Generating tax report for entreprise ${entreprise_id}...`)
     return apiClient.post(`${this.baseUrl}/predefined/tax/`, {
       entreprise_id,
       exercice_id,
@@ -256,7 +257,7 @@ class ReportingService {
     niveau_detail: 'RESUME' | 'DETAILLE'
     format: 'PDF' | 'EXCEL'
   }) {
-    console.log(`🔍 Generating audit report for session ${audit_session_id}...`)
+    logger.debug(`Generating audit report for session ${audit_session_id}...`)
     return apiClient.post(`${this.baseUrl}/predefined/audit/`, {
       audit_session_id,
       ...options
@@ -264,7 +265,7 @@ class ReportingService {
   }
 
   async getComplianceReport(entreprise_id: string, periode_debut: string, periode_fin: string) {
-    console.log(`📋 Generating compliance report for entreprise ${entreprise_id}...`)
+    logger.debug(`Generating compliance report for entreprise ${entreprise_id}...`)
     return apiClient.post(`${this.baseUrl}/predefined/compliance/`, {
       entreprise_id,
       periode_debut,
@@ -279,7 +280,7 @@ class ReportingService {
     expiration_date?: string
     require_password: boolean
   }) {
-    console.log(`📤 Sharing report ${id}...`)
+    logger.debug(`Sharing report ${id}...`)
     return apiClient.post(`${this.baseUrl}/reports/${id}/share/`, options)
   }
 
@@ -288,7 +289,7 @@ class ReportingService {
     destinataires: string[]
     parametres: any
   }) {
-    console.log(`⏰ Scheduling report with template ${template_id}...`)
+    logger.debug(`⏰ Scheduling report with template ${template_id}...`)
     return apiClient.post(`${this.baseUrl}/schedule/`, {
       template_id,
       ...schedule
@@ -296,17 +297,17 @@ class ReportingService {
   }
 
   async getScheduledReports() {
-    console.log('🔄 Fetching scheduled reports from backend...')
+    logger.debug('Fetching scheduled reports from backend...')
     return apiClient.get(`${this.baseUrl}/schedule/`)
   }
 
   async updateScheduledReport(id: string, schedule: Partial<any>) {
-    console.log(`📤 Updating scheduled report ${id}...`)
+    logger.debug(`Updating scheduled report ${id}...`)
     return apiClient.patch(`${this.baseUrl}/schedule/${id}/`, schedule)
   }
 
   async deleteScheduledReport(id: string): Promise<void> {
-    console.log(`🗑️ Deleting scheduled report ${id}...`)
+    logger.debug(`Deleting scheduled report ${id}...`)
     return apiClient.delete(`${this.baseUrl}/schedule/${id}/`)
   }
 
@@ -316,12 +317,12 @@ class ReportingService {
     type_rapport?: string
     limit?: number
   }) {
-    console.log('🔄 Getting report history from backend...', params)
+    logger.debug('Getting report history from backend...', params)
     return apiClient.get(`${this.baseUrl}/history/`, params)
   }
 
   async compareReports(report1_id: string, report2_id: string) {
-    console.log(`📊 Comparing reports ${report1_id} and ${report2_id}...`)
+    logger.debug(`Comparing reports ${report1_id} and ${report2_id}...`)
     return apiClient.get(`${this.baseUrl}/compare/`, {
       report1: report1_id,
       report2: report2_id
@@ -330,12 +331,12 @@ class ReportingService {
 
   // Validation et qualité - CONNEXION RÉELLE AU BACKEND
   async validateReportData(data: any) {
-    console.log('🔍 Validating report data on backend...')
+    logger.debug('Validating report data on backend...')
     return apiClient.post(`${this.baseUrl}/validate/`, data)
   }
 
   async getDataQualityReport(entreprise_id: string, exercice_id: string) {
-    console.log(`📊 Getting data quality report for entreprise ${entreprise_id}...`)
+    logger.debug(`Getting data quality report for entreprise ${entreprise_id}...`)
     return apiClient.get(`${this.baseUrl}/data-quality/`, {
       entreprise: entreprise_id,
       exercice: exercice_id
@@ -344,42 +345,42 @@ class ReportingService {
 
   // KPI Management - CONNEXION RÉELLE AU BACKEND
   async getKPIs(params?: { entreprise?: string; page?: number; page_size?: number }) {
-    console.log('📊 Getting KPIs from backend...', params)
+    logger.debug('Getting KPIs from backend...', params)
     return apiClient.get(`${this.baseUrl}/kpis/`, params)
   }
 
   async getKPIHistory(id: string, params?: { periode_debut?: string; periode_fin?: string }) {
-    console.log(`📈 Getting KPI history for ${id}...`)
+    logger.debug(`Getting KPI history for ${id}...`)
     return apiClient.get(`${this.baseUrl}/kpis/${id}/history/`, params)
   }
 
   async getKPIAlertes(params?: { entreprise?: string; active_only?: boolean }) {
-    console.log('🚨 Getting KPI alerts from backend...', params)
+    logger.debug('Getting KPI alerts from backend...', params)
     return apiClient.get(`${this.baseUrl}/kpi-alerts/`, params)
   }
 
   async createKPI(kpi: any) {
-    console.log('📤 Creating KPI in backend...', kpi)
+    logger.debug('Creating KPI in backend...', kpi)
     return apiClient.post(`${this.baseUrl}/kpis/`, kpi)
   }
 
   async updateKPI(id: string, kpi: any) {
-    console.log(`📤 Updating KPI ${id} in backend...`)
+    logger.debug(`Updating KPI ${id} in backend...`)
     return apiClient.patch(`${this.baseUrl}/kpis/${id}/`, kpi)
   }
 
   async deleteKPI(id: string) {
-    console.log(`🗑️ Deleting KPI ${id} from backend...`)
+    logger.debug(`Deleting KPI ${id} from backend...`)
     return apiClient.delete(`${this.baseUrl}/kpis/${id}/`)
   }
 
   async recalculateKPI(id: string) {
-    console.log(`🔄 Recalculating KPI ${id}...`)
+    logger.debug(`Recalculating KPI ${id}...`)
     return apiClient.post(`${this.baseUrl}/kpis/${id}/recalculate/`)
   }
 
   async resolveKPIAlerte(id: string) {
-    console.log(`✅ Resolving KPI alert ${id}...`)
+    logger.debug(`Resolving KPI alert ${id}...`)
     return apiClient.patch(`${this.baseUrl}/kpi-alerts/${id}/`, { resolved: true })
   }
 

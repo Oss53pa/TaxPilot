@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Bilan Actif SYSCOHADA - Avec intégration automatique de la balance
  * Respecte le style et la charte graphique TaxPilot
@@ -23,6 +24,7 @@ import {
   useTheme,
   alpha,
 } from '@mui/material'
+import { formatNumber as formatNumberFR } from '@/utils/formatting'
 import {
   Calculate as CalcIcon,
   Comment as CommentIcon,
@@ -215,10 +217,7 @@ const BilanActifSYSCOHADA: React.FC = () => {
 
   const formatNumber = (value: number | undefined) => {
     if (!value || value === 0) return '-'
-    return new Intl.NumberFormat('fr-FR', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value)
+    return formatNumberFR(value)
   }
 
   const renderRow = (item: any) => {
@@ -370,7 +369,7 @@ const BilanActifSYSCOHADA: React.FC = () => {
 
   const handleSave = () => {
     // Logique de sauvegarde
-    console.log('Sauvegarde du Bilan Actif:', mergedData)
+    logger.debug('Sauvegarde du Bilan Actif:', mergedData)
     setHasChanges(false)
   }
 
@@ -459,7 +458,7 @@ const BilanActifSYSCOHADA: React.FC = () => {
       <TableContainer sx={{ mb: 3 }}>
         <Table size="small" sx={{ minWidth: 900 }}>
           <TableHead>
-            <TableRow sx={{ bgcolor: '#f5f5f5' }}>
+            <TableRow sx={{ bgcolor: 'grey.100' }}>
               <TableCell sx={{ fontWeight: 600, fontSize: '0.875rem' }}>Réf</TableCell>
               <TableCell sx={{ fontWeight: 600, fontSize: '0.875rem' }}>ACTIF</TableCell>
               <TableCell align="center" sx={{ fontWeight: 600, fontSize: '0.875rem' }}>Note</TableCell>

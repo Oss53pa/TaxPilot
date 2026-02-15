@@ -26,16 +26,12 @@ import {
   Alert,
   useTheme,
   alpha,
-  IconButton,
-  Tooltip,
   Tabs,
   Tab,
 } from '@mui/material'
 import {
   MonetizationOn as RevenueIcon,
   Save as SaveIcon,
-  Print as PrintIcon,
-  GetApp as ExportIcon,
   TrendingUp as GrowthIcon,
   TrendingDown as DeclineIcon,
   Timeline as TrendIcon,
@@ -44,6 +40,9 @@ import {
   Assessment as AnalysisIcon,
   Info as InfoIcon,
 } from '@mui/icons-material'
+import { formatCurrency } from '@/utils/formatting'
+import { TabPanel } from '@/components/shared/TabPanel'
+import { SheetHeader } from '@/components/liasse/common/SheetHeader'
 
 interface ChiffreAffaires {
   id: string
@@ -68,25 +67,6 @@ interface MontantsComparatifs {
   montantN1: number
   evolution?: number
   pourcentageCA?: number
-}
-
-interface TabPanelProps {
-  children?: React.ReactNode
-  index: number
-  value: number
-}
-
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      {...other}
-    >
-      {value === index && <Box sx={{ pt: 2 }}>{children}</Box>}
-    </div>
-  )
 }
 
 const SECTEURS_ACTIVITE = [
@@ -219,23 +199,11 @@ const Note17SYSCOHADA: React.FC = () => {
     setHasChanges(true)
   }
 
-  const formatNumber = (value: number) => {
-    return new Intl.NumberFormat('fr-FR', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value)
-  }
-
-  const formatCurrency = (value: number) => {
-    return formatNumber(value)
-  }
-
   const formatPercent = (value: number) => {
     return `${value.toFixed(1)}%`
   }
 
   const handleSave = () => {
-    console.log('Sauvegarde Note 17:', { chiffresAffaires, evolutionMensuelle, comment })
     setHasChanges(false)
   }
 
@@ -598,40 +566,20 @@ const Note17SYSCOHADA: React.FC = () => {
     >
       {/* En-tête */}
       <Box sx={{ mb: 3 }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-          <Stack direction="row" spacing={2} alignItems="center">
-            <RevenueIcon color="primary" sx={{ fontSize: 28 }} />
-            <Typography variant="h5" sx={{ fontWeight: 600, color: theme.palette.primary.main }}>
-              NOTE 17 - CHIFFRE D'AFFAIRES (en FCFA)
-            </Typography>
-          </Stack>
-          
-          <Stack direction="row" spacing={1}>
-            <Tooltip title="Imprimer">
-              <IconButton size="small">
-                <PrintIcon />
-              </IconButton>
-            </Tooltip>
-            
-            <Tooltip title="Exporter">
-              <IconButton size="small">
-                <ExportIcon />
-              </IconButton>
-            </Tooltip>
-            
-            {hasChanges && (
-              <Button
-                variant="contained"
-                size="small"
-                startIcon={<SaveIcon />}
-                onClick={handleSave}
-                color="success"
-              >
-                Enregistrer
-              </Button>
-            )}
-          </Stack>
-        </Stack>
+        <SheetHeader title="NOTE 17 - CHIFFRE D'AFFAIRES (en FCFA)" icon={<RevenueIcon />} />
+        {hasChanges && (
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
+            <Button
+              variant="contained"
+              size="small"
+              startIcon={<SaveIcon />}
+              onClick={handleSave}
+              color="success"
+            >
+              Enregistrer
+            </Button>
+          </Box>
+        )}
 
         <Alert severity="info" sx={{ mb: 2 }}>
           <Typography variant="body2">

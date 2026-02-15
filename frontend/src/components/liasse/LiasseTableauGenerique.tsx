@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Composant générique pour afficher un tableau de la liasse fiscale
  * avec champ de commentaires intégré
@@ -149,7 +150,7 @@ const LiasseTableauGenerique: React.FC<LiasseTableauGeneriqueProps> = ({
       // Évaluation sécurisée de la formule
       return Function('"use strict"; return (' + calculation + ')')()
     } catch (error) {
-      console.error('Erreur de calcul:', error)
+      logger.error('Erreur de calcul:', error)
       return 0
     }
   }, [columns])

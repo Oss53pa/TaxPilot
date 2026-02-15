@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Module Génération Professionnel - Création de documents SYSCOHADA
  * Interface moderne pour génération de liasses, états financiers et déclarations
@@ -118,7 +119,7 @@ const ModernGeneration: React.FC = () => {
   const loadBackendData = async () => {
     setLoading(true)
     try {
-      console.log('📤 Loading generation data from backend...')
+      logger.debug('📤 Loading generation data from backend...')
 
       // Charger les templates
       const templatesRes = await templatesService.getTemplates({ page_size: 100 }) as Record<string, any>
@@ -162,9 +163,9 @@ const ModernGeneration: React.FC = () => {
       setCompanies(entreprises.length > 0 ? entreprises : getDefaultCompanies())
       setGenerationTasks(tasks)
 
-      console.log('✅ Generation data loaded:', { templates: templates.length, entreprises: entreprises.length, tasks: tasks.length })
+      logger.debug('✅ Generation data loaded:', { templates: templates.length, entreprises: entreprises.length, tasks: tasks.length })
     } catch (error) {
-      console.error('❌ Error loading generation data:', error)
+      logger.error('❌ Error loading generation data:', error)
       // Utiliser les données par défaut en cas d'erreur
       setGenerationTemplates(getDefaultTemplates())
       setCompanies(getDefaultCompanies())
@@ -333,7 +334,7 @@ const ModernGeneration: React.FC = () => {
 
   const handleGenerate = () => {
     // Simuler la génération
-    console.log('Génération avec:', {
+    logger.debug('Génération avec:', {
       template: selectedTemplate,
       company: selectedCompany,
       params: generationParams
@@ -362,7 +363,7 @@ const ModernGeneration: React.FC = () => {
             mb: 2,
             color: '#525252',
             fontWeight: 500,
-            '&:hover': { bgcolor: '#f5f5f5', color: '#171717' },
+            '&:hover': { bgcolor: 'grey.100', color: '#171717' },
           }}
         >
           Retour au menu principal

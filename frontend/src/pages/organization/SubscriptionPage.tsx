@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Page de gestion de l'abonnement d'une organisation
  * Affiche le plan actuel, l'usage des quotas, et permet l'upgrade/downgrade
@@ -93,7 +94,7 @@ const SubscriptionPage: React.FC<SubscriptionPageProps> = ({ organizationSlug })
       setOrganization(orgData)
       setSubscription(subData)
     } catch (err: any) {
-      console.error('Error loading data:', err)
+      logger.error('Error loading data:', err)
       setError(err.message || 'Erreur lors du chargement des données')
     } finally {
       setLoading(false)
@@ -115,7 +116,7 @@ const SubscriptionPage: React.FC<SubscriptionPageProps> = ({ organizationSlug })
       // Recharger les données
       loadData()
     } catch (err: any) {
-      console.error('Error upgrading subscription:', err)
+      logger.error('Error upgrading subscription:', err)
       setError(err.message || 'Erreur lors de la mise à niveau')
     } finally {
       setUpgrading(false)

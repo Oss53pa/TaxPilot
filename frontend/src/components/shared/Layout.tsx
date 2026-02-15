@@ -117,8 +117,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           onClick={() => navigate('/')}
           size="small"
           sx={{
-            color: '#a3a3a3',
-            '&:hover': { color: '#ffffff', bgcolor: '#262626' },
+            color: 'text.disabled',
+            '&:hover': { color: '#ffffff', bgcolor: 'grey.900' },
           }}
           title="Page d'accueil"
         >
@@ -137,7 +137,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     variant="caption"
                     sx={{
                       fontWeight: 700,
-                      color: '#a3a3a3',
+                      color: 'text.disabled',
                       textTransform: 'uppercase',
                       letterSpacing: 1.5,
                       fontSize: '0.65rem',
@@ -174,7 +174,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     '& .MuiListItemText-primary': { color: '#ffffff', fontWeight: 600 },
                     '&:hover': { backgroundColor: '#525252' },
                   },
-                  '& .MuiListItemIcon-root': { color: '#a3a3a3' },
+                  '& .MuiListItemIcon-root': { color: 'text.disabled' },
                   '& .MuiListItemText-primary': { color: '#d4d4d4' },
                 }}
               >
@@ -205,13 +205,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         sx={{
           width: { md: `calc(100% - ${DRAWER_WIDTH}px)` },
           ml: { md: `${DRAWER_WIDTH}px` },
-          bgcolor: '#ffffff',
-          color: '#171717',
+          bgcolor: 'background.paper',
+          color: 'text.primary',
           borderBottom: '1px solid #e5e5e5',
           zIndex: theme.zIndex.drawer + 1,
         }}
       >
-        <Toolbar sx={{ bgcolor: '#ffffff', color: '#171717' }}>
+        <Toolbar sx={{ bgcolor: 'background.paper', color: 'text.primary' }}>
           <IconButton
             color="inherit"
             aria-label="open drawer"
@@ -226,7 +226,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             variant="h6"
             noWrap
             component="div"
-            sx={{ flexGrow: 1, fontWeight: 600, color: '#171717' }}
+            sx={{ flexGrow: 1, fontWeight: 600, color: 'text.primary' }}
           >
             TaxPilot
           </Typography>
@@ -242,7 +242,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             color="inherit"
           >
             <Avatar
-              sx={{ width: 32, height: 32, bgcolor: '#171717', color: '#ffffff', fontSize: '0.85rem', fontWeight: 600 }}
+              sx={{ width: 32, height: 32, bgcolor: 'text.primary', color: '#ffffff', fontSize: '0.85rem', fontWeight: 600 }}
             >
               {user?.first_name?.[0] || user?.username?.[0] || <AccountCircle />}
             </Avatar>
@@ -326,7 +326,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           minHeight: '100vh',
           display: 'flex',
           flexDirection: 'column',
-          bgcolor: '#fafafa',
+          bgcolor: 'grey.50',
         }}
       >
         <Toolbar />

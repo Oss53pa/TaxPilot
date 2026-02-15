@@ -56,6 +56,7 @@ import {
   Sync as SyncIcon,
   History as HistoryIcon,
 } from '@mui/icons-material'
+import { TabPanel } from '@/components/shared/TabPanel'
 
 interface BackupInfo {
   id: string
@@ -66,18 +67,6 @@ interface BackupInfo {
   status: 'completed' | 'in_progress' | 'failed'
   location: 'local' | 'cloud' | 'both'
 }
-
-interface TabPanelProps {
-  children?: React.ReactNode
-  value: number
-  index: number
-}
-
-const TabPanel: React.FC<TabPanelProps> = ({ children, value, index }) => (
-  <div hidden={value !== index}>
-    {value === index && <Box sx={{ py: 3 }}>{children}</Box>}
-  </div>
-)
 
 const BackupRestoreSettings: React.FC = () => {
   const [activeTab, setActiveTab] = useState(0)

@@ -70,20 +70,7 @@ import type {
   SyntheseSyscohada,
   RegleValidation,
 } from '@/services/documentationJuridiqueService'
-
-// === TabPanel local ===
-
-interface TabPanelProps {
-  children?: React.ReactNode
-  value: number
-  index: number
-}
-
-const TabPanel: React.FC<TabPanelProps> = ({ children, value, index }) => (
-  <div hidden={value !== index}>
-    {value === index && <Box sx={{ py: 3 }}>{children}</Box>}
-  </div>
-)
+import { TabPanel } from '@/components/shared/TabPanel'
 
 // === Données demo : Lois de Finances ===
 

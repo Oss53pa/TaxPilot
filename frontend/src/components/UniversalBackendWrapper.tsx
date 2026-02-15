@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Wrapper universel qui connecte automatiquement TOUS les composants au backend
  * Intercepte et remplace toutes les données mockées automatiquement
@@ -23,7 +24,7 @@ export const useUniversalBackend = () => {
 
   const loadAllBackendData = async () => {
     try {
-      console.log('🌐 Loading ALL backend data for universal wrapper...')
+      logger.debug('🌐 Loading ALL backend data for universal wrapper...')
 
       const [
         entreprises,
@@ -60,9 +61,9 @@ export const useUniversalBackend = () => {
       }
 
       setGlobalData(data)
-      console.log('✅ Universal backend data loaded')
+      logger.debug('✅ Universal backend data loaded')
     } catch (error) {
-      console.error('❌ Error loading universal backend data:', error)
+      logger.error('❌ Error loading universal backend data:', error)
     } finally {
       setLoading(false)
     }

@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Composant pour générer des rapports personnalisés
  * Utilise les APIs du module Reporting
@@ -139,7 +140,7 @@ export default function ReportGeneratorView() {
       }) as any
       setReports(data.results || data)
     } catch (error) {
-      console.error('Erreur lors du chargement des rapports:', error)
+      logger.error('Erreur lors du chargement des rapports:', error)
       toast({
         title: "Erreur",
         description: "Impossible de charger les rapports",
@@ -155,7 +156,7 @@ export default function ReportGeneratorView() {
       const data = await reportingService.getReportTemplates() as any
       setTemplates(data.results || data)
     } catch (error) {
-      console.error('Erreur lors du chargement des templates:', error)
+      logger.error('Erreur lors du chargement des templates:', error)
     }
   }
 
@@ -186,7 +187,7 @@ export default function ReportGeneratorView() {
       // Recharger la liste
       loadReports()
     } catch (error) {
-      console.error('Erreur lors de la génération:', error)
+      logger.error('Erreur lors de la génération:', error)
       toast({
         title: "Erreur",
         description: "Impossible de générer le rapport",
@@ -229,7 +230,7 @@ export default function ReportGeneratorView() {
           })
         }
       } catch (error) {
-        console.error('Erreur lors de la vérification:', error)
+        logger.error('Erreur lors de la vérification:', error)
       }
     }
   }
@@ -254,7 +255,7 @@ export default function ReportGeneratorView() {
         description: "Le rapport a été téléchargé"
       })
     } catch (error) {
-      console.error('Erreur lors du téléchargement:', error)
+      logger.error('Erreur lors du téléchargement:', error)
       toast({
         title: "Erreur",
         description: "Impossible de télécharger le rapport",
@@ -279,7 +280,7 @@ export default function ReportGeneratorView() {
         description: "Le rapport a été envoyé aux destinataires"
       })
     } catch (error) {
-      console.error('Erreur lors du partage:', error)
+      logger.error('Erreur lors du partage:', error)
       toast({
         title: "Erreur",
         description: "Impossible de partager le rapport",
@@ -305,7 +306,7 @@ export default function ReportGeneratorView() {
 
       loadReports()
     } catch (error) {
-      console.error('Erreur lors de l\'annulation:', error)
+      logger.error('Erreur lors de l\'annulation:', error)
       toast({
         title: "Erreur",
         description: "Impossible d'annuler la génération",
@@ -334,7 +335,7 @@ export default function ReportGeneratorView() {
         description: "Le rapport sera généré automatiquement selon la fréquence définie"
       })
     } catch (error) {
-      console.error('Erreur lors de la planification:', error)
+      logger.error('Erreur lors de la planification:', error)
       toast({
         title: "Erreur",
         description: "Impossible de planifier le rapport",

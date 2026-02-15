@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Service pour la gestion des écritures comptables
  * CONNEXION RÉELLE AU BACKEND DJANGO
@@ -69,7 +70,7 @@ class EcritureService {
   private baseUrl = '/api/v1/accounting/ecritures'
 
   async list(filters?: EcritureFilters): Promise<{ count: number; results: EcritureComptable[] }> {
-    console.log('🔄 Fetching écritures from backend...', filters)
+    logger.debug('Fetching écritures from backend...', filters)
     return apiClient.get(this.baseUrl, filters)
   }
 
@@ -78,7 +79,7 @@ class EcritureService {
   }
 
   async create(data: CreateEcriture): Promise<EcritureComptable> {
-    console.log('📤 Creating écriture...', data)
+    logger.debug('Creating écriture...', data)
     return apiClient.post(this.baseUrl, data)
   }
 
@@ -91,12 +92,12 @@ class EcritureService {
   }
 
   async valider(id: number): Promise<EcritureComptable> {
-    console.log(`✅ Validating écriture ${id}...`)
+    logger.debug(`Validating écriture ${id}...`)
     return apiClient.post(`${this.baseUrl}/${id}/valider/`)
   }
 
   async annulerValidation(id: number): Promise<EcritureComptable> {
-    console.log(`🔓 Canceling validation for écriture ${id}...`)
+    logger.debug(`Canceling validation for écriture ${id}...`)
     return apiClient.post(`${this.baseUrl}/${id}/annuler_validation/`)
   }
 

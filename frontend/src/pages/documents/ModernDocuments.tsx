@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 import React, { useState, useEffect } from 'react';
 import { generationService, templatesService } from '@/services';
 import {
@@ -133,7 +134,7 @@ const ModernDocuments: React.FC = () => {
   const loadBackendData = async () => {
     setBackendLoading(true);
     try {
-      console.log('📤 Loading documents data from backend...');
+      logger.debug('📤 Loading documents data from backend...');
 
       // Charger les templates
       const templatesRes = await templatesService.getTemplates({ page_size: 100 }) as any;
@@ -178,12 +179,12 @@ const ModernDocuments: React.FC = () => {
       setTemplates(backendTemplates);
       setJobs(backendJobs);
 
-      console.log('✅ Documents backend data loaded:', {
+      logger.debug('✅ Documents backend data loaded:', {
         templates: backendTemplates.length,
         jobs: backendJobs.length
       });
     } catch (error) {
-      console.error('❌ Error loading documents data:', error);
+      logger.error('❌ Error loading documents data:', error);
       // Utiliser des données par défaut en cas d'erreur
       setTemplates([]);
       setJobs([]);

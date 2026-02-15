@@ -10,10 +10,7 @@ import {
   Paper,
   Grid,
   Typography,
-  IconButton,
-  Tooltip,
-  // Button,
-  Stack,
+  // Stack used in Grid below
   Table,
   TableBody,
   TableCell,
@@ -32,34 +29,13 @@ import {
 import {
   TrendingUp as UpIcon,
   TrendingDown as DownIcon,
-  Print as PrintIcon,
-  GetApp as ExportIcon,
   ShowChart as ChartIcon,
   Lock as LockIcon,
 } from '@mui/icons-material'
 import type { Entreprise, ParticipationEntry } from '@/types'
-
-interface TabPanelProps {
-  children?: React.ReactNode
-  index: number
-  value: number
-}
-
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`participation-tabpanel-${index}`}
-      aria-labelledby={`participation-tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box sx={{ pt: 2 }}>{children}</Box>}
-    </div>
-  )
-}
+import { formatNumber, formatDateFR } from '@/utils/formatting'
+import { SheetHeader } from '@/components/liasse/common/SheetHeader'
+import { TabPanel } from '@/components/shared/TabPanel'
 
 interface FicheR3SYSCOHADAProps {
   entreprise?: Entreprise
@@ -71,21 +47,6 @@ const FicheR3SYSCOHADA: React.FC<FicheR3SYSCOHADAProps> = ({ entreprise }) => {
   const ent = entreprise
 
   const participations: ParticipationEntry[] = ent?.participations_filiales || []
-
-  const formatNumber = (value: number) => {
-    return new Intl.NumberFormat('fr-FR', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value)
-  }
-
-  /** Formate une date ISO (YYYY-MM-DD) en DD/MM/YYYY */
-  const formatDateFR = (isoDate?: string): string => {
-    if (!isoDate) return '-'
-    const parts = isoDate.split('-')
-    if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`
-    return isoDate
-  }
 
   // Classification
   const filiales = participations.filter(p => p.pourcentage_participation > 50)
@@ -113,7 +74,7 @@ const FicheR3SYSCOHADA: React.FC<FicheR3SYSCOHADAProps> = ({ entreprise }) => {
     <TableContainer>
       <Table size="small">
         <TableHead>
-          <TableRow sx={{ bgcolor: '#f5f5f5' }}>
+          <TableRow sx={{ bgcolor: 'grey.100' }}>
             <TableCell sx={{ fontWeight: 600 }}>Société</TableCell>
             <TableCell sx={{ fontWeight: 600 }}>Forme / Secteur</TableCell>
             <TableCell sx={{ fontWeight: 600 }}>Contact</TableCell>
@@ -210,28 +171,7 @@ const FicheR3SYSCOHADA: React.FC<FicheR3SYSCOHADAProps> = ({ entreprise }) => {
     >
       {/* En-tête */}
       <Box sx={{ mb: 3 }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-          <Stack direction="row" spacing={2} alignItems="center">
-            <ChartIcon color="primary" sx={{ fontSize: 28 }} />
-            <Typography variant="h5" sx={{ fontWeight: 600, color: theme.palette.primary.main }}>
-              FICHE R3 - PARTICIPATIONS ET FILIALES (en FCFA)
-            </Typography>
-          </Stack>
-
-          <Stack direction="row" spacing={1}>
-            <Tooltip title="Imprimer">
-              <IconButton size="small">
-                <PrintIcon />
-              </IconButton>
-            </Tooltip>
-
-            <Tooltip title="Exporter">
-              <IconButton size="small">
-                <ExportIcon />
-              </IconButton>
-            </Tooltip>
-          </Stack>
-        </Stack>
+        <SheetHeader title="FICHE R3 - PARTICIPATIONS ET FILIALES (en FCFA)" icon={<ChartIcon />} />
 
         <Alert severity="info" icon={<LockIcon />} sx={{ mb: 2 }}>
           Toutes les données sont automatiquement issues du paramétrage.

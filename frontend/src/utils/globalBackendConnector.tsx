@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * Connecteur global automatique pour TOUS les composants
  * Ce HOC détecte et injecte automatiquement les données backend
@@ -64,7 +65,7 @@ export function withGlobalBackend<P extends object>(
 
     const loadBackendData = async () => {
       try {
-        console.log(`Auto-connecting ${componentName} to backend...`)
+        logger.debug(`Auto-connecting ${componentName} to backend...`)
 
         // Déterminer les types de données à charger
         let dataTypesToLoad = options?.dataTypes || []
@@ -73,7 +74,7 @@ export function withGlobalBackend<P extends object>(
           dataTypesToLoad = [...dataTypesToLoad, ...detectRequiredDataType(componentName)]
         }
 
-        console.log(`Loading data types for ${componentName}:`, dataTypesToLoad)
+        logger.debug(`Loading data types for ${componentName}:`, dataTypesToLoad)
 
         // Charger toutes les données nécessaires
         const loadedData: any = {}
@@ -100,9 +101,9 @@ export function withGlobalBackend<P extends object>(
         )
 
         setBackendData(loadedData)
-        console.log(`${componentName} connected to backend with ${Object.keys(loadedData).length} data sources`)
+        logger.debug(`${componentName} connected to backend with ${Object.keys(loadedData).length} data sources`)
       } catch (err) {
-        console.error(`Error connecting ${componentName} to backend:`, err)
+        logger.error(`Error connecting ${componentName} to backend:`, err)
         setError(err as Error)
       } finally {
         setLoading(false)
