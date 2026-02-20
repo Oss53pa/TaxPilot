@@ -3,7 +3,7 @@
  * Affiche le contenu complet avec tableaux détaillés et sections d'information
  */
 
-import React from 'react'
+import React, { useMemo } from 'react'
 import {
   Box,
   Paper,
@@ -19,12 +19,17 @@ import {
   TableRow,
   TextField,
   Stack,
+  Alert,
+  Chip,
   useTheme,
 } from '@mui/material'
 import CommentairesSection from '../shared/CommentairesSection'
 import TableActions from '../shared/TableActions'
 import EditableToolbar from '../shared/EditableToolbar'
 import { useEditableTable } from '../../../hooks/useEditableTable'
+import { generateAnnexeData } from '@/services/annexeDataService'
+import { getLatestBalance } from '@/services/balanceStorageService'
+import { MOCK_BALANCE } from '@/data/mockBalance'
 
 interface NoteRestanteProps {
   numeroNote: number
@@ -1210,7 +1215,19 @@ const NotesRestantes: React.FC<NoteRestanteProps> = ({
   titre,
 }) => {
   const theme = useTheme()
-  const noteData = NOTES_DATA[numeroNote]
+
+  // Générer les données depuis la balance importée
+  const computedNotes = useMemo(() => {
+    const stored = getLatestBalance()
+    const entries = stored?.entries?.length ? stored.entries : MOCK_BALANCE
+    return generateAnnexeData(entries)
+  }, [])
+  const usingImported = !!getLatestBalance()?.entries?.length
+
+  // Utiliser les données calculées si disponibles, sinon fallback hardcodé
+  const noteData = (computedNotes[numeroNote] as NoteData) || NOTES_DATA[numeroNote]
+  const isComputed = !!computedNotes[numeroNote]
+
   const { isEditMode, toggleEditMode, handleCellChange, getCellValue, hasChanges, handleSave } = useEditableTable()
 
   const formatMontant = (val: string) => val
@@ -1260,8 +1277,18 @@ const NotesRestantes: React.FC<NoteRestanteProps> = ({
         onImport={() => alert('Import des données')}
       />
 
+      {/* Indicateur source des données */}
+      {isComputed && (
+        <Alert severity={usingImported ? 'success' : 'info'} sx={{ mb: 2 }}>
+          {usingImported
+            ? 'Donnees calculees depuis la balance importee'
+            : 'Donnees calculees depuis la balance de demonstration'}
+          <Chip label="Auto" size="small" color={usingImported ? 'success' : 'default'} sx={{ ml: 1 }} />
+        </Alert>
+      )}
+
       {/* Alerte info */}
-      {noteData.alerteInfo && (
+      {noteData.alerteInfo && !isComputed && (
         <Paper sx={{ p: 2, mb: 3, backgroundColor: '#f0f7ff', border: '1px solid #bbdefb' }}>
           <Typography variant="body2" sx={{ color: '#1565c0' }}>
             {noteData.alerteInfo}
@@ -1278,7 +1305,7 @@ const NotesRestantes: React.FC<NoteRestanteProps> = ({
                 <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: theme.palette.primary.main }}>
                   {key}
                 </Typography>
-                {typeof value === 'object' && 'description' in value ? (
+                {typeof value === 'object' && value && 'description' in value ? (
                   <Box>
                     <Typography variant="body1" sx={{ mb: 2 }}>
                       {(value as { description: string; details?: string[] }).description}

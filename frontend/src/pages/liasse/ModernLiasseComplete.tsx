@@ -98,6 +98,8 @@ import SupplementAvantagesFiscaux from '../../components/liasse/sheets/Supplemen
 import FicheRenseignements from '../../components/liasse/sheets/FicheRenseignements'
 import TablesCalculImpots from '../../components/liasse/sheets/TablesCalculImpots'
 import TableauxSupplementaires from '../../components/liasse/sheets/TableauxSupplementaires'
+import ValidationPanel from '../../components/liasse/ValidationPanel'
+import { liasseDataService } from '../../services/liasseDataService'
 import { LIASSE_SHEETS, SHEET_CATEGORIES } from '../../config/liasseFiscaleSheets'
 
 const DRAWER_WIDTH = 380
@@ -169,29 +171,43 @@ const ModernLiasseComplete: React.FC = () => {
 
   // Actions pour les boutons
   const handleExportLiasse = () => {
+    // Vérifier les contrôles croisés avant export
+    const validation = liasseDataService.validateCoherenceDetailed()
+    const criticalErrors = validation.checks.filter(c => !c.ok)
+
+    if (criticalErrors.length > 0) {
+      const details = criticalErrors
+        .map(c => `- ${c.code}: ${c.labelA} (${Math.round(c.valeurA).toLocaleString('fr-FR')}) != ${c.labelB} (${Math.round(c.valeurB).toLocaleString('fr-FR')}), ecart: ${Math.round(c.ecart).toLocaleString('fr-FR')}`)
+        .join('\n')
+      alert(
+        `Export bloque — ${criticalErrors.length} controle(s) critique(s) en ecart:\n\n${details}\n\nCorrigez ces ecarts avant d'exporter la liasse.`
+      )
+      setShowValidation(true)
+      return
+    }
+
     logger.debug('Export de la liasse en cours...')
-    // Simulation de l'export
     const exportData = {
       dateExport: new Date().toISOString(),
+      validation: { isValid: true, checks: validation.checks },
       sheets: LIASSE_SHEETS.map(sheet => ({
         id: sheet.id,
         name: sheet.name,
         completed: sheetProgress[sheet.id]?.status === 'complete'
       }))
     }
-    
-    // Créer un fichier JSON pour l'export
+
     const dataStr = JSON.stringify(exportData, null, 2)
     const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr)
-    
+
     const exportFileDefaultName = `liasse_fiscale_${new Date().toISOString().split('T')[0]}.json`
-    
+
     const linkElement = document.createElement('a')
     linkElement.setAttribute('href', dataUri)
     linkElement.setAttribute('download', exportFileDefaultName)
     linkElement.click()
-    
-    alert('Export réussi ! Le fichier a été téléchargé.')
+
+    alert('Export reussi ! Le fichier a ete telecharge.')
   }
 
   const handlePrintSheet = () => {
@@ -757,8 +773,17 @@ const ModernLiasseComplete: React.FC = () => {
             <Alert severity="info">
               La validation vérifie la cohérence et la complétude de votre liasse fiscale
             </Alert>
-            
+
+            {/* Contrôles croisés SYSCOHADA */}
+            <Typography variant="subtitle1" sx={{ fontWeight: 600, mt: 1 }}>
+              Contrôles croisés
+            </Typography>
+            <ValidationPanel />
+
             {/* Résultats de validation par catégorie */}
+            <Typography variant="subtitle1" sx={{ fontWeight: 600, mt: 1 }}>
+              Complétude par catégorie
+            </Typography>
             {SHEET_CATEGORIES.map(category => {
               const categorySheets = LIASSE_SHEETS.filter(s => s.category === category.id)
               const requiredSheets = categorySheets.filter(s => s.required)

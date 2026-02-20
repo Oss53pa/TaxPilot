@@ -194,6 +194,38 @@ function FI010(ctx: AuditContext): ResultatControle {
   return ok(ref, nom, 'Coherence charges personnel / cotisations')
 }
 
+// FI-011: Dons au-dela du plafond 5‰ du CA (comptes 658)
+function FI011(ctx: AuditContext): ResultatControle {
+  const ref = 'FI-011', nom = 'Dons excedentaires (658)'
+  const dons = absSum(find(ctx.balanceN, '658'))
+  const ca = absSum(find(ctx.balanceN, '70'))
+  const taux = getTauxFiscaux()
+  const plafond = ca * taux.DEDUCTIBILITE.plafond_dons // 5‰
+  if (dons > plafond && plafond > 0) {
+    const exces = dons - plafond
+    return anomalie(ref, nom, 'MINEUR',
+      `Dons (${dons.toLocaleString('fr-FR')}) > plafond 5‰ CA (${plafond.toLocaleString('fr-FR')}), exces: ${exces.toLocaleString('fr-FR')}`,
+      { montants: { dons, plafond, ca, exces } },
+      'L\'excedent des dons au-dela de 5 pour mille du CA est a reintegrer',
+      'CGI Art. 18-5')
+  }
+  return ok(ref, nom, 'Dons dans les limites (5‰ du CA)')
+}
+
+// FI-012: Charges somptuaires (compte 6257) — 100% non deductibles
+function FI012(ctx: AuditContext): ResultatControle {
+  const ref = 'FI-012', nom = 'Charges somptuaires (6257)'
+  const somptuaires = absSum(find(ctx.balanceN, '6257'))
+  if (somptuaires > 0) {
+    return anomalie(ref, nom, 'MINEUR',
+      `Charges somptuaires: ${somptuaires.toLocaleString('fr-FR')} (100% non deductibles)`,
+      { montants: { somptuaires } },
+      'Les charges somptuaires (depenses de luxe) sont integralement non deductibles',
+      'CGI Art. 18-6')
+  }
+  return ok(ref, nom, 'Aucune charge somptuaire detectee')
+}
+
 // --- Enregistrement ---
 
 export function registerLevel7Controls(): void {
@@ -208,6 +240,8 @@ export function registerLevel7Controls(): void {
     ['FI-008', 'Minimum forfaitaire (IMF)', 'IS >= 1% du CA', 'MINEUR', FI008],
     ['FI-009', 'TVA a reverser', 'Coherence TVA collectee/deductible/due', 'MINEUR', FI009],
     ['FI-010', 'Charges personnel vs cotisations', 'Coherence salaires/cotisations', 'INFO', FI010],
+    ['FI-011', 'Dons excedentaires (658)', 'Plafond 5‰ du CA — CGI Art. 18-5', 'MINEUR', FI011],
+    ['FI-012', 'Charges somptuaires (6257)', 'Depenses de luxe non deductibles — CGI Art. 18-6', 'MINEUR', FI012],
   ]
 
   for (const [ref, nom, desc, sev, fn] of defs) {

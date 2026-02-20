@@ -38,6 +38,9 @@ import {
   Print as PrintIcon
 } from '@mui/icons-material'
 import { arrondiFCFA, getTauxFiscaux } from '@/config/taux-fiscaux-ci'
+import { calculerRetenues, type RetenuesResult } from '@/services/retenuesSourceService'
+import { getLatestBalance } from '@/services/balanceStorageService'
+import { MOCK_BALANCE } from '@/data/mockBalance'
 
 interface LigneCalculImpot {
   code: string
@@ -76,6 +79,13 @@ const TablesCalculImpots: FC = () => {
   })
   
   const [calculAutomatique, setCalculAutomatique] = useState(true)
+
+  // Calcul automatique des retenues à la source depuis la balance
+  const retenuesResult: RetenuesResult = (() => {
+    const stored = getLatestBalance()
+    const entries = stored?.entries?.length ? stored.entries : MOCK_BALANCE
+    return calculerRetenues(entries)
+  })()
 
   useEffect(() => {
     if (calculAutomatique) {
@@ -483,6 +493,66 @@ const TablesCalculImpots: FC = () => {
               </Typography>
             </Grid>
           </Grid>
+        </CardContent>
+      </Card>
+
+      {/* Retenues à la source */}
+      <Card sx={{ mb: 3 }}>
+        <CardContent>
+          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+            <Typography variant="h6" sx={{ fontWeight: 700 }}>
+              Retenues a la Source
+            </Typography>
+            <Chip
+              label={`Total: ${formaterMontant(retenuesResult.total)}`}
+              color="warning"
+              sx={{ fontWeight: 600 }}
+            />
+          </Stack>
+
+          <TableContainer component={Paper} variant="outlined">
+            <Table size="small">
+              <TableHead>
+                <TableRow sx={{ backgroundColor: '#fff3e0' }}>
+                  <TableCell sx={{ fontWeight: 600 }}>Code</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>Libelle</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 600 }}>Base</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 600 }}>Taux</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 600 }}>Montant</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>Base legale</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {retenuesResult.retenues.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} align="center" sx={{ color: 'text.secondary', py: 3 }}>
+                      Aucune retenue detectee dans la balance
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  retenuesResult.retenues.map((r, i) => (
+                    <TableRow key={i}>
+                      <TableCell>
+                        <Chip label={r.code} size="small" color="warning" variant="outlined" />
+                      </TableCell>
+                      <TableCell>{r.libelle}</TableCell>
+                      <TableCell align="right">{formaterMontant(r.base)}</TableCell>
+                      <TableCell align="right">{(r.taux * 100).toFixed(1)}%</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 600 }}>{formaterMontant(r.montant)}</TableCell>
+                      <TableCell sx={{ fontSize: '0.8rem', color: 'text.secondary' }}>{r.base_legale}</TableCell>
+                    </TableRow>
+                  ))
+                )}
+                {retenuesResult.retenues.length > 0 && (
+                  <TableRow sx={{ backgroundColor: '#fff3e0' }}>
+                    <TableCell colSpan={4} sx={{ fontWeight: 700 }}>TOTAL RETENUES</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 700 }}>{formaterMontant(retenuesResult.total)}</TableCell>
+                    <TableCell />
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
         </CardContent>
       </Card>
 
