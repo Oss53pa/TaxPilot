@@ -252,11 +252,8 @@ export const fiscasyncTheme = createTheme({
     MuiTableHead: {
       styleOverrides: {
         root: {
-          backgroundColor: fiscasyncPalette.primary100,
           '& .MuiTableCell-head': {
-            color: fiscasyncPalette.primary900,
             fontWeight: 600,
-            backgroundColor: fiscasyncPalette.primary100,
           },
         },
       },

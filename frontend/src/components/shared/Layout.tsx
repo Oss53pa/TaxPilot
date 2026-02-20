@@ -117,8 +117,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           onClick={() => navigate('/')}
           size="small"
           sx={{
-            color: 'text.disabled',
-            '&:hover': { color: '#ffffff', bgcolor: 'grey.900' },
+            color: '#737373',
+            '&:hover': { color: '#ffffff', bgcolor: '#262626' },
           }}
           title="Page d'accueil"
         >
@@ -137,7 +137,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     variant="caption"
                     sx={{
                       fontWeight: 700,
-                      color: 'text.disabled',
+                      color: '#737373',
                       textTransform: 'uppercase',
                       letterSpacing: 1.5,
                       fontSize: '0.65rem',
@@ -174,7 +174,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     '& .MuiListItemText-primary': { color: '#ffffff', fontWeight: 600 },
                     '&:hover': { backgroundColor: '#525252' },
                   },
-                  '& .MuiListItemIcon-root': { color: 'text.disabled' },
+                  '& .MuiListItemIcon-root': { color: '#a3a3a3' },
                   '& .MuiListItemText-primary': { color: '#d4d4d4' },
                 }}
               >

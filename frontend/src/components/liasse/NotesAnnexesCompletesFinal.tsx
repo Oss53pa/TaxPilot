@@ -1284,11 +1284,12 @@ const NotesAnnexesCompletesFinal: React.FC<NotesAnnexesCompletesFinalProps> = ({
         <TableHead>
           <TableRow sx={{ backgroundColor: PRIMARY_COLOR }}>
             {tableau.colonnes.map((colonne: string, index: number) => (
-              <TableCell 
+              <TableCell
                 key={index}
-                sx={{ 
+                sx={{
                   fontWeight: 700,
-                  color: 'white',
+                  color: '#ffffff',
+                  backgroundColor: PRIMARY_COLOR,
                   border: '1px solid #e5e5e5'
                 }}
                 align={index > 0 ? 'right' : 'left'}

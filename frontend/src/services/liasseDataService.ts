@@ -628,6 +628,53 @@ export class LiasseDataService {
     return { isValid: errors.length === 0, errors }
   }
 
+  /**
+   * Validation détaillée avec valeurs structurées pour le ValidationPanel
+   */
+  validateCoherenceDetailed(): {
+    checks: Array<{
+      code: string
+      label: string
+      valeurA: number
+      labelA: string
+      valeurB: number
+      labelB: string
+      ecart: number
+      ok: boolean
+    }>
+    isValid: boolean
+  } {
+    const totalActif = this.calculateTotalActif()
+    const totalPassif = this.calculateTotalPassif()
+    const resultatBilan = this.getResultatFromBilan()
+    const resultatCdR = this.getResultatFromCompteResultat()
+
+    const checks = [
+      {
+        code: 'BZ=DZ',
+        label: 'Equilibre du Bilan (Total Actif = Total Passif)',
+        valeurA: totalActif,
+        labelA: 'Total Actif (BZ)',
+        valeurB: totalPassif,
+        labelB: 'Total Passif (DZ)',
+        ecart: Math.abs(totalActif - totalPassif),
+        ok: Math.abs(totalActif - totalPassif) <= 1,
+      },
+      {
+        code: 'XI=CJ',
+        label: 'Coherence Resultat (CdR = Bilan)',
+        valeurA: resultatCdR,
+        labelA: 'Resultat CdR (XI)',
+        valeurB: resultatBilan,
+        labelB: 'Resultat Bilan (CJ)',
+        ecart: Math.abs(resultatCdR - resultatBilan),
+        ok: Math.abs(resultatCdR - resultatBilan) <= 1,
+      },
+    ]
+
+    return { checks, isValid: checks.every(c => c.ok) }
+  }
+
   private calculateTotalActif(): number {
     const actifData = this.generateBilanActif()
     return actifData.reduce((sum: number, row: any) => sum + row.net, 0)

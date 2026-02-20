@@ -2,8 +2,10 @@
  * Supplément Impôt sur les Sociétés - Calcul détaillé de l'IS
  */
 
-import React from 'react'
-import { arrondiFCFA } from '@/config/taux-fiscaux-ci'
+import React, { useMemo } from 'react'
+import { calculerPassageFiscal, type TableauPassageResult } from '@/services/passageFiscalService'
+import { getLatestBalance } from '@/services/balanceStorageService'
+import { MOCK_BALANCE } from '@/data/mockBalance'
 import {
   Box,
   Paper,
@@ -28,42 +30,39 @@ import {
 const SupplementImpotSociete: React.FC = () => {
   const theme = useTheme()
 
+  // Charger la balance importée (ou MOCK en fallback)
+  const passage = useMemo<TableauPassageResult>(() => {
+    const stored = getLatestBalance()
+    const entries = stored?.entries?.length ? stored.entries : MOCK_BALANCE
+    return calculerPassageFiscal(entries)
+  }, [])
+
+  const usingImported = !!getLatestBalance()?.entries?.length
+
+  // Mapper vers la structure d'affichage
   const calculIS = {
-    resultatComptable: 28500000,
-    reintegrations: [
-      { nature: 'Amendes et pénalités fiscales', montant: 450000 },
-      { nature: 'Charges sur voitures de tourisme', montant: 280000 },
-      { nature: 'Dons non déductibles', montant: 150000 },
-      { nature: 'Provision non déductible', montant: 320000 },
-      { nature: 'Frais de réception excédentaires', montant: 180000 },
-    ],
-    deductions: [
-      { nature: 'Dividendes reçus (filiales)', montant: 850000 },
-      { nature: 'Plus-values sur cessions exonérées', montant: 0 },
-      { nature: 'Reprises de provisions', montant: 220000 },
-    ],
-    acomptes: [
-      { periode: '1er trimestre', montant: 2100000, dateVersement: '15/04/2024' },
-      { periode: '2e trimestre', montant: 2100000, dateVersement: '15/07/2024' },
-      { periode: '3e trimestre', montant: 2100000, dateVersement: '15/10/2024' },
-      { periode: '4e trimestre', montant: 2100000, dateVersement: '15/01/2025' },
-    ],
-    credits: [
-      { nature: 'Crédit d\'impôt recherche', montant: 0 },
-      { nature: 'Crédit d\'impôt investissement', montant: 180000 },
-      { nature: 'Autres crédits d\'impôt', montant: 0 },
-    ]
+    resultatComptable: passage.resultat_comptable,
+    reintegrations: passage.reintegrations.map(r => ({
+      nature: `${r.libelle} (${r.base_legale})`,
+      montant: r.montant,
+    })),
+    deductions: passage.deductions.map(d => ({
+      nature: `${d.libelle} (${d.base_legale})`,
+      montant: d.montant,
+    })),
+    acomptes: [] as { periode: string; montant: number; dateVersement: string }[],
+    credits: [] as { nature: string; montant: number }[],
   }
 
-  const totalReintegrations = calculIS.reintegrations.reduce((sum, item) => sum + item.montant, 0)
-  const totalDeductions = calculIS.deductions.reduce((sum, item) => sum + item.montant, 0)
+  const totalReintegrations = passage.total_reintegrations
+  const totalDeductions = passage.total_deductions
   const totalAcomptes = calculIS.acomptes.reduce((sum, item) => sum + item.montant, 0)
   const totalCredits = calculIS.credits.reduce((sum, item) => sum + item.montant, 0)
 
-  const resultatFiscal = calculIS.resultatComptable + totalReintegrations - totalDeductions
-  const impotBrut = arrondiFCFA(resultatFiscal * 0.25) // Taux IS = 25%
+  const resultatFiscal = passage.resultat_fiscal
+  const impotBrut = passage.is_brut
   const impotNet = impotBrut - totalCredits
-  const impotDu = Math.max(0, impotNet)
+  const impotDu = passage.is_du
   const soldeAVerser = Math.max(0, impotDu - totalAcomptes)
   const tropPercu = Math.max(0, totalAcomptes - impotDu)
 
@@ -79,9 +78,15 @@ const SupplementImpotSociete: React.FC = () => {
 
   return (
     <Box sx={{ p: 3 }}>
-      <Typography variant="h4" sx={{ fontWeight: 700, mb: 3, color: theme.palette.primary.main }}>
+      <Typography variant="h4" sx={{ fontWeight: 700, mb: 2, color: theme.palette.primary.main }}>
         Supplément - Calcul de l'Impôt sur les Sociétés (en FCFA)
       </Typography>
+
+      <Alert severity={usingImported ? 'success' : 'warning'} sx={{ mb: 3 }}>
+        {usingImported
+          ? `Calcul automatique depuis la balance importée — CA: ${formatMontant(passage.chiffre_affaires)} FCFA — Base: ${passage.base_is}`
+          : 'Données de démonstration — Importez une balance pour un calcul réel'}
+      </Alert>
 
       {/* Calcul du résultat fiscal */}
       <Card sx={{ mb: 3 }}>
@@ -184,8 +189,12 @@ const SupplementImpotSociete: React.FC = () => {
                 </Box>
                 
                 <Box>
-                  <Typography variant="caption" color="text.secondary">TAUX D'IMPOSITION</Typography>
-                  <Chip label="25%" color="primary" sx={{ fontWeight: 600 }} />
+                  <Typography variant="caption" color="text.secondary">BASE D'IMPOSITION</Typography>
+                  <Chip
+                    label={passage.base_is === 'IMF' ? `IMF (${formatMontant(passage.imf)})` : 'IS 25%'}
+                    color={passage.base_is === 'IMF' ? 'warning' : 'primary'}
+                    sx={{ fontWeight: 600 }}
+                  />
                 </Box>
                 
                 <Divider />
@@ -358,22 +367,25 @@ const SupplementImpotSociete: React.FC = () => {
           <Stack spacing={2}>
             <Alert severity="info">
               <Typography variant="body2">
-                <strong>Régime :</strong> Régime réel d'imposition - Taux normal 25%
+                <strong>Régime :</strong> Régime réel d'imposition — {passage.base_is === 'IMF'
+                  ? `IMF retenu (${formatMontant(passage.imf)} > IS ${formatMontant(passage.is_brut)})`
+                  : `IS retenu à 25% (${formatMontant(passage.is_brut)} > IMF ${formatMontant(passage.imf)})`}
               </Typography>
             </Alert>
-            <Alert severity="success">
+            <Alert severity={passage.resultat_fiscal >= 0 ? 'success' : 'warning'}>
               <Typography variant="body2">
-                <strong>Conformité :</strong> Tous les acomptes provisionnels ont été versés dans les délais
+                <strong>Résultat fiscal :</strong> {formatMontant(passage.resultat_fiscal)} FCFA
+                {passage.resultat_fiscal < 0 && ' (déficit reportable)'}
               </Typography>
             </Alert>
             <Alert severity="warning">
               <Typography variant="body2">
-                <strong>Échéance :</strong> Solde à verser avant le 30 avril 2025
+                <strong>Échéance :</strong> Solde à verser avant le 30 avril de l'exercice suivant
               </Typography>
             </Alert>
             <Alert severity="error">
               <Typography variant="body2">
-                <strong>Pénalités :</strong> 10% de majoration en cas de retard de paiement
+                <strong>Pénalités :</strong> 10% de majoration en cas de retard de paiement (CGI Art. 168)
               </Typography>
             </Alert>
           </Stack>

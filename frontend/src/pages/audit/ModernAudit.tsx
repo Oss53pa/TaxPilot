@@ -52,6 +52,7 @@ import type {
 import { NIVEAUX_NOMS } from '@/types/audit.types'
 import { auditOrchestrator } from '@/services/audit/auditOrchestrator'
 import { getAllSessions } from '@/services/audit/auditStorage'
+import { getLatestBalance, getLatestBalanceN1 } from '@/services/balanceStorageService'
 
 import AuditProgressDialog from '@/components/audit/AuditProgressDialog'
 import AuditResultsView from '@/components/audit/AuditResultsView'
@@ -146,6 +147,18 @@ const ModernAudit: React.FC = () => {
   const cancelledRef = useRef(false)
   const [sessions, setSessions] = useState<SessionAudit[]>(() => getAllSessions())
 
+  // Charger la balance importée, fallback sur DEMO si aucune importée
+  const importedBalance = getLatestBalance()
+  const importedBalanceN1 = getLatestBalanceN1()
+  const balanceToAudit = importedBalance?.entries?.length
+    ? importedBalance.entries
+    : DEMO_BALANCE
+  const balanceN1ToAudit = importedBalanceN1?.entries?.length
+    ? importedBalanceN1.entries
+    : undefined
+  const usingImported = !!(importedBalance?.entries?.length)
+  const exerciceToAudit = importedBalance?.exercice || String(new Date().getFullYear())
+
   // Lancer l'audit Phase 1
   const handleStartAudit = useCallback(async () => {
     cancelledRef.current = false
@@ -157,9 +170,9 @@ const ModernAudit: React.FC = () => {
 
     try {
       const session = await auditOrchestrator.startPhase1Audit(
-        DEMO_BALANCE,
-        undefined,
-        '2024',
+        balanceToAudit,
+        balanceN1ToAudit,
+        exerciceToAudit,
         {
           onProgress: (niveau, index, total, ref) => {
             setProgressNiveau(niveau)
@@ -185,7 +198,7 @@ const ModernAudit: React.FC = () => {
     } catch (err) {
       dispatch(setAuditError(err instanceof Error ? err.message : 'Erreur inconnue'))
     }
-  }, [dispatch])
+  }, [dispatch, balanceToAudit, balanceN1ToAudit, exerciceToAudit])
 
   const handleCancel = useCallback(() => {
     cancelledRef.current = true
@@ -252,6 +265,21 @@ const ModernAudit: React.FC = () => {
           </Stack>
         </Box>
       </Box>
+
+      {/* Indicateur source des donnees */}
+      {usingImported ? (
+        <Alert severity="success" sx={{ mb: 3 }} icon={<CheckIcon />}>
+          Audit sur votre balance importee — {balanceToAudit.length} comptes
+          — Import du {new Date(importedBalance!.importDate).toLocaleDateString('fr-FR')}
+          — Exercice {exerciceToAudit}
+          {balanceN1ToAudit ? ` — N-1 disponible (${balanceN1ToAudit.length} comptes)` : ''}
+        </Alert>
+      ) : (
+        <Alert severity="warning" sx={{ mb: 3 }}>
+          Aucune balance importee — Audit sur donnees de demonstration ({DEMO_BALANCE.length} comptes).
+          Importez votre balance via le menu "Import Balance" pour un audit reel.
+        </Alert>
+      )}
 
       {/* Metriques de synthese */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
@@ -331,7 +359,7 @@ const ModernAudit: React.FC = () => {
                   Aucun audit en cours
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                  Cliquez sur "Lancer l'audit" pour executer les 108 controles sur la balance demo.
+                  Cliquez sur "Lancer l'audit" pour executer les 108 controles SYSCOHADA.
                 </Typography>
                 <Button variant="contained" startIcon={<PlayIcon />} onClick={handleStartAudit}>
                   Lancer l'audit

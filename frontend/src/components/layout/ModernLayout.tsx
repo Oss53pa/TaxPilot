@@ -353,11 +353,11 @@ const ModernLayout: React.FC<ModernLayoutProps> = ({ children }) => {
               borderRadius: 2,
               mb: 0.5,
               minHeight: 44,
-              backgroundColor: active ? alpha(theme.palette.primary.main, 0.08) : 'transparent',
-              borderLeft: active ? `3px solid ${theme.palette.primary.main}` : '3px solid transparent',
+              backgroundColor: active ? 'rgba(255,255,255,0.12)' : 'transparent',
+              borderLeft: active ? '3px solid #e5e5e5' : '3px solid transparent',
               pl: level * 2 + (drawerCollapsed ? 0 : 1),
               '&:hover': {
-                backgroundColor: alpha(theme.palette.primary.main, 0.04),
+                backgroundColor: 'rgba(255,255,255,0.08)',
               },
               transition: theme.transitions.create(['background-color', 'border-left'], {
                 duration: theme.transitions.duration.short,
@@ -368,7 +368,7 @@ const ModernLayout: React.FC<ModernLayoutProps> = ({ children }) => {
               sx={{
                 minWidth: drawerCollapsed ? 0 : 40,
                 justifyContent: 'center',
-                color: active ? theme.palette.primary.main : theme.palette.text.secondary,
+                color: active ? '#ffffff' : '#a3a3a3',
               }}
             >
               {item.icon}
@@ -382,7 +382,7 @@ const ModernLayout: React.FC<ModernLayoutProps> = ({ children }) => {
                     '& .MuiListItemText-primary': {
                       fontSize: '0.875rem',
                       fontWeight: active ? 600 : 400,
-                      color: active ? theme.palette.primary.main : theme.palette.text.primary,
+                      color: active ? '#ffffff' : '#d4d4d4',
                     }
                   }}
                 />
@@ -397,7 +397,7 @@ const ModernLayout: React.FC<ModernLayoutProps> = ({ children }) => {
                 )}
                 
                 {hasChildren && (
-                  <IconButton size="small" sx={{ ml: 1 }}>
+                  <IconButton size="small" sx={{ ml: 1, color: '#a3a3a3' }}>
                     {isExpanded ? <ExpandLess /> : <ExpandMore />}
                   </IconButton>
                 )}
@@ -426,7 +426,7 @@ const ModernLayout: React.FC<ModernLayoutProps> = ({ children }) => {
       <Box
         sx={{
           p: drawerCollapsed ? 1 : 3,
-          borderBottom: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
+          borderBottom: '1px solid rgba(255,255,255,0.08)',
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -443,10 +443,10 @@ const ModernLayout: React.FC<ModernLayoutProps> = ({ children }) => {
           </Avatar>
           {!drawerCollapsed && (
             <Box sx={{ ml: 2 }}>
-              <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1 }}>
+              <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1, color: '#ffffff' }}>
                 TaxPilot
               </Typography>
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" sx={{ color: '#a3a3a3' }}>
                 Comptabilité intelligente
               </Typography>
             </Box>
@@ -466,7 +466,7 @@ const ModernLayout: React.FC<ModernLayoutProps> = ({ children }) => {
 
         {!drawerCollapsed && (
           <>
-            <Divider sx={{ my: 2, mx: 2 }} />
+            <Divider sx={{ my: 2, mx: 2, borderColor: 'rgba(255,255,255,0.12)' }} />
             <Typography
               variant="overline"
               sx={{
@@ -474,7 +474,7 @@ const ModernLayout: React.FC<ModernLayoutProps> = ({ children }) => {
                 mb: 1,
                 fontSize: '0.75rem',
                 fontWeight: 600,
-                color: 'text.secondary',
+                color: '#737373',
                 display: 'block',
               }}
             >
@@ -494,7 +494,7 @@ const ModernLayout: React.FC<ModernLayoutProps> = ({ children }) => {
 
       {/* Quick actions */}
       {!drawerCollapsed && (
-        <Box sx={{ p: 2, borderTop: `1px solid ${alpha(theme.palette.divider, 0.08)}` }}>
+        <Box sx={{ p: 2, borderTop: '1px solid rgba(255,255,255,0.08)' }}>
           <Button
             variant="contained"
             fullWidth
@@ -502,8 +502,12 @@ const ModernLayout: React.FC<ModernLayoutProps> = ({ children }) => {
             sx={{
               borderRadius: 2,
               textTransform: 'none',
-              backgroundColor: theme.palette.primary.main,
+              backgroundColor: '#404040',
+              color: '#ffffff !important',
               mb: 1,
+              '&:hover': {
+                backgroundColor: '#525252',
+              },
             }}
           >
             Nouvelle liasse
@@ -515,6 +519,12 @@ const ModernLayout: React.FC<ModernLayoutProps> = ({ children }) => {
             sx={{
               borderRadius: 2,
               textTransform: 'none',
+              borderColor: '#404040',
+              color: '#d4d4d4',
+              '&:hover': {
+                borderColor: '#737373',
+                backgroundColor: 'rgba(255,255,255,0.05)',
+              },
             }}
           >
             Support
