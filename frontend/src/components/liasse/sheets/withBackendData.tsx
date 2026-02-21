@@ -58,10 +58,16 @@ export function withBackendData<P extends object>(
             return
           }
 
-          // No DataProvider context and no backend — resolve immediately with empty data
+          // No DataProvider context and no backend — read from localStorage
           if (!liasseData || liasseData.comptes.length === 0) {
+            let localEntreprise = null
+            try {
+              const raw = localStorage.getItem('fiscasync_db_entreprises')
+              const list = raw ? JSON.parse(raw) : []
+              if (list.length > 0) localEntreprise = list[0]
+            } catch { /* ignore */ }
             setEnhancedData({
-              entreprise: null,
+              entreprise: localEntreprise,
               balance: null,
               comptes: [],
               ecritures: [],

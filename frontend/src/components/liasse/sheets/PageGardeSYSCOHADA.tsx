@@ -297,8 +297,8 @@ const PageGardeSYSCOHADA: React.FC<PageGardeSYSCOHADAProps> = ({ variant = 'defa
       <Paper
         elevation={0}
         sx={{
-          p: 4,
-          mb: 3,
+          p: 3,
+          mb: 2,
           backgroundColor: theme.palette.primary.main,
           color: 'white',
           textAlign: 'center',
@@ -310,13 +310,13 @@ const PageGardeSYSCOHADA: React.FC<PageGardeSYSCOHADAProps> = ({ variant = 'defa
           }
         }}
       >
-        <Typography variant="h4" sx={{ fontWeight: 700, mb: 2, color: P.white }}>
+        <Typography variant="h5" sx={{ fontWeight: 700, mb: 1, color: P.white }}>
           {config.titre}
         </Typography>
-        <Typography variant="h5" sx={{ mb: 2, color: P.white }}>
+        <Typography variant="h6" sx={{ mb: 1, color: P.white }}>
           {config.sousTitre}
         </Typography>
-        <Typography variant="h6" sx={{ color: P.white }}>
+        <Typography variant="body1" sx={{ color: P.white }}>
           EXERCICE CLOS LE {new Date(dateFin).toLocaleDateString('fr-FR', {
             day: 'numeric',
             month: 'long',
@@ -326,29 +326,31 @@ const PageGardeSYSCOHADA: React.FC<PageGardeSYSCOHADAProps> = ({ variant = 'defa
       </Paper>
 
       {/* Informations de l'entreprise — LECTURE SEULE */}
-      <Paper elevation={0} sx={{ p: 3, mb: 3, border: `1px solid ${theme.palette.divider}` }}>
-        <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 3 }}>
-          <BusinessIcon color="primary" sx={{ fontSize: 32 }} />
+      <Paper elevation={0} sx={{ p: 2.5, mb: 2, border: `1px solid ${theme.palette.divider}` }}>
+        <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 2 }}>
+          <BusinessIcon color="primary" sx={{ fontSize: 28 }} />
           <Typography variant="h6" sx={{ fontWeight: 600 }}>
             IDENTIFICATION DE L'ENTREPRISE
           </Typography>
           {ent && <Chip label="Auto" size="small" icon={<LockIcon />} color="default" />}
         </Stack>
 
-        <Grid container spacing={3}>
+        <Grid container spacing={2}>
           <Grid item xs={12} md={8}>
             <TextField
               fullWidth
+              size="small"
               label="Raison sociale"
               value={raisonSociale}
               InputProps={{ readOnly: true }}
-              sx={{ ...readOnlyFieldSx, mb: 2 }}
+              sx={readOnlyFieldSx}
             />
           </Grid>
 
           <Grid item xs={12} md={4}>
             <TextField
               fullWidth
+              size="small"
               label="Forme juridique"
               value={formeJuridiqueLabel}
               InputProps={{ readOnly: true }}
@@ -359,6 +361,7 @@ const PageGardeSYSCOHADA: React.FC<PageGardeSYSCOHADAProps> = ({ variant = 'defa
           <Grid item xs={12} md={4}>
             <TextField
               fullWidth
+              size="small"
               label="N° RCCM"
               value={rccm}
               InputProps={{ readOnly: true }}
@@ -369,6 +372,7 @@ const PageGardeSYSCOHADA: React.FC<PageGardeSYSCOHADAProps> = ({ variant = 'defa
           <Grid item xs={12} md={4}>
             <TextField
               fullWidth
+              size="small"
               label="N° IFU"
               value={ifu}
               InputProps={{ readOnly: true }}
@@ -379,6 +383,7 @@ const PageGardeSYSCOHADA: React.FC<PageGardeSYSCOHADAProps> = ({ variant = 'defa
           <Grid item xs={12} md={4}>
             <TextField
               fullWidth
+              size="small"
               label="N° Comptable"
               value={numeroComptable}
               InputProps={{ readOnly: true }}
@@ -389,6 +394,7 @@ const PageGardeSYSCOHADA: React.FC<PageGardeSYSCOHADAProps> = ({ variant = 'defa
           <Grid item xs={12}>
             <TextField
               fullWidth
+              size="small"
               label="Adresse du siège social"
               value={adresse}
               InputProps={{ readOnly: true }}
@@ -399,6 +405,7 @@ const PageGardeSYSCOHADA: React.FC<PageGardeSYSCOHADAProps> = ({ variant = 'defa
           <Grid item xs={12} md={4}>
             <TextField
               fullWidth
+              size="small"
               label="Ville"
               value={ville}
               InputProps={{ readOnly: true }}
@@ -409,6 +416,7 @@ const PageGardeSYSCOHADA: React.FC<PageGardeSYSCOHADAProps> = ({ variant = 'defa
           <Grid item xs={12} md={4}>
             <TextField
               fullWidth
+              size="small"
               label="Pays"
               value={pays}
               InputProps={{ readOnly: true }}
@@ -419,6 +427,7 @@ const PageGardeSYSCOHADA: React.FC<PageGardeSYSCOHADAProps> = ({ variant = 'defa
           <Grid item xs={12} md={4}>
             <TextField
               fullWidth
+              size="small"
               label="Téléphone"
               value={telephone}
               InputProps={{ readOnly: true }}
@@ -429,19 +438,20 @@ const PageGardeSYSCOHADA: React.FC<PageGardeSYSCOHADAProps> = ({ variant = 'defa
       </Paper>
 
       {/* Informations sur l'exercice — LECTURE SEULE */}
-      <Paper elevation={0} sx={{ p: 3, mb: 3, border: `1px solid ${theme.palette.divider}` }}>
-        <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 3 }}>
-          <CalendarIcon color="primary" sx={{ fontSize: 32 }} />
+      <Paper elevation={0} sx={{ p: 2.5, mb: 2, border: `1px solid ${theme.palette.divider}` }}>
+        <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 2 }}>
+          <CalendarIcon color="primary" sx={{ fontSize: 28 }} />
           <Typography variant="h6" sx={{ fontWeight: 600 }}>
             EXERCICE COMPTABLE
           </Typography>
           {ent && <Chip label="Auto" size="small" icon={<LockIcon />} color="default" />}
         </Stack>
 
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={3}>
+        <Grid container spacing={2}>
+          <Grid item xs={6} md={3}>
             <TextField
               fullWidth
+              size="small"
               label="Exercice"
               value={exerciceComptable}
               InputProps={{ readOnly: true }}
@@ -449,9 +459,10 @@ const PageGardeSYSCOHADA: React.FC<PageGardeSYSCOHADAProps> = ({ variant = 'defa
             />
           </Grid>
 
-          <Grid item xs={12} md={3}>
+          <Grid item xs={6} md={3}>
             <TextField
               fullWidth
+              size="small"
               label="Date début"
               value={formatDateFR(dateDebut)}
               InputProps={{ readOnly: true }}
@@ -459,9 +470,10 @@ const PageGardeSYSCOHADA: React.FC<PageGardeSYSCOHADAProps> = ({ variant = 'defa
             />
           </Grid>
 
-          <Grid item xs={12} md={3}>
+          <Grid item xs={6} md={3}>
             <TextField
               fullWidth
+              size="small"
               label="Date fin"
               value={formatDateFR(dateFin)}
               InputProps={{ readOnly: true }}
@@ -469,9 +481,10 @@ const PageGardeSYSCOHADA: React.FC<PageGardeSYSCOHADAProps> = ({ variant = 'defa
             />
           </Grid>
 
-          <Grid item xs={12} md={3}>
+          <Grid item xs={6} md={3}>
             <TextField
               fullWidth
+              size="small"
               label="Durée (mois)"
               value={dureeExercice}
               InputProps={{ readOnly: true }}
@@ -482,6 +495,7 @@ const PageGardeSYSCOHADA: React.FC<PageGardeSYSCOHADAProps> = ({ variant = 'defa
           <Grid item xs={12} md={4}>
             <TextField
               fullWidth
+              size="small"
               label="Régime fiscal"
               value={regimeFiscal}
               InputProps={{ readOnly: true }}
@@ -492,6 +506,7 @@ const PageGardeSYSCOHADA: React.FC<PageGardeSYSCOHADAProps> = ({ variant = 'defa
           <Grid item xs={12} md={4}>
             <TextField
               fullWidth
+              size="small"
               label="Centre des impôts"
               value={centreImpots}
               InputProps={{ readOnly: true }}
@@ -502,6 +517,7 @@ const PageGardeSYSCOHADA: React.FC<PageGardeSYSCOHADAProps> = ({ variant = 'defa
           <Grid item xs={12} md={4}>
             <TextField
               fullWidth
+              size="small"
               label="Date de dépôt"
               value={formatDateFR(dateDepot)}
               InputProps={{ readOnly: true }}
@@ -512,11 +528,11 @@ const PageGardeSYSCOHADA: React.FC<PageGardeSYSCOHADAProps> = ({ variant = 'defa
       </Paper>
 
       {/* Documents joints (ÉDITABLE) + Déclarant (LECTURE SEULE) */}
-      <Grid container spacing={3}>
+      <Grid container spacing={2}>
         <Grid item xs={12} md={6}>
-          <Paper elevation={0} sx={{ p: 3, border: `1px solid ${theme.palette.divider}`, height: '100%' }}>
-            <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 3 }}>
-              <DocIcon color="primary" sx={{ fontSize: 32 }} />
+          <Paper elevation={0} sx={{ p: 2.5, border: `1px solid ${theme.palette.divider}`, height: '100%' }}>
+            <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 2 }}>
+              <DocIcon color="primary" sx={{ fontSize: 28 }} />
               <Typography variant="h6" sx={{ fontWeight: 600 }}>
                 DOCUMENTS JOINTS
               </Typography>
@@ -552,9 +568,9 @@ const PageGardeSYSCOHADA: React.FC<PageGardeSYSCOHADAProps> = ({ variant = 'defa
 
         {/* Déclarant — LECTURE SEULE */}
         <Grid item xs={12} md={6}>
-          <Paper elevation={0} sx={{ p: 3, border: `1px solid ${theme.palette.divider}`, height: '100%' }}>
-            <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 3 }}>
-              <GroupIcon color="primary" sx={{ fontSize: 32 }} />
+          <Paper elevation={0} sx={{ p: 2.5, border: `1px solid ${theme.palette.divider}`, height: '100%' }}>
+            <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 2 }}>
+              <GroupIcon color="primary" sx={{ fontSize: 28 }} />
               <Typography variant="h6" sx={{ fontWeight: 600 }}>
                 DÉCLARANT
               </Typography>
@@ -626,7 +642,7 @@ const PageGardeSYSCOHADA: React.FC<PageGardeSYSCOHADAProps> = ({ variant = 'defa
       </Grid>
 
       {/* Validation et actions */}
-      <Paper elevation={0} sx={{ p: 3, mt: 3, border: `1px solid ${theme.palette.divider}` }}>
+      <Paper elevation={0} sx={{ p: 2.5, mt: 2, border: `1px solid ${theme.palette.divider}` }}>
         <Stack direction="row" justifyContent="space-between" alignItems="center">
           <Box>
             {isValid ? (
