@@ -38,7 +38,7 @@ import {
   CheckCircle as CheckIcon,
   Warning as WarningIcon,
 } from '@mui/icons-material'
-import { liasseDataService } from '../../../services/liasseDataService'
+import { liasseDataService } from '@/services/liasseDataService'
 import EditableToolbar from '../shared/EditableToolbar'
 
 // ═══════════════════════════════════════

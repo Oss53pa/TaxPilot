@@ -26,97 +26,41 @@ import { TrendingUp, TrendingDown, Remove } from '@mui/icons-material'
 import CommentairesSection from '../shared/CommentairesSection'
 import TableActions from '../shared/TableActions'
 import EditableToolbar from '../shared/EditableToolbar'
-import { useEditableTable } from '../../../hooks/useEditableTable'
+import { useEditableTable } from '@/hooks/useEditableTable'
+import { useBalanceData } from '@/hooks/useBalanceData'
 
 const Note3SYSCOHADA: React.FC = () => {
   const theme = useTheme()
   const { isEditMode, toggleEditMode, handleCellChange, getCellValue, hasChanges, handleSave } = useEditableTable()
 
+  // Données calculées depuis la balance importée via useBalanceData
+  const bal = useBalanceData()
+
+  const immoRow = (rubrique: string, brutPrefixes: string[], amortPrefixes: string[], taux: string, duree: string) => {
+    const brut = bal.d(brutPrefixes)
+    const amort = bal.c(amortPrefixes)
+    return {
+      rubrique,
+      valeurBruteDebut: brut,
+      acquisitions: 0,
+      cessions: 0,
+      reevaluations: 0,
+      valeurBruteFin: brut,
+      amortissements: amort,
+      valeurNette: brut - amort,
+      tauxAmort: taux,
+      dureeVie: duree,
+    }
+  }
+
   const donneesImmobilisations = [
-    {
-      rubrique: 'Terrains',
-      valeurBruteDebut: 45000000,
-      acquisitions: 0,
-      cessions: 0,
-      reevaluations: 0,
-      valeurBruteFin: 45000000,
-      amortissements: 0,
-      valeurNette: 45000000,
-      tauxAmort: '0%',
-      dureeVie: 'Illimitée',
-    },
-    {
-      rubrique: 'Bâtiments',
-      valeurBruteDebut: 180000000,
-      acquisitions: 0,
-      cessions: 0,
-      reevaluations: 0,
-      valeurBruteFin: 180000000,
-      amortissements: 55000000,
-      valeurNette: 125000000,
-      tauxAmort: '4%',
-      dureeVie: '25 ans',
-    },
-    {
-      rubrique: 'Installations techniques et outillages',
-      valeurBruteDebut: 25000000,
-      acquisitions: 2000000,
-      cessions: 0,
-      reevaluations: 0,
-      valeurBruteFin: 27000000,
-      amortissements: 14500000,
-      valeurNette: 12500000,
-      tauxAmort: '10%',
-      dureeVie: '10 ans',
-    },
-    {
-      rubrique: 'Matériel de transport',
-      valeurBruteDebut: 18000000,
-      acquisitions: 0,
-      cessions: 1500000,
-      reevaluations: 0,
-      valeurBruteFin: 16500000,
-      amortissements: 7600000,
-      valeurNette: 8900000,
-      tauxAmort: '25%',
-      dureeVie: '4 ans',
-    },
-    {
-      rubrique: 'Mobilier, matériel de bureau et informatique',
-      valeurBruteDebut: 8500000,
-      acquisitions: 1200000,
-      cessions: 0,
-      reevaluations: 0,
-      valeurBruteFin: 9700000,
-      amortissements: 4200000,
-      valeurNette: 5500000,
-      tauxAmort: '20%',
-      dureeVie: '5 ans',
-    },
-    {
-      rubrique: 'Agencements et installations',
-      valeurBruteDebut: 15000000,
-      acquisitions: 0,
-      cessions: 0,
-      reevaluations: 0,
-      valeurBruteFin: 15000000,
-      amortissements: 8000000,
-      valeurNette: 7000000,
-      tauxAmort: '10%',
-      dureeVie: '10 ans',
-    },
-    {
-      rubrique: 'Autres immobilisations corporelles',
-      valeurBruteDebut: 2500000,
-      acquisitions: 500000,
-      cessions: 0,
-      reevaluations: 0,
-      valeurBruteFin: 3000000,
-      amortissements: 1500000,
-      valeurNette: 1500000,
-      tauxAmort: '20%',
-      dureeVie: '5 ans',
-    },
+    immoRow('Terrains (22)', ['22'], ['282'], '0%', 'Illimitee'),
+    immoRow('Batiments (23)', ['23'], ['283'], '4%', '25 ans'),
+    immoRow('Installations techniques (24)', ['24'], ['284'], '10%', '10 ans'),
+    immoRow('Materiel de transport (245)', ['245'], ['2845'], '25%', '4 ans'),
+    immoRow('Mobilier et informatique (244)', ['244'], ['2844'], '20%', '5 ans'),
+    immoRow('Agencements et installations (218)', ['218'], ['2818'], '10%', '10 ans'),
+    immoRow('Autres immobilisations (25)', ['25'], ['285'], '20%', '5 ans'),
   ]
 
   const formatMontant = (montant: number) => {

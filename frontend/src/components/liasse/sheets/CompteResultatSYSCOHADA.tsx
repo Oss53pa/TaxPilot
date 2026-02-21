@@ -29,7 +29,7 @@ import {
   TrendingUp as ProfitIcon,
   TrendingDown as LossIcon,
 } from '@mui/icons-material'
-import { liasseDataService } from '../../../services/liasseDataService'
+import { liasseDataService } from '@/services/liasseDataService'
 import EditableToolbar from '../shared/EditableToolbar'
 
 // Structure du Compte de Résultat SYSCOHADA
