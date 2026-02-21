@@ -1,0 +1,334 @@
+/* PrintLayout.css — Format A4 imprimable pour la liasse fiscale SYSCOHADA */
+/* ══════════════════════════════════════════════════════════════════════════
+ * Échelle typographique : "Document Imprimé (A4/Letter)"
+ *   H1 = 27pt / 36px   — Titre du document (couverture uniquement)
+ *   H2 = 21pt / 28px   — Sections majeures
+ *   H3 = 16.5pt / 22px — Sous-sections
+ *   H4 = 13.5pt / 18px — Paragraphes titrés
+ *   Corps = 12pt / 16px — RÉFÉRENCE
+ *   Secondaire = 10.5pt / 14px — Notes, en-têtes tableau
+ *   Caption = 9pt / 12px — Pied de page, mentions légales
+ *   Micro = 7.5pt / 10px — Numéros de page
+ *
+ * Règle d'or : Corps de texte JAMAIS < 11pt (14.67px) imprimé / 14px écran
+ * Ratio : Major Third (×1.25) entre niveaux
+ * Interligne corps : 1.5× à 1.7× | Titres : 1.1× à 1.3×
+ * ══════════════════════════════════════════════════════════════════════════ */
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 20mm 15mm 20mm 15mm;
+  }
+
+  body {
+    font-size: 12pt;          /* Corps = 12pt référence */
+    font-family: 'Segoe UI', Arial, sans-serif;
+    color: #000;
+    line-height: 1.5;
+  }
+
+  .no-print,
+  .liasse-sidebar,
+  .liasse-toolbar {
+    display: none !important;
+  }
+
+  .page-break {
+    page-break-before: always;
+  }
+
+  /* Chaque page de la liasse */
+  .liasse-page {
+    width: 100%;
+    min-height: 247mm; /* A4 minus margins */
+    page-break-after: always;
+    font-size: 12pt;
+  }
+
+  .liasse-page:last-child {
+    page-break-after: auto;
+  }
+
+  /* En-tête DGI sur chaque page */
+  .dgi-header {
+    text-align: center;
+    font-size: 9pt;           /* Caption */
+    border-bottom: 1px solid #000;
+    padding-bottom: 4mm;
+    margin-bottom: 4mm;
+  }
+
+  /* Tableaux */
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  td, th {
+    border: 0.5pt solid #333;
+    padding: 3px 6px;
+    font-size: 10.5pt;        /* Secondaire */
+  }
+
+  th {
+    background: #e8e8e8 !important;
+    font-weight: 600;
+    font-size: 10.5pt;        /* Secondaire */
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .montant {
+    text-align: right;
+    font-family: 'Courier New', monospace;
+  }
+
+  .ref-cell {
+    text-align: center;
+    font-weight: bold;
+    width: 30px;
+    background: #f0f0f0 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .total-row {
+    font-weight: bold;
+    border-top: 1.5pt solid #000;
+  }
+
+  .grand-total {
+    font-weight: bold;
+    border-top: 2pt double #000;
+    background: #f5f5f5 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .section-header {
+    background: #d0d0d0 !important;
+    font-weight: bold;
+    text-transform: uppercase;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Pied de page */
+  .page-footer {
+    position: fixed;
+    bottom: 0;
+    font-size: 7.5pt;         /* Micro */
+    text-align: center;
+    color: #666;
+  }
+
+  /* Force background colors to print */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+ * SCREEN PREVIEW — A4 portrait proportional
+ * Conteneur = 210mm (794px). Le contenu est rendu avec l'échelle "print"
+ * adaptée à la lecture écran (50-70 cm).
+ * ══════════════════════════════════════════════════════════════════════════ */
+@media screen {
+  .liasse-page {
+    background: #fff;
+    padding: 20mm 15mm;                /* Marges A4 classiques */
+    margin-bottom: 8px;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+    min-height: 297mm;                 /* Hauteur A4 complète */
+    font-size: 14px;                   /* Secondaire comme base de page */
+    line-height: 1.5;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    overflow: hidden;
+  }
+
+  /* ── Titres ── */
+
+  /* h4 → Titre de feuille ("NOTE 6 - IMMOBILISATIONS CORPORELLES") */
+  .liasse-page h4,
+  .liasse-page .MuiTypography-h4 {
+    font-size: 18px !important;        /* H4 = 13.5pt / 18px */
+    font-weight: 600 !important;
+    line-height: 1.35 !important;
+    margin-bottom: 8px !important;
+    letter-spacing: 0 !important;
+  }
+
+  /* h5 → Sous-titre / indicateurs KPI */
+  .liasse-page h5,
+  .liasse-page .MuiTypography-h5 {
+    font-size: 16px !important;        /* ≈ 12pt, entre H4 et Corps */
+    font-weight: 600 !important;
+    line-height: 1.3 !important;
+  }
+
+  /* h6 → Titre de section dans les cartes */
+  .liasse-page h6,
+  .liasse-page .MuiTypography-h6 {
+    font-size: 15px !important;        /* ≈ 11.25pt */
+    font-weight: 600 !important;
+    line-height: 1.3 !important;
+    margin-bottom: 6px !important;
+  }
+
+  /* ── Texte courant ── */
+
+  .liasse-page .MuiTypography-subtitle1 {
+    font-size: 14px !important;        /* Secondaire */
+    font-weight: 500 !important;
+    line-height: 1.4 !important;
+  }
+  .liasse-page .MuiTypography-subtitle2 {
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    line-height: 1.4 !important;
+  }
+
+  /* body1 = corps de texte principal */
+  .liasse-page .MuiTypography-body1 {
+    font-size: 14px !important;        /* Secondaire = 10.5pt / 14px — plancher écran */
+    line-height: 1.5 !important;
+  }
+
+  /* body2 = texte secondaire, détails dans les cartes */
+  .liasse-page .MuiTypography-body2 {
+    font-size: 13px !important;        /* ≈ 9.75pt */
+    line-height: 1.45 !important;
+  }
+
+  /* caption = légendes, petits labels */
+  .liasse-page .MuiTypography-caption {
+    font-size: 11px !important;        /* ≈ 8.25pt */
+    line-height: 1.35 !important;
+  }
+
+  /* ── Tableaux DGI (contenus denses) ──
+   * Les tableaux fiscaux sont plus denses que le texte courant.
+   * On utilise le niveau "Secondaire" (14px) pour les cellules
+   * et "Caption" (12px) pour les en-têtes compacts. */
+
+  .liasse-page table,
+  .liasse-page .MuiTable-root {
+    font-size: 13px !important;
+  }
+
+  .liasse-page th,
+  .liasse-page .MuiTableCell-head {
+    font-size: 12px !important;        /* Caption = 9pt / 12px */
+    font-weight: 600 !important;
+    padding: 5px 8px !important;
+    line-height: 1.3 !important;
+  }
+
+  .liasse-page td,
+  .liasse-page .MuiTableCell-body {
+    font-size: 13px !important;        /* Entre caption et secondaire */
+    padding: 4px 8px !important;
+    line-height: 1.4 !important;
+  }
+
+  /* ── Cartes / Paper — espacement réduit pour densité A4 ── */
+  .liasse-page .MuiCard-root {
+    margin-bottom: 10px !important;
+  }
+  .liasse-page .MuiCardContent-root {
+    padding: 12px !important;
+  }
+  .liasse-page .MuiCardContent-root:last-child {
+    padding-bottom: 12px !important;
+  }
+
+  /* ── Chips ── */
+  .liasse-page .MuiChip-root {
+    height: 22px !important;
+    font-size: 11px !important;        /* Caption */
+  }
+  .liasse-page .MuiChip-label {
+    padding: 0 8px !important;
+  }
+
+  /* ── Alertes ── */
+  .liasse-page .MuiAlert-root {
+    padding: 6px 12px !important;
+    margin-bottom: 10px !important;
+  }
+  .liasse-page .MuiAlert-message {
+    font-size: 13px !important;
+  }
+
+  /* ── Boutons ── */
+  .liasse-page .MuiButton-root {
+    font-size: 12px !important;        /* Caption */
+    padding: 4px 12px !important;
+    min-height: 28px !important;
+  }
+  .liasse-page .MuiButton-startIcon svg,
+  .liasse-page .MuiButton-endIcon svg {
+    font-size: 16px !important;
+  }
+
+  /* ── Onglets ── */
+  .liasse-page .MuiTab-root {
+    font-size: 12px !important;        /* Caption */
+    min-height: 34px !important;
+    padding: 6px 14px !important;
+  }
+
+  /* ── TextFields (cellules éditables) ── */
+  .liasse-page .MuiTextField-root .MuiInputBase-input {
+    font-size: 13px !important;
+    padding: 4px 8px !important;
+  }
+
+  /* ── Icônes ── */
+  .liasse-page .MuiSvgIcon-root {
+    font-size: 18px !important;
+  }
+  .liasse-page .MuiSvgIcon-fontSizeSmall {
+    font-size: 16px !important;
+  }
+
+  /* ── Grid spacing ── */
+  .liasse-page .MuiGrid-container {
+    margin-top: 0 !important;
+  }
+
+  /* ── En-tête DGI ── */
+  .dgi-header {
+    text-align: center;
+    font-size: 12px;                   /* Caption */
+    border-bottom: 1px solid #d4d4d4;
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+    color: #525252;
+  }
+
+  /* ── Placeholders (pages non implémentées) ── */
+  .liasse-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    border: 2px dashed #d4d4d4;
+    border-radius: 8px;
+    color: #a3a3a3;
+  }
+
+  .liasse-placeholder-title {
+    font-size: 16px;                   /* Corps */
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .liasse-placeholder-sub {
+    font-size: 13px;                   /* body2 */
+  }
+}
