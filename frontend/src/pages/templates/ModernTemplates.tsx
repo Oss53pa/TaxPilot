@@ -1395,6 +1395,36 @@ const ModernTemplates: React.FC = () => {
           }}>
             {selectedTemplate ? (
               <>
+                {/* Aperçu pour templates liasse fiscale */}
+                {selectedTemplate.category === 'liasse' && (
+                  <Box>
+                    <Paper sx={{ p: 3, mb: 2, backgroundColor: 'white' }}>
+                      <Typography variant="h5" align="center" sx={{ fontWeight: 700, mb: 1 }}>
+                        {selectedTemplate.name.toUpperCase()}
+                      </Typography>
+                      <Typography variant="subtitle1" align="center" color="text.secondary" sx={{ mb: 3 }}>
+                        Liasse Fiscale SYSCOHADA — {selectedTemplate.size}
+                      </Typography>
+                      <Divider sx={{ mb: 3 }} />
+
+                      <Box sx={{ height: 500 }}>
+                        <LiassePrintTemplate
+                          regime={selectedRegime}
+                          entreprise={entrepriseInfo}
+                          exercice={exercice}
+                        />
+                      </Box>
+                    </Paper>
+
+                    <Alert severity="info" icon={<DocIcon />}>
+                      <AlertTitle>Template officiel SYSCOHADA</AlertTitle>
+                      <Typography variant="caption">
+                        {selectedTemplate.description}
+                      </Typography>
+                    </Alert>
+                  </Box>
+                )}
+
                 {/* Aperçu pour templates bancaires */}
                 {selectedTemplate.category === 'bank' && (
                   <Box>
