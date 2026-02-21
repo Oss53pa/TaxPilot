@@ -78,6 +78,8 @@ import {
   Error as ErrorIcon,
   Refresh as RefreshIcon,
   AccountBalanceWallet as WalletIcon,
+  ChevronRight as ChevronRightIcon,
+  ChevronLeft as ChevronLeftIcon,
 } from '@mui/icons-material'
 import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
 import LiassePrintTemplate from '@/components/liasse/templates/LiassePrintTemplate'
@@ -145,6 +147,7 @@ const ModernTemplates: React.FC = () => {
   const [batchMode, setBatchMode] = useState(false)
   const [selectedTemplates, setSelectedTemplates] = useState<string[]>([])
   const [selectedRegime, setSelectedRegime] = useState<RegimeFiscal>('normal')
+  const [sidebarOpen, setSidebarOpen] = useState(true)
 
   // Entreprise info from localStorage
   const entrepriseInfo: EntrepriseInfo = (() => {
@@ -466,14 +469,22 @@ const ModernTemplates: React.FC = () => {
 
       {/* Contenu principal */}
       <Grid container spacing={3}>
-        <Grid item xs={12} lg={8}>
+        <Grid item xs={12} lg={sidebarOpen ? 8 : 12} sx={{ transition: 'all 0.35s cubic-bezier(0.4, 0, 0.2, 1)' }}>
           <Card elevation={0} sx={{ border: `1px solid ${alpha(theme.palette.divider, 0.08)}` }}>
-            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-              <Tabs value={activeTab} onChange={(_, newValue) => setActiveTab(newValue)}>
+            <Box sx={{ borderBottom: 1, borderColor: 'divider', display: 'flex', alignItems: 'center' }}>
+              <Tabs value={activeTab} onChange={(_, newValue) => setActiveTab(newValue)} sx={{ flex: 1 }}>
                 <Tab label="Tous les templates" />
                 <Tab label="Personnalisés" />
                 <Tab label="Liasse Fiscale" />
               </Tabs>
+              <Tooltip title={sidebarOpen ? 'Masquer le panneau' : 'Afficher le panneau'}>
+                <IconButton
+                  onClick={() => setSidebarOpen(!sidebarOpen)}
+                  sx={{ mr: 1 }}
+                >
+                  {sidebarOpen ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+                </IconButton>
+              </Tooltip>
             </Box>
 
             <TabPanel value={activeTab} index={0}>
@@ -922,7 +933,23 @@ const ModernTemplates: React.FC = () => {
         </Grid>
 
         {/* Panneau latéral */}
-        <Grid item xs={12} lg={4}>
+        <Grid
+          item
+          xs={12}
+          lg={4}
+          sx={{
+            transition: 'all 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
+            ...(sidebarOpen
+              ? { opacity: 1 }
+              : {
+                  maxWidth: '0 !important',
+                  flexBasis: '0 !important',
+                  padding: '0 !important',
+                  overflow: 'hidden',
+                  opacity: 0,
+                }),
+          }}
+        >
           <Stack spacing={3}>
             {/* Éditeur de template */}
             <Card elevation={0} sx={{ border: `1px solid ${alpha(theme.palette.divider, 0.08)}` }}>
