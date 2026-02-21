@@ -224,7 +224,7 @@ const Note17SYSCOHADA: React.FC = () => {
       montant,
       pourcentage: totaux.montantN > 0 ? (montant / totaux.montantN) * 100 : 0
     }
-  }).filter(zone => zone.montant > 0)
+  })
 
   const renderTableauSynthese = () => (
     <Card sx={{ mb: 3 }}>

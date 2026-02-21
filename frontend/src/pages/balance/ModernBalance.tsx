@@ -63,7 +63,7 @@ import {
 import { StatCard } from '@/components/shared/StatCard'
 import { balanceService } from '@/services/balanceService'
 import { entrepriseService } from '@/services/entrepriseService'
-import { MOCK_BALANCE } from '../../data/mockBalance'
+import { getLatestBalance } from '@/services/balanceStorageService'
 
 interface BalanceEntry {
   id: string
@@ -184,9 +184,30 @@ const ModernBalance: React.FC = () => {
   const loadBalanceData = async () => {
     try {
       setLoading(true)
-      logger.debug('🔄 Loading balance data from backend...')
 
-      // Récupérer les entreprises et balances
+      // 1. Priorité : balance importée dans localStorage
+      const stored = getLatestBalance()
+      if (stored?.entries?.length) {
+        const formattedData = stored.entries.map((entry, index) => ({
+          id: String(index + 1),
+          account: entry.compte,
+          accountName: entry.intitule,
+          class: entry.compte.charAt(0),
+          debitOpening: 0,
+          creditOpening: 0,
+          debitMovement: entry.debit,
+          creditMovement: entry.credit,
+          debitClosing: entry.solde_debit,
+          creditClosing: entry.solde_credit,
+          status: 'validated' as const,
+          lastModified: new Date(stored.importDate).toLocaleDateString('fr-FR')
+        }))
+        setBalanceData(formattedData)
+        setFilteredData(formattedData)
+        return
+      }
+
+      // 2. Fallback : essayer le backend
       const [entreprisesResponse, balancesRaw] = await Promise.all([
         entrepriseService.getEntreprises({ page_size: 100 }),
         balanceService.getBalances({ page_size: 100 })
@@ -196,28 +217,20 @@ const ModernBalance: React.FC = () => {
       void entreprisesResponse
       const balances = balancesResponse.results || []
 
-      // Si on a des balances, récupérer les données détaillées
       if (balances.length > 0) {
         const balanceDetails = await balanceService.getLignesBalance(balances[0].id, { page_size: 1000 }) as any
-
-        // Convertir les données backend au format attendu
         const formattedData = formatBalanceData(balanceDetails)
         setBalanceData(formattedData)
         setFilteredData(formattedData)
       } else {
-        // Si pas de données, utiliser des données par défaut
-        const defaultData = generateDefaultBalanceData()
-        setBalanceData(defaultData)
-        setFilteredData(defaultData)
+        // Pas de données → afficher état vide
+        setBalanceData([])
+        setFilteredData([])
       }
-
-      logger.debug('✅ Balance data loaded successfully')
-    } catch (error) {
-      logger.error('❌ Error loading balance data:', error)
-      // En cas d'erreur, utiliser des données par défaut
-      const defaultData = generateDefaultBalanceData()
-      setBalanceData(defaultData)
-      setFilteredData(defaultData)
+    } catch {
+      // Backend indisponible → état vide
+      setBalanceData([])
+      setFilteredData([])
     } finally {
       setLoading(false)
     }
@@ -225,7 +238,7 @@ const ModernBalance: React.FC = () => {
 
   // Formater les données backend au format attendu
   const formatBalanceData = (balanceDetails: any): BalanceEntry[] => {
-    if (!balanceDetails?.lignes) return generateDefaultBalanceData()
+    if (!balanceDetails?.lignes) return []
 
     return balanceDetails.lignes.map((ligne: any, index: number) => ({
       id: ligne.id || `${index + 1}`,
@@ -243,23 +256,6 @@ const ModernBalance: React.FC = () => {
     }))
   }
 
-  // Générer des données par défaut depuis la balance mock SYSCOHADA
-  const generateDefaultBalanceData = (): BalanceEntry[] => {
-    return MOCK_BALANCE.map((entry, index) => ({
-      id: String(index + 1),
-      account: entry.compte,
-      accountName: entry.intitule,
-      class: entry.compte.charAt(0),
-      debitOpening: 0,
-      creditOpening: 0,
-      debitMovement: entry.debit,
-      creditMovement: entry.credit,
-      debitClosing: entry.solde_debit,
-      creditClosing: entry.solde_credit,
-      status: 'validated' as const,
-      lastModified: new Date().toLocaleDateString('fr-FR')
-    }))
-  }
 
   // Filtrage des données
   useEffect(() => {

@@ -6,7 +6,6 @@
 import { useMemo } from 'react'
 import type { BalanceEntry } from '@/services/liasseDataService'
 import { getLatestBalance } from '@/services/balanceStorageService'
-import { MOCK_BALANCE } from '@/data/mockBalance'
 
 function sumDebit(entries: BalanceEntry[], prefixes: string[]): number {
   return Math.round(
@@ -39,7 +38,7 @@ export interface BalanceData {
 export function useBalanceData(): BalanceData {
   return useMemo(() => {
     const stored = getLatestBalance()
-    const entries = stored?.entries?.length ? stored.entries : MOCK_BALANCE
+    const entries = stored?.entries?.length ? stored.entries : []
     const usingImported = !!(stored?.entries?.length)
     return {
       entries,

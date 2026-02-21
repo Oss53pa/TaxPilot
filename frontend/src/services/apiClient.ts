@@ -322,7 +322,7 @@ class ApiClient {
           }
         }
       } else {
-        throw new Error('Réponse invalide du serveur')
+        throw new Error('Réponse invalide')
       }
     } catch (error) {
       logger.error('Login error:', error)
@@ -365,7 +365,7 @@ class ApiClient {
         logger.info('Signup successful:', response.data.organization?.name)
         return response.data
       } else {
-        throw new Error('Réponse invalide du serveur')
+        throw new Error('Réponse invalide')
       }
     } catch (error) {
       logger.error('Signup error:', error)

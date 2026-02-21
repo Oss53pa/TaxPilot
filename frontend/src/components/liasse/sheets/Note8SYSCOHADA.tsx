@@ -237,7 +237,7 @@ const Note8SYSCOHADA: React.FC = () => {
       provisions,
       valeurNette: valeurComptable - provisions
     }
-  }).filter(cat => cat.count > 0)
+  })
 
   const totaux: ValeursStocks = {
     valeurComptable: stocks.reduce((sum, stock) => sum + stock.valeurComptable, 0),

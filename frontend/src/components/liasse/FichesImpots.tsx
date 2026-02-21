@@ -36,6 +36,7 @@ import {
 } from '@mui/icons-material'
 import EditableToolbar from './shared/EditableToolbar'
 import { TabPanel } from '@/components/shared/TabPanel'
+import { useBalanceData } from '@/hooks/useBalanceData'
 
 interface FichesImpotsProps {
   modeEdition?: boolean
@@ -46,42 +47,54 @@ const FichesImpots: React.FC<FichesImpotsProps> = () => {
   const [modeEdition, setModeEdition] = useState(false)
   const [hasChanges, setHasChanges] = useState(false)
 
+  const bal = useBalanceData()
+
+  // --- Valeurs initiales calculées depuis la balance ---
+  const resultatComptableInit = bal.c(['7']) - bal.d(['6'])
+  const tauxIS = 25 // Taux IS Côte d'Ivoire — CGI Art. 33
+  const beneficeImposableInit = Math.max(0, resultatComptableInit)
+  const impotCalculeInit = arrondiFCFA(beneficeImposableInit * (tauxIS / 100))
+
+  const tvaCollectee18Init = bal.c(['4431', '4432', '4433', '4434'])
+  const tvaDeductibleInit = bal.d(['4451', '4452', '4453', '4454', '4456'])
+  const tvaNetteInit = Math.max(0, tvaCollectee18Init - tvaDeductibleInit)
+
   // Données pour l'Impôt sur les Sociétés
   const [impotSocieteData, setImpotSocieteData] = useState({
-    resultatComptable: 42000000,
-    reintegrationsDefinitives: 8500000,
-    reintegrationsTemporaires: 3200000,
-    deductionsDefinitives: 2100000,
-    deductionsTemporaires: 1800000,
+    resultatComptable: resultatComptableInit,
+    reintegrationsDefinitives: 0,
+    reintegrationsTemporaires: 0,
+    deductionsDefinitives: 0,
+    deductionsTemporaires: 0,
     deficitAnterieur: 0,
-    beneficeImposable: 49800000,
-    tauxIS: 25, // Taux IS Côte d'Ivoire — CGI Art. 33
-    impotCalcule: 12450000,
+    beneficeImposable: beneficeImposableInit,
+    tauxIS, // Taux IS Côte d'Ivoire — CGI Art. 33
+    impotCalcule: impotCalculeInit,
     creditImpot: 0,
-    impotDu: 12450000,
+    impotDu: impotCalculeInit,
   })
 
   // Données pour la TVA
   const [tvaData, setTvaData] = useState({
-    ventesImposables18: 125600000,
-    ventesImposables15: 65400000,
-    ventesExonerees: 19800000,
-    tvaCollectee18: 22608000,
-    tvaCollectee15: 9810000,
-    achatsImposables: 95000000,
-    immobilisationsImposables: 15000000,
-    tvaDeductible: 19800000,
-    tvaNetteAVerser: 12618000,
+    ventesImposables18: bal.c(['701', '702', '703', '704', '705', '706', '707']),
+    ventesImposables15: 0,
+    ventesExonerees: 0,
+    tvaCollectee18: tvaCollectee18Init,
+    tvaCollectee15: 0,
+    achatsImposables: bal.d(['601', '602', '604', '605', '608']),
+    immobilisationsImposables: 0,
+    tvaDeductible: tvaDeductibleInit,
+    tvaNetteAVerser: tvaNetteInit,
   })
 
   // Données pour les autres impôts
   const [autresImpotsData, setAutresImpotsData] = useState({
-    patente: 0, // À calculer depuis le CA via calculerPatente()
-    centimes: 125000,
-    cnps: 7260000,
-    fdfp: 1210000,
-    versementTransport: 420000,
-    taxeApprentissage: 210000,
+    patente: 0,
+    centimes: 0,
+    cnps: 0,
+    fdfp: 0,
+    versementTransport: 0,
+    taxeApprentissage: 0,
   })
 
   const formatNumber = (value: number) => {

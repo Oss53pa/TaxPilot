@@ -32,6 +32,7 @@ import {
 } from '@mui/icons-material'
 import EditableToolbar from './shared/EditableToolbar'
 import { TabPanel } from '@/components/shared/TabPanel'
+import { useBalanceData } from '@/hooks/useBalanceData'
 
 interface EtatAnnexeProps {
   modeEdition?: boolean
@@ -41,130 +42,150 @@ const EtatAnnexe: React.FC<EtatAnnexeProps> = () => {
   const [tabValue, setTabValue] = useState(0)
   const [modeEdition, setModeEdition] = useState(false)
   const [hasChanges, setHasChanges] = useState(false)
+  const bal = useBalanceData()
 
-  // Données des immobilisations
+  // Données des immobilisations (computed from balance)
+  const terrainsBrut = bal.d(['22'])
+  const batimentsBrut = bal.d(['23'])
+  const materielBrut = bal.d(['24'])
+  const vehiculesBrut = bal.d(['245'])
+  const mobilierBrut = bal.d(['244'])
+  const amortTerrains = bal.c(['282'])
+  const amortBatiments = bal.c(['283'])
+  const amortMateriel = bal.c(['284'])
+  const amortVehicules = bal.c(['2845'])
+  const amortMobilier = bal.c(['2844'])
+
   const [immobilisationsData, setImmobilisationsData] = useState([
     {
       nature: 'Terrains',
-      valeurBrute: 45000000,
-      amortissements: 0,
-      valeurNette: 45000000,
+      valeurBrute: terrainsBrut,
+      amortissements: amortTerrains,
+      valeurNette: terrainsBrut - amortTerrains,
       acquisitions: 0,
       cessions: 0,
     },
     {
       nature: 'Bâtiments',
-      valeurBrute: 125000000,
-      amortissements: 25000000,
-      valeurNette: 100000000,
-      acquisitions: 15000000,
+      valeurBrute: batimentsBrut,
+      amortissements: amortBatiments,
+      valeurNette: batimentsBrut - amortBatiments,
+      acquisitions: 0,
       cessions: 0,
     },
     {
       nature: 'Matériel et outillage',
-      valeurBrute: 65000000,
-      amortissements: 32000000,
-      valeurNette: 33000000,
-      acquisitions: 8500000,
-      cessions: 2000000,
+      valeurBrute: materielBrut,
+      amortissements: amortMateriel,
+      valeurNette: materielBrut - amortMateriel,
+      acquisitions: 0,
+      cessions: 0,
     },
     {
       nature: 'Matériel de transport',
-      valeurBrute: 28000000,
-      amortissements: 15000000,
-      valeurNette: 13000000,
-      acquisitions: 5000000,
-      cessions: 3500000,
+      valeurBrute: vehiculesBrut,
+      amortissements: amortVehicules,
+      valeurNette: vehiculesBrut - amortVehicules,
+      acquisitions: 0,
+      cessions: 0,
     },
     {
       nature: 'Mobilier et matériel de bureau',
-      valeurBrute: 12000000,
-      amortissements: 7500000,
-      valeurNette: 4500000,
-      acquisitions: 1200000,
+      valeurBrute: mobilierBrut,
+      amortissements: amortMobilier,
+      valeurNette: mobilierBrut - amortMobilier,
+      acquisitions: 0,
       cessions: 0,
     },
   ])
 
-  // Données des stocks
+  // Données des stocks (computed from balance)
   const [stocksData, setStocksData] = useState([
     {
       nature: 'Marchandises',
-      stockInitial: 25000000,
-      stockFinal: 28500000,
-      provisions: 1200000,
-      rotation: 8.5,
+      stockInitial: 0,
+      stockFinal: bal.d(['31']),
+      provisions: 0,
+      rotation: 0,
     },
     {
       nature: 'Matières premières',
-      stockInitial: 15000000,
-      stockFinal: 18200000,
-      provisions: 800000,
-      rotation: 12.3,
+      stockInitial: 0,
+      stockFinal: bal.d(['32', '33']),
+      provisions: 0,
+      rotation: 0,
     },
     {
       nature: 'Produits finis',
-      stockInitial: 32000000,
-      stockFinal: 35600000,
-      provisions: 1500000,
-      rotation: 6.8,
+      stockInitial: 0,
+      stockFinal: bal.d(['36', '37', '38']),
+      provisions: 0,
+      rotation: 0,
     },
     {
       nature: 'En-cours de production',
-      stockInitial: 8500000,
-      stockFinal: 9200000,
-      provisions: 400000,
-      rotation: 15.2,
+      stockInitial: 0,
+      stockFinal: bal.d(['34', '35']),
+      provisions: 0,
+      rotation: 0,
     },
   ])
 
-  // Données des créances
+  // Données des créances (computed from balance)
+  const clientsBrut = bal.d(['411', '412', '413', '414', '415', '416', '418'])
+  const provisionsClients = bal.c(['491'])
+  const autresCreances = bal.d(['42', '43', '44', '45', '46', '47'])
+
   const [creancesData, setCreancesData] = useState([
     {
       nature: 'Clients et comptes rattachés',
-      montantBrut: 45000000,
-      provisions: 2250000,
-      montantNet: 42750000,
+      montantBrut: clientsBrut,
+      provisions: provisionsClients,
+      montantNet: clientsBrut - provisionsClients,
       echeance: '< 1 an',
     },
     {
       nature: 'Autres créances',
-      montantBrut: 8500000,
-      provisions: 150000,
-      montantNet: 8350000,
+      montantBrut: autresCreances,
+      provisions: 0,
+      montantNet: autresCreances,
       echeance: '< 6 mois',
     },
     {
       nature: 'Comptes de régularisation',
-      montantBrut: 3200000,
+      montantBrut: 0,
       provisions: 0,
-      montantNet: 3200000,
+      montantNet: 0,
       echeance: '< 3 mois',
     },
   ])
 
-  // Données des dettes
+  // Données des dettes (computed from balance)
+  const emprunts = bal.c(['16', '17'])
+  const fournisseurs = bal.c(['40'])
+  const dettesFiscalesSociales = bal.c(['43', '44'])
+
   const [dettesData, setDettesData] = useState([
     {
       nature: 'Emprunts et dettes financières',
-      montant: 85000000,
-      echeance1an: 12000000,
-      echeance1a5ans: 45000000,
-      echeanceplus5ans: 28000000,
-      taux: '6.5%',
+      montant: emprunts,
+      echeance1an: 0,
+      echeance1a5ans: 0,
+      echeanceplus5ans: 0,
+      taux: '-',
     },
     {
       nature: 'Fournisseurs et comptes rattachés',
-      montant: 28500000,
-      echeance1an: 28500000,
+      montant: fournisseurs,
+      echeance1an: fournisseurs,
       echeance1a5ans: 0,
       echeanceplus5ans: 0,
       taux: '-',
     },
     {
       nature: 'Dettes fiscales et sociales',
-      montant: 15200000,
-      echeance1an: 15200000,
+      montant: dettesFiscalesSociales,
+      echeance1an: dettesFiscalesSociales,
       echeance1a5ans: 0,
       echeanceplus5ans: 0,
       taux: '-',

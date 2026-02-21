@@ -8,6 +8,7 @@ import { logger } from '@/utils/logger'
 import React, { useState, useEffect } from 'react'
 import { entrepriseService } from '@/services'
 import { useBackendData } from '@/hooks/useBackendData'
+import { saveEntreprise, getEntreprise } from '@/services/entrepriseStorageService'
 import {
   Box,
   Grid,
@@ -235,55 +236,60 @@ const EntrepriseSettings: React.FC = () => {
     } as any,
   })
 
-  // Charger les données de l'entreprise quand elles sont disponibles
+  // Charger les données : priorité backend, fallback localStorage
   useEffect(() => {
-    if (entreprises && entreprises.length > 0) {
-      const entreprise = entreprises[0]
-      setEntrepriseId(entreprise.id)
+    const entreprise = (entreprises && entreprises.length > 0)
+      ? entreprises[0]
+      : getEntreprise()
 
-      reset({
-        raison_sociale: entreprise.raison_sociale || '',
-        forme_juridique: entreprise.forme_juridique || 'SARL',
-        numero_contribuable: entreprise.numero_contribuable || '',
-        email: entreprise.email || '',
-        adresse_ligne1: entreprise.adresse_ligne1 || entreprise.adresse || '',
-        ville: entreprise.ville || '',
-        pays: entreprise.pays || 'SN',
-        nom_dirigeant: entreprise.nom_dirigeant || '',
-        fonction_dirigeant: entreprise.fonction_dirigeant || '',
-        regime_imposition: entreprise.regime_imposition || 'REEL_NORMAL',
-        secteur_activite: entreprise.secteur_activite || 'SERVICES',
-        chiffre_affaires_annuel: entreprise.chiffre_affaires_annuel || 0,
-        devise_principale: entreprise.devise_principale || 'XOF',
-        rccm: entreprise.rccm,
-        ifu: entreprise.ifu,
-        capital_social: entreprise.capital_social || 0,
-        numero_comptable: entreprise.numero_comptable || '',
-        centre_impots: entreprise.centre_impots || '',
-        exercice_debut: entreprise.exercice_debut || `${new Date().getFullYear()}-01-01`,
-        exercice_fin: entreprise.exercice_fin || `${new Date().getFullYear()}-12-31`,
-        date_depot: entreprise.date_depot || '',
-        email_dirigeant: entreprise.email_dirigeant || '',
-        telephone_dirigeant: entreprise.telephone_dirigeant || '',
-        nombre_etablissements: entreprise.nombre_etablissements || 1,
-        effectif_permanent: entreprise.effectif_permanent || 0,
-        effectif_temporaire: entreprise.effectif_temporaire || 0,
-        masse_salariale: entreprise.masse_salariale || 0,
-        nom_groupe: entreprise.nom_groupe || '',
-        pays_siege_groupe: entreprise.pays_siege_groupe || '',
-        cac_nom: entreprise.cac_nom || '',
-        cac_adresse: entreprise.cac_adresse || '',
-        cac_numero_inscription: entreprise.cac_numero_inscription || '',
-        expert_nom: entreprise.expert_nom || '',
-        expert_adresse: entreprise.expert_adresse || '',
-        expert_numero_inscription: entreprise.expert_numero_inscription || '',
-      })
+    if (!entreprise) return
 
-      // Load array data
-      if (entreprise.dirigeants?.length) setDirigeants(entreprise.dirigeants)
-      if (entreprise.commissaires_comptes?.length) setCommissaires(entreprise.commissaires_comptes)
-      if (entreprise.participations_filiales?.length) setParticipations(entreprise.participations_filiales)
+    if ((entreprises as any)?.[0]?.id) {
+      setEntrepriseId((entreprises as any)[0].id)
     }
+
+    reset({
+      raison_sociale: entreprise.raison_sociale || '',
+      forme_juridique: entreprise.forme_juridique || 'SARL',
+      numero_contribuable: entreprise.numero_contribuable || '',
+      email: entreprise.email || '',
+      adresse_ligne1: entreprise.adresse_ligne1 || (entreprise as any).adresse || '',
+      ville: entreprise.ville || '',
+      pays: entreprise.pays || 'SN',
+      nom_dirigeant: entreprise.nom_dirigeant || '',
+      fonction_dirigeant: entreprise.fonction_dirigeant || '',
+      regime_imposition: entreprise.regime_imposition || 'REEL_NORMAL',
+      secteur_activite: entreprise.secteur_activite || 'SERVICES',
+      chiffre_affaires_annuel: entreprise.chiffre_affaires_annuel || 0,
+      devise_principale: entreprise.devise_principale || 'XOF',
+      rccm: entreprise.rccm,
+      ifu: entreprise.ifu,
+      capital_social: entreprise.capital_social || 0,
+      numero_comptable: entreprise.numero_comptable || '',
+      centre_impots: entreprise.centre_impots || '',
+      exercice_debut: entreprise.exercice_debut || `${new Date().getFullYear()}-01-01`,
+      exercice_fin: entreprise.exercice_fin || `${new Date().getFullYear()}-12-31`,
+      date_depot: entreprise.date_depot || '',
+      email_dirigeant: entreprise.email_dirigeant || '',
+      telephone_dirigeant: entreprise.telephone_dirigeant || '',
+      nombre_etablissements: entreprise.nombre_etablissements || 1,
+      effectif_permanent: entreprise.effectif_permanent || 0,
+      effectif_temporaire: entreprise.effectif_temporaire || 0,
+      masse_salariale: entreprise.masse_salariale || 0,
+      nom_groupe: entreprise.nom_groupe || '',
+      pays_siege_groupe: entreprise.pays_siege_groupe || '',
+      cac_nom: entreprise.cac_nom || '',
+      cac_adresse: entreprise.cac_adresse || '',
+      cac_numero_inscription: entreprise.cac_numero_inscription || '',
+      expert_nom: entreprise.expert_nom || '',
+      expert_adresse: entreprise.expert_adresse || '',
+      expert_numero_inscription: entreprise.expert_numero_inscription || '',
+    })
+
+    // Load array data
+    if (entreprise.dirigeants?.length) setDirigeants(entreprise.dirigeants)
+    if (entreprise.commissaires_comptes?.length) setCommissaires(entreprise.commissaires_comptes)
+    if (entreprise.participations_filiales?.length) setParticipations(entreprise.participations_filiales)
   }, [entreprises, reset])
 
   const chiffre_affaires = watch('chiffre_affaires_annuel')
@@ -321,11 +327,18 @@ const EntrepriseSettings: React.FC = () => {
         participations_filiales: participations,
       }
 
-      if (entrepriseId) {
-        await entrepriseService.updateEntreprise(entrepriseId, payload as any)
-      } else {
-        const newEntreprise = await entrepriseService.createEntreprise(payload as any)
-        setEntrepriseId(newEntreprise.id)
+      // Toujours persister en localStorage (source de vérité locale)
+      saveEntreprise(payload as any)
+
+      try {
+        if (entrepriseId) {
+          await entrepriseService.updateEntreprise(entrepriseId, payload as any)
+        } else {
+          const newEntreprise = await entrepriseService.createEntreprise(payload as any)
+          setEntrepriseId(newEntreprise.id)
+        }
+      } catch {
+        // Backend indisponible — données sauvées en localStorage
       }
 
       setSuccess(true)

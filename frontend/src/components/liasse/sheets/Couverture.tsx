@@ -116,19 +116,19 @@ const Couverture: React.FC<CouvertureProps> = ({ data = {}, entreprise }) => {
 
   const displayData = {
     entreprise: {
-      raisonSociale: ent?.raison_sociale || data.entreprise?.raisonSociale || 'ENTREPRISE EXEMPLE SA',
+      raisonSociale: ent?.raison_sociale || data.entreprise?.raisonSociale || '(Non renseigné)',
       formeJuridique: ent
         ? (formesJuridiquesMap[ent.forme_juridique] || ent.forme_juridique)
-        : (data.entreprise?.formeJuridique || 'Société Anonyme (SA)'),
-      capitalSocial: ent?.capital_social ?? data.entreprise?.capitalSocial ?? 100000000,
-      rccm: ent?.rccm || data.entreprise?.rccm || 'RB/COT/2020/B/1234',
-      ifu: ent?.ifu || data.entreprise?.ifu || '3202010123456',
+        : (data.entreprise?.formeJuridique || '—'),
+      capitalSocial: ent?.capital_social ?? data.entreprise?.capitalSocial ?? 0,
+      rccm: ent?.rccm || data.entreprise?.rccm || '—',
+      ifu: ent?.ifu || data.entreprise?.ifu || '—',
       numeroComptable: ent?.numero_comptable || '',
       adresse: ent
         ? [ent.adresse_ligne1, ent.adresse_ligne2, ent.ville, paysOhadaMap[ent.pays] || ent.pays].filter(Boolean).join(', ')
-        : (data.entreprise?.adresse || '01 BP 1234 Cotonou, Bénin'),
-      telephone: ent?.telephone || data.entreprise?.telephone || '+229 21 31 00 00',
-      email: ent?.email || data.entreprise?.email || 'contact@entreprise.bj',
+        : (data.entreprise?.adresse || '—'),
+      telephone: ent?.telephone || data.entreprise?.telephone || '—',
+      email: ent?.email || data.entreprise?.email || '—',
     },
     exercice: {
       debut: ent?.exercice_debut

@@ -106,116 +106,43 @@ const ModernTeledeclaration: React.FC = () => {
   const [certificateDialog, setCertificateDialog] = useState(false)
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 1500)
-    return () => clearTimeout(timer)
+    setLoading(false)
   }, [])
 
-  const declarations: Declaration[] = [
-    {
-      id: '1',
-      type: 'TVA Mensuelle',
-      period: 'Décembre 2024',
-      company: 'SARL TECH SOLUTIONS',
-      status: 'submitted',
-      dueDate: '2025-01-15',
-      submittedDate: '2025-01-10',
-      amount: 250000,
-      reference: 'TVA202412001',
-      attachments: ['balance_dec_2024.pdf', 'journal_ventes.xlsx']
-    },
-    {
-      id: '2',
-      type: 'Impôt sur les Sociétés',
-      period: 'Exercice 2024',
-      company: 'SA COMMERCE PLUS',
-      status: 'ready',
-      dueDate: '2025-04-30',
-      amount: 1200000,
-      attachments: ['liasse_fiscale_2024.pdf', 'bilan_2024.xlsx']
-    },
-    {
-      id: '3',
-      type: 'Déclaration Sociale',
-      period: 'Q4 2024',
-      company: 'SARL TECH SOLUTIONS',
-      status: 'draft',
-      dueDate: '2025-01-31',
-      attachments: []
-    },
-    {
-      id: '4',
-      type: 'TVA Trimestrielle',
-      period: 'Q4 2024',
-      company: 'SA COMMERCE PLUS',
-      status: 'accepted',
-      dueDate: '2025-01-20',
-      submittedDate: '2025-01-15',
-      amount: 450000,
-      reference: 'TVA202404Q4',
-      attachments: ['synthese_q4.pdf']
-    }
-  ]
+  const declarations: Declaration[] = []
 
-  const governmentServices: GovernmentService[] = [
-    {
-      id: '1',
-      name: 'Direction Générale des Impôts',
-      code: 'DGI',
-      status: 'online',
-      lastCheck: '2024-12-16 14:30',
-      responseTime: 1.2
-    },
-    {
-      id: '2',
-      name: 'Caisse Nationale de Sécurité Sociale',
-      code: 'CNSS',
-      status: 'online',
-      lastCheck: '2024-12-16 14:25',
-      responseTime: 2.1
-    },
-    {
-      id: '3',
-      name: 'Direction des Douanes',
-      code: 'DOUANES',
-      status: 'maintenance',
-      lastCheck: '2024-12-16 12:00',
-      responseTime: 0
-    }
-  ]
+  const governmentServices: GovernmentService[] = []
 
   const transmissionSteps: TransmissionStep[] = [
     {
       id: '1',
       name: 'Validation des données',
-      status: 'completed',
+      status: 'pending',
       description: 'Vérification de la cohérence des données',
-      timestamp: '2024-12-16 14:20'
     },
     {
       id: '2',
       name: 'Chiffrement des fichiers',
-      status: 'completed',
+      status: 'pending',
       description: 'Sécurisation des données sensibles',
-      timestamp: '2024-12-16 14:21'
     },
     {
       id: '3',
       name: 'Transmission au service',
-      status: 'running',
-      description: 'Envoi vers la DGI',
-      details: 'Progression: 67%'
+      status: 'pending',
+      description: 'Envoi vers le service fiscal',
     },
     {
       id: '4',
       name: 'Accusé de réception',
       status: 'pending',
-      description: 'Attente de confirmation'
+      description: 'Attente de confirmation',
     },
     {
       id: '5',
       name: 'Archivage sécurisé',
       status: 'pending',
-      description: 'Sauvegarde des preuves de dépôt'
+      description: 'Sauvegarde des preuves de dépôt',
     }
   ]
 
@@ -340,7 +267,7 @@ const ModernTeledeclaration: React.FC = () => {
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <Box>
                     <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, color: theme.palette.success.main }}>
-                      12
+                      {declarations.filter(d => d.status === 'submitted' || d.status === 'accepted').length}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                       Déclarations transmises
@@ -369,7 +296,7 @@ const ModernTeledeclaration: React.FC = () => {
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <Box>
                     <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, color: theme.palette.warning.main }}>
-                      3
+                      {declarations.filter(d => d.status === 'ready' || d.status === 'draft').length}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                       En attente de transmission
@@ -398,7 +325,7 @@ const ModernTeledeclaration: React.FC = () => {
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <Box>
                     <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, color: theme.palette.primary.main }}>
-                      98%
+                      {declarations.length > 0 ? Math.round((declarations.filter(d => d.status === 'accepted').length / declarations.length) * 100) : 0}%
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                       Taux d'acceptation
@@ -427,7 +354,7 @@ const ModernTeledeclaration: React.FC = () => {
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <Box>
                     <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, color: theme.palette.info.main }}>
-                      2.3M
+                      {declarations.reduce((s, d) => s + (d.amount || 0), 0).toLocaleString('fr-FR')}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                       Total transmis (FCFA)

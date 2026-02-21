@@ -4,13 +4,12 @@
  */
 
 import React, { createContext, useContext, useState, ReactNode } from 'react'
-import { MOCK_BALANCE } from '../../data/mockBalance'
 import { liasseDataService } from '../../services/liasseDataService'
 import { getLatestBalance, getLatestBalanceN1 } from '../../services/balanceStorageService'
 
-// Charger la balance importée si disponible, sinon fallback sur MOCK
+// Charger la balance importée si disponible
 const storedBalance = getLatestBalance()
-const initialBalance = storedBalance?.entries?.length ? storedBalance.entries : MOCK_BALANCE
+const initialBalance = storedBalance?.entries?.length ? storedBalance.entries : []
 liasseDataService.loadBalance(initialBalance)
 
 // Charger la balance N-1 si disponible
@@ -60,7 +59,7 @@ export const LiasseDataProvider: React.FC<LiasseDataProviderProps> = ({
   exerciceId: _exerciceId
 }) => {
   const [data] = useState<LiasseData>({
-    entreprise: { nom: 'FISCASYNC DEMO SARL', siret: '85412369700015', regime_imposition: 'REEL_NORMAL' },
+    entreprise: null,
     exercice: { annee: 2024 },
     balance: initialBalance,
     comptes: [],

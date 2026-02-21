@@ -5,7 +5,6 @@
 import React, { useMemo } from 'react'
 import { calculerPassageFiscal, type TableauPassageResult } from '@/services/passageFiscalService'
 import { getLatestBalance } from '@/services/balanceStorageService'
-import { MOCK_BALANCE } from '@/data/mockBalance'
 import {
   Box,
   Paper,
@@ -30,10 +29,10 @@ import {
 const SupplementImpotSociete: React.FC = () => {
   const theme = useTheme()
 
-  // Charger la balance importée (ou MOCK en fallback)
+  // Charger la balance importée
   const passage = useMemo<TableauPassageResult>(() => {
     const stored = getLatestBalance()
-    const entries = stored?.entries?.length ? stored.entries : MOCK_BALANCE
+    const entries = stored?.entries?.length ? stored.entries : []
     return calculerPassageFiscal(entries)
   }, [])
 

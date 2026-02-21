@@ -4,6 +4,8 @@
 
 import React, { useState } from 'react'
 import { arrondiFCFA } from '@/config/taux-fiscaux-ci'
+import { useBalanceData } from '@/hooks/useBalanceData'
+import { useEntrepriseData } from '@/hooks/useEntrepriseData'
 import {
   Box,
   Typography,
@@ -44,38 +46,37 @@ interface DSFProps {
 }
 
 const DSF: React.FC<DSFProps> = ({ modeEdition = false }) => {
+  const bal = useBalanceData()
+  const ent = useEntrepriseData()
+
   // Données de l'entreprise
   const [entrepriseData, setEntrepriseData] = useState({
-    raisonSociale: 'TAXPILOT SARL',
-    numeroContribuable: '1234567890',
-    rccm: 'CI-ABJ-2024-B-12345',
-    adresse: 'Abidjan, Plateau',
-    secteurActivite: 'Services informatiques',
-    formeJuridique: 'SARL',
-    capitalSocial: 10000000,
+    raisonSociale: ent.nom || '',
+    numeroContribuable: ent.numeroContribuable || '',
+    rccm: ent.rccm || '',
+    adresse: ent.adresse ? `${ent.adresse}, ${ent.ville}` : '',
+    secteurActivite: ent.secteurActivite || '',
+    formeJuridique: ent.formeJuridique || '',
+    capitalSocial: ent.capitalSocial || 0,
   })
 
   // Données financières pour la DSF
   const [donneesFinancieres, setDonneesFinancieres] = useState({
-    chiffreAffaires: 210800000,
-    exportations: 25000000,
-    importations: 45000000,
-    investissements: 28500000,
-    stocksFinal: 91500000,
-    effectifMoyen: 85,
-    masseSalariale: 121000000,
-    beneficeImposable: 35000000,
-    impotSociete: 10500000,
-    tvaCollectee: 42160000,
-    tvaDeductible: 18500000,
+    chiffreAffaires: bal.c(['70', '71', '72', '73']),
+    exportations: bal.c(['701']),
+    importations: bal.d(['601']),
+    investissements: bal.d(['2']),
+    stocksFinal: bal.d(['3']),
+    effectifMoyen: (ent.entreprise?.effectif_permanent || 0) + (ent.entreprise?.effectif_temporaire || 0),
+    masseSalariale: ent.entreprise?.masse_salariale || bal.d(['66']),
+    beneficeImposable: bal.c(['7']) - bal.d(['6']),
+    impotSociete: bal.d(['695', '696', '697', '698', '699']),
+    tvaCollectee: bal.c(['4431', '4432', '4433', '4434', '4435']),
+    tvaDeductible: bal.d(['4451', '4452', '4453', '4454', '4455', '4456']),
   })
 
   // Répartition du chiffre d'affaires par activité
-  const [repartitionCA] = useState([
-    { activite: 'Vente de marchandises', montant: 125600000, taux: 15.0 },
-    { activite: 'Prestations de services', montant: 65400000, taux: 18.0 },
-    { activite: 'Production industrielle', montant: 19800000, taux: 18.0 },
-  ])
+  const [repartitionCA] = useState<{ activite: string; montant: number; taux: number }[]>([])
 
   // Calculs automatiques
   const tvaNetteAVerser = donneesFinancieres.tvaCollectee - donneesFinancieres.tvaDeductible

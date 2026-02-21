@@ -3,7 +3,7 @@
  * Dashboard fiscal - Palette Grayscale monochrome
  */
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import {
   Box,
   Typography,
@@ -34,13 +34,14 @@ import {
   Analytics,
   ArrowForward,
   CalendarMonth,
-  Error as ErrorIcon,
   AccessTime,
   BarChart,
   Refresh,
 } from '@mui/icons-material'
 import { useNavigate } from 'react-router-dom'
 import { fiscasyncPalette } from '@/theme/fiscasyncTheme'
+import { useEntrepriseData } from '@/hooks/useEntrepriseData'
+import { useBalanceData } from '@/hooks/useBalanceData'
 
 // ─── Palette tokens (derived from central theme) ─────────────────────
 const C = {
@@ -99,84 +100,88 @@ interface WorkflowStep {
 const AppDashboard: React.FC = () => {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
+  const ent = useEntrepriseData()
+  const bal = useBalanceData()
 
   useEffect(() => {
-    const t = setTimeout(() => setLoading(false), 500)
-    return () => clearTimeout(t)
+    setLoading(false)
   }, [])
 
-  // ── KPIs ──
+  const fmt = (n: number) => n.toLocaleString('fr-FR')
+
+  // ── Balance Summary (computed from real data) ──
+  const balanceSummary = useMemo(() => {
+    const totalDebit = bal.entries.reduce((s, e) => s + (e.solde_debit || 0), 0)
+    const totalCredit = bal.entries.reduce((s, e) => s + (e.solde_credit || 0), 0)
+    const ca = bal.c(['70', '71', '72', '73'])
+    const charges = bal.d(['60', '61', '62', '63', '64', '65', '66', '67', '68', '69'])
+    const produits = bal.c(['70', '71', '72', '73', '74', '75', '76', '77', '78', '79'])
+    return {
+      totalDebit: bal.entries.length ? fmt(totalDebit) : '\u2014',
+      totalCredit: bal.entries.length ? fmt(totalCredit) : '\u2014',
+      nbComptes: bal.entries.length,
+      chiffreAffaires: bal.entries.length ? fmt(ca) : '\u2014',
+      resultatNet: bal.entries.length ? fmt(produits - charges) : '\u2014',
+      ecart: Math.abs(totalDebit - totalCredit),
+    }
+  }, [bal])
+
+  // ── KPIs (computed from balance or show —) ──
   const kpis: KPI[] = [
     {
       label: 'Avancement Liasse',
-      value: '67%',
-      subtitle: '8 / 12 feuillets complétés',
-      trend: 12,
-      trendLabel: 'vs mois dernier',
+      value: '\u2014',
+      subtitle: 'Aucune donnée',
+      trend: 0,
+      trendLabel: '',
       icon: <Assignment sx={{ fontSize: 20 }} />,
     },
     {
       label: 'Conformité Fiscale',
-      value: '92%',
-      subtitle: '23 / 25 contrôles OK',
-      trend: 3,
-      trendLabel: 'vs exercice N-1',
+      value: '\u2014',
+      subtitle: 'Aucune donnée',
+      trend: 0,
+      trendLabel: '',
       icon: <Security sx={{ fontSize: 20 }} />,
     },
     {
       label: 'Anomalies Détectées',
-      value: '4',
-      subtitle: '2 critiques, 2 mineures',
-      trend: -6,
-      trendLabel: 'vs mois dernier',
+      value: '\u2014',
+      subtitle: 'Aucune donnée',
+      trend: 0,
+      trendLabel: '',
       icon: <WarningIcon sx={{ fontSize: 20 }} />,
     },
     {
-      label: 'Solde Balance',
-      value: '0',
-      subtitle: 'Balance équilibrée',
+      label: 'Comptes Balance',
+      value: bal.entries.length ? String(bal.entries.length) : '\u2014',
+      subtitle: bal.entries.length ? 'Balance importée' : 'Aucune balance importée',
       trend: 0,
-      trendLabel: 'Écart débit/crédit',
+      trendLabel: '',
       icon: <AccountBalance sx={{ fontSize: 20 }} />,
     },
   ]
 
   // ── Workflow ──
   const workflow: WorkflowStep[] = [
-    { label: 'Configuration', status: 'done', path: '/parametrage' },
-    { label: 'Import Balance', status: 'done', path: '/import-balance' },
-    { label: 'Contrôle & Audit', status: 'active', path: '/audit' },
-    { label: 'Production Liasse', status: 'active', path: '/direct-liasse' },
+    { label: 'Configuration', status: ent.hasEntreprise ? 'done' : 'pending', path: '/parametrage' },
+    { label: 'Import Balance', status: bal.usingImported ? 'done' : 'pending', path: '/import-balance' },
+    { label: 'Contrôle & Audit', status: bal.usingImported ? 'active' : 'pending', path: '/audit' },
+    { label: 'Production Liasse', status: bal.usingImported ? 'active' : 'pending', path: '/direct-liasse' },
     { label: 'Validation', status: 'pending', path: '/validation-liasse' },
     { label: 'Télédéclaration', status: 'pending', path: '/teledeclaration' },
   ]
 
-  // ── Deadlines ──
+  // ── Deadlines (generic fiscal calendar — static reference data) ──
   const deadlines: Deadline[] = [
-    { label: 'Déclaration TVA mensuelle', date: '15 Fév 2025', daysLeft: 8, type: 'urgent', description: 'DGI - Formulaire DSF' },
-    { label: 'Dépôt Liasse Fiscale SYSCOHADA', date: '31 Mars 2025', daysLeft: 52, type: 'warning', description: 'États financiers annuels' },
-    { label: 'Déclaration IS - Acompte T1', date: '15 Avr 2025', daysLeft: 67, type: 'normal', description: 'Impôt sur les sociétés' },
-    { label: 'Patente annuelle', date: '30 Juin 2025', daysLeft: 143, type: 'normal', description: 'Contribution des patentes' },
+    { label: 'Déclaration TVA mensuelle', date: '15 du mois', daysLeft: 0, type: 'normal', description: 'DGI - Formulaire DSF' },
+    { label: 'Dépôt Liasse Fiscale SYSCOHADA', date: '31 Mars', daysLeft: 0, type: 'warning', description: 'États financiers annuels' },
+    { label: 'Déclaration IS - Acompte T1', date: '15 Avril', daysLeft: 0, type: 'normal', description: 'Impôt sur les sociétés' },
+    { label: 'Patente annuelle', date: '30 Juin', daysLeft: 0, type: 'normal', description: 'Contribution des patentes' },
   ]
 
-  // ── Activity ──
-  const activities: Activity[] = [
-    { action: 'Balance importée', detail: 'Balance générale 2024 — 247 comptes', time: 'Il y a 2h', icon: <CloudUpload sx={{ fontSize: 18 }} /> },
-    { action: 'Audit de cohérence', detail: '4 anomalies détectées sur 128 contrôles', time: 'Il y a 3h', icon: <Security sx={{ fontSize: 18 }} /> },
-    { action: 'Feuillet Bilan Actif généré', detail: 'Liasse SYSCOHADA — Tableau 1', time: 'Hier', icon: <Description sx={{ fontSize: 18 }} /> },
-    { action: 'Plan comptable mis à jour', detail: 'SYSCOHADA révisé — 8 comptes ajoutés', time: 'Hier', icon: <AccountBalance sx={{ fontSize: 18 }} /> },
-    { action: 'Configuration exercice', detail: 'Exercice 2024 — 01/01 au 31/12', time: '2 jours', icon: <CalendarMonth sx={{ fontSize: 18 }} /> },
-  ]
-
-  // ── Balance Summary ──
-  const balanceSummary = {
-    totalDebit: '1 247 583 620',
-    totalCredit: '1 247 583 620',
-    nbComptes: 247,
-    nbEcritures: 3842,
-    chiffreAffaires: '856 420 000',
-    resultatNet: '42 315 780',
-  }
+  // ── Activity (empty — real activity log doesn't exist yet) ──
+  const activities: Activity[] = []
 
   if (loading) {
     return (
@@ -213,10 +218,10 @@ const AppDashboard: React.FC = () => {
           </Typography>
           <Stack direction="row" spacing={1.5} alignItems="center">
             <Typography variant="body2" sx={{ color: C.secondary }}>
-              TAXPILOT DEMO SARL
+              {ent.nom || '\u2014'}
             </Typography>
             <Chip
-              label="Exercice 2024"
+              label={ent.exerciceDebut ? `Exercice ${ent.exerciceDebut.substring(0, 4)}` : 'Exercice \u2014'}
               size="small"
               sx={{ height: 22, fontSize: '0.75rem', fontWeight: 600, bgcolor: C.card, color: C.label, border: `1px solid ${C.border}` }}
             />
@@ -255,31 +260,33 @@ const AppDashboard: React.FC = () => {
       </Box>
 
       {/* ── Alert Banner ── */}
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 1.5,
-          px: 2.5,
-          py: 1.5,
-          mb: 2.5,
-          borderRadius: 4,
-          bgcolor: 'error.50',
-          border: '1px solid #fecaca',
-        }}
-      >
-        <ErrorIcon sx={{ color: C.error, fontSize: 20 }} />
-        <Typography variant="body2" sx={{ color: '#991b1b', fontWeight: 500, flex: 1 }}>
-          2 anomalies critiques nécessitent une correction avant dépôt
-        </Typography>
-        <Button
-          size="small"
-          onClick={() => navigate('/audit')}
-          sx={{ textTransform: 'none', color: C.error, fontWeight: 600, fontSize: '0.8rem' }}
+      {!bal.usingImported && (
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1.5,
+            px: 2.5,
+            py: 1.5,
+            mb: 2.5,
+            borderRadius: 4,
+            bgcolor: 'warning.50',
+            border: '1px solid #fde68a',
+          }}
         >
-          Voir les anomalies
-        </Button>
-      </Box>
+          <WarningIcon sx={{ color: C.warning, fontSize: 20 }} />
+          <Typography variant="body2" sx={{ color: '#92400e', fontWeight: 500, flex: 1 }}>
+            Aucune balance importée — importez votre balance pour commencer
+          </Typography>
+          <Button
+            size="small"
+            onClick={() => navigate('/import-balance')}
+            sx={{ textTransform: 'none', color: '#92400e', fontWeight: 600, fontSize: '0.8rem' }}
+          >
+            Importer
+          </Button>
+        </Box>
+      )}
 
       {/* ── KPI Cards ── */}
       <Grid container spacing={2.5} sx={{ mb: 3 }}>
@@ -349,7 +356,7 @@ const AppDashboard: React.FC = () => {
                   </Typography>
                 </Box>
                 <Chip
-                  label="67% complété"
+                  label={`${workflow.filter(s => s.status === 'done').length}/${workflow.length} étapes`}
                   size="small"
                   sx={{ bgcolor: 'warning.50', color: '#92400e', fontWeight: 600, fontSize: '0.75rem', border: '1px solid #fde68a' }}
                 />
@@ -357,7 +364,7 @@ const AppDashboard: React.FC = () => {
 
               <LinearProgress
                 variant="determinate"
-                value={67}
+                value={Math.round((workflow.filter(s => s.status === 'done').length / workflow.length) * 100)}
                 sx={{
                   height: 6,
                   borderRadius: 3,
@@ -472,9 +479,7 @@ const AppDashboard: React.FC = () => {
                         color: C.white,
                       }}
                     >
-                      <Typography sx={{ fontSize: '0.85rem', fontWeight: 700, lineHeight: 1 }}>
-                        J-{d.daysLeft}
-                      </Typography>
+                      <CalendarMonth sx={{ fontSize: 18 }} />
                     </Box>
                     <Box sx={{ flex: 1, minWidth: 0 }}>
                       <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.8rem', color: C.text, lineHeight: 1.3 }}>
@@ -563,17 +568,12 @@ const AppDashboard: React.FC = () => {
 
               <Stack direction="row" justifyContent="space-around">
                 <Box sx={{ textAlign: 'center' }}>
-                  <Typography variant="h5" sx={{ fontWeight: 700, color: C.text }}>{balanceSummary.nbComptes}</Typography>
+                  <Typography variant="h5" sx={{ fontWeight: 700, color: C.text }}>{balanceSummary.nbComptes || '\u2014'}</Typography>
                   <Typography variant="caption" sx={{ color: C.secondary, fontSize: '0.7rem' }}>Comptes</Typography>
                 </Box>
                 <Divider orientation="vertical" flexItem sx={{ borderColor: C.border }} />
                 <Box sx={{ textAlign: 'center' }}>
-                  <Typography variant="h5" sx={{ fontWeight: 700, color: C.text }}>{balanceSummary.nbEcritures}</Typography>
-                  <Typography variant="caption" sx={{ color: C.secondary, fontSize: '0.7rem' }}>Écritures</Typography>
-                </Box>
-                <Divider orientation="vertical" flexItem sx={{ borderColor: C.border }} />
-                <Box sx={{ textAlign: 'center' }}>
-                  <Typography variant="h5" sx={{ fontWeight: 700, color: C.success }}>0</Typography>
+                  <Typography variant="h5" sx={{ fontWeight: 700, color: bal.entries.length ? (balanceSummary.ecart < 1 ? C.success : C.error) : C.placeholder }}>{bal.entries.length ? fmt(balanceSummary.ecart) : '\u2014'}</Typography>
                   <Typography variant="caption" sx={{ color: C.secondary, fontSize: '0.7rem' }}>Écart D/C</Typography>
                 </Box>
               </Stack>

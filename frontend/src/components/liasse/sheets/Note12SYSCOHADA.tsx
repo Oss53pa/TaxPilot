@@ -65,14 +65,14 @@ const Note12SYSCOHADA: React.FC = () => {
     { libelle: 'Produits HAO divers (84)', montant: bal.c(['84']), origine: 'HAO', impacte_fiscal: true },
     { libelle: 'Reprises de provisions HAO (86)', montant: bal.c(['86']), origine: 'Reprises', impacte_fiscal: true },
     { libelle: 'Subventions d\'équilibre (88)', montant: bal.c(['88']), origine: 'Subventions', impacte_fiscal: false },
-  ].filter(p => p.montant > 0)
+  ]
 
   const chargesExceptionnelles = [
     { libelle: 'Valeurs comptables des cessions (81)', montant: bal.d(['81']), origine: 'Cessions', impacte_fiscal: true },
     { libelle: 'Charges HAO (83)', montant: bal.d(['83']), origine: 'HAO', impacte_fiscal: true },
     { libelle: 'Dotations HAO (85)', montant: bal.d(['85']), origine: 'Dotations', impacte_fiscal: false },
     { libelle: 'Participations des travailleurs (87)', montant: bal.d(['87']), origine: 'Participations', impacte_fiscal: true },
-  ].filter(c => c.montant > 0)
+  ]
 
   const ajouterCommentaire = () => {
     if (typeCommentaire && commentaire.trim()) {

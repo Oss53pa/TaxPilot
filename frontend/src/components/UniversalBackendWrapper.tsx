@@ -142,7 +142,7 @@ export const UniversalBackendWrapper: React.FC<BackendWrapperProps> = ({
         textAlign: 'center',
         opacity: 0.7
       }}>
-        Connexion au backend en cours pour {componentName || 'le composant'}...
+        Chargement des données pour {componentName || 'le composant'}...
       </div>
     )
   }

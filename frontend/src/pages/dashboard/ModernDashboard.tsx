@@ -23,29 +23,25 @@ import {
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
 import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
+import { useEntrepriseData } from '@/hooks/useEntrepriseData'
+import { useBalanceData } from '@/hooks/useBalanceData'
 
 const ModernDashboard: React.FC = () => {
   const navigate = useNavigate()
   const { user } = useAuthStore()
   const [loading, setLoading] = useState(true)
-  const [stats, setStats] = useState({
+  const ent = useEntrepriseData()
+  const bal = useBalanceData()
+
+  const stats = {
     declarations: 0,
-    comptes: 0,
+    comptes: bal.entries.length,
     conformite: 0,
     avancement: 0,
-  })
+  }
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setStats({
-        declarations: 18,
-        comptes: 247,
-        conformite: 92,
-        avancement: 67.5,
-      })
-      setLoading(false)
-    }, 600)
-    return () => clearTimeout(timer)
+    setLoading(false)
   }, [])
 
   const now = new Date()
@@ -53,8 +49,8 @@ const ModernDashboard: React.FC = () => {
   const diffTime = endOfYear.getTime() - now.getTime()
   const daysUntilClose = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)))
 
-  const entrepriseNom = 'TAXPILOT DEMO SARL'
-  const exercice = '2024'
+  const entrepriseNom = ent.nom || '\u2014'
+  const exercice = ent.exerciceDebut ? ent.exerciceDebut.substring(0, 4) : String(new Date().getFullYear())
 
   const navItems = [
     { label: 'Application', icon: <DashboardIcon fontSize="small" />, path: '/dashboard' },

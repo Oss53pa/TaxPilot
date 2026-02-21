@@ -33,6 +33,59 @@ import Note19SYSCOHADABase from './Note19SYSCOHADA'
 import Note36TablesBase from './Note36Tables'
 import NotesRestantesBase from './NotesRestantes'
 
+// Notes créées via factory (NotesRestantes.tsx)
+import {
+  Note4SYSCOHADA as Note4SYSCOHADABase,
+  Note7SYSCOHADA as Note7SYSCOHADABase,
+  Note9SYSCOHADA as Note9SYSCOHADABase,
+  Note10SYSCOHADA as Note10SYSCOHADABase,
+  Note13SYSCOHADA as Note13SYSCOHADABase,
+  Note16SYSCOHADA as Note16SYSCOHADABase,
+  Note18SYSCOHADA as Note18SYSCOHADABase,
+  Note20SYSCOHADA as Note20SYSCOHADABase,
+  Note21SYSCOHADA as Note21SYSCOHADABase,
+  Note22SYSCOHADA as Note22SYSCOHADABase,
+  Note23SYSCOHADA as Note23SYSCOHADABase,
+  Note24SYSCOHADA as Note24SYSCOHADABase,
+  Note25SYSCOHADA as Note25SYSCOHADABase,
+  Note26SYSCOHADA as Note26SYSCOHADABase,
+  Note27SYSCOHADA as Note27SYSCOHADABase,
+  Note28SYSCOHADA as Note28SYSCOHADABase,
+  Note29SYSCOHADA as Note29SYSCOHADABase,
+  Note30SYSCOHADA as Note30SYSCOHADABase,
+  Note31SYSCOHADA as Note31SYSCOHADABase,
+  Note32SYSCOHADA as Note32SYSCOHADABase,
+  Note33SYSCOHADA as Note33SYSCOHADABase,
+  Note34SYSCOHADA as Note34SYSCOHADABase,
+  Note35SYSCOHADA as Note35SYSCOHADABase,
+  Note36SYSCOHADA_NR as Note36SYSCOHADANRBase,
+  Note36NomenclatureSYSCOHADA as Note36NomenclatureSYSCOHADABase,
+  Note37SYSCOHADA as Note37SYSCOHADABase,
+  Note38SYSCOHADA as Note38SYSCOHADABase,
+  Note39SYSCOHADA as Note39SYSCOHADABase,
+  NotesDgiInsSYSCOHADA as NotesDgiInsSYSCOHADABase,
+} from './NotesRestantes'
+
+// Pages de garde génériques
+import {
+  GardeDgiIns as GardeDgiInsBase,
+  GardeBic as GardeBicBase,
+  GardeBnc as GardeBncBase,
+  GardeBa as GardeBaBase,
+  Garde301 as Garde301Base,
+  Garde302 as Garde302Base,
+  Garde3 as Garde3Base,
+} from './GenericGardePage'
+
+// Pages de suppléments génériques
+import {
+  Suppl4 as Suppl4Base,
+  Suppl5 as Suppl5Base,
+  Suppl6 as Suppl6Base,
+  Suppl7 as Suppl7Base,
+  CompTva2 as CompTva2Base,
+} from './GenericSupplementPage'
+
 // Fiches R
 import FicheR1SYSCOHADABase from './FicheR1SYSCOHADA'
 import FicheR2SYSCOHADABase from './FicheR2SYSCOHADA'
@@ -86,6 +139,53 @@ export const Note17SYSCOHADA = withBackendData(Note17SYSCOHADABase)
 export const Note19SYSCOHADA = withBackendData(Note19SYSCOHADABase)
 export const Note36Tables = withBackendData(Note36TablesBase)
 export const NotesRestantes = withBackendData(NotesRestantesBase)
+
+// Notes via factory (wrapped with withBackendData)
+export const Note4SYSCOHADA = withBackendData(Note4SYSCOHADABase)
+export const Note7SYSCOHADA = withBackendData(Note7SYSCOHADABase)
+export const Note9SYSCOHADA = withBackendData(Note9SYSCOHADABase)
+export const Note10SYSCOHADA = withBackendData(Note10SYSCOHADABase)
+export const Note13SYSCOHADA = withBackendData(Note13SYSCOHADABase)
+export const Note16SYSCOHADA = withBackendData(Note16SYSCOHADABase)
+export const Note18SYSCOHADA = withBackendData(Note18SYSCOHADABase)
+export const Note20SYSCOHADA = withBackendData(Note20SYSCOHADABase)
+export const Note21SYSCOHADA = withBackendData(Note21SYSCOHADABase)
+export const Note22SYSCOHADA = withBackendData(Note22SYSCOHADABase)
+export const Note23SYSCOHADA = withBackendData(Note23SYSCOHADABase)
+export const Note24SYSCOHADA = withBackendData(Note24SYSCOHADABase)
+export const Note25SYSCOHADA = withBackendData(Note25SYSCOHADABase)
+export const Note26SYSCOHADA = withBackendData(Note26SYSCOHADABase)
+export const Note27SYSCOHADA = withBackendData(Note27SYSCOHADABase)
+export const Note28SYSCOHADA = withBackendData(Note28SYSCOHADABase)
+export const Note29SYSCOHADA = withBackendData(Note29SYSCOHADABase)
+export const Note30SYSCOHADA = withBackendData(Note30SYSCOHADABase)
+export const Note31SYSCOHADA = withBackendData(Note31SYSCOHADABase)
+export const Note32SYSCOHADA = withBackendData(Note32SYSCOHADABase)
+export const Note33SYSCOHADA = withBackendData(Note33SYSCOHADABase)
+export const Note34SYSCOHADA = withBackendData(Note34SYSCOHADABase)
+export const Note35SYSCOHADA = withBackendData(Note35SYSCOHADABase)
+export const Note36SYSCOHADA_NR = withBackendData(Note36SYSCOHADANRBase)
+export const Note36NomenclatureSYSCOHADA = withBackendData(Note36NomenclatureSYSCOHADABase)
+export const Note37SYSCOHADA = withBackendData(Note37SYSCOHADABase)
+export const Note38SYSCOHADA = withBackendData(Note38SYSCOHADABase)
+export const Note39SYSCOHADA = withBackendData(Note39SYSCOHADABase)
+export const NotesDgiInsSYSCOHADA = withBackendData(NotesDgiInsSYSCOHADABase)
+
+// Pages de garde génériques
+export const GardeDgiIns = withBackendData(GardeDgiInsBase)
+export const GardeBic = withBackendData(GardeBicBase)
+export const GardeBnc = withBackendData(GardeBncBase)
+export const GardeBa = withBackendData(GardeBaBase)
+export const Garde301 = withBackendData(Garde301Base)
+export const Garde302 = withBackendData(Garde302Base)
+export const Garde3 = withBackendData(Garde3Base)
+
+// Pages de suppléments génériques
+export const Suppl4 = withBackendData(Suppl4Base)
+export const Suppl5 = withBackendData(Suppl5Base)
+export const Suppl6 = withBackendData(Suppl6Base)
+export const Suppl7 = withBackendData(Suppl7Base)
+export const CompTva2 = withBackendData(CompTva2Base)
 
 // Fiches R
 export const FicheR1SYSCOHADA = withBackendData(FicheR1SYSCOHADABase)

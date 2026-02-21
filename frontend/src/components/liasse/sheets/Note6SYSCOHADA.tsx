@@ -103,23 +103,21 @@ const Note6SYSCOHADA: React.FC = () => {
     for (const m of mapping) {
       const brut = bal.d(m.brutPrefixes)
       const amort = bal.c(m.amortPrefixes)
-      if (brut > 0 || amort > 0) {
-        data.push({
-          id: m.id,
-          categorie: m.categorie,
-          designation: m.designation,
-          dateAcquisition: '',
-          valeurAcquisition: brut,
-          dureeAmortissement: m.duree,
-          tauxAmortissement: m.taux,
-          methodeAmortissement: 'Linéaire',
-          amortissementsCumules: amort,
-          amortissementExercice: m.taux > 0 ? Math.round(brut * m.taux / 100) : 0,
-          valeurNetteComptable: brut - amort,
-          cessions: [],
-          observations: ''
-        })
-      }
+      data.push({
+        id: m.id,
+        categorie: m.categorie,
+        designation: m.designation,
+        dateAcquisition: '',
+        valeurAcquisition: brut,
+        dureeAmortissement: m.duree,
+        tauxAmortissement: m.taux,
+        methodeAmortissement: 'Linéaire',
+        amortissementsCumules: amort,
+        amortissementExercice: m.taux > 0 ? Math.round(brut * m.taux / 100) : 0,
+        valeurNetteComptable: brut - amort,
+        cessions: [],
+        observations: ''
+      })
     }
     return data
   })
@@ -189,7 +187,7 @@ const Note6SYSCOHADA: React.FC = () => {
       amortissements,
       valeurNette
     }
-  }).filter(cat => cat.count > 0)
+  })
 
   const totaux = {
     valeurBrute: immobilisations.reduce((sum, immo) => sum + immo.valeurAcquisition, 0),

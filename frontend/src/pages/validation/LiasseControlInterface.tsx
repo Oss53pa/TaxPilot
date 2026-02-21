@@ -72,59 +72,10 @@ const LiasseControlInterface: React.FC = () => {
   const [preComments, setPreComments] = useState<PreComment[]>([])
 
   useEffect(() => {
-    // Données de démonstration
-    setLiasses([
-      {
-        id: 1,
-        liasse_id: 'LI-2024-001',
-        score_validation: 98,
-        nb_erreurs_critiques: 0,
-        nb_avertissements: 1,
-        nb_controles_reussis: 8,
-        prete_validation: true,
-        prete_teledeclaration: true,
-        date_validation: '2024-01-15'
-      },
-      {
-        id: 2,
-        liasse_id: 'LI-2024-002',
-        score_validation: 85,
-        nb_erreurs_critiques: 1,
-        nb_avertissements: 3,
-        nb_controles_reussis: 6,
-        prete_validation: true,
-        prete_teledeclaration: false,
-        date_validation: '2024-01-14'
-      },
-      {
-        id: 3,
-        liasse_id: 'LI-2024-003',
-        score_validation: 72,
-        nb_erreurs_critiques: 2,
-        nb_avertissements: 5,
-        nb_controles_reussis: 4,
-        prete_validation: false,
-        prete_teledeclaration: false,
-        date_validation: '2024-01-13'
-      }
-    ])
-
-    setPreComments([
-      {
-        section: 'QUALITE_DONNEES',
-        titre: 'Qualité des données',
-        commentaire: 'La balance de l\'exercice 2024 présente une qualité excellente avec 8 contrôles réussis. Aucune anomalie critique détectée.',
-        type: 'POSITIF',
-        auto_genere: true
-      },
-      {
-        section: 'TYPE_LIASSE',
-        titre: 'Type de liasse déterminé',
-        commentaire: 'La liasse a été générée selon le Système Normal conformément aux critères SYSCOHADA. La détermination automatique s\'est basée sur le chiffre d\'affaires.',
-        type: 'INFORMATIF',
-        auto_genere: true
-      }
-    ])
+    // Pas de données fictives — la liste se remplit lorsque l'utilisateur
+    // crée et valide des liasses via le module de production.
+    setLiasses([])
+    setPreComments([])
   }, [])
 
   const handleValidateLiasse = (liasse: ValidationResult) => {
@@ -277,7 +228,7 @@ const LiasseControlInterface: React.FC = () => {
                 <CardContent>
                   <ValidIcon sx={{ fontSize: 40, color: 'success.main', mb: 1 }} />
                   <Typography variant="h4" sx={{ color: 'text.primary' }}>
-                    97%
+                    {liasses.length > 0 ? `${Math.round(liasses.reduce((s, l) => s + l.score_validation, 0) / liasses.length)}%` : '—'}
                   </Typography>
                   <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                     Taux de Validation Moyen

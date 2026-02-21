@@ -250,16 +250,7 @@ const ModernGeneration: React.FC = () => {
     }
   ]
 
-  const getDefaultCompanies = (): CompanyData[] => [
-    {
-      id: '1',
-      name: 'Entreprise Demo',
-      siret: '000000000',
-      address: 'Abidjan, Côte d\'Ivoire',
-      exercice: new Date().getFullYear().toString(),
-      regime: 'Réel normal'
-    }
-  ]
+  const getDefaultCompanies = (): CompanyData[] => []
 
   const steps = [
     'Sélection du modèle',

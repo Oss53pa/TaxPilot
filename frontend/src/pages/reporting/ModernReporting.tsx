@@ -4,7 +4,7 @@
  * CONFORME AUX EXIGENCES SPÉCIFIÉES
  */
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import {
   Box,
   Typography,
@@ -45,6 +45,7 @@ import {
   Speed,
 } from '@mui/icons-material'
 import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
+import { useBalanceData } from '@/hooks/useBalanceData'
 
 interface RatioFinancier {
   code: string
@@ -68,6 +69,43 @@ const ModernReporting = () => {
   const [selectedTemplate, setSelectedTemplate] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
 
+  const bal = useBalanceData()
+
+  const donneesFinancieres = useMemo(() => {
+    const totalActif = bal.d(['2', '3', '4', '5'])
+    const immobilisationsNettes = bal.d(['2'])
+    const stocksMarchandises = bal.d(['3'])
+    const creancesClients = bal.d(['41'])
+    const disponibilites = bal.d(['5'])
+    const capitauxPropres = bal.c(['10', '11', '12', '13', '14', '15'])
+    const dettesLT = bal.c(['16', '17'])
+    const dettesCT = bal.c(['40', '42', '43', '44', '45', '46', '47', '48'])
+    const chiffreAffaires = bal.c(['70', '71', '72', '73'])
+    const charges = bal.d(['60', '61', '62', '63', '64', '65', '66', '67', '68', '69'])
+    const produits = bal.c(['70', '71', '72', '73', '74', '75', '76', '77', '78', '79'])
+    const resultatNet = produits - charges
+    const chargesFinancieres = bal.d(['67'])
+    return {
+      totalActif,
+      immobilisationsNettes,
+      stocksMarchandises,
+      creancesClients,
+      disponibilites,
+      totalPassif: totalActif,
+      capitauxPropres,
+      dettesLT,
+      dettesCT,
+      chiffreAffaires,
+      resultatExploitation: bal.c(['70','71','72','73','74','75']) - bal.d(['60','61','62','63','64','65']),
+      resultatNet,
+      chargesFinancieres,
+      exercicePrecedent: {
+        chiffreAffaires: 0,
+        resultatNet: 0,
+      },
+    }
+  }, [bal])
+
   useEffect(() => {
     loadRatiosFinanciers()
     generateAnalyseExercice()
@@ -75,31 +113,6 @@ const ModernReporting = () => {
   }, [])
 
   const loadRatiosFinanciers = () => {
-    // DONNÉES FINANCIÈRES DE BASE (à remplacer par API)
-    const donneesFinancieres = {
-      // BILAN
-      totalActif: 4200000,
-      immobilisationsNettes: 2200000,
-      stocksMarchandises: 650000,
-      creancesClients: 450000,
-      disponibilites: 320000,
-      totalPassif: 4200000,
-      capitauxPropres: 1500000,
-      dettesLT: 1300000,
-      dettesCT: 800000,
-      
-      // COMPTE DE RÉSULTAT
-      chiffreAffaires: 2850000,
-      resultatExploitation: 425000,
-      resultatNet: 285000,
-      chargesFinancieres: 75000,
-      
-      // RATIOS DE BASE
-      exercicePrecedent: {
-        chiffreAffaires: 2530000,
-        resultatNet: 275000
-      }
-    }
 
     // CALCUL DES RATIOS FINANCIERS SYSCOHADA STANDARDS
     const ratiosCalcules: RatioFinancier[] = [
@@ -341,12 +354,9 @@ const ModernReporting = () => {
   const genererRapport = async (templateId: string) => {
     setIsGenerating(true)
     setSelectedTemplate(templateId)
-    
-    // Simulation génération rapport
-    setTimeout(() => {
-      setIsGenerating(false)
-      alert(`Rapport généré avec succès !`)
-    }, 3000)
+
+    setIsGenerating(false)
+    alert(`Rapport généré avec succès !`)
   }
 
   const getStatutColor = (statut: string) => {
@@ -649,29 +659,7 @@ const ModernReporting = () => {
       }
     ]
 
-    const rapportsRecents = [
-      {
-        nom: 'Rapport Ratios Q4-2024',
-        date: '2024-12-20',
-        statut: 'Généré',
-        taille: '2.4 MB',
-        telechargements: 12
-      },
-      {
-        nom: 'Diagnostic Financier 2024',
-        date: '2024-12-15', 
-        statut: 'Généré',
-        taille: '5.1 MB',
-        telechargements: 8
-      },
-      {
-        nom: 'Tableau de Bord Nov-2024',
-        date: '2024-12-01',
-        statut: 'Archivé', 
-        taille: '1.2 MB',
-        telechargements: 25
-      }
-    ]
+    const rapportsRecents: { nom: string; date: string; statut: string; taille: string; telechargements: number }[] = []
 
 
     return (
@@ -906,12 +894,10 @@ const ModernReporting = () => {
               startIcon={<Refresh />}
               onClick={() => {
                 setLoading(true)
-                setTimeout(() => {
-                  loadRatiosFinanciers()
-                  generateAnalyseExercice()
-                  setLastRefresh(new Date())
-                  setLoading(false)
-                }, 1000)
+                loadRatiosFinanciers()
+                generateAnalyseExercice()
+                setLastRefresh(new Date())
+                setLoading(false)
               }}
             >
               Actualiser

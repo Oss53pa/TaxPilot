@@ -58,6 +58,20 @@ export function withBackendData<P extends object>(
             return
           }
 
+          // No DataProvider context and no backend — resolve immediately with empty data
+          if (!liasseData || liasseData.comptes.length === 0) {
+            setEnhancedData({
+              entreprise: null,
+              balance: null,
+              comptes: [],
+              ecritures: [],
+              loading: false,
+              error: null
+            })
+            setLoading(false)
+            return
+          }
+
           // Sinon charger depuis le backend
           const [entreprises, balances, comptes] = await Promise.all([
             entrepriseService.getEntreprises({ page_size: 10 }),
@@ -128,7 +142,7 @@ export function withBackendData<P extends object>(
     if (loading) {
       return (
         <div style={{ padding: '20px', textAlign: 'center' }}>
-          Chargement des données depuis le backend...
+          Chargement des données en cours...
         </div>
       )
     }

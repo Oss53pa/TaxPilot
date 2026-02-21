@@ -139,8 +139,7 @@ const ModernFiscalCalendar: React.FC = () => {
   const [notifications, setNotifications] = useState(true)
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 1500)
-    return () => clearTimeout(timer)
+    setLoading(false)
   }, [])
 
   // Données conformes aux exigences du cahier des charges

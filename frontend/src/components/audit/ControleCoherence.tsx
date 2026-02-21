@@ -49,8 +49,10 @@ import {
   InfoOutlined,
 } from '@mui/icons-material'
 import { coherenceService, type ControleCoherence, type ResultatValidation } from '@/services/coherenceService'
+import { useBalanceData } from '@/hooks/useBalanceData'
 
 const ControleCoherenceComponent: React.FC = () => {
+  const bal = useBalanceData()
   const [resultats, setResultats] = useState<ResultatValidation | null>(null)
   const [loading, setLoading] = useState(false)
   const [detailDialog, setDetailDialog] = useState<ControleCoherence | null>(null)
@@ -63,56 +65,68 @@ const ControleCoherenceComponent: React.FC = () => {
   const lancerControles = async () => {
     setLoading(true)
     try {
-      // Données de test - remplacer par vraies données liasse
+      // Données calculées à partir de la balance importée
+      const immobilisationsCorporelles = bal.d(['23', '24', '25'])
+      const immobilisationsIncorporelles = bal.d(['21'])
+      const stocks = bal.d(['3'])
+      const creancesClients = bal.d(['41'])
+      const totalActif = bal.d(['2', '3', '4', '5'])
+      const dettesFinancieres = bal.c(['16', '17'])
+      const provisions = bal.c(['19'])
+      const totalPassif = bal.c(['1', '4', '5'])
+      const chiffreAffaires = bal.c(['70', '71', '72', '73'])
+      const dotationsAmortissements = bal.d(['68'])
+      const dotationsProvisions = bal.d(['69'])
+
       const donneesTest = {
         bilanActif: {
-          immobilisationsCorporelles: 150000000,
-          immobilisationsIncorporelles: 25000000,
-          stocks: 45000000,
-          creancesClients: 30000000,
-          totalActif: 280000000
+          immobilisationsCorporelles,
+          immobilisationsIncorporelles,
+          stocks,
+          creancesClients,
+          totalActif
         },
         bilanPassif: {
-          dettesFinancieres: 80000000,
-          provisions: 15000000,
-          totalPassif: 280000000
+          dettesFinancieres,
+          provisions,
+          totalPassif
         },
         compteResultat: {
-          chiffreAffaires: 200000000,
-          dotationsAmortissements: 18000000,
-          dotationsProvisions: 5000000
+          chiffreAffaires,
+          dotationsAmortissements,
+          dotationsProvisions
         },
         tft: {
-          fluxExploitation: { total: 25000000, dotationsAmortissements: 18000000 },
-          fluxInvestissement: { 
-            total: -15000000,
-            acquisitionsImmobilisations: 20000000,
-            cessionImmobilisations: 5000000,
+          fluxExploitation: { total: 0, dotationsAmortissements },
+          fluxInvestissement: {
+            total: 0,
+            acquisitionsImmobilisations: 0,
+            cessionImmobilisations: 0,
             subventionsRecues: 0
           },
-          fluxFinancement: { total: -8000000 },
-          variationTresorerie: 2000000
+          fluxFinancement: { total: 0 },
+          variationTresorerie: 0
         },
         notesAnnexes: {
           tableauImmobilisations: {
-            totalNetCorporelles: 148000000, // Écart de 2M avec bilan
-            totalNetIncorporelles: 25000000,
-            mouvements: { augmentations: 20000000, diminutions: 5000000 },
-            amortissements: { dotationsExercice: 18000000 },
+            totalNetCorporelles: immobilisationsCorporelles,
+            totalNetIncorporelles: immobilisationsIncorporelles,
+            mouvements: { augmentations: 0, diminutions: 0 },
+            amortissements: { dotationsExercice: dotationsAmortissements },
             subventions: { recuesExercice: 0 }
           },
           tableauProvisions: {
-            totalProvisions: 16000000, // Écart de 1M avec bilan
-            dotationsExercice: 5000000
+            totalProvisions: provisions,
+            dotationsExercice: dotationsProvisions
           },
           dettesSurEtablissementCredit: {
-            totalDettes: 79000000 // Écart de 1M avec bilan
+            totalDettes: dettesFinancieres
           },
           chiffreAffaires: {
-            totalCA: 200000000
+            totalCA: chiffreAffaires
           },
           mouvementStocks: {
-            valeurFinale: 44000000 // Écart de 1M avec bilan
+            valeurFinale: stocks
           }
         }
       }

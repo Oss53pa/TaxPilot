@@ -77,16 +77,18 @@ import {
   Warning as WarningIcon,
   Error as ErrorIcon,
   Refresh as RefreshIcon,
-  TrendingUp as TrendingUpIcon,
-  TrendingDown as TrendingDownIcon,
+  AccountBalanceWallet as WalletIcon,
 } from '@mui/icons-material'
 import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
+import LiassePrintTemplate from '@/components/liasse/templates/LiassePrintTemplate'
+import type { RegimeFiscal, EntrepriseInfo } from '@/components/liasse/templates/LiassePrintTemplate'
+import { LIASSE_PAGES, SECTION_LABELS, getPageCountForRegime, type Regime as ConfigRegime, type SectionId } from '@/config/liasse-pages-config'
 
 interface Template {
   id: string
   name: string
   description: string
-  category: 'syscohada' | 'ifrs' | 'bank' | 'management' | 'custom'
+  category: 'liasse' | 'bank' | 'management' | 'custom'
   format: 'excel' | 'word' | 'pdf' | 'xml' | 'json'
   type: 'official' | 'enterprise' | 'personal'
   version: string
@@ -142,145 +144,82 @@ const ModernTemplates: React.FC = () => {
   const [activeStep, setActiveStep] = useState(0)
   const [batchMode, setBatchMode] = useState(false)
   const [selectedTemplates, setSelectedTemplates] = useState<string[]>([])
+  const [selectedRegime, setSelectedRegime] = useState<RegimeFiscal>('normal')
+
+  // Entreprise info from localStorage
+  const entrepriseInfo: EntrepriseInfo = (() => {
+    try {
+      const stored = localStorage.getItem('fiscasync_user')
+      const user = stored ? JSON.parse(stored) : null
+      const dbEntreprises = localStorage.getItem('fiscasync_db_entreprises')
+      const entreprises = dbEntreprises ? JSON.parse(dbEntreprises) : []
+      const ent = entreprises[0] || {}
+      return {
+        raison_sociale: ent.raison_sociale || user?.entreprise?.raison_sociale || '',
+        numero_contribuable: ent.numero_contribuable || user?.entreprise?.numero_contribuable || '',
+        forme_juridique: ent.forme_juridique || '',
+        regime_imposition: ent.regime_imposition || '',
+        secteur_activite: ent.secteur_activite || '',
+        adresse: ent.adresse || '',
+        ville: ent.ville || '',
+        rccm: ent.rccm || '',
+      }
+    } catch {
+      return { raison_sociale: '', numero_contribuable: '' }
+    }
+  })()
+
+  const exercice = new Date().getFullYear().toString()
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 1500)
-    return () => clearTimeout(timer)
+    setLoading(false)
   }, [])
 
-  // Templates préconçus conformes aux exigences
-  const templates: Template[] = [
-    {
-      id: '1',
-      name: 'Liasse Fiscale SYSCOHADA Complète',
-      description: 'Modèle officiel de liasse fiscale conforme SYSCOHADA avec tous les tableaux',
-      category: 'syscohada',
-      format: 'excel',
-      type: 'official',
-      version: '2024.1',
-      lastModified: '2024-12-01',
-      author: 'OHADA',
-      size: '2.4 MB',
-      tags: ['fiscal', 'officiel', 'syscohada', 'complet'],
-      variables: [
-        { id: 'v1', name: 'exercice', type: 'date', source: 'params.exercice' },
-        { id: 'v2', name: 'company_name', type: 'text', source: 'company.name' },
-        { id: 'v3', name: 'balance_data', type: 'table', source: 'balance.accounts' }
-      ],
-      conditions: [
-        { id: 'c1', name: 'check_regime', condition: 'regime == "normal"', thenAction: 'include_all_tables' }
-      ],
-      status: 'active',
-      usage: 156
-    },
-    {
-      id: '2',
-      name: 'États Financiers IFRS',
-      description: 'Modèle conforme aux normes IFRS internationales',
-      category: 'ifrs',
-      format: 'excel',
-      type: 'official',
-      version: '2024.2',
-      lastModified: '2024-11-28',
-      author: 'IASB',
-      size: '1.8 MB',
-      tags: ['ifrs', 'international', 'consolidation'],
-      variables: [],
-      conditions: [],
-      status: 'active',
-      usage: 89
-    },
-    {
-      id: '3',
-      name: 'Dossier de Crédit Bancaire',
-      description: 'Format standard pour demande de financement bancaire',
-      category: 'bank',
-      format: 'pdf',
-      type: 'enterprise',
-      version: '3.2',
-      lastModified: '2024-12-10',
-      author: 'Finance Team',
-      size: '850 KB',
-      tags: ['banque', 'crédit', 'financement'],
-      variables: [],
-      conditions: [],
-      status: 'active',
-      usage: 45
-    },
-    {
-      id: '4',
-      name: 'Tableau de Bord Excel Dynamique',
-      description: 'Dashboard avec graphiques et KPIs automatisés',
-      category: 'management',
-      format: 'excel',
-      type: 'enterprise',
-      version: '2.5',
-      lastModified: '2024-12-05',
-      author: 'Contrôle de Gestion',
-      size: '3.1 MB',
-      tags: ['dashboard', 'kpi', 'graphiques', 'dynamique'],
-      variables: [],
-      conditions: [],
-      status: 'active',
-      usage: 234
-    },
-    {
-      id: '5',
-      name: 'Rapport Mensuel PowerPoint',
-      description: 'Présentation automatisée avec données financières',
-      category: 'management',
-      format: 'pdf',
-      type: 'personal',
-      version: '1.0',
-      lastModified: '2024-12-12',
-      author: 'Direction',
-      size: '1.2 MB',
-      tags: ['présentation', 'mensuel', 'direction'],
-      variables: [],
-      conditions: [],
-      status: 'draft',
-      usage: 12
+  // Générer les templates de la liasse fiscale depuis la config réelle
+  const liasseTemplates: Template[] = React.useMemo(() => {
+    const sections = new Map<SectionId, typeof LIASSE_PAGES>()
+    for (const page of LIASSE_PAGES) {
+      const list = sections.get(page.section) || []
+      list.push(page)
+      sections.set(page.section, list)
     }
-  ]
 
-  const exportJobs: ExportJob[] = [
-    {
-      id: '1',
-      templateId: '1',
-      templateName: 'Liasse Fiscale SYSCOHADA',
-      status: 'completed',
-      progress: 100,
-      startTime: '2024-12-16 14:30',
-      endTime: '2024-12-16 14:32',
-      outputFile: 'liasse_2024_final.xlsx',
-      scheduled: false
-    },
-    {
-      id: '2',
-      templateId: '4',
-      templateName: 'Tableau de Bord Excel',
-      status: 'processing',
-      progress: 65,
-      startTime: '2024-12-16 15:45',
-      scheduled: true,
-      schedulePattern: 'Tous les lundis à 9h00'
-    },
-    {
-      id: '3',
-      templateId: '2',
-      templateName: 'États Financiers IFRS',
-      status: 'error',
-      progress: 0,
-      startTime: '2024-12-16 13:20',
-      error: 'Données source manquantes',
-      scheduled: false
+    return Array.from(sections.entries()).map(([sectionId, pages]) => ({
+      id: `liasse-${sectionId}`,
+      name: SECTION_LABELS[sectionId],
+      description: `${pages.length} page${pages.length > 1 ? 's' : ''} — ${pages.map(p => p.label).slice(0, 3).join(', ')}${pages.length > 3 ? '...' : ''}`,
+      category: 'liasse' as const,
+      format: 'pdf' as const,
+      type: 'official' as const,
+      version: '1.0',
+      lastModified: new Date().toISOString().slice(0, 10),
+      author: 'SYSCOHADA',
+      size: `${pages.length} pages`,
+      tags: pages.slice(0, 4).map(p => p.label),
+      variables: [],
+      conditions: [],
+      status: 'active' as const,
+      usage: 0,
+    }))
+  }, [])
+
+  // Templates personnalisés depuis localStorage
+  const customTemplates: Template[] = React.useMemo(() => {
+    try {
+      const stored = localStorage.getItem('fiscasync_db_custom_templates')
+      return stored ? JSON.parse(stored) : []
+    } catch {
+      return []
     }
-  ]
+  }, [])
+
+  const templates: Template[] = [...liasseTemplates, ...customTemplates]
+
+  const exportJobs: ExportJob[] = []
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
-      case 'syscohada': return <BankIcon />
-      case 'ifrs': return <BusinessIcon />
+      case 'liasse': return <BankIcon />
       case 'bank': return <BankIcon />
       case 'management': return <ReportIcon />
       case 'custom': return <SettingsIcon />
@@ -290,8 +229,7 @@ const ModernTemplates: React.FC = () => {
 
   const getCategoryColor = (category: string) => {
     switch (category) {
-      case 'syscohada': return theme.palette.primary.main
-      case 'ifrs': return theme.palette.info.main
+      case 'liasse': return theme.palette.primary.main
       case 'bank': return theme.palette.success.main
       case 'management': return theme.palette.warning.main
       case 'custom': return theme.palette.secondary.main
@@ -447,7 +385,7 @@ const ModernTemplates: React.FC = () => {
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <Box>
                     <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, color: theme.palette.success.main }}>
-                      536
+                      {exportJobs.filter(j => j.status === 'completed').length}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                       Exports réussis
@@ -476,7 +414,7 @@ const ModernTemplates: React.FC = () => {
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <Box>
                     <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, color: theme.palette.warning.main }}>
-                      12
+                      {exportJobs.filter(j => j.status === 'pending').length}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                       Exports programmés
@@ -533,9 +471,8 @@ const ModernTemplates: React.FC = () => {
             <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
               <Tabs value={activeTab} onChange={(_, newValue) => setActiveTab(newValue)}>
                 <Tab label="Tous les templates" />
-                <Tab label="SYSCOHADA" />
-                <Tab label="IFRS" />
                 <Tab label="Personnalisés" />
+                <Tab label="Liasse Fiscale" />
               </Tabs>
             </Box>
 
@@ -738,398 +675,6 @@ const ModernTemplates: React.FC = () => {
             <TabPanel value={activeTab} index={1}>
               <CardContent sx={{ p: 3 }}>
                 <Alert severity="info" sx={{ mb: 3 }}>
-                  <AlertTitle>Templates SYSCOHADA</AlertTitle>
-                  Modèles officiels conformes aux normes OHADA pour tous les pays membres.
-                </Alert>
-
-                <Box sx={{ mb: 3 }}>
-                  <TextField
-                    fullWidth
-                    placeholder="Rechercher dans les templates SYSCOHADA..."
-                    variant="outlined"
-                    size="small"
-                    InputProps={{
-                      startAdornment: '🔍',
-                    }}
-                  />
-                </Box>
-
-                <List>
-                  {loading ? (
-                    Array.from({ length: 2 }).map((_, index) => (
-                      <Box key={index} sx={{ mb: 2 }}>
-                        <Skeleton variant="rectangular" height={100} />
-                      </Box>
-                    ))
-                  ) : (
-                    templates
-                      .filter(t => t.category === 'syscohada')
-                      .map((template, index, filtered) => (
-                        <React.Fragment key={template.id}>
-                          <ListItem
-                            sx={{
-                              py: 2,
-                              px: 0,
-                              backgroundColor: selectedTemplates.includes(template.id)
-                                ? alpha(theme.palette.primary.main, 0.05)
-                                : 'transparent',
-                              borderRadius: 1,
-                            }}
-                          >
-                            {batchMode && (
-                              <Checkbox
-                                checked={selectedTemplates.includes(template.id)}
-                                onChange={(e) => {
-                                  if (e.target.checked) {
-                                    setSelectedTemplates([...selectedTemplates, template.id])
-                                  } else {
-                                    setSelectedTemplates(selectedTemplates.filter(id => id !== template.id))
-                                  }
-                                }}
-                                sx={{ mr: 2 }}
-                              />
-                            )}
-                            <ListItemIcon>
-                              <Avatar
-                                sx={{
-                                  backgroundColor: alpha(getCategoryColor(template.category), 0.1),
-                                  color: getCategoryColor(template.category),
-                                  width: 48,
-                                  height: 48,
-                                }}
-                              >
-                                {getCategoryIcon(template.category)}
-                              </Avatar>
-                            </ListItemIcon>
-                            <ListItemText
-                              primary={
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
-                                  <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                                    {template.name}
-                                  </Typography>
-                                  <Chip
-                                    label={template.type === 'official' ? 'Officiel' :
-                                           template.type === 'enterprise' ? 'Entreprise' : 'Personnel'}
-                                    size="small"
-                                    sx={{
-                                      backgroundColor: alpha(
-                                        template.type === 'official' ? theme.palette.success.main :
-                                        template.type === 'enterprise' ? theme.palette.info.main :
-                                        theme.palette.grey[500],
-                                        0.1
-                                      ),
-                                      color: template.type === 'official' ? theme.palette.success.main :
-                                             template.type === 'enterprise' ? theme.palette.info.main :
-                                             theme.palette.grey[500],
-                                    }}
-                                  />
-                                  <Avatar
-                                    sx={{
-                                      width: 24,
-                                      height: 24,
-                                      backgroundColor: alpha(getFormatColor(template.format), 0.1),
-                                      color: getFormatColor(template.format),
-                                    }}
-                                  >
-                                    {getFormatIcon(template.format)}
-                                  </Avatar>
-                                  <Typography variant="caption" color="text.secondary">
-                                    v{template.version}
-                                  </Typography>
-                                </Box>
-                              }
-                              secondary={
-                                <Box>
-                                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                                    {template.description}
-                                  </Typography>
-                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                    <Typography variant="caption" color="text.secondary">
-                                      Par {template.author}
-                                    </Typography>
-                                    <Typography variant="caption" color="text.secondary">
-                                      {template.size}
-                                    </Typography>
-                                    <Typography variant="caption" color="text.secondary">
-                                      Utilisé {template.usage} fois
-                                    </Typography>
-                                    <Typography variant="caption" color="text.secondary">
-                                      Modifié le {template.lastModified}
-                                    </Typography>
-                                  </Box>
-                                  {template.tags.length > 0 && (
-                                    <Box sx={{ display: 'flex', gap: 0.5, mt: 1 }}>
-                                      {template.tags.map((tag) => (
-                                        <Chip
-                                          key={tag}
-                                          label={tag}
-                                          size="small"
-                                          variant="outlined"
-                                          sx={{ height: 20, fontSize: '0.75rem' }}
-                                        />
-                                      ))}
-                                    </Box>
-                                  )}
-                                </Box>
-                              }
-                            />
-                            <ListItemSecondaryAction>
-                              <Stack direction="row" spacing={1}>
-                                <Tooltip title="Aperçu">
-                                  <IconButton
-                                    size="small"
-                                    onClick={() => {
-                                      setSelectedTemplate(template)
-                                      setPreviewOpen(true)
-                                    }}
-                                  >
-                                    <PreviewIcon fontSize="small" />
-                                  </IconButton>
-                                </Tooltip>
-                                <Tooltip title="Éditer">
-                                  <IconButton size="small">
-                                    <EditIcon fontSize="small" />
-                                  </IconButton>
-                                </Tooltip>
-                                <Tooltip title="Exporter">
-                                  <IconButton
-                                    size="small"
-                                    color="primary"
-                                    onClick={() => {
-                                      setSelectedTemplate(template)
-                                      setExportDialogOpen(true)
-                                    }}
-                                  >
-                                    <DownloadIcon fontSize="small" />
-                                  </IconButton>
-                                </Tooltip>
-                              </Stack>
-                            </ListItemSecondaryAction>
-                          </ListItem>
-                          {index < filtered.length - 1 && <Divider />}
-                        </React.Fragment>
-                      ))
-                  )}
-                </List>
-
-                {!loading && templates.filter(t => t.category === 'syscohada').length === 0 && (
-                  <Box sx={{ textAlign: 'center', py: 4 }}>
-                    <Typography variant="body2" color="text.secondary">
-                      Aucun template SYSCOHADA disponible
-                    </Typography>
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      startIcon={<AddIcon />}
-                      sx={{ mt: 2 }}
-                      onClick={() => setEditorOpen(true)}
-                    >
-                      Créer un template
-                    </Button>
-                  </Box>
-                )}
-              </CardContent>
-            </TabPanel>
-
-            <TabPanel value={activeTab} index={2}>
-              <CardContent sx={{ p: 3 }}>
-                <Alert severity="info" sx={{ mb: 3 }}>
-                  <AlertTitle>Templates IFRS</AlertTitle>
-                  Modèles conformes aux normes internationales IFRS.
-                </Alert>
-
-                <Box sx={{ mb: 3 }}>
-                  <TextField
-                    fullWidth
-                    placeholder="Rechercher dans les templates IFRS..."
-                    variant="outlined"
-                    size="small"
-                    InputProps={{
-                      startAdornment: '🔍',
-                    }}
-                  />
-                </Box>
-
-                <List>
-                  {loading ? (
-                    Array.from({ length: 2 }).map((_, index) => (
-                      <Box key={index} sx={{ mb: 2 }}>
-                        <Skeleton variant="rectangular" height={100} />
-                      </Box>
-                    ))
-                  ) : (
-                    templates
-                      .filter(t => t.category === 'ifrs')
-                      .map((template, index, filtered) => (
-                        <React.Fragment key={template.id}>
-                          <ListItem
-                            sx={{
-                              py: 2,
-                              px: 0,
-                              backgroundColor: selectedTemplates.includes(template.id)
-                                ? alpha(theme.palette.primary.main, 0.05)
-                                : 'transparent',
-                              borderRadius: 1,
-                            }}
-                          >
-                            {batchMode && (
-                              <Checkbox
-                                checked={selectedTemplates.includes(template.id)}
-                                onChange={(e) => {
-                                  if (e.target.checked) {
-                                    setSelectedTemplates([...selectedTemplates, template.id])
-                                  } else {
-                                    setSelectedTemplates(selectedTemplates.filter(id => id !== template.id))
-                                  }
-                                }}
-                                sx={{ mr: 2 }}
-                              />
-                            )}
-                            <ListItemIcon>
-                              <Avatar
-                                sx={{
-                                  backgroundColor: alpha(getCategoryColor(template.category), 0.1),
-                                  color: getCategoryColor(template.category),
-                                  width: 48,
-                                  height: 48,
-                                }}
-                              >
-                                {getCategoryIcon(template.category)}
-                              </Avatar>
-                            </ListItemIcon>
-                            <ListItemText
-                              primary={
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
-                                  <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                                    {template.name}
-                                  </Typography>
-                                  <Chip
-                                    label={template.type === 'official' ? 'Officiel' :
-                                           template.type === 'enterprise' ? 'Entreprise' : 'Personnel'}
-                                    size="small"
-                                    sx={{
-                                      backgroundColor: alpha(
-                                        template.type === 'official' ? theme.palette.success.main :
-                                        template.type === 'enterprise' ? theme.palette.info.main :
-                                        theme.palette.grey[500],
-                                        0.1
-                                      ),
-                                      color: template.type === 'official' ? theme.palette.success.main :
-                                             template.type === 'enterprise' ? theme.palette.info.main :
-                                             theme.palette.grey[500],
-                                    }}
-                                  />
-                                  <Avatar
-                                    sx={{
-                                      width: 24,
-                                      height: 24,
-                                      backgroundColor: alpha(getFormatColor(template.format), 0.1),
-                                      color: getFormatColor(template.format),
-                                    }}
-                                  >
-                                    {getFormatIcon(template.format)}
-                                  </Avatar>
-                                  <Typography variant="caption" color="text.secondary">
-                                    v{template.version}
-                                  </Typography>
-                                </Box>
-                              }
-                              secondary={
-                                <Box>
-                                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                                    {template.description}
-                                  </Typography>
-                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                    <Typography variant="caption" color="text.secondary">
-                                      Par {template.author}
-                                    </Typography>
-                                    <Typography variant="caption" color="text.secondary">
-                                      {template.size}
-                                    </Typography>
-                                    <Typography variant="caption" color="text.secondary">
-                                      Utilisé {template.usage} fois
-                                    </Typography>
-                                    <Typography variant="caption" color="text.secondary">
-                                      Modifié le {template.lastModified}
-                                    </Typography>
-                                  </Box>
-                                  {template.tags.length > 0 && (
-                                    <Box sx={{ display: 'flex', gap: 0.5, mt: 1 }}>
-                                      {template.tags.map((tag) => (
-                                        <Chip
-                                          key={tag}
-                                          label={tag}
-                                          size="small"
-                                          variant="outlined"
-                                          sx={{ height: 20, fontSize: '0.75rem' }}
-                                        />
-                                      ))}
-                                    </Box>
-                                  )}
-                                </Box>
-                              }
-                            />
-                            <ListItemSecondaryAction>
-                              <Stack direction="row" spacing={1}>
-                                <Tooltip title="Aperçu">
-                                  <IconButton
-                                    size="small"
-                                    onClick={() => {
-                                      setSelectedTemplate(template)
-                                      setPreviewOpen(true)
-                                    }}
-                                  >
-                                    <PreviewIcon fontSize="small" />
-                                  </IconButton>
-                                </Tooltip>
-                                <Tooltip title="Éditer">
-                                  <IconButton size="small">
-                                    <EditIcon fontSize="small" />
-                                  </IconButton>
-                                </Tooltip>
-                                <Tooltip title="Exporter">
-                                  <IconButton
-                                    size="small"
-                                    color="primary"
-                                    onClick={() => {
-                                      setSelectedTemplate(template)
-                                      setExportDialogOpen(true)
-                                    }}
-                                  >
-                                    <DownloadIcon fontSize="small" />
-                                  </IconButton>
-                                </Tooltip>
-                              </Stack>
-                            </ListItemSecondaryAction>
-                          </ListItem>
-                          {index < filtered.length - 1 && <Divider />}
-                        </React.Fragment>
-                      ))
-                  )}
-                </List>
-
-                {!loading && templates.filter(t => t.category === 'ifrs').length === 0 && (
-                  <Box sx={{ textAlign: 'center', py: 4 }}>
-                    <Typography variant="body2" color="text.secondary">
-                      Aucun template IFRS disponible
-                    </Typography>
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      startIcon={<AddIcon />}
-                      sx={{ mt: 2 }}
-                      onClick={() => setEditorOpen(true)}
-                    >
-                      Créer un template
-                    </Button>
-                  </Box>
-                )}
-              </CardContent>
-            </TabPanel>
-
-            <TabPanel value={activeTab} index={3}>
-              <CardContent sx={{ p: 3 }}>
-                <Alert severity="info" sx={{ mb: 3 }}>
                   <AlertTitle>Templates personnalisés</AlertTitle>
                   Vos modèles personnalisés créés avec l'éditeur visuel.
                 </Alert>
@@ -1304,7 +849,7 @@ const ModernTemplates: React.FC = () => {
                   )}
                 </List>
 
-                {!loading && templates.filter(t => t.type === 'personal').length === 0 && (
+                {!loading && customTemplates.length === 0 && (
                   <Box sx={{ textAlign: 'center', py: 4 }}>
                     <Typography variant="body2" color="text.secondary">
                       Aucun template personnalisé
@@ -1320,6 +865,57 @@ const ModernTemplates: React.FC = () => {
                     </Button>
                   </Box>
                 )}
+              </CardContent>
+            </TabPanel>
+
+            <TabPanel value={activeTab} index={2}>
+              <CardContent sx={{ p: 2 }}>
+                {/* Selecteur de regime */}
+                <Grid container spacing={2} sx={{ mb: 2 }}>
+                  {([
+                    { key: 'normal' as RegimeFiscal, configKey: 'reel_normal' as ConfigRegime, label: 'Reel Normal', icon: <BusinessIcon /> },
+                    { key: 'simplifie' as RegimeFiscal, configKey: 'reel_simplifie' as ConfigRegime, label: 'Reel Simplifie', icon: <DocIcon /> },
+                    { key: 'forfaitaire' as RegimeFiscal, configKey: 'forfaitaire' as ConfigRegime, label: 'Forfaitaire', icon: <WalletIcon /> },
+                    { key: 'micro' as RegimeFiscal, configKey: 'micro' as ConfigRegime, label: 'Micro-Entreprise', icon: <ReportIcon /> },
+                  ]).map((r) => (
+                    <Grid item xs={6} sm={3} key={r.key}>
+                      <Card
+                        elevation={0}
+                        onClick={() => setSelectedRegime(r.key)}
+                        sx={{
+                          cursor: 'pointer',
+                          border: `2px solid ${selectedRegime === r.key ? P.primary900 : P.primary200}`,
+                          backgroundColor: selectedRegime === r.key ? P.primary100 : P.white,
+                          transition: 'all 0.2s',
+                          '&:hover': { borderColor: P.primary900 },
+                        }}
+                      >
+                        <CardContent sx={{ textAlign: 'center', py: 1.5, px: 1, '&:last-child': { pb: 1.5 } }}>
+                          <Avatar sx={{
+                            mx: 'auto', mb: 0.5, width: 36, height: 36,
+                            backgroundColor: selectedRegime === r.key ? P.primary900 : P.primary200,
+                            color: selectedRegime === r.key ? P.white : P.primary600,
+                          }}>
+                            {r.icon}
+                          </Avatar>
+                          <Typography sx={{ fontSize: '12px', fontWeight: 600 }}>{r.label}</Typography>
+                          <Typography sx={{ fontSize: '10px', color: P.primary500 }}>
+                            {getPageCountForRegime(r.configKey)} pages
+                          </Typography>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                  ))}
+                </Grid>
+
+                {/* Liasse viewer with sidebar */}
+                <Box sx={{ height: 650 }}>
+                  <LiassePrintTemplate
+                    regime={selectedRegime}
+                    entreprise={entrepriseInfo}
+                    exercice={exercice}
+                  />
+                </Box>
               </CardContent>
             </TabPanel>
           </Card>
@@ -1706,151 +1302,6 @@ const ModernTemplates: React.FC = () => {
           }}>
             {selectedTemplate ? (
               <>
-                {/* Aperçu pour template SYSCOHADA */}
-                {selectedTemplate.category === 'syscohada' && (
-                  <Box>
-                    <Paper sx={{ p: 3, mb: 2, backgroundColor: 'white' }}>
-                      <Typography variant="h5" align="center" sx={{ fontWeight: 700, mb: 1 }}>
-                        LIASSE FISCALE SYSCOHADA 2024
-                      </Typography>
-                      <Typography variant="subtitle1" align="center" color="text.secondary" sx={{ mb: 3 }}>
-                        Entreprise ABC Commerce SARL
-                      </Typography>
-                      <Divider sx={{ mb: 3 }} />
-
-                      <Grid container spacing={2}>
-                        <Grid item xs={6}>
-                          <Typography variant="body2" color="text.secondary">Exercice fiscal</Typography>
-                          <Typography variant="body1" fontWeight={600}>2024</Typography>
-                        </Grid>
-                        <Grid item xs={6}>
-                          <Typography variant="body2" color="text.secondary">Régime</Typography>
-                          <Typography variant="body1" fontWeight={600}>Système Normal</Typography>
-                        </Grid>
-                        <Grid item xs={6}>
-                          <Typography variant="body2" color="text.secondary">Secteur d'activité</Typography>
-                          <Typography variant="body1" fontWeight={600}>Commerce de détail</Typography>
-                        </Grid>
-                        <Grid item xs={6}>
-                          <Typography variant="body2" color="text.secondary">Juridiction</Typography>
-                          <Typography variant="body1" fontWeight={600}>OHADA - Côte d'Ivoire</Typography>
-                        </Grid>
-                      </Grid>
-                    </Paper>
-
-                    <Paper sx={{ p: 3, mb: 2, backgroundColor: 'white' }}>
-                      <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
-                        Bilan Actif (Extrait)
-                      </Typography>
-                      <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse' }}>
-                        <Box component="thead" sx={{ backgroundColor: alpha(theme.palette.primary.main, 0.1) }}>
-                          <Box component="tr">
-                            <Box component="th" sx={{ p: 1, textAlign: 'left', borderBottom: 1, borderColor: 'divider' }}>
-                              <Typography variant="caption" fontWeight={600}>Poste</Typography>
-                            </Box>
-                            <Box component="th" sx={{ p: 1, textAlign: 'right', borderBottom: 1, borderColor: 'divider' }}>
-                              <Typography variant="caption" fontWeight={600}>N</Typography>
-                            </Box>
-                            <Box component="th" sx={{ p: 1, textAlign: 'right', borderBottom: 1, borderColor: 'divider' }}>
-                              <Typography variant="caption" fontWeight={600}>N-1</Typography>
-                            </Box>
-                          </Box>
-                        </Box>
-                        <Box component="tbody">
-                          {[
-                            { label: 'Immobilisations incorporelles', n: '2 500 000', n1: '2 200 000' },
-                            { label: 'Immobilisations corporelles', n: '15 800 000', n1: '14 500 000' },
-                            { label: 'Stocks et en-cours', n: '8 400 000', n1: '7 900 000' },
-                            { label: 'Créances clients', n: '5 200 000', n1: '4 800 000' },
-                            { label: 'Trésorerie', n: '3 100 000', n1: '2 600 000' }
-                          ].map((row, index) => (
-                            <Box component="tr" key={index}>
-                              <Box component="td" sx={{ p: 1, borderBottom: 1, borderColor: 'divider' }}>
-                                <Typography variant="body2">{row.label}</Typography>
-                              </Box>
-                              <Box component="td" sx={{ p: 1, textAlign: 'right', borderBottom: 1, borderColor: 'divider' }}>
-                                <Typography variant="body2">{row.n}</Typography>
-                              </Box>
-                              <Box component="td" sx={{ p: 1, textAlign: 'right', borderBottom: 1, borderColor: 'divider' }}>
-                                <Typography variant="body2">{row.n1}</Typography>
-                              </Box>
-                            </Box>
-                          ))}
-                          <Box component="tr">
-                            <Box component="td" sx={{ p: 1, borderTop: 2, borderColor: 'divider' }}>
-                              <Typography variant="body2" fontWeight={700}>TOTAL ACTIF</Typography>
-                            </Box>
-                            <Box component="td" sx={{ p: 1, textAlign: 'right', borderTop: 2, borderColor: 'divider' }}>
-                              <Typography variant="body2" fontWeight={700}>35 000 000</Typography>
-                            </Box>
-                            <Box component="td" sx={{ p: 1, textAlign: 'right', borderTop: 2, borderColor: 'divider' }}>
-                              <Typography variant="body2" fontWeight={700}>32 000 000</Typography>
-                            </Box>
-                          </Box>
-                        </Box>
-                      </Box>
-                    </Paper>
-
-                    <Alert severity="info" icon={<FormulaIcon />}>
-                      <AlertTitle>Variables mappées automatiquement</AlertTitle>
-                      <Typography variant="caption">
-                        • {'{'}{'{'} company.name {'}'}{'}'}  → ABC Commerce SARL<br/>
-                        • {'{'}{'{'} exercice {'}'}{'}'}  → 2024<br/>
-                        • {'{'}{'{'} balance.total_actif {'}'}{'}'}  → 35 000 000
-                      </Typography>
-                    </Alert>
-                  </Box>
-                )}
-
-                {/* Aperçu pour template IFRS */}
-                {selectedTemplate.category === 'ifrs' && (
-                  <Box>
-                    <Paper sx={{ p: 3, mb: 2, backgroundColor: 'white' }}>
-                      <Typography variant="h5" align="center" sx={{ fontWeight: 700, mb: 1 }}>
-                        ÉTATS FINANCIERS IFRS
-                      </Typography>
-                      <Typography variant="subtitle1" align="center" color="text.secondary" sx={{ mb: 3 }}>
-                        Conforme aux normes internationales
-                      </Typography>
-                      <Divider sx={{ mb: 3 }} />
-
-                      <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
-                        Statement of Financial Position (Position Financière)
-                      </Typography>
-                      <Grid container spacing={2}>
-                        {[
-                          { label: 'Non-current Assets', value: '18 300 000' },
-                          { label: 'Current Assets', value: '16 700 000' },
-                          { label: 'Total Assets', value: '35 000 000' },
-                          { label: 'Equity', value: '15 000 000' },
-                          { label: 'Non-current Liabilities', value: '12 000 000' },
-                          { label: 'Current Liabilities', value: '8 000 000' }
-                        ].map((item, index) => (
-                          <Grid item xs={6} key={index}>
-                            <Box sx={{
-                              p: 2,
-                              border: 1,
-                              borderColor: 'divider',
-                              borderRadius: 1,
-                              backgroundColor: index >= 3 ? alpha(theme.palette.info.main, 0.05) : 'transparent'
-                            }}>
-                              <Typography variant="caption" color="text.secondary">{item.label}</Typography>
-                              <Typography variant="h6" fontWeight={600}>{item.value}</Typography>
-                            </Box>
-                          </Grid>
-                        ))}
-                      </Grid>
-                    </Paper>
-
-                    <Alert severity="success" icon={<CheckIcon />}>
-                      <AlertTitle>Conformité IFRS validée</AlertTitle>
-                      <Typography variant="caption">
-                        Ce template respecte les normes IAS 1, IAS 7, et IFRS 15
-                      </Typography>
-                    </Alert>
-                  </Box>
-                )}
-
                 {/* Aperçu pour templates bancaires */}
                 {selectedTemplate.category === 'bank' && (
                   <Box>
@@ -1859,7 +1310,7 @@ const ModernTemplates: React.FC = () => {
                         DOSSIER DE DEMANDE DE CRÉDIT
                       </Typography>
                       <Typography variant="subtitle1" align="center" color="text.secondary" sx={{ mb: 3 }}>
-                        Entreprise ABC Commerce SARL
+                        Aperçu du format d'export
                       </Typography>
                       <Divider sx={{ mb: 3 }} />
 
@@ -1870,19 +1321,19 @@ const ModernTemplates: React.FC = () => {
                         <Grid item xs={4}>
                           <Box sx={{ textAlign: 'center', p: 2, border: 1, borderColor: 'divider', borderRadius: 1 }}>
                             <Typography variant="caption" color="text.secondary">Chiffre d'affaires</Typography>
-                            <Typography variant="h5" fontWeight={700} color="primary.main">42M</Typography>
+                            <Typography variant="h5" fontWeight={700} color="primary.main">—</Typography>
                           </Box>
                         </Grid>
                         <Grid item xs={4}>
                           <Box sx={{ textAlign: 'center', p: 2, border: 1, borderColor: 'divider', borderRadius: 1 }}>
                             <Typography variant="caption" color="text.secondary">Résultat Net</Typography>
-                            <Typography variant="h5" fontWeight={700} color="success.main">3.2M</Typography>
+                            <Typography variant="h5" fontWeight={700} color="success.main">—</Typography>
                           </Box>
                         </Grid>
                         <Grid item xs={4}>
                           <Box sx={{ textAlign: 'center', p: 2, border: 1, borderColor: 'divider', borderRadius: 1 }}>
                             <Typography variant="caption" color="text.secondary">Fonds Propres</Typography>
-                            <Typography variant="h5" fontWeight={700} color="info.main">15M</Typography>
+                            <Typography variant="h5" fontWeight={700} color="info.main">—</Typography>
                           </Box>
                         </Grid>
                       </Grid>
@@ -1892,10 +1343,10 @@ const ModernTemplates: React.FC = () => {
                       </Typography>
                       <Grid container spacing={2}>
                         {[
-                          { label: 'Ratio de liquidité', value: '1.85', status: 'success' },
-                          { label: 'Ratio d\'endettement', value: '57%', status: 'warning' },
-                          { label: 'ROE', value: '21.3%', status: 'success' },
-                          { label: 'Couverture intérêts', value: '4.2x', status: 'success' }
+                          { label: 'Ratio de liquidité', value: '—' },
+                          { label: 'Ratio d\'endettement', value: '—' },
+                          { label: 'ROE', value: '—' },
+                          { label: 'Couverture intérêts', value: '—' }
                         ].map((ratio, index) => (
                           <Grid item xs={6} key={index}>
                             <Box sx={{
@@ -1911,7 +1362,7 @@ const ModernTemplates: React.FC = () => {
                               <Chip
                                 label={ratio.value}
                                 size="small"
-                                color={ratio.status as 'success' | 'warning'}
+                                color="default"
                               />
                             </Box>
                           </Grid>
@@ -1936,65 +1387,37 @@ const ModernTemplates: React.FC = () => {
                         TABLEAU DE BORD DIRECTION
                       </Typography>
                       <Typography variant="subtitle1" align="center" color="text.secondary" sx={{ mb: 3 }}>
-                        Période: Décembre 2024
+                        Aperçu du format d'export
                       </Typography>
                       <Divider sx={{ mb: 3 }} />
 
                       <Grid container spacing={2} sx={{ mb: 3 }}>
                         {[
-                          { label: 'CA Mensuel', value: '3.5M', evolution: '+12%', color: 'success' },
-                          { label: 'Marge Brute', value: '28.5%', evolution: '+2.1%', color: 'success' },
-                          { label: 'Charges Fixes', value: '850K', evolution: '-5%', color: 'success' },
-                          { label: 'Trésorerie', value: '2.1M', evolution: '+8%', color: 'info' }
+                          { label: 'CA Mensuel', value: '—' },
+                          { label: 'Marge Brute', value: '—' },
+                          { label: 'Charges Fixes', value: '—' },
+                          { label: 'Trésorerie', value: '—' }
                         ].map((kpi, index) => (
                           <Grid item xs={6} key={index}>
-                            <Paper sx={{ p: 2, backgroundColor: alpha(theme.palette[kpi.color as 'success' | 'info'].main, 0.05) }}>
+                            <Paper sx={{ p: 2, backgroundColor: alpha(theme.palette.grey[100], 0.5) }}>
                               <Typography variant="caption" color="text.secondary">{kpi.label}</Typography>
                               <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1, mt: 0.5 }}>
                                 <Typography variant="h5" fontWeight={700}>{kpi.value}</Typography>
-                                <Chip
-                                  label={kpi.evolution}
-                                  size="small"
-                                  color={kpi.color as 'success' | 'info'}
-                                  icon={kpi.evolution.startsWith('+') ? <TrendingUpIcon /> : <TrendingDownIcon />}
-                                />
                               </Box>
                             </Paper>
                           </Grid>
                         ))}
                       </Grid>
 
-                      <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
-                        Top 5 Clients du Mois
+                      <Typography variant="body2" color="text.secondary" align="center" sx={{ py: 3 }}>
+                        Les données seront remplies à partir de votre balance importée.
                       </Typography>
-                      {[
-                        { name: 'Client A', ca: '850 000', part: '24%' },
-                        { name: 'Client B', ca: '620 000', part: '18%' },
-                        { name: 'Client C', ca: '480 000', part: '14%' },
-                        { name: 'Client D', ca: '390 000', part: '11%' },
-                        { name: 'Client E', ca: '310 000', part: '9%' }
-                      ].map((client, index) => (
-                        <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
-                          <Avatar sx={{ width: 32, height: 32, bgcolor: theme.palette.primary.main }}>
-                            {index + 1}
-                          </Avatar>
-                          <Box sx={{ flex: 1 }}>
-                            <Typography variant="body2" fontWeight={600}>{client.name}</Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              {client.ca}
-                            </Typography>
-                          </Box>
-                          <Chip label={client.part} size="small" />
-                        </Box>
-                      ))}
                     </Paper>
 
-                    <Alert severity="warning" icon={<WarningIcon />}>
-                      <AlertTitle>Alertes & Indicateurs</AlertTitle>
+                    <Alert severity="info" icon={<WarningIcon />}>
+                      <AlertTitle>Template de gestion</AlertTitle>
                       <Typography variant="caption">
-                        • 2 factures impayées depuis plus de 60 jours<br/>
-                        • Stock produit X en rupture prévue dans 5 jours<br/>
-                        • Objectif CA mensuel atteint à 105%
+                        Les indicateurs seront calculés à partir de votre balance importée.
                       </Typography>
                     </Alert>
                   </Box>

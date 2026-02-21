@@ -164,8 +164,7 @@ const ModernCompliance: React.FC = () => {
   const [reportDialogOpen, setReportDialogOpen] = useState(false)
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 1500)
-    return () => clearTimeout(timer)
+    setLoading(false)
   }, [])
 
   // Données multi-entités/multi-pays

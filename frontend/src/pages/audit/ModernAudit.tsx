@@ -58,80 +58,6 @@ import AuditProgressDialog from '@/components/audit/AuditProgressDialog'
 import AuditResultsView from '@/components/audit/AuditResultsView'
 import CorrectionReportView from '@/components/audit/CorrectionReportView'
 
-// -- Demo balance --
-import { BalanceEntry } from '@/services/liasseDataService'
-
-const DEMO_BALANCE: BalanceEntry[] = [
-  // Classe 1 - Ressources durables
-  { compte: '1013', intitule: 'Capital souscrit, appele, verse', debit: 0, credit: 50000000, solde_debit: 0, solde_credit: 50000000 },
-  { compte: '1061', intitule: 'Ecart de reevaluation legal', debit: 0, credit: 2000000, solde_debit: 0, solde_credit: 2000000 },
-  { compte: '1111', intitule: 'Reserves legales', debit: 0, credit: 5000000, solde_debit: 0, solde_credit: 5000000 },
-  { compte: '1181', intitule: 'Reserves facultatives', debit: 0, credit: 3000000, solde_debit: 0, solde_credit: 3000000 },
-  { compte: '1210', intitule: 'Report a nouveau crediteur', debit: 0, credit: 1500000, solde_debit: 0, solde_credit: 1500000 },
-  { compte: '1310', intitule: 'Resultat net: benefice', debit: 0, credit: 8200000, solde_debit: 0, solde_credit: 8200000 },
-  { compte: '1610', intitule: 'Emprunts obligataires', debit: 0, credit: 15000000, solde_debit: 0, solde_credit: 15000000 },
-  { compte: '1650', intitule: 'Depots et cautionnements recus', debit: 0, credit: 1000000, solde_debit: 0, solde_credit: 1000000 },
-  { compte: '1910', intitule: 'Provisions pour litiges', debit: 0, credit: 2500000, solde_debit: 0, solde_credit: 2500000 },
-  // Classe 2 - Immobilisations
-  { compte: '2110', intitule: 'Frais de recherche et developpement', debit: 5000000, credit: 0, solde_debit: 5000000, solde_credit: 0 },
-  { compte: '2131', intitule: 'Brevets', debit: 3000000, credit: 0, solde_debit: 3000000, solde_credit: 0 },
-  { compte: '2310', intitule: 'Batiments industriels', debit: 40000000, credit: 0, solde_debit: 40000000, solde_credit: 0 },
-  { compte: '2411', intitule: 'Materiel industriel', debit: 25000000, credit: 0, solde_debit: 25000000, solde_credit: 0 },
-  { compte: '2450', intitule: 'Materiel de transport', debit: 18000000, credit: 0, solde_debit: 18000000, solde_credit: 0 },
-  { compte: '2710', intitule: 'Prets au personnel', debit: 1500000, credit: 0, solde_debit: 1500000, solde_credit: 0 },
-  // Amortissements - IC-001 anomalie: amort > brut sur 2131
-  { compte: '2811', intitule: 'Amort. frais R&D', debit: 0, credit: 2000000, solde_debit: 0, solde_credit: 2000000 },
-  { compte: '2813', intitule: 'Amort. brevets', debit: 0, credit: 4000000, solde_debit: 0, solde_credit: 4000000 }, // > brut 3M !
-  { compte: '2831', intitule: 'Amort. batiments', debit: 0, credit: 12000000, solde_debit: 0, solde_credit: 12000000 },
-  { compte: '2841', intitule: 'Amort. materiel industriel', debit: 0, credit: 10000000, solde_debit: 0, solde_credit: 10000000 },
-  { compte: '2845', intitule: 'Amort. materiel transport', debit: 0, credit: 9000000, solde_debit: 0, solde_credit: 9000000 },
-  // Classe 3 - Stocks
-  { compte: '3110', intitule: 'Marchandises en stock', debit: 12000000, credit: 0, solde_debit: 12000000, solde_credit: 0 },
-  { compte: '3210', intitule: 'Matieres premieres', debit: 6000000, credit: 0, solde_debit: 6000000, solde_credit: 0 },
-  { compte: '3710', intitule: 'Produits finis', debit: 8000000, credit: 0, solde_debit: 8000000, solde_credit: 0 },
-  // Classe 4 - Tiers
-  { compte: '4011', intitule: 'Fournisseurs', debit: 0, credit: 18000000, solde_debit: 0, solde_credit: 18000000 },
-  { compte: '4091', intitule: 'Fournisseurs avances', debit: 2000000, credit: 0, solde_debit: 2000000, solde_credit: 0 },
-  { compte: '4111', intitule: 'Clients', debit: 22000000, credit: 0, solde_debit: 22000000, solde_credit: 0 },
-  { compte: '4112', intitule: 'Client Beta SA', debit: 0, credit: 1500000, solde_debit: 0, solde_credit: 1500000 }, // Client crediteur!
-  { compte: '4210', intitule: 'Personnel remunerations dues', debit: 0, credit: 4500000, solde_debit: 0, solde_credit: 4500000 },
-  { compte: '4310', intitule: 'Securite sociale', debit: 0, credit: 1800000, solde_debit: 0, solde_credit: 1800000 },
-  { compte: '4431', intitule: 'TVA facturee', debit: 0, credit: 7200000, solde_debit: 0, solde_credit: 7200000 },
-  { compte: '4451', intitule: 'TVA recuperable sur immob', debit: 3500000, credit: 0, solde_debit: 3500000, solde_credit: 0 },
-  { compte: '4452', intitule: 'TVA recup sur achats', debit: 5000000, credit: 0, solde_debit: 5000000, solde_credit: 0 },
-  { compte: '4471', intitule: 'Etat impot sur benefices', debit: 0, credit: 2800000, solde_debit: 0, solde_credit: 2800000 },
-  // Classe 5 - Tresorerie
-  { compte: '5210', intitule: 'Banque BICEC', debit: 8500000, credit: 0, solde_debit: 8500000, solde_credit: 0 },
-  { compte: '5220', intitule: 'Banque SGC', debit: 0, credit: 3000000, solde_debit: 0, solde_credit: 3000000 }, // Banque creditrice!
-  { compte: '5310', intitule: 'Caisse centrale', debit: 2500000, credit: 0, solde_debit: 2500000, solde_credit: 0 },
-  // Classe 6 - Charges (avec desequilibre intentionnel de 5500 FCFA)
-  { compte: '6011', intitule: 'Achats de marchandises', debit: 45000000, credit: 0, solde_debit: 45000000, solde_credit: 0 },
-  { compte: '6031', intitule: 'Variation stocks marchandises', debit: 2000000, credit: 0, solde_debit: 2000000, solde_credit: 0 },
-  { compte: '6052', intitule: 'Fournitures non stockees', debit: 3500000, credit: 0, solde_debit: 3500000, solde_credit: 0 },
-  { compte: '6130', intitule: 'Transports pour le compte de tiers', debit: 1200000, credit: 0, solde_debit: 1200000, solde_credit: 0 },
-  { compte: '6220', intitule: 'Locations et charges locatives', debit: 6000000, credit: 0, solde_debit: 6000000, solde_credit: 0 },
-  { compte: '6320', intitule: 'Remunerations intermediaires', debit: 800000, credit: 0, solde_debit: 800000, solde_credit: 0 },
-  { compte: '6410', intitule: 'Impots et taxes', debit: 3200000, credit: 0, solde_debit: 3200000, solde_credit: 0 },
-  { compte: '6610', intitule: 'Remunerations directes', debit: 24000000, credit: 0, solde_debit: 24000000, solde_credit: 0 },
-  { compte: '6640', intitule: 'Charges sociales', debit: 7200000, credit: 0, solde_debit: 7200000, solde_credit: 0 },
-  { compte: '6710', intitule: 'Interets des emprunts', debit: 2500000, credit: 0, solde_debit: 2500000, solde_credit: 0 },
-  { compte: '6811', intitule: 'Dotations amort immob incorp', debit: 1500000, credit: 0, solde_debit: 1500000, solde_credit: 0 },
-  { compte: '6812', intitule: 'Dotations amort immob corp', debit: 7000000, credit: 0, solde_debit: 7000000, solde_credit: 0 },
-  { compte: '6471', intitule: 'Amendes fiscales', debit: 150000, credit: 0, solde_debit: 150000, solde_credit: 0 },
-  { compte: '8910', intitule: 'Impot sur les benefices', debit: 2800000, credit: 0, solde_debit: 2800000, solde_credit: 0 },
-  // Compte non OHADA (C-001 anomalie)
-  { compte: '9999', intitule: 'Compte special hors plan', debit: 500000, credit: 0, solde_debit: 500000, solde_credit: 0 },
-  // Classe 7 - Produits
-  { compte: '7011', intitule: 'Ventes de marchandises', debit: 0, credit: 85000000, solde_debit: 0, solde_credit: 85000000 },
-  { compte: '7060', intitule: 'Services vendus', debit: 0, credit: 15000000, solde_debit: 0, solde_credit: 15000000 },
-  { compte: '7071', intitule: 'Ports, emballages factures', debit: 0, credit: 2000000, solde_debit: 0, solde_credit: 2000000 },
-  { compte: '7510', intitule: 'Revenus des immeubles', debit: 0, credit: 3600000, solde_debit: 0, solde_credit: 3600000 },
-  { compte: '7710', intitule: 'Interets des prets', debit: 0, credit: 450000, solde_debit: 0, solde_credit: 450000 },
-  { compte: '7910', intitule: 'Reprises provisions exploitation', debit: 0, credit: 800000, solde_debit: 0, solde_credit: 800000 },
-  // Ajout desequilibre de 5500 FCFA
-  { compte: '4710', intitule: 'Compte d\'attente debiteur', debit: 5500, credit: 0, solde_debit: 5500, solde_credit: 0 },
-]
-
 // --- Composant principal ---
 
 const ModernAudit: React.FC = () => {
@@ -147,12 +73,12 @@ const ModernAudit: React.FC = () => {
   const cancelledRef = useRef(false)
   const [sessions, setSessions] = useState<SessionAudit[]>(() => getAllSessions())
 
-  // Charger la balance importée, fallback sur DEMO si aucune importée
+  // Charger la balance importée (pas de fallback demo)
   const importedBalance = getLatestBalance()
   const importedBalanceN1 = getLatestBalanceN1()
   const balanceToAudit = importedBalance?.entries?.length
     ? importedBalance.entries
-    : DEMO_BALANCE
+    : []
   const balanceN1ToAudit = importedBalanceN1?.entries?.length
     ? importedBalanceN1.entries
     : undefined
@@ -276,8 +202,7 @@ const ModernAudit: React.FC = () => {
         </Alert>
       ) : (
         <Alert severity="warning" sx={{ mb: 3 }}>
-          Aucune balance importee — Audit sur donnees de demonstration ({DEMO_BALANCE.length} comptes).
-          Importez votre balance via le menu "Import Balance" pour un audit reel.
+          Aucune balance importee. Importez votre balance via le menu "Import Balance" pour lancer un audit.
         </Alert>
       )}
 

@@ -296,7 +296,7 @@ const Note14SYSCOHADA: React.FC = () => {
       montant,
       pourcentage
     }
-  }).filter(type => type.count > 0)
+  })
 
   const renderTableauEmprunts = () => (
     <Card sx={{ mb: 3 }}>

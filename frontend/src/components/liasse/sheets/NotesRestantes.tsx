@@ -30,7 +30,6 @@ import { useEditableTable } from '@/hooks/useEditableTable'
 import { generateAnnexeData } from '@/services/annexeDataService'
 import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
 import { getLatestBalance } from '@/services/balanceStorageService'
-import { MOCK_BALANCE } from '@/data/mockBalance'
 
 interface NoteRestanteProps {
   numeroNote: number
@@ -1220,7 +1219,7 @@ const NotesRestantes: React.FC<NoteRestanteProps> = ({
   // Générer les données depuis la balance importée
   const computedNotes = useMemo(() => {
     const stored = getLatestBalance()
-    const entries = stored?.entries?.length ? stored.entries : MOCK_BALANCE
+    const entries = stored?.entries?.length ? stored.entries : []
     return generateAnnexeData(entries)
   }, [])
   const usingImported = !!getLatestBalance()?.entries?.length
@@ -1503,6 +1502,174 @@ export const NOTES_CONFIGS = {
     contenuPrevu: ['Provisions pour litiges, garanties, restructuration'],
     priorite: 'moyenne' as const,
   },
+  note13: {
+    numeroNote: 13,
+    titre: 'DETTES FISCALES ET SOCIALES',
+    description: 'Détail des dettes fiscales et sociales.',
+    contenuPrevu: ['Impôts, taxes et cotisations sociales dus'],
+    priorite: 'haute' as const,
+  },
+  note16: {
+    numeroNote: 16,
+    titre: 'CHARGES DE PERSONNEL',
+    description: 'Analyse des charges de personnel.',
+    contenuPrevu: ['Salaires, charges sociales, effectifs'],
+    priorite: 'moyenne' as const,
+  },
+  note18: {
+    numeroNote: 18,
+    titre: 'CHARGES ET PRODUITS FINANCIERS',
+    description: 'Détail du résultat financier.',
+    contenuPrevu: ['Produits et charges financiers'],
+    priorite: 'moyenne' as const,
+  },
+  note20: {
+    numeroNote: 20,
+    titre: 'ENGAGEMENTS HORS BILAN',
+    description: 'État des engagements hors bilan.',
+    contenuPrevu: ['Engagements donnés et reçus'],
+    priorite: 'haute' as const,
+  },
+  note21: {
+    numeroNote: 21,
+    titre: 'EFFECTIF DU PERSONNEL ET FRAIS DE PERSONNEL',
+    description: 'Évolution de l\'effectif par catégorie professionnelle.',
+    contenuPrevu: ['Effectifs, masse salariale, formation'],
+    priorite: 'moyenne' as const,
+  },
+  note22: {
+    numeroNote: 22,
+    titre: 'RÉMUNÉRATION DES DIRIGEANTS',
+    description: 'Rémunérations et avantages des dirigeants et mandataires sociaux.',
+    contenuPrevu: ['Détail rémunérations dirigeants'],
+    priorite: 'moyenne' as const,
+  },
+  note23: {
+    numeroNote: 23,
+    titre: 'RÉPARTITION DU CAPITAL ET DROITS DE VOTE',
+    description: 'Structure de l\'actionnariat.',
+    contenuPrevu: ['Actionnaires, parts, droits de vote'],
+    priorite: 'moyenne' as const,
+  },
+  note24: {
+    numeroNote: 24,
+    titre: 'VENTILATION DU CHIFFRE D\'AFFAIRES',
+    description: 'CA par zone géographique et type d\'activité.',
+    contenuPrevu: ['Ventilation du chiffre d\'affaires'],
+    priorite: 'haute' as const,
+  },
+  note25: {
+    numeroNote: 25,
+    titre: 'TRANSACTIONS AVEC LES PARTIES LIÉES',
+    description: 'Détail des transactions avec les parties liées.',
+    contenuPrevu: ['Opérations parties liées'],
+    priorite: 'haute' as const,
+  },
+  note26: {
+    numeroNote: 26,
+    titre: 'ENGAGEMENTS FINANCIERS DONNÉS ET REÇUS',
+    description: 'État des engagements hors bilan détaillé.',
+    contenuPrevu: ['Garanties, hypothèques, nantissements'],
+    priorite: 'haute' as const,
+  },
+  note27: {
+    numeroNote: 27,
+    titre: 'CRÉDIT-BAIL ET CONTRATS ASSIMILÉS',
+    description: 'État des contrats de crédit-bail.',
+    contenuPrevu: ['Contrats crédit-bail, redevances'],
+    priorite: 'moyenne' as const,
+  },
+  note28: {
+    numeroNote: 28,
+    titre: 'ÉCHÉANCES DES CRÉANCES ET DETTES',
+    description: 'Ventilation par échéance des créances et dettes.',
+    contenuPrevu: ['Échéancier créances et dettes'],
+    priorite: 'haute' as const,
+  },
+  note29: {
+    numeroNote: 29,
+    titre: 'VENTILATION CHARGES ET PRODUITS PAR DESTINATION',
+    description: 'Charges d\'exploitation par destination et par nature.',
+    contenuPrevu: ['Répartition charges par fonction'],
+    priorite: 'moyenne' as const,
+  },
+  note30: {
+    numeroNote: 30,
+    titre: 'PRODUITS À RECEVOIR ET CHARGES À PAYER',
+    description: 'Régularisations de fin d\'exercice.',
+    contenuPrevu: ['Charges à payer, produits à recevoir'],
+    priorite: 'moyenne' as const,
+  },
+  note31: {
+    numeroNote: 31,
+    titre: 'CHARGES ET PRODUITS CONSTATÉS D\'AVANCE',
+    description: 'CCA et PCA de fin d\'exercice.',
+    contenuPrevu: ['Charges et produits constatés d\'avance'],
+    priorite: 'moyenne' as const,
+  },
+  note32: {
+    numeroNote: 32,
+    titre: 'CONVERSION DES OPÉRATIONS EN DEVISES',
+    description: 'Positions en devises et écarts de conversion.',
+    contenuPrevu: ['Opérations en devises, écarts conversion'],
+    priorite: 'moyenne' as const,
+  },
+  note33: {
+    numeroNote: 33,
+    titre: 'ÉVÉNEMENTS POSTÉRIEURS À LA CLÔTURE',
+    description: 'Événements ajustants et non ajustants après clôture.',
+    contenuPrevu: ['Événements post-clôture'],
+    priorite: 'haute' as const,
+  },
+  note34: {
+    numeroNote: 34,
+    titre: 'FILIALES ET PARTICIPATIONS',
+    description: 'Informations sur les filiales et participations.',
+    contenuPrevu: ['Tableau filiales et participations'],
+    priorite: 'moyenne' as const,
+  },
+  note35: {
+    numeroNote: 35,
+    titre: 'INFORMATIONS COMPLÉMENTAIRES ET DIVERSES',
+    description: 'Informations complémentaires requises par le SYSCOHADA.',
+    contenuPrevu: ['Honoraires, litiges, RSE'],
+    priorite: 'basse' as const,
+  },
+  note36: {
+    numeroNote: 36,
+    titre: 'TABLE DES CODES',
+    description: 'Nomenclature et codes utilisés.',
+    contenuPrevu: ['Table des codes DGI'],
+    priorite: 'basse' as const,
+  },
+  note37: {
+    numeroNote: 37,
+    titre: 'INFORMATIONS COMPLÉMENTAIRES',
+    description: 'Informations complémentaires exigées par l\'administration fiscale.',
+    contenuPrevu: ['Réintégrations fiscales, déductions, crédits'],
+    priorite: 'moyenne' as const,
+  },
+  note38: {
+    numeroNote: 38,
+    titre: 'DÉCLARATIONS SPÉCIALES',
+    description: 'Déclarations fiscales spéciales et annexes obligatoires.',
+    contenuPrevu: ['État 301, État 302, prix de transfert'],
+    priorite: 'moyenne' as const,
+  },
+  note39: {
+    numeroNote: 39,
+    titre: 'ATTESTATIONS ET CERTIFICATIONS',
+    description: 'Attestations, certifications et rapports de contrôle légal.',
+    contenuPrevu: ['CAC, attestations fiscales, certifications'],
+    priorite: 'basse' as const,
+  },
+  noteDgiIns: {
+    numeroNote: 0,
+    titre: 'NOTES DGI-INS',
+    description: 'Notes destinées à la DGI et à l\'INS.',
+    contenuPrevu: ['Informations statistiques et fiscales DSF'],
+    priorite: 'haute' as const,
+  },
 }
 
 // Exports des composants individuels
@@ -1510,5 +1677,30 @@ export const Note4SYSCOHADA = createNoteComponent(NOTES_CONFIGS.note4)
 export const Note7SYSCOHADA = createNoteComponent(NOTES_CONFIGS.note7)
 export const Note9SYSCOHADA = createNoteComponent(NOTES_CONFIGS.note9)
 export const Note10SYSCOHADA = createNoteComponent(NOTES_CONFIGS.note10)
+export const Note13SYSCOHADA = createNoteComponent(NOTES_CONFIGS.note13)
+export const Note16SYSCOHADA = createNoteComponent(NOTES_CONFIGS.note16)
+export const Note18SYSCOHADA = createNoteComponent(NOTES_CONFIGS.note18)
+export const Note20SYSCOHADA = createNoteComponent(NOTES_CONFIGS.note20)
+export const Note21SYSCOHADA = createNoteComponent(NOTES_CONFIGS.note21)
+export const Note22SYSCOHADA = createNoteComponent(NOTES_CONFIGS.note22)
+export const Note23SYSCOHADA = createNoteComponent(NOTES_CONFIGS.note23)
+export const Note24SYSCOHADA = createNoteComponent(NOTES_CONFIGS.note24)
+export const Note25SYSCOHADA = createNoteComponent(NOTES_CONFIGS.note25)
+export const Note26SYSCOHADA = createNoteComponent(NOTES_CONFIGS.note26)
+export const Note27SYSCOHADA = createNoteComponent(NOTES_CONFIGS.note27)
+export const Note28SYSCOHADA = createNoteComponent(NOTES_CONFIGS.note28)
+export const Note29SYSCOHADA = createNoteComponent(NOTES_CONFIGS.note29)
+export const Note30SYSCOHADA = createNoteComponent(NOTES_CONFIGS.note30)
+export const Note31SYSCOHADA = createNoteComponent(NOTES_CONFIGS.note31)
+export const Note32SYSCOHADA = createNoteComponent(NOTES_CONFIGS.note32)
+export const Note33SYSCOHADA = createNoteComponent(NOTES_CONFIGS.note33)
+export const Note34SYSCOHADA = createNoteComponent(NOTES_CONFIGS.note34)
+export const Note35SYSCOHADA = createNoteComponent(NOTES_CONFIGS.note35)
+export const Note36SYSCOHADA_NR = createNoteComponent(NOTES_CONFIGS.note36)
+export const Note36NomenclatureSYSCOHADA = createNoteComponent(NOTES_CONFIGS.note36)
+export const Note37SYSCOHADA = createNoteComponent(NOTES_CONFIGS.note37)
+export const Note38SYSCOHADA = createNoteComponent(NOTES_CONFIGS.note38)
+export const Note39SYSCOHADA = createNoteComponent(NOTES_CONFIGS.note39)
+export const NotesDgiInsSYSCOHADA = createNoteComponent(NOTES_CONFIGS.noteDgiIns)
 
 export default NotesRestantes

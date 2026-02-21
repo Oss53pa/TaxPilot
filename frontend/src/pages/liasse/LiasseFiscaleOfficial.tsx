@@ -227,30 +227,10 @@ const LiasseFiscaleOfficial: React.FC = () => {
   }, [isProducing, productionStartTime])
 
   const initializeLiasses = () => {
-    const mockLiasses: LiasseTemplate[] = [
-      {
-        id: '1',
-        name: 'Liasse Fiscale 2024 - ABC Commerce',
-        type: 'normal',
-        jurisdiction: 'OHADA',
-        sector: 'Commerce',
-        year: 2024,
-        status: 'in-progress',
-        progress: 65,
-        company: {
-          name: 'ABC Commerce SARL',
-          siret: '12345678901234',
-          sector: 'Commerce de détail',
-          size: 'PME'
-        },
-        validations: [],
-        createdAt: new Date('2024-10-01'),
-        lastModified: new Date(),
-        deadline: new Date('2024-12-31'),
-        isUrgent: true
-      }
-    ]
-    setSelectedLiasse(mockLiasses[0])
+    const liasses: LiasseTemplate[] = []
+    if (liasses.length > 0) {
+      setSelectedLiasse(liasses[0])
+    }
   }
 
   const initializeProductionSteps = () => {

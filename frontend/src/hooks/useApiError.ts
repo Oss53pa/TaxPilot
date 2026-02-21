@@ -38,10 +38,10 @@ export const useApiError = (): UseApiErrorReturn => {
         404: 'Ressource non trouvée',
         422: 'Données de validation échouées',
         429: 'Trop de requêtes - Veuillez patienter',
-        500: 'Erreur serveur interne',
-        502: 'Serveur indisponible',
+        500: 'Erreur interne',
+        502: 'Service indisponible',
         503: 'Service temporairement indisponible',
-        504: 'Timeout du serveur'
+        504: 'Délai de réponse dépassé'
       }
 
       let message = statusMessages[status || 0] || 'Erreur de connexion'
@@ -74,7 +74,7 @@ export const useApiError = (): UseApiErrorReturn => {
 
       if (error.message.includes('timeout')) {
         return {
-          message: 'Délai d\'attente dépassé - Le serveur met trop de temps à répondre',
+          message: 'Délai d\'attente dépassé - L\'opération met trop de temps à répondre',
           code: 'TIMEOUT_ERROR'
         }
       }

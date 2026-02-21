@@ -25,6 +25,8 @@ import {
   Chip,
 } from '@mui/material'
 import { ExpandMore, Info, Assessment, Description } from '@mui/icons-material'
+import { useBalanceData } from '@/hooks/useBalanceData'
+import { useEntrepriseData } from '@/hooks/useEntrepriseData'
 
 interface EtatComplementsProps {
   modeEdition?: boolean
@@ -41,25 +43,34 @@ const EtatComplements: React.FC<EtatComplementsProps> = ({ modeEdition = false }
     )
   }
 
+  const bal = useBalanceData()
+  const ent = useEntrepriseData()
+
   // Données pour les tableaux complémentaires
   const [effectifData] = useState([
-    { category: 'Cadres supérieurs', nombre: 5, salaireBrut: 15000000 },
-    { category: 'Cadres moyens', nombre: 12, salaireBrut: 24000000 },
-    { category: 'Employés', nombre: 45, salaireBrut: 54000000 },
-    { category: 'Ouvriers', nombre: 28, salaireBrut: 28000000 },
+    { category: 'Cadres supérieurs', nombre: 0, salaireBrut: 0 },
+    { category: 'Cadres moyens', nombre: 0, salaireBrut: 0 },
+    { category: 'Employés', nombre: 0, salaireBrut: 0 },
+    { category: 'Ouvriers', nombre: 0, salaireBrut: 0 },
   ])
 
   const [engagementsData] = useState([
-    { type: 'Crédits-bails mobiliers', montant: 8500000, echeance: '2-5 ans' },
-    { type: 'Crédits-bails immobiliers', montant: 25000000, echeance: '+5 ans' },
-    { type: 'Cautions et avals donnés', montant: 5000000, echeance: '1-2 ans' },
-    { type: 'Autres engagements', montant: 2500000, echeance: '<1 an' },
+    { type: 'Crédits-bails mobiliers', montant: 0, echeance: '—' },
+    { type: 'Crédits-bails immobiliers', montant: 0, echeance: '—' },
+    { type: 'Cautions et avals', montant: 0, echeance: '—' },
+    { type: 'Autres', montant: 0, echeance: '—' },
   ])
 
+  const venteMarchandises = bal.c(['701', '702', '703', '704', '705', '706', '707'])
+  const prestations = bal.c(['71'])
+  const production = bal.c(['72', '73'])
+  const caTotal = venteMarchandises + prestations + production
+  const pct = (v: number) => caTotal > 0 ? Math.round((v / caTotal) * 1000) / 10 : 0
+
   const [repartitionCAData] = useState([
-    { activite: 'Vente de marchandises', montant: 125600000, pourcentage: 59.6 },
-    { activite: 'Prestations de services', montant: 65400000, pourcentage: 31.0 },
-    { activite: 'Production vendue', montant: 19800000, pourcentage: 9.4 },
+    { activite: 'Vente de marchandises', montant: venteMarchandises, pourcentage: pct(venteMarchandises) },
+    { activite: 'Prestations de services', montant: prestations, pourcentage: pct(prestations) },
+    { activite: 'Production vendue', montant: production, pourcentage: pct(production) },
   ])
 
   const formatNumber = (value: number) => {
@@ -171,7 +182,7 @@ const EtatComplements: React.FC<EtatComplementsProps> = ({ modeEdition = false }
                   <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                     <Typography variant="body2">Salaire moyen:</Typography>
                     <Typography variant="body2" fontWeight={600}>
-                      {formatNumber(Math.round(totalSalaires / totalEffectif))} F
+                      {formatNumber(totalEffectif > 0 ? Math.round(totalSalaires / totalEffectif) : 0)} F
                     </Typography>
                   </Box>
                 </CardContent>
@@ -305,7 +316,7 @@ const EtatComplements: React.FC<EtatComplementsProps> = ({ modeEdition = false }
                   </Typography>
                   <Divider sx={{ my: 2 }} />
                   <Typography variant="body2" fontWeight={600}>
-                    Activité principale: Vente de marchandises (59.6%)
+                    Activité principale: Vente de marchandises ({pct(venteMarchandises)}%)
                   </Typography>
                 </CardContent>
               </Card>
@@ -334,15 +345,15 @@ const EtatComplements: React.FC<EtatComplementsProps> = ({ modeEdition = false }
                   <Typography variant="h6" gutterBottom>Informations légales</Typography>
                   <Box sx={{ mb: 2 }}>
                     <Typography variant="body2" color="text.secondary">RCCM:</Typography>
-                    <Typography variant="body1">CI-ABJ-2024-B-12345</Typography>
+                    <Typography variant="body1">{ent.rccm || '\u2014'}</Typography>
                   </Box>
                   <Box sx={{ mb: 2 }}>
                     <Typography variant="body2" color="text.secondary">N° Contribuable:</Typography>
-                    <Typography variant="body1">1234567890</Typography>
+                    <Typography variant="body1">{ent.numeroContribuable || '\u2014'}</Typography>
                   </Box>
                   <Box>
                     <Typography variant="body2" color="text.secondary">Forme juridique:</Typography>
-                    <Typography variant="body1">Société Anonyme</Typography>
+                    <Typography variant="body1">{ent.formeJuridique || '\u2014'}</Typography>
                   </Box>
                 </CardContent>
               </Card>
@@ -361,7 +372,7 @@ const EtatComplements: React.FC<EtatComplementsProps> = ({ modeEdition = false }
                   </Box>
                   <Box>
                     <Typography variant="body2" color="text.secondary">Commissaire aux comptes:</Typography>
-                    <Typography variant="body1">Cabinet AUDIT & CONSEIL</Typography>
+                    <Typography variant="body1">{ent.entreprise?.cac_nom || '\u2014'}</Typography>
                   </Box>
                 </CardContent>
               </Card>

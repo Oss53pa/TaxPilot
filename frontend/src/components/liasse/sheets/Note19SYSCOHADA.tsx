@@ -313,7 +313,7 @@ const Note19SYSCOHADA: React.FC = () => {
       montant,
       pourcentage
     }
-  }).filter(cat => cat.montant > 0)
+  })
 
   const renderTableauCharges = () => (
     <Card sx={{ mb: 3 }}>

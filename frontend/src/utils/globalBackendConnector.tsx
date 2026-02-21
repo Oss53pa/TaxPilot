@@ -161,7 +161,7 @@ export function withGlobalBackend<P extends object>(
           textAlign: 'center',
           opacity: 0.6
         }}>
-          Connexion au backend en cours...
+          Chargement des données en cours...
         </div>
       )
     }
