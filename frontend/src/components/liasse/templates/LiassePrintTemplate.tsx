@@ -4,7 +4,7 @@
  * 74 pages pour le Reel Normal, ~50 pour Simplifie, ~10 Forfaitaire, ~4 Micro.
  */
 
-import React, { useState, useRef, useCallback } from 'react'
+import React, { useState, useRef, useCallback, useEffect } from 'react'
 import {
   Box,
   Typography,
@@ -60,6 +60,7 @@ export interface LiassePrintTemplateProps {
   regime: RegimeFiscal
   entreprise: EntrepriseInfo
   exercice: string
+  initialPageId?: string
 }
 
 // Map from RegimeFiscal to config Regime
@@ -269,7 +270,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
 // MAIN COMPONENT
 // ══════════════════════════════════════════
 
-const LiassePrintTemplate: React.FC<LiassePrintTemplateProps> = ({ regime, entreprise, exercice }) => {
+const LiassePrintTemplate: React.FC<LiassePrintTemplateProps> = ({ regime, entreprise, exercice, initialPageId }) => {
   const configRegime = REGIME_MAP[regime]
   const allPages = getPagesForRegime(configRegime)
   const [currentPageIndex, setCurrentPageIndex] = useState(0)
@@ -279,6 +280,13 @@ const LiassePrintTemplate: React.FC<LiassePrintTemplateProps> = ({ regime, entre
   React.useEffect(() => {
     setCurrentPageIndex(0)
   }, [configRegime])
+
+  // Navigate to a specific page when initialPageId is provided
+  useEffect(() => {
+    if (!initialPageId) return
+    const idx = allPages.findIndex(p => p.id === initialPageId)
+    if (idx >= 0) setCurrentPageIndex(idx)
+  }, [initialPageId, allPages])
 
   const safeIndex = currentPageIndex < allPages.length ? currentPageIndex : 0
   const currentPage = allPages[safeIndex]

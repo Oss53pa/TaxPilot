@@ -4,7 +4,7 @@ import { logger } from '@/utils/logger'
  * Conforme aux exigences EX-EXPORT-001 à EX-EXPORT-010
  */
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import {
   Box,
   Grid,
@@ -84,7 +84,13 @@ import {
 import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
 import LiassePrintTemplate from '@/components/liasse/templates/LiassePrintTemplate'
 import type { RegimeFiscal, EntrepriseInfo } from '@/components/liasse/templates/LiassePrintTemplate'
-import { LIASSE_PAGES, SECTION_LABELS, getPageCountForRegime, type Regime as ConfigRegime, type SectionId } from '@/config/liasse-pages-config'
+import { LIASSE_PAGES, SECTION_LABELS, getPageCountForRegime, type Regime as ConfigRegime, type SectionId, type LiassePage } from '@/config/liasse-pages-config'
+import CountryCustomization from '@/components/Templates/CountryCustomization'
+import ExportProfiles from '@/components/Templates/ExportProfiles'
+import ExportCenter from '@/components/Templates/ExportCenter'
+import ScheduledExports from '@/components/Templates/ScheduledExports'
+import ExportHistory from '@/components/Templates/ExportHistory'
+import { type ExportProfile, type ExportHistoryRecord, type ScheduledExport, loadFromStorage, STORAGE_KEYS } from '@/components/Templates/exportTypes'
 
 interface Template {
   id: string
@@ -148,6 +154,11 @@ const ModernTemplates: React.FC = () => {
   const [selectedTemplates, setSelectedTemplates] = useState<string[]>([])
   const [selectedRegime, setSelectedRegime] = useState<RegimeFiscal>('normal')
   const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [selectedPages, setSelectedPages] = useState<Set<string>>(new Set())
+  const [initialPageId, setInitialPageId] = useState<string | undefined>(undefined)
+  const [exportProfiles, setExportProfiles] = useState<ExportProfile[]>(() =>
+    loadFromStorage<ExportProfile[]>(STORAGE_KEYS.EXPORT_PROFILES, [])
+  )
 
   // Entreprise info from localStorage
   const entrepriseInfo: EntrepriseInfo = (() => {
@@ -173,6 +184,85 @@ const ModernTemplates: React.FC = () => {
   })()
 
   const exercice = new Date().getFullYear().toString()
+
+  // Map from SectionId to its pages (all regimes)
+  const sectionPagesMap = useMemo(() => {
+    const map = new Map<SectionId, LiassePage[]>()
+    for (const page of LIASSE_PAGES) {
+      const list = map.get(page.section) || []
+      list.push(page)
+      map.set(page.section, list)
+    }
+    return map
+  }, [])
+
+  // Extract sectionId from template id: "liasse-etats" → "etats"
+  const getSectionIdFromTemplate = useCallback((templateId: string): SectionId | null => {
+    const prefix = 'liasse-'
+    if (!templateId.startsWith(prefix)) return null
+    return templateId.slice(prefix.length) as SectionId
+  }, [])
+
+  const togglePageSelection = useCallback((pageId: string) => {
+    setSelectedPages(prev => {
+      const next = new Set(prev)
+      if (next.has(pageId)) next.delete(pageId)
+      else next.add(pageId)
+      return next
+    })
+  }, [])
+
+  const selectAllInSection = useCallback((sectionId: SectionId) => {
+    const pages = sectionPagesMap.get(sectionId) || []
+    setSelectedPages(prev => {
+      const next = new Set(prev)
+      for (const p of pages) next.add(p.id)
+      return next
+    })
+  }, [sectionPagesMap])
+
+  const deselectAllInSection = useCallback((sectionId: SectionId) => {
+    const pages = sectionPagesMap.get(sectionId) || []
+    setSelectedPages(prev => {
+      const next = new Set(prev)
+      for (const p of pages) next.delete(p.id)
+      return next
+    })
+  }, [sectionPagesMap])
+
+  const isAllSelectedInSection = useCallback((sectionId: SectionId): boolean => {
+    const pages = sectionPagesMap.get(sectionId) || []
+    if (pages.length === 0) return false
+    return pages.every(p => selectedPages.has(p.id))
+  }, [sectionPagesMap, selectedPages])
+
+  const handleEditPage = useCallback((pageId: string) => {
+    setInitialPageId(pageId)
+    setActiveTab(6)
+  }, [])
+
+  const handleEditSelected = useCallback(() => {
+    if (selectedPages.size === 0) return
+    const firstId = Array.from(selectedPages)[0]
+    setInitialPageId(firstId)
+    setActiveTab(6)
+  }, [selectedPages])
+
+  const clearPageSelection = useCallback(() => {
+    setSelectedPages(new Set())
+  }, [])
+
+  // Clear initialPageId when leaving Liasse Fiscale tab (index 6)
+  useEffect(() => {
+    if (activeTab !== 6) setInitialPageId(undefined)
+  }, [activeTab])
+
+  // Refresh profiles from localStorage when switching to profiles or exports tab
+  useEffect(() => {
+    if (activeTab === 2 || activeTab === 3 || activeTab === 4) {
+      setExportProfiles(loadFromStorage<ExportProfile[]>(STORAGE_KEYS.EXPORT_PROFILES, []))
+    }
+  }, [activeTab])
 
   useEffect(() => {
     setLoading(false)
@@ -218,7 +308,30 @@ const ModernTemplates: React.FC = () => {
 
   const templates: Template[] = [...liasseTemplates, ...customTemplates]
 
-  const exportJobs: ExportJob[] = []
+  // Load real export history and scheduled exports from localStorage
+  const exportHistory = useMemo(() =>
+    loadFromStorage<ExportHistoryRecord[]>(STORAGE_KEYS.EXPORT_HISTORY, [])
+  , [activeTab]) // refresh when switching tabs
+
+  const scheduledExports = useMemo(() =>
+    loadFromStorage<ScheduledExport[]>(STORAGE_KEYS.SCHEDULED_EXPORTS, [])
+  , [activeTab])
+
+  // Convert real export history into ExportJob format for the sidebar
+  const exportJobs: ExportJob[] = useMemo(() =>
+    exportHistory.slice(0, 10).map(record => ({
+      id: record.id,
+      templateId: `liasse-${record.regime}`,
+      templateName: `${record.regimeLabel} — ${record.company}`,
+      status: record.status === 'completed' ? 'completed' as const
+        : record.status === 'error' ? 'error' as const
+        : 'pending' as const,
+      progress: record.status === 'completed' ? 100 : 0,
+      startTime: new Date(record.date).toLocaleString('fr-FR'),
+      outputFile: record.status === 'completed' ? record.fileName : undefined,
+      error: record.error,
+    }))
+  , [exportHistory])
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
@@ -388,7 +501,7 @@ const ModernTemplates: React.FC = () => {
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <Box>
                     <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, color: theme.palette.success.main }}>
-                      {exportJobs.filter(j => j.status === 'completed').length}
+                      {exportHistory.filter(r => r.status === 'completed').length}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                       Exports réussis
@@ -417,7 +530,7 @@ const ModernTemplates: React.FC = () => {
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <Box>
                     <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, color: theme.palette.warning.main }}>
-                      {exportJobs.filter(j => j.status === 'pending').length}
+                      {scheduledExports.filter(s => s.enabled).length}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                       Exports programmés
@@ -472,9 +585,19 @@ const ModernTemplates: React.FC = () => {
         <Grid item xs={12} lg={sidebarOpen ? 8 : 12} sx={{ transition: 'all 0.35s cubic-bezier(0.4, 0, 0.2, 1)' }}>
           <Card elevation={0} sx={{ border: `1px solid ${alpha(theme.palette.divider, 0.08)}` }}>
             <Box sx={{ borderBottom: 1, borderColor: 'divider', display: 'flex', alignItems: 'center' }}>
-              <Tabs value={activeTab} onChange={(_, newValue) => setActiveTab(newValue)} sx={{ flex: 1 }}>
-                <Tab label="Tous les templates" />
-                <Tab label="Personnalisés" />
+              <Tabs
+                value={activeTab}
+                onChange={(_, newValue) => setActiveTab(newValue)}
+                variant="scrollable"
+                scrollButtons="auto"
+                sx={{ flex: 1 }}
+              >
+                <Tab label="Templates" />
+                <Tab label="Personnalisation" />
+                <Tab label="Profils d'export" />
+                <Tab label="Exports" />
+                <Tab label="Programmes" />
+                <Tab label="Historique" />
                 <Tab label="Liasse Fiscale" />
               </Tabs>
               <Tooltip title={sidebarOpen ? 'Masquer le panneau' : 'Afficher le panneau'}>
@@ -602,19 +725,59 @@ const ModernTemplates: React.FC = () => {
                                     Modifié le {template.lastModified}
                                   </Typography>
                                 </Box>
-                                {template.tags.length > 0 && (
-                                  <Box sx={{ display: 'flex', gap: 0.5, mt: 1 }}>
-                                    {template.tags.map((tag) => (
-                                      <Chip
-                                        key={tag}
-                                        label={tag}
-                                        size="small"
-                                        variant="outlined"
-                                        sx={{ height: 20, fontSize: '0.75rem' }}
-                                      />
-                                    ))}
-                                  </Box>
-                                )}
+                                {(() => {
+                                  const sectionId = getSectionIdFromTemplate(template.id)
+                                  const pages = sectionId ? sectionPagesMap.get(sectionId) || [] : []
+                                  if (pages.length === 0) return null
+                                  const allSelected = sectionId ? isAllSelectedInSection(sectionId) : false
+                                  return (
+                                    <Box sx={{ mt: 1 }}>
+                                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
+                                        <Chip
+                                          label={allSelected ? 'Tout déselect.' : 'Tout sélect.'}
+                                          size="small"
+                                          variant="outlined"
+                                          color={allSelected ? 'primary' : 'default'}
+                                          onClick={(e) => {
+                                            e.stopPropagation()
+                                            if (sectionId) {
+                                              allSelected ? deselectAllInSection(sectionId) : selectAllInSection(sectionId)
+                                            }
+                                          }}
+                                          sx={{ height: 22, fontSize: '0.7rem', fontWeight: 600 }}
+                                        />
+                                      </Box>
+                                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                        {pages.map((page) => {
+                                          const isSelected = selectedPages.has(page.id)
+                                          return (
+                                            <Chip
+                                              key={page.id}
+                                              label={page.label}
+                                              size="small"
+                                              variant={isSelected ? 'filled' : 'outlined'}
+                                              color={isSelected ? 'primary' : 'default'}
+                                              onClick={(e) => {
+                                                e.stopPropagation()
+                                                togglePageSelection(page.id)
+                                              }}
+                                              onDoubleClick={(e) => {
+                                                e.stopPropagation()
+                                                handleEditPage(page.id)
+                                              }}
+                                              sx={{
+                                                height: 22,
+                                                fontSize: '0.7rem',
+                                                cursor: 'pointer',
+                                                '&:hover': { opacity: 0.85 },
+                                              }}
+                                            />
+                                          )
+                                        })}
+                                      </Box>
+                                    </Box>
+                                  )
+                                })()}
                               </Box>
                             }
                           />
@@ -680,206 +843,102 @@ const ModernTemplates: React.FC = () => {
                     </Stack>
                   </Box>
                 )}
-              </CardContent>
-            </TabPanel>
 
-            <TabPanel value={activeTab} index={1}>
-              <CardContent sx={{ p: 3 }}>
-                <Alert severity="info" sx={{ mb: 3 }}>
-                  <AlertTitle>Templates personnalisés</AlertTitle>
-                  Vos modèles personnalisés créés avec l'éditeur visuel.
-                </Alert>
-
-                <Box sx={{ mb: 3 }}>
-                  <TextField
-                    fullWidth
-                    placeholder="Rechercher dans vos templates..."
-                    variant="outlined"
-                    size="small"
-                    InputProps={{
-                      startAdornment: '🔍',
-                    }}
-                  />
-                </Box>
-
-                <List>
-                  {loading ? (
-                    Array.from({ length: 2 }).map((_, index) => (
-                      <Box key={index} sx={{ mb: 2 }}>
-                        <Skeleton variant="rectangular" height={100} />
-                      </Box>
-                    ))
-                  ) : (
-                    templates
-                      .filter(t => t.type === 'personal')
-                      .map((template, index, filtered) => (
-                        <React.Fragment key={template.id}>
-                          <ListItem
-                            sx={{
-                              py: 2,
-                              px: 0,
-                              backgroundColor: selectedTemplates.includes(template.id)
-                                ? alpha(theme.palette.primary.main, 0.05)
-                                : 'transparent',
-                              borderRadius: 1,
-                            }}
-                          >
-                            {batchMode && (
-                              <Checkbox
-                                checked={selectedTemplates.includes(template.id)}
-                                onChange={(e) => {
-                                  if (e.target.checked) {
-                                    setSelectedTemplates([...selectedTemplates, template.id])
-                                  } else {
-                                    setSelectedTemplates(selectedTemplates.filter(id => id !== template.id))
-                                  }
-                                }}
-                                sx={{ mr: 2 }}
-                              />
-                            )}
-                            <ListItemIcon>
-                              <Avatar
-                                sx={{
-                                  backgroundColor: alpha(getCategoryColor(template.category), 0.1),
-                                  color: getCategoryColor(template.category),
-                                  width: 48,
-                                  height: 48,
-                                }}
-                              >
-                                {getCategoryIcon(template.category)}
-                              </Avatar>
-                            </ListItemIcon>
-                            <ListItemText
-                              primary={
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
-                                  <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                                    {template.name}
-                                  </Typography>
-                                  <Chip
-                                    label={template.status === 'active' ? 'Actif' :
-                                           template.status === 'draft' ? 'Brouillon' : 'Archivé'}
-                                    size="small"
-                                    sx={{
-                                      backgroundColor: alpha(
-                                        template.status === 'active' ? theme.palette.success.main :
-                                        template.status === 'draft' ? theme.palette.warning.main :
-                                        theme.palette.grey[500],
-                                        0.1
-                                      ),
-                                      color: template.status === 'active' ? theme.palette.success.main :
-                                             template.status === 'draft' ? theme.palette.warning.main :
-                                             theme.palette.grey[500],
-                                    }}
-                                  />
-                                  <Avatar
-                                    sx={{
-                                      width: 24,
-                                      height: 24,
-                                      backgroundColor: alpha(getFormatColor(template.format), 0.1),
-                                      color: getFormatColor(template.format),
-                                    }}
-                                  >
-                                    {getFormatIcon(template.format)}
-                                  </Avatar>
-                                  <Typography variant="caption" color="text.secondary">
-                                    v{template.version}
-                                  </Typography>
-                                </Box>
-                              }
-                              secondary={
-                                <Box>
-                                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                                    {template.description}
-                                  </Typography>
-                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                    <Typography variant="caption" color="text.secondary">
-                                      Par {template.author}
-                                    </Typography>
-                                    <Typography variant="caption" color="text.secondary">
-                                      {template.size}
-                                    </Typography>
-                                    <Typography variant="caption" color="text.secondary">
-                                      Utilisé {template.usage} fois
-                                    </Typography>
-                                    <Typography variant="caption" color="text.secondary">
-                                      Modifié le {template.lastModified}
-                                    </Typography>
-                                  </Box>
-                                  {template.tags.length > 0 && (
-                                    <Box sx={{ display: 'flex', gap: 0.5, mt: 1 }}>
-                                      {template.tags.map((tag) => (
-                                        <Chip
-                                          key={tag}
-                                          label={tag}
-                                          size="small"
-                                          variant="outlined"
-                                          sx={{ height: 20, fontSize: '0.75rem' }}
-                                        />
-                                      ))}
-                                    </Box>
-                                  )}
-                                </Box>
-                              }
-                            />
-                            <ListItemSecondaryAction>
-                              <Stack direction="row" spacing={1}>
-                                <Tooltip title="Aperçu">
-                                  <IconButton
-                                    size="small"
-                                    onClick={() => {
-                                      setSelectedTemplate(template)
-                                      setPreviewOpen(true)
-                                    }}
-                                  >
-                                    <PreviewIcon fontSize="small" />
-                                  </IconButton>
-                                </Tooltip>
-                                <Tooltip title="Éditer">
-                                  <IconButton size="small">
-                                    <EditIcon fontSize="small" />
-                                  </IconButton>
-                                </Tooltip>
-                                <Tooltip title="Exporter">
-                                  <IconButton
-                                    size="small"
-                                    color="primary"
-                                    onClick={() => {
-                                      setSelectedTemplate(template)
-                                      setExportDialogOpen(true)
-                                    }}
-                                  >
-                                    <DownloadIcon fontSize="small" />
-                                  </IconButton>
-                                </Tooltip>
-                              </Stack>
-                            </ListItemSecondaryAction>
-                          </ListItem>
-                          {index < filtered.length - 1 && <Divider />}
-                        </React.Fragment>
-                      ))
-                  )}
-                </List>
-
-                {!loading && customTemplates.length === 0 && (
-                  <Box sx={{ textAlign: 'center', py: 4 }}>
-                    <Typography variant="body2" color="text.secondary">
-                      Aucun template personnalisé
-                    </Typography>
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      startIcon={<AddIcon />}
-                      sx={{ mt: 2 }}
-                      onClick={() => setEditorOpen(true)}
-                    >
-                      Créer votre premier template
-                    </Button>
+                {selectedPages.size > 0 && (
+                  <Box sx={{
+                    position: 'sticky',
+                    bottom: 0,
+                    mt: 3,
+                    p: 2,
+                    backgroundColor: alpha(P.primary900, 0.95),
+                    borderRadius: 1,
+                    backdropFilter: 'blur(8px)',
+                    zIndex: 10,
+                  }}>
+                    <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between">
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: P.white }}>
+                        {selectedPages.size} page{selectedPages.size > 1 ? 's' : ''} sélectionnée{selectedPages.size > 1 ? 's' : ''}
+                      </Typography>
+                      <Stack direction="row" spacing={1}>
+                        <Button
+                          variant="contained"
+                          size="small"
+                          startIcon={<EditIcon />}
+                          onClick={handleEditSelected}
+                          sx={{ backgroundColor: P.white, color: P.primary900, '&:hover': { backgroundColor: P.primary100 } }}
+                        >
+                          Éditer
+                        </Button>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          startIcon={<DownloadIcon />}
+                          sx={{ borderColor: P.white, color: P.white, '&:hover': { borderColor: P.primary200, backgroundColor: alpha(P.white, 0.1) } }}
+                        >
+                          Exporter la sélection
+                        </Button>
+                        <Button
+                          variant="text"
+                          size="small"
+                          onClick={clearPageSelection}
+                          sx={{ color: alpha(P.white, 0.8), '&:hover': { color: P.white } }}
+                        >
+                          Désélectionner tout
+                        </Button>
+                      </Stack>
+                    </Stack>
                   </Box>
                 )}
               </CardContent>
             </TabPanel>
 
+            {/* Tab 1: Personnalisation par pays */}
+            <TabPanel value={activeTab} index={1}>
+              <CardContent sx={{ p: 3 }}>
+                <CountryCustomization
+                  onSaveProfile={() => {
+                    setExportProfiles(loadFromStorage<ExportProfile[]>(STORAGE_KEYS.EXPORT_PROFILES, []))
+                  }}
+                />
+              </CardContent>
+            </TabPanel>
+
+            {/* Tab 2: Profils d'export */}
             <TabPanel value={activeTab} index={2}>
+              <CardContent sx={{ p: 3 }}>
+                <ExportProfiles
+                  onEditProfile={() => {
+                    setActiveTab(1)
+                  }}
+                />
+              </CardContent>
+            </TabPanel>
+
+            {/* Tab 3: Exports (multi-format, batch, mapping, merge) */}
+            <TabPanel value={activeTab} index={3}>
+              <CardContent sx={{ p: 3 }}>
+                <ExportCenter profiles={exportProfiles} />
+              </CardContent>
+            </TabPanel>
+
+            {/* Tab 4: Exports programmes */}
+            <TabPanel value={activeTab} index={4}>
+              <CardContent sx={{ p: 3 }}>
+                <ScheduledExports profiles={exportProfiles} />
+              </CardContent>
+            </TabPanel>
+
+            {/* Tab 5: Historique */}
+            <TabPanel value={activeTab} index={5}>
+              <CardContent sx={{ p: 3 }}>
+                <ExportHistory
+                  onReExport={() => setActiveTab(3)}
+                />
+              </CardContent>
+            </TabPanel>
+
+            {/* Tab 6: Liasse Fiscale */}
+            <TabPanel value={activeTab} index={6}>
               <CardContent sx={{ p: 2 }}>
                 {/* Selecteur de regime */}
                 <Grid container spacing={2} sx={{ mb: 2 }}>
@@ -925,6 +984,7 @@ const ModernTemplates: React.FC = () => {
                     regime={selectedRegime}
                     entreprise={entrepriseInfo}
                     exercice={exercice}
+                    initialPageId={initialPageId}
                   />
                 </Box>
               </CardContent>
@@ -1011,62 +1071,68 @@ const ModernTemplates: React.FC = () => {
                 </Box>
 
                 <List disablePadding>
-                  {exportJobs.map((job, index) => (
-                    <React.Fragment key={job.id}>
-                      <ListItem sx={{ px: 0, py: 2 }}>
-                        <ListItemIcon>
-                          <Avatar
-                            sx={{
-                              width: 32,
-                              height: 32,
-                              backgroundColor: alpha(getStatusColor(job.status), 0.1),
-                              color: getStatusColor(job.status),
-                            }}
-                          >
-                            {getStatusIcon(job.status)}
-                          </Avatar>
-                        </ListItemIcon>
-                        <ListItemText
-                          primary={
-                            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                              {job.templateName}
-                            </Typography>
-                          }
-                          secondary={
-                            <Box>
-                              {job.status === 'processing' && (
-                                <LinearProgress
-                                  variant="determinate"
-                                  value={job.progress}
-                                  sx={{
-                                    height: 4,
-                                    borderRadius: 2,
-                                    my: 1,
-                                    backgroundColor: alpha(theme.palette.divider, 0.1),
-                                  }}
-                                />
-                              )}
-                              <Typography variant="caption" color="text.secondary">
-                                {job.scheduled && `${job.schedulePattern} • `}
-                                {job.startTime}
+                  {exportJobs.length === 0 ? (
+                    <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 3 }}>
+                      Aucun export recent
+                    </Typography>
+                  ) : (
+                    exportJobs.map((job, index) => (
+                      <React.Fragment key={job.id}>
+                        <ListItem sx={{ px: 0, py: 2 }}>
+                          <ListItemIcon>
+                            <Avatar
+                              sx={{
+                                width: 32,
+                                height: 32,
+                                backgroundColor: alpha(getStatusColor(job.status), 0.1),
+                                color: getStatusColor(job.status),
+                              }}
+                            >
+                              {getStatusIcon(job.status)}
+                            </Avatar>
+                          </ListItemIcon>
+                          <ListItemText
+                            primary={
+                              <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                                {job.templateName}
                               </Typography>
-                              {job.outputFile && (
-                                <Typography variant="caption" sx={{ display: 'block', color: 'primary.main' }}>
-                                  {job.outputFile}
+                            }
+                            secondary={
+                              <Box>
+                                {job.status === 'processing' && (
+                                  <LinearProgress
+                                    variant="determinate"
+                                    value={job.progress}
+                                    sx={{
+                                      height: 4,
+                                      borderRadius: 2,
+                                      my: 1,
+                                      backgroundColor: alpha(theme.palette.divider, 0.1),
+                                    }}
+                                  />
+                                )}
+                                <Typography variant="caption" color="text.secondary">
+                                  {job.scheduled && `${job.schedulePattern} • `}
+                                  {job.startTime}
                                 </Typography>
-                              )}
-                              {job.error && (
-                                <Typography variant="caption" sx={{ display: 'block', color: 'error.main' }}>
-                                  {job.error}
-                                </Typography>
-                              )}
-                            </Box>
-                          }
-                        />
-                      </ListItem>
-                      {index < exportJobs.length - 1 && <Divider />}
-                    </React.Fragment>
-                  ))}
+                                {job.outputFile && (
+                                  <Typography variant="caption" sx={{ display: 'block', color: 'primary.main' }}>
+                                    {job.outputFile}
+                                  </Typography>
+                                )}
+                                {job.error && (
+                                  <Typography variant="caption" sx={{ display: 'block', color: 'error.main' }}>
+                                    {job.error}
+                                  </Typography>
+                                )}
+                              </Box>
+                            }
+                          />
+                        </ListItem>
+                        {index < exportJobs.length - 1 && <Divider />}
+                      </React.Fragment>
+                    ))
+                  )}
                 </List>
               </CardContent>
             </Card>
