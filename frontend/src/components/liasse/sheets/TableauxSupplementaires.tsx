@@ -3,7 +3,7 @@
  * Notes 12-13, 15-16, 18, 20-35 et autres tableaux obligatoires
  */
 
-import React, { useState, useMemo } from 'react'
+import React, { useState } from 'react'
 import {
   Box,
   Card,
@@ -38,7 +38,6 @@ const TableauxSupplementaires: React.FC = () => {
 
   // Données calculées depuis la balance
   const masseSalariale = bal.d(['66'])
-  const titresParticipation = bal.d(['26'])
 
   const [tableauEffectif] = useState(() => {
     // Estimation de la répartition par catégorie depuis la masse salariale totale

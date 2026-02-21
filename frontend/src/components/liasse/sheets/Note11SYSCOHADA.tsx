@@ -2,7 +2,7 @@
  * Note 11 - Capital social
  */
 
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import {
   Box,
   Paper,
@@ -46,6 +46,7 @@ import {
   TrendingUp as IncreaseIcon,
 } from '@mui/icons-material'
 import { formatNumber, formatCurrency } from '@/utils/formatting'
+import { useBalanceData } from '@/hooks/useBalanceData'
 import { TabPanel } from '@/components/shared/TabPanel'
 import { SheetHeader } from '@/components/liasse/common/SheetHeader'
 
@@ -90,119 +91,30 @@ const NATURES_AUGMENTATION = [
 
 const Note11SYSCOHADA: React.FC = () => {
   const theme = useTheme()
+  const bal = useBalanceData()
   const [tabValue, setTabValue] = useState(0)
   const [actionnaires, setActionnaires] = useState<Actionnaire[]>([])
   const [mouvements, setMouvements] = useState<MouvementCapital[]>([])
-  const [capitalInfo, _setCapitalInfo] = useState({
-    capitalSocial: 100000000,
-    nombreActionsTotal: 10000,
-    valeurNominale: 10000,
-    capitalLibere: 100000000,
-    capitalNonAppele: 0,
-    primeEmission: 0,
-    dateConstitution: '2015-01-15',
-    formeJuridique: 'SA',
-    bourseInscription: ''
+  const [capitalInfo, _setCapitalInfo] = useState(() => {
+    // Capital social calculé depuis la balance importée
+    const cs = bal.c(['101'])
+    const cna = bal.d(['109'])
+    const pe = bal.c(['104', '105'])
+    const vn = 10000
+    return {
+      capitalSocial: cs,
+      nombreActionsTotal: cs > 0 ? Math.round(cs / vn) : 0,
+      valeurNominale: vn,
+      capitalLibere: cs - cna,
+      capitalNonAppele: cna,
+      primeEmission: pe,
+      dateConstitution: '',
+      formeJuridique: 'SA',
+      bourseInscription: ''
+    }
   })
   const [comment, setComment] = useState('')
   const [hasChanges, setHasChanges] = useState(false)
-
-  useEffect(() => {
-    loadInitialData()
-  }, [])
-
-  const loadInitialData = () => {
-    const initialActionnaires: Actionnaire[] = [
-      {
-        id: '1',
-        nom: 'Groupe ABC Holdings',
-        type: 'personne_morale',
-        nationalite: 'Bénin',
-        nombreActions: 5100,
-        valeurNominale: 10000,
-        montantCapital: 51000000,
-        pourcentage: 51,
-        droitsVote: 51,
-        dateEntree: '2015-01-15',
-        observations: 'Actionnaire majoritaire'
-      },
-      {
-        id: '2',
-        nom: 'M. Jean DUPONT',
-        type: 'personne_physique',
-        nationalite: 'France',
-        nombreActions: 2500,
-        valeurNominale: 10000,
-        montantCapital: 25000000,
-        pourcentage: 25,
-        droitsVote: 25,
-        dateEntree: '2015-01-15',
-        observations: 'Fondateur'
-      },
-      {
-        id: '3',
-        nom: 'Mme Marie MARTIN',
-        type: 'personne_physique',
-        nationalite: 'Bénin',
-        nombreActions: 1500,
-        valeurNominale: 10000,
-        montantCapital: 15000000,
-        pourcentage: 15,
-        droitsVote: 15,
-        dateEntree: '2018-06-01',
-        observations: ''
-      },
-      {
-        id: '4',
-        nom: 'Autres actionnaires',
-        type: 'personne_physique',
-        nationalite: 'Divers',
-        nombreActions: 900,
-        valeurNominale: 10000,
-        montantCapital: 9000000,
-        pourcentage: 9,
-        droitsVote: 9,
-        dateEntree: '2020-01-01',
-        observations: 'Actionnariat salarié'
-      }
-    ]
-
-    const initialMouvements: MouvementCapital[] = [
-      {
-        id: '1',
-        date: '2015-01-15',
-        type: 'constitution',
-        montant: 50000000,
-        nombreActions: 5000,
-        prime: 0,
-        nature: 'Apport en numéraire',
-        description: 'Constitution de la société'
-      },
-      {
-        id: '2',
-        date: '2018-06-01',
-        type: 'augmentation',
-        montant: 30000000,
-        nombreActions: 3000,
-        prime: 5000000,
-        nature: 'Apport en numéraire',
-        description: 'Augmentation de capital pour développement'
-      },
-      {
-        id: '3',
-        date: '2020-01-01',
-        type: 'augmentation',
-        montant: 20000000,
-        nombreActions: 2000,
-        prime: 3000000,
-        nature: 'Incorporation de réserves',
-        description: 'Renforcement des fonds propres'
-      }
-    ]
-
-    setActionnaires(initialActionnaires)
-    setMouvements(initialMouvements)
-  }
 
   const handleActionnaireChange = (id: string, field: keyof Actionnaire, value: any) => {
     setActionnaires(prev => prev.map(actionnaire => {

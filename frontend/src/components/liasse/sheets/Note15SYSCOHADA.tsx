@@ -28,8 +28,10 @@ import {
 import {
   Add,
 } from '@mui/icons-material'
+import { useBalanceData } from '@/hooks/useBalanceData'
 
 const Note15SYSCOHADA: React.FC = () => {
+  const bal = useBalanceData()
   const [typeCommentaire, setTypeCommentaire] = useState('')
   const [commentaire, setCommentaire] = useState('')
   const [commentaires, setCommentaires] = useState<Array<{
@@ -44,31 +46,23 @@ const Note15SYSCOHADA: React.FC = () => {
     'Autre observation'
   ]
 
-  // Données des cessions
-  const cessions = [
+  // Cessions calculées depuis la balance (comptes SYSCOHADA)
+  const prixCession = bal.c(['82'])
+  const vncCession = bal.d(['81'])
+  const plusMoinsValue = prixCession - vncCession
+  const cessions = (prixCession > 0 || vncCession > 0) ? [
     {
-      nature: 'Terrain industriel Zone 3',
-      date_acquisition: '2018-03-15',
-      date_cession: '2024-09-30',
-      valeur_origine: 5000000,
+      nature: 'Cessions d\'immobilisations de l\'exercice',
+      date_acquisition: '',
+      date_cession: '',
+      valeur_origine: 0,
       amortissements: 0,
-      vnc: 5000000,
-      prix_cession: 7500000,
-      plus_moins_value: 2500000,
-      regime_fiscal: 'Exonéré (réinvestissement)'
-    },
-    {
-      nature: 'Véhicule utilitaire',
-      date_acquisition: '2020-01-10',
-      date_cession: '2024-11-15',
-      valeur_origine: 2500000,
-      amortissements: 1875000,
-      vnc: 625000,
-      prix_cession: 800000,
-      plus_moins_value: 175000,
-      regime_fiscal: 'Imposable'
+      vnc: vncCession,
+      prix_cession: prixCession,
+      plus_moins_value: plusMoinsValue,
+      regime_fiscal: plusMoinsValue >= 0 ? 'Imposable' : 'Moins-value'
     }
-  ]
+  ] : []
 
   const ajouterCommentaire = () => {
     if (typeCommentaire && commentaire.trim()) {
@@ -116,12 +110,14 @@ const Note15SYSCOHADA: React.FC = () => {
                       <Typography variant="body2" sx={{ fontWeight: 500 }}>
                         {cession.nature}
                       </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        Acquis le {new Date(cession.date_acquisition).toLocaleDateString('fr-FR')}
-                      </Typography>
+                      {cession.date_acquisition && (
+                        <Typography variant="caption" color="text.secondary">
+                          Acquis le {new Date(cession.date_acquisition).toLocaleDateString('fr-FR')}
+                        </Typography>
+                      )}
                     </TableCell>
                     <TableCell sx={{ textAlign: 'center' }}>
-                      {new Date(cession.date_cession).toLocaleDateString('fr-FR')}
+                      {cession.date_cession ? new Date(cession.date_cession).toLocaleDateString('fr-FR') : '-'}
                     </TableCell>
                     <TableCell sx={{ textAlign: 'right', fontFamily: 'monospace' }}>
                       {new Intl.NumberFormat('fr-FR').format(cession.valeur_origine)}

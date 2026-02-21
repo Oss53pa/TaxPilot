@@ -18,7 +18,6 @@ import {
   CardContent,
   useTheme,
   Chip,
-  Alert,
   LinearProgress,
 } from '@mui/material'
 import { useBalanceData } from '@/hooks/useBalanceData'

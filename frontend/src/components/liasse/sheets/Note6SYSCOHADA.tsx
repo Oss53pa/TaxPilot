@@ -2,7 +2,7 @@
  * Note 6 - Immobilisations corporelles
  */
 
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import {
   Box,
   Paper,
@@ -49,6 +49,7 @@ import {
   Build as EquipmentIcon,
   Computer as ITIcon,
 } from '@mui/icons-material'
+import { useBalanceData } from '@/hooks/useBalanceData'
 
 interface ImmobilisationCorporelle {
   id: string
@@ -85,52 +86,45 @@ const CATEGORIES_IMMOBILISATIONS = [
 
 const Note6SYSCOHADA: React.FC = () => {
   const theme = useTheme()
+  const bal = useBalanceData()
   const [tabValue, setTabValue] = useState(0)
-  const [immobilisations, setImmobilisations] = useState<ImmobilisationCorporelle[]>([])
+  const [immobilisations, setImmobilisations] = useState<ImmobilisationCorporelle[]>(() => {
+    // Générer les immobilisations depuis la balance importée
+    const mapping = [
+      { id: 'terrains', categorie: 'terrains', designation: 'Terrains', brutPrefixes: ['22'], amortPrefixes: ['282'], duree: 0, taux: 0 },
+      { id: 'constructions', categorie: 'constructions', designation: 'Constructions', brutPrefixes: ['23'], amortPrefixes: ['283'], duree: 20, taux: 5 },
+      { id: 'installations', categorie: 'installations', designation: 'Installations techniques', brutPrefixes: ['24'], amortPrefixes: ['284'], duree: 10, taux: 10 },
+      { id: 'materiel_transport', categorie: 'materiel_transport', designation: 'Matériel de transport', brutPrefixes: ['245'], amortPrefixes: ['2845'], duree: 4, taux: 25 },
+      { id: 'materiel_bureau', categorie: 'materiel_bureau', designation: 'Matériel de bureau et informatique', brutPrefixes: ['244'], amortPrefixes: ['2844'], duree: 3, taux: 33 },
+      { id: 'mobilier', categorie: 'mobilier', designation: 'Mobilier', brutPrefixes: ['218'], amortPrefixes: ['2818'], duree: 8, taux: 12.5 },
+      { id: 'autres', categorie: 'autres', designation: 'Autres immobilisations corporelles', brutPrefixes: ['25'], amortPrefixes: ['285'], duree: 5, taux: 20 },
+    ]
+    const data: ImmobilisationCorporelle[] = []
+    for (const m of mapping) {
+      const brut = bal.d(m.brutPrefixes)
+      const amort = bal.c(m.amortPrefixes)
+      if (brut > 0 || amort > 0) {
+        data.push({
+          id: m.id,
+          categorie: m.categorie,
+          designation: m.designation,
+          dateAcquisition: '',
+          valeurAcquisition: brut,
+          dureeAmortissement: m.duree,
+          tauxAmortissement: m.taux,
+          methodeAmortissement: 'Linéaire',
+          amortissementsCumules: amort,
+          amortissementExercice: m.taux > 0 ? Math.round(brut * m.taux / 100) : 0,
+          valeurNetteComptable: brut - amort,
+          cessions: [],
+          observations: ''
+        })
+      }
+    }
+    return data
+  })
   const [comment, setComment] = useState('')
   const [hasChanges, setHasChanges] = useState(false)
-
-  useEffect(() => {
-    loadInitialData()
-  }, [])
-
-  const loadInitialData = () => {
-    // Charger les données existantes ou créer des exemples
-    const initialData: ImmobilisationCorporelle[] = [
-      {
-        id: '1',
-        categorie: 'constructions',
-        designation: 'Bâtiment administratif',
-        dateAcquisition: '2020-01-15',
-        valeurAcquisition: 500000000,
-        dureeAmortissement: 20,
-        tauxAmortissement: 5,
-        methodeAmortissement: 'Linéaire',
-        amortissementsCumules: 125000000,
-        amortissementExercice: 25000000,
-        valeurNetteComptable: 375000000,
-        cessions: [],
-        observations: ''
-      },
-      {
-        id: '2',
-        categorie: 'materiel_transport',
-        designation: 'Véhicule de service Toyota Land Cruiser',
-        dateAcquisition: '2022-06-10',
-        valeurAcquisition: 35000000,
-        dureeAmortissement: 4,
-        tauxAmortissement: 25,
-        methodeAmortissement: 'Linéaire',
-        amortissementsCumules: 17500000,
-        amortissementExercice: 8750000,
-        valeurNetteComptable: 17500000,
-        cessions: [],
-        observations: ''
-      }
-    ]
-    
-    setImmobilisations(initialData)
-  }
 
   const handleImmobilisationChange = (id: string, field: keyof ImmobilisationCorporelle, value: any) => {
     setImmobilisations(prev => prev.map(immo => {

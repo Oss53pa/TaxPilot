@@ -38,6 +38,7 @@ import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
 import { useBalanceData } from '@/hooks/useBalanceData'
 
 const Note12SYSCOHADA: React.FC = () => {
+  const bal = useBalanceData()
   // Types de commentaires prédéfinis
   const [typeCommentaire, setTypeCommentaire] = useState('')
   const [commentaire, setCommentaire] = useState('')
@@ -58,16 +59,20 @@ const Note12SYSCOHADA: React.FC = () => {
     'Autre observation'
   ]
 
-  // Données exemple pour le tableau
+  // Produits et charges exceptionnels calculés depuis la balance (comptes HAO SYSCOHADA)
   const produitsExceptionnels = [
-    { libelle: 'Plus-value cession immobilisation', montant: 2500000, origine: 'Cession terrain', impacte_fiscal: true },
-    { libelle: 'Subvention équipement reçue', montant: 1200000, origine: 'État Cameroun', impacte_fiscal: false }
-  ]
+    { libelle: 'Produits des cessions d\'immobilisations (82)', montant: bal.c(['82']), origine: 'Cessions', impacte_fiscal: true },
+    { libelle: 'Produits HAO divers (84)', montant: bal.c(['84']), origine: 'HAO', impacte_fiscal: true },
+    { libelle: 'Reprises de provisions HAO (86)', montant: bal.c(['86']), origine: 'Reprises', impacte_fiscal: true },
+    { libelle: 'Subventions d\'équilibre (88)', montant: bal.c(['88']), origine: 'Subventions', impacte_fiscal: false },
+  ].filter(p => p.montant > 0)
 
   const chargesExceptionnelles = [
-    { libelle: 'VNC cession immobilisation', montant: 1800000, origine: 'Cession terrain', impacte_fiscal: true },
-    { libelle: 'Provision restructuration', montant: 800000, origine: 'Plan social', impacte_fiscal: false }
-  ]
+    { libelle: 'Valeurs comptables des cessions (81)', montant: bal.d(['81']), origine: 'Cessions', impacte_fiscal: true },
+    { libelle: 'Charges HAO (83)', montant: bal.d(['83']), origine: 'HAO', impacte_fiscal: true },
+    { libelle: 'Dotations HAO (85)', montant: bal.d(['85']), origine: 'Dotations', impacte_fiscal: false },
+    { libelle: 'Participations des travailleurs (87)', montant: bal.d(['87']), origine: 'Participations', impacte_fiscal: true },
+  ].filter(c => c.montant > 0)
 
   const ajouterCommentaire = () => {
     if (typeCommentaire && commentaire.trim()) {
