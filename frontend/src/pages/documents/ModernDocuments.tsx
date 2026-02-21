@@ -61,6 +61,7 @@ import {
   TableView,
   Code
 } from '@mui/icons-material';
+import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme';
 
 interface DocumentTemplate {
   id: string;
@@ -461,8 +462,8 @@ const ModernDocuments: React.FC = () => {
       case 'urgent': return '#ef4444';
       case 'high': return '#f59e0b';
       case 'normal': return '#22c55e';
-      case 'low': return '#a3a3a3';
-      default: return '#a3a3a3';
+      case 'low': return P.primary400;
+      default: return P.primary400;
     }
   };
 

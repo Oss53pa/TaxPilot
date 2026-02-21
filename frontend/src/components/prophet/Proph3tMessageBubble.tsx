@@ -4,6 +4,7 @@ import type {
   ChatMessage, RichContent, AccountCard, FonctionnementCard, ChapitreCard,
   SearchResultCard, StatsCard, FiscalInfoCard, LiasseSheetCard, AuditControlCard, PredictionCard,
 } from './types'
+import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
 
 // ── Bold markdown renderer ───────────────────────────────────────────
 function renderMarkdown(text: string): React.ReactNode[] {
@@ -17,7 +18,7 @@ function renderMarkdown(text: string): React.ReactNode[] {
         <code
           key={i}
           style={{
-            background: '#f5f5f5',
+            background: P.primary100,
             padding: '1px 5px',
             borderRadius: 4,
             fontSize: '0.85em',
@@ -65,11 +66,11 @@ function AccountCardView({ data }: { data: AccountCard }) {
   }
 
   return (
-    <Box sx={{ mt: 1, p: 1.5, borderRadius: 2, border: '1px solid #e5e5e5', bgcolor: 'grey.50' }}>
+    <Box sx={{ mt: 1, p: 1.5, borderRadius: 2, border: `1px solid ${P.primary200}`, bgcolor: 'grey.50' }}>
       <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap', mb: 1 }}>
-        <Chip label={compte.nature} size="small" sx={{ bgcolor: natureColor[compte.nature] || '#737373', color: '#fff', fontWeight: 600, fontSize: '0.7rem', height: 22 }} />
+        <Chip label={compte.nature} size="small" sx={{ bgcolor: natureColor[compte.nature] || P.primary500, color: P.white, fontWeight: 600, fontSize: '0.7rem', height: 22 }} />
         <Chip label={compte.sens} size="small" variant="outlined" sx={{ fontSize: '0.7rem', height: 22 }} />
-        <Chip label={compte.utilisation} size="small" variant="outlined" sx={{ fontSize: '0.7rem', height: 22, borderColor: compte.utilisation === 'OBLIGATOIRE' ? '#dc2626' : '#737373', color: compte.utilisation === 'OBLIGATOIRE' ? '#dc2626' : '#737373' }} />
+        <Chip label={compte.utilisation} size="small" variant="outlined" sx={{ fontSize: '0.7rem', height: 22, borderColor: compte.utilisation === 'OBLIGATOIRE' ? '#dc2626' : P.primary500, color: compte.utilisation === 'OBLIGATOIRE' ? '#dc2626' : P.primary500 }} />
       </Box>
       {children && children.length > 0 && (
         <Box sx={{ mt: 1 }}>
@@ -77,7 +78,7 @@ function AccountCardView({ data }: { data: AccountCard }) {
             Sous-comptes ({children.length})
           </Typography>
           {children.slice(0, 8).map(c => (
-            <Typography key={c.numero} variant="caption" sx={{ display: 'block', color: '#404040', pl: 1, lineHeight: 1.7 }}>
+            <Typography key={c.numero} variant="caption" sx={{ display: 'block', color: P.primary700, pl: 1, lineHeight: 1.7 }}>
               {c.numero} — {c.libelle}
             </Typography>
           ))}
@@ -98,14 +99,14 @@ function FonctionnementCardView({ data }: { data: FonctionnementCard }) {
   const { debit, credit } = fonc.fonctionnement
 
   return (
-    <Box sx={{ mt: 1, p: 1.5, borderRadius: 2, border: '1px solid #e5e5e5', bgcolor: 'grey.50' }}>
+    <Box sx={{ mt: 1, p: 1.5, borderRadius: 2, border: `1px solid ${P.primary200}`, bgcolor: 'grey.50' }}>
       <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1.5 }}>
         <Box>
           <Typography variant="caption" sx={{ fontWeight: 700, color: 'error.main', display: 'block', mb: 0.5 }}>
             DEBIT
           </Typography>
           {debit.length > 0 ? debit.map((d, i) => (
-            <Typography key={i} variant="caption" sx={{ display: 'block', color: '#404040', lineHeight: 1.6 }}>
+            <Typography key={i} variant="caption" sx={{ display: 'block', color: P.primary700, lineHeight: 1.6 }}>
               • {d.description}
             </Typography>
           )) : (
@@ -117,7 +118,7 @@ function FonctionnementCardView({ data }: { data: FonctionnementCard }) {
             CREDIT
           </Typography>
           {credit.length > 0 ? credit.map((c, i) => (
-            <Typography key={i} variant="caption" sx={{ display: 'block', color: '#404040', lineHeight: 1.6 }}>
+            <Typography key={i} variant="caption" sx={{ display: 'block', color: P.primary700, lineHeight: 1.6 }}>
               • {c.description}
             </Typography>
           )) : (
@@ -127,7 +128,7 @@ function FonctionnementCardView({ data }: { data: FonctionnementCard }) {
       </Box>
 
       {fonc.exclusions.length > 0 && (
-        <Box sx={{ mt: 1.5, pt: 1, borderTop: '1px solid #e5e5e5' }}>
+        <Box sx={{ mt: 1.5, pt: 1, borderTop: `1px solid ${P.primary200}` }}>
           <Typography variant="caption" sx={{ fontWeight: 600, color: 'warning.main' }}>
             Exclusions
           </Typography>
@@ -147,13 +148,13 @@ function ChapitreCardView({ data }: { data: ChapitreCard }) {
   const { chapitre } = data
 
   return (
-    <Box sx={{ mt: 1, p: 1.5, borderRadius: 2, border: '1px solid #e5e5e5', bgcolor: 'grey.50' }}>
+    <Box sx={{ mt: 1, p: 1.5, borderRadius: 2, border: `1px solid ${P.primary200}`, bgcolor: 'grey.50' }}>
       {chapitre.sections.slice(0, 3).map((section, i) => (
         <Box key={i} sx={{ mb: 1 }}>
           <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.primary', display: 'block' }}>
             {section.titre}
           </Typography>
-          <Typography variant="caption" sx={{ color: '#404040', lineHeight: 1.5, display: 'block' }}>
+          <Typography variant="caption" sx={{ color: P.primary700, lineHeight: 1.5, display: 'block' }}>
             {section.contenu.slice(0, 200)}{section.contenu.length > 200 ? '...' : ''}
           </Typography>
           {section.ecritures && section.ecritures.slice(0, 1).map((ecr, j) => (
@@ -216,7 +217,7 @@ function SearchResultsCardView({ data, onSelect }: { data: SearchResultCard; onS
           <Typography variant="caption" sx={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 600, color: 'text.primary', minWidth: 48 }}>
             {r.numero}
           </Typography>
-          <Typography variant="caption" sx={{ color: '#404040', flex: 1 }}>
+          <Typography variant="caption" sx={{ color: P.primary700, flex: 1 }}>
             {r.libelle}
           </Typography>
           {r.detail && (
@@ -233,13 +234,13 @@ function SearchResultsCardView({ data, onSelect }: { data: SearchResultCard; onS
 // ── Stats card ───────────────────────────────────────────────────────
 function StatsCardView({ data }: { data: StatsCard }) {
   return (
-    <Box sx={{ mt: 1, p: 1.5, borderRadius: 2, border: '1px solid #e5e5e5', bgcolor: 'grey.50' }}>
+    <Box sx={{ mt: 1, p: 1.5, borderRadius: 2, border: `1px solid ${P.primary200}`, bgcolor: 'grey.50' }}>
       <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.primary', display: 'block', mb: 0.5 }}>
         Repartition par classe
       </Typography>
       {Object.entries(data.parClasse).map(([cls, count]) => (
         <Box key={cls} sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.3 }}>
-          <Typography variant="caption" sx={{ minWidth: 60, fontWeight: 500, color: '#404040' }}>
+          <Typography variant="caption" sx={{ minWidth: 60, fontWeight: 500, color: P.primary700 }}>
             Classe {cls}
           </Typography>
           <Box sx={{ flex: 1, height: 6, bgcolor: 'grey.300', borderRadius: 3, overflow: 'hidden' }}>
@@ -257,13 +258,13 @@ function StatsCardView({ data }: { data: StatsCard }) {
 // ── Fiscal Info card ─────────────────────────────────────────────────
 function FiscalInfoCardView({ data }: { data: FiscalInfoCard }) {
   return (
-    <Box sx={{ mt: 1, p: 1.5, borderRadius: 2, border: '1px solid #e5e5e5', bgcolor: 'grey.50' }}>
+    <Box sx={{ mt: 1, p: 1.5, borderRadius: 2, border: `1px solid ${P.primary200}`, bgcolor: 'grey.50' }}>
       <Typography variant="caption" sx={{ fontWeight: 700, color: 'error.main', display: 'block', mb: 0.75, textTransform: 'uppercase', fontSize: '0.65rem', letterSpacing: 0.5 }}>
         {data.category}
       </Typography>
       {data.items.map((item, i) => (
         <Box key={i} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 0.3, borderBottom: i < data.items.length - 1 ? '1px solid #f0f0f0' : 'none' }}>
-          <Typography variant="caption" sx={{ color: '#404040' }}>
+          <Typography variant="caption" sx={{ color: P.primary700 }}>
             {item.label}
           </Typography>
           <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.primary', fontFamily: "'JetBrains Mono', monospace" }}>
@@ -272,12 +273,12 @@ function FiscalInfoCardView({ data }: { data: FiscalInfoCard }) {
         </Box>
       ))}
       {data.calculation && (
-        <Box sx={{ mt: 1, pt: 1, borderTop: '1px solid #e5e5e5' }}>
+        <Box sx={{ mt: 1, pt: 1, borderTop: `1px solid ${P.primary200}` }}>
           <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.secondary', display: 'block', mb: 0.3 }}>
             Detail du calcul
           </Typography>
           {data.calculation.steps.map((step, i) => (
-            <Typography key={i} variant="caption" sx={{ display: 'block', color: '#404040', lineHeight: 1.7, pl: 1 }}>
+            <Typography key={i} variant="caption" sx={{ display: 'block', color: P.primary700, lineHeight: 1.7, pl: 1 }}>
               {i + 1}. {step}
             </Typography>
           ))}
@@ -293,19 +294,19 @@ function FiscalInfoCardView({ data }: { data: FiscalInfoCard }) {
 // ── Liasse Sheet card ────────────────────────────────────────────────
 const CATEGORY_COLORS: Record<string, string> = {
   cover: '#3b82f6', guards: '#22c55e', fiches: '#f59e0b',
-  statements: '#8b5cf6', notes: '#06b6d4', supplements: '#d97706', comments: '#737373',
+  statements: '#8b5cf6', notes: '#06b6d4', supplements: '#d97706', comments: P.primary500,
 }
 
 function LiasseSheetCardView({ data }: { data: LiasseSheetCard }) {
   return (
     <Box sx={{ mt: 1 }}>
       {data.sheets.map((sheet, i) => (
-        <Box key={i} sx={{ p: 1.5, borderRadius: 2, border: '1px solid #e5e5e5', bgcolor: 'grey.50', mb: i < data.sheets.length - 1 ? 1 : 0 }}>
+        <Box key={i} sx={{ p: 1.5, borderRadius: 2, border: `1px solid ${P.primary200}`, bgcolor: 'grey.50', mb: i < data.sheets.length - 1 ? 1 : 0 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.5, flexWrap: 'wrap' }}>
             <Chip
               label={sheet.category}
               size="small"
-              sx={{ bgcolor: CATEGORY_COLORS[sheet.category] || '#737373', color: '#fff', fontWeight: 600, fontSize: '0.6rem', height: 20 }}
+              sx={{ bgcolor: CATEGORY_COLORS[sheet.category] || P.primary500, color: P.white, fontWeight: 600, fontSize: '0.6rem', height: 20 }}
             />
             <Chip
               label={sheet.required ? 'Obligatoire' : 'Facultatif'}
@@ -313,8 +314,8 @@ function LiasseSheetCardView({ data }: { data: LiasseSheetCard }) {
               variant="outlined"
               sx={{
                 fontSize: '0.6rem', height: 20,
-                borderColor: sheet.required ? '#dc2626' : '#a3a3a3',
-                color: sheet.required ? '#dc2626' : '#a3a3a3',
+                borderColor: sheet.required ? '#dc2626' : P.primary400,
+                color: sheet.required ? '#dc2626' : P.primary400,
               }}
             />
           </Box>
@@ -329,7 +330,7 @@ function LiasseSheetCardView({ data }: { data: LiasseSheetCard }) {
           {sheet.regimes && (
             <Box sx={{ display: 'flex', gap: 0.5, mt: 0.75, flexWrap: 'wrap' }}>
               {Object.entries(sheet.regimes).map(([regime, status]) => {
-                const color = status === 'obligatoire' ? '#dc2626' : status === 'facultatif' ? '#d97706' : '#a3a3a3'
+                const color = status === 'obligatoire' ? '#dc2626' : status === 'facultatif' ? '#d97706' : P.primary400
                 return (
                   <Chip
                     key={regime}
@@ -350,7 +351,7 @@ function LiasseSheetCardView({ data }: { data: LiasseSheetCard }) {
 
 // ── Audit Control card ───────────────────────────────────────────────
 const SEVERITY_COLORS: Record<string, string> = {
-  BLOQUANT: '#dc2626', MAJEUR: '#d97706', MINEUR: '#3b82f6', INFO: '#737373', OK: '#16a34a',
+  BLOQUANT: '#dc2626', MAJEUR: '#d97706', MINEUR: '#3b82f6', INFO: P.primary500, OK: '#16a34a',
 }
 
 function AuditControlCardView({ data }: { data: AuditControlCard }) {
@@ -362,17 +363,17 @@ function AuditControlCardView({ data }: { data: AuditControlCard }) {
         </Typography>
       )}
       {data.controls.map((ctrl, i) => (
-        <Box key={i} sx={{ p: 1.5, borderRadius: 2, border: '1px solid #e5e5e5', bgcolor: 'grey.50', mb: i < data.controls.length - 1 ? 0.75 : 0 }}>
+        <Box key={i} sx={{ p: 1.5, borderRadius: 2, border: `1px solid ${P.primary200}`, bgcolor: 'grey.50', mb: i < data.controls.length - 1 ? 0.75 : 0 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.5, flexWrap: 'wrap' }}>
             <Chip
               label={ctrl.ref}
               size="small"
-              sx={{ bgcolor: 'text.primary', color: '#fff', fontWeight: 700, fontSize: '0.65rem', height: 22, fontFamily: "'JetBrains Mono', monospace" }}
+              sx={{ bgcolor: 'text.primary', color: P.white, fontWeight: 700, fontSize: '0.65rem', height: 22, fontFamily: "'JetBrains Mono', monospace" }}
             />
             <Chip
               label={ctrl.severite}
               size="small"
-              sx={{ bgcolor: SEVERITY_COLORS[ctrl.severite] || '#737373', color: '#fff', fontWeight: 600, fontSize: '0.6rem', height: 20 }}
+              sx={{ bgcolor: SEVERITY_COLORS[ctrl.severite] || P.primary500, color: P.white, fontWeight: 600, fontSize: '0.6rem', height: 20 }}
             />
             <Chip
               label={`Niveau ${ctrl.niveau}`}
@@ -404,7 +405,7 @@ const TREND_ARROWS: Record<string, string> = {
 
 function PredictionCardView({ data }: { data: PredictionCard }) {
   return (
-    <Box sx={{ mt: 1, p: 1.5, borderRadius: 2, border: '1px solid #e5e5e5', bgcolor: 'grey.50' }}>
+    <Box sx={{ mt: 1, p: 1.5, borderRadius: 2, border: `1px solid ${P.primary200}`, bgcolor: 'grey.50' }}>
       <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.primary', display: 'block', mb: 1, fontSize: '0.75rem' }}>
         {data.title}
       </Typography>
@@ -413,7 +414,7 @@ function PredictionCardView({ data }: { data: PredictionCard }) {
       <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0.75 }}>
         {data.indicators.map((ind, i) => (
           <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 0.75, p: 0.75, borderRadius: 1, bgcolor: 'background.paper', border: '1px solid #f0f0f0' }}>
-            <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: STATUS_COLORS[ind.status] || '#737373', flexShrink: 0 }} />
+            <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: STATUS_COLORS[ind.status] || P.primary500, flexShrink: 0 }} />
             <Box sx={{ flex: 1, minWidth: 0 }}>
               <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', fontSize: '0.6rem', lineHeight: 1.2 }}>
                 {ind.label}
@@ -421,7 +422,7 @@ function PredictionCardView({ data }: { data: PredictionCard }) {
               <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.primary', display: 'block', fontSize: '0.7rem', fontFamily: "'JetBrains Mono', monospace" }}>
                 {ind.value}
                 {ind.trend && (
-                  <span style={{ color: ind.trend === 'up' ? '#16a34a' : ind.trend === 'down' ? '#dc2626' : '#737373', marginLeft: 4 }}>
+                  <span style={{ color: ind.trend === 'up' ? '#16a34a' : ind.trend === 'down' ? '#dc2626' : P.primary500, marginLeft: 4 }}>
                     {TREND_ARROWS[ind.trend]}
                   </span>
                 )}
@@ -434,7 +435,7 @@ function PredictionCardView({ data }: { data: PredictionCard }) {
       {/* Narrative */}
       {data.narrative && (
         <Box sx={{ mt: 1, pt: 0.75, borderTop: '1px solid #f0f0f0' }}>
-          <Typography variant="caption" sx={{ color: '#404040', lineHeight: 1.6 }}>
+          <Typography variant="caption" sx={{ color: P.primary700, lineHeight: 1.6 }}>
             {renderMarkdown(data.narrative)}
           </Typography>
         </Box>
@@ -447,7 +448,7 @@ function PredictionCardView({ data }: { data: PredictionCard }) {
             RECOMMANDATIONS
           </Typography>
           {data.recommendations.map((rec, i) => (
-            <Typography key={i} variant="caption" sx={{ display: 'block', color: '#404040', lineHeight: 1.6, pl: 1 }}>
+            <Typography key={i} variant="caption" sx={{ display: 'block', color: P.primary700, lineHeight: 1.6, pl: 1 }}>
               • {rec}
             </Typography>
           ))}
@@ -493,7 +494,7 @@ export function TypingIndicator() {
         sx={{
           maxWidth: '85%',
           bgcolor: 'background.paper',
-          border: '1px solid #e5e5e5',
+          border: `1px solid ${P.primary200}`,
           borderRadius: '12px 12px 12px 4px',
           px: 2,
           py: 1.2,
@@ -545,8 +546,8 @@ export default function Proph3tMessageBubble({ message, onSuggestionClick }: Pro
       <Box
         sx={{
           maxWidth: isUser ? '80%' : '85%',
-          bgcolor: isUser ? '#f5f5f5' : '#fff',
-          border: isUser ? 'none' : '1px solid #e5e5e5',
+          bgcolor: isUser ? P.primary100 : P.white,
+          border: isUser ? 'none' : `1px solid ${P.primary200}`,
           borderRadius: isUser ? '12px 12px 4px 12px' : '12px 12px 12px 4px',
           px: 2,
           py: 1.2,
@@ -574,9 +575,9 @@ export default function Proph3tMessageBubble({ message, onSuggestionClick }: Pro
                   fontSize: '0.7rem',
                   height: 24,
                   cursor: 'pointer',
-                  borderColor: '#d4d4d4',
-                  color: '#525252',
-                  '&:hover': { bgcolor: 'grey.100', borderColor: '#171717' },
+                  borderColor: P.primary300,
+                  color: P.primary600,
+                  '&:hover': { bgcolor: 'grey.100', borderColor: P.primary900 },
                 }}
               />
             ))}

@@ -39,8 +39,7 @@ import {
 } from '@mui/icons-material'
 import { arrondiFCFA, getTauxFiscaux } from '@/config/taux-fiscaux-ci'
 import { calculerRetenues, type RetenuesResult } from '@/services/retenuesSourceService'
-import { getLatestBalance } from '@/services/balanceStorageService'
-import { MOCK_BALANCE } from '@/data/mockBalance'
+import { useBalanceData } from '@/hooks/useBalanceData'
 
 interface LigneCalculImpot {
   code: string
@@ -53,6 +52,8 @@ interface LigneCalculImpot {
 }
 
 const TablesCalculImpots: FC = () => {
+  const bal = useBalanceData()
+
   // États pour les calculs d'impôts
   const [impotSociete, setImpotSociete] = useState<LigneCalculImpot[]>([])
   const [taxesTVA, setTaxesTVA] = useState<LigneCalculImpot[]>([])
@@ -67,25 +68,23 @@ const TablesCalculImpots: FC = () => {
       pays: 'COTE_DIVOIRE'
     }
   })
-  
-  // Données de base depuis la liasse
+
+  // Données de base calculées depuis la balance importée
+  const produits = bal.c(['7'])
+  const charges = bal.d(['6'])
   const [donneesComptables] = useState({
-    benefice_comptable: 2500000,
-    chiffre_affaires_ht: 15000000,
-    achats_ht: 8000000,
-    reintegrations: 150000,
-    deductions: 75000,
+    benefice_comptable: produits - charges,
+    chiffre_affaires_ht: bal.c(['70']),
+    achats_ht: bal.d(['60']),
+    reintegrations: bal.d(['671', '6257']),
+    deductions: bal.c(['791', '797', '799']),
     reports_deficitaires: 0
   })
-  
+
   const [calculAutomatique, setCalculAutomatique] = useState(true)
 
   // Calcul automatique des retenues à la source depuis la balance
-  const retenuesResult: RetenuesResult = (() => {
-    const stored = getLatestBalance()
-    const entries = stored?.entries?.length ? stored.entries : MOCK_BALANCE
-    return calculerRetenues(entries)
-  })()
+  const retenuesResult: RetenuesResult = calculerRetenues(bal.entries)
 
   useEffect(() => {
     if (calculAutomatique) {

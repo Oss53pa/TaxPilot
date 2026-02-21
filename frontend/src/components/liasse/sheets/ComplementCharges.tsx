@@ -18,76 +18,116 @@ import {
   CardContent,
   useTheme,
   Chip,
+  Alert,
   LinearProgress,
 } from '@mui/material'
+import { useBalanceData } from '@/hooks/useBalanceData'
 
 const ComplementCharges: React.FC = () => {
   const theme = useTheme()
+  const bal = useBalanceData()
+
+  const chiffreAffaires = bal.c(['70'])
+
+  const pct = (n: number) => chiffreAffaires > 0 ? Math.round(n / chiffreAffaires * 1000) / 10 : 0
+
+  // Construire les données depuis la balance
+  const achatsMarch = bal.d(['601'])
+  const varStockMarch = bal.d(['6031']) - bal.c(['6031'])
+  const achatsMP = bal.d(['602'])
+  const varStockMP = bal.d(['6032']) - bal.c(['6032'])
+  const autresAchats = bal.d(['604', '605', '608'])
+  const totalAchats = achatsMarch + varStockMarch + achatsMP + varStockMP + autresAchats
+
+  const sousTrait = bal.d(['621', '622'])
+  const locations = bal.d(['613', '614'])
+  const entretien = bal.d(['615', '616'])
+  const assurances = bal.d(['617'])
+  const docFormation = bal.d(['618'])
+  const totalServExt = sousTrait + locations + entretien + assurances + docFormation
+
+  const remunInterm = bal.d(['631', '632'])
+  const publicite = bal.d(['627'])
+  const transports = bal.d(['624'])
+  const deplacements = bal.d(['625', '626'])
+  const servicesBanc = bal.d(['631'])
+  const totalAutresServ = remunInterm + publicite + transports + deplacements + servicesBanc
+
+  const impotRemun = bal.d(['641'])
+  const autresImpots = bal.d(['645', '646', '647', '648'])
+  const droitsEnreg = bal.d(['642', '643'])
+  const totalImpots = impotRemun + autresImpots + droitsEnreg
+
+  const salaires = bal.d(['661'])
+  const chargesCNPS = bal.d(['664'])
+  const autresChargesSoc = bal.d(['662', '663'])
+  const formation = bal.d(['658'])
+  const autresPerso = bal.d(['665', '668'])
+  const totalPersonnel = salaires + chargesCNPS + autresChargesSoc + formation + autresPerso
 
   const donneesCharges = [
     {
       categorie: 'ACHATS',
       sousCategories: [
-        { nature: 'Achats de marchandises', montantN: 65200000, montantN1: 61500000, pourcentageCA: 30.9 },
-        { nature: 'Variation de stock de marchandises', montantN: -1700000, montantN1: 800000, pourcentageCA: -0.8 },
-        { nature: 'Achats de matières premières', montantN: 28000000, montantN1: 26500000, pourcentageCA: 13.3 },
-        { nature: 'Variation de stock matières premières', montantN: -700000, montantN1: -500000, pourcentageCA: -0.3 },
-        { nature: 'Autres achats et charges externes', montantN: 15200000, montantN1: 14800000, pourcentageCA: 7.2 },
+        { nature: 'Achats de marchandises (601)', montantN: achatsMarch, montantN1: 0, pourcentageCA: pct(achatsMarch) },
+        { nature: 'Variation de stock marchandises (6031)', montantN: varStockMarch, montantN1: 0, pourcentageCA: pct(varStockMarch) },
+        { nature: 'Achats de matieres premieres (602)', montantN: achatsMP, montantN1: 0, pourcentageCA: pct(achatsMP) },
+        { nature: 'Variation de stock matieres (6032)', montantN: varStockMP, montantN1: 0, pourcentageCA: pct(varStockMP) },
+        { nature: 'Autres achats et charges (604-608)', montantN: autresAchats, montantN1: 0, pourcentageCA: pct(autresAchats) },
       ],
-      totalN: 105000000,
-      totalN1: 102100000
+      totalN: totalAchats,
+      totalN1: 0
     },
     {
       categorie: 'SERVICES EXTERIEURS',
       sousCategories: [
-        { nature: 'Sous-traitance générale', montantN: 3500000, montantN1: 3200000, pourcentageCA: 1.7 },
-        { nature: 'Locations et charges locatives', montantN: 2400000, montantN1: 2400000, pourcentageCA: 1.1 },
-        { nature: 'Entretien et réparations', montantN: 1800000, montantN1: 1600000, pourcentageCA: 0.9 },
-        { nature: 'Assurances', montantN: 1200000, montantN1: 1100000, pourcentageCA: 0.6 },
-        { nature: 'Documentation et formation', montantN: 800000, montantN1: 750000, pourcentageCA: 0.4 },
+        { nature: 'Sous-traitance (621-622)', montantN: sousTrait, montantN1: 0, pourcentageCA: pct(sousTrait) },
+        { nature: 'Locations et charges locatives (613-614)', montantN: locations, montantN1: 0, pourcentageCA: pct(locations) },
+        { nature: 'Entretien et reparations (615-616)', montantN: entretien, montantN1: 0, pourcentageCA: pct(entretien) },
+        { nature: 'Assurances (617)', montantN: assurances, montantN1: 0, pourcentageCA: pct(assurances) },
+        { nature: 'Documentation et formation (618)', montantN: docFormation, montantN1: 0, pourcentageCA: pct(docFormation) },
       ],
-      totalN: 9700000,
-      totalN1: 9050000
+      totalN: totalServExt,
+      totalN1: 0
     },
     {
       categorie: 'AUTRES SERVICES EXTERIEURS',
       sousCategories: [
-        { nature: 'Rémunérations d\'intermédiaires', montantN: 2100000, montantN1: 1900000, pourcentageCA: 1.0 },
-        { nature: 'Publicité et relations publiques', montantN: 1800000, montantN1: 1600000, pourcentageCA: 0.9 },
-        { nature: 'Transports', montantN: 3200000, montantN1: 2800000, pourcentageCA: 1.5 },
-        { nature: 'Déplacements et missions', montantN: 900000, montantN1: 600000, pourcentageCA: 0.4 },
-        { nature: 'Services bancaires', montantN: 1500000, montantN1: 1400000, pourcentageCA: 0.7 },
+        { nature: 'Remunerations d\'intermediaires (631-632)', montantN: remunInterm, montantN1: 0, pourcentageCA: pct(remunInterm) },
+        { nature: 'Publicite et relations publiques (627)', montantN: publicite, montantN1: 0, pourcentageCA: pct(publicite) },
+        { nature: 'Transports (624)', montantN: transports, montantN1: 0, pourcentageCA: pct(transports) },
+        { nature: 'Deplacements et missions (625-626)', montantN: deplacements, montantN1: 0, pourcentageCA: pct(deplacements) },
+        { nature: 'Services bancaires (631)', montantN: servicesBanc, montantN1: 0, pourcentageCA: pct(servicesBanc) },
       ],
-      totalN: 9500000,
-      totalN1: 8300000
+      totalN: totalAutresServ,
+      totalN1: 0
     },
     {
       categorie: 'IMPOTS ET TAXES',
       sousCategories: [
-        { nature: 'Impôts et taxes sur rémunérations', montantN: 1400000, montantN1: 1300000, pourcentageCA: 0.7 },
-        { nature: 'Autres impôts et taxes', montantN: 2200000, montantN1: 2100000, pourcentageCA: 1.0 },
-        { nature: 'Droits d\'enregistrement', montantN: 300000, montantN1: 250000, pourcentageCA: 0.1 },
+        { nature: 'Impots sur remunerations (641)', montantN: impotRemun, montantN1: 0, pourcentageCA: pct(impotRemun) },
+        { nature: 'Autres impots et taxes (645-648)', montantN: autresImpots, montantN1: 0, pourcentageCA: pct(autresImpots) },
+        { nature: 'Droits d\'enregistrement (642-643)', montantN: droitsEnreg, montantN1: 0, pourcentageCA: pct(droitsEnreg) },
       ],
-      totalN: 3900000,
-      totalN1: 3650000
+      totalN: totalImpots,
+      totalN1: 0
     },
     {
       categorie: 'CHARGES DE PERSONNEL',
       sousCategories: [
-        { nature: 'Salaires et appointements', montantN: 35000000, montantN1: 32500000, pourcentageCA: 16.6 },
-        { nature: 'Charges sociales CNPS', montantN: 6300000, montantN1: 5850000, pourcentageCA: 3.0 },
-        { nature: 'Autres charges sociales', montantN: 2200000, montantN1: 2150000, pourcentageCA: 1.0 },
-        { nature: 'Formation du personnel', montantN: 500000, montantN1: 400000, pourcentageCA: 0.2 },
-        { nature: 'Autres charges de personnel', montantN: 4500000, montantN1: 4300000, pourcentageCA: 2.1 },
+        { nature: 'Salaires et appointements (661)', montantN: salaires, montantN1: 0, pourcentageCA: pct(salaires) },
+        { nature: 'Charges sociales CNPS (664)', montantN: chargesCNPS, montantN1: 0, pourcentageCA: pct(chargesCNPS) },
+        { nature: 'Autres charges sociales (662-663)', montantN: autresChargesSoc, montantN1: 0, pourcentageCA: pct(autresChargesSoc) },
+        { nature: 'Formation du personnel (658)', montantN: formation, montantN1: 0, pourcentageCA: pct(formation) },
+        { nature: 'Autres charges de personnel (665-668)', montantN: autresPerso, montantN1: 0, pourcentageCA: pct(autresPerso) },
       ],
-      totalN: 48500000,
-      totalN1: 45200000
+      totalN: totalPersonnel,
+      totalN1: 0
     }
   ]
 
   const totalGeneral = donneesCharges.reduce((sum, cat) => sum + cat.totalN, 0)
   const totalGeneralN1 = donneesCharges.reduce((sum, cat) => sum + cat.totalN1, 0)
-  const chiffreAffaires = 210800000
 
   const formatMontant = (montant: number) => {
     return montant.toLocaleString('fr-FR')

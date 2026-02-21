@@ -107,6 +107,7 @@ import SupplementAvantagesFiscaux from '../../components/liasse/sheets/Supplemen
 
 // Styles
 import '../../styles/liasse-fixes.css'
+import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -485,7 +486,7 @@ const LiasseFiscaleOfficial: React.FC = () => {
           sx={{
             width: 260,
             flexShrink: 0,
-            border: '1px solid #e5e5e5',
+            border: `1px solid ${P.primary200}`,
             borderRadius: 3,
             overflow: 'auto',
             maxHeight: 'calc(100vh - 120px)',
@@ -564,7 +565,7 @@ const LiasseFiscaleOfficial: React.FC = () => {
                             pl: 4,
                             borderRadius: 1,
                             cursor: 'pointer',
-                            bgcolor: selectedSheet === sheet.id ? '#f5f5f5' : 'transparent',
+                            bgcolor: selectedSheet === sheet.id ? P.primary100 : 'transparent',
                           }}
                         >
                           <ListItemIcon>
@@ -620,7 +621,7 @@ const LiasseFiscaleOfficial: React.FC = () => {
             onClick={() => navigate('/dashboard')}
             sx={{
               mb: 2,
-              color: '#525252',
+              color: P.primary600,
               fontWeight: 500,
               '&:hover': { bgcolor: 'grey.100', color: 'text.primary' },
             }}
@@ -660,7 +661,7 @@ const LiasseFiscaleOfficial: React.FC = () => {
               <Chip
                 label={`Progression: ${selectedLiasse?.progress || 0}%`}
                 icon={<Speed sx={{ color: '#fff !important' }} />}
-                sx={{ bgcolor: 'text.primary', color: '#fff', fontWeight: 600 }}
+                sx={{ bgcolor: 'text.primary', color: P.white, fontWeight: 600 }}
               />
               <Chip
                 label={selectedLiasse?.status || 'draft'}

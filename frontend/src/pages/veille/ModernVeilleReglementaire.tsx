@@ -47,6 +47,7 @@ import {
   AssignmentTurnedIn,
   NotificationImportant
 } from '@mui/icons-material';
+import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme';
 
 // EX-VEILLE-001 à 010: Module Veille Réglementaire Complet
 // Surveillance automatique des changements réglementaires avec alertes intelligentes
@@ -403,7 +404,7 @@ const ModernVeilleReglementaire: React.FC = () => {
       case 'high': return '#d97706';
       case 'medium': return '#2563eb';
       case 'low': return '#16a34a';
-      default: return '#737373';
+      default: return P.primary500;
     }
   };
 

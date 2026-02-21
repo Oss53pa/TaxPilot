@@ -34,6 +34,7 @@ import {
 import { formatCurrency } from '@/utils/formatting'
 import { SheetHeader } from '@/components/liasse/common/SheetHeader'
 import { TabPanel } from '@/components/shared/TabPanel'
+import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
 import {
   AccountBalance as ProvisionIcon,
   Save as SaveIcon,
@@ -343,7 +344,7 @@ const FicheR4SYSCOHADA: React.FC = () => {
               })}
               
               {/* Ligne de total */}
-              <TableRow sx={{ backgroundColor: '#f5f5f5', fontWeight: 600 }}>
+              <TableRow sx={{ backgroundColor: P.primary100, fontWeight: 600 }}>
                 <TableCell sx={{ fontWeight: 600 }}>TOTAL</TableCell>
                 <TableCell align="center" sx={{ fontWeight: 600 }}>
                   <Chip label={provisions.length} size="small" color="primary" />

@@ -54,6 +54,7 @@ import type { CompteComptable } from '../../data/syscohada/types'
 import type { FonctionnementCompte, ChapitreOperations } from '../../data/syscohada/types'
 import { getFonctionnement } from '../../data/syscohada/fonctionnement'
 import { findChapitresByCompte } from '../../data/syscohada/operations'
+import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
 
 /** Drawer de détail pour un compte */
 function AccountDetailDrawer({
@@ -107,7 +108,7 @@ function AccountDetailDrawer({
       PaperProps={{ sx: { width: { xs: '100%', md: 520 }, p: 0 } }}
     >
       {/* Header */}
-      <Box sx={{ p: 3, bgcolor: 'text.primary', color: '#fff' }}>
+      <Box sx={{ p: 3, bgcolor: 'text.primary', color: P.white }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <Box>
             <Typography variant="h5" sx={{ fontFamily: 'monospace', fontWeight: 700, mb: 0.5 }}>
@@ -117,7 +118,7 @@ function AccountDetailDrawer({
               {compte.libelle}
             </Typography>
           </Box>
-          <IconButton onClick={onClose} sx={{ color: '#fff' }}>
+          <IconButton onClick={onClose} sx={{ color: P.white }}>
             <CloseIcon />
           </IconButton>
         </Box>
@@ -125,18 +126,18 @@ function AccountDetailDrawer({
           <Chip
             label={`${compte.nature} (${compte.sens})`}
             size="small"
-            sx={{ bgcolor: 'rgba(255,255,255,0.15)', color: '#fff' }}
+            sx={{ bgcolor: 'rgba(255,255,255,0.15)', color: P.white }}
           />
           <Chip
             label={compte.utilisation}
             size="small"
             color={compte.utilisation === 'OBLIGATOIRE' ? 'success' : 'default'}
-            sx={{ color: '#fff', bgcolor: compte.utilisation === 'OBLIGATOIRE' ? '#16a34a' : 'rgba(255,255,255,0.15)' }}
+            sx={{ color: P.white, bgcolor: compte.utilisation === 'OBLIGATOIRE' ? '#16a34a' : 'rgba(255,255,255,0.15)' }}
           />
           <Chip
             label={`Classe ${compte.classe}`}
             size="small"
-            sx={{ bgcolor: 'rgba(255,255,255,0.15)', color: '#fff' }}
+            sx={{ bgcolor: 'rgba(255,255,255,0.15)', color: P.white }}
           />
         </Stack>
       </Box>
@@ -346,10 +347,10 @@ const PlanSYSCOHADARevise = () => {
     setDrawerOpen(true)
   }
 
-  const getClassColor = (_classe: number): string => '#f5f5f5'
+  const getClassColor = (_classe: number): string => P.primary100
 
   return (
-    <Box sx={{ p: 3, backgroundColor: '#fafafa', minHeight: '100vh' }}>
+    <Box sx={{ p: 3, backgroundColor: P.primary50, minHeight: '100vh' }}>
       {/* Header */}
       <Box sx={{ mb: 4 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
@@ -366,14 +367,14 @@ const PlanSYSCOHADARevise = () => {
             <Button
               variant="outlined"
               startIcon={<DownloadIcon />}
-              sx={{ borderColor: '#e5e5e5', color: 'text.primary' }}
+              sx={{ borderColor: P.primary200, color: 'text.primary' }}
             >
               Exporter
             </Button>
             <Button
               variant="contained"
               startIcon={<ViewIcon />}
-              sx={{ backgroundColor: '#171717', '&:hover': { backgroundColor: '#262626' } }}
+              sx={{ backgroundColor: P.primary900, '&:hover': { backgroundColor: P.primary800 } }}
             >
               Vue Arbre
             </Button>
@@ -414,7 +415,7 @@ const PlanSYSCOHADARevise = () => {
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
             <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'grey.100' }}>
-              <Typography variant="h4" sx={{ fontWeight: 700, color: '#525252' }}>
+              <Typography variant="h4" sx={{ fontWeight: 700, color: P.primary600 }}>
                 17
               </Typography>
               <Typography variant="caption" sx={{ color: 'text.secondary' }}>
@@ -426,7 +427,7 @@ const PlanSYSCOHADARevise = () => {
       </Box>
 
       {/* Recherche et filtres */}
-      <Card sx={{ mb: 3, border: '1px solid #e5e5e5' }}>
+      <Card sx={{ mb: 3, border: `1px solid ${P.primary200}` }}>
         <CardContent sx={{ p: 3 }}>
           <Grid container spacing={3} alignItems="center">
             <Grid item xs={12} md={6}>
@@ -444,7 +445,7 @@ const PlanSYSCOHADARevise = () => {
                 }}
                 sx={{
                   '& .MuiOutlinedInput-root': {
-                    backgroundColor: '#FFFFFF',
+                    backgroundColor: P.white,
                   }
                 }}
               />
@@ -454,7 +455,7 @@ const PlanSYSCOHADARevise = () => {
                 fullWidth
                 variant="outlined"
                 onClick={() => setSelectedSector(selectedSector === 'TOUS' ? 'COMMERCE' : 'TOUS')}
-                sx={{ borderColor: '#e5e5e5', color: 'text.primary' }}
+                sx={{ borderColor: P.primary200, color: 'text.primary' }}
               >
                 Secteur: {selectedSector}
               </Button>
@@ -471,7 +472,7 @@ const PlanSYSCOHADARevise = () => {
       </Card>
 
       {/* Plan comptable par classes */}
-      <Card sx={{ border: '1px solid #e5e5e5' }}>
+      <Card sx={{ border: `1px solid ${P.primary200}` }}>
         <CardContent sx={{ p: 3 }}>
           <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: 'text.primary' }}>
             Plan Comptable SYSCOHADA Révisé - 9 Classes
@@ -493,7 +494,7 @@ const PlanSYSCOHADARevise = () => {
                 sx={{
                   mb: 1,
                   '&:before': { display: 'none' },
-                  border: '1px solid #e5e5e5',
+                  border: `1px solid ${P.primary200}`,
                   borderRadius: 2
                 }}
               >
@@ -520,7 +521,7 @@ const PlanSYSCOHADARevise = () => {
                   <Chip
                     label={`${comptes.length} comptes`}
                     size="small"
-                    sx={{ backgroundColor: '#FFFFFF', color: 'text.primary' }}
+                    sx={{ backgroundColor: P.white, color: 'text.primary' }}
                   />
                 </AccordionSummary>
 
@@ -528,7 +529,7 @@ const PlanSYSCOHADARevise = () => {
                   <TableContainer>
                     <Table>
                       <TableHead>
-                        <TableRow sx={{ backgroundColor: '#e5e5e5' }}>
+                        <TableRow sx={{ backgroundColor: P.primary200 }}>
                           <TableCell sx={{ fontWeight: 600, color: 'text.primary' }}>N° Compte</TableCell>
                           <TableCell sx={{ fontWeight: 600, color: 'text.primary' }}>Libellé</TableCell>
                           <TableCell sx={{ fontWeight: 600, color: 'text.primary' }}>Nature</TableCell>
@@ -542,7 +543,7 @@ const PlanSYSCOHADARevise = () => {
                             key={compte.numero}
                             onClick={() => handleRowClick(compte)}
                             sx={{
-                              backgroundColor: index % 2 === 0 ? '#FFFFFF' : '#f5f5f5',
+                              backgroundColor: index % 2 === 0 ? P.white : P.primary100,
                               '&:hover': { backgroundColor: '#e0f2fe', cursor: 'pointer' },
                             }}
                           >
@@ -570,7 +571,7 @@ const PlanSYSCOHADARevise = () => {
                                 sx={{
                                   fontSize: '0.7rem',
                                   fontWeight: 600,
-                                  color: '#fff',
+                                  color: P.white,
                                   bgcolor:
                                     compte.nature === 'ACTIF' ? theme.palette.info.main :
                                     compte.nature === 'PASSIF' ? theme.palette.secondary.main :

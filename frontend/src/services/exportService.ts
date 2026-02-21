@@ -8,6 +8,7 @@ import { saveAs } from 'file-saver'
 import { arrondiFCFA } from '@/config/taux-fiscaux-ci'
 import { liasseDataService } from './liasseDataService'
 import type { TypeLiasse } from '../types'
+import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
 
 // ============================================================
 // Libellés SYSCOHADA pour les références
@@ -202,7 +203,7 @@ export function exportLiassePDF(
   th { background: #1976d2; color: white; padding: 5px 8px; text-align: left; font-size: 10px; }
   td { padding: 4px 8px; border-bottom: 1px solid #e0e0e0; font-size: 10px; }
   .num { text-align: right; font-variant-numeric: tabular-nums; }
-  .total td { font-weight: bold; border-top: 2px solid #333; background: #f5f5f5; }
+  .total td { font-weight: bold; border-top: 2px solid #333; background: ${P.primary100}; }
   .sig td { font-weight: bold; background: #e3f2fd; }
   .grandtotal td { font-weight: bold; background: #1976d2; color: white; }
   @media print { .no-print { display: none; } body { margin: 10mm; } }

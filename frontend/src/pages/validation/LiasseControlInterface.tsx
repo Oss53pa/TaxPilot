@@ -43,6 +43,7 @@ import {
   Comment as CommentIcon,
   // History as HistoryIcon,
 } from '@mui/icons-material'
+import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
 
 interface ValidationResult {
   id: number
@@ -201,8 +202,8 @@ const LiasseControlInterface: React.FC = () => {
                     <TableRow 
                       key={liasse.id}
                       sx={{ 
-                        bgcolor: index % 2 === 0 ? '#fafafa' : '#f5f5f5',
-                        '&:hover': { bgcolor: '#e5e5e530' }
+                        bgcolor: index % 2 === 0 ? P.primary50 : P.primary100,
+                        '&:hover': { bgcolor: `${P.primary200}30` }
                       }}
                     >
                       <TableCell>
@@ -254,7 +255,7 @@ const LiasseControlInterface: React.FC = () => {
                           onClick={() => handleValidateLiasse(liasse)}
                           sx={{ 
                             color: 'text.primary',
-                            '&:hover': { bgcolor: '#e5e5e530' }
+                            '&:hover': { bgcolor: `${P.primary200}30` }
                           }}
                         >
                           Valider
@@ -424,8 +425,8 @@ const LiasseControlInterface: React.FC = () => {
                           label={comment.type}
                           size="small"
                           sx={{ 
-                            bgcolor: comment.type === 'POSITIF' ? '#f5f5f5' : '#e5e5e5',
-                            color: comment.type === 'POSITIF' ? '#22c55e' : '#171717'
+                            bgcolor: comment.type === 'POSITIF' ? P.primary100 : P.primary200,
+                            color: comment.type === 'POSITIF' ? '#22c55e' : P.primary900
                           }}
                         />
                       </ListItem>

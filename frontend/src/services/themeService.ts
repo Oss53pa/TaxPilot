@@ -4,6 +4,7 @@ import { logger } from '@/utils/logger'
  */
 
 import { apiClient } from './apiClient'
+import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
 
 export interface ThemeConfiguration {
   id?: number
@@ -159,15 +160,15 @@ class ThemeService {
       couleur_primaire: predefinedTheme.couleur_primaire,
       couleur_secondaire: predefinedTheme.couleur_secondaire,
       couleur_accent: predefinedTheme.couleur_accent,
-      couleur_fond: predefinedTheme.couleur_fond || '#FFFFFF',
-      couleur_surface: predefinedTheme.couleur_surface || '#F5F5F5',
+      couleur_fond: predefinedTheme.couleur_fond || P.white,
+      couleur_surface: predefinedTheme.couleur_surface || P.primary100,
       couleur_texte_primaire: predefinedTheme.couleur_texte_primaire || '#212121',
-      couleur_texte_secondaire: predefinedTheme.couleur_texte_secondaire || '#737373',
+      couleur_texte_secondaire: predefinedTheme.couleur_texte_secondaire || P.primary500,
       couleur_texte_disabled: '#BDBDBD',
       mode_sombre_active: false,
       couleur_fond_sombre: '#121212',
       couleur_surface_sombre: '#1E1E1E',
-      couleur_texte_sombre: '#FFFFFF',
+      couleur_texte_sombre: P.white,
       police_principale: predefinedTheme.police_principale,
       police_secondaire: predefinedTheme.police_secondaire,
       taille_police_base: 14,

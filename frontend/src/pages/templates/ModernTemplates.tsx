@@ -80,6 +80,7 @@ import {
   TrendingUp as TrendingUpIcon,
   TrendingDown as TrendingDownIcon,
 } from '@mui/icons-material'
+import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
 
 interface Template {
   id: string
@@ -315,7 +316,7 @@ const ModernTemplates: React.FC = () => {
       case 'word': return '#3b82f6'
       case 'pdf': return '#ef4444'
       case 'xml': return '#f59e0b'
-      case 'json': return '#171717'
+      case 'json': return P.primary900
       default: return theme.palette.grey[500]
     }
   }

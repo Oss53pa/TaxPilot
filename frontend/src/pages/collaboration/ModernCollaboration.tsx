@@ -33,6 +33,7 @@ import {
   Sync,
   SyncProblem
 } from '@mui/icons-material';
+import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme';
 
 // EX-COLLAB-001 à 010: Module Collaboration Complet
 // Collaboration temps réel multi-utilisateurs avec gestion des droits
@@ -456,8 +457,8 @@ const ModernCollaboration: React.FC = () => {
       case 'online': return '#22c55e';
       case 'away': return '#f59e0b';
       case 'busy': return '#ef4444';
-      case 'offline': return '#a3a3a3';
-      default: return '#a3a3a3';
+      case 'offline': return P.primary400;
+      default: return P.primary400;
     }
   };
 

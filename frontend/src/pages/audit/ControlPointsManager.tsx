@@ -51,6 +51,7 @@ import { registerLevel5Controls } from '@/services/audit/controls/level5-year-ov
 import { registerLevel6Controls } from '@/services/audit/controls/level6-financial-statements'
 import { registerLevel7Controls } from '@/services/audit/controls/level7-fiscal'
 import { registerLevel8Controls } from '@/services/audit/controls/level8-archive'
+import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
 
 interface ControlPoint {
   id: number
@@ -1313,7 +1314,7 @@ const ControlPointsManager: React.FC = () => {
                 </TableHead>
                 <TableBody>
                   {filteredRegistryControls.map((ctrl, index) => (
-                    <TableRow key={ctrl.ref} sx={{ bgcolor: index % 2 === 0 ? '#fafafa' : '#f5f5f5' }}>
+                    <TableRow key={ctrl.ref} sx={{ bgcolor: index % 2 === 0 ? P.primary50 : P.primary100 }}>
                       <TableCell>
                         <Typography variant="body2" sx={{ fontFamily: 'monospace', fontWeight: 600, color: 'text.primary' }}>
                           {ctrl.ref}
@@ -1393,8 +1394,8 @@ const ControlPointsManager: React.FC = () => {
                     <TableRow 
                       key={point.id}
                       sx={{ 
-                        bgcolor: index % 2 === 0 ? '#fafafa' : '#f5f5f5',
-                        '&:hover': { bgcolor: '#e5e5e530' }
+                        bgcolor: index % 2 === 0 ? P.primary50 : P.primary100,
+                        '&:hover': { bgcolor: `${P.primary200}30` }
                       }}
                     >
                       <TableCell>
@@ -1441,7 +1442,7 @@ const ControlPointsManager: React.FC = () => {
                           label={point.est_active ? 'Actif' : 'Inactif'}
                           size="small"
                           sx={{
-                            bgcolor: point.est_active ? '#f5f5f5' : '#fef2f2',
+                            bgcolor: point.est_active ? P.primary100 : '#fef2f2',
                             color: point.est_active ? '#22c55e' : '#ef4444'
                           }}
                         />
@@ -1455,8 +1456,8 @@ const ControlPointsManager: React.FC = () => {
                             sx={{ 
                               fontSize: '0.75rem',
                               color: 'text.primary',
-                              borderColor: '#e5e5e5',
-                              '&:hover': { borderColor: '#171717' }
+                              borderColor: P.primary200,
+                              '&:hover': { borderColor: P.primary900 }
                             }}
                           >
                             Algorithme
@@ -1568,7 +1569,7 @@ const ControlPointsManager: React.FC = () => {
           onChange={(_e, newValue) => setActiveTab(newValue)}
           sx={{ 
             borderBottom: 1, 
-            borderColor: '#e5e5e5',
+            borderColor: P.primary200,
             '& .MuiTab-root': { 
               color: 'text.secondary',
               '&.Mui-selected': { color: 'text.primary' }
@@ -1698,7 +1699,7 @@ const ControlPointsManager: React.FC = () => {
               <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'text.primary' }}>
                 📝 Description de l'Algorithme
               </Typography>
-              <Paper sx={{ p: 3, mb: 3, bgcolor: 'grey.50', border: '1px solid #e5e5e5' }}>
+              <Paper sx={{ p: 3, mb: 3, bgcolor: 'grey.50', border: `1px solid ${P.primary200}` }}>
                 <Typography variant="body1" sx={{ lineHeight: 1.6, color: 'text.primary' }}>
                   {selectedAlgorithm.detailDescription}
                 </Typography>
@@ -1709,7 +1710,7 @@ const ControlPointsManager: React.FC = () => {
                 ⚙️ Paramètres de Configuration
               </Typography>
               {selectedAlgorithm.parametres && Object.entries(selectedAlgorithm.parametres).map(([key, param]) => (
-                <Paper key={key} sx={{ p: 2, mb: 2, border: '1px solid #e5e5e5' }}>
+                <Paper key={key} sx={{ p: 2, mb: 2, border: `1px solid ${P.primary200}` }}>
                   <Grid container spacing={2} alignItems="center">
                     <Grid item xs={3}>
                       <Typography variant="subtitle2" sx={{ fontFamily: 'monospace', color: 'text.primary', fontWeight: 600 }}>
@@ -1768,10 +1769,10 @@ const ControlPointsManager: React.FC = () => {
 // Fonctions utilitaires pour le modal
 const getTypeColor = (type: string) => {
   switch (type) {
-    case 'DETECTION': return '#f5f5f5'
-    case 'CLASSIFICATION': return '#f5f5f5'
-    case 'PREDICTION': return '#f5f5f5'
-    default: return '#fafafa'
+    case 'DETECTION': return P.primary100
+    case 'CLASSIFICATION': return P.primary100
+    case 'PREDICTION': return P.primary100
+    default: return P.primary50
   }
 }
 

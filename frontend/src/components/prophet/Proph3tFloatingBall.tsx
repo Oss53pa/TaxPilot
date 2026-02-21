@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Box, Fab } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import Proph3tChatPanel from './Proph3tChatPanel'
+import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
 
 export default function Proph3tFloatingBall() {
   const [open, setOpen] = useState(false)
@@ -21,8 +22,8 @@ export default function Proph3tFloatingBall() {
           zIndex: 1400,
           width: 56,
           height: 56,
-          bgcolor: '#171717',
-          color: '#fff',
+          bgcolor: P.primary900,
+          color: P.white,
           boxShadow: '0 4px 14px rgba(0,0,0,0.25)',
           transition: 'all 0.2s ease',
           '&:hover': {

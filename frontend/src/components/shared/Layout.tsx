@@ -4,6 +4,7 @@
  */
 
 import React, { useState } from 'react'
+import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
 import '../../styles/liasse-fixes.css'
 import {
   Box,
@@ -107,7 +108,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             fontFamily: "'Grand Hotel', cursive",
             fontSize: '1.6rem',
             fontWeight: 400,
-            color: '#ffffff',
+            color: P.white,
             letterSpacing: 0.5,
           }}
         >
@@ -117,8 +118,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           onClick={() => navigate('/')}
           size="small"
           sx={{
-            color: '#737373',
-            '&:hover': { color: '#ffffff', bgcolor: '#262626' },
+            color: P.primary500,
+            '&:hover': { color: P.white, bgcolor: P.primary800 },
           }}
           title="Page d'accueil"
         >
@@ -131,13 +132,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           <React.Fragment key={item.text}>
             {item.divider && index > 0 && (
               <>
-                <Divider sx={{ my: 1.5, mx: 2, borderColor: '#404040', opacity: 0.5 }} />
+                <Divider sx={{ my: 1.5, mx: 2, borderColor: P.primary700, opacity: 0.5 }} />
                 <ListItem sx={{ py: 0.5, px: 2 }}>
                   <Typography
                     variant="caption"
                     sx={{
                       fontWeight: 700,
-                      color: '#737373',
+                      color: P.primary500,
                       textTransform: 'uppercase',
                       letterSpacing: 1.5,
                       fontSize: '0.65rem',
@@ -161,21 +162,21 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   mx: 1,
                   my: 0.25,
                   py: 0.75,
-                  color: '#d4d4d4',
+                  color: P.primary300,
                   '&:hover': {
-                    backgroundColor: '#262626',
-                    color: '#ffffff',
-                    '& .MuiListItemIcon-root': { color: '#ffffff' },
+                    backgroundColor: P.primary800,
+                    color: P.white,
+                    '& .MuiListItemIcon-root': { color: P.white },
                   },
                   '&.Mui-selected': {
-                    backgroundColor: '#404040',
-                    color: '#ffffff',
-                    '& .MuiListItemIcon-root': { color: '#ffffff' },
-                    '& .MuiListItemText-primary': { color: '#ffffff', fontWeight: 600 },
-                    '&:hover': { backgroundColor: '#525252' },
+                    backgroundColor: P.primary700,
+                    color: P.white,
+                    '& .MuiListItemIcon-root': { color: P.white },
+                    '& .MuiListItemText-primary': { color: P.white, fontWeight: 600 },
+                    '&:hover': { backgroundColor: P.primary600 },
                   },
-                  '& .MuiListItemIcon-root': { color: '#a3a3a3' },
-                  '& .MuiListItemText-primary': { color: '#d4d4d4' },
+                  '& .MuiListItemIcon-root': { color: P.primary400 },
+                  '& .MuiListItemText-primary': { color: P.primary300 },
                 }}
               >
                 <ListItemIcon>{item.icon}</ListItemIcon>
@@ -207,7 +208,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           ml: { md: `${DRAWER_WIDTH}px` },
           bgcolor: 'background.paper',
           color: 'text.primary',
-          borderBottom: '1px solid #e5e5e5',
+          borderBottom: `1px solid ${P.primary200}`,
           zIndex: theme.zIndex.drawer + 1,
         }}
       >
@@ -242,7 +243,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             color="inherit"
           >
             <Avatar
-              sx={{ width: 32, height: 32, bgcolor: 'text.primary', color: '#ffffff', fontSize: '0.85rem', fontWeight: 600 }}
+              sx={{ width: 32, height: 32, bgcolor: 'text.primary', color: P.white, fontSize: '0.85rem', fontWeight: 600 }}
             >
               {user?.first_name?.[0] || user?.username?.[0] || <AccountCircle />}
             </Avatar>
@@ -290,7 +291,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             '& .MuiDrawer-paper': {
               boxSizing: 'border-box',
               width: DRAWER_WIDTH,
-              backgroundColor: '#171717',
+              backgroundColor: P.primary900,
               borderRight: 'none',
             },
           }}
@@ -306,7 +307,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               boxSizing: 'border-box',
               width: DRAWER_WIDTH,
               position: 'relative',
-              backgroundColor: '#171717',
+              backgroundColor: P.primary900,
               height: '100vh',
               borderRight: 'none',
             },

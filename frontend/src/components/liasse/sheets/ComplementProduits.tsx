@@ -18,43 +18,64 @@ import {
   CardContent,
   useTheme,
   Chip,
+  Alert,
   LinearProgress,
 } from '@mui/material'
+import { useBalanceData } from '@/hooks/useBalanceData'
 
 const ComplementProduits: React.FC = () => {
   const theme = useTheme()
+  const bal = useBalanceData()
+
+  const chiffreAffaires = bal.c(['70'])
+  const pct = (n: number) => chiffreAffaires > 0 ? Math.round(n / chiffreAffaires * 1000) / 10 : 0
+
+  // Produits depuis la balance
+  const ventesMarch = bal.c(['701'])
+  const venteProdFinis = bal.c(['702', '703'])
+  const venteProdSemiFinis = bal.c(['704'])
+  const venteDechets = bal.c(['705', '706', '707'])
+  const totalVentes = ventesMarch + venteProdFinis + venteProdSemiFinis + venteDechets
+
+  const varStockPF = bal.c(['73'])
+  const prodImmo = bal.c(['72'])
+  const totalProdStockee = varStockPF + prodImmo
+
+  const subventions = bal.c(['71'])
+  const autresProduits = bal.c(['75'])
+  const reprisesProvisions = bal.c(['791', '797', '799'])
+  const totalSubventions = subventions + autresProduits + reprisesProvisions
 
   const donneesProduits = [
     {
       categorie: 'VENTES',
       sousCategories: [
-        { nature: 'Ventes de marchandises', montantN: 125000000, montantN1: 117000000, pourcentageCA: 59.3 },
-        { nature: 'Ventes de produits finis', montantN: 68000000, montantN1: 63500000, pourcentageCA: 32.3 },
-        { nature: 'Ventes de produits semi-finis', montantN: 12500000, montantN1: 11200000, pourcentageCA: 5.9 },
-        { nature: 'Ventes de déchets et rebuts', montantN: 1800000, montantN1: 1600000, pourcentageCA: 0.9 },
+        { nature: 'Ventes de marchandises (701)', montantN: ventesMarch, montantN1: 0, pourcentageCA: pct(ventesMarch) },
+        { nature: 'Ventes de produits finis (702-703)', montantN: venteProdFinis, montantN1: 0, pourcentageCA: pct(venteProdFinis) },
+        { nature: 'Ventes de produits semi-finis (704)', montantN: venteProdSemiFinis, montantN1: 0, pourcentageCA: pct(venteProdSemiFinis) },
+        { nature: 'Autres ventes (705-707)', montantN: venteDechets, montantN1: 0, pourcentageCA: pct(venteDechets) },
       ],
-      totalN: 207300000,
-      totalN1: 193300000
+      totalN: totalVentes,
+      totalN1: 0
     },
     {
-      categorie: 'PRODUCTION STOCKEE',
+      categorie: 'PRODUCTION STOCKEE ET IMMOBILISEE',
       sousCategories: [
-        { nature: 'Variation stock produits finis', montantN: 2100000, montantN1: -800000, pourcentageCA: 1.0 },
-        { nature: 'Variation stock en-cours', montantN: 800000, montantN1: 600000, pourcentageCA: 0.4 },
-        { nature: 'Production immobilisée', montantN: 600000, montantN1: 500000, pourcentageCA: 0.3 },
+        { nature: 'Variation stock produits (73)', montantN: varStockPF, montantN1: 0, pourcentageCA: pct(varStockPF) },
+        { nature: 'Production immobilisee (72)', montantN: prodImmo, montantN1: 0, pourcentageCA: pct(prodImmo) },
       ],
-      totalN: 3500000,
-      totalN1: 300000
+      totalN: totalProdStockee,
+      totalN1: 0
     },
     {
       categorie: 'SUBVENTIONS ET AUTRES PRODUITS',
       sousCategories: [
-        { nature: 'Subventions d\'exploitation', montantN: 0, montantN1: 0, pourcentageCA: 0.0 },
-        { nature: 'Autres produits d\'exploitation', montantN: 0, montantN1: 0, pourcentageCA: 0.0 },
-        { nature: 'Reprises de provisions', montantN: 0, montantN1: 3800000, pourcentageCA: 0.0 },
+        { nature: 'Subventions d\'exploitation (71)', montantN: subventions, montantN1: 0, pourcentageCA: pct(subventions) },
+        { nature: 'Autres produits d\'exploitation (75)', montantN: autresProduits, montantN1: 0, pourcentageCA: pct(autresProduits) },
+        { nature: 'Reprises de provisions (791-799)', montantN: reprisesProvisions, montantN1: 0, pourcentageCA: pct(reprisesProvisions) },
       ],
-      totalN: 0,
-      totalN1: 3800000
+      totalN: totalSubventions,
+      totalN1: 0
     }
   ]
 

@@ -17,6 +17,7 @@ import {
   Grid,
   // Tooltip,
 } from '@mui/material'
+import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
 
 interface CompteResultatProps {
   modeEdition?: boolean
@@ -343,13 +344,13 @@ const CompteResultat: React.FC<CompteResultatProps> = ({ modeEdition: _modeEditi
     }
     if (ligne.isSubTotal) {
       return {
-        backgroundColor: '#fafafa',
+        backgroundColor: P.primary50,
         fontWeight: 700,
       }
     }
     if (ligne.isHeader) {
       return {
-        backgroundColor: '#f5f5f5',
+        backgroundColor: P.primary100,
         fontWeight: 700,
       }
     }

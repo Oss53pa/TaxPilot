@@ -40,27 +40,28 @@ import {
   Refresh,
 } from '@mui/icons-material'
 import { useNavigate } from 'react-router-dom'
+import { fiscasyncPalette } from '@/theme/fiscasyncTheme'
 
-// ─── Palette tokens ──────────────────────────────────────────────────
+// ─── Palette tokens (derived from central theme) ─────────────────────
 const C = {
-  bg:       '#fafafa',
-  surface:  '#ffffff',
-  card:     '#f5f5f5',
-  border:   '#e5e5e5',
-  subtle:   '#d4d4d4',
-  placeholder: '#a3a3a3',
-  secondary: '#737373',
-  label:    '#525252',
-  ghost:    '#404040',
-  hover:    '#262626',
-  text:     '#171717',
-  active:   '#0a0a0a',
-  white:    '#ffffff',
-  success:  '#22c55e',
-  warning:  '#f59e0b',
-  error:    '#ef4444',
-  info:     '#3b82f6',
-  critical: '#7f1d1d',
+  bg:       fiscasyncPalette.primary50,
+  surface:  fiscasyncPalette.white,
+  card:     fiscasyncPalette.primary100,
+  border:   fiscasyncPalette.primary200,
+  subtle:   fiscasyncPalette.primary300,
+  placeholder: fiscasyncPalette.primary400,
+  secondary: fiscasyncPalette.primary500,
+  label:    fiscasyncPalette.primary600,
+  ghost:    fiscasyncPalette.primary700,
+  hover:    fiscasyncPalette.primary800,
+  text:     fiscasyncPalette.primary900,
+  active:   fiscasyncPalette.primary950,
+  white:    fiscasyncPalette.white,
+  success:  fiscasyncPalette.success,
+  warning:  fiscasyncPalette.warning,
+  error:    fiscasyncPalette.error,
+  info:     fiscasyncPalette.info,
+  critical: fiscasyncPalette.critical,
 }
 
 // ─── Types ───────────────────────────────────────────────────────────

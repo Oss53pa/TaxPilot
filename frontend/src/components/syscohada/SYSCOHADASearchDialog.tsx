@@ -29,6 +29,7 @@ import {
   MenuBook as BookIcon,
 } from '@mui/icons-material'
 import { syscohadaReferenceService, type SearchResult } from '../../services/syscohadaReferenceService'
+import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
 
 interface SYSCOHADASearchDialogProps {
   open: boolean
@@ -119,7 +120,7 @@ export default function SYSCOHADASearchDialog({ open, onClose, onSelectAccount }
               </InputAdornment>
             ) : null,
           }}
-          sx={{ mb: 2, '& .MuiOutlinedInput-root': { backgroundColor: '#fafafa' } }}
+          sx={{ mb: 2, '& .MuiOutlinedInput-root': { backgroundColor: P.primary50 } }}
         />
 
         {/* Résultats */}

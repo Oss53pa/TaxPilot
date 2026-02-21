@@ -7,6 +7,7 @@ import { processQuery } from './Proph3tEngine'
 import { balanceService } from '@/services/balanceService'
 import type { Balance } from '@/types'
 import type { ChatMessage, ConversationContext } from './types'
+import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
 
 // ── Quick action chips ───────────────────────────────────────────────
 const QUICK_ACTIONS = [
@@ -159,7 +160,7 @@ export default function Proph3tChatPanel({ open, onClose }: Props) {
           boxShadow: '0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08)',
           bgcolor: 'background.paper',
           zIndex: 1400,
-          border: '1px solid #e5e5e5',
+          border: `1px solid ${P.primary200}`,
         }}
       >
         {/* ── Header ──────────────────────────────────────────── */}
@@ -179,7 +180,7 @@ export default function Proph3tChatPanel({ open, onClose }: Props) {
               sx={{
                 fontFamily: "'Grand Hotel', cursive",
                 fontSize: '1.6rem',
-                color: '#fff',
+                color: P.white,
                 lineHeight: 1.2,
               }}
             >
@@ -189,7 +190,7 @@ export default function Proph3tChatPanel({ open, onClose }: Props) {
               Assistant SYSCOHADA & Fiscal CI
             </Typography>
           </Box>
-          <IconButton onClick={onClose} size="small" sx={{ color: 'text.disabled', '&:hover': { color: '#fff' } }}>
+          <IconButton onClick={onClose} size="small" sx={{ color: 'text.disabled', '&:hover': { color: P.white } }}>
             <CloseIcon fontSize="small" />
           </IconButton>
         </Box>
@@ -203,7 +204,7 @@ export default function Proph3tChatPanel({ open, onClose }: Props) {
             py: 2,
             bgcolor: 'grey.50',
             '&::-webkit-scrollbar': { width: 4 },
-            '&::-webkit-scrollbar-thumb': { bgcolor: '#d4d4d4', borderRadius: 2 },
+            '&::-webkit-scrollbar-thumb': { bgcolor: P.primary300, borderRadius: 2 },
           }}
         >
           {messages.map(msg => (
@@ -242,9 +243,9 @@ export default function Proph3tChatPanel({ open, onClose }: Props) {
                 height: 26,
                 flexShrink: 0,
                 cursor: 'pointer',
-                borderColor: '#e5e5e5',
-                color: '#525252',
-                '&:hover': { bgcolor: 'grey.100', borderColor: '#171717' },
+                borderColor: P.primary200,
+                color: P.primary600,
+                '&:hover': { bgcolor: 'grey.100', borderColor: P.primary900 },
               }}
             />
           ))}
@@ -258,7 +259,7 @@ export default function Proph3tChatPanel({ open, onClose }: Props) {
             display: 'flex',
             gap: 1,
             alignItems: 'flex-end',
-            borderTop: '1px solid #e5e5e5',
+            borderTop: `1px solid ${P.primary200}`,
             bgcolor: 'background.paper',
             flexShrink: 0,
           }}
@@ -280,9 +281,9 @@ export default function Proph3tChatPanel({ open, onClose }: Props) {
                 borderRadius: '12px',
                 fontSize: '0.85rem',
                 bgcolor: 'grey.50',
-                '& fieldset': { borderColor: '#e5e5e5' },
-                '&:hover fieldset': { borderColor: '#a3a3a3' },
-                '&.Mui-focused fieldset': { borderColor: '#171717' },
+                '& fieldset': { borderColor: P.primary200 },
+                '&:hover fieldset': { borderColor: P.primary400 },
+                '&.Mui-focused fieldset': { borderColor: P.primary900 },
               },
             }}
           />
@@ -291,7 +292,7 @@ export default function Proph3tChatPanel({ open, onClose }: Props) {
             disabled={!input.trim() || typing}
             sx={{
               bgcolor: 'text.primary',
-              color: '#fff',
+              color: P.white,
               width: 36,
               height: 36,
               flexShrink: 0,

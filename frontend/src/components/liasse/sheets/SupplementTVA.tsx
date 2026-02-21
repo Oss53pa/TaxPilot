@@ -25,28 +25,44 @@ import {
   Divider,
   Stack,
 } from '@mui/material'
+import { useBalanceData } from '@/hooks/useBalanceData'
+import { getTauxFiscaux } from '@/config/taux-fiscaux-ci'
 
 const SupplementTVA: FC = () => {
   const theme = useTheme()
   const [activeTab, setActiveTab] = useState(0)
+  const bal = useBalanceData()
+  const tauxTVA = getTauxFiscaux().TVA.taux_normal * 100
 
   const handleTabChange = (_event: SyntheticEvent, newValue: number) => {
     setActiveTab(newValue)
   }
 
+  // TVA calculée depuis la balance
+  const ventesMarch = bal.c(['701'])
+  const prestations = bal.c(['702', '703', '704', '705', '706', '707'])
+  const locations = bal.c(['708'])
+  const exportations = bal.c(['709'])
+
+  const achatsMarch = bal.d(['601'])
+  const achatsMP = bal.d(['602'])
+  const servicesExt = bal.d(['61', '62', '63'])
+  const immobilisations = bal.d(['21', '22', '23', '24', '25'])
+  const autresCharges = bal.d(['604', '605', '608'])
+
   const operationsTVA = {
     collectee: [
-      { description: 'Ventes de marchandises (taux 18%)', baseHT: 125000000, taux: 18, montantTVA: 22500000 },
-      { description: 'Prestations de services (taux 18%)', baseHT: 15000000, taux: 18, montantTVA: 2700000 },
-      { description: 'Locations (taux 18%)', baseHT: 8000000, taux: 18, montantTVA: 1440000 },
-      { description: 'Exportations (taux 0%)', baseHT: 12000000, taux: 0, montantTVA: 0 },
+      { description: `Ventes de marchandises (701) — ${tauxTVA}%`, baseHT: ventesMarch, taux: tauxTVA, montantTVA: Math.round(ventesMarch * tauxTVA / 100) },
+      { description: `Prestations de services (702-707) — ${tauxTVA}%`, baseHT: prestations, taux: tauxTVA, montantTVA: Math.round(prestations * tauxTVA / 100) },
+      { description: `Locations (708) — ${tauxTVA}%`, baseHT: locations, taux: tauxTVA, montantTVA: Math.round(locations * tauxTVA / 100) },
+      { description: 'Exportations (709) — 0%', baseHT: exportations, taux: 0, montantTVA: 0 },
     ],
     deductible: [
-      { description: 'Achats de marchandises', baseHT: 65200000, taux: 18, montantTVA: 11736000 },
-      { description: 'Achats matières premières', baseHT: 28000000, taux: 18, montantTVA: 5040000 },
-      { description: 'Services extérieurs', baseHT: 19200000, taux: 18, montantTVA: 3456000 },
-      { description: 'Immobilisations', baseHT: 5000000, taux: 18, montantTVA: 900000 },
-      { description: 'Autres charges', baseHT: 8000000, taux: 18, montantTVA: 1440000 },
+      { description: 'Achats de marchandises (601)', baseHT: achatsMarch, taux: tauxTVA, montantTVA: Math.round(achatsMarch * tauxTVA / 100) },
+      { description: 'Achats matieres premieres (602)', baseHT: achatsMP, taux: tauxTVA, montantTVA: Math.round(achatsMP * tauxTVA / 100) },
+      { description: 'Services exterieurs (61-63)', baseHT: servicesExt, taux: tauxTVA, montantTVA: Math.round(servicesExt * tauxTVA / 100) },
+      { description: 'Immobilisations (21-25)', baseHT: immobilisations, taux: tauxTVA, montantTVA: Math.round(immobilisations * tauxTVA / 100) },
+      { description: 'Autres charges (604-608)', baseHT: autresCharges, taux: tauxTVA, montantTVA: Math.round(autresCharges * tauxTVA / 100) },
     ]
   }
 
@@ -55,20 +71,14 @@ const SupplementTVA: FC = () => {
   const tvaAVerser = Math.max(0, totalTVACollectee - totalTVADeductible)
   const creditTVA = Math.max(0, totalTVADeductible - totalTVACollectee)
 
-  const declarationsMensuelles = [
-    { mois: 'Janvier', collectee: 2100000, deductible: 1850000, aVerser: 250000, verse: 250000 },
-    { mois: 'Février', collectee: 2200000, deductible: 1900000, aVerser: 300000, verse: 300000 },
-    { mois: 'Mars', collectee: 2300000, deductible: 2100000, aVerser: 200000, verse: 200000 },
-    { mois: 'Avril', collectee: 2150000, deductible: 1950000, aVerser: 200000, verse: 200000 },
-    { mois: 'Mai', collectee: 2400000, deductible: 2200000, aVerser: 200000, verse: 200000 },
-    { mois: 'Juin', collectee: 2250000, deductible: 2000000, aVerser: 250000, verse: 250000 },
-    { mois: 'Juillet', collectee: 2300000, deductible: 2100000, aVerser: 200000, verse: 200000 },
-    { mois: 'Août', collectee: 2350000, deductible: 2150000, aVerser: 200000, verse: 200000 },
-    { mois: 'Septembre', collectee: 2200000, deductible: 2000000, aVerser: 200000, verse: 200000 },
-    { mois: 'Octobre', collectee: 2400000, deductible: 2200000, aVerser: 200000, verse: 200000 },
-    { mois: 'Novembre', collectee: 2300000, deductible: 2100000, aVerser: 200000, verse: 200000 },
-    { mois: 'Décembre', collectee: 2186000, deductible: 2082000, aVerser: 104000, verse: 104000 },
-  ]
+  // Ventilation mensuelle estimée (1/12 par mois)
+  const moisNoms = ['Janvier', 'Fevrier', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Aout', 'Septembre', 'Octobre', 'Novembre', 'Decembre']
+  const declarationsMensuelles = moisNoms.map(mois => {
+    const coll = Math.round(totalTVACollectee / 12)
+    const ded = Math.round(totalTVADeductible / 12)
+    const aVerser = Math.max(0, coll - ded)
+    return { mois, collectee: coll, deductible: ded, aVerser, verse: aVerser }
+  })
 
   const formatMontant = (montant: number) => {
     return montant.toLocaleString('fr-FR')

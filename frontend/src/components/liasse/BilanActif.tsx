@@ -18,6 +18,7 @@ import {
   Tooltip,
 } from '@mui/material'
 // import { Notes, Info } from '@mui/icons-material'
+import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
 
 interface BilanActifProps {
   modeEdition?: boolean
@@ -377,13 +378,13 @@ const BilanActif: React.FC<BilanActifProps> = ({ modeEdition = false }) => {
     }
     if (ligne.isHeader) {
       return { 
-        backgroundColor: '#f5f5f5',
+        backgroundColor: P.primary100,
         fontWeight: 700,
       }
     }
     if (ligne.isSubHeader) {
       return { 
-        backgroundColor: '#fafafa',
+        backgroundColor: P.primary50,
         fontWeight: 600,
       }
     }
@@ -429,7 +430,7 @@ const BilanActif: React.FC<BilanActifProps> = ({ modeEdition = false }) => {
                   key={index}
                   sx={{
                     ...getRowStyle(ligne),
-                    '&:hover': { backgroundColor: ligne.isHeader || ligne.isTotal || ligne.isTotalGeneral ? undefined : '#fafafa' }
+                    '&:hover': { backgroundColor: ligne.isHeader || ligne.isTotal || ligne.isTotalGeneral ? undefined : P.primary50 }
                   }}
                 >
                   <TableCell sx={{ fontWeight: ligne.isHeader || ligne.isTotal ? 700 : 400 }}>

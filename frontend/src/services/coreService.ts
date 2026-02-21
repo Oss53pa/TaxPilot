@@ -4,6 +4,7 @@
  */
 
 import { apiClient } from './apiClient'
+import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
 
 // ===== PARAMETRES SYSTEME =====
 
@@ -278,7 +279,7 @@ class CoreService {
       'ERROR': '#ef4444',
       'SUCCESS': '#22c55e'
     }
-    return colors[type] || '#a3a3a3'
+    return colors[type] || P.primary400
   }
 
   formatMontantDevise(montant: number, _devise: DeviseMonnaie): string {

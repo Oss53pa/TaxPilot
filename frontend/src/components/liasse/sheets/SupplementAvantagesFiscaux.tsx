@@ -30,9 +30,12 @@ import {
   Security,
   Assignment,
 } from '@mui/icons-material'
+import { useBalanceData } from '@/hooks/useBalanceData'
 
 const SupplementAvantagesFiscaux: React.FC = () => {
   const theme = useTheme()
+  const bal = useBalanceData()
+  const resultatAvantImpot = bal.c(['7']) - bal.d(['6'])
 
   const avantagesFiscaux = {
     creditImpot: [
@@ -367,7 +370,7 @@ const SupplementAvantagesFiscaux: React.FC = () => {
                 
                 <Box sx={{ mt: 2 }}>
                   <Typography variant="caption" color="text.secondary">
-                    Soit une économie de {((totalAvantages / 28500000) * 100).toFixed(1)}% du résultat avant impôt
+                    Soit une economie de {resultatAvantImpot > 0 ? ((totalAvantages / resultatAvantImpot) * 100).toFixed(1) : '0.0'}% du resultat avant impot
                   </Typography>
                 </Box>
               </Stack>

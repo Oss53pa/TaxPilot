@@ -21,63 +21,27 @@ import {
   useTheme,
 } from '@mui/material'
 import { Inventory, Warning, CheckCircle } from '@mui/icons-material'
+import { useBalanceData } from '@/hooks/useBalanceData'
 import CommentairesSection from '../shared/CommentairesSection'
 import TableActions from '../shared/TableActions'
 
 const Note5SYSCOHADA: React.FC = () => {
   const theme = useTheme()
+  const bal = useBalanceData()
+
+  // Stocks calculés depuis la balance importée
+  const stockRow = (nature: string, stockPrefixes: string[], provPrefixes: string[], methode: string) => {
+    const brut = bal.d(stockPrefixes)
+    const prov = bal.c(provPrefixes)
+    return { nature, stockInitial: 0, entrees: 0, sorties: 0, stockFinalBrut: brut, provisions: prov, stockFinalNet: brut - prov, methodeEvaluation: methode }
+  }
 
   const donneesStocks = [
-    {
-      nature: 'Marchandises',
-      stockInitial: 6800000,
-      entrees: 42500000,
-      sorties: 40800000,
-      stockFinalBrut: 8500000,
-      provisions: 300000,
-      stockFinalNet: 8200000,
-      methodeEvaluation: 'CMP',
-    },
-    {
-      nature: 'Matières premières',
-      stockInitial: 3500000,
-      entrees: 28000000,
-      sorties: 27300000,
-      stockFinalBrut: 4200000,
-      provisions: 200000,
-      stockFinalNet: 4000000,
-      methodeEvaluation: 'CMP',
-    },
-    {
-      nature: 'Matières consommables',
-      stockInitial: 800000,
-      entrees: 5200000,
-      sorties: 5200000,
-      stockFinalBrut: 800000,
-      provisions: 0,
-      stockFinalNet: 800000,
-      methodeEvaluation: 'CMP',
-    },
-    {
-      nature: 'En-cours de production',
-      stockInitial: 1200000,
-      entrees: 15000000,
-      sorties: 14400000,
-      stockFinalBrut: 1800000,
-      provisions: 0,
-      stockFinalNet: 1800000,
-      methodeEvaluation: 'Coût réel',
-    },
-    {
-      nature: 'Produits finis',
-      stockInitial: 800000,
-      entrees: 12500000,
-      sorties: 12200000,
-      stockFinalBrut: 1100000,
-      provisions: 100000,
-      stockFinalNet: 1000000,
-      methodeEvaluation: 'CMP',
-    },
+    stockRow('Marchandises', ['31'], ['391'], 'CMP'),
+    stockRow('Matières premières', ['32'], ['392'], 'CMP'),
+    stockRow('Matières consommables', ['33'], ['393'], 'CMP'),
+    stockRow('En-cours de production', ['34', '35'], ['394', '395'], 'Coût réel'),
+    stockRow('Produits finis', ['36', '37'], ['396', '397'], 'CMP'),
   ]
 
   const total = {
@@ -180,39 +144,21 @@ const Note5SYSCOHADA: React.FC = () => {
               <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'primary.main' }}>
                 Provisions pour dépréciation
               </Typography>
-              <Box sx={{ mb: 2 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                  <Warning color="error" fontSize="small" sx={{ mr: 1 }} />
-                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                    Marchandises : 300 000 FCFA
-                  </Typography>
+              {donneesStocks.filter(s => s.provisions > 0).map((s, i) => (
+                <Box key={i} sx={{ mb: 2 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                    <Warning color="error" fontSize="small" sx={{ mr: 1 }} />
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      {s.nature} : {formatMontant(s.provisions)} FCFA
+                    </Typography>
+                  </Box>
                 </Box>
-                <Typography variant="caption" color="text.secondary" sx={{ pl: 3 }}>
-                  Stocks anciens de plus de 12 mois
+              ))}
+              {donneesStocks.every(s => s.provisions === 0) && (
+                <Typography variant="body2" color="text.secondary">
+                  Aucune provision pour dépréciation constatée
                 </Typography>
-              </Box>
-              <Box sx={{ mb: 2 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                  <Warning color="error" fontSize="small" sx={{ mr: 1 }} />
-                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                    Matières premières : 200 000 FCFA
-                  </Typography>
-                </Box>
-                <Typography variant="caption" color="text.secondary" sx={{ pl: 3 }}>
-                  Détérioration partielle constatée
-                </Typography>
-              </Box>
-              <Box sx={{ mb: 2 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                  <Warning color="error" fontSize="small" sx={{ mr: 1 }} />
-                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                    Produits finis : 100 000 FCFA
-                  </Typography>
-                </Box>
-                <Typography variant="caption" color="text.secondary" sx={{ pl: 3 }}>
-                  Invendus depuis plus de 6 mois
-                </Typography>
-              </Box>
+              )}
             </CardContent>
           </Card>
         </Grid>

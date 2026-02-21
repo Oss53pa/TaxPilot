@@ -40,6 +40,7 @@ import {
   LocalPolice,
   LockClock
 } from '@mui/icons-material';
+import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme';
 
 // EX-SECURE-001 à 010: Module Sécurité & Accès Complet
 // Gestion avancée de la sécurité avec authentification multi-facteurs
@@ -420,7 +421,7 @@ const ModernSecurity: React.FC = () => {
       case 'high': return '#d97706';
       case 'medium': return '#fbbf24';
       case 'low': return '#16a34a';
-      default: return '#737373';
+      default: return P.primary500;
     }
   };
 

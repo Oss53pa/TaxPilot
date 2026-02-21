@@ -3,7 +3,7 @@
  * Pages 981-982, 986, 997 du PDF SYSCOHADA
  */
 
-import React from 'react'
+import React, { useMemo } from 'react'
 import {
   Box,
   Paper,
@@ -26,6 +26,7 @@ import {
   TrendingUp as TrendingUpIcon,
   TrendingDown as TrendingDownIcon,
 } from '@mui/icons-material'
+import { liasseDataService } from '@/services/liasseDataService'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -160,110 +161,36 @@ const BilanSynthetique: React.FC<BilanSynthetiqueProps> = ({
 }) => {
   const theme = useTheme()
 
-  // ── Données démonstration Actif ──────────────────────────────────────────
-  const actifData: Record<string, ActifValues> = {
-    // Immobilisations incorporelles
-    AE: { brut: 1200000,   amort: 480000,    netN: 720000,     netN1: 540000 },
-    AF: { brut: 3500000,   amort: 1400000,   netN: 2100000,    netN1: 1800000 },
-    AG: { brut: 8500000,   amort: 0,         netN: 8500000,    netN1: 8500000 },
-    AH: { brut: 650000,    amort: 260000,    netN: 390000,     netN1: 290000 },
-    // Group AD
-    AD: { brut: 13850000,  amort: 2140000,   netN: 11710000,   netN1: 11130000 },
+  // ── Données calculées depuis la balance importée ──────────────────────
+  const { actifData, passifData } = useMemo(() => {
+    const actifRows = liasseDataService.generateBilanActif()
+    const passifRows = liasseDataService.generateBilanPassif()
 
-    // Immobilisations corporelles
-    AJ: { brut: 45000000,  amort: 0,         netN: 45000000,   netN1: 45000000 },
-    AK: { brut: 120000000, amort: 36000000,  netN: 84000000,   netN1: 90000000 },
-    AL: { brut: 18500000,  amort: 7400000,   netN: 11100000,   netN1: 12200000 },
-    AM: { brut: 35000000,  amort: 21000000,  netN: 14000000,   netN1: 17500000 },
-    AN: { brut: 28000000,  amort: 16800000,  netN: 11200000,   netN1: 14000000 },
-    // Group AI
-    AI: { brut: 246500000, amort: 81200000,  netN: 165300000,  netN1: 178700000 },
+    // Convertir les rows générés en Record<ref, values>
+    const actif: Record<string, ActifValues> = {}
+    actifRows.forEach((row: any) => {
+      if (row.ref) {
+        actif[row.ref] = {
+          brut: row.brut || 0,
+          amort: row.amort || 0,
+          netN: row.net || 0,
+          netN1: row.net_n1 || 0,
+        }
+      }
+    })
 
-    // Avances
-    AP: { brut: 3500000,   amort: 0,         netN: 3500000,    netN1: 2800000 },
+    const passif: Record<string, PassifValues> = {}
+    passifRows.forEach((row: any) => {
+      if (row.ref) {
+        passif[row.ref] = {
+          netN: row.montant || 0,
+          netN1: row.montant_n1 || 0,
+        }
+      }
+    })
 
-    // Immobilisations financières
-    AR: { brut: 7500000,   amort: 750000,    netN: 6750000,    netN1: 6200000 },
-    AS: { brut: 4200000,   amort: 420000,    netN: 3780000,    netN1: 3500000 },
-    // Group AQ
-    AQ: { brut: 11700000,  amort: 1170000,   netN: 10530000,   netN1: 9700000 },
-
-    // TOTAL ACTIF IMMOBILISÉ
-    AZ: { brut: 275550000, amort: 84510000,  netN: 191040000,  netN1: 202330000 },
-
-    // ACTIF CIRCULANT
-    BA: { brut: 500000,    amort: 0,         netN: 500000,     netN1: 400000 },
-    BB: { brut: 16500000,  amort: 700000,    netN: 15800000,   netN1: 13100000 },
-    // Créances
-    BH: { brut: 2800000,   amort: 0,         netN: 2800000,    netN1: 2200000 },
-    BI: { brut: 35000000,  amort: 1750000,   netN: 33250000,   netN1: 24500000 },
-    BJ: { brut: 7000000,   amort: 650000,    netN: 6350000,    netN1: 4300000 },
-    // Group BG
-    BG: { brut: 44800000,  amort: 2400000,   netN: 42400000,   netN1: 31000000 },
-    // TOTAL ACTIF CIRCULANT
-    BK: { brut: 61800000,  amort: 3100000,   netN: 58700000,   netN1: 44500000 },
-
-    // TRÉSORERIE-ACTIF
-    BQ: { brut: 2000000,   amort: 0,         netN: 2000000,    netN1: 1500000 },
-    BR: { brut: 800000,    amort: 0,         netN: 800000,     netN1: 600000 },
-    BS: { brut: 10200000,  amort: 0,         netN: 10200000,   netN1: 7200000 },
-    // TOTAL TRÉSORERIE-ACTIF
-    BT: { brut: 13000000,  amort: 0,         netN: 13000000,   netN1: 9300000 },
-
-    // Écart de conversion
-    BU: { brut: 200000,    amort: 0,         netN: 200000,     netN1: 150000 },
-
-    // TOTAL GÉNÉRAL
-    BZ: { brut: 350550000, amort: 87610000,  netN: 262940000,  netN1: 256280000 },
-  }
-
-  // ── Données démonstration Passif ─────────────────────────────────────────
-  const passifData: Record<string, PassifValues> = {
-    // Capitaux propres
-    CA: { netN: 100000000, netN1: 100000000 },
-    CB: { netN: 0,         netN1: 0 },
-    CD: { netN: 5000000,   netN1: 5000000 },
-    CE: { netN: 3500000,   netN1: 3500000 },
-    CF: { netN: 10000000,  netN1: 10000000 },
-    CG: { netN: 15000000,  netN1: 12000000 },
-    CH: { netN: 8200000,   netN1: 6500000 },
-    CJ: { netN: 12500000,  netN1: 10200000 },
-    CL: { netN: 2500000,   netN1: 2800000 },
-    CM: { netN: 1800000,   netN1: 1500000 },
-    // TOTAL CAPITAUX PROPRES
-    CP: { netN: 158500000, netN1: 151500000 },
-
-    // Dettes financières
-    DA: { netN: 42000000,  netN1: 50000000 },
-    DB: { netN: 2500000,   netN1: 3000000 },
-    DC: { netN: 5250000,   netN1: 4200000 },
-    // TOTAL DETTES FINANCIÈRES
-    DD: { netN: 49750000,  netN1: 57200000 },
-    // TOTAL RESSOURCES STABLES
-    DF: { netN: 208250000, netN1: 208700000 },
-
-    // Passif circulant
-    DH: { netN: 800000,    netN1: 600000 },
-    DI: { netN: 3500000,   netN1: 2800000 },
-    DJ: { netN: 28000000,  netN1: 24000000 },
-    DK: { netN: 12500000,  netN1: 10800000 },
-    DM: { netN: 5200000,   netN1: 4300000 },
-    DN: { netN: 1300000,   netN1: 1100000 },
-    // TOTAL PASSIF CIRCULANT
-    DP: { netN: 51300000,  netN1: 43600000 },
-
-    // Trésorerie passif
-    DQ: { netN: 1500000,   netN1: 2000000 },
-    DR: { netN: 1440000,   netN1: 1670000 },
-    // TOTAL TRÉSORERIE-PASSIF
-    DT: { netN: 2940000,   netN1: 3670000 },
-
-    // Écart de conversion
-    DV: { netN: 450000,    netN1: 310000 },
-
-    // TOTAL GÉNÉRAL
-    DZ: { netN: 262940000, netN1: 256280000 },
-  }
+    return { actifData: actif, passifData: passif }
+  }, [])
 
   // ── Helpers ──────────────────────────────────────────────────────────────
 

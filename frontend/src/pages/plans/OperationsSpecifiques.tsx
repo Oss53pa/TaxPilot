@@ -33,6 +33,7 @@ import {
 } from '@mui/icons-material'
 import { CHAPITRES_SOMMAIRE, loadChapitre } from '../../data/syscohada/operations'
 import type { ChapitreOperations } from '../../data/syscohada/types'
+import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
 
 const OperationsSpecifiques = () => {
   const [searchTerm, setSearchTerm] = useState('')
@@ -59,7 +60,7 @@ const OperationsSpecifiques = () => {
   }, [expandedChapitre])
 
   return (
-    <Box sx={{ p: 3, backgroundColor: '#fafafa', minHeight: '100vh' }}>
+    <Box sx={{ p: 3, backgroundColor: P.primary50, minHeight: '100vh' }}>
       {/* Header */}
       <Box sx={{ mb: 4 }}>
         <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, color: 'text.primary' }}>
@@ -99,7 +100,7 @@ const OperationsSpecifiques = () => {
       </Grid>
 
       {/* Recherche */}
-      <Card sx={{ mb: 3, border: '1px solid #e5e5e5' }}>
+      <Card sx={{ mb: 3, border: `1px solid ${P.primary200}` }}>
         <CardContent sx={{ p: 3 }}>
           <TextField
             fullWidth
@@ -113,13 +114,13 @@ const OperationsSpecifiques = () => {
                 </InputAdornment>
               ),
             }}
-            sx={{ '& .MuiOutlinedInput-root': { backgroundColor: '#FFFFFF' } }}
+            sx={{ '& .MuiOutlinedInput-root': { backgroundColor: P.white } }}
           />
         </CardContent>
       </Card>
 
       {/* Liste des chapitres */}
-      <Card sx={{ border: '1px solid #e5e5e5' }}>
+      <Card sx={{ border: `1px solid ${P.primary200}` }}>
         <CardContent sx={{ p: 3 }}>
           <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: 'text.primary' }}>
             <BookIcon sx={{ fontSize: 20, verticalAlign: 'middle', mr: 1 }} />
@@ -134,7 +135,7 @@ const OperationsSpecifiques = () => {
               sx={{
                 mb: 1,
                 '&:before': { display: 'none' },
-                border: '1px solid #e5e5e5',
+                border: `1px solid ${P.primary200}`,
                 borderRadius: 2,
               }}
             >
@@ -153,7 +154,7 @@ const OperationsSpecifiques = () => {
                     fontFamily: 'monospace',
                     fontWeight: 700,
                     bgcolor: 'text.primary',
-                    color: '#fff',
+                    color: P.white,
                     minWidth: 60,
                   }}
                 />
@@ -193,7 +194,7 @@ const OperationsSpecifiques = () => {
                         {section.ecritures && section.ecritures.length > 0 && (
                           <>
                             {section.ecritures.map(ecriture => (
-                              <Paper key={ecriture.numero} sx={{ p: 2, mb: 1, bgcolor: 'background.paper', border: '1px solid #e5e5e5' }}>
+                              <Paper key={ecriture.numero} sx={{ p: 2, mb: 1, bgcolor: 'background.paper', border: `1px solid ${P.primary200}` }}>
                                 <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.secondary', display: 'block', mb: 1 }}>
                                   Écriture {ecriture.numero} : {ecriture.description}
                                 </Typography>

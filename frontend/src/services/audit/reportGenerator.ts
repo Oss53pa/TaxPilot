@@ -4,6 +4,7 @@
 
 import type { SessionAudit, ResultatControle, Severite } from '@/types/audit.types'
 import { NIVEAUX_NOMS } from '@/types/audit.types'
+import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
 
 class ReportGenerator {
   /**
@@ -50,12 +51,12 @@ class ReportGenerator {
           <p style="color:#666">${okCount} OK, ${anomCount} anomalies sur ${items.length} controles</p>
           <table style="width:100%;border-collapse:collapse;margin-bottom:16px">
             <thead>
-              <tr style="background:#f5f5f5">
-                <th style="text-align:left;padding:8px;border-bottom:2px solid #e5e5e5">Ref</th>
-                <th style="text-align:left;padding:8px;border-bottom:2px solid #e5e5e5">Controle</th>
-                <th style="text-align:center;padding:8px;border-bottom:2px solid #e5e5e5">Severite</th>
-                <th style="text-align:left;padding:8px;border-bottom:2px solid #e5e5e5">Resultat</th>
-                <th style="text-align:left;padding:8px;border-bottom:2px solid #e5e5e5">Suggestion</th>
+              <tr style="background:${P.primary100}">
+                <th style="text-align:left;padding:8px;border-bottom:2px solid ${P.primary200}">Ref</th>
+                <th style="text-align:left;padding:8px;border-bottom:2px solid ${P.primary200}">Controle</th>
+                <th style="text-align:center;padding:8px;border-bottom:2px solid ${P.primary200}">Severite</th>
+                <th style="text-align:left;padding:8px;border-bottom:2px solid ${P.primary200}">Resultat</th>
+                <th style="text-align:left;padding:8px;border-bottom:2px solid ${P.primary200}">Suggestion</th>
               </tr>
             </thead>
             <tbody>
@@ -78,7 +79,7 @@ class ReportGenerator {
     .summary-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin: 20px 0; }
     .summary-card { text-align: center; padding: 16px; border-radius: 8px; }
     table { font-size: 13px; }
-    tr:nth-child(even) { background: #fafafa; }
+    tr:nth-child(even) { background: ${P.primary50}; }
     td, th { border-bottom: 1px solid #eee; }
     @media print { body { max-width: none; } }
   </style>

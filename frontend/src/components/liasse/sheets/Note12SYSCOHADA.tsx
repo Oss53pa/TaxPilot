@@ -34,6 +34,8 @@ import {
   Save,
   Add
 } from '@mui/icons-material'
+import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
+import { useBalanceData } from '@/hooks/useBalanceData'
 
 const Note12SYSCOHADA: React.FC = () => {
   // Types de commentaires prédéfinis
@@ -262,7 +264,7 @@ const Note12SYSCOHADA: React.FC = () => {
                   ) : (
                     <Stack spacing={2}>
                       {commentairesSauvegardes.map((comm) => (
-                        <Paper key={comm.id} sx={{ p: 2, border: '1px solid #e5e5e5' }}>
+                        <Paper key={comm.id} sx={{ p: 2, border: `1px solid ${P.primary200}` }}>
                           <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 1 }}>
                             <Chip label={comm.type} size="small" color="primary" />
                             <Typography variant="caption" color="text.secondary">

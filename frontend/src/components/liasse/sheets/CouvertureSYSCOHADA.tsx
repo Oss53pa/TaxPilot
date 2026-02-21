@@ -22,6 +22,7 @@ import {
   CalendarToday as CalendarIcon,
 } from '@mui/icons-material'
 import EditableToolbar from '../shared/EditableToolbar'
+import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
 
 const CouvertureSYSCOHADA: React.FC = () => {
   const theme = useTheme()
@@ -75,7 +76,7 @@ const CouvertureSYSCOHADA: React.FC = () => {
         elevation={0}
         sx={{
           p: 6,
-          backgroundColor: '#ffffff',
+          backgroundColor: P.white,
           border: `2px solid ${theme.palette.primary.main}`,
           position: 'relative',
           minHeight: '90vh',

@@ -36,6 +36,7 @@ import type { Entreprise, ParticipationEntry } from '@/types'
 import { formatNumber, formatDateFR } from '@/utils/formatting'
 import { SheetHeader } from '@/components/liasse/common/SheetHeader'
 import { TabPanel } from '@/components/shared/TabPanel'
+import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
 
 interface FicheR3SYSCOHADAProps {
   entreprise?: Entreprise
@@ -201,7 +202,7 @@ const FicheR3SYSCOHADA: React.FC<FicheR3SYSCOHADAProps> = ({ entreprise }) => {
             </Card>
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
-            <Card sx={{ textAlign: 'center', backgroundColor: '#f5f5f5' }}>
+            <Card sx={{ textAlign: 'center', backgroundColor: P.primary100 }}>
               <CardContent sx={{ py: 2 }}>
                 <Typography variant="h6" color="info.main" sx={{ fontWeight: 600 }}>
                   {formatNumber(totalValeurComptable)}
@@ -211,7 +212,7 @@ const FicheR3SYSCOHADA: React.FC<FicheR3SYSCOHADAProps> = ({ entreprise }) => {
             </Card>
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
-            <Card sx={{ textAlign: 'center', backgroundColor: '#f5f5f5' }}>
+            <Card sx={{ textAlign: 'center', backgroundColor: P.primary100 }}>
               <CardContent sx={{ py: 2 }}>
                 <Typography variant="h6" color="warning.main" sx={{ fontWeight: 600 }}>
                   {formatNumber(totalDividendes)}

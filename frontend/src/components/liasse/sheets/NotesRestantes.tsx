@@ -26,8 +26,9 @@ import {
 import CommentairesSection from '../shared/CommentairesSection'
 import TableActions from '../shared/TableActions'
 import EditableToolbar from '../shared/EditableToolbar'
-import { useEditableTable } from '../../../hooks/useEditableTable'
+import { useEditableTable } from '@/hooks/useEditableTable'
 import { generateAnnexeData } from '@/services/annexeDataService'
+import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
 import { getLatestBalance } from '@/services/balanceStorageService'
 import { MOCK_BALANCE } from '@/data/mockBalance'
 
@@ -1387,7 +1388,7 @@ const NotesRestantes: React.FC<NoteRestanteProps> = ({
                             fontStyle: isHeader ? 'italic' : 'normal',
                             fontSize: isTotal ? '0.9rem' : '0.85rem',
                             color: isTotal && cellIdx > 0 ? theme.palette.primary.main : 'inherit',
-                            border: '1px solid #e5e5e5',
+                            border: `1px solid ${P.primary200}`,
                             whiteSpace: 'nowrap',
                             pl: cell.startsWith('  ') ? 4 : undefined,
                             p: isEditable ? 0.5 : undefined,

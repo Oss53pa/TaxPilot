@@ -30,6 +30,7 @@ import {
   Lock as LockIcon,
 } from '@mui/icons-material'
 import type { Entreprise } from '@/types'
+import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
 
 // Dictionnaires de mapping code → label
 const formesJuridiquesMap: Record<string, string> = {
@@ -116,13 +117,13 @@ const PageGarde: React.FC<PageGardeProps> = ({ entreprise }) => {
           color: 'white'
         }}
       >
-        <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, color: '#ffffff' }}>
+        <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, color: P.white }}>
           Page de Garde
         </Typography>
-        <Typography variant="h6" sx={{ color: '#ffffff' }}>
+        <Typography variant="h6" sx={{ color: P.white }}>
           Renseignements généraux de l'entreprise
         </Typography>
-        <Typography variant="body2" sx={{ opacity: 0.9, mt: 1, color: '#ffffff' }}>
+        <Typography variant="body2" sx={{ opacity: 0.9, mt: 1, color: P.white }}>
           Exercice comptable du {dateDebut} au {dateFin}
         </Typography>
       </Paper>

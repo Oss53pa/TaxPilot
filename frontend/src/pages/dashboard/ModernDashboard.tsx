@@ -22,6 +22,7 @@ import {
 } from '@mui/icons-material'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
+import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
 
 const ModernDashboard: React.FC = () => {
   const navigate = useNavigate()
@@ -98,7 +99,7 @@ const ModernDashboard: React.FC = () => {
         justifyContent: 'space-between',
         px: { xs: 2, md: 4 },
         py: 2,
-        borderBottom: '1px solid #e5e5e5',
+        borderBottom: `1px solid ${P.primary200}`,
       }}>
         <Box>
           <Typography
@@ -125,7 +126,7 @@ const ModernDashboard: React.FC = () => {
                 height: 20,
                 fontSize: '0.7rem',
                 bgcolor: 'error.main',
-                color: '#fff',
+                color: P.white,
                 fontWeight: 600,
                 '& .MuiChip-label': { px: 0.8 },
               }}
@@ -158,7 +159,7 @@ const ModernDashboard: React.FC = () => {
             onClick={() => navigate('/dashboard')}
             sx={{
               bgcolor: 'text.primary',
-              color: '#fff',
+              color: P.white,
               borderRadius: 3,
               textTransform: 'none',
               fontWeight: 600,
@@ -266,8 +267,8 @@ const ModernDashboard: React.FC = () => {
               startIcon={item.icon}
               onClick={() => navigate(item.path)}
               sx={{
-                borderColor: '#e5e5e5',
-                color: '#525252',
+                borderColor: P.primary200,
+                color: P.primary600,
                 borderRadius: 3,
                 textTransform: 'none',
                 fontWeight: 500,
@@ -275,7 +276,7 @@ const ModernDashboard: React.FC = () => {
                 py: 0.8,
                 fontSize: '0.85rem',
                 '&:hover': {
-                  borderColor: '#a3a3a3',
+                  borderColor: P.primary400,
                   bgcolor: 'grey.50',
                 },
               }}
@@ -287,7 +288,7 @@ const ModernDashboard: React.FC = () => {
 
         <Typography
           variant="caption"
-          sx={{ color: '#d4d4d4', mt: 1, fontSize: '0.7rem' }}
+          sx={{ color: P.primary300, mt: 1, fontSize: '0.7rem' }}
         >
           Powered by TaxPilot
         </Typography>

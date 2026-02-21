@@ -44,6 +44,7 @@ import {
   Schedule,
   Speed,
 } from '@mui/icons-material'
+import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
 
 interface RatioFinancier {
   code: string
@@ -355,7 +356,7 @@ const ModernReporting = () => {
       case 'MOYEN': return '#f59e0b'
       case 'FAIBLE': return '#ef4444'
       case 'CRITIQUE': return '#dc2626'
-      default: return '#737373'
+      default: return P.primary500
     }
   }
 
@@ -366,7 +367,7 @@ const ModernReporting = () => {
       case 'RENTABILITE': return '#22c55e'
       case 'GESTION': return '#f59e0b'
       case 'ACTIVITE': return '#06b6d4'
-      default: return '#737373'
+      default: return P.primary500
     }
   }
 

@@ -65,6 +65,7 @@ import {
   Add as AddIcon,
   ArrowBack,
 } from '@mui/icons-material'
+import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
 
 interface GenerationTemplate {
   id: string
@@ -361,9 +362,9 @@ const ModernGeneration: React.FC = () => {
           onClick={() => navigate('/dashboard')}
           sx={{
             mb: 2,
-            color: '#525252',
+            color: P.primary600,
             fontWeight: 500,
-            '&:hover': { bgcolor: 'grey.100', color: '#171717' },
+            '&:hover': { bgcolor: 'grey.100', color: P.primary900 },
           }}
         >
           Retour au menu principal

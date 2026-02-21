@@ -37,8 +37,9 @@ import {
   Comment,
   Add,
 } from '@mui/icons-material'
+import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
 
-const PRIMARY_COLOR = '#171717'
+const PRIMARY_COLOR = P.primary900
 
 interface NotesAnnexesCompletesFinalProps {
   modeEdition?: boolean
@@ -1288,9 +1289,9 @@ const NotesAnnexesCompletesFinal: React.FC<NotesAnnexesCompletesFinalProps> = ({
                 key={index}
                 sx={{
                   fontWeight: 700,
-                  color: '#ffffff',
+                  color: P.white,
                   backgroundColor: PRIMARY_COLOR,
-                  border: '1px solid #e5e5e5'
+                  border: `1px solid ${P.primary200}`
                 }}
                 align={index > 0 ? 'right' : 'left'}
               >
@@ -1307,9 +1308,9 @@ const NotesAnnexesCompletesFinal: React.FC<NotesAnnexesCompletesFinalProps> = ({
                   key={cellIndex}
                   align={cellIndex > 0 ? 'right' : 'left'}
                   sx={{
-                    border: '1px solid #e5e5e5',
+                    border: `1px solid ${P.primary200}`,
                     fontWeight: cell.includes('TOTAL') || cell.includes(':') ? 700 : 400,
-                    backgroundColor: cell.includes('TOTAL') || cell.includes(':') ? '#f5f5f5' : 'white',
+                    backgroundColor: cell.includes('TOTAL') || cell.includes(':') ? P.primary100 : 'white',
                     fontStyle: cell.includes(':') ? 'italic' : 'normal',
                   }}
                 >
@@ -1534,7 +1535,7 @@ const NotesAnnexesCompletesFinal: React.FC<NotesAnnexesCompletesFinalProps> = ({
               ) : (
                 <Stack spacing={1}>
                   {(commentairesParNote[currentNoteIndex] || []).map((comm) => (
-                    <Paper key={comm.id} sx={{ p: 2, border: '1px solid #e5e5e5' }}>
+                    <Paper key={comm.id} sx={{ p: 2, border: `1px solid ${P.primary200}` }}>
                       <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 1 }}>
                         <Chip label={comm.type} size="small" color="primary" />
                         <Typography variant="caption" color="text.secondary">

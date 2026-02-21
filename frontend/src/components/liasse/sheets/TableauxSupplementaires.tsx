@@ -3,7 +3,7 @@
  * Notes 12-13, 15-16, 18, 20-35 et autres tableaux obligatoires
  */
 
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import {
   Box,
   Card,
@@ -30,28 +30,42 @@ import {
   People,
   Description
 } from '@mui/icons-material'
+import { useBalanceData } from '@/hooks/useBalanceData'
 
 const TableauxSupplementaires: React.FC = () => {
   const [activeTab, setActiveTab] = useState(0)
-  
-  // Données pour les différents tableaux
-  const [tableauEffectif] = useState([
-    { categorie: 'Cadres supérieurs', effectif_debut: 5, embauches: 1, departs: 0, effectif_fin: 6, masse_salariale: 24000000 },
-    { categorie: 'Cadres moyens', effectif_debut: 12, embauches: 2, departs: 1, effectif_fin: 13, masse_salariale: 32000000 },
-    { categorie: 'Employés', effectif_debut: 25, embauches: 5, departs: 2, effectif_fin: 28, masse_salariale: 28000000 },
-    { categorie: 'Ouvriers', effectif_debut: 18, embauches: 3, departs: 1, effectif_fin: 20, masse_salariale: 18000000 }
-  ])
-  
-  const [tableauFiliales] = useState([
-    { denomination: 'TAXPILOT BENIN SARL', capital: 25000000, pourcentage_detention: 75, valeur_comptable: 18750000, resultat_n: 2100000 },
-    { denomination: 'TAXPILOT TOGO SA', capital: 50000000, pourcentage_detention: 60, valeur_comptable: 30000000, resultat_n: 3200000 }
-  ])
-  
-  const [engagementsHorsBilan] = useState([
-    { nature: 'Garanties données', montant: 5000000, echeance: '2025-12-31', beneficiaire: 'Banque XYZ' },
-    { nature: 'Commandes fermes', montant: 8500000, echeance: '2025-06-30', beneficiaire: 'Client ABC' },
-    { nature: 'Crédit-bail mobilier', montant: 12000000, echeance: '2027-12-31', beneficiaire: 'Société Leasing' }
-  ])
+  const bal = useBalanceData()
+
+  // Données calculées depuis la balance
+  const masseSalariale = bal.d(['66'])
+  const titresParticipation = bal.d(['26'])
+
+  const [tableauEffectif] = useState(() => {
+    // Estimation de la répartition par catégorie depuis la masse salariale totale
+    const total = masseSalariale || 1
+    return [
+      { categorie: 'Cadres superieurs', effectif_debut: 0, embauches: 0, departs: 0, effectif_fin: 0, masse_salariale: Math.round(total * 0.25) },
+      { categorie: 'Cadres moyens', effectif_debut: 0, embauches: 0, departs: 0, effectif_fin: 0, masse_salariale: Math.round(total * 0.30) },
+      { categorie: 'Employes', effectif_debut: 0, embauches: 0, departs: 0, effectif_fin: 0, masse_salariale: Math.round(total * 0.25) },
+      { categorie: 'Ouvriers', effectif_debut: 0, embauches: 0, departs: 0, effectif_fin: 0, masse_salariale: Math.round(total * 0.20) }
+    ]
+  })
+
+  // Filiales depuis les titres de participation (comptes 26x)
+  const [tableauFiliales] = useState(() => {
+    const accounts = bal.accounts(['26'])
+    if (accounts.length === 0) return []
+    return accounts.map(a => ({
+      denomination: a.intitule || `Participation ${a.compte}`,
+      capital: 0,
+      pourcentage_detention: 0,
+      valeur_comptable: a.solde_debit || a.debit || 0,
+      resultat_n: 0
+    }))
+  })
+
+  // Engagements hors bilan (comptes 80x, pas dans la balance — structure vide)
+  const [engagementsHorsBilan] = useState<Array<{ nature: string; montant: number; echeance: string; beneficiaire: string }>>([])
 
   const renderTableauEffectifPersonnel = () => (
     <Card>
