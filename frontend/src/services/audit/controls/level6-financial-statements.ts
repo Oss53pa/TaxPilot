@@ -80,7 +80,8 @@ function EF001(ctx: AuditContext): ResultatControle {
   if (ecart > 1) {
     return anomalie(ref, nom, 'BLOQUANT',
       `Bilan desequilibre: Actif=${actif.toLocaleString('fr-FR')}, Passif=${passif.toLocaleString('fr-FR')} (ecart: ${ecart.toLocaleString('fr-FR')})`,
-      { ecart, montants: { actif, passif } }, undefined,
+      { ecart, montants: { actif, passif } },
+      'Verifier l\'affectation de tous les comptes de bilan et l\'equilibre Actif = Passif',
       'Art. 29 Acte Uniforme OHADA')
   }
   return ok(ref, nom, `Bilan equilibre: ${actif.toLocaleString('fr-FR')}`)
@@ -96,7 +97,8 @@ function EF002(ctx: AuditContext): ResultatControle {
 
   if (totalImmob < 0) {
     return anomalie(ref, nom, 'BLOQUANT', `Sous-total actif immobilise negatif: ${totalImmob.toLocaleString('fr-FR')}`,
-      { montants: { actifImmobilise: totalImmob } })
+      { montants: { actifImmobilise: totalImmob } },
+      'Les amortissements cumules depassent la valeur brute des immobilisations - regulariser les comptes 28x')
   }
   return ok(ref, nom, `Sous-totaux actif coherents (Immo: ${totalImmob.toLocaleString('fr-FR')}, Circ: ${totalCirc.toLocaleString('fr-FR')})`)
 }
@@ -119,7 +121,8 @@ function EF004(ctx: AuditContext): ResultatControle {
   if (ecart > totalBilanBalance * 0.05 && ecart > 10000) {
     return anomalie(ref, nom, 'BLOQUANT',
       `Ecart significatif entre bilan mapping et bilan balance: ${ecart.toLocaleString('fr-FR')}`,
-      { ecart, montants: { bilanMapping: actif, bilanBalance: totalBilanBalance } })
+      { ecart, montants: { bilanMapping: actif, bilanBalance: totalBilanBalance } },
+      'Verifier que tous les comptes de bilan sont correctement mappes dans les etats financiers')
   }
   return ok(ref, nom, 'Bilan et balance coherents')
 }
@@ -135,7 +138,8 @@ function EF005(ctx: AuditContext): ResultatControle {
   if (ecart > 1 && find(ctx.balanceN, '13').length > 0) {
     return anomalie(ref, nom, 'BLOQUANT',
       `Resultat CdR (${resultatCdR.toLocaleString('fr-FR')}) != Resultat bilan (${resultatBilan.toLocaleString('fr-FR')})`,
-      { ecart, montants: { resultatCdR, resultatBilan } })
+      { ecart, montants: { resultatCdR, resultatBilan } },
+      'Le resultat du compte de resultat doit etre identique au resultat inscrit au bilan (compte 13)')
   }
   return ok(ref, nom, `Resultat coherent: ${resultatCdR.toLocaleString('fr-FR')}`)
 }
@@ -184,7 +188,8 @@ function EF008(ctx: AuditContext): ResultatControle {
   if (ecart > 1 && find(ctx.balanceN, '13').length > 0) {
     return anomalie(ref, nom, 'BLOQUANT',
       `Cascade: RAO(${rao.toLocaleString('fr-FR')}) + HAO(${hao.toLocaleString('fr-FR')}) - IS(${impot.toLocaleString('fr-FR')}) = ${resultatNet.toLocaleString('fr-FR')} != 13x(${resultat13.toLocaleString('fr-FR')})`,
-      { ecart })
+      { ecart },
+      'Verifier la cascade: Resultat AO + Resultat HAO - Impot = Resultat net (compte 13)')
   }
   return ok(ref, nom, 'Cascade du resultat coherente')
 }
@@ -242,7 +247,8 @@ function EF013(ctx: AuditContext): ResultatControle {
   if (ecart > Math.abs(resultatN) * 0.2 && ecart > 10000) {
     return anomalie(ref, nom, 'MINEUR',
       `Variation CP (${variation.toLocaleString('fr-FR')}) significativement differente du resultat (${resultatN.toLocaleString('fr-FR')})`,
-      { montants: { variationCP: variation, resultat: resultatN } })
+      { montants: { variationCP: variation, resultat: resultatN } },
+      'Verifier les operations sur capitaux propres (dividendes, augmentation capital, etc.)')
   }
   return ok(ref, nom, 'Variation capitaux propres coherente')
 }

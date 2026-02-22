@@ -201,9 +201,6 @@ const AuditResultsView: React.FC<AuditResultsViewProps> = ({ resultats }) => {
                 <Box
                   onClick={() => setExpandedRef(expandedRef === r.ref ? null : r.ref)}
                   sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 1.5,
                     px: 2,
                     py: 1.5,
                     cursor: 'pointer',
@@ -212,20 +209,29 @@ const AuditResultsView: React.FC<AuditResultsViewProps> = ({ resultats }) => {
                     '&:hover': { bgcolor: 'action.hover' },
                   }}
                 >
-                  {severiteIcon(r.severite)}
-                  <Typography variant="caption" sx={{ fontFamily: 'monospace', fontWeight: 600, minWidth: 60, color: 'text.secondary' }}>
-                    {r.ref}
-                  </Typography>
-                  <Typography variant="body2" sx={{ flex: 1 }}>
-                    {r.message}
-                  </Typography>
-                  <Chip
-                    label={r.severite}
-                    size="small"
-                    color={SEVERITE_MUI_COLOR[r.severite]}
-                    variant="outlined"
-                    sx={{ fontWeight: 600, height: 22, fontSize: '0.65rem' }}
-                  />
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                    {severiteIcon(r.severite)}
+                    <Typography variant="caption" sx={{ fontFamily: 'monospace', fontWeight: 600, minWidth: 60, color: 'text.secondary' }}>
+                      {r.ref}
+                    </Typography>
+                    <Typography variant="body2" sx={{ flex: 1 }}>
+                      {r.message}
+                    </Typography>
+                    <Chip
+                      label={r.severite}
+                      size="small"
+                      color={SEVERITE_MUI_COLOR[r.severite]}
+                      variant="outlined"
+                      sx={{ fontWeight: 600, height: 22, fontSize: '0.65rem' }}
+                    />
+                  </Box>
+                  {r.statut === 'ANOMALIE' && r.suggestion && (
+                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mt: 1, ml: 4, pl: '60px' }}>
+                      <Typography variant="body2" sx={{ color: 'info.main', fontWeight: 500, fontSize: '0.8rem' }}>
+                        Correction : {r.suggestion}
+                      </Typography>
+                    </Box>
+                  )}
                 </Box>
 
                 {/* Panel de details */}

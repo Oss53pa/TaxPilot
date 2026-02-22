@@ -79,7 +79,8 @@ function F002(ctx: AuditContext): ResultatControle {
   if (ecart > TOLERANCE) {
     return anomalie(ref, nom, 'BLOQUANT',
       `Desequilibre N-1 de ${ecart.toLocaleString('fr-FR')}`,
-      { ecart, montants: { totalDebitN1: totalD, totalCreditN1: totalC } })
+      { ecart, montants: { totalDebitN1: totalD, totalCreditN1: totalC } },
+      'Verifier la balance N-1 importee - la somme des debits doit etre egale a la somme des credits')
   }
   return ok(ref, nom, `Balance N-1 equilibree`)
 }
@@ -111,7 +112,8 @@ function F003(ctx: AuditContext): ResultatControle {
   if (comptes13.length === 0) {
     return anomalie(ref, nom, 'MINEUR',
       `Resultat calcule: ${resultatCalcule.toLocaleString('fr-FR')} mais pas de compte 13x`,
-      { montants: { resultatCalcule } })
+      { montants: { resultatCalcule } },
+      'Pour une balance pre-cloture c\'est normal. Sinon, ajouter le compte 13x avec le resultat de l\'exercice')
   }
   return ok(ref, nom, `Resultat coherent: ${resultatCalcule.toLocaleString('fr-FR')}`)
 }

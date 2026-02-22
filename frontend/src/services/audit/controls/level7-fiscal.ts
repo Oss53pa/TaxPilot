@@ -166,7 +166,8 @@ function FI009(ctx: AuditContext): ResultatControle {
     if (soldeTheorique > 0 && tvaDue === 0) {
       return anomalie(ref, nom, 'MINEUR',
         `TVA due theorique (${soldeTheorique.toLocaleString('fr-FR')}) non comptabilisee (444x)`,
-        { montants: { tvaCollectee, tvaDeductible, soldeTheorique } })
+        { montants: { tvaCollectee, tvaDeductible, soldeTheorique } },
+        'Comptabiliser la TVA due (444x) correspondant a la difference TVA collectee - TVA deductible')
     }
   }
   return ok(ref, nom, 'TVA a reverser coherente')
@@ -188,7 +189,8 @@ function FI010(ctx: AuditContext): ResultatControle {
     if (ratio < 10) {
       return anomalie(ref, nom, 'INFO',
         `Ratio cotisations/salaires faible: ${ratio.toFixed(1)}%`,
-        { montants: { chargesPersonnel: chargesPerso, cotisations, ratioPct: ratio } })
+        { montants: { chargesPersonnel: chargesPerso, cotisations, ratioPct: ratio } },
+        'Verifier le taux de cotisations sociales applique (CNPS/NSIF)')
     }
   }
   return ok(ref, nom, 'Coherence charges personnel / cotisations')

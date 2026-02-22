@@ -38,6 +38,7 @@ import {
 import { useAppDispatch, useAppSelector } from '@/store'
 import {
   setSession,
+  setCorrectionReport,
   startAudit,
   stopAudit,
   setAuditProgress,
@@ -51,7 +52,8 @@ import type {
 } from '@/types/audit.types'
 import { NIVEAUX_NOMS } from '@/types/audit.types'
 import { auditOrchestrator } from '@/services/audit/auditOrchestrator'
-import { getAllSessions } from '@/services/audit/auditStorage'
+import { generateCorrectionReport } from '@/services/audit/auditEngine'
+import { getAllSessions, getSnapshotByBalance } from '@/services/audit/auditStorage'
 import { getLatestBalance, getLatestBalanceN1 } from '@/services/balanceStorageService'
 
 import AuditProgressDialog from '@/components/audit/AuditProgressDialog'
@@ -120,6 +122,38 @@ const ModernAudit: React.FC = () => {
 
       dispatch(setSession(session))
       dispatch(stopAudit())
+
+      // Generer rapport de corrections si une session precedente existe
+      const allSessions = getAllSessions()
+      const previousSession = allSessions.find(
+        (s) => s.id !== session.id && s.statut === 'TERMINEE'
+      )
+      if (previousSession) {
+        const rapport = generateCorrectionReport(previousSession, session)
+        // Comparer les balances pour identifier les comptes modifies
+        const oldSnapshot = getSnapshotByBalance(previousSession.balanceId)
+        if (oldSnapshot) {
+          const oldMap = new Map(oldSnapshot.lignes.map((l) => [l.compte, l]))
+          for (const newLine of balanceToAudit) {
+            const oldLine = oldMap.get(newLine.compte)
+            const newSolde = (newLine.solde_debit || 0) - (newLine.solde_credit || 0)
+            const oldSolde = oldLine
+              ? (oldLine.solde_debit || 0) - (oldLine.solde_credit || 0)
+              : 0
+            if (Math.abs(newSolde - oldSolde) > 0.01) {
+              rapport.comptesModifies.push({
+                compte: newLine.compte,
+                libelle: newLine.intitule,
+                soldeAvant: oldSolde,
+                soldeApres: newSolde,
+                ecart: newSolde - oldSolde,
+              })
+            }
+          }
+        }
+        dispatch(setCorrectionReport(rapport))
+      }
+
       setSessions(getAllSessions())
     } catch (err) {
       dispatch(setAuditError(err instanceof Error ? err.message : 'Erreur inconnue'))

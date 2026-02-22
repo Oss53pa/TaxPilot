@@ -28,10 +28,12 @@ function anomalie(
 function S001(ctx: AuditContext): ResultatControle {
   const ref = 'S-001', nom = 'Fichier lisible'
   if (!ctx.balanceN || !Array.isArray(ctx.balanceN)) {
-    return anomalie(ref, nom, 'BLOQUANT', 'La balance est absente ou illisible')
+    return anomalie(ref, nom, 'BLOQUANT', 'La balance est absente ou illisible',
+      undefined, 'Reimporter le fichier balance en format Excel (.xlsx) ou CSV')
   }
   if (ctx.balanceN.length === 0) {
-    return anomalie(ref, nom, 'BLOQUANT', 'La balance ne contient aucune ligne')
+    return anomalie(ref, nom, 'BLOQUANT', 'La balance ne contient aucune ligne',
+      undefined, 'Reimporter un fichier balance contenant des donnees comptables')
   }
   return ok(ref, nom, `Balance lisible: ${ctx.balanceN.length} lignes`)
 }
@@ -51,7 +53,8 @@ function S002(ctx: AuditContext): ResultatControle {
   if (!hasDebit) missing.push('debit')
   if (!hasCredit) missing.push('credit')
   if (missing.length > 0) {
-    return anomalie(ref, nom, 'BLOQUANT', `Colonnes manquantes: ${missing.join(', ')}`)
+    return anomalie(ref, nom, 'BLOQUANT', `Colonnes manquantes: ${missing.join(', ')}`,
+      undefined, 'Verifier que le fichier contient les colonnes: Compte, Libelle, Debit, Credit')
   }
   return ok(ref, nom, 'Toutes les colonnes requises sont presentes')
 }
@@ -77,7 +80,8 @@ function S003(ctx: AuditContext): ResultatControle {
   if (invalides.length > 0) {
     return anomalie(ref, nom, 'MINEUR',
       `${invalides.length} compte(s) avec format non standard`,
-      { comptes: invalides.slice(0, 10) })
+      { comptes: invalides.slice(0, 10) },
+      'Corriger les numeros de compte non standard (format attendu: 2 a 12 chiffres)')
   }
   return ok(ref, nom, `Tous les ${total} comptes ont un format valide`)
 }
@@ -95,7 +99,8 @@ function S004(ctx: AuditContext): ResultatControle {
   if (nonNumeriques.length > 0) {
     return anomalie(ref, nom, 'BLOQUANT',
       `${nonNumeriques.length} ligne(s) avec montants non numeriques`,
-      { comptes: nonNumeriques.slice(0, 10) })
+      { comptes: nonNumeriques.slice(0, 10) },
+      'Verifier que les colonnes debit et credit contiennent uniquement des montants numeriques')
   }
   return ok(ref, nom, 'Tous les montants sont numeriques')
 }
@@ -207,7 +212,8 @@ function S010(ctx: AuditContext): ResultatControle {
   if (dansNPasDansN1.length > 10 || dansN1PasDansN.length > 10) {
     return anomalie(ref, nom, 'MINEUR',
       `${dansNPasDansN1.length} nouveaux comptes en N, ${dansN1PasDansN.length} disparus`,
-      { montants: { nouveauxN: dansNPasDansN1.length, disparusN1: dansN1PasDansN.length } })
+      { montants: { nouveauxN: dansNPasDansN1.length, disparusN1: dansN1PasDansN.length } },
+      'Verifier la correspondance des plans de comptes entre les deux exercices')
   }
   return ok(ref, nom, `${tauxCommun.toFixed(0)}% de comptes communs entre N et N-1`)
 }

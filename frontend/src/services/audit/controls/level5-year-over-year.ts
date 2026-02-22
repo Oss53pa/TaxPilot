@@ -66,7 +66,8 @@ function NN002(ctx: AuditContext): ResultatControle {
   if (variation > 100) {
     return anomalie(ref, nom, 'BLOQUANT',
       `Variation totale du bilan de ${variation.toFixed(0)}% entre N-1 et N - possibles erreurs de report`,
-      { montants: { totalBilanN, totalBilanN1, variationPct: variation } })
+      { montants: { totalBilanN, totalBilanN1, variationPct: variation } },
+      'Verifier que les soldes d\'ouverture N correspondent aux soldes de cloture N-1')
   }
   return ok(ref, nom, 'Soldes d\'ouverture coherents')
 }
@@ -143,7 +144,8 @@ function NN006(ctx: AuditContext): ResultatControle {
     if (Math.abs(pct) > 30) {
       return anomalie(ref, nom, 'INFO',
         `Total bilan varie de ${pct > 0 ? '+' : ''}${pct.toFixed(1)}%`,
-        { montants: { totalBilanN: tbN, totalBilanN1: tbN1, variationPct: pct } })
+        { montants: { totalBilanN: tbN, totalBilanN1: tbN1, variationPct: pct } },
+        'Justifier la variation importante du total bilan entre les deux exercices')
     }
   }
   return ok(ref, nom, 'Variation du total bilan dans les limites')
@@ -168,7 +170,8 @@ function NN007(ctx: AuditContext): ResultatControle {
   if (disparus.length > 0) {
     return anomalie(ref, nom, 'MINEUR',
       `${disparus.length} compte(s) de gestion significatif(s) en N-1 absent(s) ou a zero en N`,
-      { comptes: disparus.slice(0, 10) })
+      { comptes: disparus.slice(0, 10) },
+      'Verifier si la disparition de ces comptes de gestion est justifiee')
   }
   return ok(ref, nom, 'Continuite des comptes de gestion')
 }

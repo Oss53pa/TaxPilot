@@ -137,7 +137,8 @@ function IC005(ctx: AuditContext): ResultatControle {
   if (problemes.length > 0) {
     return anomalie(ref, nom, 'BLOQUANT',
       'Depreciations depassant la valeur brute',
-      { comptes: problemes })
+      { comptes: problemes },
+      'Regulariser les depreciations pour ne pas depasser la valeur brute de l\'actif')
   }
   return ok(ref, nom, 'Depreciations coherentes')
 }
@@ -151,7 +152,8 @@ function IC006(ctx: AuditContext): ResultatControle {
   if ((dot691 + dot697) === 0 && prov > 0) {
     return anomalie(ref, nom, 'MINEUR',
       `Provisions au bilan (${prov.toLocaleString('fr-FR')}) sans dotation (691/697)`,
-      { montants: { provisions: prov, dotations: 0 } })
+      { montants: { provisions: prov, dotations: 0 } },
+      'Comptabiliser les dotations aux provisions (691/697) ou verifier les reprises')
   }
   return ok(ref, nom, 'Dotations provisions coherentes')
 }
@@ -164,7 +166,8 @@ function IC007(ctx: AuditContext): ResultatControle {
   if (tb > 0 && prov > tb * 0.10) {
     return anomalie(ref, nom, 'INFO',
       `Provisions (${prov.toLocaleString('fr-FR')}) > 10% du bilan (${tb.toLocaleString('fr-FR')})`,
-      { montants: { provisions: prov, totalBilan: tb, ratio: (prov / tb * 100) } })
+      { montants: { provisions: prov, totalBilan: tb, ratio: (prov / tb * 100) } },
+      'Justifier le niveau eleve des provisions dans les notes annexes')
   }
   return ok(ref, nom, 'Provisions dans les limites')
 }
@@ -223,7 +226,8 @@ function IC011(ctx: AuditContext): ResultatControle {
   if (achats > 0 && fournisseurs === 0) {
     return anomalie(ref, nom, 'INFO',
       `Achats de ${achats.toLocaleString('fr-FR')} sans dettes fournisseurs (401x)`,
-      { montants: { achats } })
+      { montants: { achats } },
+      'Des achats significatifs impliquent generalement des dettes fournisseurs en cours')
   }
   return ok(ref, nom, 'Achats et dettes fournisseurs coherents')
 }
@@ -236,7 +240,8 @@ function IC012(ctx: AuditContext): ResultatControle {
   if (interets > 0 && emprunts === 0) {
     return anomalie(ref, nom, 'INFO',
       `Charges financieres (${interets.toLocaleString('fr-FR')}) sans emprunts (16x)`,
-      { montants: { chargesFinancieres: interets } })
+      { montants: { chargesFinancieres: interets } },
+      'Verifier la coherence entre charges financieres et dettes financieres au bilan')
   }
   return ok(ref, nom, 'Interets et emprunts coherents')
 }
@@ -249,12 +254,14 @@ function IC013(ctx: AuditContext): ResultatControle {
   if (immob > 0 && dotations === 0) {
     return anomalie(ref, nom, 'MINEUR',
       `Immobilisations (${immob.toLocaleString('fr-FR')}) sans dotations (681/682)`,
-      { montants: { immobilisations: immob, dotations: 0 } })
+      { montants: { immobilisations: immob, dotations: 0 } },
+      'Comptabiliser les dotations aux amortissements pour les immobilisations existantes')
   }
   if (immob > 0 && dotations > immob * 0.5) {
     return anomalie(ref, nom, 'INFO',
       `Dotations (${dotations.toLocaleString('fr-FR')}) > 50% des immobilisations (${immob.toLocaleString('fr-FR')})`,
-      { montants: { immobilisations: immob, dotations } })
+      { montants: { immobilisations: immob, dotations } },
+      'Verifier les taux et durees d\'amortissement appliques')
   }
   return ok(ref, nom, 'Dotations et immobilisations coherentes')
 }
@@ -289,7 +296,8 @@ function IC015(ctx: AuditContext): ResultatControle {
     if (ratio > 25 || ratio < 10) {
       return anomalie(ref, nom, 'INFO',
         `Ratio TVA/CA atypique: ${ratio.toFixed(1)}%`,
-        { montants: { ca, tvaCollectee, ratioPct: ratio } })
+        { montants: { ca, tvaCollectee, ratioPct: ratio } },
+        'Verifier le taux de TVA applique et les operations exonerees')
     }
   }
   return ok(ref, nom, 'TVA collectee coherente avec le CA')
@@ -303,7 +311,8 @@ function IC016(ctx: AuditContext): ResultatControle {
   if (achats > 0 && tvaDed === 0) {
     return anomalie(ref, nom, 'INFO',
       `Achats/services (${achats.toLocaleString('fr-FR')}) sans TVA deductible (445x)`,
-      { montants: { achats, tvaDeductible: 0 } })
+      { montants: { achats, tvaDeductible: 0 } },
+      'Verifier le regime de TVA applicable aux achats et services')
   }
   return ok(ref, nom, 'TVA deductible coherente')
 }
@@ -316,7 +325,8 @@ function IC017(ctx: AuditContext): ResultatControle {
   if (effets > 0 && clients === 0) {
     return anomalie(ref, nom, 'INFO',
       `Effets a recevoir (${effets.toLocaleString('fr-FR')}) sans clients (411x)`,
-      { montants: { effetsRecevoir: effets } })
+      { montants: { effetsRecevoir: effets } },
+      'Verifier la coherence des effets a recevoir avec le poste clients')
   }
   return ok(ref, nom, 'Effets et clients coherents')
 }
@@ -329,7 +339,8 @@ function IC018(ctx: AuditContext): ResultatControle {
   if (effets > 0 && fournisseurs === 0) {
     return anomalie(ref, nom, 'INFO',
       `Effets a payer (${effets.toLocaleString('fr-FR')}) sans fournisseurs (401x)`,
-      { montants: { effetsPayer: effets } })
+      { montants: { effetsPayer: effets } },
+      'Verifier la coherence des effets a payer avec le poste fournisseurs')
   }
   return ok(ref, nom, 'Effets et fournisseurs coherents')
 }

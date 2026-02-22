@@ -189,7 +189,8 @@ function AR006(ctx: AuditContext): ResultatControle {
   if (nouveaux.length > 5 || supprimes.length > 5) {
     return anomalie(ref, nom, 'INFO',
       `Changements de structure: +${nouveaux.length} prefixes, -${supprimes.length} prefixes`,
-      { comptes: [...nouveaux.map((p) => `+${p}`), ...supprimes.map((p) => `-${p}`)] })
+      { comptes: [...nouveaux.map((p) => `+${p}`), ...supprimes.map((p) => `-${p}`)] },
+      'Verifier le respect du principe de permanence des methodes comptables')
   }
   return ok(ref, nom, 'Methodes comptables stables')
 }
