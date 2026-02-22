@@ -479,17 +479,48 @@ export class LiasseDataService {
 
     // Comptes réciproques pour le passif (42x côté créditeur, 48x côté créditeur, 52x côté créditeur)
     const reciprocalRefs = ['DH', 'DL', 'DQ', 'DR']
+    // Comptes signés : peuvent avoir un solde débiteur légitime dans le passif
+    // CG (12) = Report à nouveau (+/-)
+    const signedRefs = ['CG']
+    // Contre-compte débiteur : toujours débiteur, présenté en déduction
+    const debitContraRefs = ['CB']
+    // Détecter si la balance est pré-clôture (comptes classes 6/7 présents)
+    const hasClassesPL = Array.from(this.mappingCache.keys()).some(k => k.startsWith('6') || k.startsWith('7'))
 
     Object.entries(SYSCOHADA_MAPPING.passif).forEach(([ref, mapping]) => {
-      const montant = reciprocalRefs.includes(ref)
-        ? this.calculatePassifReciprocal(mapping.comptes)
-        : this.calculatePassif(mapping.comptes)
+      let montant: number
+      if (ref === 'CH') {
+        // Résultat net : calculé depuis le CdR si balance pré-clôture,
+        // sinon depuis le compte 13
+        const cdrResult = this.getResultatFromCompteResultat()
+        montant = hasClassesPL ? cdrResult : -this.sumSoldes(mapping.comptes)
+      } else if (reciprocalRefs.includes(ref)) {
+        montant = this.calculatePassifReciprocal(mapping.comptes)
+      } else if (signedRefs.includes(ref)) {
+        // Crédit → positif (report créditeur), Débit → négatif (report débiteur)
+        montant = -this.sumSoldes(mapping.comptes)
+      } else if (debitContraRefs.includes(ref)) {
+        // Toujours débiteur, montant positif affiché en déduction par le UI
+        montant = Math.abs(this.sumSoldes(mapping.comptes))
+      } else {
+        montant = this.calculatePassif(mapping.comptes)
+      }
 
       let montant_n1 = 0
       if (this.hasN1) {
-        montant_n1 = reciprocalRefs.includes(ref)
-          ? this.calculatePassifReciprocalN1(mapping.comptes)
-          : this.calculatePassifN1(mapping.comptes)
+        const hasClassesPLN1 = Array.from(this.mappingCacheN1.keys()).some(k => k.startsWith('6') || k.startsWith('7'))
+        if (ref === 'CH') {
+          const cdrN1 = this.getResultatFromCompteResultatN1()
+          montant_n1 = hasClassesPLN1 ? cdrN1 : -this.sumSoldesN1(mapping.comptes)
+        } else if (reciprocalRefs.includes(ref)) {
+          montant_n1 = this.calculatePassifReciprocalN1(mapping.comptes)
+        } else if (signedRefs.includes(ref)) {
+          montant_n1 = -this.sumSoldesN1(mapping.comptes)
+        } else if (debitContraRefs.includes(ref)) {
+          montant_n1 = Math.abs(this.sumSoldesN1(mapping.comptes))
+        } else {
+          montant_n1 = this.calculatePassifN1(mapping.comptes)
+        }
       }
 
       rows.push({ ref, montant, montant_n1 })
@@ -682,17 +713,32 @@ export class LiasseDataService {
 
   private calculateTotalPassif(): number {
     const passifData = this.generateBilanPassif()
-    return passifData.reduce((sum: number, row: any) => sum + row.montant, 0)
+    return passifData.reduce((sum: number, row: any) => {
+      // CB (capital non appelé) est un contre-compte affiché en déduction
+      if (row.ref === 'CB') return sum - row.montant
+      return sum + row.montant
+    }, 0)
   }
 
   private getResultatFromBilan(): number {
-    return this.calculatePassif(SYSCOHADA_MAPPING.passif.CH.comptes)
+    // Si balance pré-clôture → résultat calculé depuis CdR
+    const hasClassesPL = Array.from(this.mappingCache.keys()).some(k => k.startsWith('6') || k.startsWith('7'))
+    if (hasClassesPL) return this.getResultatFromCompteResultat()
+    // Sinon compte 13 : crédit = bénéfice (positif), débit = perte (négatif)
+    return -this.sumSoldes(SYSCOHADA_MAPPING.passif.CH.comptes)
   }
 
-  private getResultatFromCompteResultat(): number {
+  getResultatFromCompteResultat(): number {
     const { charges, produits } = this.generateCompteResultat()
     const totalCharges = charges.reduce((sum: number, row: any) => sum + row.montant, 0)
     const totalProduits = produits.reduce((sum: number, row: any) => sum + row.montant, 0)
+    return totalProduits - totalCharges
+  }
+
+  private getResultatFromCompteResultatN1(): number {
+    const { charges, produits } = this.generateCompteResultat()
+    const totalCharges = charges.reduce((sum: number, row: any) => sum + (row.montant_n1 || 0), 0)
+    const totalProduits = produits.reduce((sum: number, row: any) => sum + (row.montant_n1 || 0), 0)
     return totalProduits - totalCharges
   }
 

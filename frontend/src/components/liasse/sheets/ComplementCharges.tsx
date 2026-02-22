@@ -45,7 +45,7 @@ const ComplementCharges: React.FC = () => {
   const docFormation = bal.d(['618'])
   const totalServExt = sousTrait + locations + entretien + assurances + docFormation
 
-  const remunInterm = bal.d(['631', '632'])
+  const remunInterm = bal.d(['632'])
   const publicite = bal.d(['627'])
   const transports = bal.d(['624'])
   const deplacements = bal.d(['625', '626'])

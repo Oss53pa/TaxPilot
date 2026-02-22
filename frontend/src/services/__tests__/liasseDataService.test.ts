@@ -25,12 +25,11 @@ describe('LiasseDataService - Mapping SYSCOHADA', () => {
     { compte: '411', intitule: 'Clients', debit: 150000, credit: 0, solde_debit: 150000, solde_credit: 0 },
 
     // ACTIF - Trésorerie
-    { compte: '521', intitule: 'Banque', debit: 100000, credit: 0, solde_debit: 100000, solde_credit: 0 },
+    { compte: '521', intitule: 'Banque', debit: 300000, credit: 0, solde_debit: 300000, solde_credit: 0 },
 
     // PASSIF - Capitaux propres
     { compte: '101', intitule: 'Capital', debit: 0, credit: 500000, solde_debit: 0, solde_credit: 500000 },
-    { compte: '11', intitule: 'Réserves', debit: 0, credit: 100000, solde_debit: 0, solde_credit: 100000 },
-    { compte: '13', intitule: 'Résultat', debit: 0, credit: 270000, solde_debit: 0, solde_credit: 270000 },
+    { compte: '111', intitule: 'Réserves', debit: 0, credit: 100000, solde_debit: 0, solde_credit: 100000 },
 
     // PASSIF - Dettes
     { compte: '161', intitule: 'Emprunts', debit: 0, credit: 200000, solde_debit: 0, solde_credit: 200000 },
@@ -132,20 +131,21 @@ describe('LiasseDataService - Mapping SYSCOHADA', () => {
       expect(posteCA.montant).toBe(500000)
     })
 
-    it('devrait calculer correctement les réserves (CC)', () => {
-      const bilanPassif = liasseDataService.generateBilanPassif()
-      const posteCC = bilanPassif.find((row: any) => row.ref === 'CC')
-
-      expect(posteCC).toBeDefined()
-      expect(posteCC.montant).toBe(100000)
-    })
-
-    it('devrait calculer correctement le résultat (CE)', () => {
+    it('devrait calculer correctement les réserves (CE)', () => {
       const bilanPassif = liasseDataService.generateBilanPassif()
       const posteCE = bilanPassif.find((row: any) => row.ref === 'CE')
 
       expect(posteCE).toBeDefined()
-      expect(posteCE.montant).toBe(270000)
+      expect(posteCE.montant).toBe(100000)
+    })
+
+    it('devrait calculer correctement le résultat (CH) depuis le CdR', () => {
+      const bilanPassif = liasseDataService.generateBilanPassif()
+      const posteCH = bilanPassif.find((row: any) => row.ref === 'CH')
+
+      // Résultat = Produits (700000) - Charges (200000+30000+150000+50000) = 270000
+      expect(posteCH).toBeDefined()
+      expect(posteCH.montant).toBe(270000)
     })
 
     it('devrait calculer correctement les emprunts (DA)', () => {
