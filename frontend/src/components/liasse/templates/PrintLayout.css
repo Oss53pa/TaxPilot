@@ -123,6 +123,10 @@
     color: #666;
   }
 
+  /* Hide MUI Tabs in print — all tab content is unfolded via PrintModeContext */
+  .MuiTabs-root { display: none !important; }
+  .MuiTab-root { display: none !important; }
+
   /* Force background colors to print */
   * {
     -webkit-print-color-adjust: exact !important;

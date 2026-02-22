@@ -36,6 +36,7 @@ import type { Entreprise, ParticipationEntry } from '@/types'
 import { formatNumber, formatDateFR } from '@/utils/formatting'
 import { SheetHeader } from '@/components/liasse/common/SheetHeader'
 import { TabPanel } from '@/components/shared/TabPanel'
+import { usePrintMode } from '@/components/liasse/PrintModeContext'
 import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
 
 interface FicheR3SYSCOHADAProps {
@@ -44,6 +45,7 @@ interface FicheR3SYSCOHADAProps {
 
 const FicheR3SYSCOHADA: React.FC<FicheR3SYSCOHADAProps> = ({ entreprise }) => {
   const theme = useTheme()
+  const printMode = usePrintMode()
   const [tabValue, setTabValue] = useState(0)
   const ent = entreprise
 
@@ -241,16 +243,18 @@ const FicheR3SYSCOHADA: React.FC<FicheR3SYSCOHADAProps> = ({ entreprise }) => {
       </Box>
 
       {/* Onglets */}
-      <Box sx={{ mb: 2 }}>
-        <Tabs value={tabValue} onChange={(_e, newValue) => setTabValue(newValue)}>
-          <Tab label={`Toutes les participations (${participations.length})`} />
-          <Tab label={`Filiales (${filiales.length})`} />
-          <Tab label={`Participations minoritaires (${participationsMinoritaires.length})`} />
-        </Tabs>
-      </Box>
+      {!printMode && (
+        <Box sx={{ mb: 2 }}>
+          <Tabs value={tabValue} onChange={(_e, newValue) => setTabValue(newValue)}>
+            <Tab label={`Toutes les participations (${participations.length})`} />
+            <Tab label={`Filiales (${filiales.length})`} />
+            <Tab label={`Participations minoritaires (${participationsMinoritaires.length})`} />
+          </Tabs>
+        </Box>
+      )}
 
       {/* Contenu des onglets */}
-      <TabPanel value={tabValue} index={0}>
+      <TabPanel value={tabValue} index={0} label="Toutes les participations">
         {participations.length > 0 ? (
           renderParticipationTable(participations)
         ) : (
@@ -260,7 +264,7 @@ const FicheR3SYSCOHADA: React.FC<FicheR3SYSCOHADAProps> = ({ entreprise }) => {
         )}
       </TabPanel>
 
-      <TabPanel value={tabValue} index={1}>
+      <TabPanel value={tabValue} index={1} label="Filiales">
         {filiales.length > 0 ? (
           renderParticipationTable(filiales)
         ) : (
@@ -270,7 +274,7 @@ const FicheR3SYSCOHADA: React.FC<FicheR3SYSCOHADAProps> = ({ entreprise }) => {
         )}
       </TabPanel>
 
-      <TabPanel value={tabValue} index={2}>
+      <TabPanel value={tabValue} index={2} label="Participations minoritaires">
         {participationsMinoritaires.length > 0 ? (
           renderParticipationTable(participationsMinoritaires)
         ) : (

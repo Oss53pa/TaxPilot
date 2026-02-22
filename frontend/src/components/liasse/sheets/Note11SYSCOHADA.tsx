@@ -48,6 +48,7 @@ import {
 import { formatNumber, formatCurrency } from '@/utils/formatting'
 import { useBalanceData } from '@/hooks/useBalanceData'
 import { TabPanel } from '@/components/shared/TabPanel'
+import { usePrintMode } from '@/components/liasse/PrintModeContext'
 import { SheetHeader } from '@/components/liasse/common/SheetHeader'
 
 interface Actionnaire {
@@ -91,6 +92,7 @@ const NATURES_AUGMENTATION = [
 
 const Note11SYSCOHADA: React.FC = () => {
   const theme = useTheme()
+  const printMode = usePrintMode()
   const bal = useBalanceData()
   const [tabValue, setTabValue] = useState(0)
   const [actionnaires, setActionnaires] = useState<Actionnaire[]>([])
@@ -718,24 +720,26 @@ const Note11SYSCOHADA: React.FC = () => {
       </Box>
 
       {/* Onglets */}
-      <Box sx={{ mb: 2 }}>
-        <Tabs value={tabValue} onChange={(_e, newValue) => setTabValue(newValue)}>
-          <Tab label="Composition" />
-          <Tab label="Évolution" />
-          <Tab label="Analyse" />
-        </Tabs>
-      </Box>
+      {!printMode && (
+        <Box sx={{ mb: 2 }}>
+          <Tabs value={tabValue} onChange={(_e, newValue) => setTabValue(newValue)}>
+            <Tab label="Composition" />
+            <Tab label="Évolution" />
+            <Tab label="Analyse" />
+          </Tabs>
+        </Box>
+      )}
 
       {/* Contenu des onglets */}
-      <TabPanel value={tabValue} index={0}>
+      <TabPanel value={tabValue} index={0} label="Composition">
         {renderCompositionCapital()}
       </TabPanel>
 
-      <TabPanel value={tabValue} index={1}>
+      <TabPanel value={tabValue} index={1} label="Évolution">
         {renderEvolutionCapital()}
       </TabPanel>
 
-      <TabPanel value={tabValue} index={2}>
+      <TabPanel value={tabValue} index={2} label="Analyse">
         {renderAnalyse()}
       </TabPanel>
 

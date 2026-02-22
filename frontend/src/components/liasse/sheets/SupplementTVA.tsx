@@ -4,6 +4,7 @@
 
 import { useState, type FC, type SyntheticEvent } from 'react'
 import { TabPanel } from '@/components/shared/TabPanel'
+import { usePrintMode } from '@/components/liasse/PrintModeContext'
 import {
   Box,
   Paper,
@@ -30,6 +31,7 @@ import { getTauxFiscaux } from '@/config/taux-fiscaux-ci'
 
 const SupplementTVA: FC = () => {
   const theme = useTheme()
+  const printMode = usePrintMode()
   const [activeTab, setActiveTab] = useState(0)
   const bal = useBalanceData()
   const tauxTVA = getTauxFiscaux().TVA.taux_normal * 100
@@ -91,18 +93,20 @@ const SupplementTVA: FC = () => {
       </Typography>
 
       <Paper sx={{ mb: 3 }}>
-        <Tabs 
-          value={activeTab} 
-          onChange={handleTabChange}
-          sx={{ borderBottom: 1, borderColor: 'divider' }}
-        >
-          <Tab label="TVA Collectée" />
-          <Tab label="TVA Déductible" />
-          <Tab label="Suivi Mensuel" />
-          <Tab label="Récapitulatif" />
-        </Tabs>
+        {!printMode && (
+          <Tabs
+            value={activeTab}
+            onChange={handleTabChange}
+            sx={{ borderBottom: 1, borderColor: 'divider' }}
+          >
+            <Tab label="TVA Collectée" />
+            <Tab label="TVA Déductible" />
+            <Tab label="Suivi Mensuel" />
+            <Tab label="Récapitulatif" />
+          </Tabs>
+        )}
 
-        <TabPanel value={activeTab} index={0}>
+        <TabPanel value={activeTab} index={0} label="TVA Collectée">
           <Box sx={{ p: 3 }}>
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
               TVA Collectée sur les Ventes
@@ -150,7 +154,7 @@ const SupplementTVA: FC = () => {
           </Box>
         </TabPanel>
 
-        <TabPanel value={activeTab} index={1}>
+        <TabPanel value={activeTab} index={1} label="TVA Déductible">
           <Box sx={{ p: 3 }}>
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
               TVA Déductible sur les Achats
@@ -198,7 +202,7 @@ const SupplementTVA: FC = () => {
           </Box>
         </TabPanel>
 
-        <TabPanel value={activeTab} index={2}>
+        <TabPanel value={activeTab} index={2} label="Suivi Mensuel">
           <Box sx={{ p: 3 }}>
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
               Suivi des Déclarations Mensuelles
@@ -260,7 +264,7 @@ const SupplementTVA: FC = () => {
           </Box>
         </TabPanel>
 
-        <TabPanel value={activeTab} index={3}>
+        <TabPanel value={activeTab} index={3} label="Récapitulatif">
           <Box sx={{ p: 3 }}>
             <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
               Récapitulatif Annuel TVA

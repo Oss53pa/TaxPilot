@@ -34,12 +34,14 @@ import {
   Category as CategoryIcon,
 } from '@mui/icons-material'
 import { TabPanel } from '@/components/shared/TabPanel'
+import { usePrintMode } from '@/components/liasse/PrintModeContext'
 
 interface Note36TablesProps {
   initialTab?: number
 }
 
 const Note36Tables: React.FC<Note36TablesProps> = ({ initialTab = 0 }) => {
+  const printMode = usePrintMode()
   const [tabValue, setTabValue] = useState(initialTab)
   const [searchTerm, setSearchTerm] = useState('')
   const [expandedClasses, setExpandedClasses] = useState<string[]>([])
@@ -245,14 +247,16 @@ const Note36Tables: React.FC<Note36TablesProps> = ({ initialTab = 0 }) => {
       </Typography>
 
       <Paper sx={{ width: '100%' }}>
-        <Tabs value={tabValue} onChange={(_e, v) => setTabValue(v)} sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <Tab label="Plan Comptable" icon={<AccountTreeIcon />} iconPosition="start" />
-          <Tab label="Codes & Abréviations" icon={<CategoryIcon />} iconPosition="start" />
-          <Tab label="Instructions" icon={<DescriptionIcon />} iconPosition="start" />
-        </Tabs>
+        {!printMode && (
+          <Tabs value={tabValue} onChange={(_e, v) => setTabValue(v)} sx={{ borderBottom: 1, borderColor: 'divider' }}>
+            <Tab label="Plan Comptable" icon={<AccountTreeIcon />} iconPosition="start" />
+            <Tab label="Codes & Abréviations" icon={<CategoryIcon />} iconPosition="start" />
+            <Tab label="Instructions" icon={<DescriptionIcon />} iconPosition="start" />
+          </Tabs>
+        )}
 
         {/* Plan Comptable */}
-        <TabPanel value={tabValue} index={0}>
+        <TabPanel value={tabValue} index={0} label="Plan Comptable">
           <Box sx={{ mb: 3 }}>
             <TextField
               fullWidth
@@ -339,7 +343,7 @@ const Note36Tables: React.FC<Note36TablesProps> = ({ initialTab = 0 }) => {
         </TabPanel>
 
         {/* Codes & Abréviations */}
-        <TabPanel value={tabValue} index={1}>
+        <TabPanel value={tabValue} index={1} label="Codes & Abréviations">
           <TableContainer>
             <Table>
               <TableHead>
@@ -365,7 +369,7 @@ const Note36Tables: React.FC<Note36TablesProps> = ({ initialTab = 0 }) => {
         </TabPanel>
 
         {/* Instructions */}
-        <TabPanel value={tabValue} index={2}>
+        <TabPanel value={tabValue} index={2} label="Instructions">
           <Box sx={{ p: 2 }}>
             <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
               Instructions d'utilisation

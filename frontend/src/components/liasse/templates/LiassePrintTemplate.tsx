@@ -15,6 +15,12 @@ import {
   useTheme,
   Tooltip,
   IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  FormControlLabel,
+  Checkbox,
 } from '@mui/material'
 import {
   Print as PrintIcon,
@@ -37,8 +43,8 @@ import {
   type SectionId,
 } from '@/config/liasse-pages-config'
 import PageRenderer from './PageRenderer'
-import { printLiasse } from '@/services/liassePrintService'
 import { exportLiasseExcel } from '@/services/exportService'
+import { PrintModeProvider } from '@/components/liasse/PrintModeContext'
 import './PrintLayout.css'
 
 // ── Types ──
@@ -274,6 +280,9 @@ const LiassePrintTemplate: React.FC<LiassePrintTemplateProps> = ({ regime, entre
   const configRegime = REGIME_MAP[regime]
   const allPages = getPagesForRegime(configRegime)
   const [currentPageIndex, setCurrentPageIndex] = useState(0)
+  const [printMode, setPrintMode] = useState(false)
+  const [unfoldTabs, setUnfoldTabs] = useState(true)
+  const [printDialogOpen, setPrintDialogOpen] = useState(false)
   const contentRef = useRef<HTMLDivElement>(null)
 
   // Reset page index when regime changes or if out of bounds
@@ -302,8 +311,8 @@ const LiassePrintTemplate: React.FC<LiassePrintTemplateProps> = ({ regime, entre
   const handleLast = useCallback(() => handlePageSelect(allPages.length - 1), [allPages.length, handlePageSelect])
 
   const handlePrint = useCallback(() => {
-    printLiasse(regime, entreprise, exercice)
-  }, [regime, entreprise, exercice])
+    setPrintDialogOpen(true)
+  }, [])
 
   const handleExcel = useCallback(() => {
     exportLiasseExcel(
@@ -314,8 +323,13 @@ const LiassePrintTemplate: React.FC<LiassePrintTemplateProps> = ({ regime, entre
   }, [regime, entreprise, exercice])
 
   const handlePdf = useCallback(() => {
-    printLiasse(regime, entreprise, exercice)
-  }, [regime, entreprise, exercice])
+    setPrintDialogOpen(true)
+  }, [])
+
+  const handleConfirmPrint = useCallback(() => {
+    setPrintDialogOpen(false)
+    setPrintMode(true)
+  }, [])
 
   // Keyboard navigation
   React.useEffect(() => {
@@ -328,6 +342,47 @@ const LiassePrintTemplate: React.FC<LiassePrintTemplateProps> = ({ regime, entre
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
   }, [handlePrev, handleNext, handleFirst, handleLast])
+
+  // Trigger window.print() when entering print mode, then revert
+  useEffect(() => {
+    if (!printMode) return
+    // Small delay to let React render all pages
+    const timer = setTimeout(() => {
+      window.print()
+    }, 300)
+    const onAfterPrint = () => setPrintMode(false)
+    window.addEventListener('afterprint', onAfterPrint)
+    return () => {
+      clearTimeout(timer)
+      window.removeEventListener('afterprint', onAfterPrint)
+    }
+  }, [printMode])
+
+  if (printMode) {
+    return (
+      <PrintModeProvider value={unfoldTabs}>
+        <Box>
+          {/* Cover page */}
+          <Box className="liasse-page" sx={{ pageBreakAfter: 'always', textAlign: 'center', pt: '80mm' }}>
+            <Typography sx={{ fontSize: 24, fontWeight: 700, mb: 2 }}>LIASSE FISCALE SYSCOHADA</Typography>
+            <Typography sx={{ fontSize: 18, fontWeight: 600, mb: 1 }}>{entreprise.raison_sociale}</Typography>
+            <Typography sx={{ fontSize: 14, mb: 0.5 }}>N° Contribuable : {entreprise.numero_contribuable}</Typography>
+            {entreprise.forme_juridique && <Typography sx={{ fontSize: 14, mb: 0.5 }}>{entreprise.forme_juridique}</Typography>}
+            {entreprise.adresse && <Typography sx={{ fontSize: 14, mb: 0.5 }}>{entreprise.adresse}{entreprise.ville ? ` — ${entreprise.ville}` : ''}</Typography>}
+            <Typography sx={{ fontSize: 14, mt: 2 }}>Exercice clos le {exercice}</Typography>
+            <Typography sx={{ fontSize: 14, mt: 1 }}>{REGIME_LABELS[configRegime]} — {allPages.length} pages</Typography>
+          </Box>
+
+          {/* All pages */}
+          {allPages.map((page) => (
+            <Box key={page.id} className="liasse-page" sx={{ pageBreakAfter: 'always' }}>
+              <PageRenderer page={page} showHeader />
+            </Box>
+          ))}
+        </Box>
+      </PrintModeProvider>
+    )
+  }
 
   return (
     <Box sx={{ display: 'flex', height: '100%', minHeight: 600, border: `1px solid ${P.primary200}`, borderRadius: 1, overflow: 'hidden' }}>
@@ -378,6 +433,47 @@ const LiassePrintTemplate: React.FC<LiassePrintTemplateProps> = ({ regime, entre
           </Box>
         </Box>
       </Box>
+
+      {/* Print options dialog */}
+      <Dialog open={printDialogOpen} onClose={() => setPrintDialogOpen(false)} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ fontSize: 15, fontWeight: 700, pb: 0.5 }}>
+          Options d'impression
+        </DialogTitle>
+        <DialogContent>
+          <Typography sx={{ fontSize: 13, color: P.primary500, mb: 2 }}>
+            {REGIME_LABELS[configRegime]} — {allPages.length} pages
+          </Typography>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={unfoldTabs}
+                onChange={(e) => setUnfoldTabs(e.target.checked)}
+                size="small"
+              />
+            }
+            label={
+              <Box>
+                <Typography sx={{ fontSize: 13, fontWeight: 500 }}>
+                  Inclure le contenu des onglets secondaires
+                </Typography>
+                <Typography sx={{ fontSize: 11, color: P.primary400 }}>
+                  Deplie tous les onglets (Synthese, Detail, Analyse...) dans chaque page
+                </Typography>
+              </Box>
+            }
+          />
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button size="small" onClick={() => setPrintDialogOpen(false)} sx={{ fontSize: 12 }}>
+            Annuler
+          </Button>
+          <Button size="small" variant="contained" onClick={handleConfirmPrint}
+            startIcon={<PrintIcon />}
+            sx={{ fontSize: 12, backgroundColor: P.primary900, '&:hover': { backgroundColor: P.primary800 } }}>
+            Lancer l'impression
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   )
 }

@@ -36,6 +36,7 @@ import {
 } from '@mui/material'
 import { formatCurrency } from '@/utils/formatting'
 import { TabPanel } from '@/components/shared/TabPanel'
+import { usePrintMode } from '@/components/liasse/PrintModeContext'
 import { SheetHeader } from '@/components/liasse/common/SheetHeader'
 import {
   BusinessCenter as ImmobilisationIcon,
@@ -86,6 +87,7 @@ const CATEGORIES_IMMOBILISATIONS = [
 
 const Note6SYSCOHADA: React.FC = () => {
   const theme = useTheme()
+  const printMode = usePrintMode()
   const bal = useBalanceData()
   const [tabValue, setTabValue] = useState(0)
   const [immobilisations, setImmobilisations] = useState<ImmobilisationCorporelle[]>(() => {
@@ -463,24 +465,26 @@ const Note6SYSCOHADA: React.FC = () => {
       </Box>
 
       {/* Onglets */}
-      <Box sx={{ mb: 2 }}>
-        <Tabs value={tabValue} onChange={(_e, newValue) => setTabValue(newValue)}>
-          <Tab label="Synthèse" />
-          <Tab label="Détail" />
-          <Tab label="Méthodes comptables" />
-        </Tabs>
-      </Box>
+      {!printMode && (
+        <Box sx={{ mb: 2 }}>
+          <Tabs value={tabValue} onChange={(_e, newValue) => setTabValue(newValue)}>
+            <Tab label="Synthèse" />
+            <Tab label="Détail" />
+            <Tab label="Méthodes comptables" />
+          </Tabs>
+        </Box>
+      )}
 
       {/* Contenu des onglets */}
-      <TabPanel value={tabValue} index={0}>
+      <TabPanel value={tabValue} index={0} label="Synthèse">
         {renderTableauSynthese()}
       </TabPanel>
 
-      <TabPanel value={tabValue} index={1}>
+      <TabPanel value={tabValue} index={1} label="Détail">
         {renderTableauDetail()}
       </TabPanel>
 
-      <TabPanel value={tabValue} index={2}>
+      <TabPanel value={tabValue} index={2} label="Méthodes comptables">
         <Card sx={{ mb: 3 }}>
           <CardContent>
             <Typography variant="h6" sx={{ mb: 2 }}>

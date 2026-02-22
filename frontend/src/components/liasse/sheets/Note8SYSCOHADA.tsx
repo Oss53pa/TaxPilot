@@ -33,6 +33,7 @@ import {
 } from '@mui/material'
 import { formatCurrency } from '@/utils/formatting'
 import { TabPanel } from '@/components/shared/TabPanel'
+import { usePrintMode } from '@/components/liasse/PrintModeContext'
 import { SheetHeader } from '@/components/liasse/common/SheetHeader'
 import {
   Inventory as StockIcon,
@@ -109,6 +110,7 @@ const UNITES = [
 
 const Note8SYSCOHADA: React.FC = () => {
   const theme = useTheme()
+  const printMode = usePrintMode()
   const [tabValue, setTabValue] = useState(0)
   const [stocks, setStocks] = useState<Stock[]>([])
   const [comment, setComment] = useState('')
@@ -632,24 +634,26 @@ const Note8SYSCOHADA: React.FC = () => {
       </Box>
 
       {/* Onglets */}
-      <Box sx={{ mb: 2 }}>
-        <Tabs value={tabValue} onChange={(_e, newValue) => setTabValue(newValue)}>
-          <Tab label="Synthèse" />
-          <Tab label="Détail" />
-          <Tab label="Méthodes comptables" />
-        </Tabs>
-      </Box>
+      {!printMode && (
+        <Box sx={{ mb: 2 }}>
+          <Tabs value={tabValue} onChange={(_e, newValue) => setTabValue(newValue)}>
+            <Tab label="Synthèse" />
+            <Tab label="Détail" />
+            <Tab label="Méthodes comptables" />
+          </Tabs>
+        </Box>
+      )}
 
       {/* Contenu des onglets */}
-      <TabPanel value={tabValue} index={0}>
+      <TabPanel value={tabValue} index={0} label="Synthèse">
         {renderTableauSynthese()}
       </TabPanel>
 
-      <TabPanel value={tabValue} index={1}>
+      <TabPanel value={tabValue} index={1} label="Détail">
         {renderTableauDetail()}
       </TabPanel>
 
-      <TabPanel value={tabValue} index={2}>
+      <TabPanel value={tabValue} index={2} label="Méthodes comptables">
         {renderMethodesComptables()}
       </TabPanel>
 

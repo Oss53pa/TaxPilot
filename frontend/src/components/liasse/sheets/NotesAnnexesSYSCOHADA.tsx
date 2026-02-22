@@ -35,6 +35,7 @@ import {
   Info as InfoIcon,
 } from '@mui/icons-material'
 import { TabPanel } from '@/components/shared/TabPanel'
+import { usePrintMode } from '@/components/liasse/PrintModeContext'
 import { SheetHeader } from '@/components/liasse/common/SheetHeader'
 
 // Structure des notes annexes SYSCOHADA
@@ -98,6 +99,7 @@ const NOTES_STRUCTURE = [
 
 const NotesAnnexesSYSCOHADA: React.FC = () => {
   const theme = useTheme()
+  const printMode = usePrintMode()
   const [tabValue, setTabValue] = useState(0)
   const [notesContent, setNotesContent] = useState<{[key: number]: string}>({})
   const [expandedNote, setExpandedNote] = useState<number | false>(false)
@@ -354,36 +356,38 @@ const NotesAnnexesSYSCOHADA: React.FC = () => {
       </Box>
 
       {/* Navigation par catégorie */}
-      <Box sx={{ mb: 2 }}>
-        <Tabs 
-          value={tabValue} 
-          onChange={(_e, newValue) => setTabValue(newValue)}
-          variant="scrollable"
-          scrollButtons="auto"
-        >
-          {NOTES_STRUCTURE.map((category, _index) => (
-            <Tab
-              key={category.category}
-              label={category.category}
-              icon={
-                <Chip 
-                  label={category.notes.filter(n => notesContent[n.num]?.trim()).length}
-                  size="small"
-                  color={
-                    category.notes.filter(n => n.mandatory && notesContent[n.num]?.trim()).length === 
-                    category.notes.filter(n => n.mandatory).length ? "success" : "default"
-                  }
-                />
-              }
-              iconPosition="end"
-            />
-          ))}
-        </Tabs>
-      </Box>
+      {!printMode && (
+        <Box sx={{ mb: 2 }}>
+          <Tabs
+            value={tabValue}
+            onChange={(_e, newValue) => setTabValue(newValue)}
+            variant="scrollable"
+            scrollButtons="auto"
+          >
+            {NOTES_STRUCTURE.map((category, _index) => (
+              <Tab
+                key={category.category}
+                label={category.category}
+                icon={
+                  <Chip
+                    label={category.notes.filter(n => notesContent[n.num]?.trim()).length}
+                    size="small"
+                    color={
+                      category.notes.filter(n => n.mandatory && notesContent[n.num]?.trim()).length ===
+                      category.notes.filter(n => n.mandatory).length ? "success" : "default"
+                    }
+                  />
+                }
+                iconPosition="end"
+              />
+            ))}
+          </Tabs>
+        </Box>
+      )}
 
       {/* Contenu des onglets */}
       {NOTES_STRUCTURE.map((category, index) => (
-        <TabPanel key={category.category} value={tabValue} index={index}>
+        <TabPanel key={category.category} value={tabValue} index={index} label={category.category}>
           <Typography variant="h6" sx={{ mb: 2, color: theme.palette.primary.main, fontWeight: 600 }}>
             {category.category}
           </Typography>

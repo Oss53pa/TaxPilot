@@ -160,6 +160,70 @@ export function exportLiasseExcel(
   wsTft['!cols'] = [{ wch: 6 }, { wch: 45 }, { wch: 18 }]
   XLSX.utils.book_append_sheet(wb, wsTft, 'TFT')
 
+  // 6. TAFIRE
+  const tafire = liasseDataService.generateTAFIRE()
+  const tafireRows = [
+    ['TAFIRE — TABLEAU FINANCIER DES RESSOURCES ET EMPLOIS', '', ''],
+    ['', '', ''],
+    ['Libellé', 'Exercice N', 'Exercice N-1'],
+    ['', '', ''],
+    ['PARTIE I — ACTIVITÉ', '', ''],
+    ['Capacité d\'Autofinancement Globale (CAFG)', arrondiFCFA(tafire.CAFG), arrondiFCFA(tafire.CAFG_N1)],
+    ['(-) Dividendes distribués', arrondiFCFA(-tafire.dividendes), ''],
+    ['= Autofinancement', arrondiFCFA(tafire.autofinancement), ''],
+    ['', '', ''],
+    ['PARTIE II — INVESTISSEMENT', '', ''],
+    ['Acquisitions d\'immobilisations', arrondiFCFA(tafire.acquisImmo), ''],
+    ['Cessions d\'immobilisations', arrondiFCFA(tafire.cessions), ''],
+    ['Variation immobilisations financières', arrondiFCFA(tafire.varImmoFin), ''],
+    ['', '', ''],
+    ['PARTIE III — FINANCEMENT', '', ''],
+    ['Augmentation de capital', arrondiFCFA(tafire.augCapital), ''],
+    ['Emprunts nouveaux', arrondiFCFA(tafire.empruntsNouveaux), ''],
+    ['Remboursement d\'emprunts', arrondiFCFA(-tafire.remboursements), ''],
+    ['', '', ''],
+    ['VARIATION DU BFR', '', ''],
+    ['Variation des stocks', arrondiFCFA(tafire.varStocks), ''],
+    ['Variation des créances', arrondiFCFA(tafire.varCreances), ''],
+    ['Variation des dettes fournisseurs', arrondiFCFA(tafire.varFournisseurs), ''],
+    ['Variation du BFR', arrondiFCFA(tafire.varBFR), ''],
+    ['', '', ''],
+    ['SYNTHÈSE', '', ''],
+    ['Total des emplois', arrondiFCFA(tafire.totalEmplois), ''],
+    ['Total des ressources', arrondiFCFA(tafire.totalRessources), ''],
+    ['VARIATION DE TRÉSORERIE', arrondiFCFA(tafire.varTresorerie), ''],
+  ]
+  const wsTafire = XLSX.utils.aoa_to_sheet(tafireRows)
+  wsTafire['!cols'] = [{ wch: 50 }, { wch: 18 }, { wch: 18 }]
+  XLSX.utils.book_append_sheet(wb, wsTafire, 'TAFIRE')
+
+  // 7. Passage Fiscal
+  const resultatNet = sig.find((s: any) => s.ref === 'SIG9')?.montant ?? 0
+  const passageFiscalRows = [
+    ['TABLEAU DE PASSAGE — RÉSULTAT COMPTABLE AU RÉSULTAT FISCAL', ''],
+    ['', ''],
+    ['Désignation', 'Montant (FCFA)'],
+    ['Résultat comptable net', arrondiFCFA(resultatNet)],
+    ['', ''],
+    ['RÉINTÉGRATIONS', ''],
+    ['Charges non déductibles', ''],
+    ['Amortissements excédentaires', ''],
+    ['Provisions non déductibles', ''],
+    ['Total réintégrations', ''],
+    ['', ''],
+    ['DÉDUCTIONS', ''],
+    ['Produits non imposables', ''],
+    ['Dividendes reçus (régime mère-fille)', ''],
+    ['Total déductions', ''],
+    ['', ''],
+    ['RÉSULTAT FISCAL', arrondiFCFA(resultatNet)],
+    ['', ''],
+    ['Note : Les réintégrations et déductions sont à renseigner manuellement.', ''],
+  ]
+  const wsPassage = XLSX.utils.aoa_to_sheet(passageFiscalRows)
+  wsPassage['!cols'] = [{ wch: 50 }, { wch: 18 }]
+  XLSX.utils.book_append_sheet(wb, wsPassage, 'Passage Fiscal')
+
   // Generate file
   const filename = `Liasse_${typeLiasse}_${entreprise.raison_sociale.replace(/\s+/g, '_')}_${exercice}.xlsx`
   const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' })

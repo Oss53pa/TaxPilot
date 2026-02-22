@@ -44,6 +44,7 @@ import {
 } from '@mui/icons-material'
 import { formatCurrency } from '@/utils/formatting'
 import { TabPanel } from '@/components/shared/TabPanel'
+import { usePrintMode } from '@/components/liasse/PrintModeContext'
 import { SheetHeader } from '@/components/liasse/common/SheetHeader'
 
 interface Emprunt {
@@ -90,6 +91,7 @@ const TYPES_REMBOURSEMENT = [
 
 const Note14SYSCOHADA: React.FC = () => {
   const theme = useTheme()
+  const printMode = usePrintMode()
   const [tabValue, setTabValue] = useState(0)
   const [emprunts, setEmprunts] = useState<Emprunt[]>([])
   const [selectedEmprunt, setSelectedEmprunt] = useState<string | null>(null)
@@ -732,24 +734,26 @@ const Note14SYSCOHADA: React.FC = () => {
       </Box>
 
       {/* Onglets */}
-      <Box sx={{ mb: 2 }}>
-        <Tabs value={tabValue} onChange={(_e, newValue) => setTabValue(newValue)}>
-          <Tab label="Détail des emprunts" />
-          <Tab label="Échéancier" />
-          <Tab label="Analyse" />
-        </Tabs>
-      </Box>
+      {!printMode && (
+        <Box sx={{ mb: 2 }}>
+          <Tabs value={tabValue} onChange={(_e, newValue) => setTabValue(newValue)}>
+            <Tab label="Détail des emprunts" />
+            <Tab label="Échéancier" />
+            <Tab label="Analyse" />
+          </Tabs>
+        </Box>
+      )}
 
       {/* Contenu des onglets */}
-      <TabPanel value={tabValue} index={0}>
+      <TabPanel value={tabValue} index={0} label="Détail des emprunts">
         {renderTableauEmprunts()}
       </TabPanel>
 
-      <TabPanel value={tabValue} index={1}>
+      <TabPanel value={tabValue} index={1} label="Échéancier">
         {renderEcheancier()}
       </TabPanel>
 
-      <TabPanel value={tabValue} index={2}>
+      <TabPanel value={tabValue} index={2} label="Analyse">
         {renderAnalyse()}
       </TabPanel>
 
