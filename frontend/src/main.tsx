@@ -3,13 +3,37 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { ThemeProvider, CssBaseline } from '@mui/material'
-import { SnackbarProvider } from 'notistack'
+import { ThemeProvider, CssBaseline, styled } from '@mui/material'
+import { SnackbarProvider, MaterialDesignContent } from 'notistack'
 import { Provider } from 'react-redux'
 import App from './App.tsx'
 import { store } from './store/index.ts'
-import fiscasyncTheme from './theme/fiscasyncTheme.ts'
+import fiscasyncTheme, { fiscasyncPalette } from './theme/fiscasyncTheme.ts'
 import './index.css'
+
+// Notistack styled snackbar variants - prevent white-on-white from MuiPaper override
+const StyledMaterialDesignContent = styled(MaterialDesignContent)(() => ({
+  '&.notistack-MuiContent-success': {
+    backgroundColor: fiscasyncPalette.success,
+    color: '#ffffff',
+  },
+  '&.notistack-MuiContent-error': {
+    backgroundColor: fiscasyncPalette.error,
+    color: '#ffffff',
+  },
+  '&.notistack-MuiContent-warning': {
+    backgroundColor: fiscasyncPalette.warning,
+    color: '#ffffff',
+  },
+  '&.notistack-MuiContent-info': {
+    backgroundColor: fiscasyncPalette.info,
+    color: '#ffffff',
+  },
+  '&.notistack-MuiContent-default': {
+    backgroundColor: fiscasyncPalette.primary900,
+    color: '#ffffff',
+  },
+}))
 import './styles/contrast-fix.css'
 
 // Configuration du client React Query
@@ -68,6 +92,13 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
             maxSnack={3}
             anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
             autoHideDuration={4000}
+            Components={{
+              success: StyledMaterialDesignContent,
+              error: StyledMaterialDesignContent,
+              warning: StyledMaterialDesignContent,
+              info: StyledMaterialDesignContent,
+              default: StyledMaterialDesignContent,
+            }}
           >
             <BrowserRouter
               future={{

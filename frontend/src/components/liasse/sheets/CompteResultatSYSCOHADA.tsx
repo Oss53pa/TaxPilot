@@ -346,9 +346,12 @@ const CompteResultatSYSCOHADA: React.FC<CompteResultatProps> = ({ onNoteClick })
               label={item.note}
               size="small"
               variant="outlined"
-              onClick={onNoteClick ? () => onNoteClick(`note${item.note.replace(/[^0-9]/g, '') || item.note}`) : undefined}
+              clickable={!!onNoteClick}
+              onClick={onNoteClick ? () => { onNoteClick(`note${item.note.replace(/[^0-9]/g, '') || item.note}`); } : undefined}
+              color={onNoteClick ? 'primary' : 'default'}
               sx={onNoteClick ? {
                 cursor: 'pointer',
+                fontWeight: 600,
                 '&:hover': { bgcolor: 'primary.main', color: 'white', borderColor: 'primary.main' },
               } : undefined}
             />

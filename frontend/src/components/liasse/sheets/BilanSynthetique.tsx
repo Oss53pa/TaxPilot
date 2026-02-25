@@ -62,6 +62,7 @@ interface BilanSynthetiqueProps {
   data?: any
   exerciceN?: number
   exerciceN1?: number
+  onNoteClick?: (noteId: string) => void
 }
 
 // ─── Structures SYSCOHADA officielles ────────────────────────────────────────
@@ -158,6 +159,7 @@ const BilanSynthetique: React.FC<BilanSynthetiqueProps> = ({
   data: _data,
   exerciceN = 2024,
   exerciceN1 = 2023,
+  onNoteClick,
 }) => {
   const theme = useTheme()
 
@@ -323,7 +325,17 @@ const BilanSynthetique: React.FC<BilanSynthetiqueProps> = ({
           {row.label}
         </TableCell>
         <TableCell align="center" sx={{ width: 50 }}>
-          {row.note && <Chip label={row.note} size="small" variant="outlined" sx={{ height: 22, fontSize: '0.75rem' }} />}
+          {row.note && (
+            <Chip
+              label={row.note}
+              size="small"
+              variant="outlined"
+              clickable={!!onNoteClick}
+              onClick={onNoteClick ? () => { onNoteClick(`note${row.note!.replace(/[^0-9]/g, '') || row.note}`); } : undefined}
+              color={onNoteClick ? 'primary' : 'default'}
+              sx={{ height: 22, fontSize: '0.75rem', fontWeight: 600, ...(onNoteClick ? { cursor: 'pointer', '&:hover': { bgcolor: 'primary.main', color: 'white', borderColor: 'primary.main' } } : {}) }}
+            />
+          )}
         </TableCell>
         <TableCell align="right" sx={{ width: 120, fontWeight: getValueWeight(row.type) }}>
           {formatMontant(values?.brut)}
@@ -363,7 +375,17 @@ const BilanSynthetique: React.FC<BilanSynthetiqueProps> = ({
           {row.label}
         </TableCell>
         <TableCell align="center" sx={{ width: 50 }}>
-          {row.note && <Chip label={row.note} size="small" variant="outlined" sx={{ height: 22, fontSize: '0.75rem' }} />}
+          {row.note && (
+            <Chip
+              label={row.note}
+              size="small"
+              variant="outlined"
+              clickable={!!onNoteClick}
+              onClick={onNoteClick ? () => { onNoteClick(`note${row.note!.replace(/[^0-9]/g, '') || row.note}`); } : undefined}
+              color={onNoteClick ? 'primary' : 'default'}
+              sx={{ height: 22, fontSize: '0.75rem', fontWeight: 600, ...(onNoteClick ? { cursor: 'pointer', '&:hover': { bgcolor: 'primary.main', color: 'white', borderColor: 'primary.main' } } : {}) }}
+            />
+          )}
         </TableCell>
         <TableCell align="right" sx={{ width: 140, fontWeight: getValueWeight(row.type), backgroundColor: alpha(theme.palette.info.main, 0.04), color: row.type === 'grandtotal' ? theme.palette.error.dark : 'inherit' }}>
           {formatMontant(values?.netN)}

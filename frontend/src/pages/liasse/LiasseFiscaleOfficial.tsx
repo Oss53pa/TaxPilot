@@ -378,7 +378,7 @@ const LiasseFiscaleOfficial: React.FC = () => {
       case 'fiche_r4': return <FicheR4SYSCOHADA />
 
       // États financiers
-      case 'bilan': return <BilanSynthetique />
+      case 'bilan': return <BilanSynthetique onNoteClick={setSelectedSheet} />
       case 'actif': return <BilanActifSYSCOHADA onNoteClick={setSelectedSheet} />
       case 'passif': return <BilanPassifSYSCOHADA onNoteClick={setSelectedSheet} />
       case 'resultat': return <CompteResultatSYSCOHADA onNoteClick={setSelectedSheet} />

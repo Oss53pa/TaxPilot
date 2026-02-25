@@ -357,12 +357,52 @@ export const fiscasyncTheme = createTheme({
           fontWeight: 500,
         },
         filled: {
-          backgroundColor: fiscasyncPalette.primary100,
-          color: fiscasyncPalette.primary700,
+          backgroundColor: fiscasyncPalette.primary200,
+          color: fiscasyncPalette.primary900,
+          '&.MuiChip-colorPrimary': {
+            backgroundColor: fiscasyncPalette.primary900,
+            color: fiscasyncPalette.white,
+          },
+          '&.MuiChip-colorSuccess': {
+            backgroundColor: fiscasyncPalette.success,
+            color: fiscasyncPalette.white,
+          },
+          '&.MuiChip-colorWarning': {
+            backgroundColor: fiscasyncPalette.warning,
+            color: fiscasyncPalette.white,
+          },
+          '&.MuiChip-colorError': {
+            backgroundColor: fiscasyncPalette.error,
+            color: fiscasyncPalette.white,
+          },
+          '&.MuiChip-colorInfo': {
+            backgroundColor: fiscasyncPalette.info,
+            color: fiscasyncPalette.white,
+          },
         },
         outlined: {
-          borderColor: fiscasyncPalette.primary200,
-          color: fiscasyncPalette.primary600,
+          borderColor: fiscasyncPalette.primary400,
+          color: fiscasyncPalette.primary900,
+          '&.MuiChip-colorPrimary': {
+            borderColor: fiscasyncPalette.primary900,
+            color: fiscasyncPalette.primary900,
+          },
+          '&.MuiChip-colorSuccess': {
+            borderColor: fiscasyncPalette.success,
+            color: fiscasyncPalette.success,
+          },
+          '&.MuiChip-colorWarning': {
+            borderColor: fiscasyncPalette.warning,
+            color: '#92400e',
+          },
+          '&.MuiChip-colorError': {
+            borderColor: fiscasyncPalette.error,
+            color: fiscasyncPalette.error,
+          },
+          '&.MuiChip-colorInfo': {
+            borderColor: fiscasyncPalette.info,
+            color: fiscasyncPalette.info,
+          },
         },
       },
     },
