@@ -25,6 +25,7 @@ import { useAuthStore } from '@/store/authStore'
 import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
 import { useEntrepriseData } from '@/hooks/useEntrepriseData'
 import { useBalanceData } from '@/hooks/useBalanceData'
+import OnboardingTour from '@/components/onboarding/OnboardingTour'
 
 const ModernDashboard: React.FC = () => {
   const navigate = useNavigate()
@@ -88,6 +89,7 @@ const ModernDashboard: React.FC = () => {
       bgcolor: 'background.paper',
       position: 'relative',
     }}>
+      <OnboardingTour />
       {/* Header bar */}
       <Box sx={{
         display: 'flex',

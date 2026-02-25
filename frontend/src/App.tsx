@@ -46,14 +46,12 @@ const SubscriptionPage = React.lazy(() => import('@/pages/organization/Subscript
 const InvitationsPage = React.lazy(() => import('@/pages/organization/InvitationsPage'))
 
 import { useAuthStore } from './store/authStore'
-import OnboardingTour from './components/onboarding/OnboardingTour'
 import TestComponents from './components/shared/TestComponents'
 import ButtonTest from './components/debug/ButtonTest'
 
 /** Wrapper: page avec sidebar */
 const WithSidebar: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <ModernLayout>
-    <OnboardingTour />
     {children}
   </ModernLayout>
 )

@@ -110,7 +110,11 @@ interface CompteResultatData {
   }
 }
 
-const CompteResultatSYSCOHADA: React.FC = () => {
+interface CompteResultatProps {
+  onNoteClick?: (noteId: string) => void
+}
+
+const CompteResultatSYSCOHADA: React.FC<CompteResultatProps> = ({ onNoteClick }) => {
   const theme = useTheme()
   const [data, setData] = useState<CompteResultatData>({})
   const [comment, setComment] = useState('')
@@ -337,7 +341,18 @@ const CompteResultatSYSCOHADA: React.FC = () => {
         </TableCell>
         
         <TableCell sx={{ width: '60px', textAlign: 'center' }}>
-          {item.note && <Chip label={item.note} size="small" variant="outlined" />}
+          {item.note && (
+            <Chip
+              label={item.note}
+              size="small"
+              variant="outlined"
+              onClick={onNoteClick ? () => onNoteClick(`note${item.note.replace(/[^0-9]/g, '') || item.note}`) : undefined}
+              sx={onNoteClick ? {
+                cursor: 'pointer',
+                '&:hover': { bgcolor: 'primary.main', color: 'white', borderColor: 'primary.main' },
+              } : undefined}
+            />
+          )}
         </TableCell>
         
         <TableCell align="right" sx={{ 

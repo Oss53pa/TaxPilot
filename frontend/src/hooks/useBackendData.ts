@@ -7,6 +7,9 @@ import { logger } from '@/utils/logger'
 import { useState, useEffect } from 'react'
 import * as services from '@/services'
 
+// Backend désactivé → on renvoie directement defaultData sans appel réseau
+const BACKEND_ENABLED = import.meta.env.VITE_BACKEND_ENABLED === 'true'
+
 interface UseBackendDataOptions {
   service: keyof typeof services
   method: string
@@ -23,10 +26,12 @@ export const useBackendData = <T = any>({
   autoLoad = true
 }: UseBackendDataOptions) => {
   const [data, setData] = useState<T | null>(defaultData)
-  const [loading, setLoading] = useState(autoLoad)
+  const [loading, setLoading] = useState(BACKEND_ENABLED && autoLoad)
   const [error, setError] = useState<Error | null>(null)
 
   const loadData = async () => {
+    if (!BACKEND_ENABLED) return defaultData
+
     try {
       setLoading(true)
       setError(null)
@@ -59,7 +64,7 @@ export const useBackendData = <T = any>({
   }
 
   useEffect(() => {
-    if (autoLoad) {
+    if (BACKEND_ENABLED && autoLoad) {
       loadData()
     }
   }, [])

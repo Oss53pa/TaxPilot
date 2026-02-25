@@ -112,7 +112,11 @@ interface TFTData {
   }
 }
 
-const TableauFluxTresorerieSYSCOHADA: FC = () => {
+interface TFTProps {
+  onNoteClick?: (noteId: string) => void
+}
+
+const TableauFluxTresorerieSYSCOHADA: FC<TFTProps> = ({ onNoteClick }) => {
   const theme = useTheme()
   const [data, setData] = useState<TFTData>({})
   const [comment, setComment] = useState('')
@@ -390,7 +394,18 @@ const TableauFluxTresorerieSYSCOHADA: FC = () => {
 
         {/* Note */}
         <TableCell sx={{ width: 60, textAlign: 'center' }}>
-          {item.note && <Chip label={item.note} size="small" variant="outlined" />}
+          {item.note && (
+            <Chip
+              label={item.note}
+              size="small"
+              variant="outlined"
+              onClick={onNoteClick && item.note ? () => onNoteClick(`note${item.note!.replace(/[^0-9]/g, '') || item.note}`) : undefined}
+              sx={onNoteClick ? {
+                cursor: 'pointer',
+                '&:hover': { bgcolor: 'primary.main', color: 'white', borderColor: 'primary.main' },
+              } : undefined}
+            />
+          )}
         </TableCell>
 
         {/* Exercice N */}

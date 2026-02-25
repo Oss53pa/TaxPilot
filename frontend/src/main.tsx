@@ -4,6 +4,7 @@ import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ThemeProvider, CssBaseline } from '@mui/material'
+import { SnackbarProvider } from 'notistack'
 import { Provider } from 'react-redux'
 import App from './App.tsx'
 import { store } from './store/index.ts'
@@ -63,14 +64,20 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <QueryClientProvider client={queryClient}>
         <ThemeProvider theme={fiscasyncTheme}>
           <CssBaseline />
-          <BrowserRouter
-            future={{
-              v7_startTransition: true,
-              v7_relativeSplatPath: true
-            }}
+          <SnackbarProvider
+            maxSnack={3}
+            anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+            autoHideDuration={4000}
           >
-            <App />
-          </BrowserRouter>
+            <BrowserRouter
+              future={{
+                v7_startTransition: true,
+                v7_relativeSplatPath: true
+              }}
+            >
+              <App />
+            </BrowserRouter>
+          </SnackbarProvider>
         </ThemeProvider>
       </QueryClientProvider>
     </Provider>

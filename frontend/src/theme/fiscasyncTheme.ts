@@ -295,27 +295,56 @@ export const fiscasyncTheme = createTheme({
     },
 
     // ── Alerts ──
+    // Use root with nested selectors for higher specificity than MuiPaper.root
     MuiAlert: {
       styleOverrides: {
-        standardSuccess: {
-          backgroundColor: '#f0fdf4',
-          color: '#166534',
-          '& .MuiAlert-icon': { color: fiscasyncPalette.success },
+        root: {
+          '&.MuiAlert-standardSuccess': {
+            backgroundColor: '#f0fdf4',
+            color: '#166534',
+            '& .MuiAlert-icon': { color: fiscasyncPalette.success },
+          },
+          '&.MuiAlert-standardWarning': {
+            backgroundColor: '#fffbeb',
+            color: '#92400e',
+            '& .MuiAlert-icon': { color: fiscasyncPalette.warning },
+          },
+          '&.MuiAlert-standardError': {
+            backgroundColor: '#fef2f2',
+            color: '#991b1b',
+            '& .MuiAlert-icon': { color: fiscasyncPalette.error },
+          },
+          '&.MuiAlert-standardInfo': {
+            backgroundColor: '#eff6ff',
+            color: '#1e40af',
+            '& .MuiAlert-icon': { color: fiscasyncPalette.info },
+          },
+          '&.MuiAlert-filledSuccess': {
+            backgroundColor: fiscasyncPalette.success,
+            color: '#ffffff',
+          },
+          '&.MuiAlert-filledWarning': {
+            backgroundColor: fiscasyncPalette.warning,
+            color: '#ffffff',
+          },
+          '&.MuiAlert-filledError': {
+            backgroundColor: fiscasyncPalette.error,
+            color: '#ffffff',
+          },
+          '&.MuiAlert-filledInfo': {
+            backgroundColor: fiscasyncPalette.info,
+            color: '#ffffff',
+          },
         },
-        standardWarning: {
-          backgroundColor: '#fffbeb',
-          color: '#92400e',
-          '& .MuiAlert-icon': { color: fiscasyncPalette.warning },
-        },
-        standardError: {
-          backgroundColor: '#fef2f2',
-          color: '#991b1b',
-          '& .MuiAlert-icon': { color: fiscasyncPalette.error },
-        },
-        standardInfo: {
-          backgroundColor: '#eff6ff',
-          color: '#1e40af',
-          '& .MuiAlert-icon': { color: fiscasyncPalette.info },
+      },
+    },
+
+    // ── Snackbar ──
+    MuiSnackbarContent: {
+      styleOverrides: {
+        root: {
+          backgroundColor: fiscasyncPalette.primary900,
+          color: fiscasyncPalette.white,
         },
       },
     },

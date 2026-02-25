@@ -7,9 +7,16 @@ import { STORAGE_KEYS } from '@/constants/storage'
 import { API_TIMEOUTS } from '@/constants/api'
 import { logger } from '@/utils/logger'
 
+// Mode sans backend : toutes les requêtes renvoient des données vides
+const BACKEND_ENABLED = import.meta.env.VITE_BACKEND_ENABLED === 'true'
+
 // Configuration de base - CONNEXION RÉELLE AU BACKEND
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
-logger.debug('API_BASE_URL:', API_BASE_URL)
+if (BACKEND_ENABLED) {
+  logger.debug('API_BASE_URL:', API_BASE_URL)
+} else {
+  logger.debug('Backend désactivé – les requêtes API renvoient des données vides')
+}
 
 // Types pour l'authentification
 export interface LoginCredentials {
@@ -458,6 +465,7 @@ class ApiClient {
    * GET request
    */
   public async get<T>(url: string, params?: Record<string, any>): Promise<T> {
+    if (!BACKEND_ENABLED) return { results: [], count: 0 } as unknown as T
     const response = await this.api.get<T>(url, { params })
     return response.data
   }
@@ -466,6 +474,7 @@ class ApiClient {
    * POST request
    */
   public async post<T>(url: string, data?: unknown): Promise<T> {
+    if (!BACKEND_ENABLED) return {} as T
     const response = await this.api.post<T>(url, data)
     return response.data
   }
@@ -474,6 +483,7 @@ class ApiClient {
    * PUT request
    */
   public async put<T>(url: string, data?: unknown): Promise<T> {
+    if (!BACKEND_ENABLED) return {} as T
     const response = await this.api.put<T>(url, data)
     return response.data
   }
@@ -482,6 +492,7 @@ class ApiClient {
    * PATCH request
    */
   public async patch<T>(url: string, data?: unknown): Promise<T> {
+    if (!BACKEND_ENABLED) return {} as T
     const response = await this.api.patch<T>(url, data)
     return response.data
   }
@@ -490,6 +501,7 @@ class ApiClient {
    * DELETE request
    */
   public async delete<T>(url: string): Promise<T> {
+    if (!BACKEND_ENABLED) return {} as T
     const response = await this.api.delete<T>(url)
     return response.data
   }
@@ -498,6 +510,7 @@ class ApiClient {
    * Upload de fichier
    */
   public async upload<T>(url: string, file: File, additionalData?: Record<string, any>): Promise<T> {
+    if (!BACKEND_ENABLED) return {} as T
     const formData = new FormData()
     formData.append('file', file)
 

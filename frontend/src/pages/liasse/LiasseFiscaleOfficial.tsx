@@ -379,10 +379,10 @@ const LiasseFiscaleOfficial: React.FC = () => {
 
       // États financiers
       case 'bilan': return <BilanSynthetique />
-      case 'actif': return <BilanActifSYSCOHADA />
-      case 'passif': return <BilanPassifSYSCOHADA />
-      case 'resultat': return <CompteResultatSYSCOHADA />
-      case 'tft': return <TableauFluxTresorerieSYSCOHADA />
+      case 'actif': return <BilanActifSYSCOHADA onNoteClick={setSelectedSheet} />
+      case 'passif': return <BilanPassifSYSCOHADA onNoteClick={setSelectedSheet} />
+      case 'resultat': return <CompteResultatSYSCOHADA onNoteClick={setSelectedSheet} />
+      case 'tft': return <TableauFluxTresorerieSYSCOHADA onNoteClick={setSelectedSheet} />
 
       // Notes annexes - composants spécifiques
       case 'note1': return <Note1SYSCOHADA />

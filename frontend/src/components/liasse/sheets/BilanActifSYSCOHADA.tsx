@@ -106,7 +106,11 @@ interface BilanActifData {
   }
 }
 
-const BilanActifSYSCOHADA: React.FC = () => {
+interface BilanActifProps {
+  onNoteClick?: (noteId: string) => void
+}
+
+const BilanActifSYSCOHADA: React.FC<BilanActifProps> = ({ onNoteClick }) => {
   const theme = useTheme()
   const [data, setData] = useState<BilanActifData>({})
   const [comment, setComment] = useState('')
@@ -277,7 +281,16 @@ const BilanActifSYSCOHADA: React.FC = () => {
         
         <TableCell sx={{ width: '60px', textAlign: 'center' }}>
           {item.note ? (
-            <Chip label={item.note} size="small" variant="outlined" />
+            <Chip
+              label={item.note}
+              size="small"
+              variant="outlined"
+              onClick={onNoteClick ? () => onNoteClick(`note${item.note.replace(/[^0-9]/g, '') || item.note}`) : undefined}
+              sx={onNoteClick ? {
+                cursor: 'pointer',
+                '&:hover': { bgcolor: 'primary.main', color: 'white', borderColor: 'primary.main' },
+              } : undefined}
+            />
           ) : isEditable ? (
             <TextField
               size="small"
