@@ -139,7 +139,7 @@ export interface SimulationFiscale {
 }
 
 class TaxService {
-  private baseUrl = '/api/v1/fiscal'
+  private baseUrl = '/api/v1/tax/'
 
   // Impôts et taxes - CONNEXION RÉELLE AU BACKEND
   async getImpots(params?: {
@@ -228,6 +228,7 @@ class TaxService {
     periode_debut?: string
     periode_fin?: string
     page?: number
+    page_size?: number
   }) {
     console.log('🔄 Fetching déclarations from backend...', params)
     return apiClient.get(`${this.baseUrl}/declarations/`, params)
@@ -310,6 +311,7 @@ class TaxService {
     date_debut?: string
     date_fin?: string
     page?: number
+    page_size?: number
   }) {
     console.log('🔄 Fetching obligations fiscales from backend...', params)
     return apiClient.get(`${this.baseUrl}/obligations/`, params)

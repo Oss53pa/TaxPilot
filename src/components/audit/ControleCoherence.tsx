@@ -52,6 +52,7 @@ import {
   InfoOutlined,
 } from '@mui/icons-material'
 import { coherenceService, type ControleCoherence, type ResultatValidation } from '@/services/coherenceService'
+import { liasseDataService, SYSCOHADA_MAPPING } from '@/services/liasseDataService'
 
 const ControleCoherenceComponent: React.FC = () => {
   const [resultats, setResultats] = useState<ResultatValidation | null>(null)
@@ -66,61 +67,103 @@ const ControleCoherenceComponent: React.FC = () => {
   const lancerControles = async () => {
     setLoading(true)
     try {
-      // Données de test - remplacer par vraies données liasse
-      const donneesTest = {
+      // Calculer les données réelles depuis la balance chargée
+      const svc = liasseDataService
+      const bilanActifRows = svc.isLoaded() ? svc.generateBilanActif() : []
+      const bilanPassifRows = svc.isLoaded() ? svc.generateBilanPassif() : []
+      const crData = svc.isLoaded() ? svc.generateCompteResultat() : { charges: [], produits: [] }
+
+      // Helper: sum net by refs
+      const sumActifNet = (refs: string[]) => bilanActifRows.filter((r: any) => refs.includes(r.ref)).reduce((s: number, r: any) => s + r.net, 0)
+      const sumPassif = (refs: string[]) => bilanPassifRows.filter((r: any) => refs.includes(r.ref)).reduce((s: number, r: any) => s + r.montant, 0)
+      const sumCharges = (refs: string[]) => crData.charges.filter((r: any) => refs.includes(r.ref)).reduce((s: number, r: any) => s + r.montant, 0)
+      const sumProduits = (refs: string[]) => crData.produits.filter((r: any) => refs.includes(r.ref)).reduce((s: number, r: any) => s + r.montant, 0)
+
+      // Immobilisations corporelles = refs AJ+AK+AL+AM+AN (net)
+      const immoCorporellesBilan = sumActifNet(['AJ', 'AK', 'AL', 'AM', 'AN'])
+      // Immobilisations incorporelles = refs AD+AE+AF+AG (net)
+      const immoIncorporellesBilan = sumActifNet(['AD', 'AE', 'AF', 'AG'])
+      // Stocks = refs BC+BD+BE+BF+BG (net)
+      const stocksBilan = sumActifNet(['BC', 'BD', 'BE', 'BF', 'BG'])
+      // Total actif / passif
+      const totalActif = bilanActifRows.reduce((s: number, r: any) => s + r.net, 0)
+      const totalPassif = bilanPassifRows.reduce((s: number, r: any) => s + r.montant, 0)
+      // Dettes financières = DA+DB+DC+DD+DE+DF
+      const dettesFinancieres = sumPassif(['DA', 'DB', 'DC', 'DD', 'DE', 'DF'])
+      // Provisions = CJ
+      const provisions = sumPassif(['CJ'])
+      // CA from produits
+      const chiffreAffaires = sumProduits(['TA', 'TB', 'TC'])
+      // Dotations amortissements (RL in charges)
+      const dotationsAmort = sumCharges(['RL'])
+      // Dotations provisions (RM in charges)
+      const dotationsProv = sumCharges(['RM'])
+
+      // Note 6 data for cross-check
+      const note6 = svc.isLoaded() ? svc.generateNote6() : []
+      const note6NetCorp = note6.reduce((s: number, l: any) => s + l.valeurNette, 0)
+      // Note 3A for incorporelles
+      const note3A = svc.isLoaded() ? svc.generateNote3A() : { incorporelles: [], corporelles: [], financieres: [], avances: [] }
+      const note3ANetIncorp = note3A.incorporelles.reduce((s: number, l: any) => s + (l.brutCloture || 0), 0)
+      // Note 8 for stocks
+      const note8 = svc.isLoaded() ? svc.generateNote8() : []
+      const note8Total = note8.reduce((s: number, l: any) => s + l.valeurNette, 0)
+      // Note 14 for dettes
+      const note14 = svc.isLoaded() ? svc.generateNote14() : []
+      const note14Total = note14.reduce((s: number, l: any) => s + l.solde, 0)
+      // Note 17 for CA
+      const note17 = svc.isLoaded() ? svc.generateNote17() : []
+      const note17Total = note17.reduce((s: number, l: any) => s + l.montantN, 0)
+
+      const donneesReelles = {
         bilanActif: {
-          immobilisationsCorporelles: 150000000,
-          immobilisationsIncorporelles: 25000000,
-          stocks: 45000000,
-          creancesClients: 30000000,
-          totalActif: 280000000
+          immobilisationsCorporelles: immoCorporellesBilan,
+          immobilisationsIncorporelles: immoIncorporellesBilan,
+          stocks: stocksBilan,
+          creancesClients: sumActifNet(['BJ']),
+          totalActif,
         },
         bilanPassif: {
-          dettesFinancieres: 80000000,
-          provisions: 15000000,
-          totalPassif: 280000000
+          dettesFinancieres,
+          provisions,
+          totalPassif,
         },
         compteResultat: {
-          chiffreAffaires: 200000000,
-          dotationsAmortissements: 18000000,
-          dotationsProvisions: 5000000
+          chiffreAffaires,
+          dotationsAmortissements: dotationsAmort,
+          dotationsProvisions: dotationsProv,
         },
         tft: {
-          fluxExploitation: { total: 25000000, dotationsAmortissements: 18000000 },
-          fluxInvestissement: { 
-            total: -15000000,
-            acquisitionsImmobilisations: 20000000,
-            cessionImmobilisations: 5000000,
-            subventionsRecues: 0
-          },
-          fluxFinancement: { total: -8000000 },
-          variationTresorerie: 2000000
+          fluxExploitation: { total: 0, dotationsAmortissements: dotationsAmort },
+          fluxInvestissement: { total: 0, acquisitionsImmobilisations: 0, cessionImmobilisations: 0, subventionsRecues: 0 },
+          fluxFinancement: { total: 0 },
+          variationTresorerie: 0,
         },
         notesAnnexes: {
           tableauImmobilisations: {
-            totalNetCorporelles: 148000000, // Écart de 2M avec bilan
-            totalNetIncorporelles: 25000000,
-            mouvements: { augmentations: 20000000, diminutions: 5000000 },
-            amortissements: { dotationsExercice: 18000000 },
-            subventions: { recuesExercice: 0 }
+            totalNetCorporelles: note6NetCorp,
+            totalNetIncorporelles: note3ANetIncorp,
+            mouvements: { augmentations: 0, diminutions: 0 },
+            amortissements: { dotationsExercice: dotationsAmort },
+            subventions: { recuesExercice: 0 },
           },
           tableauProvisions: {
-            totalProvisions: 16000000, // Écart de 1M avec bilan
-            dotationsExercice: 5000000
+            totalProvisions: provisions,
+            dotationsExercice: dotationsProv,
           },
           dettesSurEtablissementCredit: {
-            totalDettes: 79000000 // Écart de 1M avec bilan
+            totalDettes: note14Total,
           },
           chiffreAffaires: {
-            totalCA: 200000000
+            totalCA: note17Total,
           },
           mouvementStocks: {
-            valeurFinale: 44000000 // Écart de 1M avec bilan
-          }
-        }
+            valeurFinale: note8Total,
+          },
+        },
       }
 
-      const resultats = await coherenceService.lancerControlesCoherence(donneesTest)
+      const resultats = await coherenceService.lancerControlesCoherence(donneesReelles)
       setResultats(resultats)
     } catch (error) {
       console.error('Erreur lors des contrôles:', error)

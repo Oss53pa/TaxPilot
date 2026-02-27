@@ -85,6 +85,8 @@ import {
   Warning as WarningIcon,
   Error as ErrorIcon,
   Refresh as RefreshIcon,
+  TrendingUp as TrendingUpIcon,
+  TrendingDown as TrendingDownIcon,
 } from '@mui/icons-material'
 
 interface Template {
@@ -749,29 +751,590 @@ const ModernTemplates: React.FC = () => {
             </TabPanel>
 
             <TabPanel value={activeTab} index={1}>
-              <CardContent>
-                <Alert severity="info">
+              <CardContent sx={{ p: 3 }}>
+                <Alert severity="info" sx={{ mb: 3 }}>
                   <AlertTitle>Templates SYSCOHADA</AlertTitle>
                   Modèles officiels conformes aux normes OHADA pour tous les pays membres.
                 </Alert>
+
+                <Box sx={{ mb: 3 }}>
+                  <TextField
+                    fullWidth
+                    placeholder="Rechercher dans les templates SYSCOHADA..."
+                    variant="outlined"
+                    size="small"
+                    InputProps={{
+                      startAdornment: '🔍',
+                    }}
+                  />
+                </Box>
+
+                <List>
+                  {loading ? (
+                    Array.from({ length: 2 }).map((_, index) => (
+                      <Box key={index} sx={{ mb: 2 }}>
+                        <Skeleton variant="rectangular" height={100} />
+                      </Box>
+                    ))
+                  ) : (
+                    templates
+                      .filter(t => t.category === 'syscohada')
+                      .map((template, index, filtered) => (
+                        <React.Fragment key={template.id}>
+                          <ListItem
+                            sx={{
+                              py: 2,
+                              px: 0,
+                              backgroundColor: selectedTemplates.includes(template.id)
+                                ? alpha(theme.palette.primary.main, 0.05)
+                                : 'transparent',
+                              borderRadius: 1,
+                            }}
+                          >
+                            {batchMode && (
+                              <Checkbox
+                                checked={selectedTemplates.includes(template.id)}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setSelectedTemplates([...selectedTemplates, template.id])
+                                  } else {
+                                    setSelectedTemplates(selectedTemplates.filter(id => id !== template.id))
+                                  }
+                                }}
+                                sx={{ mr: 2 }}
+                              />
+                            )}
+                            <ListItemIcon>
+                              <Avatar
+                                sx={{
+                                  backgroundColor: alpha(getCategoryColor(template.category), 0.1),
+                                  color: getCategoryColor(template.category),
+                                  width: 48,
+                                  height: 48,
+                                }}
+                              >
+                                {getCategoryIcon(template.category)}
+                              </Avatar>
+                            </ListItemIcon>
+                            <ListItemText
+                              primary={
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+                                  <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                                    {template.name}
+                                  </Typography>
+                                  <Chip
+                                    label={template.type === 'official' ? 'Officiel' :
+                                           template.type === 'enterprise' ? 'Entreprise' : 'Personnel'}
+                                    size="small"
+                                    sx={{
+                                      backgroundColor: alpha(
+                                        template.type === 'official' ? theme.palette.success.main :
+                                        template.type === 'enterprise' ? theme.palette.info.main :
+                                        theme.palette.grey[500],
+                                        0.1
+                                      ),
+                                      color: template.type === 'official' ? theme.palette.success.main :
+                                             template.type === 'enterprise' ? theme.palette.info.main :
+                                             theme.palette.grey[500],
+                                    }}
+                                  />
+                                  <Avatar
+                                    sx={{
+                                      width: 24,
+                                      height: 24,
+                                      backgroundColor: alpha(getFormatColor(template.format), 0.1),
+                                      color: getFormatColor(template.format),
+                                    }}
+                                  >
+                                    {getFormatIcon(template.format)}
+                                  </Avatar>
+                                  <Typography variant="caption" color="text.secondary">
+                                    v{template.version}
+                                  </Typography>
+                                </Box>
+                              }
+                              secondary={
+                                <Box>
+                                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                                    {template.description}
+                                  </Typography>
+                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                    <Typography variant="caption" color="text.secondary">
+                                      Par {template.author}
+                                    </Typography>
+                                    <Typography variant="caption" color="text.secondary">
+                                      {template.size}
+                                    </Typography>
+                                    <Typography variant="caption" color="text.secondary">
+                                      Utilisé {template.usage} fois
+                                    </Typography>
+                                    <Typography variant="caption" color="text.secondary">
+                                      Modifié le {template.lastModified}
+                                    </Typography>
+                                  </Box>
+                                  {template.tags.length > 0 && (
+                                    <Box sx={{ display: 'flex', gap: 0.5, mt: 1 }}>
+                                      {template.tags.map((tag) => (
+                                        <Chip
+                                          key={tag}
+                                          label={tag}
+                                          size="small"
+                                          variant="outlined"
+                                          sx={{ height: 20, fontSize: '0.75rem' }}
+                                        />
+                                      ))}
+                                    </Box>
+                                  )}
+                                </Box>
+                              }
+                            />
+                            <ListItemSecondaryAction>
+                              <Stack direction="row" spacing={1}>
+                                <Tooltip title="Aperçu">
+                                  <IconButton
+                                    size="small"
+                                    onClick={() => {
+                                      setSelectedTemplate(template)
+                                      setPreviewOpen(true)
+                                    }}
+                                  >
+                                    <PreviewIcon fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Éditer">
+                                  <IconButton size="small">
+                                    <EditIcon fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Exporter">
+                                  <IconButton
+                                    size="small"
+                                    color="primary"
+                                    onClick={() => {
+                                      setSelectedTemplate(template)
+                                      setExportDialogOpen(true)
+                                    }}
+                                  >
+                                    <DownloadIcon fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                              </Stack>
+                            </ListItemSecondaryAction>
+                          </ListItem>
+                          {index < filtered.length - 1 && <Divider />}
+                        </React.Fragment>
+                      ))
+                  )}
+                </List>
+
+                {!loading && templates.filter(t => t.category === 'syscohada').length === 0 && (
+                  <Box sx={{ textAlign: 'center', py: 4 }}>
+                    <Typography variant="body2" color="text.secondary">
+                      Aucun template SYSCOHADA disponible
+                    </Typography>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      startIcon={<AddIcon />}
+                      sx={{ mt: 2 }}
+                      onClick={() => setEditorOpen(true)}
+                    >
+                      Créer un template
+                    </Button>
+                  </Box>
+                )}
               </CardContent>
             </TabPanel>
 
             <TabPanel value={activeTab} index={2}>
-              <CardContent>
-                <Alert severity="info">
+              <CardContent sx={{ p: 3 }}>
+                <Alert severity="info" sx={{ mb: 3 }}>
                   <AlertTitle>Templates IFRS</AlertTitle>
                   Modèles conformes aux normes internationales IFRS.
                 </Alert>
+
+                <Box sx={{ mb: 3 }}>
+                  <TextField
+                    fullWidth
+                    placeholder="Rechercher dans les templates IFRS..."
+                    variant="outlined"
+                    size="small"
+                    InputProps={{
+                      startAdornment: '🔍',
+                    }}
+                  />
+                </Box>
+
+                <List>
+                  {loading ? (
+                    Array.from({ length: 2 }).map((_, index) => (
+                      <Box key={index} sx={{ mb: 2 }}>
+                        <Skeleton variant="rectangular" height={100} />
+                      </Box>
+                    ))
+                  ) : (
+                    templates
+                      .filter(t => t.category === 'ifrs')
+                      .map((template, index, filtered) => (
+                        <React.Fragment key={template.id}>
+                          <ListItem
+                            sx={{
+                              py: 2,
+                              px: 0,
+                              backgroundColor: selectedTemplates.includes(template.id)
+                                ? alpha(theme.palette.primary.main, 0.05)
+                                : 'transparent',
+                              borderRadius: 1,
+                            }}
+                          >
+                            {batchMode && (
+                              <Checkbox
+                                checked={selectedTemplates.includes(template.id)}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setSelectedTemplates([...selectedTemplates, template.id])
+                                  } else {
+                                    setSelectedTemplates(selectedTemplates.filter(id => id !== template.id))
+                                  }
+                                }}
+                                sx={{ mr: 2 }}
+                              />
+                            )}
+                            <ListItemIcon>
+                              <Avatar
+                                sx={{
+                                  backgroundColor: alpha(getCategoryColor(template.category), 0.1),
+                                  color: getCategoryColor(template.category),
+                                  width: 48,
+                                  height: 48,
+                                }}
+                              >
+                                {getCategoryIcon(template.category)}
+                              </Avatar>
+                            </ListItemIcon>
+                            <ListItemText
+                              primary={
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+                                  <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                                    {template.name}
+                                  </Typography>
+                                  <Chip
+                                    label={template.type === 'official' ? 'Officiel' :
+                                           template.type === 'enterprise' ? 'Entreprise' : 'Personnel'}
+                                    size="small"
+                                    sx={{
+                                      backgroundColor: alpha(
+                                        template.type === 'official' ? theme.palette.success.main :
+                                        template.type === 'enterprise' ? theme.palette.info.main :
+                                        theme.palette.grey[500],
+                                        0.1
+                                      ),
+                                      color: template.type === 'official' ? theme.palette.success.main :
+                                             template.type === 'enterprise' ? theme.palette.info.main :
+                                             theme.palette.grey[500],
+                                    }}
+                                  />
+                                  <Avatar
+                                    sx={{
+                                      width: 24,
+                                      height: 24,
+                                      backgroundColor: alpha(getFormatColor(template.format), 0.1),
+                                      color: getFormatColor(template.format),
+                                    }}
+                                  >
+                                    {getFormatIcon(template.format)}
+                                  </Avatar>
+                                  <Typography variant="caption" color="text.secondary">
+                                    v{template.version}
+                                  </Typography>
+                                </Box>
+                              }
+                              secondary={
+                                <Box>
+                                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                                    {template.description}
+                                  </Typography>
+                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                    <Typography variant="caption" color="text.secondary">
+                                      Par {template.author}
+                                    </Typography>
+                                    <Typography variant="caption" color="text.secondary">
+                                      {template.size}
+                                    </Typography>
+                                    <Typography variant="caption" color="text.secondary">
+                                      Utilisé {template.usage} fois
+                                    </Typography>
+                                    <Typography variant="caption" color="text.secondary">
+                                      Modifié le {template.lastModified}
+                                    </Typography>
+                                  </Box>
+                                  {template.tags.length > 0 && (
+                                    <Box sx={{ display: 'flex', gap: 0.5, mt: 1 }}>
+                                      {template.tags.map((tag) => (
+                                        <Chip
+                                          key={tag}
+                                          label={tag}
+                                          size="small"
+                                          variant="outlined"
+                                          sx={{ height: 20, fontSize: '0.75rem' }}
+                                        />
+                                      ))}
+                                    </Box>
+                                  )}
+                                </Box>
+                              }
+                            />
+                            <ListItemSecondaryAction>
+                              <Stack direction="row" spacing={1}>
+                                <Tooltip title="Aperçu">
+                                  <IconButton
+                                    size="small"
+                                    onClick={() => {
+                                      setSelectedTemplate(template)
+                                      setPreviewOpen(true)
+                                    }}
+                                  >
+                                    <PreviewIcon fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Éditer">
+                                  <IconButton size="small">
+                                    <EditIcon fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Exporter">
+                                  <IconButton
+                                    size="small"
+                                    color="primary"
+                                    onClick={() => {
+                                      setSelectedTemplate(template)
+                                      setExportDialogOpen(true)
+                                    }}
+                                  >
+                                    <DownloadIcon fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                              </Stack>
+                            </ListItemSecondaryAction>
+                          </ListItem>
+                          {index < filtered.length - 1 && <Divider />}
+                        </React.Fragment>
+                      ))
+                  )}
+                </List>
+
+                {!loading && templates.filter(t => t.category === 'ifrs').length === 0 && (
+                  <Box sx={{ textAlign: 'center', py: 4 }}>
+                    <Typography variant="body2" color="text.secondary">
+                      Aucun template IFRS disponible
+                    </Typography>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      startIcon={<AddIcon />}
+                      sx={{ mt: 2 }}
+                      onClick={() => setEditorOpen(true)}
+                    >
+                      Créer un template
+                    </Button>
+                  </Box>
+                )}
               </CardContent>
             </TabPanel>
 
             <TabPanel value={activeTab} index={3}>
-              <CardContent>
-                <Alert severity="info">
+              <CardContent sx={{ p: 3 }}>
+                <Alert severity="info" sx={{ mb: 3 }}>
                   <AlertTitle>Templates personnalisés</AlertTitle>
                   Vos modèles personnalisés créés avec l'éditeur visuel.
                 </Alert>
+
+                <Box sx={{ mb: 3 }}>
+                  <TextField
+                    fullWidth
+                    placeholder="Rechercher dans vos templates..."
+                    variant="outlined"
+                    size="small"
+                    InputProps={{
+                      startAdornment: '🔍',
+                    }}
+                  />
+                </Box>
+
+                <List>
+                  {loading ? (
+                    Array.from({ length: 2 }).map((_, index) => (
+                      <Box key={index} sx={{ mb: 2 }}>
+                        <Skeleton variant="rectangular" height={100} />
+                      </Box>
+                    ))
+                  ) : (
+                    templates
+                      .filter(t => t.type === 'personal')
+                      .map((template, index, filtered) => (
+                        <React.Fragment key={template.id}>
+                          <ListItem
+                            sx={{
+                              py: 2,
+                              px: 0,
+                              backgroundColor: selectedTemplates.includes(template.id)
+                                ? alpha(theme.palette.primary.main, 0.05)
+                                : 'transparent',
+                              borderRadius: 1,
+                            }}
+                          >
+                            {batchMode && (
+                              <Checkbox
+                                checked={selectedTemplates.includes(template.id)}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setSelectedTemplates([...selectedTemplates, template.id])
+                                  } else {
+                                    setSelectedTemplates(selectedTemplates.filter(id => id !== template.id))
+                                  }
+                                }}
+                                sx={{ mr: 2 }}
+                              />
+                            )}
+                            <ListItemIcon>
+                              <Avatar
+                                sx={{
+                                  backgroundColor: alpha(getCategoryColor(template.category), 0.1),
+                                  color: getCategoryColor(template.category),
+                                  width: 48,
+                                  height: 48,
+                                }}
+                              >
+                                {getCategoryIcon(template.category)}
+                              </Avatar>
+                            </ListItemIcon>
+                            <ListItemText
+                              primary={
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+                                  <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                                    {template.name}
+                                  </Typography>
+                                  <Chip
+                                    label={template.status === 'active' ? 'Actif' :
+                                           template.status === 'draft' ? 'Brouillon' : 'Archivé'}
+                                    size="small"
+                                    sx={{
+                                      backgroundColor: alpha(
+                                        template.status === 'active' ? theme.palette.success.main :
+                                        template.status === 'draft' ? theme.palette.warning.main :
+                                        theme.palette.grey[500],
+                                        0.1
+                                      ),
+                                      color: template.status === 'active' ? theme.palette.success.main :
+                                             template.status === 'draft' ? theme.palette.warning.main :
+                                             theme.palette.grey[500],
+                                    }}
+                                  />
+                                  <Avatar
+                                    sx={{
+                                      width: 24,
+                                      height: 24,
+                                      backgroundColor: alpha(getFormatColor(template.format), 0.1),
+                                      color: getFormatColor(template.format),
+                                    }}
+                                  >
+                                    {getFormatIcon(template.format)}
+                                  </Avatar>
+                                  <Typography variant="caption" color="text.secondary">
+                                    v{template.version}
+                                  </Typography>
+                                </Box>
+                              }
+                              secondary={
+                                <Box>
+                                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                                    {template.description}
+                                  </Typography>
+                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                    <Typography variant="caption" color="text.secondary">
+                                      Par {template.author}
+                                    </Typography>
+                                    <Typography variant="caption" color="text.secondary">
+                                      {template.size}
+                                    </Typography>
+                                    <Typography variant="caption" color="text.secondary">
+                                      Utilisé {template.usage} fois
+                                    </Typography>
+                                    <Typography variant="caption" color="text.secondary">
+                                      Modifié le {template.lastModified}
+                                    </Typography>
+                                  </Box>
+                                  {template.tags.length > 0 && (
+                                    <Box sx={{ display: 'flex', gap: 0.5, mt: 1 }}>
+                                      {template.tags.map((tag) => (
+                                        <Chip
+                                          key={tag}
+                                          label={tag}
+                                          size="small"
+                                          variant="outlined"
+                                          sx={{ height: 20, fontSize: '0.75rem' }}
+                                        />
+                                      ))}
+                                    </Box>
+                                  )}
+                                </Box>
+                              }
+                            />
+                            <ListItemSecondaryAction>
+                              <Stack direction="row" spacing={1}>
+                                <Tooltip title="Aperçu">
+                                  <IconButton
+                                    size="small"
+                                    onClick={() => {
+                                      setSelectedTemplate(template)
+                                      setPreviewOpen(true)
+                                    }}
+                                  >
+                                    <PreviewIcon fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Éditer">
+                                  <IconButton size="small">
+                                    <EditIcon fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Exporter">
+                                  <IconButton
+                                    size="small"
+                                    color="primary"
+                                    onClick={() => {
+                                      setSelectedTemplate(template)
+                                      setExportDialogOpen(true)
+                                    }}
+                                  >
+                                    <DownloadIcon fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                              </Stack>
+                            </ListItemSecondaryAction>
+                          </ListItem>
+                          {index < filtered.length - 1 && <Divider />}
+                        </React.Fragment>
+                      ))
+                  )}
+                </List>
+
+                {!loading && templates.filter(t => t.type === 'personal').length === 0 && (
+                  <Box sx={{ textAlign: 'center', py: 4 }}>
+                    <Typography variant="body2" color="text.secondary">
+                      Aucun template personnalisé
+                    </Typography>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      startIcon={<AddIcon />}
+                      sx={{ mt: 2 }}
+                      onClick={() => setEditorOpen(true)}
+                    >
+                      Créer votre premier template
+                    </Button>
+                  </Box>
+                )}
               </CardContent>
             </TabPanel>
           </Card>
@@ -1123,23 +1686,420 @@ const ModernTemplates: React.FC = () => {
         <DialogTitle>
           Aperçu du template
           {selectedTemplate && (
-            <Typography variant="body2" color="text.secondary">
-              {selectedTemplate.name}
-            </Typography>
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                {selectedTemplate.name}
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
+                <Chip
+                  icon={getFormatIcon(selectedTemplate.format)}
+                  label={selectedTemplate.format.toUpperCase()}
+                  size="small"
+                  sx={{ backgroundColor: alpha(getFormatColor(selectedTemplate.format), 0.1) }}
+                />
+                <Chip
+                  label={`v${selectedTemplate.version}`}
+                  size="small"
+                  variant="outlined"
+                />
+                <Chip
+                  label={`${selectedTemplate.size}`}
+                  size="small"
+                  variant="outlined"
+                />
+              </Box>
+            </Box>
           )}
         </DialogTitle>
         <DialogContent>
-          <Box sx={{ height: 600, border: `1px solid ${theme.palette.divider}`, borderRadius: 1, p: 2 }}>
-            <Typography variant="body1" align="center" color="text.secondary">
-              Aperçu en temps réel du template avec données d'exemple
-            </Typography>
+          <Box sx={{
+            minHeight: 600,
+            border: `1px solid ${theme.palette.divider}`,
+            borderRadius: 1,
+            p: 3,
+            backgroundColor: alpha(theme.palette.grey[100], 0.3)
+          }}>
+            {selectedTemplate ? (
+              <>
+                {/* Aperçu pour template SYSCOHADA */}
+                {selectedTemplate.category === 'syscohada' && (
+                  <Box>
+                    <Paper sx={{ p: 3, mb: 2, backgroundColor: 'white' }}>
+                      <Typography variant="h5" align="center" sx={{ fontWeight: 700, mb: 1 }}>
+                        LIASSE FISCALE SYSCOHADA 2024
+                      </Typography>
+                      <Typography variant="subtitle1" align="center" color="text.secondary" sx={{ mb: 3 }}>
+                        Entreprise ABC Commerce SARL
+                      </Typography>
+                      <Divider sx={{ mb: 3 }} />
+
+                      <Grid container spacing={2}>
+                        <Grid item xs={6}>
+                          <Typography variant="body2" color="text.secondary">Exercice fiscal</Typography>
+                          <Typography variant="body1" fontWeight={600}>2024</Typography>
+                        </Grid>
+                        <Grid item xs={6}>
+                          <Typography variant="body2" color="text.secondary">Régime</Typography>
+                          <Typography variant="body1" fontWeight={600}>Système Normal</Typography>
+                        </Grid>
+                        <Grid item xs={6}>
+                          <Typography variant="body2" color="text.secondary">Secteur d'activité</Typography>
+                          <Typography variant="body1" fontWeight={600}>Commerce de détail</Typography>
+                        </Grid>
+                        <Grid item xs={6}>
+                          <Typography variant="body2" color="text.secondary">Juridiction</Typography>
+                          <Typography variant="body1" fontWeight={600}>OHADA - Côte d'Ivoire</Typography>
+                        </Grid>
+                      </Grid>
+                    </Paper>
+
+                    <Paper sx={{ p: 3, mb: 2, backgroundColor: 'white' }}>
+                      <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+                        Bilan Actif (Extrait)
+                      </Typography>
+                      <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <Box component="thead" sx={{ backgroundColor: alpha(theme.palette.primary.main, 0.1) }}>
+                          <Box component="tr">
+                            <Box component="th" sx={{ p: 1, textAlign: 'left', borderBottom: 1, borderColor: 'divider' }}>
+                              <Typography variant="caption" fontWeight={600}>Poste</Typography>
+                            </Box>
+                            <Box component="th" sx={{ p: 1, textAlign: 'right', borderBottom: 1, borderColor: 'divider' }}>
+                              <Typography variant="caption" fontWeight={600}>N</Typography>
+                            </Box>
+                            <Box component="th" sx={{ p: 1, textAlign: 'right', borderBottom: 1, borderColor: 'divider' }}>
+                              <Typography variant="caption" fontWeight={600}>N-1</Typography>
+                            </Box>
+                          </Box>
+                        </Box>
+                        <Box component="tbody">
+                          {[
+                            { label: 'Immobilisations incorporelles', n: '2 500 000', n1: '2 200 000' },
+                            { label: 'Immobilisations corporelles', n: '15 800 000', n1: '14 500 000' },
+                            { label: 'Stocks et en-cours', n: '8 400 000', n1: '7 900 000' },
+                            { label: 'Créances clients', n: '5 200 000', n1: '4 800 000' },
+                            { label: 'Trésorerie', n: '3 100 000', n1: '2 600 000' }
+                          ].map((row, index) => (
+                            <Box component="tr" key={index}>
+                              <Box component="td" sx={{ p: 1, borderBottom: 1, borderColor: 'divider' }}>
+                                <Typography variant="body2">{row.label}</Typography>
+                              </Box>
+                              <Box component="td" sx={{ p: 1, textAlign: 'right', borderBottom: 1, borderColor: 'divider' }}>
+                                <Typography variant="body2">{row.n}</Typography>
+                              </Box>
+                              <Box component="td" sx={{ p: 1, textAlign: 'right', borderBottom: 1, borderColor: 'divider' }}>
+                                <Typography variant="body2">{row.n1}</Typography>
+                              </Box>
+                            </Box>
+                          ))}
+                          <Box component="tr">
+                            <Box component="td" sx={{ p: 1, borderTop: 2, borderColor: 'divider' }}>
+                              <Typography variant="body2" fontWeight={700}>TOTAL ACTIF</Typography>
+                            </Box>
+                            <Box component="td" sx={{ p: 1, textAlign: 'right', borderTop: 2, borderColor: 'divider' }}>
+                              <Typography variant="body2" fontWeight={700}>35 000 000</Typography>
+                            </Box>
+                            <Box component="td" sx={{ p: 1, textAlign: 'right', borderTop: 2, borderColor: 'divider' }}>
+                              <Typography variant="body2" fontWeight={700}>32 000 000</Typography>
+                            </Box>
+                          </Box>
+                        </Box>
+                      </Box>
+                    </Paper>
+
+                    <Alert severity="info" icon={<FormulaIcon />}>
+                      <AlertTitle>Variables mappées automatiquement</AlertTitle>
+                      <Typography variant="caption">
+                        • {'{'}{'{'} company.name {'}'}{'}'}  → ABC Commerce SARL<br/>
+                        • {'{'}{'{'} exercice {'}'}{'}'}  → 2024<br/>
+                        • {'{'}{'{'} balance.total_actif {'}'}{'}'}  → 35 000 000 FCFA
+                      </Typography>
+                    </Alert>
+                  </Box>
+                )}
+
+                {/* Aperçu pour template IFRS */}
+                {selectedTemplate.category === 'ifrs' && (
+                  <Box>
+                    <Paper sx={{ p: 3, mb: 2, backgroundColor: 'white' }}>
+                      <Typography variant="h5" align="center" sx={{ fontWeight: 700, mb: 1 }}>
+                        ÉTATS FINANCIERS IFRS
+                      </Typography>
+                      <Typography variant="subtitle1" align="center" color="text.secondary" sx={{ mb: 3 }}>
+                        Conforme aux normes internationales
+                      </Typography>
+                      <Divider sx={{ mb: 3 }} />
+
+                      <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+                        Statement of Financial Position (Position Financière)
+                      </Typography>
+                      <Grid container spacing={2}>
+                        {[
+                          { label: 'Non-current Assets', value: '18 300 000' },
+                          { label: 'Current Assets', value: '16 700 000' },
+                          { label: 'Total Assets', value: '35 000 000' },
+                          { label: 'Equity', value: '15 000 000' },
+                          { label: 'Non-current Liabilities', value: '12 000 000' },
+                          { label: 'Current Liabilities', value: '8 000 000' }
+                        ].map((item, index) => (
+                          <Grid item xs={6} key={index}>
+                            <Box sx={{
+                              p: 2,
+                              border: 1,
+                              borderColor: 'divider',
+                              borderRadius: 1,
+                              backgroundColor: index >= 3 ? alpha(theme.palette.info.main, 0.05) : 'transparent'
+                            }}>
+                              <Typography variant="caption" color="text.secondary">{item.label}</Typography>
+                              <Typography variant="h6" fontWeight={600}>{item.value} FCFA</Typography>
+                            </Box>
+                          </Grid>
+                        ))}
+                      </Grid>
+                    </Paper>
+
+                    <Alert severity="success" icon={<CheckIcon />}>
+                      <AlertTitle>Conformité IFRS validée</AlertTitle>
+                      <Typography variant="caption">
+                        Ce template respecte les normes IAS 1, IAS 7, et IFRS 15
+                      </Typography>
+                    </Alert>
+                  </Box>
+                )}
+
+                {/* Aperçu pour templates bancaires */}
+                {selectedTemplate.category === 'bank' && (
+                  <Box>
+                    <Paper sx={{ p: 3, mb: 2, backgroundColor: 'white' }}>
+                      <Typography variant="h5" align="center" sx={{ fontWeight: 700, mb: 1 }}>
+                        DOSSIER DE DEMANDE DE CRÉDIT
+                      </Typography>
+                      <Typography variant="subtitle1" align="center" color="text.secondary" sx={{ mb: 3 }}>
+                        Entreprise ABC Commerce SARL
+                      </Typography>
+                      <Divider sx={{ mb: 3 }} />
+
+                      <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+                        Synthèse Financière
+                      </Typography>
+                      <Grid container spacing={2} sx={{ mb: 3 }}>
+                        <Grid item xs={4}>
+                          <Box sx={{ textAlign: 'center', p: 2, border: 1, borderColor: 'divider', borderRadius: 1 }}>
+                            <Typography variant="caption" color="text.secondary">Chiffre d'affaires</Typography>
+                            <Typography variant="h5" fontWeight={700} color="primary.main">42M FCFA</Typography>
+                          </Box>
+                        </Grid>
+                        <Grid item xs={4}>
+                          <Box sx={{ textAlign: 'center', p: 2, border: 1, borderColor: 'divider', borderRadius: 1 }}>
+                            <Typography variant="caption" color="text.secondary">Résultat Net</Typography>
+                            <Typography variant="h5" fontWeight={700} color="success.main">3.2M FCFA</Typography>
+                          </Box>
+                        </Grid>
+                        <Grid item xs={4}>
+                          <Box sx={{ textAlign: 'center', p: 2, border: 1, borderColor: 'divider', borderRadius: 1 }}>
+                            <Typography variant="caption" color="text.secondary">Fonds Propres</Typography>
+                            <Typography variant="h5" fontWeight={700} color="info.main">15M FCFA</Typography>
+                          </Box>
+                        </Grid>
+                      </Grid>
+
+                      <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+                        Ratios Financiers
+                      </Typography>
+                      <Grid container spacing={2}>
+                        {[
+                          { label: 'Ratio de liquidité', value: '1.85', status: 'success' },
+                          { label: 'Ratio d\'endettement', value: '57%', status: 'warning' },
+                          { label: 'ROE', value: '21.3%', status: 'success' },
+                          { label: 'Couverture intérêts', value: '4.2x', status: 'success' }
+                        ].map((ratio, index) => (
+                          <Grid item xs={6} key={index}>
+                            <Box sx={{
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              p: 1.5,
+                              border: 1,
+                              borderColor: 'divider',
+                              borderRadius: 1
+                            }}>
+                              <Typography variant="body2">{ratio.label}</Typography>
+                              <Chip
+                                label={ratio.value}
+                                size="small"
+                                color={ratio.status as 'success' | 'warning'}
+                              />
+                            </Box>
+                          </Grid>
+                        ))}
+                      </Grid>
+                    </Paper>
+
+                    <Alert severity="info" icon={<BankIcon />}>
+                      <AlertTitle>Format bancaire standard</AlertTitle>
+                      <Typography variant="caption">
+                        Compatible avec les exigences de BCEAO, BICICI, SIB, et principales banques de la zone OHADA
+                      </Typography>
+                    </Alert>
+                  </Box>
+                )}
+
+                {/* Aperçu pour templates de gestion */}
+                {selectedTemplate.category === 'management' && (
+                  <Box>
+                    <Paper sx={{ p: 3, mb: 2, backgroundColor: 'white' }}>
+                      <Typography variant="h5" align="center" sx={{ fontWeight: 700, mb: 1 }}>
+                        TABLEAU DE BORD DIRECTION
+                      </Typography>
+                      <Typography variant="subtitle1" align="center" color="text.secondary" sx={{ mb: 3 }}>
+                        Période: Décembre 2024
+                      </Typography>
+                      <Divider sx={{ mb: 3 }} />
+
+                      <Grid container spacing={2} sx={{ mb: 3 }}>
+                        {[
+                          { label: 'CA Mensuel', value: '3.5M', evolution: '+12%', color: 'success' },
+                          { label: 'Marge Brute', value: '28.5%', evolution: '+2.1%', color: 'success' },
+                          { label: 'Charges Fixes', value: '850K', evolution: '-5%', color: 'success' },
+                          { label: 'Trésorerie', value: '2.1M', evolution: '+8%', color: 'info' }
+                        ].map((kpi, index) => (
+                          <Grid item xs={6} key={index}>
+                            <Paper sx={{ p: 2, backgroundColor: alpha(theme.palette[kpi.color as 'success' | 'info'].main, 0.05) }}>
+                              <Typography variant="caption" color="text.secondary">{kpi.label}</Typography>
+                              <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1, mt: 0.5 }}>
+                                <Typography variant="h5" fontWeight={700}>{kpi.value}</Typography>
+                                <Chip
+                                  label={kpi.evolution}
+                                  size="small"
+                                  color={kpi.color as 'success' | 'info'}
+                                  icon={kpi.evolution.startsWith('+') ? <TrendingUpIcon /> : <TrendingDownIcon />}
+                                />
+                              </Box>
+                            </Paper>
+                          </Grid>
+                        ))}
+                      </Grid>
+
+                      <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+                        Top 5 Clients du Mois
+                      </Typography>
+                      {[
+                        { name: 'Client A', ca: '850 000', part: '24%' },
+                        { name: 'Client B', ca: '620 000', part: '18%' },
+                        { name: 'Client C', ca: '480 000', part: '14%' },
+                        { name: 'Client D', ca: '390 000', part: '11%' },
+                        { name: 'Client E', ca: '310 000', part: '9%' }
+                      ].map((client, index) => (
+                        <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+                          <Avatar sx={{ width: 32, height: 32, bgcolor: theme.palette.primary.main }}>
+                            {index + 1}
+                          </Avatar>
+                          <Box sx={{ flex: 1 }}>
+                            <Typography variant="body2" fontWeight={600}>{client.name}</Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              {client.ca} FCFA
+                            </Typography>
+                          </Box>
+                          <Chip label={client.part} size="small" />
+                        </Box>
+                      ))}
+                    </Paper>
+
+                    <Alert severity="warning" icon={<WarningIcon />}>
+                      <AlertTitle>Alertes & Indicateurs</AlertTitle>
+                      <Typography variant="caption">
+                        • 2 factures impayées depuis plus de 60 jours<br/>
+                        • Stock produit X en rupture prévue dans 5 jours<br/>
+                        • Objectif CA mensuel atteint à 105%
+                      </Typography>
+                    </Alert>
+                  </Box>
+                )}
+
+                {/* Aperçu pour templates personnalisés */}
+                {selectedTemplate.type === 'personal' && (
+                  <Box>
+                    <Paper sx={{ p: 3, mb: 2, backgroundColor: 'white' }}>
+                      <Typography variant="h5" align="center" sx={{ fontWeight: 700, mb: 1 }}>
+                        {selectedTemplate.name.toUpperCase()}
+                      </Typography>
+                      <Typography variant="subtitle1" align="center" color="text.secondary" sx={{ mb: 3 }}>
+                        Template personnalisé - Version {selectedTemplate.version}
+                      </Typography>
+                      <Divider sx={{ mb: 3 }} />
+
+                      <Box sx={{ textAlign: 'center', py: 4 }}>
+                        <FormatIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
+                        <Typography variant="h6" color="text.secondary" sx={{ mb: 2 }}>
+                          Aperçu du template personnalisé
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Les données seront injectées dynamiquement selon votre configuration<br/>
+                          Variables disponibles: {selectedTemplate.variables.length}<br/>
+                          Conditions définies: {selectedTemplate.conditions.length}
+                        </Typography>
+                      </Box>
+
+                      {selectedTemplate.variables.length > 0 && (
+                        <Box sx={{ mt: 3 }}>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+                            Variables configurées:
+                          </Typography>
+                          <Stack spacing={1}>
+                            {selectedTemplate.variables.map((variable) => (
+                              <Chip
+                                key={variable.id}
+                                label={`{{${variable.name}}} → ${variable.source}`}
+                                size="small"
+                                variant="outlined"
+                                icon={<FormulaIcon />}
+                              />
+                            ))}
+                          </Stack>
+                        </Box>
+                      )}
+                    </Paper>
+
+                    <Alert severity="info" icon={<SettingsIcon />}>
+                      <AlertTitle>Template en brouillon</AlertTitle>
+                      <Typography variant="caption">
+                        Utilisez l'éditeur visuel pour compléter la configuration de ce template
+                      </Typography>
+                    </Alert>
+                  </Box>
+                )}
+              </>
+            ) : (
+              <Box sx={{ textAlign: 'center', py: 8 }}>
+                <PreviewIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
+                <Typography variant="body1" color="text.secondary">
+                  Sélectionnez un template pour voir son aperçu
+                </Typography>
+              </Box>
+            )}
           </Box>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setPreviewOpen(false)}>
             Fermer
           </Button>
-          <Button variant="contained" startIcon={<DownloadIcon />}>
+          <Button
+            variant="outlined"
+            startIcon={<EditIcon />}
+            onClick={() => {
+              setPreviewOpen(false)
+              setEditorOpen(true)
+            }}
+          >
+            Éditer
+          </Button>
+          <Button
+            variant="contained"
+            startIcon={<DownloadIcon />}
+            onClick={() => {
+              setPreviewOpen(false)
+              setExportDialogOpen(true)
+            }}
+          >
             Exporter
           </Button>
         </DialogActions>

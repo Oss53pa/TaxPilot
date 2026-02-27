@@ -224,7 +224,7 @@ const BilanActif: React.FC = () => {
   const displayRows = data.rows.map(row => ({
     ...row,
     poste: row.isHeader ? (
-      <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#1976d2' }}>
+      <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#171717' }}>
         {row.poste}
       </Typography>
     ) : row.isTotal ? (
@@ -266,7 +266,7 @@ const BilanActif: React.FC = () => {
         onSave={handleSave}
         comment={data.comment}
         validations={validations}
-        headerColor="#1976d2"
+        headerColor="#171717"
         alternateRowColors={true}
       />
     </Box>

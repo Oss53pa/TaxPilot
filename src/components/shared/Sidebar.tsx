@@ -28,6 +28,9 @@ import {
   Business,
   ExpandLess,
   ExpandMore,
+  People,
+  Payment,
+  Mail,
 } from '@mui/icons-material'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
@@ -65,6 +68,27 @@ const menuItems: MenuItem[] = [
         title: 'Plans Comptables',
         icon: <AccountBalance />,
         path: '/parametrage/plans-comptables',
+      },
+    ],
+  },
+  {
+    title: 'Organisation',
+    icon: <Business />,
+    children: [
+      {
+        title: 'Membres',
+        icon: <People />,
+        path: '/settings/members',
+      },
+      {
+        title: 'Abonnement',
+        icon: <Payment />,
+        path: '/settings/subscription',
+      },
+      {
+        title: 'Invitations',
+        icon: <Mail />,
+        path: '/settings/invitations',
       },
     ],
   },

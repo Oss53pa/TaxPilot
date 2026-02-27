@@ -74,7 +74,7 @@ const PASSIF_STRUCTURE = [
   
   { type: 'total', ref: 'DG', label: 'TOTAL DETTES FINANCIÈRES', formula: 'DA+DB+DC+DD+DE+DF' },
   
-  { type: 'total', ref: 'DZ', label: 'TOTAL RESSOURCES STABLES', formula: 'CZ+DG' },
+  { type: 'total', ref: 'DP', label: 'TOTAL RESSOURCES STABLES', formula: 'CZ+DG' },
   
   { type: 'section', label: 'PASSIF CIRCULANT', bold: true },
   
@@ -96,7 +96,7 @@ const PASSIF_STRUCTURE = [
   
   { type: 'line', ref: 'DT', label: 'Écart de conversion - Passif', note: '23', indent: 0 },
   
-  { type: 'grandtotal', ref: 'DZ', label: 'TOTAL GÉNÉRAL PASSIF', formula: 'DZ+DN+DS+DT' }
+  { type: 'grandtotal', ref: 'DZ', label: 'TOTAL GÉNÉRAL PASSIF', formula: 'DP+DN+DS+DT' }
 ]
 
 interface BilanPassifData {
@@ -139,51 +139,49 @@ const BilanPassifSYSCOHADA: React.FC = () => {
   // Calculer les totaux automatiquement
   const calculateTotals = useMemo(() => {
     const totals: BilanPassifData = {}
-    
+
+    // Cherche dans totals déjà calculés OU dans data
     const calculateGroup = (refs: string[]) => {
       let montant = 0, montantN1 = 0
       refs.forEach(ref => {
-        if (data[ref]) {
-          // Gérer le cas spécial CB qui est soustrait
+        const source = totals[ref] || data[ref]
+        if (source) {
           if (ref === 'CB') {
-            montant -= data[ref].montant || 0
-            montantN1 -= data[ref].montantN1 || 0
+            montant -= source.montant || 0
+            montantN1 -= source.montantN1 || 0
           } else {
-            montant += data[ref].montant || 0
-            montantN1 += data[ref].montantN1 || 0
+            montant += source.montant || 0
+            montantN1 += source.montantN1 || 0
           }
         }
       })
       return { montant, montantN1 }
     }
-    
+
     // Total Capitaux Propres (CL)
     totals.CL = calculateGroup(['CA', 'CB', 'CC', 'CD', 'CE', 'CF', 'CG', 'CH', 'CI', 'CJ'])
-    
+
     // Total Autres Capitaux Propres (CS)
     totals.CS = calculateGroup(['CM', 'CN', 'CO', 'CR'])
-    
+
     // Total Capitaux Propres et Ressources Assimilées (CZ)
     totals.CZ = calculateGroup(['CL', 'CS'])
-    
+
     // Total Dettes Financières (DG)
     totals.DG = calculateGroup(['DA', 'DB', 'DC', 'DD', 'DE', 'DF'])
-    
-    // Total Ressources Stables (DZ premier)
-    const DZ_stable = totals.CZ.montant + totals.DG.montant
-    
+
+    // Total Ressources Stables (DP)
+    totals.DP = calculateGroup(['CZ', 'DG'])
+
     // Total Passif Circulant (DN)
     totals.DN = calculateGroup(['DH', 'DI', 'DJ', 'DK', 'DL', 'DM'])
-    
+
     // Total Trésorerie Passif (DS)
     totals.DS = calculateGroup(['DQ', 'DR'])
-    
-    // Total Général (DZ final)
-    totals.DZ = {
-      montant: DZ_stable + totals.DN.montant + totals.DS.montant + (data.DT?.montant || 0),
-      montantN1: 0 // À calculer avec les données N-1
-    }
-    
+
+    // Total Général Passif (DZ)
+    totals.DZ = calculateGroup(['DP', 'DN', 'DS', 'DT'])
+
     return totals
   }, [data])
 

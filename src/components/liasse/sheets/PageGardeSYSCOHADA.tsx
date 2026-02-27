@@ -43,6 +43,8 @@ import {
   AttachMoney as MoneyIcon,
   Group as GroupIcon,
 } from '@mui/icons-material'
+import { useLiasseData } from '../DataProvider'
+import { entrepriseService } from '../../../services/entrepriseService'
 
 interface PageGardeData {
   // Informations générales
@@ -99,10 +101,11 @@ interface PageGardeData {
 
 const PageGardeSYSCOHADA: React.FC = () => {
   const theme = useTheme()
+  const liasseData = useLiasseData()
   const [data, setData] = useState<PageGardeData>({
-    exerciceComptable: '2024',
-    dateDebut: '2024-01-01',
-    dateFin: '2024-12-31',
+    exerciceComptable: new Date().getFullYear().toString(),
+    dateDebut: `${new Date().getFullYear()}-01-01`,
+    dateFin: `${new Date().getFullYear()}-12-31`,
     dureeExercice: 12,
     raisonSociale: '',
     formeJuridique: 'SA',
@@ -110,7 +113,7 @@ const PageGardeSYSCOHADA: React.FC = () => {
     numeroIFU: '',
     adresseSiege: '',
     ville: '',
-    pays: 'Bénin',
+    pays: '',
     telephone: '',
     email: '',
     regimeFiscal: 'RNI',
@@ -138,6 +141,31 @@ const PageGardeSYSCOHADA: React.FC = () => {
     adresseExpert: '',
     telephoneExpert: ''
   })
+
+  // Charger les données entreprise depuis la config
+  useEffect(() => {
+    const ent = liasseData?.entreprise
+    if (ent) {
+      setData(prev => ({
+        ...prev,
+        raisonSociale: ent.raison_sociale || prev.raisonSociale,
+        formeJuridique: ent.forme_juridique || prev.formeJuridique,
+        numeroRCCM: ent.rccm || prev.numeroRCCM,
+        numeroIFU: ent.numero_contribuable || ent.ifu || prev.numeroIFU,
+        adresseSiege: ent.adresse_ligne1 || prev.adresseSiege,
+        ville: ent.ville || prev.ville,
+        pays: ent.pays_detail?.nom || ent.pays || prev.pays,
+        telephone: ent.telephone || prev.telephone,
+        email: ent.email || prev.email,
+        regimeFiscal: ent.regime_imposition || prev.regimeFiscal,
+        centreImpots: ent.centre_impots || prev.centreImpots,
+        monnaie: ent.devise_principale || prev.monnaie,
+        nomDeclarant: ent.nom_dirigeant || prev.nomDeclarant,
+        qualiteDeclarant: ent.fonction_dirigeant || prev.qualiteDeclarant,
+        emailDeclarant: ent.email_dirigeant || prev.emailDeclarant,
+      }))
+    }
+  }, [liasseData?.entreprise])
 
   const handleFieldChange = (field: keyof PageGardeData, value: any) => {
     setData(prev => {

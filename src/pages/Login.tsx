@@ -78,7 +78,7 @@ const Login: React.FC = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)',
+        background: 'linear-gradient(135deg, #171717 0%, #404040 100%)',
         p: 2,
       }}
     >

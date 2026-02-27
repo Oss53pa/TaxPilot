@@ -222,7 +222,7 @@ const TestComponents: React.FC = () => {
             />
             <Chip
               icon={<CheckCircle />}
-              label="Backend Django : ✅ Actif sur port 8001"
+              label="Backend Django : ✅ Actif sur port 8000"
               color="success"
             />
             <Chip

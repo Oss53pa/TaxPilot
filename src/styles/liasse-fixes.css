@@ -1,222 +1,31 @@
 /**
- * Corrections de styles pour la liasse fiscale moderne
- * Assure un bon contraste entre le texte et l'arrière-plan
+ * Liasse fiscale table styling - Grayscale design system
  */
 
-/* Correction pour les tableaux uniquement */
-
-/* Correction globale pour les tableaux de la liasse */
+/* Table cells - dark text on light background */
 .liasse-table .MuiTableCell-root {
-  color: inherit !important;
+  color: #171717 !important;
 }
 
-/* Correction pour les en-têtes avec arrière-plans colorés */
+/* Table headers */
 .liasse-table .MuiTableHead-root .MuiTableCell-root {
-  color: white !important;
+  color: #404040 !important;
+  background-color: #f5f5f5 !important;
+  font-weight: 600 !important;
 }
 
-/* Correction pour les lignes avec arrière-plans transparents */
+/* Table body rows */
 .liasse-table .MuiTableRow-root .MuiTableCell-root {
-  color: var(--mui-palette-text-primary, rgba(0, 0, 0, 0.87)) !important;
+  color: #171717 !important;
 }
 
-/* Modes sombres - si utilisés */
-@media (prefers-color-scheme: dark) {
-  .liasse-table .MuiTableRow-root .MuiTableCell-root {
-    color: var(--mui-palette-text-primary, rgba(255, 255, 255, 0.87)) !important;
-  }
-}
-
-/* Correction pour les chips et éléments secondaires */
+/* Chips in tables */
 .liasse-table .MuiChip-root {
   color: inherit;
 }
 
-/* Correction pour les éléments de navigation */
+/* Sidebar navigation for liasse */
 .liasse-sidebar .MuiListItemText-primary,
 .liasse-sidebar .MuiListItemText-secondary {
   color: inherit !important;
-}
-
-/* Corrections spécifiques pour la sidebar des liasses modernes */
-.MuiDrawer-paper .MuiListItemText-primary,
-.MuiDrawer-paper .MuiListItemText-primary > * {
-  color: #1a1a1a !important;
-}
-
-.MuiDrawer-paper .MuiListItemText-secondary,
-.MuiDrawer-paper .MuiListItemText-secondary > * {
-  color: #666666 !important;
-}
-
-.MuiDrawer-paper .MuiTypography-root {
-  color: #1a1a1a !important;
-}
-
-.MuiDrawer-paper .MuiStack-root .MuiTypography-root {
-  color: #1a1a1a !important;
-}
-
-/* Mode sombre pour la sidebar - POLICE BLANCHE */
-@media (prefers-color-scheme: dark) {
-  .MuiDrawer-paper .MuiListItemText-primary,
-  .MuiDrawer-paper .MuiListItemText-primary > *,
-  .MuiDrawer-paper .MuiListItemText-secondary,
-  .MuiDrawer-paper .MuiListItemText-secondary > *,
-  .MuiDrawer-paper .MuiTypography-root,
-  .MuiDrawer-paper .MuiStack-root .MuiTypography-root,
-  .MuiDrawer-paper * {
-    color: white !important;
-  }
-}
-
-/* Correction pour les boutons de liste */
-.MuiDrawer-paper .MuiListItemButton-root .MuiTypography-root {
-  color: inherit !important;
-}
-
-/* Correction pour les icônes */
-.MuiDrawer-paper .MuiListItemIcon-root {
-  color: var(--mui-palette-text-secondary, rgba(0, 0, 0, 0.54)) !important;
-}
-
-@media (prefers-color-scheme: dark) {
-  .MuiDrawer-paper .MuiListItemIcon-root {
-    color: var(--mui-palette-text-secondary, rgba(255, 255, 255, 0.7)) !important;
-  }
-}
-
-/* Corrections additionnelles pour forcer la lisibilité */
-.MuiDrawer-paper .MuiListItem-root * {
-  color: #1a1a1a !important;
-}
-
-@media (prefers-color-scheme: dark) {
-  .MuiDrawer-paper .MuiListItem-root * {
-    color: white !important;
-  }
-}
-
-/* Correction spécifique pour les éléments de titre */
-.MuiDrawer-paper h6,
-.MuiDrawer-paper .MuiTypography-h6,
-.MuiDrawer-paper .MuiTypography-subtitle1,
-.MuiDrawer-paper .MuiTypography-subtitle2,
-.MuiDrawer-paper .MuiTypography-body1,
-.MuiDrawer-paper .MuiTypography-body2 {
-  color: #1a1a1a !important;
-}
-
-@media (prefers-color-scheme: dark) {
-  .MuiDrawer-paper h6,
-  .MuiDrawer-paper .MuiTypography-h6,
-  .MuiDrawer-paper .MuiTypography-subtitle1,
-  .MuiDrawer-paper .MuiTypography-subtitle2,
-  .MuiDrawer-paper .MuiTypography-body1,
-  .MuiDrawer-paper .MuiTypography-body2 {
-    color: white !important;
-  }
-}
-
-/* Correction pour les headers et titres principaux */
-.MuiDrawer-paper .MuiBox-root h6,
-.MuiDrawer-paper .MuiBox-root .MuiTypography-h6 {
-  color: #1a1a1a !important;
-  font-weight: 600 !important;
-}
-
-@media (prefers-color-scheme: dark) {
-  .MuiDrawer-paper .MuiBox-root h6,
-  .MuiDrawer-paper .MuiBox-root .MuiTypography-h6 {
-    color: white !important;
-    font-weight: 600 !important;
-  }
-}
-
-/* S'assurer que les puces et badges soient visibles */
-.MuiDrawer-paper .MuiChip-root {
-  background-color: rgba(25, 118, 210, 0.1) !important;
-  color: #1976d2 !important;
-  border: 1px solid rgba(25, 118, 210, 0.2) !important;
-}
-
-@media (prefers-color-scheme: dark) {
-  .MuiDrawer-paper .MuiChip-root {
-    background-color: rgba(144, 202, 249, 0.15) !important;
-    color: white !important;
-    border: 1px solid rgba(144, 202, 249, 0.25) !important;
-  }
-}
-
-/* FORCE BRUTALE - MODE SOMBRE = TEXTE BLANC POUR TOUTES LES SIDEBARS */
-@media (prefers-color-scheme: dark) {
-  /* Toutes les sidebars et drawers */
-  .MuiDrawer-paper,
-  .MuiDrawer-paper *,
-  .sidebar,
-  .sidebar *,
-  .navigation-sidebar,
-  .navigation-sidebar *,
-  .MuiList-root,
-  .MuiList-root *,
-  .MuiListItem-root,
-  .MuiListItem-root *,
-  .MuiListItemButton-root,
-  .MuiListItemButton-root *,
-  .MuiListItemText-root,
-  .MuiListItemText-root *,
-  .MuiDrawer-paper span,
-  .MuiDrawer-paper p,
-  .MuiDrawer-paper div,
-  .MuiDrawer-paper h1,
-  .MuiDrawer-paper h2,
-  .MuiDrawer-paper h3,
-  .MuiDrawer-paper h4,
-  .MuiDrawer-paper h5,
-  .MuiDrawer-paper h6 {
-    color: white !important;
-  }
-  
-  /* Icônes aussi en blanc */
-  .MuiDrawer-paper svg,
-  .MuiDrawer-paper .MuiSvgIcon-root,
-  .sidebar svg,
-  .sidebar .MuiSvgIcon-root,
-  .navigation-sidebar svg,
-  .navigation-sidebar .MuiSvgIcon-root {
-    color: white !important;
-    fill: white !important;
-  }
-  
-  /* Correction pour toutes les navigations */
-  nav,
-  nav *,
-  .nav,
-  .nav *,
-  .navigation,
-  .navigation *,
-  [class*="sidebar"],
-  [class*="sidebar"] *,
-  [class*="drawer"],
-  [class*="drawer"] *,
-  [class*="navigation"],
-  [class*="navigation"] *,
-  [class*="menu"],
-  [class*="menu"] *,
-  [class*="list"],
-  [class*="list"] * {
-    color: white !important;
-  }
-  
-  /* Force brutale pour TOUT élément de structure */
-  aside,
-  aside *,
-  .MuiPaper-root,
-  .MuiPaper-root *,
-  .MuiAppBar-root,
-  .MuiAppBar-root *,
-  .MuiToolbar-root,
-  .MuiToolbar-root * {
-    color: white !important;
-  }
 }

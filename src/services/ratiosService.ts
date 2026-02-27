@@ -3,6 +3,8 @@
  * Calculs basés sur la balance et liasse fiscale réelle
  */
 
+import { apiClient } from './apiClient'
+
 interface LigneBalance {
   numero_compte: string;
   debit: number;
@@ -34,19 +36,21 @@ interface IndicateurEntreprise {
 }
 
 export class RatiosService {
-  private apiBaseUrl = 'http://localhost:8001/api/v1';
-
   /**
    * Calcule tous les ratios financiers depuis la balance
    */
-  async calculerRatiosDepuisBalance(entrepriseId: number, exercice: string): Promise<{
+  async calculerRatiosDepuisBalance(
+    entrepriseId: number,
+    exercice: string,
+    signal?: AbortSignal
+  ): Promise<{
     ratios: RatioFinancier[];
     kpis: IndicateurEntreprise[];
     situationFinanciere: any;
   }> {
     try {
       // Récupérer la balance depuis l'API
-      const balance = await this.obtenirBalanceEntreprise(entrepriseId, exercice);
+      const balance = await this.obtenirBalanceEntreprise(entrepriseId, exercice, signal);
       
       // Calculer les agrégats SYSCOHADA
       const agregats = this.calculerAgregatsBalance(balance);
@@ -72,37 +76,33 @@ export class RatiosService {
   /**
    * Calcule les ratios financiers via l'API backend (méthode alternative)
    */
-  async calculerRatiosDepuisAPI(entrepriseId: number, exercice: string): Promise<{
+  async calculerRatiosDepuisAPI(
+    entrepriseId: number,
+    exercice: string,
+    signal?: AbortSignal
+  ): Promise<{
     ratios: RatioFinancier[];
     kpis: IndicateurEntreprise[];
     situationFinanciere: any;
   }> {
     try {
       // Appel direct à l'endpoint de calcul des ratios
-      const response = await fetch(
-        `${this.apiBaseUrl}/balance/balances/calculer_ratios_financiers/?entreprise=${entrepriseId}&exercice=${exercice}`, 
+      const data = await apiClient.get(
+        '/api/v1/balance/balances/calculer_ratios_financiers/',
         {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-            'Content-Type': 'application/json'
-          }
+          entreprise: entrepriseId,
+          exercice: exercice
         }
       );
-      
-      if (!response.ok) {
-        throw new Error(`Erreur API: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      
+
       console.log('📊 Ratios calculés depuis la balance:', data);
-      
+
       return {
         ratios: data.ratios || [],
         kpis: data.kpis || [],
         situationFinanciere: data.situation || {}
       };
-      
+
     } catch (error) {
       console.error('❌ Erreur calcul ratios depuis API:', error);
       // Retourner des données par défaut en cas d'erreur
@@ -113,19 +113,16 @@ export class RatiosService {
   /**
    * Récupère la balance depuis l'API backend (méthode de fallback)
    */
-  private async obtenirBalanceEntreprise(entrepriseId: number, exercice: string): Promise<LigneBalance[]> {
-    const response = await fetch(`${this.apiBaseUrl}/balance/?entreprise=${entrepriseId}&exercice=${exercice}`, {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-        'Content-Type': 'application/json'
-      }
+  private async obtenirBalanceEntreprise(
+    entrepriseId: number,
+    exercice: string,
+    signal?: AbortSignal
+  ): Promise<LigneBalance[]> {
+    const data = await apiClient.get('/api/v1/balance/', {
+      entreprise: entrepriseId,
+      exercice: exercice
     });
-    
-    if (!response.ok) {
-      throw new Error('Erreur récupération balance');
-    }
-    
-    const data = await response.json();
+
     return data.results || [];
   }
 

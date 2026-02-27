@@ -76,7 +76,7 @@ const PlanSYSCOHADARevise: React.FC = () => {
   }
 
   const getClassIcon = (classe: number): React.ReactElement => {
-    return <AccountIcon sx={{ color: '#373B4D' }} />
+    return <AccountIcon sx={{ color: '#171717' }} />
   }
 
   const getNatureChip = (nature: string, sens: string) => {
@@ -110,15 +110,15 @@ const PlanSYSCOHADARevise: React.FC = () => {
   }
 
   return (
-    <Box sx={{ p: 3, backgroundColor: '#ECECEF', minHeight: '100vh' }}>
+    <Box sx={{ p: 3, backgroundColor: '#fafafa', minHeight: '100vh' }}>
       {/* Header */}
       <Box sx={{ mb: 4 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
           <Box>
-            <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, color: '#373B4D' }}>
+            <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, color: '#171717' }}>
               Plan Comptable SYSCOHADA Révisé
             </Typography>
-            <Typography variant="body1" sx={{ color: '#949597' }}>
+            <Typography variant="body1" sx={{ color: '#737373' }}>
               Référentiel officiel OHADA 2017 - 9 Classes complètes
             </Typography>
           </Box>
@@ -127,14 +127,14 @@ const PlanSYSCOHADARevise: React.FC = () => {
             <Button
               variant="outlined"
               startIcon={<DownloadIcon />}
-              sx={{ borderColor: '#BDBFB7', color: '#373B4D' }}
+              sx={{ borderColor: '#e5e5e5', color: '#171717' }}
             >
               Exporter
             </Button>
             <Button
               variant="contained"
               startIcon={<ViewIcon />}
-              sx={{ backgroundColor: '#373B4D', '&:hover': { backgroundColor: '#4A4F65' } }}
+              sx={{ backgroundColor: '#171717', '&:hover': { backgroundColor: '#262626' } }}
             >
               Vue Arbre
             </Button>
@@ -144,11 +144,11 @@ const PlanSYSCOHADARevise: React.FC = () => {
         {/* Statistiques */}
         <Grid container spacing={3} sx={{ mb: 3 }}>
           <Grid item xs={12} sm={6} md={3}>
-            <Paper sx={{ p: 2, textAlign: 'center', bgcolor: '#E3F2FD' }}>
-              <Typography variant="h4" sx={{ fontWeight: 700, color: '#1976D2' }}>
+            <Paper sx={{ p: 2, textAlign: 'center', bgcolor: '#f5f5f5' }}>
+              <Typography variant="h4" sx={{ fontWeight: 700, color: '#171717' }}>
                 {Object.keys(SYSCOHADA_REVISE_CLASSES).length}
               </Typography>
-              <Typography variant="caption" sx={{ color: '#949597' }}>
+              <Typography variant="caption" sx={{ color: '#737373' }}>
                 Classes
               </Typography>
             </Paper>
@@ -158,7 +158,7 @@ const PlanSYSCOHADARevise: React.FC = () => {
               <Typography variant="h4" sx={{ fontWeight: 700, color: '#388E3C' }}>
                 {PLAN_SYSCOHADA_REVISE.length}
               </Typography>
-              <Typography variant="caption" sx={{ color: '#949597' }}>
+              <Typography variant="caption" sx={{ color: '#737373' }}>
                 Comptes Total
               </Typography>
             </Paper>
@@ -168,7 +168,7 @@ const PlanSYSCOHADARevise: React.FC = () => {
               <Typography variant="h4" sx={{ fontWeight: 700, color: '#F57C00' }}>
                 {PLAN_SYSCOHADA_REVISE.filter(c => c.utilisation === 'OBLIGATOIRE').length}
               </Typography>
-              <Typography variant="caption" sx={{ color: '#949597' }}>
+              <Typography variant="caption" sx={{ color: '#737373' }}>
                 Obligatoires
               </Typography>
             </Paper>
@@ -178,7 +178,7 @@ const PlanSYSCOHADARevise: React.FC = () => {
               <Typography variant="h4" sx={{ fontWeight: 700, color: '#7B1FA2' }}>
                 17
               </Typography>
-              <Typography variant="caption" sx={{ color: '#949597' }}>
+              <Typography variant="caption" sx={{ color: '#737373' }}>
                 Pays OHADA
               </Typography>
             </Paper>
@@ -187,7 +187,7 @@ const PlanSYSCOHADARevise: React.FC = () => {
       </Box>
 
       {/* Recherche et filtres */}
-      <Card sx={{ mb: 3, border: '1px solid #BDBFB7' }}>
+      <Card sx={{ mb: 3, border: '1px solid #e5e5e5' }}>
         <CardContent sx={{ p: 3 }}>
           <Grid container spacing={3} alignItems="center">
             <Grid item xs={12} md={6}>
@@ -199,7 +199,7 @@ const PlanSYSCOHADARevise: React.FC = () => {
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <SearchIcon sx={{ color: '#949597' }} />
+                      <SearchIcon sx={{ color: '#737373' }} />
                     </InputAdornment>
                   ),
                 }}
@@ -215,7 +215,7 @@ const PlanSYSCOHADARevise: React.FC = () => {
                 fullWidth
                 variant="outlined"
                 onClick={() => setSelectedSector(selectedSector === 'TOUS' ? 'COMMERCE' : 'TOUS')}
-                sx={{ borderColor: '#BDBFB7', color: '#373B4D' }}
+                sx={{ borderColor: '#e5e5e5', color: '#171717' }}
               >
                 Secteur: {selectedSector}
               </Button>
@@ -232,9 +232,9 @@ const PlanSYSCOHADARevise: React.FC = () => {
       </Card>
 
       {/* Plan comptable par classes */}
-      <Card sx={{ border: '1px solid #BDBFB7' }}>
+      <Card sx={{ border: '1px solid #e5e5e5' }}>
         <CardContent sx={{ p: 3 }}>
-          <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: '#373B4D' }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: '#171717' }}>
             📊 Plan Comptable SYSCOHADA Révisé - 9 Classes
           </Typography>
 
@@ -254,7 +254,7 @@ const PlanSYSCOHADARevise: React.FC = () => {
                 sx={{ 
                   mb: 1,
                   '&:before': { display: 'none' },
-                  border: '1px solid #BDBFB7',
+                  border: '1px solid #e5e5e5',
                   borderRadius: 2
                 }}
               >
@@ -271,17 +271,17 @@ const PlanSYSCOHADARevise: React.FC = () => {
                 >
                   {getClassIcon(parseInt(classeNum))}
                   <Box sx={{ flex: 1 }}>
-                    <Typography variant="h6" sx={{ fontWeight: 600, color: '#373B4D' }}>
+                    <Typography variant="h6" sx={{ fontWeight: 600, color: '#171717' }}>
                       Classe {classeNum} - {classeInfo.libelle}
                     </Typography>
-                    <Typography variant="body2" sx={{ color: '#949597' }}>
+                    <Typography variant="body2" sx={{ color: '#737373' }}>
                       {classeInfo.description}
                     </Typography>
                   </Box>
                   <Chip 
                     label={`${comptes.length} comptes`}
                     size="small"
-                    sx={{ backgroundColor: '#FFFFFF', color: '#373B4D' }}
+                    sx={{ backgroundColor: '#FFFFFF', color: '#171717' }}
                   />
                 </AccordionSummary>
                 
@@ -289,12 +289,12 @@ const PlanSYSCOHADARevise: React.FC = () => {
                   <TableContainer>
                     <Table>
                       <TableHead>
-                        <TableRow sx={{ backgroundColor: '#BDBFB7' }}>
-                          <TableCell sx={{ fontWeight: 600, color: '#373B4D' }}>N° Compte</TableCell>
-                          <TableCell sx={{ fontWeight: 600, color: '#373B4D' }}>Libellé</TableCell>
-                          <TableCell sx={{ fontWeight: 600, color: '#373B4D' }}>Nature</TableCell>
-                          <TableCell sx={{ fontWeight: 600, color: '#373B4D' }}>Utilisation</TableCell>
-                          <TableCell sx={{ fontWeight: 600, color: '#373B4D' }}>Secteurs</TableCell>
+                        <TableRow sx={{ backgroundColor: '#e5e5e5' }}>
+                          <TableCell sx={{ fontWeight: 600, color: '#171717' }}>N° Compte</TableCell>
+                          <TableCell sx={{ fontWeight: 600, color: '#171717' }}>Libellé</TableCell>
+                          <TableCell sx={{ fontWeight: 600, color: '#171717' }}>Nature</TableCell>
+                          <TableCell sx={{ fontWeight: 600, color: '#171717' }}>Utilisation</TableCell>
+                          <TableCell sx={{ fontWeight: 600, color: '#171717' }}>Secteurs</TableCell>
                         </TableRow>
                       </TableHead>
                       <TableBody>
@@ -302,21 +302,21 @@ const PlanSYSCOHADARevise: React.FC = () => {
                           <TableRow 
                             key={compte.numero}
                             sx={{ 
-                              backgroundColor: index % 2 === 0 ? '#FFFFFF' : '#ECEDEF',
-                              '&:hover': { backgroundColor: '#BDBFB7' }
+                              backgroundColor: index % 2 === 0 ? '#FFFFFF' : '#ffffff',
+                              '&:hover': { backgroundColor: '#e5e5e5' }
                             }}
                           >
                             <TableCell>
                               <Typography variant="body2" sx={{ 
                                 fontFamily: 'monospace', 
                                 fontWeight: 600, 
-                                color: '#373B4D'
+                                color: '#171717'
                               }}>
                                 {compte.numero}
                               </Typography>
                             </TableCell>
                             <TableCell>
-                              <Typography variant="body2" sx={{ color: '#373B4D' }}>
+                              <Typography variant="body2" sx={{ color: '#171717' }}>
                                 {compte.libelle}
                               </Typography>
                             </TableCell>
@@ -351,14 +351,14 @@ const PlanSYSCOHADARevise: React.FC = () => {
                                       size="small"
                                       sx={{ 
                                         fontSize: '0.6rem',
-                                        bgcolor: '#ECECEF',
-                                        color: '#373B4D'
+                                        bgcolor: '#fafafa',
+                                        color: '#171717'
                                       }}
                                     />
                                   ))}
                                 </Stack>
                               ) : (
-                                <Typography variant="caption" sx={{ color: '#949597' }}>
+                                <Typography variant="caption" sx={{ color: '#737373' }}>
                                   Tous secteurs
                                 </Typography>
                               )}

@@ -179,6 +179,7 @@ class AccountingService {
     search?: string
     is_actif?: boolean
     page?: number
+    page_size?: number
   }) {
     console.log('🔄 Fetching comptes from backend...', params)
     return apiClient.get(`${this.baseUrl}/comptes/`, params)
@@ -425,6 +426,27 @@ class AccountingService {
   async cancelCloture(exercice: string) {
     console.log(`❌ Cancelling clôture for exercice ${exercice}...`)
     return apiClient.post(`${this.baseUrl}/cloture/cancel/`, { exercice })
+  }
+
+  // Validation et Mapping - CONNEXION RÉELLE AU BACKEND
+  async validatePlanComptable(entrepriseId: string) {
+    console.log(`🔍 Validating plan comptable for entreprise ${entrepriseId}...`)
+    return apiClient.post(`${this.baseUrl}/validation_plan_comptable/`, { entreprise_id: entrepriseId })
+  }
+
+  async mappingAutomatique(entrepriseId: string) {
+    console.log(`🤖 Running automatic mapping for entreprise ${entrepriseId}...`)
+    return apiClient.post(`${this.baseUrl}/mapping_automatique/`, { entreprise_id: entrepriseId })
+  }
+
+  async determinerTypeLiasse(params: {
+    chiffre_affaires: number
+    secteur_activite: string
+    forme_juridique: string
+    is_groupe: boolean
+  }) {
+    console.log('🔍 Determining type liasse...', params)
+    return apiClient.post(`${this.baseUrl}/determiner_type_liasse/`, params)
   }
 }
 

@@ -86,7 +86,7 @@ export interface DashboardStats {
 }
 
 class EntrepriseService {
-  private baseUrl = '/api/v1/parametrage/api/entreprises'
+  private baseUrl = '/api/v1/parametrage/entreprises'
 
   // CRUD Operations
   async getEntreprises(params?: {
@@ -157,7 +157,7 @@ class EntrepriseService {
     secteur?: string
     pays?: string
   }): Promise<TypeLiasse[]> {
-    const baseUrl = '/api/v1/parametrage/api/types-liasse'
+    const baseUrl = '/api/v1/parametrage/types-liasse'
     if (params && Object.keys(params).length > 0) {
       return apiClient.get(`${baseUrl}/by_criteria/`, params)
     }
@@ -165,7 +165,7 @@ class EntrepriseService {
   }
 
   async getTypesLiasseSyscohada(): Promise<TypeLiasse[]> {
-    return apiClient.get('/api/v1/parametrage/api/types-liasse/officiel_syscohada/')
+    return apiClient.get('/api/v1/parametrage/types-liasse/officiel_syscohada/')
   }
 }
 

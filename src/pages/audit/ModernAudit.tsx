@@ -611,8 +611,8 @@ const ModernAudit: React.FC = () => {
                   variant="contained" 
                   size="small"
                   sx={{ 
-                    bgcolor: '#373B4D',
-                    '&:hover': { bgcolor: '#4A4F65' }
+                    bgcolor: '#171717',
+                    '&:hover': { bgcolor: '#262626' }
                   }}
                 >
                   Imprimer Rapport
@@ -631,8 +631,8 @@ const ModernAudit: React.FC = () => {
                 </Paper>
               </Grid>
               <Grid item xs={12} md={3}>
-                <Paper sx={{ p: 2, textAlign: 'center', bgcolor: '#E3F2FD' }}>
-                  <Typography variant="h5" sx={{ fontWeight: 700, color: '#1976D2' }}>
+                <Paper sx={{ p: 2, textAlign: 'center', bgcolor: '#f5f5f5' }}>
+                  <Typography variant="h5" sx={{ fontWeight: 700, color: '#171717' }}>
                     {correctionReport.totalCorrections}
                   </Typography>
                   <Typography variant="caption">Corrections proposées</Typography>

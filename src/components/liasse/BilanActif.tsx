@@ -364,7 +364,7 @@ const BilanActif: React.FC<BilanActifProps> = ({ modeEdition = false }) => {
   const getRowStyle = (ligne: any) => {
     if (ligne.isTotalGeneral) {
       return { 
-        backgroundColor: '#1976d2', 
+        backgroundColor: '#171717', 
         color: 'white',
         fontWeight: 700,
       }
@@ -396,10 +396,10 @@ const BilanActif: React.FC<BilanActifProps> = ({ modeEdition = false }) => {
         BILAN - ACTIF
       </Typography>
       
-      <TableContainer component={Paper} sx={{ border: '2px solid #1976d2' }}>
+      <TableContainer component={Paper} sx={{ border: '2px solid #171717' }}>
         <Table size="small" sx={{ minWidth: 800 }}>
           <TableHead>
-            <TableRow sx={{ backgroundColor: '#1976d2' }}>
+            <TableRow sx={{ backgroundColor: '#171717' }}>
               <TableCell sx={{ color: 'white', fontWeight: 700, width: '60px' }}>Réf</TableCell>
               <TableCell sx={{ color: 'white', fontWeight: 700, minWidth: '350px' }}>ACTIF</TableCell>
               <TableCell sx={{ color: 'white', fontWeight: 700, width: '60px' }} align="center">Note</TableCell>

@@ -62,13 +62,13 @@ import ValidationModal from '../components/liasse/modals/ValidationModal'
 
 const DRAWER_WIDTH = 280
 // Palette FiscaSync
-const PRIMARY_COLOR = '#373B4D'        // Bleu foncé principal  
-const SECONDARY_COLOR = '#949597'      // Gris moyen
-const BACKGROUND_COLOR = '#ECECEF'     // Fond global clair
-const SURFACE_COLOR = '#ECEDEF'        // Fond des cartes
-const ACCENT_COLOR = '#BDBFB7'         // Accent pour encadrés
-const TEXT_PRIMARY = '#373B4D'         // Texte principal
-const TEXT_SECONDARY = '#949597'       // Texte secondaire
+const PRIMARY_COLOR = '#171717'        // Bleu foncé principal  
+const SECONDARY_COLOR = '#737373'      // Gris moyen
+const BACKGROUND_COLOR = '#fafafa'     // Fond global clair
+const SURFACE_COLOR = '#ffffff'        // Fond des cartes
+const ACCENT_COLOR = '#e5e5e5'         // Accent pour encadrés
+const TEXT_PRIMARY = '#171717'         // Texte principal
+const TEXT_SECONDARY = '#737373'       // Texte secondaire
 
 const LiasseCompleteFinal: React.FC = () => {
   const [selectedOnglet, setSelectedOnglet] = useState('couverture')

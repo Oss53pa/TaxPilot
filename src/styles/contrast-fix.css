@@ -1,122 +1,73 @@
-/* Corrections de contraste pour une meilleure lisibilité */
+/* Contrast fixes for grayscale monochrome design system */
 
-/* Boutons avec fond bleu foncé - texte blanc */
+/* Dark backgrounds (#171717, #262626) - white text */
+.MuiAppBar-root,
+.MuiDrawer-paper,
+.MuiToolbar-root {
+  color: #ffffff !important;
+}
+
+.MuiAppBar-root *,
+.MuiDrawer-paper *,
+.MuiToolbar-root * {
+  color: inherit;
+}
+
+.MuiAppBar-root .MuiTypography-root,
+.MuiDrawer-paper .MuiTypography-root,
+.MuiToolbar-root .MuiTypography-root {
+  color: #ffffff !important;
+}
+
+.MuiAppBar-root a,
+.MuiDrawer-paper a {
+  color: #e5e5e5 !important;
+}
+
+/* Contained buttons - white text */
 .MuiButton-containedPrimary,
-.MuiButton-containedSecondary,
-.MuiButton-contained[style*="background-color: rgb(26, 35, 126)"],
-.MuiButton-contained[style*="background-color: #1a237e"],
-.MuiButton-contained[style*="background-color: rgb(13, 71, 161)"],
-.MuiButton-contained[style*="background-color: #0d47a1"],
-.MuiButton-contained[style*="background-color: rgb(25, 118, 210)"],
-.MuiButton-contained[style*="background-color: #1976d2"] {
+.MuiButton-containedSecondary {
   color: #ffffff !important;
 }
 
-/* Chips avec fond sombre - texte blanc */
-.MuiChip-colorPrimary,
-.MuiChip-colorSecondary,
-.MuiChip-root[style*="background-color: rgb(26, 35, 126)"],
-.MuiChip-root[style*="background-color: #1a237e"] {
+/* Chips on dark backgrounds only (AppBar, Drawer, Toolbar) */
+.MuiAppBar-root .MuiChip-colorPrimary,
+.MuiAppBar-root .MuiChip-colorSecondary,
+.MuiDrawer-paper .MuiChip-colorPrimary,
+.MuiDrawer-paper .MuiChip-colorSecondary,
+.MuiToolbar-root .MuiChip-colorPrimary,
+.MuiToolbar-root .MuiChip-colorSecondary {
   color: #ffffff !important;
 }
 
-/* AppBar et Toolbar - texte blanc */
-.MuiAppBar-colorPrimary,
-.MuiAppBar-colorSecondary,
-.MuiAppBar-root {
+/* Filled chips (not outlined) on light backgrounds need contrasted text */
+.MuiChip-filled.MuiChip-colorPrimary:not(.MuiAppBar-root *):not(.MuiDrawer-paper *):not(.MuiToolbar-root *) {
   color: #ffffff !important;
 }
 
+/* Outlined chips should use their color as text, not white */
+.MuiChip-outlined:not(.MuiAppBar-root *):not(.MuiDrawer-paper *):not(.MuiToolbar-root *) {
+  color: inherit;
+}
+
+/* AppBar icons and buttons */
 .MuiAppBar-root .MuiTypography-root,
 .MuiAppBar-root .MuiButton-root,
 .MuiAppBar-root .MuiIconButton-root {
   color: #ffffff !important;
 }
 
-/* Cards avec fond sombre */
-.MuiCard-root[style*="background-color: rgb(26, 35, 126)"],
-.MuiCard-root[style*="background-color: #1a237e"],
-.MuiPaper-root[style*="background-color: rgb(26, 35, 126)"],
-.MuiPaper-root[style*="background-color: #1a237e"] {
-  color: #ffffff !important;
-}
-
-/* Tous les éléments avec fond bleu foncé */
-[style*="background-color: rgb(26, 35, 126)"],
-[style*="background-color: #1a237e"],
-[style*="background-color: rgb(13, 71, 161)"],
-[style*="background-color: #0d47a1"],
-[style*="background: rgb(26, 35, 126)"],
-[style*="background: #1a237e"] {
-  color: #ffffff !important;
-}
-
-/* Texte dans les éléments avec fond sombre */
-[style*="background-color: rgb(26, 35, 126)"] *,
-[style*="background-color: #1a237e"] *,
-[style*="background-color: rgb(13, 71, 161)"] *,
-[style*="background-color: #0d47a1"] * {
-  color: inherit;
-}
-
-/* Badges avec fond sombre */
+/* Badges */
 .MuiBadge-colorPrimary,
 .MuiBadge-colorSecondary {
   color: #ffffff !important;
 }
 
-/* Tabs avec fond sombre */
-.MuiTabs-root[style*="background-color: rgb(26, 35, 126)"] .MuiTab-root,
-.MuiTabs-root[style*="background-color: #1a237e"] .MuiTab-root {
-  color: rgba(255, 255, 255, 0.7) !important;
-}
-
-.MuiTabs-root[style*="background-color: rgb(26, 35, 126)"] .Mui-selected,
-.MuiTabs-root[style*="background-color: #1a237e"] .Mui-selected {
-  color: #ffffff !important;
-}
-
-/* Drawer avec fond sombre */
-.MuiDrawer-paper[style*="background-color: rgb(26, 35, 126)"],
-.MuiDrawer-paper[style*="background-color: #1a237e"] {
-  color: #ffffff !important;
-}
-
-.MuiDrawer-paper[style*="background-color: rgb(26, 35, 126)"] .MuiListItemText-root,
-.MuiDrawer-paper[style*="background-color: #1a237e"] .MuiListItemText-root,
-.MuiDrawer-paper[style*="background-color: rgb(26, 35, 126)"] .MuiListItemIcon-root,
-.MuiDrawer-paper[style*="background-color: #1a237e"] .MuiListItemIcon-root {
-  color: #ffffff !important;
-}
-
-/* Snackbar avec fond sombre */
-.MuiSnackbarContent-root[style*="background-color: rgb(26, 35, 126)"],
-.MuiSnackbarContent-root[style*="background-color: #1a237e"] {
-  color: #ffffff !important;
-}
-
-/* Tableaux avec header sombre */
-.MuiTableCell-head[style*="background-color: rgb(26, 35, 126)"],
-.MuiTableCell-head[style*="background-color: #1a237e"] {
-  color: #ffffff !important;
-}
-
-/* Classe utilitaire pour forcer le texte blanc */
+/* Utility class */
 .white-text {
   color: #ffffff !important;
 }
 
 .white-text * {
-  color: #ffffff !important;
-}
-
-/* Classe pour les boutons primaires avec fond bleu foncé */
-.dark-blue-button {
-  background-color: #1a237e !important;
-  color: #ffffff !important;
-}
-
-.dark-blue-button:hover {
-  background-color: #0d47a1 !important;
   color: #ffffff !important;
 }

@@ -43,24 +43,39 @@ const Dashboard: React.FC = () => {
   const [situationReelle, setSituationReelle] = React.useState(null)
   const [chargementDonnees, setChargementDonnees] = React.useState(true)
   
-  // Chargement des vraies données au démarrage
+  // Chargement des vraies données au démarrage avec AbortController
   React.useEffect(() => {
+    const controller = new AbortController()
+
     const chargerDonneesReelles = async () => {
       try {
         setChargementDonnees(true)
-        const donneesCalculees = await ratiosService.calculerRatiosDepuisBalance(1, '2024')
-        
+        const donneesCalculees = await ratiosService.calculerRatiosDepuisBalance(
+          1,
+          '2024',
+          controller.signal
+        )
+
         setRatiosReels(donneesCalculees.ratios)
         setKpisReels(donneesCalculees.kpis)
         setSituationReelle(donneesCalculees.situationFinanciere)
-      } catch (error) {
+      } catch (error: unknown) {
+        // Ignore AbortError when component unmounts
+        if (error instanceof Error && error.name === 'AbortError') {
+          return
+        }
         console.error('Erreur chargement données réelles:', error)
       } finally {
         setChargementDonnees(false)
       }
     }
-    
+
     chargerDonneesReelles()
+
+    // Cleanup: abort request if component unmounts
+    return () => {
+      controller.abort()
+    }
   }, [])
 
   // Transformation des ratios réels pour l'affichage

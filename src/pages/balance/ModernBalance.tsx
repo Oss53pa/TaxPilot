@@ -102,21 +102,23 @@ const StatCard: React.FC<{
   <Card elevation={0} sx={{ border: `1px solid ${alpha(theme.palette.divider, 0.08)}`, height: '100%' }}>
     <CardContent sx={{ p: 3 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+        <Box sx={{ flex: 1 }}>
+          <Typography variant="h4" sx={{ fontWeight: 700, mb: 0.5 }}>
+            {typeof value === 'number' ? value.toLocaleString() : value}
+          </Typography>
+          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+            {title}
+          </Typography>
+          {subtitle && (
+            <Typography variant="caption" color="text.secondary">
+              {subtitle}
+            </Typography>
+          )}
+        </Box>
         <Avatar sx={{ backgroundColor: alpha(color, 0.1), color, width: 48, height: 48 }}>
           {icon}
         </Avatar>
       </Box>
-      <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
-        {typeof value === 'number' ? value.toLocaleString() : value}
-      </Typography>
-      <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-        {title}
-      </Typography>
-      {subtitle && (
-        <Typography variant="body2" color="text.secondary">
-          {subtitle}
-        </Typography>
-      )}
     </CardContent>
   </Card>
 )
@@ -130,7 +132,7 @@ const ModernBalance: React.FC = () => {
   const [selectedClass, setSelectedClass] = useState('all')
   const [selectedStatus, setSelectedStatus] = useState('all')
   const [page, setPage] = useState(0)
-  const [rowsPerPage, setRowsPerPage] = useState(25)
+  const [rowsPerPage, setRowsPerPage] = useState(15)
   const [tabValue, setTabValue] = useState(0)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [selectedEntry, setSelectedEntry] = useState<BalanceEntry | null>(null)
@@ -184,6 +186,7 @@ const ModernBalance: React.FC = () => {
 
     return data.sort((a, b) => a.account.localeCompare(b.account))
   }
+  */
 
   // Calcul des statistiques
   const balanceStats: BalanceStats = useMemo(() => {
@@ -228,7 +231,7 @@ const ModernBalance: React.FC = () => {
 
       // Si on a des balances, récupérer les données détaillées
       if (balances.length > 0) {
-        const balanceDetails = await balanceService.getBalanceDetails(balances[0].id)
+        const balanceDetails = await balanceService.getLignesBalance(balances[0].id, { page_size: 1000 })
 
         // Convertir les données backend au format attendu
         const formattedData = formatBalanceData(balanceDetails)
@@ -405,6 +408,7 @@ const ModernBalance: React.FC = () => {
   }
 
   return (
+    <>
     <Box sx={{ p: 3, backgroundColor: 'background.default', minHeight: '100vh' }}>
       {/* Header */}
       <Box sx={{ mb: 4 }}>
@@ -569,18 +573,51 @@ const ModernBalance: React.FC = () => {
           <TableContainer>
             <Table stickyHeader>
               <TableHead>
+                {/* En-tête de groupes de colonnes */}
                 <TableRow>
-                  <TableCell sx={{ fontWeight: 600 }}>Compte</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Libellé</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }} align="center">Classe</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }} align="right">Débit ouverture</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }} align="right">Crédit ouverture</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }} align="right">Mvt débit</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }} align="right">Mvt crédit</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }} align="right">Débit clôture</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }} align="right">Crédit clôture</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }} align="center">Statut</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }} align="center">Actions</TableCell>
+                  <TableCell rowSpan={2} sx={{ fontWeight: 600, borderBottom: `2px solid ${theme.palette.divider}` }}>Compte</TableCell>
+                  <TableCell rowSpan={2} sx={{ fontWeight: 600, borderBottom: `2px solid ${theme.palette.divider}` }}>Libellé</TableCell>
+                  <TableCell rowSpan={2} sx={{ fontWeight: 600, borderBottom: `2px solid ${theme.palette.divider}` }} align="center">Classe</TableCell>
+                  <TableCell colSpan={2} align="center" sx={{
+                    fontWeight: 700,
+                    backgroundColor: alpha(theme.palette.warning.main, 0.1),
+                    color: theme.palette.warning.dark,
+                    borderBottom: `2px solid ${theme.palette.warning.main}`,
+                    fontSize: '0.8rem',
+                    letterSpacing: '0.05em',
+                  }}>
+                    SOLDES N-1 (Ouverture)
+                  </TableCell>
+                  <TableCell colSpan={2} align="center" sx={{
+                    fontWeight: 700,
+                    backgroundColor: alpha(theme.palette.info.main, 0.1),
+                    color: theme.palette.info.dark,
+                    borderBottom: `2px solid ${theme.palette.info.main}`,
+                    fontSize: '0.8rem',
+                    letterSpacing: '0.05em',
+                  }}>
+                    MOUVEMENTS N
+                  </TableCell>
+                  <TableCell colSpan={2} align="center" sx={{
+                    fontWeight: 700,
+                    backgroundColor: alpha(theme.palette.success.main, 0.1),
+                    color: theme.palette.success.dark,
+                    borderBottom: `2px solid ${theme.palette.success.main}`,
+                    fontSize: '0.8rem',
+                    letterSpacing: '0.05em',
+                  }}>
+                    SOLDES N (Clôture)
+                  </TableCell>
+                  <TableCell rowSpan={2} sx={{ fontWeight: 600, borderBottom: `2px solid ${theme.palette.divider}` }} align="center">Statut</TableCell>
+                  <TableCell rowSpan={2} sx={{ fontWeight: 600, borderBottom: `2px solid ${theme.palette.divider}` }} align="center">Actions</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell sx={{ fontWeight: 600, backgroundColor: alpha(theme.palette.warning.main, 0.05) }} align="right">Débit</TableCell>
+                  <TableCell sx={{ fontWeight: 600, backgroundColor: alpha(theme.palette.warning.main, 0.05) }} align="right">Crédit</TableCell>
+                  <TableCell sx={{ fontWeight: 600, backgroundColor: alpha(theme.palette.info.main, 0.05) }} align="right">Débit</TableCell>
+                  <TableCell sx={{ fontWeight: 600, backgroundColor: alpha(theme.palette.info.main, 0.05) }} align="right">Crédit</TableCell>
+                  <TableCell sx={{ fontWeight: 600, backgroundColor: alpha(theme.palette.success.main, 0.05) }} align="right">Débit</TableCell>
+                  <TableCell sx={{ fontWeight: 600, backgroundColor: alpha(theme.palette.success.main, 0.05) }} align="right">Crédit</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -628,22 +665,22 @@ const ModernBalance: React.FC = () => {
                             variant="outlined"
                           />
                         </TableCell>
-                        <TableCell align="right" sx={{ fontFamily: 'monospace' }}>
+                        <TableCell align="right" sx={{ fontFamily: 'monospace', backgroundColor: alpha(theme.palette.warning.main, 0.03) }}>
                           {formatAmount(entry.debitOpening)}
                         </TableCell>
-                        <TableCell align="right" sx={{ fontFamily: 'monospace' }}>
+                        <TableCell align="right" sx={{ fontFamily: 'monospace', backgroundColor: alpha(theme.palette.warning.main, 0.03) }}>
                           {formatAmount(entry.creditOpening)}
                         </TableCell>
-                        <TableCell align="right" sx={{ fontFamily: 'monospace' }}>
+                        <TableCell align="right" sx={{ fontFamily: 'monospace', backgroundColor: alpha(theme.palette.info.main, 0.03) }}>
                           {formatAmount(entry.debitMovement)}
                         </TableCell>
-                        <TableCell align="right" sx={{ fontFamily: 'monospace' }}>
+                        <TableCell align="right" sx={{ fontFamily: 'monospace', backgroundColor: alpha(theme.palette.info.main, 0.03) }}>
                           {formatAmount(entry.creditMovement)}
                         </TableCell>
-                        <TableCell align="right" sx={{ fontFamily: 'monospace', fontWeight: 600 }}>
+                        <TableCell align="right" sx={{ fontFamily: 'monospace', fontWeight: 600, backgroundColor: alpha(theme.palette.success.main, 0.05) }}>
                           {formatAmount(entry.debitClosing)}
                         </TableCell>
-                        <TableCell align="right" sx={{ fontFamily: 'monospace', fontWeight: 600 }}>
+                        <TableCell align="right" sx={{ fontFamily: 'monospace', fontWeight: 600, backgroundColor: alpha(theme.palette.success.main, 0.05) }}>
                           {formatAmount(entry.creditClosing)}
                         </TableCell>
                         <TableCell align="center">
@@ -983,6 +1020,7 @@ const ModernBalance: React.FC = () => {
         </DialogActions>
       </Dialog>
     </Box>
+    </>
   )
 }
 

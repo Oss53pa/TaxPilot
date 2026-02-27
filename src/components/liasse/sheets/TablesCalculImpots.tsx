@@ -422,8 +422,8 @@ const TablesCalculImpots: React.FC = () => {
       {renderTableauCalcul(
         '🏛️ Impôt sur les Sociétés (IS)',
         impotSociete,
-        '#1976d2',
-        <TaxIcon sx={{ color: '#1976d2' }} />
+        '#171717',
+        <TaxIcon sx={{ color: '#171717' }} />
       )}
 
       {/* Table TVA */}

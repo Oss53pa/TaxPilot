@@ -1,45 +1,35 @@
 /**
- * Conformité WCAG AA et Cahier des Charges FiscaSync
- * EX-UI-002: Support des modes clair et sombre
- * EX-UI-004: Navigation clavier (accessibilité)
+ * WCAG AA Conformity - Grayscale Design System
+ * Ensures proper contrast ratios across all components
  */
 
-/* SIDEBARS - FOND SOMBRE + TEXTE BLANC pour contraste optimal */
+/* Sidebar - dark background + light text (WCAG AA compliant) */
 .MuiDrawer-paper {
-  background-color: #1e1e1e !important;
+  background-color: #171717 !important;
 }
 
-/* TOUS les textes dans sidebars - BLANC pour lisibilité maximale */
 .MuiDrawer-paper .MuiListItemText-primary,
-.MuiDrawer-paper .MuiListItemText-primary *,
 .MuiDrawer-paper .MuiListItemText-secondary,
-.MuiDrawer-paper .MuiListItemText-secondary *,
 .MuiDrawer-paper .MuiTypography-root,
-.MuiDrawer-paper .MuiTypography-subtitle2,
-.MuiDrawer-paper .MuiTypography-body2,
-.MuiDrawer-paper .MuiTypography-caption,
-.MuiDrawer-paper .MuiTypography-overline,
 .MuiDrawer-paper span,
 .MuiDrawer-paper p,
 .MuiDrawer-paper h6 {
-  color: white !important;
+  color: #d4d4d4 !important;
 }
 
-/* Icônes en blanc pour cohérence */
 .MuiDrawer-paper .MuiSvgIcon-root {
-  color: white !important;
+  color: #a3a3a3 !important;
 }
 
-/* Éléments de navigation - État normal avec fond léger */
+/* Navigation states */
 .MuiDrawer-paper .MuiListItemButton-root {
-  background-color: rgba(255, 255, 255, 0.03) !important;
+  background-color: transparent !important;
 }
 
 .MuiDrawer-paper .MuiListItemButton-root:hover {
   background-color: rgba(255, 255, 255, 0.08) !important;
 }
 
-/* État sélectionné - Plus visible */
 .MuiDrawer-paper .MuiListItemButton-root.Mui-selected {
-  background-color: rgba(255, 255, 255, 0.15) !important;
+  background-color: rgba(255, 255, 255, 0.12) !important;
 }

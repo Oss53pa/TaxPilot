@@ -144,51 +144,52 @@ const BilanActifSYSCOHADA: React.FC = () => {
   // Calculer les totaux automatiquement
   const calculateTotals = useMemo(() => {
     const totals: BilanActifData = {}
-    
-    // Calculer les totaux des groupes
+
+    // Calculer les totaux des groupes - cherche dans data ET dans totals déjà calculés
     const calculateGroup = (refs: string[]) => {
       let brut = 0, amortProv = 0, net = 0, netN1 = 0
       refs.forEach(ref => {
-        if (data[ref]) {
-          brut += data[ref].brut || 0
-          amortProv += data[ref].amortProv || 0
-          net += data[ref].net || 0
-          netN1 += data[ref].netN1 || 0
+        const source = totals[ref] || data[ref]
+        if (source) {
+          brut += source.brut || 0
+          amortProv += source.amortProv || 0
+          net += source.net || 0
+          netN1 += source.netN1 || 0
         }
       })
       return { brut, amortProv, net, netN1 }
     }
-    
+
     // Charges immobilisées (AX)
     totals.AX = calculateGroup(['AQ', 'AR', 'AS'])
-    
+
     // Immobilisations incorporelles (AC)
     totals.AC = calculateGroup(['AD', 'AE', 'AF', 'AG'])
-    
+
     // Immobilisations corporelles (AI)
     totals.AI = calculateGroup(['AJ', 'AK', 'AL', 'AM', 'AN'])
-    
+
     // Immobilisations financières (AW)
     totals.AW = calculateGroup(['AT', 'AU'])
-    
+
     // Total Actif Immobilisé (AZ)
     totals.AZ = calculateGroup(['AX', 'AC', 'AI', 'AP', 'AW'])
-    
+
     // Stocks (BB)
     totals.BB = calculateGroup(['BC', 'BD', 'BE', 'BF', 'BG'])
-    
+
     // Créances (BH)
     totals.BH = calculateGroup(['BI', 'BJ', 'BK'])
-    
+
     // Total Actif Circulant (BL)
     totals.BL = calculateGroup(['BA', 'BB', 'BH'])
-    
+
     // Total Trésorerie Actif (BT)
     totals.BT = calculateGroup(['BQ', 'BR', 'BS'])
-    
+
     // Total Général (BZ)
     totals.BZ = calculateGroup(['AZ', 'BL', 'BT', 'BU'])
-    
+
     return totals
   }, [data])
 

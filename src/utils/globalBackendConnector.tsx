@@ -8,7 +8,7 @@ import { getBackendData } from '@/config/globalBackendIntegration'
 import * as services from '@/services'
 
 // Configuration globale
-const GLOBAL_BACKEND_ENABLED = true
+const GLOBAL_BACKEND_ENABLED = false
 const CACHE_TIMEOUT = 5 * 60 * 1000 // 5 minutes
 
 // Cache global pour éviter les appels répétés

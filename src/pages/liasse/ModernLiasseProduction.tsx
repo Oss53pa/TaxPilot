@@ -476,6 +476,353 @@ const ModernLiasseProduction: React.FC = () => {
     return matchesSearch && matchesStatus && matchesType;
   });
 
+  const renderProductionTab = () => (
+    <Box>
+      <Alert severity="info" sx={{ mb: 3 }}>
+        <Typography variant="body1" fontWeight="bold">
+          Production Automatisée
+        </Typography>
+        <Typography variant="body2">
+          Sélectionnez une liasse ci-dessous pour lancer la production automatique. Le processus complet prend moins de 30 minutes.
+        </Typography>
+      </Alert>
+
+      {/* Liste des liasses en production */}
+      <Grid container spacing={3}>
+        {liasses.map((liasse) => (
+          <Grid item xs={12} key={liasse.id}>
+            <Card>
+              <CardContent>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                  <Box>
+                    <Typography variant="h6">{liasse.name}</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {liasse.company.name} • {liasse.year}
+                    </Typography>
+                  </Box>
+                  <Chip
+                    label={liasse.status.replace('-', ' ')}
+                    color={getStatusColor(liasse.status) as any}
+                    size="small"
+                  />
+                </Box>
+
+                <Box sx={{ mb: 2 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                    <Typography variant="body2">Progression</Typography>
+                    <Typography variant="body2" fontWeight="bold">{liasse.progress}%</Typography>
+                  </Box>
+                  <LinearProgress
+                    variant="determinate"
+                    value={liasse.progress}
+                    sx={{
+                      height: 8,
+                      borderRadius: 4,
+                      '& .MuiLinearProgress-bar': {
+                        backgroundColor: getProgressColor(liasse.progress)
+                      }
+                    }}
+                  />
+                </Box>
+
+                <Box sx={{ display: 'flex', gap: 2 }}>
+                  <Button
+                    variant="contained"
+                    startIcon={<PlayArrow />}
+                    onClick={() => startAutomaticProduction(liasse)}
+                    disabled={liasse.status === 'completed' || isProducing}
+                  >
+                    Lancer la Production
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    startIcon={<Visibility />}
+                  >
+                    Voir Détails
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    startIcon={<Download />}
+                    disabled={liasse.status !== 'completed'}
+                  >
+                    Télécharger
+                  </Button>
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
+    </Box>
+  );
+
+  const renderTemplatesTab = () => (
+    <Box>
+      <Alert severity="info" sx={{ mb: 3 }}>
+        <Typography variant="body1" fontWeight="bold">
+          Templates par Secteur et Juridiction
+        </Typography>
+        <Typography variant="body2">
+          Modèles préconfigurés adaptés à votre secteur d'activité et juridiction (OHADA/SYSCOHADA)
+        </Typography>
+      </Alert>
+
+      <Grid container spacing={3}>
+        {/* Templates par juridiction */}
+        <Grid item xs={12} md={6}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>
+                <AccountBalance sx={{ mr: 1, verticalAlign: 'middle' }} />
+                Templates par Juridiction
+              </Typography>
+              <Divider sx={{ mb: 2 }} />
+
+              {Object.entries(jurisdictionTemplates).map(([jurisdiction, pays]) => (
+                <Accordion key={jurisdiction}>
+                  <AccordionSummary expandIcon={<ExpandMore />}>
+                    <Typography fontWeight="medium">{jurisdiction}</Typography>
+                    <Chip label={Array.isArray(pays) ? pays.length : '1'} size="small" sx={{ ml: 1 }} />
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <List dense>
+                      {(Array.isArray(pays) ? pays : [pays]).map((country) => (
+                        <ListItem key={country}>
+                          <ListItemIcon>
+                            <Folder fontSize="small" />
+                          </ListItemIcon>
+                          <ListItemText primary={country} />
+                          <Button size="small" startIcon={<Add />}>
+                            Utiliser
+                          </Button>
+                        </ListItem>
+                      ))}
+                    </List>
+                  </AccordionDetails>
+                </Accordion>
+              ))}
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* Templates par secteur */}
+        <Grid item xs={12} md={6}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>
+                <BusinessCenter sx={{ mr: 1, verticalAlign: 'middle' }} />
+                Templates par Secteur
+              </Typography>
+              <Divider sx={{ mb: 2 }} />
+
+              {Object.entries(sectorTemplates).map(([sector, subsectors]) => (
+                <Accordion key={sector}>
+                  <AccordionSummary expandIcon={<ExpandMore />}>
+                    <Typography fontWeight="medium">{sector}</Typography>
+                    <Chip label={subsectors.length} size="small" sx={{ ml: 1 }} />
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <List dense>
+                      {subsectors.map((subsector) => (
+                        <ListItem key={subsector}>
+                          <ListItemIcon>
+                            <Description fontSize="small" />
+                          </ListItemIcon>
+                          <ListItemText primary={subsector} />
+                          <Button size="small" startIcon={<Add />}>
+                            Utiliser
+                          </Button>
+                        </ListItem>
+                      ))}
+                    </List>
+                  </AccordionDetails>
+                </Accordion>
+              ))}
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+    </Box>
+  );
+
+  const renderValidationsTab = () => (
+    <Box>
+      <Alert severity="warning" sx={{ mb: 3 }}>
+        <Typography variant="body1" fontWeight="bold">
+          Validation Multi-Niveaux
+        </Typography>
+        <Typography variant="body2">
+          Contrôles de cohérence, complétude et conformité pour toutes vos liasses
+        </Typography>
+      </Alert>
+
+      {/* Résumé des validations */}
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        <Grid item xs={12} sm={6} md={3}>
+          <Card>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                <CheckCircle color="success" sx={{ mr: 1 }} />
+                <Typography variant="h6">
+                  {liasses.reduce((acc, l) => acc + l.validations.filter(v => v.type === 'info').length, 0)}
+                </Typography>
+              </Box>
+              <Typography color="textSecondary" variant="body2">
+                Validations OK
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <Card>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                <Warning color="warning" sx={{ mr: 1 }} />
+                <Typography variant="h6">
+                  {liasses.reduce((acc, l) => acc + l.validations.filter(v => v.type === 'warning').length, 0)}
+                </Typography>
+              </Box>
+              <Typography color="textSecondary" variant="body2">
+                Avertissements
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <Card>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                <ErrorIcon color="error" sx={{ mr: 1 }} />
+                <Typography variant="h6">
+                  {liasses.reduce((acc, l) => acc + l.validations.filter(v => v.type === 'error').length, 0)}
+                </Typography>
+              </Box>
+              <Typography color="textSecondary" variant="body2">
+                Erreurs
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <Card>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                <Security color="info" sx={{ mr: 1 }} />
+                <Typography variant="h6">
+                  {liasses.reduce((acc, l) => acc + l.validations.filter(v => v.isBlocking).length, 0)}
+                </Typography>
+              </Box>
+              <Typography color="textSecondary" variant="body2">
+                Bloquantes
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+
+      {/* Détails des validations par liasse */}
+      <Grid container spacing={3}>
+        {liasses.map((liasse) => {
+          const validationsLiasse = validateLiasse(liasse);
+
+          return (
+            <Grid item xs={12} key={liasse.id}>
+              <Card>
+                <CardContent>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                    <Box>
+                      <Typography variant="h6">{liasse.name}</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {validationsLiasse.length} contrôle(s) effectué(s)
+                      </Typography>
+                    </Box>
+                    <Button
+                      variant="outlined"
+                      startIcon={<Refresh />}
+                      size="small"
+                    >
+                      Re-valider
+                    </Button>
+                  </Box>
+
+                  {validationsLiasse.length === 0 ? (
+                    <Alert severity="success">
+                      Aucune validation à effectuer pour cette liasse
+                    </Alert>
+                  ) : (
+                    <TableContainer>
+                      <Table size="small">
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>Type</TableCell>
+                            <TableCell>Catégorie</TableCell>
+                            <TableCell>Message</TableCell>
+                            <TableCell>Sévérité</TableCell>
+                            <TableCell>Bloquant</TableCell>
+                            <TableCell>Suggestion</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {validationsLiasse.map((validation) => (
+                            <TableRow key={validation.id}>
+                              <TableCell>
+                                <Chip
+                                  icon={
+                                    validation.type === 'error' ? <ErrorIcon /> :
+                                    validation.type === 'warning' ? <Warning /> :
+                                    <CheckCircle />
+                                  }
+                                  label={validation.type}
+                                  size="small"
+                                  color={
+                                    validation.type === 'error' ? 'error' :
+                                    validation.type === 'warning' ? 'warning' :
+                                    'success'
+                                  }
+                                />
+                              </TableCell>
+                              <TableCell>
+                                <Chip label={validation.category} size="small" variant="outlined" />
+                              </TableCell>
+                              <TableCell>{validation.message}</TableCell>
+                              <TableCell>
+                                <Chip
+                                  label={validation.severity}
+                                  size="small"
+                                  color={
+                                    validation.severity === 'critical' ? 'error' :
+                                    validation.severity === 'high' ? 'warning' :
+                                    'default'
+                                  }
+                                />
+                              </TableCell>
+                              <TableCell>
+                                {validation.isBlocking ? (
+                                  <Chip label="Oui" size="small" color="error" />
+                                ) : (
+                                  <Chip label="Non" size="small" />
+                                )}
+                              </TableCell>
+                              <TableCell>
+                                <Typography variant="caption" color="text.secondary">
+                                  {validation.suggestion || '-'}
+                                </Typography>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  )}
+                </CardContent>
+              </Card>
+            </Grid>
+          );
+        })}
+      </Grid>
+    </Box>
+  );
+
   const renderDashboardTab = () => (
     <Box>
       {/* Métriques de performance */}
@@ -888,6 +1235,9 @@ const ModernLiasseProduction: React.FC = () => {
 
       {/* Contenu */}
       {activeTab === 0 && renderDashboardTab()}
+      {activeTab === 1 && renderProductionTab()}
+      {activeTab === 2 && renderTemplatesTab()}
+      {activeTab === 3 && renderValidationsTab()}
 
       {/* Dialog de production automatique */}
       {renderProductionDialog()}

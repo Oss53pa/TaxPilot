@@ -42,6 +42,7 @@ import {
 import { useAppSelector, useAppDispatch } from '@/store'
 import { startAudit, setAuditProgress, setCurrentAudit } from '@/store/auditSlice'
 import { AuditAnomalie } from '@/types'
+import { liasseDataService } from '@/services/liasseDataService'
 
 interface ValidationTest {
   id: string
@@ -138,25 +139,76 @@ const BalanceValidation: React.FC = () => {
           }]
         }
       } else if (test.id === 'coherence') {
-        // Simulation d'anomalies mineures
-        statut = 'warning'
-        resultat = '2 avertissements détectés'
-        anomalies = [
-          {
-            id: 'coh1',
-            type: 'WARNING',
-            compte: '411000',
-            description: 'Solde créditeur inhabituel pour un compte client',
-            priorite: 'MOYENNE',
-          },
-          {
-            id: 'coh2',
-            type: 'WARNING',
-            compte: '401000',
-            description: 'Solde débiteur pour un compte fournisseur',
-            priorite: 'BASSE',
-          },
+        // Détection réelle d'anomalies de sens de comptes
+        anomalies = []
+        let anomalyId = 0
+
+        // Règles de sens de comptes SYSCOHADA
+        const sensRules: { prefix: string; sensNormal: 'debit' | 'credit'; label: string; exceptions?: string[] }[] = [
+          { prefix: '1', sensNormal: 'credit', label: 'Capitaux propres', exceptions: ['109', '119'] },
+          { prefix: '2', sensNormal: 'debit', label: 'Immobilisations', exceptions: ['28', '29'] },
+          { prefix: '28', sensNormal: 'credit', label: 'Amortissements' },
+          { prefix: '29', sensNormal: 'credit', label: 'Dépréciations immobilisations' },
+          { prefix: '3', sensNormal: 'debit', label: 'Stocks', exceptions: ['39'] },
+          { prefix: '39', sensNormal: 'credit', label: 'Dépréciations stocks' },
+          { prefix: '401', sensNormal: 'credit', label: 'Fournisseurs' },
+          { prefix: '411', sensNormal: 'debit', label: 'Clients' },
+          { prefix: '6', sensNormal: 'debit', label: 'Charges' },
+          { prefix: '7', sensNormal: 'credit', label: 'Produits' },
         ]
+
+        for (const rule of sensRules) {
+          for (const b of balances) {
+            const compte = (b as any).compte || (b as any).numero_compte || ''
+            if (!compte.startsWith(rule.prefix)) continue
+            if (rule.exceptions?.some(exc => compte.startsWith(exc))) continue
+
+            const soldeD = Number((b as any).solde_debit || (b as any).solde_debiteur) || 0
+            const soldeC = Number((b as any).solde_credit || (b as any).solde_crediteur) || 0
+
+            const isBadSense =
+              (rule.sensNormal === 'credit' && soldeD > 0 && soldeC === 0) ||
+              (rule.sensNormal === 'debit' && soldeC > 0 && soldeD === 0)
+
+            if (isBadSense) {
+              anomalyId++
+              anomalies.push({
+                id: `sens_${anomalyId}`,
+                type: 'WARNING',
+                compte,
+                description: `Solde ${rule.sensNormal === 'credit' ? 'débiteur' : 'créditeur'} inhabituel pour ${rule.label} (${compte})`,
+                montant_impact: rule.sensNormal === 'credit' ? soldeD : soldeC,
+                priorite: 'MOYENNE',
+              })
+            }
+          }
+        }
+
+        // Vérifier aussi l'équilibre bilan via liasseDataService
+        if (liasseDataService.isLoaded()) {
+          const validation = liasseDataService.validateCoherence()
+          if (!validation.isValid) {
+            for (const err of validation.errors) {
+              anomalyId++
+              anomalies.push({
+                id: `coh_${anomalyId}`,
+                type: 'ERROR',
+                compte: 'GLOBAL',
+                description: err,
+                priorite: 'HAUTE',
+              })
+            }
+          }
+        }
+
+        if (anomalies.length === 0) {
+          statut = 'success'
+          resultat = 'Aucune anomalie de sens détectée'
+        } else {
+          const hasErrors = anomalies.some(a => a.type === 'ERROR')
+          statut = hasErrors ? 'error' : 'warning'
+          resultat = `${anomalies.length} anomalie(s) détectée(s)`
+        }
       }
       
       setTests(prev => prev.map(t => 
@@ -166,19 +218,24 @@ const BalanceValidation: React.FC = () => {
       ))
     }
     
-    // Finalisation de l'audit
-    const scoreGlobal = 85
-    const nbAnomalies = tests.reduce((sum, t) => sum + (t.anomalies?.length || 0), 0)
-    
+    // Finalisation de l'audit - score calculé dynamiquement
+    const allAnomalies = tests.flatMap(t => t.anomalies || [])
+    const nbAnomalies = allAnomalies.length
+    const nbErrors = allAnomalies.filter(a => a.type === 'ERROR').length
+    const nbWarnings = allAnomalies.filter(a => a.type === 'WARNING').length
+    // Score: 100 - 20 par erreur - 5 par warning, minimum 0
+    const scoreGlobal = Math.max(0, 100 - nbErrors * 20 - nbWarnings * 5)
+
+    const recommandations: string[] = []
+    if (nbErrors > 0) recommandations.push('Corriger les erreurs bloquantes (équilibre, cohérence)')
+    if (nbWarnings > 0) recommandations.push('Vérifier les comptes avec soldes inhabituels')
+    if (nbAnomalies === 0) recommandations.push('Aucune anomalie détectée - balance conforme')
+
     dispatch(setCurrentAudit({
       score_global: scoreGlobal,
       nb_anomalies: nbAnomalies,
-      anomalies: tests.flatMap(t => t.anomalies || []),
-      recommandations: [
-        'Corriger le déséquilibre détecté',
-        'Vérifier les comptes avec soldes inhabituels',
-        'Effectuer un rapprochement bancaire',
-      ],
+      anomalies: allAnomalies,
+      recommandations,
       last_audit: new Date().toISOString(),
     }))
     

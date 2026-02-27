@@ -4,16 +4,18 @@
 
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
-import { authService, type User } from '../services/authService'
+import { authService, type User, type SignupData, type SignupResponse } from '../services/authService'
+import { useOrganizationStore } from './organizationStore'
 
 interface AuthState {
   user: User | null
   isAuthenticated: boolean
   isLoading: boolean
   error: string | null
-  
+
   // Actions
   login: (username: string, password: string) => Promise<void>
+  signup: (signupData: SignupData) => Promise<SignupResponse>
   logout: () => void
   setUser: (user: User) => void
   setLoading: (loading: boolean) => void
@@ -32,11 +34,11 @@ export const useAuthStore = create<AuthState>()(
 
       login: async (username: string, password: string) => {
         set({ isLoading: true, error: null })
-        
+
         try {
           // Utiliser le service d'authentification
           const response = await authService.login({ username, password })
-          
+
           if (response.success && response.data.user) {
             set({
               user: response.data.user,
@@ -57,6 +59,47 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
+      signup: async (signupData: SignupData) => {
+        set({ isLoading: true, error: null })
+
+        try {
+          // Appeler l'API d'inscription
+          const response = await authService.signup(signupData)
+
+          // Créer l'objet User depuis la réponse
+          const user: User = {
+            id: response.user.id,
+            username: response.user.email,
+            email: response.user.email,
+            first_name: response.user.first_name,
+            last_name: response.user.last_name,
+            is_staff: false,
+            is_superuser: false,
+          }
+
+          set({
+            user: user,
+            isAuthenticated: true,
+            isLoading: false,
+            error: null,
+          })
+
+          // Sauvegarder l'organisation dans le store dédié
+          if (response.organization) {
+            useOrganizationStore.getState().setOrganization(response.organization)
+          }
+
+          return response
+        } catch (error: any) {
+          set({
+            error: error.message || 'Erreur lors de l\'inscription',
+            isLoading: false,
+            isAuthenticated: false,
+          })
+          throw error
+        }
+      },
+
       logout: () => {
         authService.logout()
         set({
@@ -64,6 +107,9 @@ export const useAuthStore = create<AuthState>()(
           isAuthenticated: false,
           error: null,
         })
+
+        // Nettoyer l'organisation
+        useOrganizationStore.getState().clearOrganization()
       },
 
       setUser: (user: User) => {

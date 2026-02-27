@@ -150,11 +150,11 @@ const LiasseControlInterface: React.FC = () => {
 
   return (
     <Box sx={{ p: 3 }}>
-      <Typography variant="h4" gutterBottom sx={{ color: '#373B4D' }}>
+      <Typography variant="h4" gutterBottom sx={{ color: '#171717' }}>
         🔍 Contrôle de Liasse Fiscale
       </Typography>
       
-      <Typography variant="h6" color="text.secondary" gutterBottom sx={{ color: '#949597' }}>
+      <Typography variant="h6" color="text.secondary" gutterBottom sx={{ color: '#737373' }}>
         Validation avancée avant soumission hiérarchique et télédéclaration
       </Typography>
 
@@ -162,14 +162,14 @@ const LiasseControlInterface: React.FC = () => {
         sx={{ 
           p: 3, 
           mb: 3, 
-          bgcolor: '#BDBFB7',
+          bgcolor: '#e5e5e5',
           borderRadius: 2
         }}
       >
-        <Typography variant="subtitle1" gutterBottom sx={{ color: '#373B4D', fontWeight: 600 }}>
+        <Typography variant="subtitle1" gutterBottom sx={{ color: '#171717', fontWeight: 600 }}>
           🎯 Processus de Validation de Liasse
         </Typography>
-        <Typography variant="body2" sx={{ color: '#373B4D' }}>
+        <Typography variant="body2" sx={{ color: '#171717' }}>
           <strong>1.</strong> Vérification affectation balance → tableaux • 
           <strong>2.</strong> Contrôle exactitude calculs • 
           <strong>3.</strong> Validation cohérence inter-états • 
@@ -181,20 +181,20 @@ const LiasseControlInterface: React.FC = () => {
       <Grid container spacing={3}>
         {/* Panel gauche - Liste des liasses */}
         <Grid item xs={12} md={8}>
-          <Paper sx={{ bgcolor: '#ECEDEF', p: 3 }}>
-            <Typography variant="h6" gutterBottom sx={{ color: '#373B4D' }}>
+          <Paper sx={{ bgcolor: '#ffffff', p: 3 }}>
+            <Typography variant="h6" gutterBottom sx={{ color: '#171717' }}>
               Liasses en Validation
             </Typography>
 
             <TableContainer>
               <Table>
-                <TableHead sx={{ bgcolor: '#BDBFB7' }}>
+                <TableHead sx={{ bgcolor: '#e5e5e5' }}>
                   <TableRow>
-                    <TableCell sx={{ color: '#373B4D', fontWeight: 600 }}>Liasse</TableCell>
-                    <TableCell sx={{ color: '#373B4D', fontWeight: 600 }}>Score</TableCell>
-                    <TableCell sx={{ color: '#373B4D', fontWeight: 600 }}>Contrôles</TableCell>
-                    <TableCell sx={{ color: '#373B4D', fontWeight: 600 }}>Statut</TableCell>
-                    <TableCell sx={{ color: '#373B4D', fontWeight: 600 }}>Actions</TableCell>
+                    <TableCell sx={{ color: '#171717', fontWeight: 600 }}>Liasse</TableCell>
+                    <TableCell sx={{ color: '#171717', fontWeight: 600 }}>Score</TableCell>
+                    <TableCell sx={{ color: '#171717', fontWeight: 600 }}>Contrôles</TableCell>
+                    <TableCell sx={{ color: '#171717', fontWeight: 600 }}>Statut</TableCell>
+                    <TableCell sx={{ color: '#171717', fontWeight: 600 }}>Actions</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -202,14 +202,14 @@ const LiasseControlInterface: React.FC = () => {
                     <TableRow 
                       key={liasse.id}
                       sx={{ 
-                        bgcolor: index % 2 === 0 ? '#ECECEF' : '#ECEDEF',
-                        '&:hover': { bgcolor: '#BDBFB730' }
+                        bgcolor: index % 2 === 0 ? '#fafafa' : '#ffffff',
+                        '&:hover': { bgcolor: '#e5e5e530' }
                       }}
                     >
                       <TableCell>
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <LiasseIcon sx={{ color: '#373B4D', mr: 1 }} />
-                          <Typography variant="body2" sx={{ color: '#373B4D', fontWeight: 500 }}>
+                          <LiasseIcon sx={{ color: '#171717', mr: 1 }} />
+                          <Typography variant="body2" sx={{ color: '#171717', fontWeight: 500 }}>
                             {liasse.liasse_id}
                           </Typography>
                         </Box>
@@ -254,8 +254,8 @@ const LiasseControlInterface: React.FC = () => {
                           startIcon={<PreviewIcon />}
                           onClick={() => handleValidateLiasse(liasse)}
                           sx={{ 
-                            color: '#373B4D',
-                            '&:hover': { bgcolor: '#BDBFB730' }
+                            color: '#171717',
+                            '&:hover': { bgcolor: '#e5e5e530' }
                           }}
                         >
                           Valider
@@ -273,13 +273,13 @@ const LiasseControlInterface: React.FC = () => {
         <Grid item xs={12} md={4}>
           <Grid container spacing={2}>
             <Grid item xs={12}>
-              <Card sx={{ bgcolor: '#ECEDEF', textAlign: 'center' }}>
+              <Card sx={{ bgcolor: '#ffffff', textAlign: 'center' }}>
                 <CardContent>
                   <ValidIcon sx={{ fontSize: 40, color: '#2E7D0F', mb: 1 }} />
-                  <Typography variant="h4" sx={{ color: '#373B4D' }}>
+                  <Typography variant="h4" sx={{ color: '#171717' }}>
                     97%
                   </Typography>
-                  <Typography variant="body2" sx={{ color: '#949597' }}>
+                  <Typography variant="body2" sx={{ color: '#737373' }}>
                     Taux de Validation Moyen
                   </Typography>
                 </CardContent>
@@ -287,13 +287,13 @@ const LiasseControlInterface: React.FC = () => {
             </Grid>
 
             <Grid item xs={12}>
-              <Card sx={{ bgcolor: '#ECEDEF', textAlign: 'center' }}>
+              <Card sx={{ bgcolor: '#ffffff', textAlign: 'center' }}>
                 <CardContent>
                   <WarningIcon sx={{ fontSize: 40, color: '#8A6914', mb: 1 }} />
-                  <Typography variant="h4" sx={{ color: '#373B4D' }}>
+                  <Typography variant="h4" sx={{ color: '#171717' }}>
                     {liasses.filter(l => l.prete_teledeclaration).length}
                   </Typography>
-                  <Typography variant="body2" sx={{ color: '#949597' }}>
+                  <Typography variant="body2" sx={{ color: '#737373' }}>
                     Prêtes Télédéclaration
                   </Typography>
                 </CardContent>
@@ -301,13 +301,13 @@ const LiasseControlInterface: React.FC = () => {
             </Grid>
 
             <Grid item xs={12}>
-              <Card sx={{ bgcolor: '#ECEDEF', textAlign: 'center' }}>
+              <Card sx={{ bgcolor: '#ffffff', textAlign: 'center' }}>
                 <CardContent>
                   <ErrorIcon sx={{ fontSize: 40, color: '#842029', mb: 1 }} />
-                  <Typography variant="h4" sx={{ color: '#373B4D' }}>
+                  <Typography variant="h4" sx={{ color: '#171717' }}>
                     {liasses.filter(l => !l.prete_validation).length}
                   </Typography>
-                  <Typography variant="body2" sx={{ color: '#949597' }}>
+                  <Typography variant="body2" sx={{ color: '#737373' }}>
                     Corrections Requises
                   </Typography>
                 </CardContent>
@@ -324,16 +324,16 @@ const LiasseControlInterface: React.FC = () => {
         maxWidth="lg"
         fullWidth
       >
-        <DialogTitle sx={{ bgcolor: '#373B4D', color: 'white' }}>
+        <DialogTitle sx={{ bgcolor: '#171717', color: 'white' }}>
           Validation Liasse {selectedLiasse?.liasse_id}
         </DialogTitle>
-        <DialogContent sx={{ bgcolor: '#ECECEF', mt: 2 }}>
+        <DialogContent sx={{ bgcolor: '#fafafa', mt: 2 }}>
           {selectedLiasse && (
             <Grid container spacing={3}>
               {/* Score global */}
               <Grid item xs={12}>
-                <Card sx={{ bgcolor: '#ECEDEF', p: 2 }}>
-                  <Typography variant="h6" sx={{ color: '#373B4D', mb: 2 }}>
+                <Card sx={{ bgcolor: '#ffffff', p: 2 }}>
+                  <Typography variant="h6" sx={{ color: '#171717', mb: 2 }}>
                     Score de Validation Global
                   </Typography>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
@@ -367,7 +367,7 @@ const LiasseControlInterface: React.FC = () => {
                         <Typography variant="h4" sx={{ color: '#2E7D0F' }}>
                           {selectedLiasse.nb_controles_reussis}
                         </Typography>
-                        <Typography variant="caption" sx={{ color: '#949597' }}>
+                        <Typography variant="caption" sx={{ color: '#737373' }}>
                           Contrôles Réussis
                         </Typography>
                       </Box>
@@ -377,7 +377,7 @@ const LiasseControlInterface: React.FC = () => {
                         <Typography variant="h4" sx={{ color: '#8A6914' }}>
                           {selectedLiasse.nb_avertissements}
                         </Typography>
-                        <Typography variant="caption" sx={{ color: '#949597' }}>
+                        <Typography variant="caption" sx={{ color: '#737373' }}>
                           Avertissements
                         </Typography>
                       </Box>
@@ -387,7 +387,7 @@ const LiasseControlInterface: React.FC = () => {
                         <Typography variant="h4" sx={{ color: '#842029' }}>
                           {selectedLiasse.nb_erreurs_critiques}
                         </Typography>
-                        <Typography variant="caption" sx={{ color: '#949597' }}>
+                        <Typography variant="caption" sx={{ color: '#737373' }}>
                           Erreurs Critiques
                         </Typography>
                       </Box>
@@ -398,26 +398,26 @@ const LiasseControlInterface: React.FC = () => {
 
               {/* Pré-commentaires générés */}
               <Grid item xs={12}>
-                <Card sx={{ bgcolor: '#ECEDEF', p: 2 }}>
-                  <Typography variant="h6" sx={{ color: '#373B4D', mb: 2 }}>
+                <Card sx={{ bgcolor: '#ffffff', p: 2 }}>
+                  <Typography variant="h6" sx={{ color: '#171717', mb: 2 }}>
                     📝 Pré-commentaires Générés par IA
                   </Typography>
                   
                   <List>
                     {preComments.map((comment, index) => (
-                      <ListItem key={index} sx={{ bgcolor: '#ECECEF', mb: 1, borderRadius: 1 }}>
+                      <ListItem key={index} sx={{ bgcolor: '#fafafa', mb: 1, borderRadius: 1 }}>
                         <ListItemIcon>
-                          <CommentIcon sx={{ color: '#373B4D' }} />
+                          <CommentIcon sx={{ color: '#171717' }} />
                         </ListItemIcon>
                         <ListItemText 
                           primary={comment.titre}
                           secondary={comment.commentaire}
                           primaryTypographyProps={{ 
                             fontWeight: 500,
-                            color: '#373B4D' 
+                            color: '#171717' 
                           }}
                           secondaryTypographyProps={{ 
-                            color: '#949597',
+                            color: '#737373',
                             fontSize: '0.875rem' 
                           }}
                         />
@@ -425,8 +425,8 @@ const LiasseControlInterface: React.FC = () => {
                           label={comment.type}
                           size="small"
                           sx={{ 
-                            bgcolor: comment.type === 'POSITIF' ? '#E8F5E8' : '#BDBFB7',
-                            color: comment.type === 'POSITIF' ? '#2E7D0F' : '#373B4D'
+                            bgcolor: comment.type === 'POSITIF' ? '#E8F5E8' : '#e5e5e5',
+                            color: comment.type === 'POSITIF' ? '#2E7D0F' : '#171717'
                           }}
                         />
                       </ListItem>
@@ -449,10 +449,10 @@ const LiasseControlInterface: React.FC = () => {
           )}
         </DialogContent>
         
-        <DialogActions sx={{ bgcolor: '#ECECEF', p: 2 }}>
+        <DialogActions sx={{ bgcolor: '#fafafa', p: 2 }}>
           <Button 
             onClick={() => setValidationDialog(false)}
-            sx={{ color: '#949597' }}
+            sx={{ color: '#737373' }}
           >
             Fermer
           </Button>
@@ -462,8 +462,8 @@ const LiasseControlInterface: React.FC = () => {
               variant="contained"
               startIcon={<SubmitIcon />}
               sx={{ 
-                bgcolor: '#373B4D',
-                '&:hover': { bgcolor: '#4A4F65' },
+                bgcolor: '#171717',
+                '&:hover': { bgcolor: '#262626' },
                 mr: 1
               }}
             >

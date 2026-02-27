@@ -65,10 +65,10 @@ export function withBackendData<P extends object>(
           ])
 
           const data = {
-            entreprise: entreprises.results?.[0] || null,
-            balance: balances.results?.[0] || null,
-            comptes: comptes.results || [],
-            exercice: balances.results?.[0]?.exercice || new Date().getFullYear(),
+            entreprise: (entreprises as any)?.results?.[0] || null,
+            balance: (balances as any)?.results?.[0] || null,
+            comptes: (comptes as any)?.results || [],
+            exercice: (balances as any)?.results?.[0]?.exercice || new Date().getFullYear(),
             ecritures: [],
             loading: false,
             error: null

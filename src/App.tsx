@@ -9,10 +9,12 @@ import './styles/wcag-conformity.css'
 import './styles/liasse-text-fix.css'
 import './styles/sidebar-ultimate-fix.css'
 
-// INTÉGRATION BACKEND GLOBALE - Active automatiquement pour TOUS les composants
-import { initializeBackendConnections } from './config/globalBackendIntegration'
+// FiscaSync-Lite: Données locales au lieu du backend
+import { seedDatabase } from './data/seedData'
 import { LiasseDataProvider } from './components/liasse/DataProvider'
-import { UniversalBackendProvider } from './components/UniversalBackendWrapper'
+
+// Initialiser la base de données locale au chargement
+seedDatabase()
 
 // Composant de loading pour le lazy loading
 const PageLoader = () => (
@@ -29,21 +31,22 @@ const PageLoader = () => (
 // Lazy loading des pages principales avec connexion backend automatique
 const ModernDashboard = React.lazy(() => import('@/pages/dashboard/ModernDashboard'))
 
-// Accès direct aux liasses
-const DirectLiasseAccess = React.lazy(() => import('@/pages/DirectLiasseAccess'))
-
 // Modules de base
 const Parametrage = React.lazy(() => import('@/pages/Parametrage'))
 const ModernImportBalance = React.lazy(() => import('@/pages/import/ModernImportBalance'))
 const ModernBalance = React.lazy(() => import('@/pages/balance/ModernBalance'))
 const PlanSYSCOHADARevise = React.lazy(() => import('@/pages/plans/PlanSYSCOHADARevise'))
 
-// Modules de production
-const ModernLiasseComplete = React.lazy(() => import('@/pages/liasse/ModernLiasseComplete'))
-const ModernLiasseProduction = React.lazy(() => import('@/pages/liasse/ModernLiasseProduction'))
-const LiasseCompleteFinal = React.lazy(() => import('@/pages/LiasseCompleteFinal'))
+// Modules de production - VERSION CONSOLIDÉE ✅
+const LiasseFiscaleOfficial = React.lazy(() => import('@/pages/liasse/LiasseFiscaleOfficial'))
 const ModernDocuments = React.lazy(() => import('@/pages/documents/ModernDocuments'))
 const ModernGeneration = React.lazy(() => import('@/pages/generation/ModernGeneration'))
+
+// ANCIENNES VERSIONS (à déprécier) ⚠️
+// const DirectLiasseAccess = React.lazy(() => import('@/pages/DirectLiasseAccess'))
+// const ModernLiasseComplete = React.lazy(() => import('@/pages/liasse/ModernLiasseComplete'))
+// const ModernLiasseProduction = React.lazy(() => import('@/pages/liasse/ModernLiasseProduction'))
+// const LiasseCompleteFinal = React.lazy(() => import('@/pages/LiasseCompleteFinal'))
 
 // Modules de conformité
 const ModernAudit = React.lazy(() => import('@/pages/audit/ModernAudit'))
@@ -64,6 +67,17 @@ const ModernCollaboration = React.lazy(() => import('@/pages/collaboration/Moder
 const ModernIntegrations = React.lazy(() => import('@/pages/integrations/ModernIntegrations'))
 const ModernSecurity = React.lazy(() => import('@/pages/security/ModernSecurity'))
 
+// Modules Organization (Multi-tenant SaaS) - NOUVEAU!
+const OrganizationWrapper = React.lazy(() => import('@/pages/organization/OrganizationWrapper'))
+const OrganizationMembersPage = React.lazy(() => import('@/pages/organization/OrganizationMembersPage'))
+const SubscriptionPage = React.lazy(() => import('@/pages/organization/SubscriptionPage'))
+const InvitationsPage = React.lazy(() => import('@/pages/organization/InvitationsPage'))
+
+// Pages publiques (non authentifié)
+const Landing = React.lazy(() => import('@/pages/public/Landing'))
+const Pricing = React.lazy(() => import('@/pages/public/Pricing'))
+const Signup = React.lazy(() => import('@/pages/public/Signup'))
+
 // Authentification
 import Login from './pages/auth/Login'
 import { useAuthStore } from './store/authStore'
@@ -79,29 +93,35 @@ function App() {
   React.useEffect(() => {
     // Vérifier l'authentification au démarrage
     checkAuth()
+  }, [checkAuth])
 
-    // INITIALISER LES CONNEXIONS BACKEND GLOBALES
-    if (isAuthenticated) {
-      console.log('🚀 Initializing global backend connections...')
-      initializeBackendConnections()
-    }
-  }, [checkAuth, isAuthenticated])
-
+  // Routes publiques - sans authentification requise
   if (!isAuthenticated) {
-    return <Login />
+    return (
+      <ErrorBoundary>
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/pricing" element={<Pricing />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Suspense>
+      </ErrorBoundary>
+    )
   }
 
+  // Routes authentifiées - avec layout
   return (
-    // ThemeProvider et CssBaseline déjà fournis par main.tsx
     <ErrorBoundary>
-      <UniversalBackendProvider>
+      {/* <UniversalBackendProvider> */}
         <ModernLayout>
           <OnboardingTour />
           <Suspense fallback={<PageLoader />}>
             <Routes>
-            <Route path="/" element={<Navigate to="/direct-liasse" replace />} />
+            <Route path="/" element={<Navigate to="/liasse" replace />} />
             <Route path="/dashboard" element={<ModernDashboard />} />
-            <Route path="/direct-liasse" element={<DirectLiasseAccess />} />
 
             {/* Modules de base */}
             <Route path="/parametrage/*" element={<Parametrage />} />
@@ -110,10 +130,11 @@ function App() {
             <Route path="/plans-comptables" element={<PlanSYSCOHADARevise />} />
             <Route path="/plan-syscohada" element={<PlanSYSCOHADARevise />} />
 
-            {/* Modules de production - AVEC DONNÉES BACKEND */}
-            <Route path="/liasse" element={<LiasseDataProvider><ModernLiasseComplete /></LiasseDataProvider>} />
-            <Route path="/production-liasse" element={<LiasseDataProvider><ModernLiasseProduction /></LiasseDataProvider>} />
-            <Route path="/liasse-complete-final" element={<LiasseDataProvider><LiasseCompleteFinal /></LiasseDataProvider>} />
+            {/* Modules de production - VERSION CONSOLIDÉE ✅ */}
+            <Route path="/liasse" element={<LiasseDataProvider><LiasseFiscaleOfficial /></LiasseDataProvider>} />
+            <Route path="/production-liasse" element={<LiasseDataProvider><LiasseFiscaleOfficial /></LiasseDataProvider>} />
+            <Route path="/liasse-complete" element={<LiasseDataProvider><LiasseFiscaleOfficial /></LiasseDataProvider>} />
+            <Route path="/direct-liasse" element={<LiasseDataProvider><LiasseFiscaleOfficial /></LiasseDataProvider>} />
             <Route path="/documents" element={<ModernDocuments />} />
             <Route path="/generation" element={<ModernGeneration />} />
 
@@ -136,6 +157,57 @@ function App() {
             <Route path="/integrations" element={<ModernIntegrations />} />
             <Route path="/security" element={<ModernSecurity />} />
 
+            {/* Modules Organization (Multi-tenant SaaS) - NOUVEAU! */}
+            <Route
+              path="/organization/:slug/members"
+              element={
+                <OrganizationWrapper>
+                  {(slug) => <OrganizationMembersPage organizationSlug={slug} />}
+                </OrganizationWrapper>
+              }
+            />
+            <Route
+              path="/organization/:slug/subscription"
+              element={
+                <OrganizationWrapper>
+                  {(slug) => <SubscriptionPage organizationSlug={slug} />}
+                </OrganizationWrapper>
+              }
+            />
+            <Route
+              path="/organization/:slug/invitations"
+              element={
+                <OrganizationWrapper>
+                  {(slug) => <InvitationsPage organizationSlug={slug} />}
+                </OrganizationWrapper>
+              }
+            />
+            {/* Routes alternatives sans slug (utilise l'org courante) */}
+            <Route
+              path="/settings/members"
+              element={
+                <OrganizationWrapper>
+                  {(slug) => <OrganizationMembersPage organizationSlug={slug} />}
+                </OrganizationWrapper>
+              }
+            />
+            <Route
+              path="/settings/subscription"
+              element={
+                <OrganizationWrapper>
+                  {(slug) => <SubscriptionPage organizationSlug={slug} />}
+                </OrganizationWrapper>
+              }
+            />
+            <Route
+              path="/settings/invitations"
+              element={
+                <OrganizationWrapper>
+                  {(slug) => <InvitationsPage organizationSlug={slug} />}
+                </OrganizationWrapper>
+              }
+            />
+
             {/* Pages de test */}
             <Route path="/test" element={<TestComponents />} />
             <Route path="/debug" element={<ButtonTest />} />
@@ -144,7 +216,7 @@ function App() {
           </Routes>
             </Suspense>
           </ModernLayout>
-      </UniversalBackendProvider>
+      {/* </UniversalBackendProvider> */}
     </ErrorBoundary>
   )
 }

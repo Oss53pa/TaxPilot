@@ -181,7 +181,7 @@ const VariationCapitaux: React.FC<VariationCapitauxProps> = ({ modeEdition = fal
   // Calcul automatique des soldes de clôture et des totaux
   React.useEffect(() => {
     setCapitauxData(prev => prev.map(item => {
-      let newItem = { ...item }
+      const newItem = { ...item }
       
       // Calcul du solde de clôture pour chaque ligne
       if (!item.isTotal && !item.isSubTotal) {

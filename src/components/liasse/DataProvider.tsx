@@ -10,6 +10,7 @@ import {
   generationService,
   accountingService
 } from '@/services'
+import { liasseDataService } from '../../services/liasseDataService'
 
 interface LiasseData {
   entreprise: any
@@ -61,10 +62,6 @@ export const LiasseDataProvider: React.FC<LiasseDataProviderProps> = ({
     error: null
   })
 
-  useEffect(() => {
-    loadLiasseData()
-  }, [entrepriseId, exerciceId])
-
   const loadLiasseData = async () => {
     try {
       setData(prev => ({ ...prev, loading: true, error: null }))
@@ -77,18 +74,26 @@ export const LiasseDataProvider: React.FC<LiasseDataProviderProps> = ({
         accountingService.getComptes({ page_size: 500 })
       ])
 
-      const entreprise = entreprisesRes.results?.[0] || null
-      const balance = balancesRes.results?.[0] || null
-      const comptes = comptesRes.results || []
+      // Extraire les données (gestion des types API)
+      const entreprise = (entreprisesRes as any)?.results?.[0] || null
+      const balance = (balancesRes as any)?.results?.[0] || null
+      const comptes = (comptesRes as any)?.results || []
 
-      // Si on a une balance, charger ses détails
+      // Si on a une balance, charger ses lignes
       let balanceDetails = null
       if (balance?.id) {
         try {
-          balanceDetails = await balanceService.getBalanceDetails(balance.id)
+          balanceDetails = await balanceService.getLignesBalance(balance.id, { page_size: 1000 })
         } catch (err) {
-          console.warn('Could not load balance details:', err)
+          console.warn('Could not load balance lines:', err)
         }
+      }
+
+      // Initialiser le service liasse avec les lignes de balance
+      const balanceLines = (balanceDetails as any)?.results || balanceDetails || []
+      if (Array.isArray(balanceLines) && balanceLines.length > 0) {
+        liasseDataService.loadBalance(balanceLines)
+        console.log(`📊 LiasseDataService initialisé avec ${balanceLines.length} lignes de balance`)
       }
 
       setData({
@@ -111,6 +116,11 @@ export const LiasseDataProvider: React.FC<LiasseDataProviderProps> = ({
       }))
     }
   }
+
+  useEffect(() => {
+    loadLiasseData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // Charger seulement au montage
 
   return (
     <LiasseDataContext.Provider value={data}>

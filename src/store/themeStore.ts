@@ -1,5 +1,5 @@
 /**
- * Store pour la gestion des thèmes et palettes de couleurs
+ * Store pour la gestion des themes et palettes de couleurs
  */
 
 import { create } from 'zustand'
@@ -8,28 +8,23 @@ import { createTheme, Theme } from '@mui/material/styles'
 import { colorPalettes, getPaletteById, defaultPaletteId, createThemeFromPalette, type ColorPalette } from '../utils/colorPalettes'
 
 interface ThemeState {
-  // État actuel
   currentPaletteId: string
   currentPalette: ColorPalette
   isDarkMode: boolean
   currentTheme: Theme
-  
-  // Actions
+
   setPalette: (paletteId: string) => void
   toggleDarkMode: () => void
   resetToDefault: () => void
-  
-  // Getters
+
   getAvailablePalettes: () => ColorPalette[]
   getCurrentPaletteName: () => string
 }
 
-// Configuration de base du thème Material-UI
 const baseThemeConfig = {
   typography: {
     fontFamily: [
-      'Quicksand',
-      'Roboto',
+      '"Exo 2"',
       '-apple-system',
       'BlinkMacSystemFont',
       '"Segoe UI"',
@@ -38,13 +33,15 @@ const baseThemeConfig = {
     ].join(','),
     h1: {
       fontSize: '2.5rem',
-      fontWeight: 600,
+      fontWeight: 700,
       lineHeight: 1.2,
+      letterSpacing: '-0.02em',
     },
     h2: {
       fontSize: '2rem',
-      fontWeight: 600,
+      fontWeight: 700,
       lineHeight: 1.2,
+      letterSpacing: '-0.01em',
     },
     h3: {
       fontSize: '1.75rem',
@@ -98,17 +95,17 @@ const baseThemeConfig = {
           transition: 'all 0.2s ease-in-out',
         },
         contained: {
-          boxShadow: '0 4px 14px 0 rgba(0, 0, 0, 0.1)',
+          boxShadow: '0 1px 2px rgba(0, 0, 0, 0.04)',
           '&:hover': {
-            boxShadow: '0 6px 20px 0 rgba(0, 0, 0, 0.15)',
-            transform: 'translateY(-2px)',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
           },
         },
         outlined: {
-          borderWidth: 2,
+          borderWidth: 1,
+          borderColor: '#d4d4d4',
           '&:hover': {
-            borderWidth: 2,
-            transform: 'translateY(-1px)',
+            borderWidth: 1,
+            backgroundColor: '#fafafa',
           },
         },
       },
@@ -117,12 +114,11 @@ const baseThemeConfig = {
       styleOverrides: {
         root: {
           borderRadius: 16,
-          boxShadow: '0 4px 20px 0 rgba(0, 0, 0, 0.05)',
-          border: '1px solid rgba(0, 0, 0, 0.04)',
-          transition: 'all 0.3s ease-in-out',
+          boxShadow: '0 1px 2px rgba(0, 0, 0, 0.04)',
+          border: '1px solid #e5e5e5',
+          transition: 'all 0.2s ease-in-out',
           '&:hover': {
-            boxShadow: '0 8px 30px 0 rgba(0, 0, 0, 0.08)',
-            transform: 'translateY(-2px)',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.06)',
           },
         },
       },
@@ -151,7 +147,7 @@ const baseThemeConfig = {
       styleOverrides: {
         head: {
           fontWeight: 600,
-          backgroundColor: 'rgba(0, 0, 0, 0.02)',
+          backgroundColor: '#f5f5f5',
           fontSize: '0.875rem',
         },
         body: {
@@ -170,7 +166,7 @@ const baseThemeConfig = {
     MuiAppBar: {
       styleOverrides: {
         root: {
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.08)',
           backgroundImage: 'none',
         },
       },
@@ -178,8 +174,8 @@ const baseThemeConfig = {
     MuiDrawer: {
       styleOverrides: {
         paper: {
-          borderRight: '1px solid rgba(0, 0, 0, 0.08)',
-          boxShadow: '2px 0 8px rgba(0, 0, 0, 0.05)',
+          borderRight: 'none',
+          boxShadow: '1px 0 4px rgba(0, 0, 0, 0.04)',
         },
       },
     },
@@ -248,7 +244,7 @@ export const useThemeStore = create<ThemeState>()(
       },
 
       getAvailablePalettes: () => colorPalettes,
-      
+
         getCurrentPaletteName: () => get().currentPalette.name,
       };
     },

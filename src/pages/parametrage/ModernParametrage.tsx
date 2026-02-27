@@ -100,6 +100,11 @@ import {
   Description as DocumentIcon,
   SupervisorAccount as AdminIcon,
   VerifiedUser as VerifiedIcon,
+  Palette as PaletteIcon,
+  DarkMode as DarkModeIcon,
+  TextFields as TextFieldsIcon,
+  FormatSize as FormatSizeIcon,
+  Notifications as NotificationsIcon,
 } from '@mui/icons-material'
 
 // EX-PARAM-001: Configuration complète en moins de 2 heures
@@ -214,7 +219,13 @@ const ModernParametrage: React.FC = () => {
   const [importDialogOpen, setImportDialogOpen] = useState(false)
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
-  
+
+  // Paramètres de thème
+  const [selectedTheme, setSelectedTheme] = useState('fiscasync')
+  const [darkMode, setDarkMode] = useState(false)
+  const [selectedFont, setSelectedFont] = useState('Exo 2')
+  const [fontSize, setFontSize] = useState('normal')
+
   // Timer pour EX-PARAM-001
   const [configStartTime] = useState(new Date())
   const [elapsedTime, setElapsedTime] = useState(0)
@@ -350,6 +361,69 @@ const ModernParametrage: React.FC = () => {
     { code: 'GW', name: 'Guinée-Bissau', flag: '🇬🇼' }
   ]
 
+  // Configuration des thèmes
+  const themes = [
+    {
+      id: 'fiscasync',
+      name: 'Élégance Sobre',
+      subtitle: 'Finance traditionnelle moderne',
+      current: true,
+      colors: {
+        primary: '#171717',
+        secondary: '#737373',
+        background: '#fafafa',
+        surface: '#ffffff'
+      }
+    },
+    {
+      id: 'modern-fintech',
+      name: 'Modern Fintech',
+      subtitle: 'Tableau de bord financier moderne',
+      colors: {
+        primary: '#171717',
+        secondary: '#42a5f5',
+        background: '#f5f5f5',
+        surface: '#ffffff'
+      }
+    },
+    {
+      id: 'minimalist-premium',
+      name: 'Minimaliste Premium',
+      subtitle: 'Élégance minimaliste avec touche premium',
+      colors: {
+        primary: '#2c3e50',
+        secondary: '#95a5a6',
+        background: '#ecf0f1',
+        surface: '#ffffff'
+      }
+    },
+    {
+      id: 'neutral-odyssey',
+      name: 'Neutral Odyssey',
+      subtitle: 'Palette haut de gamme pour immobilier',
+      colors: {
+        primary: '#34495e',
+        secondary: '#7f8c8d',
+        background: '#bdc3c7',
+        surface: '#ecf0f1'
+      }
+    }
+  ]
+
+  const fontOptions = [
+    { value: 'Inter', label: 'Inter (Recommandée)', current: false },
+    { value: 'Exo 2', label: 'Exo 2 (Actuelle)', current: true },
+    { value: 'Roboto', label: 'Roboto' },
+    { value: 'Open Sans', label: 'Open Sans' }
+  ]
+
+  const fontSizes = [
+    { value: 'small', label: 'Petite (12px)' },
+    { value: 'normal', label: 'Normale (14px)' },
+    { value: 'large', label: 'Grande (16px)' },
+    { value: 'xlarge', label: 'Très grande (18px)' }
+  ]
+
   const users: UserConfig[] = [
     {
       id: '1',
@@ -406,7 +480,7 @@ const ModernParametrage: React.FC = () => {
   // EX-PARAM-002: Validation en temps réel
   const validateField = (field: string, value: any): ValidationResult => {
     switch (field) {
-      case 'email':
+      case 'email': {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
         if (!emailRegex.test(value)) {
           return {
@@ -418,6 +492,7 @@ const ModernParametrage: React.FC = () => {
           }
         }
         break
+      }
         
       case 'registrationNumber':
         if (!value || value.length < 10) {
@@ -837,6 +912,8 @@ const ModernParametrage: React.FC = () => {
                 <Tab label="Fiscal" icon={<AccountIcon />} iconPosition="start" />
                 <Tab label="Utilisateurs" icon={<GroupIcon />} iconPosition="start" />
                 <Tab label="Sécurité" icon={<SecurityIcon />} iconPosition="start" />
+                <Tab label="Notification" icon={<NotificationsIcon />} iconPosition="start" />
+                <Tab label="Thème" icon={<PaletteIcon />} iconPosition="start" />
                 <Tab label="Avancé" icon={<SettingsIcon />} iconPosition="start" />
               </Tabs>
             </Box>
@@ -1418,6 +1495,415 @@ const ModernParametrage: React.FC = () => {
             </TabPanel>
 
             <TabPanel value={activeTab} index={4}>
+              {/* Notifications */}
+              <CardContent sx={{ p: 3 }}>
+                <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
+                  Paramètres de notification
+                </Typography>
+
+                {/* Notifications système */}
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
+                  Notifications système
+                </Typography>
+
+                <Paper sx={{ p: 3, backgroundColor: alpha(theme.palette.info.main, 0.02), mb: 3 }}>
+                  <FormGroup>
+                    <FormControlLabel
+                      control={<Switch defaultChecked />}
+                      label={
+                        <Box>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                            Alertes fiscales
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            Être notifié des échéances fiscales importantes
+                          </Typography>
+                        </Box>
+                      }
+                    />
+                    <FormControlLabel
+                      control={<Switch defaultChecked />}
+                      label={
+                        <Box>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                            Mises à jour réglementaires
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            Recevoir les nouvelles réglementations OHADA
+                          </Typography>
+                        </Box>
+                      }
+                    />
+                    <FormControlLabel
+                      control={<Switch />}
+                      label={
+                        <Box>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                            Rapports automatiques
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            Génération automatique de rapports périodiques
+                          </Typography>
+                        </Box>
+                      }
+                    />
+                  </FormGroup>
+                </Paper>
+
+                <Divider sx={{ my: 3 }} />
+
+                {/* Notifications par email */}
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
+                  Notifications par email
+                </Typography>
+
+                <Paper sx={{ p: 3, backgroundColor: alpha(theme.palette.success.main, 0.02), mb: 3 }}>
+                  <FormGroup>
+                    <FormControlLabel
+                      control={<Switch defaultChecked />}
+                      label={
+                        <Box>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                            Résumé quotidien
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            Recevoir un résumé quotidien des activités
+                          </Typography>
+                        </Box>
+                      }
+                    />
+                    <FormControlLabel
+                      control={<Switch defaultChecked />}
+                      label={
+                        <Box>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                            Erreurs de validation
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            Être alerté en cas d'erreurs de validation
+                          </Typography>
+                        </Box>
+                      }
+                    />
+                    <FormControlLabel
+                      control={<Switch />}
+                      label={
+                        <Box>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                            Newsletter mensuelle
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            Conseils et bonnes pratiques FiscaSync
+                          </Typography>
+                        </Box>
+                      }
+                    />
+                  </FormGroup>
+                </Paper>
+
+                <Divider sx={{ my: 3 }} />
+
+                {/* Canaux de notification */}
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
+                  Canaux de notification
+                </Typography>
+
+                <Grid container spacing={2}>
+                  <Grid item xs={12} md={6}>
+                    <Paper sx={{ p: 2, textAlign: 'center' }}>
+                      <EmailIcon sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
+                      <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                        Email
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        admin@fiscasync.com
+                      </Typography>
+                      <Box sx={{ mt: 1 }}>
+                        <Chip label="Actif" size="small" color="success" />
+                      </Box>
+                    </Paper>
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <Paper sx={{ p: 2, textAlign: 'center' }}>
+                      <NotificationsIcon sx={{ fontSize: 40, color: 'secondary.main', mb: 1 }} />
+                      <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                        Navigateur
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        Notifications dans l'app
+                      </Typography>
+                      <Box sx={{ mt: 1 }}>
+                        <Chip label="Actif" size="small" color="success" />
+                      </Box>
+                    </Paper>
+                  </Grid>
+                </Grid>
+
+                {/* Actions */}
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 3 }}>
+                  <Button variant="outlined">
+                    Réinitialiser
+                  </Button>
+                  <Button
+                    variant="contained"
+                    startIcon={<SaveIcon />}
+                  >
+                    Sauvegarder
+                  </Button>
+                </Box>
+              </CardContent>
+            </TabPanel>
+
+            <TabPanel value={activeTab} index={5}>
+              {/* Thème de l'application */}
+              <CardContent sx={{ p: 3 }}>
+                <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
+                  Thème de l'application
+                </Typography>
+
+                {/* Sélection du thème */}
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
+                  Thèmes prédéfinis
+                </Typography>
+
+                <Grid container spacing={2} sx={{ mb: 4 }}>
+                  {themes.map((themeOption) => (
+                    <Grid item xs={12} sm={6} md={3} key={themeOption.id}>
+                      <Card
+                        sx={{
+                          cursor: 'pointer',
+                          border: selectedTheme === themeOption.id ? 2 : 1,
+                          borderColor: selectedTheme === themeOption.id ? 'primary.main' : 'divider',
+                          '&:hover': {
+                            borderColor: 'primary.main',
+                            boxShadow: theme.shadows[4]
+                          }
+                        }}
+                        onClick={() => setSelectedTheme(themeOption.id)}
+                      >
+                        <CardContent sx={{ p: 2 }}>
+                          {/* Aperçu des couleurs */}
+                          <Box sx={{ display: 'flex', gap: 0.5, mb: 2 }}>
+                            <Box
+                              sx={{
+                                width: 20,
+                                height: 20,
+                                backgroundColor: themeOption.colors.primary,
+                                borderRadius: 1
+                              }}
+                            />
+                            <Box
+                              sx={{
+                                width: 20,
+                                height: 20,
+                                backgroundColor: themeOption.colors.secondary,
+                                borderRadius: 1
+                              }}
+                            />
+                            <Box
+                              sx={{
+                                width: 20,
+                                height: 20,
+                                backgroundColor: themeOption.colors.background,
+                                borderRadius: 1,
+                                border: '1px solid',
+                                borderColor: 'divider'
+                              }}
+                            />
+                          </Box>
+
+                          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                            {themeOption.name}
+                            {themeOption.current && (
+                              <Chip
+                                label="Actuel"
+                                size="small"
+                                color="primary"
+                                sx={{ ml: 1, fontSize: '0.6rem' }}
+                              />
+                            )}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {themeOption.subtitle}
+                          </Typography>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                  ))}
+                </Grid>
+
+                <Divider sx={{ my: 3 }} />
+
+                {/* Options d'affichage */}
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
+                  Options d'affichage
+                </Typography>
+
+                <Paper sx={{ p: 3, backgroundColor: alpha(theme.palette.info.main, 0.02), mb: 3 }}>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={darkMode}
+                        onChange={(e) => setDarkMode(e.target.checked)}
+                        icon={<DarkModeIcon />}
+                        checkedIcon={<DarkModeIcon />}
+                      />
+                    }
+                    label={
+                      <Box>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                          Mode sombre
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          Activer le thème sombre (bientôt disponible)
+                        </Typography>
+                      </Box>
+                    }
+                    disabled
+                  />
+                </Paper>
+
+                <Divider sx={{ my: 3 }} />
+
+                {/* Typographie */}
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
+                  Typographie
+                </Typography>
+
+                <Grid container spacing={3}>
+                  <Grid item xs={12} md={6}>
+                    <FormControl fullWidth>
+                      <InputLabel>Police d'affichage</InputLabel>
+                      <Select
+                        value={selectedFont}
+                        label="Police d'affichage"
+                        onChange={(e) => setSelectedFont(e.target.value)}
+                        startAdornment={
+                          <InputAdornment position="start">
+                            <TextFieldsIcon />
+                          </InputAdornment>
+                        }
+                      >
+                        {fontOptions.map((font) => (
+                          <MenuItem key={font.value} value={font.value}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                              <Typography sx={{ fontFamily: font.value }}>
+                                {font.label}
+                              </Typography>
+                              {font.current && (
+                                <Chip label="Actuelle" size="small" color="primary" />
+                              )}
+                            </Box>
+                          </MenuItem>
+                        ))}
+                      </Select>
+                      <FormHelperText>
+                        Police utilisée pour l'interface utilisateur
+                      </FormHelperText>
+                    </FormControl>
+                  </Grid>
+
+                  <Grid item xs={12} md={6}>
+                    <FormControl fullWidth>
+                      <InputLabel>Taille de police</InputLabel>
+                      <Select
+                        value={fontSize}
+                        label="Taille de police"
+                        onChange={(e) => setFontSize(e.target.value)}
+                        startAdornment={
+                          <InputAdornment position="start">
+                            <FormatSizeIcon />
+                          </InputAdornment>
+                        }
+                      >
+                        {fontSizes.map((size) => (
+                          <MenuItem key={size.value} value={size.value}>
+                            {size.label}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                      <FormHelperText>
+                        Ajustez la taille de police selon votre préférence
+                      </FormHelperText>
+                    </FormControl>
+                  </Grid>
+                </Grid>
+
+                {/* Aperçu en temps réel */}
+                <Paper sx={{ p: 3, mt: 3, backgroundColor: alpha(theme.palette.success.main, 0.02) }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
+                    Aperçu du thème sélectionné
+                  </Typography>
+                  <Box
+                    sx={{
+                      p: 2,
+                      borderRadius: 2,
+                      backgroundColor: themes.find(t => t.id === selectedTheme)?.colors.background,
+                      border: '1px solid',
+                      borderColor: 'divider'
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        p: 2,
+                        borderRadius: 1,
+                        backgroundColor: themes.find(t => t.id === selectedTheme)?.colors.surface,
+                        mb: 2
+                      }}
+                    >
+                      <Typography
+                        variant="h6"
+                        sx={{
+                          color: themes.find(t => t.id === selectedTheme)?.colors.primary,
+                          fontFamily: selectedFont,
+                          fontSize: fontSize === 'small' ? '1rem' :
+                                   fontSize === 'large' ? '1.5rem' :
+                                   fontSize === 'xlarge' ? '1.75rem' : '1.25rem'
+                        }}
+                      >
+                        Titre d'exemple
+                      </Typography>
+                      <Typography
+                        variant="body1"
+                        sx={{
+                          color: themes.find(t => t.id === selectedTheme)?.colors.secondary,
+                          fontFamily: selectedFont,
+                          fontSize: fontSize === 'small' ? '0.75rem' :
+                                   fontSize === 'large' ? '1rem' :
+                                   fontSize === 'xlarge' ? '1.125rem' : '0.875rem'
+                        }}
+                      >
+                        Texte d'exemple pour visualiser les changements de thème et de typographie.
+                      </Typography>
+                    </Box>
+                    <Button
+                      variant="contained"
+                      sx={{
+                        backgroundColor: themes.find(t => t.id === selectedTheme)?.colors.primary,
+                        fontFamily: selectedFont
+                      }}
+                    >
+                      Bouton d'exemple
+                    </Button>
+                  </Box>
+                </Paper>
+
+                {/* Actions */}
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 3 }}>
+                  <Button variant="outlined">
+                    Réinitialiser
+                  </Button>
+                  <Button
+                    variant="contained"
+                    startIcon={<SaveIcon />}
+                  >
+                    Appliquer le thème
+                  </Button>
+                </Box>
+              </CardContent>
+            </TabPanel>
+
+            <TabPanel value={activeTab} index={6}>
               {/* Paramètres avancés */}
               <CardContent sx={{ p: 3 }}>
                 <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>

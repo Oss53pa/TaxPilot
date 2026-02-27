@@ -112,7 +112,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             {/* Afficher le divider de section si défini */}
             {item.divider && index > 0 && (
               <>
-                <Divider sx={{ my: 1, borderColor: '#949597', opacity: 0.4 }} />
+                <Divider sx={{ my: 1, borderColor: '#737373', opacity: 0.4 }} />
                 <ListItem sx={{ py: 1, px: 2 }}>
                   <Typography
                     variant="caption"
@@ -149,11 +149,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   mx: 1,
                   color: '#FFFFFF',  // Force blanc pour tous les textes
                   '&:hover': {
-                    backgroundColor: '#949597',
+                    backgroundColor: '#737373',
                     color: '#FFFFFF'
                   },
                   '&.Mui-selected': {
-                    backgroundColor: '#949597',
+                    backgroundColor: '#737373',
                     color: '#FFFFFF',
                     fontWeight: 600,
                     '& .MuiListItemIcon-root': { color: '#FFFFFF' },

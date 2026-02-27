@@ -94,15 +94,25 @@ const BalanceImport: React.FC = () => {
     dispatch(setImporting(true))
 
     try {
-      // Préparation du FormData pour l'upload
-      const formData = new FormData()
-      formData.append('file', fileData.file)
-      formData.append('format', fileData.file.name.split('.').pop() || 'xlsx')
+      // Récupérer l'ID de l'entreprise et de l'exercice depuis le store ou localStorage
+      const entrepriseId = localStorage.getItem('entreprise_id') || '1'
+      const exerciceId = localStorage.getItem('exercice_id') || new Date().getFullYear().toString()
 
-      console.log('📤 Importing balance file to backend...')
+      console.log('📤 Importing balance file to backend...', {
+        entrepriseId,
+        exerciceId,
+        fileName: fileData.file.name
+      })
 
-      // Import via le backend
-      const response = await balanceService.importBalance(formData)
+      // Import via le backend avec les paramètres corrects
+      const response = await balanceService.importBalance(
+        entrepriseId,
+        exerciceId,
+        fileData.file,
+        {
+          format: fileData.file.name.split('.').pop()?.toUpperCase() || 'XLSX'
+        }
+      )
 
       if (response) {
         // Mettre à jour le status

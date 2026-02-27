@@ -1,73 +1,64 @@
-/* SOLUTION RADICALE - SIDEBARS TRÈS CLAIRES ET LISIBLES */
+/* Sidebar styling - Dark sidebar with light text */
 
-/* Fond gris TRÈS CLAIR pour les sidebars */
+/* Dark background for sidebar */
 .MuiDrawer-paper {
-  background-color: #b0b0b0 !important;
+  background-color: #171717 !important;
 }
 
-/* TOUT LE TEXTE EN BLANC ÉCLATANT */
+/* All text in sidebar - light gray */
 .MuiDrawer-paper,
-.MuiDrawer-paper *,
 .MuiDrawer-paper .MuiTypography-root,
 .MuiDrawer-paper .MuiListItemText-primary,
 .MuiDrawer-paper .MuiListItemText-secondary,
-.MuiDrawer-paper .MuiTypography-body2,
-.MuiDrawer-paper .MuiTypography-caption,
-.MuiDrawer-paper .MuiTypography-overline,
-.MuiDrawer-paper .MuiTypography-h6,
-.MuiDrawer-paper .MuiTypography-h5,
-.MuiDrawer-paper .MuiTypography-h4,
-.MuiDrawer-paper .MuiTypography-subtitle1,
-.MuiDrawer-paper .MuiTypography-subtitle2,
 .MuiDrawer-paper span,
 .MuiDrawer-paper div,
 .MuiDrawer-paper p {
-  color: #ffffff !important;
-  font-weight: 500 !important;
+  color: #d4d4d4 !important;
 }
 
-/* ICÔNES BLANCHES */
+/* Icons - gray */
 .MuiDrawer-paper .MuiSvgIcon-root,
 .MuiDrawer-paper svg {
-  color: #ffffff !important;
-  fill: #ffffff !important;
+  color: #a3a3a3 !important;
 }
 
-/* DIVIDERS TRÈS VISIBLES */
+/* Dividers */
 .MuiDrawer-paper .MuiDivider-root {
-  background-color: #aaaaaa !important;
+  background-color: #404040 !important;
   margin: 12px 0 !important;
-  height: 2px !important;
+  height: 1px !important;
 }
 
-/* HOVER ET SÉLECTION */
+/* Hover state */
 .MuiDrawer-paper .MuiListItemButton-root:hover {
-  background-color: rgba(255, 255, 255, 0.15) !important;
+  background-color: rgba(255, 255, 255, 0.08) !important;
 }
 
+/* Selected state */
 .MuiDrawer-paper .MuiListItemButton-root.Mui-selected {
-  background-color: rgba(255, 255, 255, 0.2) !important;
+  background-color: rgba(255, 255, 255, 0.12) !important;
 }
 
-/* FORCE BLANC SUR TOUT */
-.MuiDrawer-paper [color="text.secondary"],
-.MuiDrawer-paper [color="textSecondary"] {
+.MuiDrawer-paper .MuiListItemButton-root.Mui-selected,
+.MuiDrawer-paper .MuiListItemButton-root.Mui-selected *,
+.MuiDrawer-paper .MuiListItemButton-root:hover,
+.MuiDrawer-paper .MuiListItemButton-root:hover * {
   color: #ffffff !important;
 }
 
-/* CHIPS ET BOUTONS */
+/* Chips and buttons in sidebar */
 .MuiDrawer-paper .MuiChip-root {
-  background-color: rgba(255, 255, 255, 0.2) !important;
-  color: #ffffff !important;
-  border-color: rgba(255, 255, 255, 0.5) !important;
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  color: #d4d4d4 !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
 }
 
 .MuiDrawer-paper .MuiButton-root {
-  color: #ffffff !important;
-  border-color: rgba(255, 255, 255, 0.5) !important;
+  color: #d4d4d4 !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
 }
 
-/* AMÉLIORATION OMBRE */
+/* Subtle shadow */
 .MuiDrawer-paper {
-  box-shadow: 4px 0 20px rgba(0,0,0,0.2) !important;
+  box-shadow: 1px 0 4px rgba(0, 0, 0, 0.1) !important;
 }

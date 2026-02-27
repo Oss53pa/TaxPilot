@@ -51,6 +51,7 @@ import {
 } from '@mui/icons-material'
 import { useAppSelector } from '@/store'
 import { Balance } from '@/types'
+import BalanceExportDialog from './BalanceExportDialog'
 
 // Données factices pour la démonstration
 // Données mockées supprimées - utilisation exclusive de l'API
@@ -68,6 +69,7 @@ const BalanceConsultation: React.FC = () => {
   const [filterType, setFilterType] = useState('')
   const [detailModalOpen, setDetailModalOpen] = useState(false)
   const [editModalOpen, setEditModalOpen] = useState(false)
+  const [exportDialogOpen, setExportDialogOpen] = useState(false)
   const [selectedBalance, setSelectedBalance] = useState<Balance | null>(null)
   const [editedBalance, setEditedBalance] = useState<Balance | null>(null)
 
@@ -148,9 +150,7 @@ const BalanceConsultation: React.FC = () => {
   }, [])
 
   const handleExport = useCallback(() => {
-    // Logique pour exporter la balance
-    console.log('Export de la balance...')
-    // TODO: Implémenter l'export réel
+    setExportDialogOpen(true)
   }, [])
 
   return (
@@ -636,6 +636,14 @@ const BalanceConsultation: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Export Dialog */}
+      <BalanceExportDialog
+        open={exportDialogOpen}
+        onClose={() => setExportDialogOpen(false)}
+        balanceId="current-balance" // TODO: Get actual balance ID from props or store
+        balanceName="Balance Actuelle"
+      />
     </Box>
   )
 }

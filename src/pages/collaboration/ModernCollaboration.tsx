@@ -594,7 +594,7 @@ const ModernCollaboration: React.FC = () => {
     switch (priority) {
       case 'urgent': return '#d32f2f';
       case 'high': return '#f57c00';
-      case 'medium': return '#1976d2';
+      case 'medium': return '#171717';
       case 'low': return '#388e3c';
       default: return '#757575';
     }

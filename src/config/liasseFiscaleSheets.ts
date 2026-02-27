@@ -225,21 +225,202 @@ export const LIASSE_SHEETS: SheetConfig[] = [
     description: 'Tableau des flux de trésorerie'
   },
 
-  // Notes annexes (NOTE 1 à NOTE 39)
-  ...Array.from({ length: 39 }, (_, i) => {
-    const noteNumber = i + 1
-    const noteId = noteNumber === 36 ? 'note36_details' : `note${noteNumber}`
-    return {
-      id: noteId,
-      name: `NOTE ${noteNumber}`,
-      title: `Note ${noteNumber} - ${getNoteTitle(noteNumber)}`,
-      category: 'notes' as const,
-      order: 15 + i,
-      required: isNoteRequired(noteNumber),
-      hasComments: true,
-      description: getNoteDescription(noteNumber)
-    }
-  }),
+  // Notes annexes (NOTE 1 à NOTE 39) - excluding notes with sub-parts (3,8,15,16,27)
+  ...Array.from({ length: 39 }, (_, i) => i + 1)
+    .filter(n => ![3, 8, 15, 16, 27].includes(n))
+    .map(noteNumber => {
+      const noteId = noteNumber === 36 ? 'note36_details' : `note${noteNumber}`
+      return {
+        id: noteId,
+        name: `NOTE ${noteNumber}`,
+        title: `Note ${noteNumber} - ${getNoteTitle(noteNumber)}`,
+        category: 'notes' as const,
+        order: 15 + noteNumber - 1,
+        required: isNoteRequired(noteNumber),
+        hasComments: true,
+        description: getNoteDescription(noteNumber)
+      }
+    }),
+
+  // Note 3 - Immobilisations (6 sous-onglets)
+  {
+    id: 'note3a',
+    name: 'NOTE 3A',
+    title: 'Note 3A - Immobilisations (Brutes)',
+    category: 'notes' as const,
+    order: 17,
+    required: true,
+    hasComments: true,
+    description: 'Tableau des mouvements des immobilisations brutes'
+  },
+  {
+    id: 'note3b',
+    name: 'NOTE 3B',
+    title: 'Note 3B - Biens en location-acquisition',
+    category: 'notes' as const,
+    order: 17.1,
+    required: false,
+    hasComments: true,
+    description: 'Immobilisations en location-acquisition / crédit-bail'
+  },
+  {
+    id: 'note3c',
+    name: 'NOTE 3C',
+    title: 'Note 3C - Amortissements',
+    category: 'notes' as const,
+    order: 17.2,
+    required: true,
+    hasComments: true,
+    description: 'Tableau des amortissements cumulés'
+  },
+  {
+    id: 'note3c_bis',
+    name: 'NOTE 3C BIS',
+    title: 'Note 3C BIS - Dépréciations',
+    category: 'notes' as const,
+    order: 17.3,
+    required: false,
+    hasComments: true,
+    description: 'Tableau des dépréciations des immobilisations'
+  },
+  {
+    id: 'note3d',
+    name: 'NOTE 3D',
+    title: 'Note 3D - Plus/Moins-values de cessions',
+    category: 'notes' as const,
+    order: 17.4,
+    required: false,
+    hasComments: true,
+    description: 'Détermination des plus ou moins-values de cessions'
+  },
+  {
+    id: 'note3e',
+    name: 'NOTE 3E',
+    title: 'Note 3E - Réévaluations',
+    category: 'notes' as const,
+    order: 17.5,
+    required: false,
+    hasComments: true,
+    description: 'Tableau des réévaluations des immobilisations'
+  },
+
+  // Note 8 - Autres créances (3 sous-onglets)
+  {
+    id: 'note8a',
+    name: 'NOTE 8A',
+    title: 'Note 8A - Étalement charges immobilisées',
+    category: 'notes' as const,
+    order: 22,
+    required: false,
+    hasComments: true,
+    description: 'Étalement des charges immobilisées par exercice'
+  },
+  {
+    id: 'note8b',
+    name: 'NOTE 8B',
+    title: 'Note 8B - Étalement provisions (charges)',
+    category: 'notes' as const,
+    order: 22.1,
+    required: false,
+    hasComments: true,
+    description: 'Étalement des provisions pour charges'
+  },
+  {
+    id: 'note8c',
+    name: 'NOTE 8C',
+    title: 'Note 8C - Étalement provisions (risques)',
+    category: 'notes' as const,
+    order: 22.2,
+    required: false,
+    hasComments: true,
+    description: 'Étalement des provisions pour risques'
+  },
+
+  // Note 15 - Subventions et provisions réglementées (2 sous-onglets)
+  {
+    id: 'note15a',
+    name: 'NOTE 15A',
+    title: 'Note 15A - Subventions et provisions réglementées',
+    category: 'notes' as const,
+    order: 29,
+    required: true,
+    hasComments: true,
+    description: 'Subventions d\'investissement et provisions réglementées'
+  },
+  {
+    id: 'note15b',
+    name: 'NOTE 15B',
+    title: 'Note 15B - Autres fonds propres',
+    category: 'notes' as const,
+    order: 29.1,
+    required: false,
+    hasComments: true,
+    description: 'Titres participatifs, avances conditionnées, TSDI, ORA'
+  },
+
+  // Note 16 - Dettes financières (4 sous-onglets)
+  {
+    id: 'note16a',
+    name: 'NOTE 16A',
+    title: 'Note 16A - Dettes financières',
+    category: 'notes' as const,
+    order: 30,
+    required: true,
+    hasComments: true,
+    description: 'Emprunts, location-acquisition et provisions financières'
+  },
+  {
+    id: 'note16b',
+    name: 'NOTE 16B',
+    title: 'Note 16B - Engagements retraite (hypothèses)',
+    category: 'notes' as const,
+    order: 30.1,
+    required: false,
+    hasComments: true,
+    description: 'Hypothèses actuarielles, variation engagement, analyse sensibilité'
+  },
+  {
+    id: 'note16b_bis',
+    name: 'NOTE 16B BIS',
+    title: 'Note 16B BIS - Engagements retraite (actif/passif)',
+    category: 'notes' as const,
+    order: 30.2,
+    required: false,
+    hasComments: true,
+    description: 'Actif/passif net et valeur actuelle des actifs de retraite'
+  },
+  {
+    id: 'note16c',
+    name: 'NOTE 16C',
+    title: 'Note 16C - Actifs et passifs éventuels',
+    category: 'notes' as const,
+    order: 30.3,
+    required: false,
+    hasComments: true,
+    description: 'Actifs éventuels et passifs éventuels'
+  },
+
+  // Note 27 - Charges de personnel (2 sous-onglets)
+  {
+    id: 'note27a',
+    name: 'NOTE 27A',
+    title: 'Note 27A - Charges de personnel',
+    category: 'notes' as const,
+    order: 41,
+    required: true,
+    hasComments: true,
+    description: 'Détail des rémunérations et charges sociales'
+  },
+  {
+    id: 'note27b',
+    name: 'NOTE 27B',
+    title: 'Note 27B - Effectifs et masse salariale',
+    category: 'notes' as const,
+    order: 41.1,
+    required: true,
+    hasComments: true,
+    description: 'Effectifs par qualification et masse salariale'
+  },
 
   // Gardes spécifiques DGI/INS
   {
@@ -373,65 +554,97 @@ export const LIASSE_SHEETS: SheetConfig[] = [
 // Fonctions utilitaires pour les notes
 function getNoteTitle(noteNumber: number): string {
   const noteTitles: { [key: number]: string } = {
-    1: 'Méthodes comptables',
-    2: 'Changements de méthodes',
+    1: 'Dettes garanties par des sûretés réelles',
+    2: 'Informations obligatoires',
     3: 'Immobilisations',
-    4: 'État des créances et dettes',
-    5: 'Provisions',
-    6: 'Capitaux propres',
-    7: 'Tableau de variation des capitaux propres',
-    8: 'Charges et produits',
-    9: 'Engagements hors bilan',
-    10: 'Événements postérieurs',
-    11: 'Informations sectorielles',
-    12: 'Effectif et charges de personnel',
-    13: 'Rémunération des dirigeants',
-    14: 'Impôts et taxes',
-    15: 'Tableau de détermination du résultat fiscal',
-    16: 'Affectation du résultat',
-    17: 'Tableau des soldes intermédiaires de gestion',
-    18: 'Capacité d\'autofinancement',
-    19: 'État des stocks',
-    20: 'État des amortissements',
-    21: 'Plus et moins-values',
-    22: 'État des provisions',
-    23: 'Crédit-bail',
-    24: 'Échéancier des créances et dettes',
-    25: 'Charges à payer et produits à recevoir',
-    26: 'Charges et produits constatés d\'avance',
-    27: 'Composition du capital social',
-    28: 'Filiales et participations',
-    29: 'Opérations avec les entreprises liées',
-    30: 'Intégration fiscale',
-    31: 'Tableau de passage',
-    32: 'Informations diverses',
-    33: 'État de rapprochement',
-    34: 'Tableau de répartition des bénéfices',
-    35: 'État des déficits',
+    4: 'Immobilisations financières',
+    5: 'Actif circulant et dettes circulantes HAO',
+    6: 'Stocks et en-cours',
+    7: 'Clients',
+    8: 'Autres créances',
+    9: 'Titres de placement',
+    10: 'Valeurs à encaisser',
+    11: 'Disponibilités',
+    12: 'Écarts de conversion et transferts de charges',
+    13: 'Capital',
+    14: 'Primes et réserves',
+    15: 'Subventions et provisions réglementées',
+    16: 'Dettes financières et ressources assimilées',
+    17: 'Fournisseurs d\'exploitation',
+    18: 'Dettes fiscales et sociales',
+    19: 'Autres dettes et provisions CT',
+    20: 'Banques, crédit d\'escompte et trésorerie',
+    21: 'Chiffre d\'affaires et autres produits',
+    22: 'Achats',
+    23: 'Transports',
+    24: 'Services extérieurs',
+    25: 'Impôts et taxes',
+    26: 'Autres charges',
+    27: 'Charges de personnel',
+    28: 'Dotations provisions et dépréciations',
+    29: 'Charges et revenus financiers',
+    30: 'Autres charges et produits HAO',
+    31: 'Répartition du résultat',
+    32: 'Production de l\'exercice',
+    33: 'Achats destinés à la production',
+    34: 'Fiche synthèse indicateurs financiers',
+    35: 'Informations sociales, environnementales',
     36: 'Table des codes',
-    37: 'Informations complémentaires',
-    38: 'Déclarations spéciales',
-    39: 'Attestations et certifications'
+    37: 'Détermination impôts sur le résultat',
+    38: 'Événements postérieurs à la clôture',
+    39: 'Changements de méthodes comptables'
   }
   return noteTitles[noteNumber] || `Annexe ${noteNumber}`
 }
 
 function getNoteDescription(noteNumber: number): string {
   const noteDescriptions: { [key: number]: string } = {
-    1: 'Principes et méthodes comptables appliqués',
-    2: 'Changements de méthodes comptables et impacts',
-    3: 'Détail et mouvements des immobilisations',
-    4: 'Ventilation des créances et dettes par échéance',
-    5: 'État détaillé des provisions',
-    6: 'Composition et variation des capitaux propres',
-    // ... autres descriptions
+    1: 'Dettes garanties par des sûretés réelles données ou reçues',
+    2: 'Informations obligatoires obtenues auprès des tiers',
+    3: 'Tableau des mouvements des immobilisations corporelles et incorporelles',
+    4: 'Détail des immobilisations financières (titres, prêts, dépôts)',
+    5: 'Actif circulant HAO et dettes circulantes HAO',
+    6: 'Détail des stocks et en-cours de production',
+    7: 'Créances clients et comptes rattachés',
+    8: 'Autres créances (personnel, État, débiteurs divers)',
+    9: 'Titres de placement et valeurs mobilières',
+    10: 'Valeurs à encaisser (chèques, effets)',
+    11: 'Disponibilités en banques, CCP et caisse',
+    12: 'Écarts de conversion actif/passif et transferts de charges',
+    13: 'Capital social, apporteurs et associés',
+    14: 'Primes liées au capital et réserves',
+    15: 'Subventions d\'investissement et provisions réglementées',
+    16: 'Dettes financières, emprunts et ressources assimilées',
+    17: 'Fournisseurs d\'exploitation et comptes rattachés',
+    18: 'Dettes fiscales et sociales (État, organismes sociaux)',
+    19: 'Autres dettes et provisions pour risques à court terme',
+    20: 'Banques, crédit d\'escompte et soldes de trésorerie',
+    21: 'Chiffre d\'affaires et autres produits d\'exploitation',
+    22: 'Achats de marchandises et matières premières',
+    23: 'Transports de biens et de personnel',
+    24: 'Services extérieurs (loyers, entretien, assurances)',
+    25: 'Impôts, taxes et versements assimilés',
+    26: 'Autres charges d\'exploitation',
+    27: 'Charges de personnel et effectifs',
+    28: 'Dotations aux provisions et dépréciations d\'exploitation',
+    29: 'Charges et revenus financiers',
+    30: 'Autres charges et produits hors activités ordinaires',
+    31: 'Répartition du résultat de l\'exercice',
+    32: 'Production immobilisée et stockée de l\'exercice',
+    33: 'Achats destinés à la production (matières, fournitures)',
+    34: 'Fiche synthèse des indicateurs financiers',
+    35: 'Informations sociales, environnementales et sociétales',
+    36: 'Table des codes comptables SYSCOHADA',
+    37: 'Détermination des impôts sur le résultat',
+    38: 'Événements survenus après la clôture de l\'exercice',
+    39: 'Changements de méthodes comptables et corrections d\'erreurs'
   }
   return noteDescriptions[noteNumber] || `Note annexe numéro ${noteNumber}`
 }
 
 function isNoteRequired(noteNumber: number): boolean {
-  // Notes obligatoires selon SYSCOHADA
-  const requiredNotes = [1, 2, 3, 4, 5, 6, 7, 8, 14, 15, 16, 17, 20, 22, 27, 31]
+  // Notes obligatoires selon SYSCOHADA (excluding 3,8,15,16,27 which have sub-notes with their own required status)
+  const requiredNotes = [1, 2, 4, 5, 6, 7, 9, 11, 13, 14, 17, 18, 19, 20, 21, 22, 25, 28, 29, 31]
   return requiredNotes.includes(noteNumber)
 }
 

@@ -84,12 +84,33 @@ const Login: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     try {
       await login(formData.username, formData.password)
       navigate('/dashboard')
     } catch (err) {
       console.error('Erreur de connexion:', err)
+    }
+  }
+
+  const handleAutoLogin = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/api/v1/auth/auto-login/', {
+        method: 'POST',
+      })
+      const data = await response.json()
+
+      if (data.tokens && data.tokens.access) {
+        // Sauvegarder les tokens
+        localStorage.setItem('access_token', data.tokens.access)
+        localStorage.setItem('refresh_token', data.tokens.refresh)
+        localStorage.setItem('user', JSON.stringify(data.user))
+
+        // Rediriger vers le dashboard
+        navigate('/dashboard')
+      }
+    } catch (err) {
+      console.error('Erreur auto-login:', err)
     }
   }
 
@@ -101,7 +122,7 @@ const Login: React.FC = () => {
     <Box
       sx={{
         minHeight: '100vh',
-        background: 'linear-gradient(135deg, #ECECEF 0%, #F5F5F5 100%)',
+        background: 'linear-gradient(135deg, #fafafa 0%, #F5F5F5 100%)',
         position: 'relative',
         overflow: 'hidden',
       }}
@@ -124,7 +145,7 @@ const Login: React.FC = () => {
         <Grid container sx={{ minHeight: '100vh', alignItems: 'center' }}>
           {/* Section gauche - Branding et témoignages */}
           <Grid item xs={12} lg={7} sx={{ display: { xs: 'none', lg: 'block' } }}>
-            <Box sx={{ pr: 8, color: '#373B4D' }}>
+            <Box sx={{ pr: 8, color: '#171717' }}>
               {/* Logo et titre avec couleurs FiscaSync */}
               <Fade in timeout={800}>
                 <Box sx={{ mb: 6 }}>
@@ -133,7 +154,7 @@ const Login: React.FC = () => {
                       sx={{
                         width: 60,
                         height: 60,
-                        backgroundColor: '#373B4D',
+                        backgroundColor: '#171717',
                         borderRadius: 2,
                         display: 'flex',
                         alignItems: 'center',
@@ -143,16 +164,16 @@ const Login: React.FC = () => {
                     >
                       <AccountBalance sx={{ fontSize: 32, color: '#FFFFFF' }} />
                     </Box>
-                    <Typography variant="h3" sx={{ fontWeight: 900, letterSpacing: '-0.02em', color: '#373B4D' }}>
+                    <Typography variant="h3" sx={{ fontWeight: 900, letterSpacing: '-0.02em', color: '#171717' }}>
                       FiscaSync
                     </Typography>
                   </Stack>
                   
-                  <Typography variant="h4" sx={{ mb: 3, fontWeight: 300, color: '#373B4D' }}>
+                  <Typography variant="h4" sx={{ mb: 3, fontWeight: 300, color: '#171717' }}>
                     L'excellence comptable à portée de clic
                   </Typography>
                   
-                  <Typography variant="h6" sx={{ mb: 4, color: '#949597', lineHeight: 1.6 }}>
+                  <Typography variant="h6" sx={{ mb: 4, color: '#737373', lineHeight: 1.6 }}>
                     Révolutionnez votre pratique comptable avec la solution SYSCOHADA 
                     la plus avancée d'Afrique. Intelligence artificielle, conformité garantie, 
                     et productivité maximale.
@@ -164,9 +185,9 @@ const Login: React.FC = () => {
               <Fade in timeout={1000}>
                 <Grid container spacing={3} sx={{ mb: 6 }}>
                   {[
-                    { value: '17', label: 'Pays OHADA', icon: <TrendingUp />, color: '#373B4D' },
-                    { value: '99.9%', label: 'Précision', icon: <Speed />, color: '#373B4D' },
-                    { value: '80%', label: 'Gain temps', icon: <Security />, color: '#373B4D' },
+                    { value: '17', label: 'Pays OHADA', icon: <TrendingUp />, color: '#171717' },
+                    { value: '99.9%', label: 'Précision', icon: <Speed />, color: '#171717' },
+                    { value: '80%', label: 'Gain temps', icon: <Security />, color: '#171717' },
                   ].map((stat, index) => (
                     <Grid item xs={4} key={index}>
                       <Paper
@@ -176,7 +197,7 @@ const Login: React.FC = () => {
                           textAlign: 'center',
                           backgroundColor: '#FFFFFF',
                           borderRadius: 3,
-                          border: '1px solid #BDBFB7',
+                          border: '1px solid #e5e5e5',
                           transition: 'transform 0.3s ease',
                           '&:hover': {
                             transform: 'translateY(-4px)',
@@ -187,10 +208,10 @@ const Login: React.FC = () => {
                         <Box sx={{ color: stat.color, mb: 1 }}>
                           {stat.icon}
                         </Box>
-                        <Typography variant="h4" sx={{ fontWeight: 700, color: '#373B4D', mb: 1 }}>
+                        <Typography variant="h4" sx={{ fontWeight: 700, color: '#171717', mb: 1 }}>
                           {stat.value}
                         </Typography>
-                        <Typography variant="body2" sx={{ color: '#949597' }}>
+                        <Typography variant="body2" sx={{ color: '#737373' }}>
                           {stat.label}
                         </Typography>
                       </Paper>
@@ -205,24 +226,24 @@ const Login: React.FC = () => {
                   elevation={2}
                   sx={{
                     p: 4,
-                    backgroundColor: '#ECEDEF',
+                    backgroundColor: '#ffffff',
                     borderRadius: 3,
-                    border: '1px solid #BDBFB7',
+                    border: '1px solid #e5e5e5',
                   }}
                 >
                   <Box sx={{ display: 'flex', mb: 2 }}>
                     {[...Array(testimonials[currentTestimonial].rating)].map((_, i) => (
-                      <Star key={i} sx={{ color: '#373B4D', fontSize: 20 }} />
+                      <Star key={i} sx={{ color: '#171717', fontSize: 20 }} />
                     ))}
                   </Box>
-                  <Typography variant="body1" sx={{ mb: 3, fontStyle: 'italic', lineHeight: 1.6, color: '#373B4D' }}>
+                  <Typography variant="body1" sx={{ mb: 3, fontStyle: 'italic', lineHeight: 1.6, color: '#171717' }}>
                     "{testimonials[currentTestimonial].text}"
                   </Typography>
                   <Box>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#373B4D' }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#171717' }}>
                       {testimonials[currentTestimonial].author}
                     </Typography>
-                    <Typography variant="body2" sx={{ color: '#949597' }}>
+                    <Typography variant="body2" sx={{ color: '#737373' }}>
                       {testimonials[currentTestimonial].role}
                     </Typography>
                   </Box>
@@ -359,12 +380,12 @@ const Login: React.FC = () => {
                         fontSize: '1.1rem',
                         fontWeight: 600,
                         textTransform: 'none',
-                        backgroundColor: '#373B4D',
+                        backgroundColor: '#171717',
                         boxShadow: '0 8px 32px rgba(55, 59, 77, 0.3)',
-                        mb: 4,
+                        mb: 2,
                         transition: 'all 0.3s ease',
                         '&:hover': {
-                          backgroundColor: '#4A4F65',
+                          backgroundColor: '#262626',
                           transform: 'translateY(-2px)',
                           boxShadow: '0 12px 40px rgba(55, 59, 77, 0.4)',
                         },
@@ -382,6 +403,33 @@ const Login: React.FC = () => {
                         'Se connecter'
                       )}
                     </Button>
+
+                    <Button
+                      type="button"
+                      fullWidth
+                      variant="outlined"
+                      size="large"
+                      onClick={handleAutoLogin}
+                      disabled={isLoading}
+                      sx={{
+                        height: 48,
+                        borderRadius: 2,
+                        fontSize: '0.95rem',
+                        fontWeight: 600,
+                        textTransform: 'none',
+                        borderColor: '#15803d',
+                        color: '#15803d',
+                        mb: 4,
+                        transition: 'all 0.3s ease',
+                        '&:hover': {
+                          backgroundColor: 'rgba(46, 125, 15, 0.08)',
+                          borderColor: '#15803d',
+                          transform: 'translateY(-2px)',
+                        },
+                      }}
+                    >
+                      🚀 Connexion automatique (Dev)
+                    </Button>
                   </Box>
 
                   {/* Section démo avec couleurs FiscaSync */}
@@ -389,24 +437,24 @@ const Login: React.FC = () => {
                     sx={{
                       p: 3,
                       borderRadius: 2,
-                      backgroundColor: '#BDBFB7',
-                      border: '1px solid #949597',
+                      backgroundColor: '#e5e5e5',
+                      border: '1px solid #737373',
                       textAlign: 'center',
                       mb: 3,
                     }}
                   >
-                    <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, color: '#373B4D' }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, color: '#171717' }}>
                       🎯 Accès Démonstration
                     </Typography>
                     <Stack direction="row" justifyContent="space-around" alignItems="center">
                       <Box>
-                        <Typography variant="caption" sx={{ color: '#373B4D' }}>Utilisateur</Typography>
-                        <Typography variant="body2" sx={{ fontWeight: 600, color: '#373B4D' }}>admin</Typography>
+                        <Typography variant="caption" sx={{ color: '#171717' }}>Utilisateur</Typography>
+                        <Typography variant="body2" sx={{ fontWeight: 600, color: '#171717' }}>admin</Typography>
                       </Box>
-                      <Box sx={{ color: '#949597' }}>→</Box>
+                      <Box sx={{ color: '#737373' }}>→</Box>
                       <Box>
-                        <Typography variant="caption" sx={{ color: '#373B4D' }}>Mot de passe</Typography>
-                        <Typography variant="body2" sx={{ fontWeight: 600, color: '#373B4D' }}>admin</Typography>
+                        <Typography variant="caption" sx={{ color: '#171717' }}>Mot de passe</Typography>
+                        <Typography variant="body2" sx={{ fontWeight: 600, color: '#171717' }}>admin123</Typography>
                       </Box>
                     </Stack>
                   </Paper>
@@ -414,15 +462,15 @@ const Login: React.FC = () => {
                   {/* Footer sécurité avec couleurs FiscaSync */}
                   <Box sx={{ textAlign: 'center' }}>
                     <Stack direction="row" justifyContent="center" alignItems="center" spacing={1} sx={{ mb: 1 }}>
-                      <CheckCircle sx={{ fontSize: 16, color: '#2E7D0F' }} />
-                      <Typography variant="body2" sx={{ fontWeight: 500, color: '#2E7D0F' }}>
+                      <CheckCircle sx={{ fontSize: 16, color: '#15803d' }} />
+                      <Typography variant="body2" sx={{ fontWeight: 500, color: '#15803d' }}>
                         Connexion Sécurisée SSL
                       </Typography>
                     </Stack>
-                    <Typography variant="caption" sx={{ color: '#949597' }}>
+                    <Typography variant="caption" sx={{ color: '#737373' }}>
                       FiscaSync v1.0.0 - Conforme SYSCOHADA & RGPD
                     </Typography>
-                    <Typography variant="caption" sx={{ color: '#949597', display: 'block', mt: 0.5 }}>
+                    <Typography variant="caption" sx={{ color: '#737373', display: 'block', mt: 0.5 }}>
                       Développé par Preadium Tech
                     </Typography>
                   </Box>

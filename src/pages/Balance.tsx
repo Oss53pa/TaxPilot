@@ -23,6 +23,7 @@ import { useAppSelector } from '@/store'
 import BalanceImport from '@/components/Balance/BalanceImport'
 import BalanceConsultation from '@/components/Balance/BalanceConsultation'
 import BalanceValidation from '@/components/Balance/BalanceValidation'
+import ValidationHistory from '@/components/Balance/ValidationHistory'
 
 interface TabPanelProps {
   children?: React.ReactNode
@@ -180,7 +181,7 @@ const Balance: React.FC = () => {
               aria-controls="balance-tabpanel-2"
             />
             <Tab
-              label="Historique"
+              label="Historique Validations"
               icon={<History />}
               iconPosition="start"
               id="balance-tab-3"
@@ -203,14 +204,7 @@ const Balance: React.FC = () => {
         </TabPanel>
         
         <TabPanel value={activeTab} index={3}>
-          <Box sx={{ p: 3 }}>
-            <Typography variant="h6" sx={{ mb: 2 }}>
-              Historique des Imports
-            </Typography>
-            <Typography color="text.secondary">
-              Historique des imports de balance (À implémenter)
-            </Typography>
-          </Box>
+          <ValidationHistory />
         </TabPanel>
       </Paper>
     </Container>

@@ -1,59 +1,43 @@
-/* CORRECTION TEXTE LIASSE - TEXTE BLANC → NOIR */
+/* Liasse content text fix - Ensure dark text on content areas */
 
-/* Cibler uniquement les composants de liasse, pas les headers ni sidebars */
+/* Content areas - dark text */
 .liasse-content,
 .liasse-sheet,
-.liasse-table,
-.MuiTableContainer-root:not(.MuiDrawer-paper *),
-.MuiTable-root:not(.MuiDrawer-paper *),
-.MuiCard-root:not(.MuiDrawer-paper *),
-.MuiPaper-root:not(.MuiDrawer-paper *):not(.MuiAppBar-root):not([data-testid*="sidebar"]) {
-  /* Tous les textes blancs deviennent noirs */
-  color: #000000 !important;
+.liasse-table {
+  color: #171717 !important;
 }
 
-/* Texte dans les tableaux de liasse */
+/* Table cells outside sidebar */
 .MuiTableCell-root:not(.MuiDrawer-paper *) {
-  color: #000000 !important;
+  color: #171717 !important;
 }
 
 .MuiTableCell-root:not(.MuiDrawer-paper *) .MuiTypography-root {
-  color: #000000 !important;
+  color: #171717 !important;
 }
 
-/* Texte dans les cartes de liasse */
+/* Cards outside sidebar */
 .MuiCard-root:not(.MuiDrawer-paper *) .MuiTypography-root {
-  color: #000000 !important;
+  color: inherit !important;
 }
 
-.MuiCard-root:not(.MuiDrawer-paper *) .MuiCardContent-root * {
-  color: #000000 !important;
+/* Exception for sidebar elements */
+.MuiDrawer-paper .MuiTypography-root {
+  color: #d4d4d4 !important;
 }
 
-/* Texte dans les conteneurs de liasse */
-.MuiBox-root:not(.MuiDrawer-paper *):not(.MuiAppBar-root *) .MuiTypography-root {
-  color: #000000 !important;
+/* Exception for chips - outlined chips keep their variant color, filled chips keep white text */
+.MuiChip-outlined:not(.MuiDrawer-paper *) {
+  /* Let MUI handle the color based on the color prop */
 }
-
-/* Correction spécifique pour tous les éléments avec color: white */
-*:not(.MuiDrawer-paper):not(.MuiDrawer-paper *):not(.MuiAppBar-root):not(.MuiAppBar-root *) {
-  color: #000000 !important;
+.MuiChip-filled:not(.MuiDrawer-paper *) {
+  color: #ffffff !important;
 }
-
-/* Forcer le texte noir sur les pages de contenu principal */
-main *:not(.MuiDrawer-paper *):not(.MuiAppBar-root *),
-.MuiContainer-root *:not(.MuiDrawer-paper *):not(.MuiAppBar-root *),
-[role="main"] *:not(.MuiDrawer-paper *):not(.MuiAppBar-root *) {
-  color: #000000 !important;
-}
-
-/* Exception pour garder les couleurs des chips et badges */
-.MuiChip-root:not(.MuiDrawer-paper *),
 .MuiBadge-root:not(.MuiDrawer-paper *) {
   color: inherit !important;
 }
 
-/* Exception pour les icônes (garder leur couleur) */
+/* Exception for icons */
 .MuiSvgIcon-root:not(.MuiDrawer-paper *) {
   color: inherit !important;
 }

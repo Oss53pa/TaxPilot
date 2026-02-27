@@ -18,12 +18,18 @@ import {
   AccountBalance,
   Security,
   Notifications,
+  Palette,
+  Public,
+  Backup,
 } from '@mui/icons-material'
 import EntrepriseSettings from '@/components/Parametrage/EntrepriseSettings'
 import UserManagement from '@/components/Parametrage/UserManagement'
 import PlanComptableSettings from '@/components/Parametrage/PlanComptableSettings'
 import SecuritySettings from '@/components/Parametrage/SecuritySettings'
 import NotificationSettings from '@/components/Parametrage/NotificationSettings'
+import ThemeSettings from '@/pages/ThemeSettings'
+import RegionalSettings from '@/components/Parametrage/RegionalSettings'
+import BackupRestoreSettings from '@/components/Parametrage/BackupRestoreSettings'
 
 interface TabPanelProps {
   children?: React.ReactNode
@@ -58,6 +64,9 @@ const Parametrage: React.FC = () => {
     if (path.includes('/plans-comptables')) return 2
     if (path.includes('/securite')) return 3
     if (path.includes('/notifications')) return 4
+    if (path.includes('/theme')) return 5
+    if (path.includes('/regional')) return 6
+    if (path.includes('/sauvegarde')) return 7
     return 0
   }
 
@@ -72,6 +81,9 @@ const Parametrage: React.FC = () => {
       '/parametrage/plans-comptables',
       '/parametrage/securite',
       '/parametrage/notifications',
+      '/parametrage/theme',
+      '/parametrage/regional',
+      '/parametrage/sauvegarde',
     ]
     
     navigate(tabPaths[newValue])
@@ -145,6 +157,27 @@ const Parametrage: React.FC = () => {
               id="parametrage-tab-4"
               aria-controls="parametrage-tabpanel-4"
             />
+            <Tab
+              label="Thème"
+              icon={<Palette />}
+              iconPosition="start"
+              id="parametrage-tab-5"
+              aria-controls="parametrage-tabpanel-5"
+            />
+            <Tab
+              label="Régional"
+              icon={<Public />}
+              iconPosition="start"
+              id="parametrage-tab-6"
+              aria-controls="parametrage-tabpanel-6"
+            />
+            <Tab
+              label="Sauvegarde"
+              icon={<Backup />}
+              iconPosition="start"
+              id="parametrage-tab-7"
+              aria-controls="parametrage-tabpanel-7"
+            />
           </Tabs>
         </Box>
 
@@ -167,6 +200,18 @@ const Parametrage: React.FC = () => {
         
         <TabPanel value={activeTab} index={4}>
           <NotificationSettings />
+        </TabPanel>
+
+        <TabPanel value={activeTab} index={5}>
+          <ThemeSettings />
+        </TabPanel>
+
+        <TabPanel value={activeTab} index={6}>
+          <RegionalSettings />
+        </TabPanel>
+
+        <TabPanel value={activeTab} index={7}>
+          <BackupRestoreSettings />
         </TabPanel>
       </Paper>
     </Box>

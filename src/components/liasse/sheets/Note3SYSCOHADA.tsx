@@ -1,8 +1,12 @@
 /**
- * Note 3 - Immobilisations Corporelles SYSCOHADA
+ * Note 3 - Immobilisations SYSCOHADA
+ * 6 sous-onglets: 3A (Brutes), 3B (Location-acquisition), 3C (Amortissements),
+ * 3C BIS (Dépréciations), 3D (Plus/Moins-values), 3E (Réévaluations)
+ *
+ * Connecté aux données de la balance (comptes 2x, 28x, 29x)
  */
 
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   Box,
   Paper,
@@ -13,286 +17,537 @@ import {
   TableHead,
   TableRow,
   Typography,
-  Grid,
-  Card,
-  CardContent,
-  Chip,
+  Tabs,
+  Tab,
+  Alert,
   useTheme,
-  LinearProgress,
 } from '@mui/material'
-import { TrendingUp, TrendingDown, Remove } from '@mui/icons-material'
+import { Warning as WarningIcon } from '@mui/icons-material'
 import CommentairesSection from '../shared/CommentairesSection'
 import TableActions from '../shared/TableActions'
+import { liasseDataService } from '../../../services/liasseDataService'
 
-const Note3SYSCOHADA: React.FC = () => {
+interface TabPanelProps {
+  children?: React.ReactNode
+  index: number
+  value: number
+}
+
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`note3-tabpanel-${index}`}
+      aria-labelledby={`note3-tab-${index}`}
+      {...other}
+    >
+      {value === index && <Box sx={{ pt: 3 }}>{children}</Box>}
+    </div>
+  )
+}
+
+interface Note3Props {
+  initialTab?: number
+}
+
+const formatMontant = (montant: number) => {
+  if (!montant || montant === 0) return '-'
+  return montant.toLocaleString('fr-FR') + ' FCFA'
+}
+
+// ============================================================================
+// TAB 3A - IMMOBILISATIONS BRUTES
+// ============================================================================
+const Tab3A: React.FC = () => {
   const theme = useTheme()
+  const [data, setData] = useState<{ incorporelles: any[]; corporelles: any[]; financieres: any[]; avances: any[] }>({
+    incorporelles: [], corporelles: [], financieres: [], avances: []
+  })
+  const [hasData, setHasData] = useState(false)
 
-  const donneesImmobilisations = [
-    {
-      rubrique: 'Terrains',
-      valeurBruteDebut: 45000000,
-      acquisitions: 0,
-      cessions: 0,
-      reevaluations: 0,
-      valeurBruteFin: 45000000,
-      amortissements: 0,
-      valeurNette: 45000000,
-      tauxAmort: '0%',
-      dureeVie: 'Illimitée',
-    },
-    {
-      rubrique: 'Bâtiments',
-      valeurBruteDebut: 180000000,
-      acquisitions: 0,
-      cessions: 0,
-      reevaluations: 0,
-      valeurBruteFin: 180000000,
-      amortissements: 55000000,
-      valeurNette: 125000000,
-      tauxAmort: '4%',
-      dureeVie: '25 ans',
-    },
-    {
-      rubrique: 'Installations techniques et outillages',
-      valeurBruteDebut: 25000000,
-      acquisitions: 2000000,
-      cessions: 0,
-      reevaluations: 0,
-      valeurBruteFin: 27000000,
-      amortissements: 14500000,
-      valeurNette: 12500000,
-      tauxAmort: '10%',
-      dureeVie: '10 ans',
-    },
-    {
-      rubrique: 'Matériel de transport',
-      valeurBruteDebut: 18000000,
-      acquisitions: 0,
-      cessions: 1500000,
-      reevaluations: 0,
-      valeurBruteFin: 16500000,
-      amortissements: 7600000,
-      valeurNette: 8900000,
-      tauxAmort: '25%',
-      dureeVie: '4 ans',
-    },
-    {
-      rubrique: 'Mobilier, matériel de bureau et informatique',
-      valeurBruteDebut: 8500000,
-      acquisitions: 1200000,
-      cessions: 0,
-      reevaluations: 0,
-      valeurBruteFin: 9700000,
-      amortissements: 4200000,
-      valeurNette: 5500000,
-      tauxAmort: '20%',
-      dureeVie: '5 ans',
-    },
-    {
-      rubrique: 'Agencements et installations',
-      valeurBruteDebut: 15000000,
-      acquisitions: 0,
-      cessions: 0,
-      reevaluations: 0,
-      valeurBruteFin: 15000000,
-      amortissements: 8000000,
-      valeurNette: 7000000,
-      tauxAmort: '10%',
-      dureeVie: '10 ans',
-    },
-    {
-      rubrique: 'Autres immobilisations corporelles',
-      valeurBruteDebut: 2500000,
-      acquisitions: 500000,
-      cessions: 0,
-      reevaluations: 0,
-      valeurBruteFin: 3000000,
-      amortissements: 1500000,
-      valeurNette: 1500000,
-      tauxAmort: '20%',
-      dureeVie: '5 ans',
-    },
+  useEffect(() => {
+    if (liasseDataService.isLoaded()) {
+      const d = liasseDataService.generateNote3A()
+      setData(d)
+      setHasData(d.incorporelles.length > 0 || d.corporelles.length > 0 || d.financieres.length > 0 || d.avances.length > 0)
+    }
+  }, [])
+
+  const colonnes = [
+    'Rubriques',
+    'Montant brut ouverture (A)',
+    'Acquisitions / Apports (B1)',
+    'Virements poste-à-poste (B2)',
+    'Réévaluation (B3)',
+    'Cessions / Hors service (C1)',
+    'Virements sortie (C2)',
+    'Montant brut clôture (D=A+B-C)'
   ]
 
-  const total = {
-    valeurBruteDebut: donneesImmobilisations.reduce((sum, item) => sum + item.valeurBruteDebut, 0),
-    acquisitions: donneesImmobilisations.reduce((sum, item) => sum + item.acquisitions, 0),
-    cessions: donneesImmobilisations.reduce((sum, item) => sum + item.cessions, 0),
-    reevaluations: donneesImmobilisations.reduce((sum, item) => sum + item.reevaluations, 0),
-    valeurBruteFin: donneesImmobilisations.reduce((sum, item) => sum + item.valeurBruteFin, 0),
-    amortissements: donneesImmobilisations.reduce((sum, item) => sum + item.amortissements, 0),
-    valeurNette: donneesImmobilisations.reduce((sum, item) => sum + item.valeurNette, 0),
+  const toValues = (line: any) => [
+    line.brutOuverture, line.acquisitions, line.virements, line.reevaluation,
+    line.cessions, line.virementsSortie, line.brutCloture
+  ]
+
+  const sumLines = (lines: any[]) => {
+    const sums = [0, 0, 0, 0, 0, 0, 0]
+    lines.forEach(l => {
+      const v = toValues(l)
+      v.forEach((val, i) => { sums[i] += val })
+    })
+    return sums
   }
 
-  const formatMontant = (montant: number) => {
-    return montant.toLocaleString('fr-FR') + ' FCFA'
+  const renderGroup = (label: string, lines: any[]) => {
+    if (lines.length === 0) return null
+    const subtotal = sumLines(lines)
+    return (
+      <>
+        {lines.map((ligne, idx) => (
+          <TableRow key={`${label}-${idx}`} sx={{ backgroundColor: idx % 2 === 0 ? theme.palette.grey[50] : 'inherit' }}>
+            <TableCell sx={{ fontWeight: 500, fontSize: '0.8rem' }}>{ligne.rubrique}</TableCell>
+            {toValues(ligne).map((val, vi) => (
+              <TableCell key={vi} align="right" sx={{ fontWeight: 400, fontSize: '0.8rem' }}>
+                {formatMontant(val)}
+              </TableCell>
+            ))}
+          </TableRow>
+        ))}
+        <TableRow sx={{ backgroundColor: theme.palette.grey[100] }}>
+          <TableCell sx={{ fontWeight: 700, fontSize: '0.8rem' }}>Sous-total {label}</TableCell>
+          {subtotal.map((val, vi) => (
+            <TableCell key={vi} align="right" sx={{ fontWeight: 700, fontSize: '0.8rem' }}>
+              {formatMontant(val)}
+            </TableCell>
+          ))}
+        </TableRow>
+      </>
+    )
   }
 
-  const getTauxAmortissement = (amortissement: number, valeurBrute: number) => {
-    if (valeurBrute === 0) return 0
-    return (amortissement / valeurBrute) * 100
-  }
-
-  const getVariationIcon = (acquisitions: number, cessions: number) => {
-    if (acquisitions > cessions) return <TrendingUp color="success" fontSize="small" />
-    if (cessions > acquisitions) return <TrendingDown color="error" fontSize="small" />
-    return <Remove color="disabled" fontSize="small" />
-  }
+  const allLines = [...data.incorporelles, ...data.corporelles, ...data.financieres, ...data.avances]
+  const grandTotal = sumLines(allLines)
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4" sx={{ fontWeight: 700, mb: 3, color: theme.palette.primary.main }}>
-        Note 3 - Immobilisations Corporelles
+    <Box>
+      <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+        Note 3A - Tableau des mouvements des immobilisations brutes
       </Typography>
-
-      {/* Actions du tableau */}
-      <TableActions 
-        tableName="Immobilisations Corporelles"
-        showCalculate={true}
-        onSave={() => alert('Immobilisations corporelles sauvegardées')}
-        onAdd={() => alert('Nouvelle immobilisation corporelle ajoutée')}
-        onCalculate={() => alert('Recalcul des amortissements et plus-values effectué')}
-      />
-
-      {/* Tableau principal */}
-      <TableContainer component={Paper} sx={{ mb: 3 }}>
-        <Table>
+      {!hasData && (
+        <Alert severity="info" sx={{ mb: 2 }} icon={<WarningIcon />}>
+          Aucune immobilisation trouvée dans la balance. Importez une balance contenant des comptes de classe 2 pour alimenter cette note.
+        </Alert>
+      )}
+      <TableActions tableName="Immobilisations Brutes" showCalculate onSave={() => {}} />
+      <TableContainer component={Paper}>
+        <Table size="small">
           <TableHead>
             <TableRow sx={{ backgroundColor: theme.palette.primary.main }}>
-              <TableCell sx={{ color: 'white', fontWeight: 600, minWidth: 200 }}>Rubriques</TableCell>
-              <TableCell align="right" sx={{ color: 'white', fontWeight: 600, minWidth: 110 }}>Valeur brute début</TableCell>
-              <TableCell align="right" sx={{ color: 'white', fontWeight: 600, minWidth: 100 }}>Acquisitions</TableCell>
-              <TableCell align="right" sx={{ color: 'white', fontWeight: 600, minWidth: 80 }}>Cessions</TableCell>
-              <TableCell align="right" sx={{ color: 'white', fontWeight: 600, minWidth: 100 }}>Réévaluations</TableCell>
-              <TableCell align="right" sx={{ color: 'white', fontWeight: 600, minWidth: 110 }}>Valeur brute fin</TableCell>
-              <TableCell align="right" sx={{ color: 'white', fontWeight: 600, minWidth: 110 }}>Amortissements</TableCell>
-              <TableCell align="right" sx={{ color: 'white', fontWeight: 600, minWidth: 100 }}>Valeur nette</TableCell>
-              <TableCell align="center" sx={{ color: 'white', fontWeight: 600, minWidth: 60 }}>Var.</TableCell>
+              {colonnes.map((col, i) => (
+                <TableCell key={i} align={i === 0 ? 'left' : 'right'} sx={{ color: 'white', fontWeight: 600, fontSize: '0.75rem', minWidth: i === 0 ? 200 : 110 }}>
+                  {col}
+                </TableCell>
+              ))}
             </TableRow>
           </TableHead>
           <TableBody>
-            {donneesImmobilisations.map((ligne, index) => (
-              <TableRow key={index} sx={{ '&:nth-of-type(even)': { backgroundColor: theme.palette.grey[50] } }}>
-                <TableCell sx={{ fontWeight: 500 }}>{ligne.rubrique}</TableCell>
-                <TableCell align="right">{formatMontant(ligne.valeurBruteDebut)}</TableCell>
-                <TableCell align="right" sx={{ color: ligne.acquisitions > 0 ? 'success.main' : 'inherit' }}>
-                  {formatMontant(ligne.acquisitions)}
-                </TableCell>
-                <TableCell align="right" sx={{ color: ligne.cessions > 0 ? 'error.main' : 'inherit' }}>
-                  {formatMontant(ligne.cessions)}
-                </TableCell>
-                <TableCell align="right">{formatMontant(ligne.reevaluations)}</TableCell>
-                <TableCell align="right" sx={{ fontWeight: 600 }}>{formatMontant(ligne.valeurBruteFin)}</TableCell>
-                <TableCell align="right" sx={{ color: 'warning.main' }}>{formatMontant(ligne.amortissements)}</TableCell>
-                <TableCell align="right" sx={{ fontWeight: 700, color: 'primary.main' }}>
-                  {formatMontant(ligne.valeurNette)}
-                </TableCell>
-                <TableCell align="center">
-                  {getVariationIcon(ligne.acquisitions, ligne.cessions)}
-                </TableCell>
+            {renderGroup('incorporelles', data.incorporelles)}
+            {renderGroup('corporelles', data.corporelles)}
+            {renderGroup('financières', data.financieres)}
+            {renderGroup('avances', data.avances)}
+            {hasData && (
+              <TableRow sx={{ backgroundColor: theme.palette.grey[200], borderTop: `2px solid ${theme.palette.primary.main}` }}>
+                <TableCell sx={{ fontWeight: 700, fontSize: '0.9rem' }}>TOTAL GÉNÉRAL</TableCell>
+                {grandTotal.map((val, vi) => (
+                  <TableCell key={vi} align="right" sx={{ fontWeight: 700, fontSize: '0.9rem' }}>
+                    {formatMontant(val)}
+                  </TableCell>
+                ))}
               </TableRow>
-            ))}
-            <TableRow sx={{ backgroundColor: theme.palette.grey[100], borderTop: '2px solid ' + theme.palette.primary.main }}>
-              <TableCell sx={{ fontWeight: 700, fontSize: '1.1rem' }}>TOTAL</TableCell>
-              <TableCell align="right" sx={{ fontWeight: 700 }}>{formatMontant(total.valeurBruteDebut)}</TableCell>
-              <TableCell align="right" sx={{ fontWeight: 700, color: 'success.main' }}>{formatMontant(total.acquisitions)}</TableCell>
-              <TableCell align="right" sx={{ fontWeight: 700, color: 'error.main' }}>{formatMontant(total.cessions)}</TableCell>
-              <TableCell align="right" sx={{ fontWeight: 700 }}>{formatMontant(total.reevaluations)}</TableCell>
-              <TableCell align="right" sx={{ fontWeight: 700 }}>{formatMontant(total.valeurBruteFin)}</TableCell>
-              <TableCell align="right" sx={{ fontWeight: 700, color: 'warning.main' }}>{formatMontant(total.amortissements)}</TableCell>
-              <TableCell align="right" sx={{ fontWeight: 700, fontSize: '1.1rem', color: 'primary.main' }}>
-                {formatMontant(total.valeurNette)}
-              </TableCell>
-              <TableCell align="center">
-                {getVariationIcon(total.acquisitions, total.cessions)}
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Box>
+  )
+}
+
+// ============================================================================
+// TAB 3B - BIENS EN LOCATION-ACQUISITION
+// ============================================================================
+const Tab3B: React.FC = () => {
+  const theme = useTheme()
+
+  // Note 3B: location-acquisition data comes from accounts 167 (credit-bail)
+  // and off-balance-sheet info - mostly manual entry
+  const colonnes = [
+    'Rubriques',
+    'Nature contrat (I/M/A)',
+    'Montant brut ouverture (A)',
+    'Acquisitions (B1)',
+    'Virements (B2)',
+    'Réévaluation (B3)',
+    'Sorties (C1)',
+    'Virements sortie (C2)',
+    'Montant brut clôture (D=A+B-C)'
+  ]
+
+  return (
+    <Box>
+      <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+        Note 3B - Biens en location-acquisition / crédit-bail
+      </Typography>
+      <Alert severity="info" sx={{ mb: 2 }}>
+        Les biens en location-acquisition/crédit-bail sont renseignés manuellement. Les données hors bilan ne figurent pas dans la balance comptable.
+      </Alert>
+      <TableActions tableName="Location-acquisition" showCalculate onSave={() => {}} />
+      <TableContainer component={Paper}>
+        <Table size="small">
+          <TableHead>
+            <TableRow sx={{ backgroundColor: theme.palette.primary.main }}>
+              {colonnes.map((col, i) => (
+                <TableCell key={i} align={i <= 1 ? 'left' : 'right'} sx={{ color: 'white', fontWeight: 600, fontSize: '0.75rem', minWidth: i === 0 ? 200 : i === 1 ? 100 : 100 }}>
+                  {col}
+                </TableCell>
+              ))}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            <TableRow>
+              <TableCell colSpan={9} align="center" sx={{ py: 3, color: theme.palette.text.secondary }}>
+                Aucun bien en location-acquisition renseigné. Utilisez le bouton «Ajouter» pour saisir les données.
               </TableCell>
             </TableRow>
           </TableBody>
         </Table>
       </TableContainer>
+    </Box>
+  )
+}
 
-      {/* Informations complémentaires */}
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={6}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'primary.main' }}>
-                Durées d'amortissement appliquées
-              </Typography>
-              {donneesImmobilisations.map((item, index) => (
-                <Box key={index} sx={{ mb: 2 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                      {item.rubrique}
-                    </Typography>
-                    <Chip 
-                      label={item.dureeVie} 
-                      size="small" 
-                      color={item.tauxAmort === '0%' ? 'default' : 'primary'} 
-                    />
-                  </Box>
-                  {item.valeurBruteFin > 0 && (
-                    <LinearProgress
-                      variant="determinate"
-                      value={getTauxAmortissement(item.amortissements, item.valeurBruteFin)}
-                      sx={{ height: 6, borderRadius: 3 }}
-                    />
-                  )}
-                </Box>
+// ============================================================================
+// TAB 3C - AMORTISSEMENTS
+// ============================================================================
+const Tab3C: React.FC = () => {
+  const theme = useTheme()
+  const [lignes, setLignes] = useState<any[]>([])
+  const [hasData, setHasData] = useState(false)
+
+  useEffect(() => {
+    if (liasseDataService.isLoaded()) {
+      const data = liasseDataService.generateNote3C()
+      setLignes(data)
+      setHasData(data.length > 0)
+    }
+  }, [])
+
+  const colonnes = [
+    'Rubriques',
+    'Amort. cumulés ouverture (A)',
+    'Dotations (B)',
+    'Amort. sortis actif (C1)',
+    'Reprises (C2)',
+    'Virements (D)',
+    'Amort. cumulés clôture (E=A+B-C-D)'
+  ]
+
+  const totalValues = () => {
+    const sums = [0, 0, 0, 0, 0, 0]
+    lignes.forEach(l => {
+      sums[0] += l.cumulOuverture
+      sums[1] += l.dotations
+      sums[2] += l.reprises
+      sums[3] += 0 // reprises C2
+      sums[4] += l.virements
+      sums[5] += l.cumulCloture
+    })
+    return sums
+  }
+
+  return (
+    <Box>
+      <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+        Note 3C - Tableau des amortissements
+      </Typography>
+      {!hasData && (
+        <Alert severity="info" sx={{ mb: 2 }} icon={<WarningIcon />}>
+          Aucun amortissement trouvé dans la balance. Importez une balance contenant des comptes 28x.
+        </Alert>
+      )}
+      <TableActions tableName="Amortissements" showCalculate onSave={() => {}} />
+      <TableContainer component={Paper}>
+        <Table size="small">
+          <TableHead>
+            <TableRow sx={{ backgroundColor: theme.palette.primary.main }}>
+              {colonnes.map((col, i) => (
+                <TableCell key={i} align={i === 0 ? 'left' : 'right'} sx={{ color: 'white', fontWeight: 600, fontSize: '0.75rem', minWidth: i === 0 ? 200 : 120 }}>
+                  {col}
+                </TableCell>
               ))}
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'primary.main' }}>
-                Mouvements de l'exercice
-              </Typography>
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="body2" sx={{ fontWeight: 600, color: 'success.main' }}>
-                  Principales acquisitions :
-                </Typography>
-                <Typography variant="body2">• Équipement industriel : 2 000 000 FCFA</Typography>
-                <Typography variant="body2">• Matériel informatique : 1 200 000 FCFA</Typography>
-                <Typography variant="body2">• Autres équipements : 500 000 FCFA</Typography>
-              </Box>
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="body2" sx={{ fontWeight: 600, color: 'error.main' }}>
-                  Cessions de l'exercice :
-                </Typography>
-                <Typography variant="body2">• Véhicule utilitaire :</Typography>
-                <Typography variant="body2" sx={{ pl: 2 }}>
-                  - Valeur brute : 1 500 000 FCFA
-                </Typography>
-                <Typography variant="body2" sx={{ pl: 2 }}>
-                  - Amortissements : 1 200 000 FCFA
-                </Typography>
-                <Typography variant="body2" sx={{ pl: 2 }}>
-                  - Prix de cession : 400 000 FCFA
-                </Typography>
-                <Typography variant="body2" sx={{ pl: 2, color: 'success.main' }}>
-                  - Plus-value : 100 000 FCFA
-                </Typography>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {lignes.map((ligne, idx) => (
+              <TableRow key={idx} sx={{ backgroundColor: idx % 2 === 0 ? theme.palette.grey[50] : 'inherit' }}>
+                <TableCell sx={{ fontWeight: 500 }}>{ligne.rubrique}</TableCell>
+                <TableCell align="right" sx={{ fontSize: '0.8rem' }}>{formatMontant(ligne.cumulOuverture)}</TableCell>
+                <TableCell align="right" sx={{ fontSize: '0.8rem' }}>{formatMontant(ligne.dotations)}</TableCell>
+                <TableCell align="right" sx={{ fontSize: '0.8rem' }}>{formatMontant(ligne.reprises)}</TableCell>
+                <TableCell align="right" sx={{ fontSize: '0.8rem' }}>-</TableCell>
+                <TableCell align="right" sx={{ fontSize: '0.8rem' }}>{formatMontant(ligne.virements)}</TableCell>
+                <TableCell align="right" sx={{ fontSize: '0.8rem' }}>{formatMontant(ligne.cumulCloture)}</TableCell>
+              </TableRow>
+            ))}
+            {hasData && (
+              <TableRow sx={{ backgroundColor: theme.palette.grey[200], borderTop: `2px solid ${theme.palette.primary.main}` }}>
+                <TableCell sx={{ fontWeight: 700 }}>TOTAL GÉNÉRAL</TableCell>
+                {totalValues().map((val, vi) => (
+                  <TableCell key={vi} align="right" sx={{ fontWeight: 700, fontSize: '0.8rem' }}>
+                    {formatMontant(val)}
+                  </TableCell>
+                ))}
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Box>
+  )
+}
 
-      {/* Section Commentaires et Observations */}
-      <CommentairesSection 
-        titre="Commentaires et Observations - Note 3"
-        noteId="note3" 
-        commentairesInitiaux={[
-          {
-            id: '1',
-            auteur: 'Expert-comptable',
-            date: new Date().toLocaleDateString('fr-FR'),
-            contenu: 'Les immobilisations corporelles sont correctement valorisées et amorties.\n\nPoints d\'attention :\n- Les durées d\'amortissement appliquées sont conformes aux usages sectoriels\n- La cession du véhicule utilitaire génère une plus-value de 100 000 FCFA\n- Aucune dépréciation supplémentaire à constater',
-            type: 'note'
-          }
-        ]}
+// ============================================================================
+// TAB 3C BIS - DÉPRÉCIATIONS
+// ============================================================================
+const Tab3CBis: React.FC = () => {
+  const theme = useTheme()
+  const [lignes, setLignes] = useState<any[]>([])
+  const [hasData, setHasData] = useState(false)
+
+  useEffect(() => {
+    if (liasseDataService.isLoaded()) {
+      const data = liasseDataService.generateNote3CBis()
+      setLignes(data)
+      setHasData(data.length > 0)
+    }
+  }, [])
+
+  const colonnes = [
+    'Rubriques',
+    'Dépréc. ouverture (A)',
+    'Dotations (B)',
+    'Reprises (C)',
+    'Dépréc. clôture (D=A+B-C)'
+  ]
+
+  const totalValues = () => {
+    const sums = [0, 0, 0, 0]
+    lignes.forEach(l => {
+      sums[0] += l.ouverture
+      sums[1] += l.dotations
+      sums[2] += l.reprises
+      sums[3] += l.cloture
+    })
+    return sums
+  }
+
+  return (
+    <Box>
+      <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+        Note 3C BIS - Tableau des dépréciations
+      </Typography>
+      {!hasData && (
+        <Alert severity="info" sx={{ mb: 2 }} icon={<WarningIcon />}>
+          Aucune dépréciation trouvée dans la balance. Importez une balance contenant des comptes 29x.
+        </Alert>
+      )}
+      <TableActions tableName="Dépréciations" showCalculate onSave={() => {}} />
+      <TableContainer component={Paper}>
+        <Table size="small">
+          <TableHead>
+            <TableRow sx={{ backgroundColor: theme.palette.primary.main }}>
+              {colonnes.map((col, i) => (
+                <TableCell key={i} align={i === 0 ? 'left' : 'right'} sx={{ color: 'white', fontWeight: 600, fontSize: '0.75rem', minWidth: i === 0 ? 220 : 130 }}>
+                  {col}
+                </TableCell>
+              ))}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {lignes.map((ligne, idx) => (
+              <TableRow key={idx} sx={{ backgroundColor: idx % 2 === 0 ? theme.palette.grey[50] : 'inherit' }}>
+                <TableCell sx={{ fontWeight: 500 }}>{ligne.rubrique}</TableCell>
+                <TableCell align="right" sx={{ fontSize: '0.8rem' }}>{formatMontant(ligne.ouverture)}</TableCell>
+                <TableCell align="right" sx={{ fontSize: '0.8rem' }}>{formatMontant(ligne.dotations)}</TableCell>
+                <TableCell align="right" sx={{ fontSize: '0.8rem' }}>{formatMontant(ligne.reprises)}</TableCell>
+                <TableCell align="right" sx={{ fontSize: '0.8rem' }}>{formatMontant(ligne.cloture)}</TableCell>
+              </TableRow>
+            ))}
+            {hasData && (
+              <TableRow sx={{ backgroundColor: theme.palette.grey[200], borderTop: `2px solid ${theme.palette.primary.main}` }}>
+                <TableCell sx={{ fontWeight: 700 }}>TOTAL</TableCell>
+                {totalValues().map((val, vi) => (
+                  <TableCell key={vi} align="right" sx={{ fontWeight: 700, fontSize: '0.8rem' }}>
+                    {formatMontant(val)}
+                  </TableCell>
+                ))}
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Box>
+  )
+}
+
+// ============================================================================
+// TAB 3D - PLUS/MOINS-VALUES DE CESSIONS
+// ============================================================================
+const Tab3D: React.FC = () => {
+  const theme = useTheme()
+
+  const colonnes = [
+    'Rubriques',
+    'Montant brut (A)',
+    'Amort. pratiqués (B)',
+    'VCN (C=A-B)',
+    'Prix cession (D)',
+    'Plus/Moins-value (E=D-C)'
+  ]
+
+  // Plus/moins-values are manual - derived from actual cession operations
+  return (
+    <Box>
+      <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+        Note 3D - Plus ou moins-values de cessions d'immobilisations
+      </Typography>
+      <Alert severity="info" sx={{ mb: 2 }}>
+        Les plus/moins-values de cession sont renseignées manuellement à partir des opérations de cession enregistrées durant l'exercice.
+      </Alert>
+      <TableActions tableName="Plus/Moins-values" showCalculate onSave={() => {}} />
+      <TableContainer component={Paper}>
+        <Table size="small">
+          <TableHead>
+            <TableRow sx={{ backgroundColor: theme.palette.primary.main }}>
+              {colonnes.map((col, i) => (
+                <TableCell key={i} align={i === 0 ? 'left' : 'right'} sx={{ color: 'white', fontWeight: 600, fontSize: '0.75rem', minWidth: i === 0 ? 220 : 120 }}>
+                  {col}
+                </TableCell>
+              ))}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            <TableRow>
+              <TableCell colSpan={6} align="center" sx={{ py: 3, color: theme.palette.text.secondary }}>
+                Aucune cession d'immobilisation enregistrée. Utilisez le bouton «Ajouter» pour saisir les données.
+              </TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Box>
+  )
+}
+
+// ============================================================================
+// TAB 3E - RÉÉVALUATIONS
+// ============================================================================
+const Tab3E: React.FC = () => {
+  const theme = useTheme()
+
+  const colonnes = [
+    'Éléments réévalués',
+    'Coûts historiques',
+    'Montants réévalués',
+    'Écarts réévaluation',
+    'Amort. supplémentaires'
+  ]
+
+  // Réévaluations are manual
+  return (
+    <Box>
+      <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+        Note 3E - Tableau des réévaluations
+      </Typography>
+      <Alert severity="info" sx={{ mb: 2 }}>
+        Les réévaluations sont renseignées manuellement. Aucune réévaluation enregistrée pour cet exercice.
+      </Alert>
+      <TableActions tableName="Réévaluations" showCalculate onSave={() => {}} />
+      <TableContainer component={Paper}>
+        <Table size="small">
+          <TableHead>
+            <TableRow sx={{ backgroundColor: theme.palette.primary.main }}>
+              {colonnes.map((col, i) => (
+                <TableCell key={i} align={i === 0 ? 'left' : 'right'} sx={{ color: 'white', fontWeight: 600, fontSize: '0.75rem', minWidth: i === 0 ? 220 : 130 }}>
+                  {col}
+                </TableCell>
+              ))}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            <TableRow>
+              <TableCell colSpan={5} align="center" sx={{ py: 3, color: theme.palette.text.secondary }}>
+                Aucune réévaluation enregistrée. Utilisez le bouton «Ajouter» pour saisir les données.
+              </TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Box>
+  )
+}
+
+// ============================================================================
+// COMPOSANT PRINCIPAL NOTE 3
+// ============================================================================
+const Note3SYSCOHADA: React.FC<Note3Props> = ({ initialTab = 0 }) => {
+  const theme = useTheme()
+  const [tabValue, setTabValue] = useState(initialTab)
+
+  const tabLabels = [
+    '3A - Immob. Brutes',
+    '3B - Location-acquisition',
+    '3C - Amortissements',
+    '3C BIS - Dépréciations',
+    '3D - Plus/Moins-values',
+    '3E - Réévaluations'
+  ]
+
+  return (
+    <Box sx={{ p: 3 }}>
+      <Typography variant="h4" sx={{ fontWeight: 700, mb: 3, color: theme.palette.primary.main }}>
+        Note 3 - Immobilisations
+      </Typography>
+
+      <Paper sx={{ mb: 3 }}>
+        <Tabs
+          value={tabValue}
+          onChange={(_, newValue) => setTabValue(newValue)}
+          variant="scrollable"
+          scrollButtons="auto"
+          sx={{
+            '& .MuiTab-root': { minWidth: 100, fontSize: '0.8rem', fontWeight: 600 },
+            borderBottom: `1px solid ${theme.palette.divider}`
+          }}
+        >
+          {tabLabels.map((label, i) => (
+            <Tab key={i} label={label} id={`note3-tab-${i}`} aria-controls={`note3-tabpanel-${i}`} />
+          ))}
+        </Tabs>
+      </Paper>
+
+      <TabPanel value={tabValue} index={0}><Tab3A /></TabPanel>
+      <TabPanel value={tabValue} index={1}><Tab3B /></TabPanel>
+      <TabPanel value={tabValue} index={2}><Tab3C /></TabPanel>
+      <TabPanel value={tabValue} index={3}><Tab3CBis /></TabPanel>
+      <TabPanel value={tabValue} index={4}><Tab3D /></TabPanel>
+      <TabPanel value={tabValue} index={5}><Tab3E /></TabPanel>
+
+      <CommentairesSection
+        titre={`Commentaires et Observations - Note 3 (${tabLabels[tabValue]})`}
+        noteId={`note3_${['a', 'b', 'c', 'cbis', 'd', 'e'][tabValue]}`}
+        commentairesInitiaux={[]}
       />
     </Box>
   )

@@ -21,6 +21,7 @@ export interface Report {
   statut: 'EN_PREPARATION' | 'EN_COURS' | 'TERMINE' | 'ERREUR'
   progression: number
   fichier_url?: string
+  fichier_genere?: string
   taille_fichier?: number
   nb_pages?: number
   parametres: {
@@ -205,7 +206,7 @@ class ReportingService {
     entreprise?: string
   }): Promise<DashboardStats> {
     console.log('📊 Getting dashboard stats from backend...', params)
-    return apiClient.get(`${this.baseUrl}/dashboard/stats/`, params)
+    return apiClient.get(`${this.baseUrl}/reports/stats/`, params)
   }
 
   async getAnalytics(params?: {
@@ -339,6 +340,60 @@ class ReportingService {
       entreprise: entreprise_id,
       exercice: exercice_id
     })
+  }
+
+  // KPI Management - CONNEXION RÉELLE AU BACKEND
+  async getKPIs(params?: { entreprise?: string; page?: number; page_size?: number }) {
+    console.log('📊 Getting KPIs from backend...', params)
+    return apiClient.get(`${this.baseUrl}/kpis/`, params)
+  }
+
+  async getKPIHistory(id: string, params?: { periode_debut?: string; periode_fin?: string }) {
+    console.log(`📈 Getting KPI history for ${id}...`)
+    return apiClient.get(`${this.baseUrl}/kpis/${id}/history/`, params)
+  }
+
+  async getKPIAlertes(params?: { entreprise?: string; active_only?: boolean }) {
+    console.log('🚨 Getting KPI alerts from backend...', params)
+    return apiClient.get(`${this.baseUrl}/kpi-alerts/`, params)
+  }
+
+  async createKPI(kpi: any) {
+    console.log('📤 Creating KPI in backend...', kpi)
+    return apiClient.post(`${this.baseUrl}/kpis/`, kpi)
+  }
+
+  async updateKPI(id: string, kpi: any) {
+    console.log(`📤 Updating KPI ${id} in backend...`)
+    return apiClient.patch(`${this.baseUrl}/kpis/${id}/`, kpi)
+  }
+
+  async deleteKPI(id: string) {
+    console.log(`🗑️ Deleting KPI ${id} from backend...`)
+    return apiClient.delete(`${this.baseUrl}/kpis/${id}/`)
+  }
+
+  async recalculateKPI(id: string) {
+    console.log(`🔄 Recalculating KPI ${id}...`)
+    return apiClient.post(`${this.baseUrl}/kpis/${id}/recalculate/`)
+  }
+
+  async resolveKPIAlerte(id: string) {
+    console.log(`✅ Resolving KPI alert ${id}...`)
+    return apiClient.patch(`${this.baseUrl}/kpi-alerts/${id}/`, { resolved: true })
+  }
+
+  // Method aliases for compatibility
+  async getDashboardStatistics(params?: any) {
+    return this.getDashboardStats(params)
+  }
+
+  async lancerExport(request: ReportRequest) {
+    return this.generateReport(request)
+  }
+
+  async getExport(id: string) {
+    return this.getReport(id)
   }
 }
 

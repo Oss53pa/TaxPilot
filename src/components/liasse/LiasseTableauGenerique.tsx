@@ -92,7 +92,7 @@ const LiasseTableauGenerique: React.FC<LiasseTableauGeneriqueProps> = ({
   readonly = false,
   showTotals = false,
   totalRow,
-  headerColor = '#1976d2',
+  headerColor = '#171717',
   alternateRowColors = true,
 }) => {
   const theme = useTheme()

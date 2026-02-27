@@ -48,6 +48,7 @@ import {
   Refresh as RefreshIcon,
   GetApp as ExportIcon,
 } from '@mui/icons-material'
+import QuotaWidget from '@/components/Dashboard/QuotaWidget'
 import {
   LineChart,
   Line,
@@ -424,7 +425,7 @@ const ModernDashboard: React.FC = () => {
       </Grid>
 
       <Grid container spacing={3}>
-        {/* 3. GRAPHIQUE ÉVOLUTION FINANCIÈRE */}
+        {/* 4. GRAPHIQUE ÉVOLUTION FINANCIÈRE */}
         <Grid item xs={12} lg={8}>
           <Card elevation={0} sx={{ border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
             <CardHeader
@@ -441,22 +442,22 @@ const ModernDashboard: React.FC = () => {
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="annee" />
                   <YAxis tickFormatter={(value) => `${(value / 1000000).toFixed(1)}M`} />
-                  <RechartsTooltip 
+                  <RechartsTooltip
                     formatter={(value) => [formatMontant(Number(value)), '']}
                     labelFormatter={(label) => `Année ${label}`}
                   />
                   <Legend />
-                  <Line 
-                    type="monotone" 
-                    dataKey="ca" 
-                    stroke={theme.palette.primary.main} 
+                  <Line
+                    type="monotone"
+                    dataKey="ca"
+                    stroke={theme.palette.primary.main}
                     strokeWidth={3}
                     name="Chiffre d'affaires"
                   />
-                  <Line 
-                    type="monotone" 
-                    dataKey="resultat" 
-                    stroke={theme.palette.success.main} 
+                  <Line
+                    type="monotone"
+                    dataKey="resultat"
+                    stroke={theme.palette.success.main}
                     strokeWidth={3}
                     name="Résultat net"
                   />
@@ -466,7 +467,7 @@ const ModernDashboard: React.FC = () => {
           </Card>
         </Grid>
 
-        {/* 4. RÉPARTITION DES IMPÔTS */}
+        {/* 5. RÉPARTITION DES IMPÔTS */}
         <Grid item xs={12} lg={4}>
           <Card elevation={0} sx={{ border: `1px solid ${alpha(theme.palette.divider, 0.1)}`, height: '100%' }}>
             <CardHeader
@@ -498,9 +499,17 @@ const ModernDashboard: React.FC = () => {
           </Card>
         </Grid>
 
-        {/* 5. OBLIGATIONS FISCALES */}
+        {/* 3. QUOTA WIDGET - SaaS Multi-Tenant */}
+        <Grid item xs={12} lg={4}>
+          <QuotaWidget />
+        </Grid>
+      </Grid>
+
+      {/* Nouvelle section pour Obligations et Balance */}
+      <Grid container spacing={3} sx={{ mt: 1 }}>
+        {/* 6. OBLIGATIONS FISCALES */}
         <Grid item xs={12} md={6}>
-          <Card elevation={0} sx={{ border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
+          <Card elevation={0} sx={{ border: `1px solid ${alpha(theme.palette.divider, 0.1)}`, height: '100%', maxHeight: 450 }}>
             <CardHeader
               title="Obligations Fiscales"
               subheader="Échéances à venir"
@@ -509,18 +518,18 @@ const ModernDashboard: React.FC = () => {
                 <Button size="small" variant="text">Voir tout</Button>
               }
             />
-            <CardContent sx={{ pt: 0 }}>
-              <List>
-                {obligations.map((obligation, index) => (
+            <CardContent sx={{ pt: 0, maxHeight: 360, overflow: 'auto' }}>
+              <List dense>
+                {obligations.slice(0, 3).map((obligation, index) => (
                   <React.Fragment key={obligation.id}>
-                    <ListItem sx={{ px: 0 }}>
+                    <ListItem sx={{ px: 0, py: 1 }}>
                       <ListItemAvatar>
-                        <Avatar 
-                          sx={{ 
+                        <Avatar
+                          sx={{
                             bgcolor: alpha(getStatutObligationColor(obligation.statut), 0.1),
                             color: getStatutObligationColor(obligation.statut),
-                            width: 40,
-                            height: 40
+                            width: 36,
+                            height: 36
                           }}
                         >
                           <ReceiptIcon fontSize="small" />
@@ -528,8 +537,8 @@ const ModernDashboard: React.FC = () => {
                       </ListItemAvatar>
                       <ListItemText
                         primary={
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                            <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Typography variant="body2" sx={{ fontWeight: 500 }}>
                               {obligation.nom}
                             </Typography>
                             <Chip
@@ -537,15 +546,16 @@ const ModernDashboard: React.FC = () => {
                               size="small"
                               variant="outlined"
                               color="primary"
+                              sx={{ height: 20, fontSize: '0.7rem' }}
                             />
                           </Box>
                         }
                         secondary={
                           <Box>
-                            <Typography variant="body2" color="text.secondary">
+                            <Typography variant="caption" color="text.secondary">
                               Échéance: {new Date(obligation.dateEcheance).toLocaleDateString('fr-FR')}
                             </Typography>
-                            <Typography variant="body2" sx={{ fontWeight: 500, color: 'primary.main' }}>
+                            <Typography variant="caption" sx={{ fontWeight: 500, color: 'primary.main', display: 'block' }}>
                               {formatMontant(obligation.montant)}
                             </Typography>
                           </Box>
@@ -557,7 +567,8 @@ const ModernDashboard: React.FC = () => {
                           size="small"
                           sx={{
                             bgcolor: alpha(getStatutObligationColor(obligation.statut), 0.1),
-                            color: getStatutObligationColor(obligation.statut)
+                            color: getStatutObligationColor(obligation.statut),
+                            fontSize: '0.7rem'
                           }}
                         />
                       </ListItemSecondaryAction>
@@ -570,48 +581,48 @@ const ModernDashboard: React.FC = () => {
           </Card>
         </Grid>
 
-        {/* 6. BALANCE SYNCHRONISÉE */}
+        {/* 7. BALANCE SYNCHRONISÉE */}
         <Grid item xs={12} md={6}>
-          <Card elevation={0} sx={{ border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
+          <Card elevation={0} sx={{ border: `1px solid ${alpha(theme.palette.divider, 0.1)}`, height: '100%', maxHeight: 450 }}>
             <CardHeader
               title="Balance Synchronisée"
               subheader="État de synchronisation en temps réel"
               avatar={<SyncIcon color="info" />}
               action={
                 <Tooltip title="Resynchroniser">
-                  <IconButton color="primary">
-                    <RefreshIcon />
+                  <IconButton color="primary" size="small">
+                    <RefreshIcon fontSize="small" />
                   </IconButton>
                 </Tooltip>
               }
             />
-            <CardContent>
+            <CardContent sx={{ maxHeight: 360, overflow: 'auto' }}>
               {synchronisation && (
                 <Box>
                   {/* Statut principal */}
-                  <Box sx={{ 
-                    p: 2, 
+                  <Box sx={{
+                    p: 1.5,
                     bgcolor: getSyncStatusColor(synchronisation.statut).bg,
                     borderRadius: 1,
                     mb: 2
                   }}>
-                    <Stack direction="row" spacing={2} alignItems="center">
+                    <Stack direction="row" spacing={1.5} alignItems="center">
                       {synchronisation.statut === 'SYNC' ? (
-                        <CheckIcon sx={{ color: getSyncStatusColor(synchronisation.statut).color }} />
+                        <CheckIcon sx={{ color: getSyncStatusColor(synchronisation.statut).color, fontSize: 20 }} />
                       ) : (
-                        <WarningIcon sx={{ color: getSyncStatusColor(synchronisation.statut).color }} />
+                        <WarningIcon sx={{ color: getSyncStatusColor(synchronisation.statut).color, fontSize: 20 }} />
                       )}
                       <Box>
-                        <Typography variant="body1" sx={{ 
-                          fontWeight: 600, 
-                          color: getSyncStatusColor(synchronisation.statut).color 
+                        <Typography variant="body2" sx={{
+                          fontWeight: 600,
+                          color: getSyncStatusColor(synchronisation.statut).color
                         }}>
-                          {synchronisation.statut === 'SYNC' ? 'Synchronisée' : 
-                           synchronisation.statut === 'ECART' ? 'Écarts détectés' : 
+                          {synchronisation.statut === 'SYNC' ? 'Synchronisée' :
+                           synchronisation.statut === 'ECART' ? 'Écarts détectés' :
                            'Obsolète'}
                         </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {synchronisation.ecartsDetectes > 0 && 
+                        <Typography variant="caption" color="text.secondary">
+                          {synchronisation.ecartsDetectes > 0 &&
                             `${synchronisation.ecartsDetectes} écart(s) détecté(s)`
                           }
                         </Typography>
@@ -620,36 +631,36 @@ const ModernDashboard: React.FC = () => {
                   </Box>
 
                   {/* Détails synchronisation */}
-                  <Grid container spacing={2}>
+                  <Grid container spacing={1.5}>
                     <Grid item xs={12}>
-                      <Typography variant="body2" color="text.secondary">
+                      <Typography variant="caption" color="text.secondary">
                         Dernière synchronisation
                       </Typography>
-                      <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
                         {new Date(synchronisation.derniereSynchro).toLocaleString('fr-FR')}
                       </Typography>
                     </Grid>
                     <Grid item xs={12}>
-                      <Typography variant="body2" color="text.secondary">
+                      <Typography variant="caption" color="text.secondary">
                         Fichier source
                       </Typography>
-                      <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
                         {synchronisation.nomFichier}
                       </Typography>
                     </Grid>
                     <Grid item xs={6}>
-                      <Typography variant="body2" color="text.secondary">
+                      <Typography variant="caption" color="text.secondary">
                         Période
                       </Typography>
-                      <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                      <Typography variant="body2" sx={{ fontWeight: 500, fontSize: '0.8rem' }}>
                         {synchronisation.periodeCouverte}
                       </Typography>
                     </Grid>
                     <Grid item xs={6}>
-                      <Typography variant="body2" color="text.secondary">
+                      <Typography variant="caption" color="text.secondary">
                         Comptes actifs
                       </Typography>
-                      <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
                         {synchronisation.nombreComptes}
                       </Typography>
                     </Grid>
@@ -659,8 +670,11 @@ const ModernDashboard: React.FC = () => {
             </CardContent>
           </Card>
         </Grid>
+      </Grid>
 
-        {/* 7. HISTORIQUE SYNCHRONISATIONS */}
+      {/* Section Historique */}
+      <Grid container spacing={3} sx={{ mt: 1 }}>
+        {/* 8. HISTORIQUE SYNCHRONISATIONS */}
         <Grid item xs={12}>
           <Card elevation={0} sx={{ border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
             <CardHeader

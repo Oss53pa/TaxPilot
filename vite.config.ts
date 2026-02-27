@@ -20,14 +20,6 @@ export default defineConfig({
   },
   server: {
     port: 3006,
-    proxy: {
-      '/api': {
-        target: 'http://localhost:8001',
-        changeOrigin: true,
-        secure: false,
-        rewrite: (path) => path.replace(/^\/api/, '/api')
-      },
-    },
     cors: true,
   },
   build: {
@@ -84,7 +76,6 @@ export default defineConfig({
             'yup',
           ],
           'utils-vendor': [
-            'axios',
             'zustand',
             'dayjs',
           ],

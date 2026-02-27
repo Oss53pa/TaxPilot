@@ -104,7 +104,7 @@ import Note3SYSCOHADA from '../../components/liasse/sheets/Note3SYSCOHADA'
 import Note5SYSCOHADA from '../../components/liasse/sheets/Note5SYSCOHADA'
 import PageGarde from '../../components/liasse/sheets/PageGarde'
 import Recevabilite from '../../components/liasse/sheets/Recevabilite'
-import NotesRestantes, { Note4SYSCOHADA, Note7SYSCOHADA, Note9SYSCOHADA, Note10SYSCOHADA } from '../../components/liasse/sheets/NotesRestantes'
+import NotesRestantes, { Note4SYSCOHADA, Note7SYSCOHADA, Note9SYSCOHADA, Note10SYSCOHADA, NOTES_CONFIGS } from '../../components/liasse/sheets/NotesRestantes'
 
 // Import des suppléments et compléments
 import ComplementCharges from '../../components/liasse/sheets/ComplementCharges'
@@ -330,8 +330,14 @@ const ModernLiasseComplete: React.FC = () => {
         return <Note1SYSCOHADA />
       case 'note2':
         return <Note2SYSCOHADA />
-      case 'note3':
-        return <Note3SYSCOHADA />
+      // Note 3 sub-tabs
+      case 'note3a': return <Note3SYSCOHADA initialTab={0} />
+      case 'note3b': return <Note3SYSCOHADA initialTab={1} />
+      case 'note3c': return <Note3SYSCOHADA initialTab={2} />
+      case 'note3c_bis': return <Note3SYSCOHADA initialTab={3} />
+      case 'note3d': return <Note3SYSCOHADA initialTab={4} />
+      case 'note3e': return <Note3SYSCOHADA initialTab={5} />
+
       case 'note4':
         return <Note4SYSCOHADA />
       case 'note5':
@@ -340,8 +346,16 @@ const ModernLiasseComplete: React.FC = () => {
         return <Note6SYSCOHADA />
       case 'note7':
         return <Note7SYSCOHADA />
-      case 'note8':
-        return <Note8SYSCOHADA />
+
+      // Note 8 sub-notes
+      case 'note8a':
+      case 'note8b':
+      case 'note8c': {
+        const config8 = NOTES_CONFIGS[selectedSheet]
+        if (config8) return <NotesRestantes {...config8} />
+        return null
+      }
+
       case 'note9':
         return <Note9SYSCOHADA />
       case 'note10':
@@ -350,8 +364,6 @@ const ModernLiasseComplete: React.FC = () => {
         return <Note11SYSCOHADA />
       case 'note12':
       case 'note13':
-      case 'note15':
-      case 'note16':
       case 'note18':
       case 'note20':
       case 'note21':
@@ -360,7 +372,6 @@ const ModernLiasseComplete: React.FC = () => {
       case 'note24':
       case 'note25':
       case 'note26':
-      case 'note27':
       case 'note28':
       case 'note29':
       case 'note30':
@@ -371,12 +382,41 @@ const ModernLiasseComplete: React.FC = () => {
       case 'note35':
       case 'note37':
       case 'note38':
-      case 'note39':
-        return <NotesRestantes numeroNote={parseInt(selectedSheet.replace('note', ''))} 
-                             titre={sheet.title.split(' - ')[1] || sheet.title} 
-                             description={sheet.description || ''} 
-                             contenuPrevu={[`Contenu de la ${sheet.title}`]} 
+      case 'note39': {
+        const noteConfig = NOTES_CONFIGS[selectedSheet]
+        if (noteConfig) return <NotesRestantes {...noteConfig} />
+        return <NotesRestantes numeroNote={parseInt(selectedSheet.replace('note', ''))}
+                             titre={sheet.title.split(' - ')[1] || sheet.title}
+                             description={sheet.description || ''}
+                             contenuPrevu={[`Contenu de la ${sheet.title}`]}
                              priorite="moyenne" />
+      }
+
+      // Note 15 sub-notes
+      case 'note15a':
+      case 'note15b': {
+        const config15 = NOTES_CONFIGS[selectedSheet]
+        if (config15) return <NotesRestantes {...config15} />
+        return null
+      }
+
+      // Note 16 sub-notes
+      case 'note16a':
+      case 'note16b':
+      case 'note16b_bis':
+      case 'note16c': {
+        const config16 = NOTES_CONFIGS[selectedSheet]
+        if (config16) return <NotesRestantes {...config16} />
+        return null
+      }
+
+      // Note 27 sub-notes
+      case 'note27a':
+      case 'note27b': {
+        const config27 = NOTES_CONFIGS[selectedSheet]
+        if (config27) return <NotesRestantes {...config27} />
+        return null
+      }
       case 'note14':
         return <Note14SYSCOHADA />
       case 'note17':

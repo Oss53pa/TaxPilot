@@ -70,7 +70,7 @@ class GenerationService {
   // Génération de liasses - CONNEXION RÉELLE AU BACKEND
   async generateLiasse(request: GenerationRequest): Promise<LiasseGeneration> {
     console.log('📤 Starting liasse generation in backend...', request)
-    return apiClient.post(`${this.baseUrl}/liasse/`, request)
+    return apiClient.post(`${this.baseUrl}/liasses/`, request)
   }
 
   async getLiasseGenerations(params?: {
@@ -82,33 +82,33 @@ class GenerationService {
     page_size?: number
   }) {
     console.log('🔄 Fetching liasse generations from backend...', params)
-    return apiClient.get(`${this.baseUrl}/liasse/`, params)
+    return apiClient.get(`${this.baseUrl}/liasses/`, params)
   }
 
   async getLiasseGeneration(id: string): Promise<LiasseGeneration> {
     console.log(`🔄 Fetching liasse generation ${id} from backend...`)
-    return apiClient.get(`${this.baseUrl}/liasse/${id}/`)
+    return apiClient.get(`${this.baseUrl}/liasses/${id}/`)
   }
 
   async getGenerationStatus(id: string): Promise<LiasseGeneration> {
     console.log(`🔄 Getting generation status ${id} from backend...`)
-    return apiClient.get(`${this.baseUrl}/liasse/${id}/status/`)
+    return apiClient.get(`${this.baseUrl}/liasses/${id}/status/`)
   }
 
   async cancelGeneration(id: string): Promise<void> {
     console.log(`🛑 Cancelling generation ${id} on backend...`)
-    return apiClient.post(`${this.baseUrl}/liasse/${id}/cancel/`)
+    return apiClient.post(`${this.baseUrl}/liasses/${id}/cancel/`)
   }
 
   // Export et téléchargement - CONNEXION RÉELLE AU BACKEND
   async exportLiasse(id: string, options: ExportOptions) {
     console.log(`📥 Exporting liasse ${id} as ${options.format}...`)
-    return apiClient.get(`${this.baseUrl}/liasse/${id}/export/`, options)
+    return apiClient.get(`${this.baseUrl}/liasses/${id}/export/`, options)
   }
 
   async downloadLiasse(id: string, format: 'PDF' | 'EXCEL'): Promise<Blob> {
     console.log(`📥 Downloading liasse ${id} as ${format}...`)
-    const response = await apiClient.client.get(`${this.baseUrl}/liasse/${id}/download/`, {
+    const response = await apiClient.client.get(`${this.baseUrl}/liasses/${id}/download/`, {
       params: { format },
       responseType: 'blob'
     })
@@ -129,12 +129,12 @@ class GenerationService {
   // Validation et contrôles - CONNEXION RÉELLE AU BACKEND
   async validateLiasse(id: string) {
     console.log(`🔍 Validating liasse ${id} on backend...`)
-    return apiClient.post(`${this.baseUrl}/liasse/${id}/validate/`)
+    return apiClient.post(`${this.baseUrl}/liasses/${id}/validate/`)
   }
 
   async getValidationErrors(id: string) {
     console.log(`🔍 Getting validation errors for liasse ${id}...`)
-    return apiClient.get(`${this.baseUrl}/liasse/${id}/validation-errors/`)
+    return apiClient.get(`${this.baseUrl}/liasses/${id}/validation-errors/`)
   }
 
   // Statistiques - CONNEXION RÉELLE AU BACKEND
@@ -178,6 +178,89 @@ class GenerationService {
   async getBatchStatus(batch_id: string) {
     console.log(`🔄 Getting batch status ${batch_id} from backend...`)
     return apiClient.get(`${this.baseUrl}/batch/${batch_id}/`)
+  }
+
+  // Validation approfondie - CONNEXION RÉELLE AU BACKEND
+  async checkPrerequisites(liasseId: string) {
+    console.log(`🔍 Checking prerequisites for liasse ${liasseId}...`)
+    return apiClient.get(`${this.baseUrl}/liasses/${liasseId}/check-prerequisites/`)
+  }
+
+  async validateComplete(liasseId: string) {
+    console.log(`🔍 Performing complete validation for liasse ${liasseId}...`)
+    return apiClient.post(`${this.baseUrl}/liasses/${liasseId}/validate_complete/`)
+  }
+
+  async getValidationReport(liasseId: string) {
+    console.log(`📋 Getting validation report for liasse ${liasseId}...`)
+    return apiClient.get(`${this.baseUrl}/liasses/${liasseId}/validation-report/`)
+  }
+
+  // Workflow statuts - CONNEXION RÉELLE AU BACKEND
+  async getTransitions(liasseId: string) {
+    console.log(`🔄 Getting available transitions for liasse ${liasseId}...`)
+    return apiClient.get(`${this.baseUrl}/liasses/${liasseId}/get_transitions/`)
+  }
+
+  async transition(liasseId: string, action: string) {
+    console.log(`🔄 Performing transition '${action}' on liasse ${liasseId}...`)
+    return apiClient.post(`${this.baseUrl}/liasses/${liasseId}/transition/`, { action })
+  }
+
+  async verrouiller(liasseId: string) {
+    console.log(`🔒 Locking liasse ${liasseId}...`)
+    return apiClient.post(`${this.baseUrl}/liasses/${liasseId}/verrouiller/`)
+  }
+
+  async finaliser(liasseId: string) {
+    console.log(`✅ Finalizing liasse ${liasseId}...`)
+    return apiClient.post(`${this.baseUrl}/liasses/${liasseId}/finaliser/`)
+  }
+
+  async invalider(liasseId: string) {
+    console.log(`❌ Invalidating liasse ${liasseId}...`)
+    return apiClient.post(`${this.baseUrl}/liasses/${liasseId}/invalider_liasse/`)
+  }
+
+  async archiver(liasseId: string) {
+    console.log(`📦 Archiving liasse ${liasseId}...`)
+    return apiClient.post(`${this.baseUrl}/liasses/${liasseId}/archiver_liasse/`)
+  }
+
+  async remettreEnBrouillon(liasseId: string) {
+    console.log(`🔄 Resetting liasse ${liasseId} to draft...`)
+    return apiClient.post(`${this.baseUrl}/liasses/${liasseId}/remettre_brouillon/`)
+  }
+
+  async declarer(liasseId: string) {
+    console.log(`📤 Declaring liasse ${liasseId} to DGI...`)
+    return apiClient.post(`${this.baseUrl}/liasses/${liasseId}/declarer_liasse/`)
+  }
+
+  // Export batch avancé - CONNEXION RÉELLE AU BACKEND
+  async exportBatch(liasseIds: string[], format: 'PDF' | 'EXCEL') {
+    console.log(`📤 Starting batch export for ${liasseIds.length} liasses...`)
+    return apiClient.post(`${this.baseUrl}/liasses/export_batch/`, {
+      liasse_ids: liasseIds,
+      format,
+    })
+  }
+
+  async getBatchExportStatus(batchId: string) {
+    console.log(`🔄 Getting batch export status ${batchId}...`)
+    return apiClient.get(`${this.baseUrl}/liasses/export_batch/${batchId}/status/`)
+  }
+
+  async downloadBatch(batchId: string): Promise<Blob> {
+    console.log(`📥 Downloading batch export ${batchId}...`)
+    const response = await apiClient.client.get(
+      `${this.baseUrl}/liasses/download_batch/`,
+      {
+        params: { batch_id: batchId },
+        responseType: 'blob'
+      }
+    )
+    return response.data
   }
 }
 

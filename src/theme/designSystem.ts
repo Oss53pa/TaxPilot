@@ -1,47 +1,46 @@
 /**
- * Design System FiscaSync - Standards Professionnels Internationaux
- * Inspiré des meilleures pratiques de design systems modernes (Material 3, Ant Design, Chakra UI)
+ * Design System FiscaSync - Grayscale Monochrome
+ * Palette: #fafafa → #0a0a0a
+ * Fonts: Exo 2 (sans), Grand Hotel (decoratif), JetBrains Mono (mono)
  */
 
 import { createTheme, alpha } from '@mui/material/styles'
 
-// === PALETTE DE COULEURS PROFESSIONNELLE ===
+// === PALETTE GRAYSCALE ===
 const colors = {
-  // Primary - Couleur principale sophistiquée
   primary: {
-    50: '#f8f9fa',
-    100: '#f1f3f4',
-    200: '#e8eaed',
-    300: '#dadce0',
-    400: '#bdc1c6',
-    500: '#9aa0a6',
-    600: '#80868b',
-    700: '#5f6368',
-    800: '#3c4043',
-    900: '#191919', // Votre couleur de base
-    main: '#191919',
-    light: '#5f6368',
-    dark: '#000000',
+    50: '#fafafa',
+    100: '#f5f5f5',
+    200: '#e5e5e5',
+    300: '#d4d4d4',
+    400: '#a3a3a3',
+    500: '#737373',
+    600: '#525252',
+    700: '#404040',
+    800: '#262626',
+    900: '#171717',
+    950: '#0a0a0a',
+    main: '#171717',
+    light: '#525252',
+    dark: '#0a0a0a',
   },
 
-  // Secondary - Accent moderne
   secondary: {
-    50: '#f0f9ff',
-    100: '#e0f2fe',
-    200: '#bae6fd',
-    300: '#7dd3fc',
-    400: '#38bdf8',
-    500: '#0ea5e9',
-    600: '#0284c7',
-    700: '#0369a1',
-    800: '#075985',
-    900: '#0c4a6e',
-    main: '#0ea5e9',
-    light: '#38bdf8',
-    dark: '#0369a1',
+    50: '#fafafa',
+    100: '#f5f5f5',
+    200: '#e5e5e5',
+    300: '#d4d4d4',
+    400: '#a3a3a3',
+    500: '#737373',
+    600: '#525252',
+    700: '#404040',
+    800: '#262626',
+    900: '#171717',
+    main: '#737373',
+    light: '#a3a3a3',
+    dark: '#404040',
   },
 
-  // Success - Vert professionnel
   success: {
     50: '#f0fdf4',
     100: '#dcfce7',
@@ -58,24 +57,22 @@ const colors = {
     dark: '#15803d',
   },
 
-  // Warning - Orange élégant
   warning: {
     50: '#fffbeb',
     100: '#fef3c7',
-    200: '#fed7aa',
-    300: '#fdba74',
-    400: '#fb923c',
-    500: '#f97316',
-    600: '#ea580c',
-    700: '#c2410c',
-    800: '#9a3412',
-    900: '#7c2d12',
-    main: '#f97316',
-    light: '#fb923c',
-    dark: '#c2410c',
+    200: '#fde68a',
+    300: '#fcd34d',
+    400: '#fbbf24',
+    500: '#f59e0b',
+    600: '#d97706',
+    700: '#b45309',
+    800: '#92400e',
+    900: '#78350f',
+    main: '#f59e0b',
+    light: '#fbbf24',
+    dark: '#d97706',
   },
 
-  // Error - Rouge moderne
   error: {
     50: '#fef2f2',
     100: '#fee2e2',
@@ -92,7 +89,6 @@ const colors = {
     dark: '#b91c1c',
   },
 
-  // Info - Bleu information
   info: {
     50: '#eff6ff',
     100: '#dbeafe',
@@ -109,7 +105,6 @@ const colors = {
     dark: '#1d4ed8',
   },
 
-  // Neutrals - Palette de gris sophistiquée
   neutral: {
     0: '#ffffff',
     50: '#fafafa',
@@ -125,7 +120,6 @@ const colors = {
     950: '#0a0a0a',
   },
 
-  // Backgrounds & Surfaces
   background: {
     default: '#fafafa',
     paper: '#ffffff',
@@ -134,7 +128,6 @@ const colors = {
     overlay: alpha('#000000', 0.6),
   },
 
-  // Text colors optimized for readability
   text: {
     primary: '#171717',
     secondary: '#525252',
@@ -143,7 +136,6 @@ const colors = {
     inverse: '#ffffff',
   },
 
-  // Dividers and borders
   divider: alpha('#171717', 0.08),
   border: {
     light: alpha('#171717', 0.08),
@@ -152,39 +144,36 @@ const colors = {
   },
 }
 
-// === TYPOGRAPHY PROFESSIONNELLE ===
+// === TYPOGRAPHY ===
 const typography = {
-  // Font families optimized for business applications
   fontFamily: {
-    primary: '"Inter", "Roboto", "Helvetica Neue", Arial, sans-serif',
-    secondary: '"Poppins", "Inter", sans-serif',
+    primary: '"Exo 2", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif',
+    decorative: '"Grand Hotel", cursive',
     mono: '"JetBrains Mono", "Fira Code", "Consolas", monospace',
   },
 
-  // Font weights
   fontWeight: {
     light: 300,
     regular: 400,
     medium: 500,
     semibold: 600,
     bold: 700,
+    extrabold: 800,
   },
 
-  // Font sizes with perfect scaling
   fontSize: {
-    xs: '0.75rem',    // 12px
-    sm: '0.875rem',   // 14px
-    base: '1rem',     // 16px
-    lg: '1.125rem',   // 18px
-    xl: '1.25rem',    // 20px
-    '2xl': '1.5rem',  // 24px
-    '3xl': '1.875rem', // 30px
-    '4xl': '2.25rem', // 36px
-    '5xl': '3rem',    // 48px
-    '6xl': '3.75rem', // 60px
+    xs: '0.75rem',
+    sm: '0.875rem',
+    base: '1rem',
+    lg: '1.125rem',
+    xl: '1.25rem',
+    '2xl': '1.5rem',
+    '3xl': '1.875rem',
+    '4xl': '2.25rem',
+    '5xl': '3rem',
+    '6xl': '3.75rem',
   },
 
-  // Line heights for optimal readability
   lineHeight: {
     none: 1,
     tight: 1.25,
@@ -195,51 +184,54 @@ const typography = {
   },
 }
 
-// === SPACING SYSTEM ===
+// === SPACING ===
 const spacing = {
   0: '0px',
-  1: '0.25rem',   // 4px
-  2: '0.5rem',    // 8px
-  3: '0.75rem',   // 12px
-  4: '1rem',      // 16px
-  5: '1.25rem',   // 20px
-  6: '1.5rem',    // 24px
-  8: '2rem',      // 32px
-  10: '2.5rem',   // 40px
-  12: '3rem',     // 48px
-  16: '4rem',     // 64px
-  20: '5rem',     // 80px
-  24: '6rem',     // 96px
-  32: '8rem',     // 128px
+  1: '0.25rem',
+  2: '0.5rem',
+  3: '0.75rem',
+  4: '1rem',
+  5: '1.25rem',
+  6: '1.5rem',
+  8: '2rem',
+  10: '2.5rem',
+  12: '3rem',
+  16: '4rem',
+  20: '5rem',
+  24: '6rem',
+  32: '8rem',
 }
 
-// === SHADOWS PROFESSIONNELLES ===
+// === SHADOWS ===
 const shadows = {
   none: 'none',
-  sm: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-  base: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
-  md: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-  lg: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-  xl: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-  '2xl': '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-  inner: 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.06)',
-  glass: '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
+  sm: '0 1px 2px rgba(0, 0, 0, 0.04)',
+  base: '0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04)',
+  md: '0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -1px rgba(0, 0, 0, 0.04)',
+  lg: '0 10px 15px -3px rgba(0, 0, 0, 0.06), 0 4px 6px -2px rgba(0, 0, 0, 0.03)',
+  xl: '0 20px 25px -5px rgba(0, 0, 0, 0.06), 0 10px 10px -5px rgba(0, 0, 0, 0.02)',
+  '2xl': '0 25px 50px -12px rgba(0, 0, 0, 0.15)',
+  inner: 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.04)',
+  card: '0 1px 2px rgba(0, 0, 0, 0.04)',
+  dropdown: '0 4px 12px rgba(0, 0, 0, 0.08)',
 }
 
 // === BORDER RADIUS ===
 const borderRadius = {
   none: '0px',
-  sm: '0.25rem',  // 4px
-  base: '0.375rem', // 6px
-  md: '0.5rem',   // 8px
-  lg: '0.75rem',  // 12px
-  xl: '1rem',     // 16px
-  '2xl': '1.5rem', // 24px
-  '3xl': '2rem',  // 32px
+  sm: '0.25rem',
+  base: '0.375rem',
+  md: '0.5rem',
+  lg: '0.75rem',
+  xl: '1rem',
+  card: '1rem',
+  btn: '0.75rem',
+  '2xl': '1.5rem',
+  '3xl': '2rem',
   full: '9999px',
 }
 
-// === TRANSITIONS & ANIMATIONS ===
+// === TRANSITIONS ===
 const transitions = {
   duration: {
     fast: '150ms',
@@ -256,7 +248,7 @@ const transitions = {
   }
 }
 
-// === BREAKPOINTS RESPONSIFS ===
+// === BREAKPOINTS ===
 const breakpoints = {
   xs: '475px',
   sm: '640px',
@@ -266,7 +258,7 @@ const breakpoints = {
   '2xl': '1536px',
 }
 
-// === THÈME MATERIAL UI CONFIGURÉ ===
+// === MUI THEME ===
 export const theme = createTheme({
   palette: {
     mode: 'light',
@@ -336,7 +328,7 @@ export const theme = createTheme({
     borderRadius: parseInt(borderRadius.md),
   },
 
-  spacing: 8, // Base spacing unit
+  spacing: 8,
 
   shadows: [
     "none",
@@ -346,8 +338,8 @@ export const theme = createTheme({
     shadows.lg,
     shadows.xl,
     shadows['2xl'],
-    shadows.glass,
-    ...Array(16).fill(shadows.lg), // Remplir le reste
+    shadows.dropdown,
+    ...Array(16).fill(shadows.lg),
   ] as any,
 
   breakpoints: {
@@ -361,7 +353,6 @@ export const theme = createTheme({
   },
 
   components: {
-    // Configuration globale des composants
     MuiCssBaseline: {
       styleOverrides: {
         '*': {
@@ -383,18 +374,17 @@ export const theme = createTheme({
       styleOverrides: {
         root: {
           textTransform: 'none',
-          fontWeight: typography.fontWeight.medium,
-          borderRadius: borderRadius.md,
+          fontWeight: typography.fontWeight.semibold,
+          borderRadius: borderRadius.btn,
           transition: `all ${transitions.duration.base} ${transitions.timing.ease}`,
           boxShadow: shadows.sm,
           '&:hover': {
-            transform: 'translateY(-1px)',
             boxShadow: shadows.md,
           },
         },
         contained: {
           '&:hover': {
-            boxShadow: shadows.lg,
+            boxShadow: shadows.md,
           },
         },
       },
@@ -403,8 +393,8 @@ export const theme = createTheme({
     MuiCard: {
       styleOverrides: {
         root: {
-          borderRadius: borderRadius.lg,
-          boxShadow: shadows.base,
+          borderRadius: borderRadius.card,
+          boxShadow: shadows.card,
           border: `1px solid ${colors.border.light}`,
           transition: `all ${transitions.duration.base} ${transitions.timing.ease}`,
           '&:hover': {
@@ -418,7 +408,7 @@ export const theme = createTheme({
       styleOverrides: {
         root: {
           '& .MuiOutlinedInput-root': {
-            borderRadius: borderRadius.md,
+            borderRadius: borderRadius.btn,
             transition: `all ${transitions.duration.base} ${transitions.timing.ease}`,
             '&:hover': {
               '& .MuiOutlinedInput-notchedOutline': {
@@ -426,7 +416,7 @@ export const theme = createTheme({
               },
             },
             '&.Mui-focused': {
-              boxShadow: `0 0 0 3px ${alpha(colors.primary.main, 0.1)}`,
+              boxShadow: `0 0 0 3px ${alpha(colors.primary.main, 0.08)}`,
             },
           },
         },
@@ -435,7 +425,7 @@ export const theme = createTheme({
   },
 })
 
-// Export des tokens de design
+// Export design tokens
 export const designTokens = {
   colors,
   typography,

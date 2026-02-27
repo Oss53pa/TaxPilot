@@ -1,5 +1,5 @@
 /**
- * Palettes de couleurs pour FiscaSync
+ * Palettes de couleurs pour FiscaSync - Grayscale Monochrome
  */
 
 export interface ColorPalette {
@@ -25,146 +25,123 @@ export interface ColorPalette {
 }
 
 export const colorPalettes: ColorPalette[] = [
-  // 🎨 Palette 1 – Élégance sobre (finance traditionnelle moderne)
   {
-    id: 'elegance-sobre',
-    name: 'Élégance Sobre',
-    description: 'Finance traditionnelle moderne - sérieux, luxe discret, rassurant',
+    id: 'grayscale-mono',
+    name: 'Grayscale Monochrome',
+    description: 'Design system monochrome professionnel - #fafafa a #0a0a0a',
     colors: {
-      primary: '#2E7D69', // Vert émeraude
-      secondary: '#D4AF37', // Or pâle
+      primary: '#171717',
+      secondary: '#737373',
       background: {
-        default: '#F5F5F7', // Gris clair neutre
-        paper: '#FFFFFF',
+        default: '#fafafa',
+        paper: '#ffffff',
       },
       text: {
-        primary: '#1E1E2F', // Charbon profond
-        secondary: '#C2C7CE', // Gris moyen
+        primary: '#171717',
+        secondary: '#525252',
       },
-      success: '#2E7D69', // Vert émeraude
-      warning: '#D4AF37', // Or pâle
-      error: '#B91C1C',
-      info: '#2563EB',
-    }
-  },
-  
-  // 🎨 Palette 2 – Modern Fintech
-  {
-    id: 'modern-fintech',
-    name: 'Modern Fintech',
-    description: 'Moderne, clair, orienté tableau de bord financier',
-    colors: {
-      primary: '#2C3E50', // Bleu nuit désaturé
-      secondary: '#27AE60', // Vert doux
-      background: {
-        default: '#FAFAFA', // Blanc cassé
-        paper: '#FFFFFF',
-      },
-      text: {
-        primary: '#2C3E50', // Bleu nuit désaturé
-        secondary: '#7F8C8D', // Gris ardoise
-      },
-      success: '#27AE60', // Vert doux
-      warning: '#F39C12',
-      error: '#C0392B', // Rouge bourgogne
-      info: '#3498DB',
-    }
-  },
-  
-  // 🎨 Palette 3 – Minimaliste premium (PAR DÉFAUT)
-  {
-    id: 'minimaliste-premium',
-    name: 'Minimaliste Premium',
-    description: 'Élégance minimaliste avec touche premium',
-    colors: {
-      primary: '#B87333', // Cuivre rosé
-      secondary: '#6A8A82', // Vert sauge
-      background: {
-        default: '#ECECEC', // Gris clair perle
-        paper: '#FFFFFF',
-      },
-      text: {
-        primary: '#191919', // Noir fumé
-        secondary: '#444444', // Anthracite doux
-      },
-      success: '#6A8A82', // Vert sauge
-      warning: '#B87333', // Cuivre rosé
-      error: '#DC2626',
-      info: '#6366F1',
+      success: '#22c55e',
+      warning: '#f59e0b',
+      error: '#ef4444',
+      info: '#3b82f6',
     }
   },
 ]
 
-// Palette par défaut
-export const defaultPaletteId = 'minimaliste-premium'
+export const defaultPaletteId = 'grayscale-mono'
 
-// Fonction pour obtenir une palette par ID
 export const getPaletteById = (id: string): ColorPalette => {
-  return colorPalettes.find(p => p.id === id) || colorPalettes.find(p => p.id === defaultPaletteId)!
+  return colorPalettes.find(p => p.id === id) || colorPalettes[0]
 }
 
-// Fonction pour créer un thème Material-UI à partir d'une palette
 export const createThemeFromPalette = (palette: ColorPalette, mode: 'light' | 'dark' = 'light') => {
+  if (mode === 'dark') {
+    return {
+      palette: {
+        mode,
+        primary: {
+          main: '#e5e5e5',
+          light: '#f5f5f5',
+          dark: '#d4d4d4',
+          contrastText: '#171717',
+        },
+        secondary: {
+          main: '#a3a3a3',
+          light: '#d4d4d4',
+          dark: '#737373',
+          contrastText: '#171717',
+        },
+        background: {
+          default: '#171717',
+          paper: '#262626',
+        },
+        text: {
+          primary: '#ffffff',
+          secondary: '#a3a3a3',
+        },
+        success: {
+          main: palette.colors.success,
+          light: '#4ade80',
+          dark: '#15803d',
+        },
+        warning: {
+          main: palette.colors.warning,
+          light: '#fbbf24',
+          dark: '#d97706',
+        },
+        error: {
+          main: palette.colors.error,
+          light: '#f87171',
+          dark: '#dc2626',
+        },
+        info: {
+          main: palette.colors.info,
+          light: '#60a5fa',
+          dark: '#2563eb',
+        },
+        divider: 'rgba(255, 255, 255, 0.08)',
+      }
+    }
+  }
+
   return {
     palette: {
       mode,
       primary: {
         main: palette.colors.primary,
-        light: lightenColor(palette.colors.primary, 20),
-        dark: darkenColor(palette.colors.primary, 20),
+        light: '#525252',
+        dark: '#0a0a0a',
         contrastText: '#ffffff',
       },
       secondary: {
         main: palette.colors.secondary,
-        light: lightenColor(palette.colors.secondary, 20),
-        dark: darkenColor(palette.colors.secondary, 20),
+        light: '#a3a3a3',
+        dark: '#404040',
         contrastText: '#ffffff',
       },
       background: palette.colors.background,
       text: palette.colors.text,
       success: {
         main: palette.colors.success,
-        light: lightenColor(palette.colors.success, 20),
-        dark: darkenColor(palette.colors.success, 20),
+        light: '#4ade80',
+        dark: '#15803d',
       },
       warning: {
         main: palette.colors.warning,
-        light: lightenColor(palette.colors.warning, 20),
-        dark: darkenColor(palette.colors.warning, 20),
+        light: '#fbbf24',
+        dark: '#d97706',
       },
       error: {
         main: palette.colors.error,
-        light: lightenColor(palette.colors.error, 20),
-        dark: darkenColor(palette.colors.error, 20),
+        light: '#f87171',
+        dark: '#dc2626',
       },
       info: {
         main: palette.colors.info,
-        light: lightenColor(palette.colors.info, 20),
-        dark: darkenColor(palette.colors.info, 20),
+        light: '#60a5fa',
+        dark: '#2563eb',
       },
+      divider: 'rgba(23, 23, 23, 0.08)',
     }
   }
-}
-
-// Utilitaires pour éclaircir/assombrir les couleurs
-function lightenColor(color: string, percent: number): string {
-  const num = parseInt(color.replace('#', ''), 16)
-  const amt = Math.round(2.55 * percent)
-  const R = (num >> 16) + amt
-  const G = (num >> 8 & 0x00FF) + amt
-  const B = (num & 0x0000FF) + amt
-  return '#' + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
-    (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
-    (B < 255 ? B < 1 ? 0 : B : 255)).toString(16).slice(1)
-}
-
-function darkenColor(color: string, percent: number): string {
-  const num = parseInt(color.replace('#', ''), 16)
-  const amt = Math.round(2.55 * percent)
-  const R = (num >> 16) - amt
-  const G = (num >> 8 & 0x00FF) - amt
-  const B = (num & 0x0000FF) - amt
-  return '#' + (0x1000000 + (R > 255 ? 255 : R < 0 ? 0 : R) * 0x10000 +
-    (G > 255 ? 255 : G < 0 ? 0 : G) * 0x100 +
-    (B > 255 ? 255 : B < 0 ? 0 : B)).toString(16).slice(1)
 }

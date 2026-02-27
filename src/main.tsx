@@ -25,6 +25,37 @@ const queryClient = new QueryClient({
   }
 })
 
+// Global unhandled promise rejection handler
+// Prevents silent failures and logs errors for debugging
+window.addEventListener('unhandledrejection', (event) => {
+  console.error('🚨 Unhandled promise rejection:', event.reason)
+
+  // Log detailed error information for debugging
+  if (event.reason instanceof Error) {
+    console.error('Error name:', event.reason.name)
+    console.error('Error message:', event.reason.message)
+    console.error('Error stack:', event.reason.stack)
+  }
+
+  // TODO: Send to error tracking service (Sentry, LogRocket, etc.)
+  // if (window.Sentry) {
+  //   window.Sentry.captureException(event.reason)
+  // }
+
+  // Prevent the default browser error logging
+  event.preventDefault()
+})
+
+// Global error handler for synchronous errors
+window.addEventListener('error', (event) => {
+  console.error('🚨 Global error:', event.error || event.message)
+
+  // TODO: Send to error tracking service
+  // if (window.Sentry) {
+  //   window.Sentry.captureException(event.error)
+  // }
+})
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <Provider store={store}>

@@ -93,8 +93,8 @@ const Note5SYSCOHADA: React.FC = () => {
     return montant.toLocaleString('fr-FR') + ' FCFA'
   }
 
-  const getRotationStock = (sorties: number, stockMoyen: number) => {
-    if (stockMoyen === 0) return 0
+  const getRotationStock = (sorties: number, stockMoyen: number): string => {
+    if (stockMoyen === 0) return '0.0'
     return (sorties / stockMoyen).toFixed(1)
   }
 

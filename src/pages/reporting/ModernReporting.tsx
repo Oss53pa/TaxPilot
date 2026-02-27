@@ -402,7 +402,15 @@ const ModernReporting: React.FC = () => {
           
           <Grid container spacing={3} alignItems="center">
             <Grid item xs={12} md={3}>
-              <Box sx={{ textAlign: 'center' }}>
+              <Box sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                position: 'relative',
+                width: 120,
+                height: 120,
+                margin: '0 auto'
+              }}>
                 <CircularProgress
                   variant="determinate"
                   value={analyseExercice?.scoreGlobal || 0}

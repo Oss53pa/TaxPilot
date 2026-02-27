@@ -1,9 +1,9 @@
 /**
  * Hook pour la gestion centralisée des erreurs API
+ * Version FiscaSync-Lite sans dépendance Axios
  */
 
 import { useCallback } from 'react'
-import { AxiosError } from 'axios'
 
 interface ApiError {
   message: string
@@ -24,57 +24,20 @@ export const useApiError = (): UseApiErrorReturn => {
   const handleError = useCallback((error: unknown): ApiError => {
     console.error('🚨 API Error:', error)
 
-    // Erreur Axios (réponse du serveur)
-    if (error instanceof AxiosError) {
-      const status = error.response?.status
-      const data = error.response?.data
-
-      // Messages d'erreur spécifiques par status
-      const statusMessages: Record<number, string> = {
-        400: 'Données invalides',
-        401: 'Non autorisé - Veuillez vous reconnecter',
-        403: 'Accès interdit',
-        404: 'Ressource non trouvée',
-        422: 'Données de validation échouées',
-        429: 'Trop de requêtes - Veuillez patienter',
-        500: 'Erreur serveur interne',
-        502: 'Serveur indisponible',
-        503: 'Service temporairement indisponible',
-        504: 'Timeout du serveur'
-      }
-
-      let message = statusMessages[status || 0] || 'Erreur de connexion'
-
-      // Utiliser le message du serveur si disponible
-      if (data?.message) {
-        message = data.message
-      } else if (data?.detail) {
-        message = data.detail
-      } else if (data?.error) {
-        message = data.error
-      }
-
-      return {
-        message,
-        code: data?.code || error.code,
-        status,
-        details: data
-      }
-    }
-
-    // Erreur réseau
     if (error instanceof Error) {
-      if (error.message.includes('Network Error')) {
+      if (error.message.includes('non trouvee')) {
         return {
-          message: 'Erreur de connexion réseau - Vérifiez votre connexion internet',
-          code: 'NETWORK_ERROR'
+          message: 'Ressource non trouvée',
+          code: 'NOT_FOUND',
+          status: 404
         }
       }
 
-      if (error.message.includes('timeout')) {
+      if (error.message.includes('Identifiants invalides')) {
         return {
-          message: 'Délai d\'attente dépassé - Le serveur met trop de temps à répondre',
-          code: 'TIMEOUT_ERROR'
+          message: 'Non autorisé - Veuillez vous reconnecter',
+          code: 'AUTH_ERROR',
+          status: 401
         }
       }
 
@@ -84,7 +47,6 @@ export const useApiError = (): UseApiErrorReturn => {
       }
     }
 
-    // Erreur inconnue
     return {
       message: 'Une erreur inattendue s\'est produite',
       code: 'UNKNOWN_ERROR',
@@ -96,26 +58,21 @@ export const useApiError = (): UseApiErrorReturn => {
     return handleError(error).message
   }, [handleError])
 
-  const isNetworkError = useCallback((error: unknown): boolean => {
-    if (error instanceof AxiosError) {
-      return !error.response && (
-        error.code === 'NETWORK_ERROR' ||
-        error.message.includes('Network Error')
-      )
-    }
+  const isNetworkError = useCallback((_error: unknown): boolean => {
+    // Pas d'erreurs réseau en mode local
     return false
   }, [])
 
   const isAuthError = useCallback((error: unknown): boolean => {
-    if (error instanceof AxiosError) {
-      return error.response?.status === 401
+    if (error instanceof Error) {
+      return error.message.includes('Identifiants') || error.message.includes('autorisé')
     }
     return false
   }, [])
 
   const isValidationError = useCallback((error: unknown): boolean => {
-    if (error instanceof AxiosError) {
-      return error.response?.status === 400 || error.response?.status === 422
+    if (error instanceof Error) {
+      return error.message.includes('invalide') || error.message.includes('validation')
     }
     return false
   }, [])

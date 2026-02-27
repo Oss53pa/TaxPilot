@@ -1,17 +1,14 @@
 import { createTheme } from '@mui/material/styles'
 import { getPaletteById, defaultPaletteId, createThemeFromPalette } from './colorPalettes'
 
-// Récupérer la palette par défaut (Minimaliste Premium)
 const defaultPalette = getPaletteById(defaultPaletteId)
 const paletteConfig = createThemeFromPalette(defaultPalette)
 
-// Configuration du thème Material-UI pour FiscaSync
 export const theme = createTheme({
   ...paletteConfig,
   typography: {
     fontFamily: [
-      'Jura',
-      'Roboto',
+      '"Exo 2"',
       '-apple-system',
       'BlinkMacSystemFont',
       '"Segoe UI"',
@@ -20,13 +17,15 @@ export const theme = createTheme({
     ].join(','),
     h1: {
       fontSize: '2.5rem',
-      fontWeight: 600,
+      fontWeight: 700,
       lineHeight: 1.2,
+      letterSpacing: '-0.02em',
     },
     h2: {
       fontSize: '2rem',
-      fontWeight: 600,
+      fontWeight: 700,
       lineHeight: 1.2,
+      letterSpacing: '-0.01em',
     },
     h3: {
       fontSize: '1.75rem',
@@ -80,11 +79,10 @@ export const theme = createTheme({
           transition: 'all 0.2s ease-in-out',
         },
         contained: {
-          boxShadow: '0 4px 14px 0 rgba(0, 0, 0, 0.1)',
+          boxShadow: '0 1px 2px rgba(0, 0, 0, 0.04)',
           color: '#ffffff',
           '&:hover': {
-            boxShadow: '0 6px 20px 0 rgba(0, 0, 0, 0.15)',
-            transform: 'translateY(-2px)',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
           },
         },
         containedPrimary: {
@@ -100,10 +98,11 @@ export const theme = createTheme({
           },
         },
         outlined: {
-          borderWidth: 2,
+          borderWidth: 1,
+          borderColor: '#d4d4d4',
           '&:hover': {
-            borderWidth: 2,
-            transform: 'translateY(-1px)',
+            borderWidth: 1,
+            backgroundColor: '#fafafa',
           },
         },
       },
@@ -112,12 +111,11 @@ export const theme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: 16,
-          boxShadow: '0 4px 20px 0 rgba(0, 0, 0, 0.05)',
-          border: '1px solid rgba(0, 0, 0, 0.04)',
-          transition: 'all 0.3s ease-in-out',
+          boxShadow: '0 1px 2px rgba(0, 0, 0, 0.04)',
+          border: '1px solid #e5e5e5',
+          transition: 'all 0.2s ease-in-out',
           '&:hover': {
-            boxShadow: '0 8px 30px 0 rgba(0, 0, 0, 0.08)',
-            transform: 'translateY(-2px)',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.06)',
           },
         },
       },
@@ -146,7 +144,7 @@ export const theme = createTheme({
       styleOverrides: {
         head: {
           fontWeight: 600,
-          backgroundColor: 'rgba(0, 0, 0, 0.02)',
+          backgroundColor: '#f5f5f5',
           fontSize: '0.875rem',
         },
         body: {
@@ -165,7 +163,7 @@ export const theme = createTheme({
     MuiAppBar: {
       styleOverrides: {
         root: {
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.08)',
           backgroundImage: 'none',
         },
       },
@@ -173,27 +171,27 @@ export const theme = createTheme({
     MuiDrawer: {
       styleOverrides: {
         paper: {
-          borderRight: '1px solid rgba(0, 0, 0, 0.08)',
-          boxShadow: '2px 0 8px rgba(0, 0, 0, 0.05)',
+          borderRight: 'none',
+          boxShadow: '1px 0 4px rgba(0, 0, 0, 0.04)',
         },
       },
     },
   },
 })
 
-// Thème sombre
 export const darkTheme = createTheme({
   ...theme,
   palette: {
     ...theme.palette,
     mode: 'dark',
     background: {
-      default: '#121212',
-      paper: '#1e1e1e',
+      default: '#171717',
+      paper: '#262626',
     },
     text: {
       primary: '#ffffff',
-      secondary: 'rgba(255, 255, 255, 0.7)',
+      secondary: '#a3a3a3',
     },
+    divider: 'rgba(255, 255, 255, 0.08)',
   },
 })

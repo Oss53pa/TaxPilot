@@ -130,7 +130,7 @@ const KeyboardNavigation: React.FC = () => {
       // Nettoyage des event listeners
       const cleanupKey = 'fiscasync-keyboard-nav-cleanup';
       const existingCleanupFns = (window as any)[cleanupKey] || [];
-      existingCleanupFns.forEach((fn: Function) => fn());
+      existingCleanupFns.forEach((fn: () => void) => fn());
       (window as any)[cleanupKey] = [];
     };
   }, [handleGlobalKeyDown]);
@@ -143,7 +143,7 @@ const KeyboardNavigation: React.FC = () => {
     // Nettoyage des event listeners existants
     const cleanupKey = 'fiscasync-keyboard-nav-cleanup';
     const existingCleanupFns = (window as any)[cleanupKey] || [];
-    existingCleanupFns.forEach((fn: Function) => fn());
+    existingCleanupFns.forEach((fn: () => void) => fn());
     (window as any)[cleanupKey] = [];
     
     // Boutons

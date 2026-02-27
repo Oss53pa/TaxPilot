@@ -4,10 +4,12 @@
  * par les vraies données du backend Django
  */
 
+import React from 'react'
 import * as services from '@/services'
 
 // Flag global pour activer/désactiver l'intégration backend
-export const BACKEND_ENABLED = true
+// Désactivé temporairement pour éviter les boucles infinies causées par les endpoints manquants
+export const BACKEND_ENABLED = false
 
 // Cache global pour éviter les appels répétés
 const dataCache = new Map<string, any>()
@@ -34,36 +36,44 @@ export const getBackendData = async (dataType: string, params?: any): Promise<an
     switch (dataType) {
       // ENTREPRISES
       case 'entreprises':
-        const entreprisesRes = await services.entrepriseService.getEntreprises(params)
-        data = entreprisesRes.results || []
+        try {
+          const entreprisesRes = await services.entrepriseService.getEntreprises(params)
+          data = entreprisesRes.results || entreprisesRes || []
+        } catch (e) {
+          console.log('Error fetching entreprises, using empty array')
+          data = []
+        }
         break
 
       // BALANCES
       case 'balances':
-      case 'balance':
+      case 'balance': {
         const balancesRes = await services.balanceService.getBalances(params)
         data = balancesRes.results || []
         break
+      }
 
       case 'balanceDetails':
         if (params?.id) {
-          data = await services.balanceService.getBalanceDetails(params.id)
+          data = await services.balanceService.getLignesBalance(params.id, { page_size: 1000 })
         }
         break
 
       // AUDITS
       case 'audits':
-      case 'auditSessions':
+      case 'auditSessions': {
         const auditsRes = await services.auditService.getAuditSessions(params)
         data = auditsRes.results || []
         break
+      }
 
-      case 'auditAnomalies':
+      case 'auditAnomalies': {
         if (params?.sessionId) {
           const anomaliesRes = await services.auditService.getAuditAnomalies(params.sessionId)
           data = anomaliesRes.results || []
         }
         break
+      }
 
       case 'auditStats':
         data = await services.auditService.getAuditStats(params)
@@ -71,71 +81,103 @@ export const getBackendData = async (dataType: string, params?: any): Promise<an
 
       // GÉNÉRATIONS
       case 'generations':
-      case 'liasseGenerations':
+      case 'liasseGenerations': {
         const generationsRes = await services.generationService.getLiasseGenerations(params)
         data = generationsRes.results || []
         break
+      }
 
-      case 'generationTemplates':
+      case 'generationTemplates': {
         const templatesRes = await services.generationService.getAvailableTemplates(params?.type_liasse)
         data = templatesRes || []
         break
+      }
 
       // TEMPLATES
-      case 'templates':
+      case 'templates': {
         const templateRes = await services.templatesService.getTemplates(params)
         data = templateRes.results || []
         break
+      }
 
       // FISCAL
       case 'declarations':
-      case 'declarationsFiscales':
+      case 'declarationsFiscales': {
         const declarationsRes = await services.taxService.getDeclarations(params)
         data = declarationsRes.results || []
         break
+      }
 
       case 'obligations':
-      case 'obligationsFiscales':
+      case 'obligationsFiscales': {
         const obligationsRes = await services.taxService.getObligations(params)
         data = obligationsRes.results || []
         break
+      }
 
-      case 'impots':
+      case 'impots': {
         const impotsRes = await services.taxService.getImpots(params)
         data = impotsRes.results || []
         break
+      }
 
       // COMPTABILITÉ
       case 'plansComptables':
-        const plansRes = await services.accountingService.getPlansComptables(params)
-        data = plansRes.results || []
+        try {
+          const plansRes = await services.accountingService.getPlansComptables(params)
+          data = plansRes.results || plansRes || []
+        } catch (e) {
+          console.log('Error fetching plansComptables, using empty array')
+          data = []
+        }
         break
 
       case 'comptes':
-      case 'comptesComptables':
+      case 'comptesComptables': {
         const comptesRes = await services.accountingService.getComptes(params)
         data = comptesRes.results || []
         break
+      }
 
-      case 'ecritures':
+      case 'ecritures': {
         const ecrituresRes = await services.accountingService.getEcritures(params)
         data = ecrituresRes.results || []
         break
+      }
 
-      case 'journaux':
+      case 'journaux': {
         const journauxRes = await services.accountingService.getJournaux(params)
         data = journauxRes.results || []
         break
+      }
 
       // REPORTING
       case 'reports':
-      case 'rapports':
+      case 'rapports': {
         const reportsRes = await services.reportingService.getReports(params)
         data = reportsRes.results || []
         break
+      }
 
       case 'dashboardStats':
-        data = await services.reportingService.getDashboardStats(params)
+        try {
+          data = await services.reportingService.getDashboardStats(params)
+        } catch (e) {
+          console.log('Error fetching dashboardStats, using default')
+          data = {
+            entreprises_total: 0,
+            liasses_ce_mois: 0,
+            audits_en_cours: 0,
+            revenue_mensuel: 0,
+            croissance_mensuelle: 0,
+            top_erreurs: [],
+            performance: {
+              temps_moyen_generation: 0,
+              taux_reussite: 100,
+              satisfaction_client: 0
+            }
+          }
+        }
         break
 
       case 'analytics':
@@ -144,7 +186,12 @@ export const getBackendData = async (dataType: string, params?: any): Promise<an
 
       // PARAMÉTRAGE
       case 'typesLiasse':
-        data = await services.entrepriseService.getTypesLiasse(params)
+        try {
+          data = await services.entrepriseService.getTypesLiasse(params) || []
+        } catch (e) {
+          console.log('Error fetching typesLiasse, using empty array')
+          data = []
+        }
         break
 
       case 'entrepriseStats':
@@ -194,7 +241,17 @@ export const useBackendDataGlobal = (dataType: string, params?: any, defaultData
   const [loading, setLoading] = React.useState(true)
   const [error, setError] = React.useState<Error | null>(null)
 
+  // Stabiliser les params pour éviter les boucles infinies
+  const paramsKey = React.useMemo(() => {
+    return params ? JSON.stringify(params) : ''
+  }, [JSON.stringify(params)])
+
   React.useEffect(() => {
+    if (!BACKEND_ENABLED) {
+      setLoading(false)
+      return
+    }
+
     const loadData = async () => {
       setLoading(true)
       try {
@@ -209,7 +266,7 @@ export const useBackendDataGlobal = (dataType: string, params?: any, defaultData
     }
 
     loadData()
-  }, [dataType, JSON.stringify(params)])
+  }, [dataType, paramsKey])
 
   return { data, loading, error }
 }
