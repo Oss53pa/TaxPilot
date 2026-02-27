@@ -1,6 +1,6 @@
 /**
- * Niveau 1 - Controles fondamentaux (F-001 a F-011)
- * 11 controles verifiant les equilibres et coherences de base
+ * Niveau 1 - Controles fondamentaux (F-001 a F-012)
+ * 12 controles verifiant les equilibres et coherences de base
  */
 
 import { AuditContext, ResultatControle, NiveauControle } from '@/types/audit.types'
@@ -276,6 +276,38 @@ function F011(ctx: AuditContext): ResultatControle {
   return ok(ref, nom, 'Comptes collectifs correctement detailles')
 }
 
+// F-012: Solde sans mouvement (AUD-BAL-005)
+function F012(ctx: AuditContext): ResultatControle {
+  const ref = 'F-012', nom = 'Solde sans mouvement'
+
+  const anomalies = ctx.balanceN.filter((l) => {
+    const hasSolde = (l.solde_debit || 0) !== 0 || (l.solde_credit || 0) !== 0
+    const hasMouvement = (l.debit || 0) !== 0 || (l.credit || 0) !== 0
+    return hasSolde && !hasMouvement
+  })
+
+  if (anomalies.length > 0) {
+    const totalNonJustifie = anomalies.reduce(
+      (s, l) => s + (l.solde_debit || 0) + (l.solde_credit || 0), 0
+    )
+    return anomalie(ref, nom, 'BLOQUANT',
+      `${anomalies.length} compte(s) avec solde sans aucun mouvement comptable. ` +
+      `Montant total non justifie: ${totalNonJustifie.toLocaleString('fr-FR')} FCFA`,
+      {
+        comptes: anomalies.map((l) => `${l.compte} (${l.intitule || 'N/A'}): SD=${(l.solde_debit||0).toLocaleString('fr-FR')}, SC=${(l.solde_credit||0).toLocaleString('fr-FR')}`),
+        montants: { nombreComptes: anomalies.length, totalNonJustifie },
+        description: 'Un solde ne peut exister sans mouvement comptable. Causes possibles: ' +
+          'report a nouveau inscrit directement en colonne Solde au lieu d\'etre passe en ecriture d\'ouverture, ' +
+          'colonnes Mouvement mal renseignees lors de l\'export, ou balance incomplete.'
+      },
+      'Corriger la balance source: chaque compte avec un solde doit disposer de mouvements correspondants, puis reimporter la balance corrigee.',
+      undefined,
+      'Art. 19 et 20 Acte Uniforme OHADA relatif au droit comptable'
+    )
+  }
+  return ok(ref, nom, 'Tous les comptes avec solde disposent de mouvements comptables')
+}
+
 // --- Enregistrement ---
 
 export function registerLevel1Controls(): void {
@@ -291,6 +323,7 @@ export function registerLevel1Controls(): void {
     ['F-009', 'Nombre de comptes suffisant', 'Verifie au moins 50 comptes', 'MINEUR', F009],
     ['F-010', 'Comptes a solde nul', 'Signale les comptes a solde nul', 'INFO', F010],
     ['F-011', 'Comptes collectifs', 'Verifie le detail des comptes collectifs', 'MINEUR', F011],
+    ['F-012', 'Solde sans mouvement', 'Verifie que tout compte avec solde a des mouvements', 'BLOQUANT', F012],
   ]
 
   for (const [ref, nom, desc, sev, fn] of defs) {
