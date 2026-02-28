@@ -12,8 +12,8 @@ const NIVEAU: NiveauControle = 8
 function ok(ref: string, nom: string, msg: string): ResultatControle {
   return { ref, nom, niveau: NIVEAU, statut: 'OK', severite: 'OK', message: msg, timestamp: new Date().toISOString() }
 }
-function anomalie(ref: string, nom: string, sev: ResultatControle['severite'], msg: string, det?: ResultatControle['details'], sug?: string): ResultatControle {
-  return { ref, nom, niveau: NIVEAU, statut: 'ANOMALIE', severite: sev, message: msg, details: det, suggestion: sug, timestamp: new Date().toISOString() }
+function anomalie(ref: string, nom: string, sev: ResultatControle['severite'], msg: string, det?: ResultatControle['details'], sug?: string, refR?: string): ResultatControle {
+  return { ref, nom, niveau: NIVEAU, statut: 'ANOMALIE', severite: sev, message: msg, details: det, suggestion: sug, referenceReglementaire: refR, timestamp: new Date().toISOString() }
 }
 function na(ref: string, nom: string, msg: string): ResultatControle {
   return { ref, nom, niveau: NIVEAU, statut: 'NON_APPLICABLE', severite: 'OK', message: msg, timestamp: new Date().toISOString() }
@@ -59,8 +59,12 @@ function AR001(ctx: AuditContext): ResultatControle {
   if (ecartD > 1 || ecartC > 1) {
     return anomalie(ref, nom, 'BLOQUANT',
       `Balance N-1 differente de l'archive: ecarts D=${ecartD.toLocaleString('fr-FR')}, C=${ecartC.toLocaleString('fr-FR')}`,
-      { montants: { totalN1Debit: totalN1D, archiveDebit: totalArchD, totalN1Credit: totalN1C, archiveCredit: totalArchC } },
-      'La balance N-1 doit correspondre exactement a l\'archive')
+      {
+        montants: { totalN1Debit: totalN1D, archiveDebit: totalArchD, totalN1Credit: totalN1C, archiveCredit: totalArchC },
+        description: `La balance N-1 importee ne correspond pas a la liasse N-1 archivee. Ecarts: Debits ${ecartD.toLocaleString('fr-FR')}, Credits ${ecartC.toLocaleString('fr-FR')}. Cela peut indiquer que le fichier N-1 importe n\'est pas la version definitive, ou que des modifications ont ete apportees apres l\'archivage. La continuite des exercices est compromise.`
+      },
+      'Utiliser la balance N-1 issue de l\'archive officielle. Si des corrections post-cloture ont eu lieu, re-archiver la version definitive.',
+      'Art. 8 Acte Uniforme OHADA - Permanence des methodes et continuite')
   }
   return ok(ref, nom, 'Balance N-1 conforme a l\'archive')
 }
@@ -84,8 +88,13 @@ function AR002(ctx: AuditContext): ResultatControle {
   if (variations.length > 0) {
     return anomalie(ref, nom, 'MINEUR',
       `Variation(s) de capital detectee(s) sur les archives`,
-      { comptes: variations },
-      'Chaque variation de capital doit etre justifiee par une operation formelle')
+      {
+        comptes: variations,
+        montants: { variationsDetectees: variations.length, capitalActuel: capitalN },
+        description: `${variations.length} variation(s) de capital ont ete detectees en comparant l\'exercice courant avec les exercices archives. Chaque modification du capital social doit resulter d\'une decision formelle en assemblee generale (augmentation, reduction, fusion). La continuite du capital est un indicateur cle de la stabilite juridique de l\'entreprise.`
+      },
+      'Justifier chaque variation de capital par le PV d\'AG correspondant. Verifier la concordance avec les actes notaries et les publications legales.',
+      'Art. 8 Acte Uniforme OHADA - Permanence des methodes')
   }
   return ok(ref, nom, 'Capital stable sur les exercices archives')
 }
@@ -110,10 +119,16 @@ function AR003(ctx: AuditContext): ResultatControle {
     const derniers = resultats.slice(-3)
     const tousDeficitaires = derniers.every((r) => r.resultat < 0)
     if (tousDeficitaires) {
+      const totalDeficits = derniers.reduce((s, r) => s + Math.abs(r.resultat), 0)
       return anomalie(ref, nom, 'INFO',
         `Deficits consecutifs sur ${derniers.length} exercices`,
-        { comptes: derniers.map((r) => `${r.exercice}: ${r.resultat.toLocaleString('fr-FR')}`) },
-        'Situation de deficits consecutifs a surveiller')
+        {
+          comptes: derniers.map((r) => `${r.exercice}: ${r.resultat.toLocaleString('fr-FR')}`),
+          montants: { exercicesDeficitaires: derniers.length, totalDeficitsCumules: totalDeficits },
+          description: `L\'entreprise est en deficit sur ${derniers.length} exercices consecutifs pour un total cumule de ${totalDeficits.toLocaleString('fr-FR')} FCFA. Des deficits repetes signalent un probleme structurel de rentabilite et peuvent remettre en cause la continuite d\'exploitation. Si les capitaux propres deviennent inferieurs a la moitie du capital, une AG extraordinaire doit statuer.`
+        },
+        'Evaluer la situation de continuite d\'exploitation. Envisager un plan de redressement ou une restructuration. Verifier si les capitaux propres restent superieurs a la moitie du capital.',
+        'Art. 8 Acte Uniforme OHADA / Art. 664 AUSCGIE')
     }
   }
   return ok(ref, nom, `Tendance analysee sur ${resultats.length} exercice(s)`)
@@ -138,8 +153,13 @@ function AR004(ctx: AuditContext): ResultatControle {
   if (ruptures.length > 0) {
     return anomalie(ref, nom, 'MINEUR',
       `Rupture(s) dans la serie des exercices archives`,
-      { comptes: ruptures },
-      'Archiver les exercices manquants pour assurer la continuite')
+      {
+        comptes: ruptures,
+        montants: { rupturesDetectees: ruptures.length, exercicesArchives: exercices.length },
+        description: `${ruptures.length} rupture(s) ont ete detectees dans la serie des exercices archives. Des exercices manquants empechent l\'analyse de tendance complete et compromettent la verification de la continuite des reports a nouveau sur la periode concernee.`
+      },
+      'Archiver les exercices manquants pour reconstituer la serie complete. La conservation des balances sur au moins 5 exercices est recommandee.',
+      'Art. 8 Acte Uniforme OHADA - Conservation des documents comptables')
   }
   return ok(ref, nom, 'Serie d\'exercices continue')
 }
@@ -164,8 +184,13 @@ function AR005(ctx: AuditContext): ResultatControle {
   if (incoherences.length > 0) {
     return anomalie(ref, nom, 'MAJEUR',
       `${incoherences.length} incoherence(s) de report a nouveau`,
-      { comptes: incoherences },
-      'Le report a nouveau de chaque exercice doit correspondre au resultat de l\'exercice precedent')
+      {
+        comptes: incoherences,
+        montants: { incoherences: incoherences.length, exercicesVerifies: archives.length },
+        description: `${incoherences.length} incoherence(s) de report a nouveau detectees dans les exercices archives. Le RAN de chaque exercice doit correspondre au resultat (ou au resultat diminue des distributions) de l\'exercice precedent. Des ecarts non justifies remettent en cause la fiabilite de la chaine comptable sur plusieurs exercices.`
+      },
+      'Reconstituer la chaine des reports a nouveau. Pour chaque ecart, identifier s\'il s\'agit de dividendes distribues, de mises en reserves, ou d\'erreurs. Corriger les archives si necessaire.',
+      'Art. 8 Acte Uniforme OHADA - Permanence des methodes')
   }
   return ok(ref, nom, 'Reports a nouveau coherents')
 }
@@ -189,8 +214,13 @@ function AR006(ctx: AuditContext): ResultatControle {
   if (nouveaux.length > 5 || supprimes.length > 5) {
     return anomalie(ref, nom, 'INFO',
       `Changements de structure: +${nouveaux.length} prefixes, -${supprimes.length} prefixes`,
-      { comptes: [...nouveaux.map((p) => `+${p}`), ...supprimes.map((p) => `-${p}`)] },
-      'Verifier le respect du principe de permanence des methodes comptables')
+      {
+        comptes: [...nouveaux.map((p) => `+${p}`), ...supprimes.map((p) => `-${p}`)],
+        montants: { nouveauxPrefixes: nouveaux.length, prefixesSupprimes: supprimes.length },
+        description: `La structure du plan de comptes a evolue par rapport au dernier exercice archive: ${nouveaux.length} nouveaux prefixes et ${supprimes.length} supprimes. Le principe de permanence des methodes impose de maintenir la meme nomenclature comptable d\'un exercice a l\'autre, sauf changement reglementaire justifie.`
+      },
+      'Documenter les raisons des changements de nomenclature dans l\'annexe. S\'assurer de la comparabilite des etats financiers entre exercices.',
+      'Art. 8 Acte Uniforme OHADA - Permanence des methodes')
   }
   return ok(ref, nom, 'Methodes comptables stables')
 }
@@ -212,8 +242,12 @@ function AR007(ctx: AuditContext): ResultatControle {
   if (Math.abs(ecart) > 1) {
     return anomalie(ref, nom, 'MAJEUR',
       `Ajustement retrospectif detecte: ${ecart.toLocaleString('fr-FR')} (RAN - Resultat archive)`,
-      { montants: { ranN, resultatArchive: resultatArch, ajustement: ecart } },
-      'Les ajustements retrospectifs doivent etre documentes et justifies (IAS 8)')
+      {
+        montants: { ranN, resultatArchive: resultatArch, ajustement: ecart },
+        description: `Un ecart de ${ecart.toLocaleString('fr-FR')} FCFA est detecte entre le report a nouveau de l\'exercice courant (${ranN.toLocaleString('fr-FR')}) et le resultat de la derniere archive (${resultatArch.toLocaleString('fr-FR')}). Cet ecart peut resulter d\'un ajustement retrospectif (correction d\'erreur sur exercice anterieur, changement de methode comptable) ou d\'une distribution de dividendes/mise en reserves.`
+      },
+      'Documenter l\'ajustement retrospectif dans l\'annexe aux etats financiers (nature, motif, impact sur les exercices anterieurs). S\'assurer de la conformite avec IAS 8 / SYSCOHADA.',
+      'Art. 8 Acte Uniforme OHADA - Changements de methodes / IAS 8')
   }
   return ok(ref, nom, 'Pas d\'ajustement retrospectif')
 }

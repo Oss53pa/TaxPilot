@@ -13,8 +13,8 @@ const NIVEAU: NiveauControle = 7
 function ok(ref: string, nom: string, msg: string): ResultatControle {
   return { ref, nom, niveau: NIVEAU, statut: 'OK', severite: 'OK', message: msg, timestamp: new Date().toISOString() }
 }
-function anomalie(ref: string, nom: string, sev: ResultatControle['severite'], msg: string, det?: ResultatControle['details'], sug?: string, refR?: string): ResultatControle {
-  return { ref, nom, niveau: NIVEAU, statut: 'ANOMALIE', severite: sev, message: msg, details: det, suggestion: sug, referenceReglementaire: refR, timestamp: new Date().toISOString() }
+function anomalie(ref: string, nom: string, sev: ResultatControle['severite'], msg: string, det?: ResultatControle['details'], sug?: string, ecr?: ResultatControle['ecrituresCorrectives'], refR?: string): ResultatControle {
+  return { ref, nom, niveau: NIVEAU, statut: 'ANOMALIE', severite: sev, message: msg, details: det, suggestion: sug, ecrituresCorrectives: ecr, referenceReglementaire: refR, timestamp: new Date().toISOString() }
 }
 
 function find(bal: BalanceEntry[], prefix: string): BalanceEntry[] {
@@ -29,9 +29,13 @@ function FI001(ctx: AuditContext): ResultatControle {
   if (resultat < 0) {
     return anomalie(ref, nom, 'INFO',
       `Resultat deficitaire: ${resultat.toLocaleString('fr-FR')}`,
-      { montants: { resultatNet: resultat } },
-      'Un resultat deficitaire doit etre justifie et peut etre reporte sur les exercices suivants',
-      'Art. 7 CGI - Report deficitaire')
+      {
+        montants: { resultatNet: resultat },
+        description: `Le resultat de l\'exercice est deficitaire (${resultat.toLocaleString('fr-FR')} FCFA). Un deficit est reportable sur les 5 exercices suivants (sauf amortissements reputes differes). L\'entreprise reste neanmoins redevable du minimum forfaitaire d\'imposition (IMF). Le deficit doit etre justifie et documente dans la declaration fiscale.`
+      },
+      'Constituer le dossier de report deficitaire. S\'assurer du paiement du minimum forfaitaire (IMF). Documenter les causes du deficit dans la liasse fiscale.',
+      undefined,
+      'Art. 7 CGI - Report deficitaire sur 5 exercices')
   }
   return ok(ref, nom, `Resultat: ${resultat.toLocaleString('fr-FR')}`)
 }
@@ -43,11 +47,20 @@ function FI002(ctx: AuditContext): ResultatControle {
   const valeurVehicules = absSum(find(ctx.balanceN, '245'))
   // Plafond: amortissement sur base max de 25 000 000 FCFA par vehicule
   if (valeurVehicules > 25000000) {
+    const exces = valeurVehicules - 25000000
     return anomalie(ref, nom, 'MINEUR',
       `Vehicules de tourisme: ${valeurVehicules.toLocaleString('fr-FR')} (plafond fiscal: 25 000 000)`,
-      { montants: { valeurVehicules, plafond: 25000000 } },
-      'Reintegrer la fraction d\'amortissement excedant la base de 25 M FCFA',
-      'Art. 8-1 CGI CEMAC')
+      {
+        montants: { valeurVehicules, plafond: 25000000, excesAReintegrer: exces },
+        description: `La valeur des vehicules de tourisme (${valeurVehicules.toLocaleString('fr-FR')} FCFA) depasse le plafond fiscal de 25 000 000 FCFA. L\'amortissement sur la fraction excedentaire (${exces.toLocaleString('fr-FR')}) n\'est pas deductible fiscalement et doit etre reintegre dans le resultat fiscal.`
+      },
+      `Reintegrer dans le tableau de determination du resultat fiscal la fraction d\'amortissement calculee sur l\'exces de ${exces.toLocaleString('fr-FR')} FCFA au-dela du plafond.`,
+      [{
+        journal: 'FISCAL', date: new Date().toISOString().slice(0, 10),
+        lignes: [{ sens: 'D' as const, compte: 'REINTEG', libelle: 'Reintegration amort. vehicules > 25M', montant: Math.round(exces * 0.2) }],
+        commentaire: 'Reintegration fiscale estimee (taux 20% sur base excedentaire)'
+      }],
+      'Art. 8-1 CGI CEMAC - Plafond amortissement vehicules tourisme')
   }
   return ok(ref, nom, 'Vehicules de tourisme dans les limites')
 }
@@ -59,10 +72,21 @@ function FI003(ctx: AuditContext): ResultatControle {
   const receptions = absSum(find(ctx.balanceN, '627'))
   const ca = absSum(find(ctx.balanceN, '70'))
   if (ca > 0 && receptions > ca * 0.01) {
+    const ratio = receptions / ca * 100
+    const excedent = receptions - ca * 0.01
     return anomalie(ref, nom, 'MINEUR',
       `Receptions et cadeaux (${receptions.toLocaleString('fr-FR')}) > 1% du CA (${ca.toLocaleString('fr-FR')})`,
-      { montants: { receptions, ca, ratioPct: (receptions / ca * 100) } },
-      'Les charges somptuaires au-dela des seuils sont a reintegrer fiscalement')
+      {
+        montants: { receptions, ca, ratioPct: Math.round(ratio * 10) / 10, excedentAReintegrer: excedent },
+        description: `Les charges de receptions et cadeaux (627x) representent ${ratio.toFixed(1)}% du chiffre d\'affaires, depassant le seuil de 1%. L\'excedent de ${excedent.toLocaleString('fr-FR')} FCFA n\'est pas deductible fiscalement et doit etre reintegre dans le resultat fiscal.`
+      },
+      `Reintegrer l'excedent de ${excedent.toLocaleString('fr-FR')} FCFA dans le tableau de passage du resultat comptable au resultat fiscal.`,
+      [{
+        journal: 'FISCAL', date: new Date().toISOString().slice(0, 10),
+        lignes: [{ sens: 'D' as const, compte: 'REINTEG', libelle: 'Reintegration charges somptuaires excedentaires', montant: excedent }],
+        commentaire: 'Excedent charges somptuaires au-dela de 1% du CA'
+      }],
+      'CGI - Charges somptuaires')
   }
   return ok(ref, nom, 'Charges somptuaires dans les limites')
 }
@@ -74,9 +98,17 @@ function FI004(ctx: AuditContext): ResultatControle {
   if (amendes > 0) {
     return anomalie(ref, nom, 'MINEUR',
       `Amendes et penalites: ${amendes.toLocaleString('fr-FR')} (non deductibles)`,
-      { montants: { amendes } },
-      'Les amendes et penalites fiscales ne sont pas deductibles du resultat fiscal',
-      'Art. 8-d CGI')
+      {
+        montants: { amendes },
+        description: `Des amendes et penalites de ${amendes.toLocaleString('fr-FR')} FCFA sont comptabilisees (6471x/6478x). Ces charges sont integralement non deductibles du resultat fiscal et doivent etre reintegrees dans le tableau de passage au resultat fiscal.`
+      },
+      `Reintegrer la totalite des amendes (${amendes.toLocaleString('fr-FR')} FCFA) dans le resultat fiscal. Documenter la nature et l'origine de chaque penalite.`,
+      [{
+        journal: 'FISCAL', date: new Date().toISOString().slice(0, 10),
+        lignes: [{ sens: 'D' as const, compte: 'REINTEG', libelle: 'Reintegration amendes et penalites', montant: amendes }],
+        commentaire: 'Amendes et penalites - 100% non deductibles'
+      }],
+      'Art. 8-d CGI - Charges non deductibles')
   }
   return ok(ref, nom, 'Aucune amende ou penalite comptabilisee')
 }
@@ -88,11 +120,16 @@ function FI005(ctx: AuditContext): ResultatControle {
   const ca = absSum(find(ctx.balanceN, '70'))
   const plafond = ca * 0.001 // 1 pour mille
   if (dons > plafond && plafond > 0) {
+    const exces = dons - plafond
     return anomalie(ref, nom, 'MINEUR',
       `Dons (${dons.toLocaleString('fr-FR')}) > plafond 1‰ du CA (${plafond.toLocaleString('fr-FR')})`,
-      { montants: { dons, plafond, ca } },
-      'Les dons au-dela du plafond sont a reintegrer au resultat fiscal',
-      'Art. 8-e CGI')
+      {
+        montants: { dons, plafond, ca, excesAReintegrer: exces },
+        description: `Les dons et liberalites (6234x) de ${dons.toLocaleString('fr-FR')} FCFA depassent le plafond de deductibilite de 1 pour mille du CA (${plafond.toLocaleString('fr-FR')} FCFA). L'excedent de ${exces.toLocaleString('fr-FR')} FCFA doit etre reintegre au resultat fiscal.`
+      },
+      `Reintegrer l'excedent de ${exces.toLocaleString('fr-FR')} FCFA dans le tableau de passage au resultat fiscal.`,
+      undefined,
+      'Art. 8-e CGI - Plafond dons et liberalites')
   }
   return ok(ref, nom, 'Dons dans les limites du plafond')
 }
@@ -104,8 +141,13 @@ function FI006(ctx: AuditContext): ResultatControle {
   if (provisions > 0) {
     return anomalie(ref, nom, 'MINEUR',
       `Dotations aux provisions: ${provisions.toLocaleString('fr-FR')} - verifier la deductibilite`,
-      { montants: { dotationsProvisions: provisions } },
-      'Certaines provisions ne sont pas deductibles fiscalement (provisions pour propre assurance, etc.)')
+      {
+        montants: { dotationsProvisions: provisions },
+        description: `Des dotations aux provisions de ${provisions.toLocaleString('fr-FR')} FCFA sont comptabilisees (691/697). Certaines provisions ne sont pas deductibles fiscalement: provisions pour propre assurance, provisions a caractere de reserves, provisions sans objet precis. Chaque provision doit etre examinee individuellement pour determiner sa deductibilite.`
+      },
+      'Examiner chaque provision individuellement. Reintegrer les provisions non deductibles dans le resultat fiscal. Justifier les provisions deductibles par des elements probants.',
+      undefined,
+      'CGI - Deductibilite des provisions')
   }
   return ok(ref, nom, 'Pas de dotation aux provisions')
 }
@@ -124,14 +166,20 @@ function FI007(ctx: AuditContext): ResultatControle {
       if (ecart > isEstime * 0.3) {
         return anomalie(ref, nom, 'MAJEUR',
           `IS comptabilise (${isComptabilise.toLocaleString('fr-FR')}) significativement different de l'estime (${isEstime.toLocaleString('fr-FR')} @ ${taux.IS.taux_normal * 100}%)`,
-          { montants: { isComptabilise, isEstime, resultat, ecart } },
-          'Verifier le calcul de l\'IS et les reintegrations/deductions')
+          {
+            montants: { isComptabilise, isEstime, resultat, ecart, tauxIS: taux.IS.taux_normal * 100 },
+            description: `L'IS comptabilise (${isComptabilise.toLocaleString('fr-FR')}) differe de ${ecart.toLocaleString('fr-FR')} FCFA par rapport a l'estimation au taux normal de ${taux.IS.taux_normal * 100}% (${isEstime.toLocaleString('fr-FR')}). L\'ecart peut s\'expliquer par des reintegrations, des deductions fiscales, un taux reduit, ou une erreur de calcul.`
+          },
+          'Verifier le calcul de l\'IS: reintegrations extracomptables, deductions, credits d\'impot, et reports deficitaires. S\'assurer que le taux applique est correct.')
       }
     } else {
       return anomalie(ref, nom, 'MAJEUR',
         `Resultat beneficiaire (${resultat.toLocaleString('fr-FR')}) sans IS comptabilise (89x)`,
-        { montants: { resultat } },
-        'Comptabiliser l\'impot sur les societes')
+        {
+          montants: { resultat, isEstime: resultat * taux.IS.taux_normal },
+          description: `Un resultat beneficiaire de ${resultat.toLocaleString('fr-FR')} FCFA est constate sans aucun impot comptabilise (89x). L\'IS estime au taux normal de ${taux.IS.taux_normal * 100}% serait de ${(resultat * taux.IS.taux_normal).toLocaleString('fr-FR')} FCFA.`
+        },
+        `Comptabiliser l'impot sur les societes. IS estime: ${(resultat * taux.IS.taux_normal).toLocaleString('fr-FR')} FCFA au taux de ${taux.IS.taux_normal * 100}%.`)
     }
   }
   return ok(ref, nom, 'IS coherent avec le resultat')
@@ -148,8 +196,13 @@ function FI008(ctx: AuditContext): ResultatControle {
     if (isComptabilise > 0 && isComptabilise < imf) {
       return anomalie(ref, nom, 'MINEUR',
         `IS (${isComptabilise.toLocaleString('fr-FR')}) < IMF (${imf.toLocaleString('fr-FR')}) = ${taux.IMF.taux * 100}% du CA (min ${taux.IMF.minimum.toLocaleString('fr-FR')})`,
-        { montants: { isComptabilise, imf, ca } },
-        'Verifier que le minimum forfaitaire est respecte')
+        {
+          montants: { isComptabilise, imf, ca, complement: imf - isComptabilise },
+          description: `L'impot comptabilise (${isComptabilise.toLocaleString('fr-FR')}) est inferieur au minimum forfaitaire d\'imposition (IMF = ${imf.toLocaleString('fr-FR')} FCFA, soit ${taux.IMF.taux * 100}% du CA avec un minimum de ${taux.IMF.minimum.toLocaleString('fr-FR')}). L\'entreprise doit payer au minimum l\'IMF, soit un complement de ${(imf - isComptabilise).toLocaleString('fr-FR')} FCFA.`
+        },
+        `Ajuster l'IS au montant de l'IMF: comptabiliser un complement de ${(imf - isComptabilise).toLocaleString('fr-FR')} FCFA.`,
+        undefined,
+        'CGI - Minimum forfaitaire d\'imposition')
     }
   }
   return ok(ref, nom, 'IMF respecte')
@@ -166,8 +219,20 @@ function FI009(ctx: AuditContext): ResultatControle {
     if (soldeTheorique > 0 && tvaDue === 0) {
       return anomalie(ref, nom, 'MINEUR',
         `TVA due theorique (${soldeTheorique.toLocaleString('fr-FR')}) non comptabilisee (444x)`,
-        { montants: { tvaCollectee, tvaDeductible, soldeTheorique } },
-        'Comptabiliser la TVA due (444x) correspondant a la difference TVA collectee - TVA deductible')
+        {
+          montants: { tvaCollectee, tvaDeductible, soldeTheorique },
+          description: `La TVA collectee (${tvaCollectee.toLocaleString('fr-FR')}) depasse la TVA deductible (${tvaDeductible.toLocaleString('fr-FR')}), generant un solde de TVA a reverser de ${soldeTheorique.toLocaleString('fr-FR')} FCFA qui n\'est pas comptabilise au compte 444x. Ce montant doit etre declare et paye a l\'administration fiscale.`
+        },
+        'Comptabiliser la TVA due au compte 444x. Verifier la concordance avec les declarations mensuelles de TVA.',
+        [{
+          journal: 'OD', date: new Date().toISOString().slice(0, 10),
+          lignes: [
+            { sens: 'D' as const, compte: '443000', libelle: 'TVA collectee - apurement', montant: soldeTheorique },
+            { sens: 'C' as const, compte: '444000', libelle: 'Etat - TVA due', montant: soldeTheorique },
+          ],
+          commentaire: 'Centralisation TVA: transfert solde TVA collectee vers TVA due'
+        }],
+        'CGI - Declarations et paiement de la TVA')
     }
   }
   return ok(ref, nom, 'TVA a reverser coherente')
@@ -181,16 +246,22 @@ function FI010(ctx: AuditContext): ResultatControle {
   if (chargesPerso > 0 && cotisations === 0) {
     return anomalie(ref, nom, 'INFO',
       `Charges de personnel (${chargesPerso.toLocaleString('fr-FR')}) sans cotisations sociales (664x/6413x)`,
-      { montants: { chargesPersonnel: chargesPerso } },
-      'Verifier les declarations CNPS/NSIF')
+      {
+        montants: { chargesPersonnel: chargesPerso },
+        description: `Des charges de personnel de ${chargesPerso.toLocaleString('fr-FR')} FCFA sont comptabilisees sans aucune cotisation sociale patronale. L\'employeur est tenu de declarer et payer les cotisations CNPS (ou equivalent) sur les salaires verses.`
+      },
+      'Verifier les declarations sociales (CNPS/NSIF/CSS). Comptabiliser les cotisations patronales au compte 664x.')
   }
   if (chargesPerso > 0 && cotisations > 0) {
     const ratio = (cotisations / chargesPerso) * 100
     if (ratio < 10) {
       return anomalie(ref, nom, 'INFO',
         `Ratio cotisations/salaires faible: ${ratio.toFixed(1)}%`,
-        { montants: { chargesPersonnel: chargesPerso, cotisations, ratioPct: ratio } },
-        'Verifier le taux de cotisations sociales applique (CNPS/NSIF)')
+        {
+          montants: { chargesPersonnel: chargesPerso, cotisations, ratioPct: Math.round(ratio * 10) / 10 },
+          description: `Le ratio cotisations sociales / charges de personnel est de ${ratio.toFixed(1)}%, ce qui est inhabituellement bas. Les taux de cotisations patronales (CNPS, prevoyance, accidents du travail) representent generalement 15-25% de la masse salariale brute.`
+        },
+        'Verifier l\'exhaustivite des cotisations sociales: prestations familiales, accidents du travail, retraite. S\'assurer que les declarations CNPS sont a jour.')
     }
   }
   return ok(ref, nom, 'Coherence charges personnel / cotisations')
@@ -207,9 +278,13 @@ function FI011(ctx: AuditContext): ResultatControle {
     const exces = dons - plafond
     return anomalie(ref, nom, 'MINEUR',
       `Dons (${dons.toLocaleString('fr-FR')}) > plafond 5‰ CA (${plafond.toLocaleString('fr-FR')}), exces: ${exces.toLocaleString('fr-FR')}`,
-      { montants: { dons, plafond, ca, exces } },
-      'L\'excedent des dons au-dela de 5 pour mille du CA est a reintegrer',
-      'CGI Art. 18-5')
+      {
+        montants: { dons, plafond, ca, exces },
+        description: `Les dons comptabilises au compte 658 (${dons.toLocaleString('fr-FR')} FCFA) depassent le plafond de deductibilite de 5 pour mille du CA (${plafond.toLocaleString('fr-FR')} FCFA). L'excedent de ${exces.toLocaleString('fr-FR')} FCFA est fiscalement non deductible.`
+      },
+      `Reintegrer l'excedent de ${exces.toLocaleString('fr-FR')} FCFA dans le resultat fiscal.`,
+      undefined,
+      'CGI Art. 18-5 - Plafond dons')
   }
   return ok(ref, nom, 'Dons dans les limites (5‰ du CA)')
 }
@@ -221,9 +296,13 @@ function FI012(ctx: AuditContext): ResultatControle {
   if (somptuaires > 0) {
     return anomalie(ref, nom, 'MINEUR',
       `Charges somptuaires: ${somptuaires.toLocaleString('fr-FR')} (100% non deductibles)`,
-      { montants: { somptuaires } },
-      'Les charges somptuaires (depenses de luxe) sont integralement non deductibles',
-      'CGI Art. 18-6')
+      {
+        montants: { somptuaires },
+        description: `Des charges somptuaires de ${somptuaires.toLocaleString('fr-FR')} FCFA sont comptabilisees au compte 6257. Ces depenses de luxe (residence personnelle, chasse, peche, yacht, etc.) sont integralement non deductibles du resultat fiscal.`
+      },
+      `Reintegrer la totalite (${somptuaires.toLocaleString('fr-FR')} FCFA) dans le resultat fiscal. Documenter la nature des depenses somptuaires.`,
+      undefined,
+      'CGI Art. 18-6 - Charges somptuaires non deductibles')
   }
   return ok(ref, nom, 'Aucune charge somptuaire detectee')
 }

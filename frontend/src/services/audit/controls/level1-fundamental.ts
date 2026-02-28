@@ -53,8 +53,11 @@ function F001(ctx: AuditContext): ResultatControle {
   if (ecart > TOLERANCE) {
     return anomalie(ref, nom, 'BLOQUANT',
       `Desequilibre de ${ecart.toLocaleString('fr-FR')}`,
-      { ecart, montants: { totalDebit: totalD, totalCredit: totalC } },
-      'La somme des debits doit etre egale a la somme des credits',
+      {
+        ecart, montants: { totalDebit: totalD, totalCredit: totalC },
+        description: `La balance generale presente un desequilibre de ${ecart.toLocaleString('fr-FR')} FCFA. Le principe de la partie double impose que la somme des debits soit strictement egale a la somme des credits. Ce desequilibre bloque la production des etats financiers et invalide tous les controles de coherence.`
+      },
+      'Identifier l\'origine du desequilibre: erreur d\'import, ecriture incomplete, ou solde d\'ouverture mal reporte. Corriger la balance source puis reimporter.',
       [{
         journal: 'OD', date: new Date().toISOString().slice(0, 10),
         lignes: totalD > totalC
@@ -79,8 +82,13 @@ function F002(ctx: AuditContext): ResultatControle {
   if (ecart > TOLERANCE) {
     return anomalie(ref, nom, 'BLOQUANT',
       `Desequilibre N-1 de ${ecart.toLocaleString('fr-FR')}`,
-      { ecart, montants: { totalDebitN1: totalD, totalCreditN1: totalC } },
-      'Verifier la balance N-1 importee - la somme des debits doit etre egale a la somme des credits')
+      {
+        ecart, montants: { totalDebitN1: totalD, totalCreditN1: totalC },
+        description: `La balance N-1 presente un desequilibre de ${ecart.toLocaleString('fr-FR')} FCFA. Cela compromet tous les controles comparatifs inter-exercices et remet en cause la fiabilite des donnees N-1.`
+      },
+      'Verifier la balance N-1 importee. Si elle provient d\'un autre logiciel, s\'assurer que l\'export est complet et equilibre.',
+      undefined,
+      'Art. 19 Acte Uniforme OHADA relatif au droit comptable')
   }
   return ok(ref, nom, `Balance N-1 equilibree`)
 }
@@ -103,17 +111,28 @@ function F003(ctx: AuditContext): ResultatControle {
       `Ecart de ${ecart.toLocaleString('fr-FR')} entre resultat calcule et compte 13x`,
       {
         ecart,
-        montants: { resultatCalcule, resultatComptabilise, produits: totalProduits, charges: totalCharges }
+        montants: { resultatCalcule, resultatComptabilise, produits: totalProduits, charges: totalCharges },
+        description: `Le resultat calcule (produits classe 7 - charges classe 6 = ${resultatCalcule.toLocaleString('fr-FR')}) ne correspond pas au solde du compte 13x (${resultatComptabilise.toLocaleString('fr-FR')}). Ecart: ${ecart.toLocaleString('fr-FR')}. Causes possibles: affectation du resultat en cours, ecritures de cloture manquantes, ou erreur dans les a-nouveaux.`
       },
-      'Le resultat (produits-charges) doit correspondre au solde du compte 13x',
-      undefined,
+      'Verifier les ecritures d\'affectation du resultat et les operations de cloture. Le compte 13x doit refleter exactement la difference entre produits et charges.',
+      resultatCalcule > resultatComptabilise ? [{
+        journal: 'OD', date: new Date().toISOString().slice(0, 10),
+        lignes: [
+          { sens: 'D' as const, compte: '6x', libelle: 'Ajustement resultat', montant: ecart },
+          { sens: 'C' as const, compte: '130000', libelle: 'Resultat de l\'exercice', montant: ecart },
+        ],
+        commentaire: 'Ecriture corrective pour aligner le resultat'
+      }] : undefined,
       'Art. 34 Acte Uniforme OHADA')
   }
   if (comptes13.length === 0) {
     return anomalie(ref, nom, 'MINEUR',
       `Resultat calcule: ${resultatCalcule.toLocaleString('fr-FR')} mais pas de compte 13x`,
-      { montants: { resultatCalcule } },
-      'Pour une balance pre-cloture c\'est normal. Sinon, ajouter le compte 13x avec le resultat de l\'exercice')
+      {
+        montants: { resultatCalcule, produits: totalProduits, charges: totalCharges },
+        description: 'Aucun compte de resultat (13x) n\'est present dans la balance. Pour une balance pre-cloture (en cours d\'exercice), c\'est normal car le resultat n\'est pas encore affecte. Pour une balance de cloture, le compte 13x est obligatoire.'
+      },
+      'Si la balance est post-cloture, ajouter le compte 131000 (benefice) ou 139000 (perte) avec le resultat de l\'exercice.')
   }
   return ok(ref, nom, `Resultat coherent: ${resultatCalcule.toLocaleString('fr-FR')}`)
 }
@@ -134,12 +153,22 @@ function F004(ctx: AuditContext): ResultatControle {
     if (s > 0) totalActif += s
     else totalPassif += Math.abs(s)
   }
+  // Calculer la repartition par classe pour le detail
+  const parClasse: Record<string, number> = {}
+  for (const l of actifEntries) {
+    const cl = l.compte.toString().charAt(0)
+    parClasse[`classe${cl}`] = (parClasse[`classe${cl}`] || 0) + Math.abs(solde(l))
+  }
+
   const ecart = Math.abs(totalActif - totalPassif)
   if (ecart > 1) {
     return anomalie(ref, nom, 'BLOQUANT',
       `Desequilibre bilan: Actif=${totalActif.toLocaleString('fr-FR')}, Passif=${totalPassif.toLocaleString('fr-FR')} (ecart: ${ecart.toLocaleString('fr-FR')})`,
-      { ecart, montants: { totalActif, totalPassif } },
-      'Le total de l\'actif doit etre egal au total du passif',
+      {
+        ecart, montants: { totalActif, totalPassif, ...parClasse },
+        description: `Le bilan est desequilibre de ${ecart.toLocaleString('fr-FR')} FCFA. L\'actif (soldes debiteurs) et le passif (soldes crediteurs) des classes 1 a 5 doivent etre egaux. Ce desequilibre peut provenir d\'une erreur d\'affectation du resultat, de comptes mal classes, ou d\'ecritures incompletes.`
+      },
+      'Verifier l\'affectation du resultat (compte 13x), le classement des comptes de bilan, et les ecritures de regularisation.',
       undefined,
       'Art. 29 Acte Uniforme OHADA')
   }
@@ -156,10 +185,17 @@ function F005(ctx: AuditContext): ResultatControle {
   const requises = ['1', '2', '4', '5', '6', '7']
   const manquantes = requises.filter((c) => !classesPresentes.has(c))
   if (manquantes.length > 0) {
+    const nomsClasses: Record<string, string> = { '1': 'Capitaux', '2': 'Immobilisations', '3': 'Stocks', '4': 'Tiers', '5': 'Tresorerie', '6': 'Charges', '7': 'Produits' }
     return anomalie(ref, nom, 'MAJEUR',
-      `Classes manquantes: ${manquantes.join(', ')}`,
-      { comptes: manquantes },
-      'Une balance complete doit contenir les classes 1, 2, 4, 5, 6 et 7')
+      `Classes manquantes: ${manquantes.map(c => `${c} (${nomsClasses[c]})`).join(', ')}`,
+      {
+        comptes: manquantes.map(c => `Classe ${c}: ${nomsClasses[c]}`),
+        montants: { classesPresentes: classesPresentes.size, classesRequises: requises.length, classesManquantes: manquantes.length },
+        description: `${manquantes.length} classe(s) comptable(s) essentielle(s) absente(s). Une balance complete en SYSCOHADA doit comporter les classes 1 (Capitaux), 2 (Immobilisations), 4 (Tiers), 5 (Tresorerie), 6 (Charges) et 7 (Produits). L\'absence d\'une classe indique un import incomplet ou une activite tres specifique.`
+      },
+      'Verifier l\'exhaustivite de l\'import. Si l\'absence est justifiee (ex: pas de stocks pour une societe de services), documenter dans l\'annexe.',
+      undefined,
+      'Art. 14 Acte Uniforme OHADA - Plan de comptes SYSCOHADA')
   }
   return ok(ref, nom, `Toutes les classes essentielles presentes (${[...classesPresentes].sort().join(', ')})`)
 }
@@ -171,8 +207,13 @@ function F006(ctx: AuditContext): ResultatControle {
   if (capital.length === 0) {
     return anomalie(ref, nom, 'MAJEUR',
       'Aucun compte de capital social (101x) trouve',
+      {
+        description: 'Aucun compte de capital social (101x) n\'est present dans la balance. Le capital est un element obligatoire du passif pour toute societe commerciale. Son absence peut indiquer un import partiel, un plan de comptes non conforme, ou une entreprise individuelle.',
+        montants: { comptesCapital: 0 }
+      },
+      'Ajouter le compte 101000 (Capital social) ou verifier que la balance est complete.',
       undefined,
-      'Le capital social est obligatoire pour toute societe')
+      'Art. 37 Acte Uniforme OHADA / Art. 311 AUSCGIE')
   }
   const montant = capital.reduce((s, l) => s + (l.credit - l.debit), 0)
   return ok(ref, nom, `Capital social: ${montant.toLocaleString('fr-FR')}`)
@@ -185,8 +226,13 @@ function F007(ctx: AuditContext): ResultatControle {
   if (resultat.length === 0) {
     return anomalie(ref, nom, 'MINEUR',
       'Aucun compte de resultat (13x) trouve',
+      {
+        description: 'Aucun compte de resultat de l\'exercice (13x) n\'est present. Pour une balance en cours d\'exercice (pre-cloture), c\'est normal. Pour une balance de cloture, le compte 131 (benefice) ou 139 (perte) doit etre renseigne.',
+        montants: { comptesResultat: 0 }
+      },
+      'Si la balance est post-cloture, comptabiliser le resultat dans le compte 131 ou 139.',
       undefined,
-      'Le resultat de l\'exercice doit apparaitre dans la balance')
+      'Art. 34 Acte Uniforme OHADA')
   }
   const montant = resultat.reduce((s, l) => s + (l.credit - l.debit), 0)
   return ok(ref, nom, `Resultat: ${montant.toLocaleString('fr-FR')}`)
@@ -202,10 +248,16 @@ function F008(ctx: AuditContext): ResultatControle {
   const resultatN1 = findByPrefix(ctx.balanceN1, '13')
 
   if (ranN.length === 0 && resultatN1.length > 0) {
+    const montantResN1 = resultatN1.reduce((s, l) => s + (l.credit - l.debit), 0)
     return anomalie(ref, nom, 'MAJEUR',
       'Pas de report a nouveau (12x) alors que la balance N-1 a un resultat',
+      {
+        montants: { reportANouveau: 0, resultatN1: montantResN1 },
+        description: `Le resultat N-1 de ${montantResN1.toLocaleString('fr-FR')} n'a pas ete reporte dans le compte 12x en N. L\'affectation du resultat est une operation obligatoire d\'ouverture d\'exercice.`
+      },
+      'Passer l\'ecriture d\'affectation du resultat: debiter 13x et crediter 12x (ou 11x pour les reserves).',
       undefined,
-      'Le resultat N-1 doit etre reporte au compte 12x en N')
+      'Art. 36 Acte Uniforme OHADA')
   }
   if (ranN.length === 0) return na(ref, nom, 'Pas de RAN ni de resultat N-1')
 
@@ -216,8 +268,13 @@ function F008(ctx: AuditContext): ResultatControle {
   if (ecart > 1) {
     return anomalie(ref, nom, 'MAJEUR',
       `Report a nouveau (${montantRAN.toLocaleString('fr-FR')}) != Resultat N-1 (${montantResultatN1.toLocaleString('fr-FR')})`,
-      { ecart, montants: { reportANouveau: montantRAN, resultatN1: montantResultatN1 } },
-      'Le report a nouveau doit correspondre au resultat de l\'exercice precedent')
+      {
+        ecart, montants: { reportANouveau: montantRAN, resultatN1: montantResultatN1 },
+        description: `L\'ecart de ${ecart.toLocaleString('fr-FR')} entre le report a nouveau (12x) et le resultat N-1 (13x) peut s\'expliquer par: distribution de dividendes, mise en reserve, ou erreur d\'affectation. Si une distribution a eu lieu, l\'ecart doit correspondre aux dividendes distribues.`
+      },
+      'Verifier l\'ecriture d\'affectation du resultat. Le RAN doit correspondre au resultat N-1 diminue des distributions et mises en reserve.',
+      undefined,
+      'Art. 36 Acte Uniforme OHADA')
   }
   return ok(ref, nom, `Report a nouveau coherent: ${montantRAN.toLocaleString('fr-FR')}`)
 }
@@ -229,8 +286,11 @@ function F009(ctx: AuditContext): ResultatControle {
   if (count < 50) {
     return anomalie(ref, nom, 'MINEUR',
       `Seulement ${count} comptes (une balance complete comporte generalement 50+)`,
-      { montants: { nombreComptes: count } },
-      'Une balance trop courte peut indiquer un import partiel')
+      {
+        montants: { nombreComptes: count, seuilRecommande: 50 },
+        description: 'Une balance comptable standard pour une entreprise en activite comporte generalement plus de 50 comptes. Un nombre insuffisant peut indiquer un import partiel, une balance synthetique (comptes agreges), ou une micro-entreprise.'
+      },
+      'Verifier que l\'export est au niveau de detail le plus fin (comptes auxiliaires inclus). Utiliser une balance detaillee plutot que synthetique.')
   }
   return ok(ref, nom, `${count} comptes dans la balance`)
 }
@@ -246,8 +306,12 @@ function F010(ctx: AuditContext): ResultatControle {
     const pct = ((nuls.length / ctx.balanceN.length) * 100).toFixed(1)
     return anomalie(ref, nom, 'INFO',
       `${nuls.length} compte(s) a solde nul (${pct}%)`,
-      { comptes: nuls.slice(0, 10).map((l) => l.compte) },
-      'Les comptes a solde nul peuvent etre nettoyes')
+      {
+        comptes: nuls.slice(0, 10).map((l) => l.compte),
+        montants: { comptesNuls: nuls.length, totalComptes: ctx.balanceN.length, pctNuls: parseFloat(pct) },
+        description: 'Ces comptes ont un debit, credit, solde debiteur et solde crediteur tous egaux a zero. Ils n\'impactent pas les calculs mais alourdissent la balance. Leur presence peut indiquer des comptes crees mais jamais utilises.'
+      },
+      'Supprimer les comptes a solde nul de la balance pour plus de lisibilite, sauf si des mouvements sont prevus.')
   }
   return ok(ref, nom, 'Aucun compte a solde nul')
 }
@@ -270,8 +334,14 @@ function F011(ctx: AuditContext): ResultatControle {
   if (problemes.length > 0) {
     return anomalie(ref, nom, 'MINEUR',
       `Comptes collectifs non detailles: ${problemes.join(', ')}`,
-      { comptes: problemes },
-      'Les comptes collectifs (401, 411) doivent etre ventiles en sous-comptes')
+      {
+        comptes: problemes,
+        montants: { comptesCollectifsNonDetailles: problemes.length },
+        description: 'Les comptes collectifs (401 Fournisseurs, 411 Clients) sont utilises sans sous-comptes auxiliaires. En SYSCOHADA, ces comptes doivent etre ventiles par tiers pour permettre le suivi individuel des creances et dettes. L\'absence de detail empeche la justification des soldes.'
+      },
+      'Creer des sous-comptes par tiers (ex: 4110001 Client A, 4110002 Client B) pour permettre le lettrage et le suivi individuel.',
+      undefined,
+      'Art. 17 Acte Uniforme OHADA - Comptes collectifs et individuels')
   }
   return ok(ref, nom, 'Comptes collectifs correctement detailles')
 }

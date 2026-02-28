@@ -64,14 +64,16 @@ function C001(ctx: AuditContext): ResultatControle {
 
   if (nonOHADA.length > 0) {
     const pct = ((nonOHADA.length / ctx.balanceN.length) * 100).toFixed(1)
+    const avecSuggestion = nonOHADA.filter(c => c.suggestion).length
     return anomalie(ref, nom, 'MAJEUR',
       `${nonOHADA.length} compte(s) non conforme(s) au plan OHADA (${pct}%)`,
       {
         comptes: nonOHADA.slice(0, 15).map((c) => c.suggestion ? `${c.compte} -> ${c.suggestion}` : c.compte),
-        description: 'Comptes non trouves dans le plan SYSCOHADA Revise'
+        montants: { comptesNonConformes: nonOHADA.length, totalComptes: ctx.balanceN.length, pctNonConformes: parseFloat(pct), suggestionsDisponibles: avecSuggestion },
+        description: `${nonOHADA.length} numeros de compte ne figurent pas dans le referentiel SYSCOHADA Revise 2017. Ces comptes ne pourront pas etre mappes correctement dans les etats financiers (bilan, compte de resultat). ${avecSuggestion} suggestion(s) de reclassement ont ete identifiees automatiquement.`
       },
-      'Reclasser ces comptes selon le plan SYSCOHADA Revise 2017',
-      'Art. 14 Acte Uniforme OHADA')
+      'Reclasser ces comptes selon le plan SYSCOHADA Revise 2017. Utiliser les suggestions de mapping proposees ou consulter le plan de comptes officiel.',
+      'Art. 14 Acte Uniforme OHADA - Plan de comptes SYSCOHADA')
   }
   return ok(ref, nom, 'Tous les comptes sont conformes au plan OHADA')
 }
@@ -89,8 +91,13 @@ function C002(ctx: AuditContext): ResultatControle {
   if (invalides.length > 0) {
     return anomalie(ref, nom, 'BLOQUANT',
       `${invalides.length} compte(s) avec classe invalide`,
-      { comptes: invalides.slice(0, 10) },
-      'Les comptes doivent commencer par un chiffre de 1 a 9')
+      {
+        comptes: invalides.slice(0, 10),
+        montants: { comptesInvalides: invalides.length, totalComptes: ctx.balanceN.length },
+        description: 'Des numeros de compte commencent par un caractere invalide (lettre, zero, ou caractere special). En SYSCOHADA, les comptes doivent obligatoirement commencer par un chiffre de 1 a 9 representant leur classe comptable.'
+      },
+      'Corriger les numeros de compte pour qu\'ils commencent par un chiffre de classe valide (1 a 9).',
+      'Art. 14 Acte Uniforme OHADA - Nomenclature des comptes')
   }
   return ok(ref, nom, 'Toutes les classes sont valides')
 }
@@ -106,10 +113,20 @@ function C003(ctx: AuditContext): ResultatControle {
     if (len > 8) longs.push(line.compte)
   }
   if (courts.length > 0 || longs.length > 0) {
+    // Calculer la distribution des longueurs
+    const distrib: Record<string, number> = {}
+    for (const line of ctx.balanceN) {
+      const len = line.compte.toString().trim().length
+      distrib[`longueur${len}`] = (distrib[`longueur${len}`] || 0) + 1
+    }
     return anomalie(ref, nom, 'INFO',
       `${courts.length} compte(s) court(s) (<4), ${longs.length} compte(s) long(s) (>8)`,
-      { comptes: [...courts.slice(0, 5), ...longs.slice(0, 5)] },
-      'La norme SYSCOHADA recommande des comptes de 4 a 8 chiffres')
+      {
+        comptes: [...courts.slice(0, 5).map(c => `Court: ${c}`), ...longs.slice(0, 5).map(c => `Long: ${c}`)],
+        montants: { comptesCourts: courts.length, comptesLongs: longs.length, ...distrib },
+        description: 'Le SYSCOHADA recommande des numeros de compte de 4 a 8 chiffres. Les comptes courts (2-3 chiffres) sont des comptes de regroupement qui ne devraient pas porter de solde directement. Les comptes longs (>8 chiffres) sont souvent des sous-comptes auxiliaires specifiques au logiciel comptable.'
+      },
+      'Ventiler les comptes courts en sous-comptes detailles. Les comptes longs sont generalement acceptables s\'ils correspondent a des auxiliaires.')
   }
   return ok(ref, nom, 'Longueurs de comptes conformes')
 }
@@ -136,8 +153,12 @@ function C004(ctx: AuditContext): ResultatControle {
   if (trouves.length > 0) {
     return anomalie(ref, nom, 'MAJEUR',
       `${trouves.length} compte(s) obsolete(s) de l'ancien SYSCOA`,
-      { comptes: trouves },
-      'Migrer vers les comptes du SYSCOHADA Revise 2017',
+      {
+        comptes: trouves,
+        montants: { comptesObsoletes: trouves.length },
+        description: 'Des comptes de l\'ancien plan SYSCOA (avant la reforme 2017) sont encore utilises. Le SYSCOHADA Revise a modifie ou supprime ces comptes. Leur utilisation rend les etats financiers non conformes et peut entrainer un rejet par l\'administration fiscale.'
+      },
+      'Migrer vers les comptes du SYSCOHADA Revise 2017 en utilisant la table de correspondance officielle. Contacter votre editeur de logiciel comptable pour mettre a jour le plan de comptes.',
       'SYSCOHADA Revise 2017 - Guide de migration')
   }
   return ok(ref, nom, 'Aucun compte obsolete detecte')
@@ -153,9 +174,13 @@ function C005(ctx: AuditContext): ResultatControle {
   if (tafire.length > 0) {
     return anomalie(ref, nom, 'MAJEUR',
       `${tafire.length} compte(s) TAFIRE detecte(s) (supprime dans le revise)`,
-      { comptes: tafire.map((l) => l.compte) },
-      'Le TAFIRE a ete remplace par le TFT dans le SYSCOHADA Revise',
-      'SYSCOHADA Revise 2017')
+      {
+        comptes: tafire.map((l) => `${l.compte}: ${l.intitule}`),
+        montants: { comptesTafire: tafire.length },
+        description: 'Le Tableau Financier des Ressources et des Emplois (TAFIRE) a ete supprime dans le SYSCOHADA Revise 2017 et remplace par le Tableau des Flux de Tresorerie (TFT). Les comptes associes (694x, 884x, 894x) ne doivent plus etre utilises.'
+      },
+      'Supprimer ces comptes et utiliser la methode du TFT pour l\'etat des flux de tresorerie.',
+      'SYSCOHADA Revise 2017 - Suppression du TAFIRE')
   }
   return ok(ref, nom, 'Aucun compte TAFIRE obsolete')
 }
@@ -201,13 +226,22 @@ function C006(ctx: AuditContext): ResultatControle {
   if (nonMappes.length > 5) {
     return anomalie(ref, nom, 'MAJEUR',
       `${nonMappes.length} compte(s) de bilan non mappe(s) vers les etats financiers (${typeLiasse})`,
-      { comptes: nonMappes.slice(0, 15) },
-      `Ces comptes ne seront pas repris dans le bilan ${typeLiasse}`)
+      {
+        comptes: nonMappes.slice(0, 15),
+        montants: { comptesNonMappes: nonMappes.length, totalComptesBilan: ctx.balanceN.filter(l => { const cl = parseInt(l.compte.charAt(0)); return cl >= 1 && cl <= 5 }).length },
+        description: `${nonMappes.length} comptes de bilan (classes 1 a 5) n'ont pas de correspondance dans le mapping des etats financiers ${typeLiasse}. Leurs montants ne seront pas repris dans le bilan genere, ce qui provoquera un desequilibre entre la balance et les etats financiers.`
+      },
+      `Verifier le mapping des comptes vers les postes du bilan ${typeLiasse}. Ajouter les comptes manquants au referentiel de mapping.`,
+      'Art. 29 Acte Uniforme OHADA - Presentation du bilan')
   }
   if (nonMappes.length > 0) {
     return anomalie(ref, nom, 'MINEUR',
       `${nonMappes.length} compte(s) de bilan non mappe(s) (${typeLiasse})`,
-      { comptes: nonMappes })
+      {
+        comptes: nonMappes,
+        montants: { comptesNonMappes: nonMappes.length },
+        description: `${nonMappes.length} comptes de bilan n'ont pas de correspondance dans le mapping ${typeLiasse}. Impact limite mais a corriger pour une generation complete des etats financiers.`
+      })
   }
   return ok(ref, nom, `Tous les comptes de bilan sont mappables (${typeLiasse})`)
 }
@@ -219,8 +253,13 @@ function C007(ctx: AuditContext): ResultatControle {
   if (deuxChiffres.length > 0) {
     return anomalie(ref, nom, 'MINEUR',
       `${deuxChiffres.length} compte(s) a 2 chiffres (niveau insuffisant)`,
-      { comptes: deuxChiffres.map((l) => `${l.compte}: ${l.intitule}`) },
-      'Les comptes a 2 chiffres sont des comptes synthetiques, utiliser des sous-comptes')
+      {
+        comptes: deuxChiffres.map((l) => `${l.compte}: ${l.intitule}`),
+        montants: { comptesDeuxChiffres: deuxChiffres.length },
+        description: 'Les comptes a 2 chiffres representent des regroupements de classe (ex: "10" pour "Capitaux propres"). Ils ne doivent pas porter de solde directement. Un solde a ce niveau indique un plan de comptes trop synthetique ou un probleme de mapping.'
+      },
+      'Ventiler ces comptes en sous-comptes detailles (minimum 4 chiffres). Ex: "10" -> "1010" Capital social, "1040" Primes liees au capital.',
+      'Plan SYSCOHADA Revise 2017 - Hierarchie des comptes')
   }
   return ok(ref, nom, 'Aucun compte a 2 chiffres seulement')
 }
@@ -231,11 +270,20 @@ function C008(ctx: AuditContext): ResultatControle {
   const classe8 = ctx.balanceN.filter((l) => l.compte.toString().startsWith('8'))
   if (classe8.length > 0) {
     const totalMontant = classe8.reduce((s, l) => s + Math.abs(l.debit - l.credit), 0)
+    const ventilation: Record<string, number> = {}
+    for (const l of classe8) {
+      const prefix = l.compte.toString().substring(0, 2)
+      ventilation[`compte${prefix}x`] = (ventilation[`compte${prefix}x`] || 0) + Math.abs(l.debit - l.credit)
+    }
     return anomalie(ref, nom, 'INFO',
       `${classe8.length} compte(s) HAO (classe 8) pour ${totalMontant.toLocaleString('fr-FR')}`,
-      { comptes: classe8.map((l) => `${l.compte}: ${l.intitule}`).slice(0, 10) },
-      'Les operations HAO doivent etre justifiees et documentees',
-      'Art. 48 Acte Uniforme OHADA')
+      {
+        comptes: classe8.map((l) => `${l.compte}: ${l.intitule}`).slice(0, 10),
+        montants: { totalHAO: totalMontant, nombreComptes: classe8.length, ...ventilation },
+        description: `${classe8.length} comptes d'operations Hors Activites Ordinaires (HAO) sont presents pour un total de ${totalMontant.toLocaleString('fr-FR')} FCFA. Les operations HAO (cessions d\'immobilisations, sinistres, restructurations) doivent etre exceptionnelles et documentees dans l\'annexe.`
+      },
+      'Justifier chaque operation HAO dans les notes annexes. Verifier qu\'elles ne correspondent pas a des operations courantes mal classees.',
+      'Art. 48 Acte Uniforme OHADA - Operations HAO')
   }
   return ok(ref, nom, 'Aucun compte HAO (classe 8)')
 }
@@ -262,9 +310,13 @@ function C009(ctx: AuditContext): ResultatControle {
   if (interdits.length > 0) {
     return anomalie(ref, nom, 'MAJEUR',
       `${interdits.length} compte(s) utilise(s) malgre usage interdit dans le plan SYSCOHADA`,
-      { comptes: interdits.slice(0, 15) },
-      'Remplacer ces comptes par les comptes autorises correspondants',
-      'Plan SYSCOHADA Revise 2017 - Regles d\'utilisation')
+      {
+        comptes: interdits.slice(0, 15),
+        montants: { comptesInterdits: interdits.length },
+        description: 'Des comptes marques comme "INTERDIT" dans le plan SYSCOHADA Revise sont utilises dans la balance. Ces comptes ont ete supprimes ou remplaces lors de la reforme 2017 et ne doivent plus recevoir de mouvements. Leur utilisation rend les etats financiers non conformes.'
+      },
+      'Remplacer ces comptes par les comptes autorises correspondants selon la table de correspondance du SYSCOHADA Revise 2017.',
+      'Plan SYSCOHADA Revise 2017 - Regles d\'utilisation des comptes')
   }
   return ok(ref, nom, 'Aucun compte a usage interdit detecte')
 }
@@ -296,16 +348,38 @@ function C010(ctx: AuditContext): ResultatControle {
   }
 
   if (inversions.length > 5) {
+    const totalInverse = ctx.balanceN.filter(l => {
+      const num = l.compte.toString().trim()
+      const soldeNet = (l.solde_debit || 0) - (l.solde_credit || 0)
+      if (Math.abs(soldeNet) < 0.01) return false
+      for (let len = Math.min(num.length, 4); len >= 2; len--) {
+        const prefix = num.substring(0, len)
+        const compte = planMap.get(prefix)
+        if (compte) {
+          return (compte.sens === 'DEBITEUR' && soldeNet < 0) || (compte.sens === 'CREDITEUR' && soldeNet > 0)
+        }
+      }
+      return false
+    }).reduce((s, l) => s + Math.abs((l.solde_debit || 0) - (l.solde_credit || 0)), 0)
+
     return anomalie(ref, nom, 'MINEUR',
       `${inversions.length} compte(s) avec solde inverse par rapport au sens OHADA attendu`,
-      { comptes: inversions.slice(0, 15) },
-      'Verifier les soldes anormaux - un solde inverse peut indiquer une erreur de comptabilisation',
+      {
+        comptes: inversions.slice(0, 15),
+        montants: { comptesInverses: inversions.length, totalMontantInverse: totalInverse },
+        description: `${inversions.length} comptes presentent un solde dans le sens oppose a celui prevu par le plan SYSCOHADA (ex: un actif crediteur ou un passif debiteur). Cela peut indiquer des erreurs de comptabilisation ou des reclassements necessaires (ex: clients crediteurs a reclasser au passif).`
+      },
+      'Verifier chaque solde inverse. Corriger les erreurs de comptabilisation et effectuer les reclassements necessaires pour les etats financiers.',
       'Plan SYSCOHADA Revise 2017 - Sens des comptes')
   }
   if (inversions.length > 0) {
     return anomalie(ref, nom, 'INFO',
       `${inversions.length} compte(s) avec solde inverse (peut etre normal)`,
-      { comptes: inversions.slice(0, 10) })
+      {
+        comptes: inversions.slice(0, 10),
+        montants: { comptesInverses: inversions.length },
+        description: 'Quelques comptes presentent un solde inverse. En faible nombre, cela peut etre normal (ex: fournisseur debiteur pour un avoir, banque creditrice pour un decouvert).'
+      })
   }
   return ok(ref, nom, 'Sens des comptes conformes aux attentes OHADA')
 }
