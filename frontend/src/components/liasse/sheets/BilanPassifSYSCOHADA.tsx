@@ -3,7 +3,7 @@ import { logger } from '@/utils/logger'
  * Bilan Passif SYSCOHADA - Avec intégration automatique de la balance
  */
 
-import React, { useState, useEffect, useMemo, memo } from 'react'
+import React, { useState, useEffect, memo } from 'react'
 import {
   Box,
   Paper,
@@ -125,71 +125,47 @@ const BilanPassifSYSCOHADA: React.FC<BilanPassifProps> = ({ onNoteClick }) => {
 
   const loadDataFromBalance = () => {
     const passifData = liasseDataService.generateBilanPassif()
-    
-    const newData: BilanPassifData = {}
+
+    const d: BilanPassifData = {}
     passifData.forEach((item: any) => {
-      newData[item.ref] = {
+      d[item.ref] = {
         montant: item.montant || 0,
         montantN1: item.montant_n1 || 0,
         note: ''
       }
     })
-    
-    setData(newData)
-  }
 
-  // Calculer les totaux automatiquement
-  const calculateTotals = useMemo(() => {
-    const totals: BilanPassifData = {}
-    
-    // Cherche d'abord dans totals (pour les sous-totaux déjà calculés), puis dans data
-    const calculateGroup = (refs: string[]) => {
+    // Compute all group/total rows directly
+    const sum = (refs: string[]) => {
       let montant = 0, montantN1 = 0
-      refs.forEach(ref => {
-        const source = totals[ref] || data[ref]
-        if (source) {
-          // Gérer le cas spécial CB qui est soustrait
-          if (ref === 'CB') {
-            montant -= source.montant || 0
-            montantN1 -= source.montantN1 || 0
+      refs.forEach(r => {
+        if (d[r]) {
+          if (r === 'CB') {
+            montant -= d[r].montant || 0
+            montantN1 -= d[r].montantN1 || 0
           } else {
-            montant += source.montant || 0
-            montantN1 += source.montantN1 || 0
+            montant += d[r].montant || 0
+            montantN1 += d[r].montantN1 || 0
           }
         }
       })
       return { montant, montantN1 }
     }
 
-    // Total Capitaux Propres (CL)
-    totals.CL = calculateGroup(['CA', 'CB', 'CC', 'CD', 'CE', 'CF', 'CG', 'CH', 'CI', 'CJ'])
+    // Totals (computed in order so sub-totals feed higher totals)
+    d.CL = sum(['CA', 'CB', 'CC', 'CD', 'CE', 'CF', 'CG', 'CH', 'CI', 'CJ'])
+    d.CS = sum(['CM', 'CN', 'CO', 'CR'])
+    d.CZ = sum(['CL', 'CS'])
+    d.DG = sum(['DA', 'DB', 'DC', 'DD', 'DE', 'DF'])
+    d.DP = sum(['CZ', 'DG'])
+    d.DN = sum(['DH', 'DI', 'DJ', 'DK', 'DL', 'DM'])
+    d.DS = sum(['DQ', 'DR'])
+    d.DZ = sum(['DP', 'DN', 'DS', 'DT'])
 
-    // Total Autres Capitaux Propres (CS)
-    totals.CS = calculateGroup(['CM', 'CN', 'CO', 'CR'])
+    setData(d)
+  }
 
-    // Total Capitaux Propres et Ressources Assimilées (CZ)
-    totals.CZ = calculateGroup(['CL', 'CS'])
-
-    // Total Dettes Financières (DG)
-    totals.DG = calculateGroup(['DA', 'DB', 'DC', 'DD', 'DE', 'DF'])
-
-    // Total Ressources Stables (DP)
-    totals.DP = calculateGroup(['CZ', 'DG'])
-
-    // Total Passif Circulant (DN)
-    totals.DN = calculateGroup(['DH', 'DI', 'DJ', 'DK', 'DL', 'DM'])
-
-    // Total Trésorerie Passif (DS)
-    totals.DS = calculateGroup(['DQ', 'DR'])
-
-    // Total Général Passif (DZ)
-    totals.DZ = calculateGroup(['DP', 'DN', 'DS', 'DT'])
-    
-    return totals
-  }, [data])
-
-  // Fusionner les données avec les totaux calculés
-  const mergedData = { ...data, ...calculateTotals }
+  const mergedData = data
 
   const handleCellChange = (ref: string, field: string, value: string) => {
     const numValue = parseFloat(value) || 0

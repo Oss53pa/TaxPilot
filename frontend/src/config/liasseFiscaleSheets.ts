@@ -225,21 +225,59 @@ export const LIASSE_SHEETS: SheetConfig[] = [
     description: 'Tableau des flux de trésorerie'
   },
 
-  // Notes annexes (NOTE 1 à NOTE 39)
-  ...Array.from({ length: 39 }, (_, i) => {
-    const noteNumber = i + 1
-    const noteId = noteNumber === 36 ? 'note36_details' : `note${noteNumber}`
-    return {
-      id: noteId,
-      name: `NOTE ${noteNumber}`,
-      title: `Note ${noteNumber} - ${getNoteTitle(noteNumber)}`,
-      category: 'notes' as const,
-      order: 15 + i,
-      required: isNoteRequired(noteNumber),
-      hasComments: true,
-      description: getNoteDescription(noteNumber)
-    }
-  }),
+  // Notes annexes — liste explicite avec sous-notes
+  ...[1, 2].map(n => ({
+    id: `note${n}`, name: `NOTE ${n}`, title: `Note ${n} - ${getNoteTitle(n)}`,
+    category: 'notes' as const, order: 15 + n - 1, required: isNoteRequired(n), hasComments: true, description: getNoteDescription(n),
+  })),
+  // Note 3 supprimée → sous-notes 3A-3E
+  { id: 'note3a', name: 'NOTE 3A', title: `Note 3A - ${getSubNoteTitle('3A')}`, category: 'notes' as const, order: 17, required: true, hasComments: true, description: 'Mouvements des immobilisations brutes' },
+  { id: 'note3b', name: 'NOTE 3B', title: `Note 3B - ${getSubNoteTitle('3B')}`, category: 'notes' as const, order: 18, required: true, hasComments: true, description: 'Biens pris en location-acquisition (crédit-bail retraité)' },
+  { id: 'note3c', name: 'NOTE 3C', title: `Note 3C - ${getSubNoteTitle('3C')}`, category: 'notes' as const, order: 19, required: true, hasComments: true, description: 'Mouvements des amortissements' },
+  { id: 'note3c_bis', name: 'NOTE 3C BIS', title: `Note 3C BIS - ${getSubNoteTitle('3C_BIS')}`, category: 'notes' as const, order: 20, required: true, hasComments: true, description: 'Mouvements des dépréciations' },
+  { id: 'note3d', name: 'NOTE 3D', title: `Note 3D - ${getSubNoteTitle('3D')}`, category: 'notes' as const, order: 21, required: false, hasComments: true, description: 'Plus et moins-values de cession d\'immobilisations' },
+  { id: 'note3e', name: 'NOTE 3E', title: `Note 3E - ${getSubNoteTitle('3E')}`, category: 'notes' as const, order: 22, required: false, hasComments: true, description: 'Informations sur les réévaluations' },
+  // Notes 4-7
+  ...[4, 5, 6, 7].map((n, i) => ({
+    id: `note${n}`, name: `NOTE ${n}`, title: `Note ${n} - ${getNoteTitle(n)}`,
+    category: 'notes' as const, order: 23 + i, required: isNoteRequired(n), hasComments: true, description: getNoteDescription(n),
+  })),
+  // Note 8 + sous-notes 8A-8C
+  { id: 'note8', name: 'NOTE 8', title: `Note 8 - ${getNoteTitle(8)}`, category: 'notes' as const, order: 27, required: true, hasComments: true, description: getNoteDescription(8) },
+  { id: 'note8a', name: 'NOTE 8A', title: `Note 8A - ${getSubNoteTitle('8A')}`, category: 'notes' as const, order: 28, required: false, hasComments: true, description: 'Frais d\'établissement et charges à répartir' },
+  { id: 'note8b', name: 'NOTE 8B', title: `Note 8B - ${getSubNoteTitle('8B')}`, category: 'notes' as const, order: 29, required: false, hasComments: true, description: 'Provisions pour charges à répartir' },
+  { id: 'note8c', name: 'NOTE 8C', title: `Note 8C - ${getSubNoteTitle('8C')}`, category: 'notes' as const, order: 30, required: false, hasComments: true, description: 'Provisions pour pensions et obligations' },
+  // Notes 9-14
+  ...[9, 10, 11, 12, 13, 14].map((n, i) => ({
+    id: `note${n}`, name: `NOTE ${n}`, title: `Note ${n} - ${getNoteTitle(n)}`,
+    category: 'notes' as const, order: 31 + i, required: isNoteRequired(n), hasComments: true, description: getNoteDescription(n),
+  })),
+  // Note 15 supprimée → sous-notes 15A-15B
+  { id: 'note15a', name: 'NOTE 15A', title: `Note 15A - ${getSubNoteTitle('15A')}`, category: 'notes' as const, order: 37, required: true, hasComments: true, description: 'Subventions d\'investissement inscrites au passif' },
+  { id: 'note15b', name: 'NOTE 15B', title: `Note 15B - ${getSubNoteTitle('15B')}`, category: 'notes' as const, order: 38, required: false, hasComments: true, description: 'Provisions réglementées et autres fonds propres' },
+  // Note 16 supprimée → sous-notes 16A-16C
+  { id: 'note16a', name: 'NOTE 16A', title: `Note 16A - ${getSubNoteTitle('16A')}`, category: 'notes' as const, order: 39, required: true, hasComments: true, description: 'Emprunts et dettes financières par échéance' },
+  { id: 'note16b', name: 'NOTE 16B', title: `Note 16B - ${getSubNoteTitle('16B')}`, category: 'notes' as const, order: 40, required: false, hasComments: true, description: 'Hypothèses actuarielles pour les engagements de retraite' },
+  { id: 'note16b_bis', name: 'NOTE 16B BIS', title: `Note 16B BIS - ${getSubNoteTitle('16B_BIS')}`, category: 'notes' as const, order: 41, required: false, hasComments: true, description: 'Bilan actuariel des engagements de retraite' },
+  { id: 'note16c', name: 'NOTE 16C', title: `Note 16C - ${getSubNoteTitle('16C')}`, category: 'notes' as const, order: 42, required: false, hasComments: true, description: 'Actifs et passifs éventuels' },
+  // Notes 17-26
+  ...[17, 18, 19, 20, 21, 22, 23, 24, 25, 26].map((n, i) => ({
+    id: `note${n}`, name: `NOTE ${n}`, title: `Note ${n} - ${getNoteTitle(n)}`,
+    category: 'notes' as const, order: 43 + i, required: isNoteRequired(n), hasComments: true, description: getNoteDescription(n),
+  })),
+  // Note 27 supprimée → sous-notes 27A-27B
+  { id: 'note27a', name: 'NOTE 27A', title: `Note 27A - ${getSubNoteTitle('27A')}`, category: 'notes' as const, order: 53, required: true, hasComments: true, description: 'Détail des charges de personnel par catégorie' },
+  { id: 'note27b', name: 'NOTE 27B', title: `Note 27B - ${getSubNoteTitle('27B')}`, category: 'notes' as const, order: 54, required: true, hasComments: true, description: 'Effectifs par genre, nationalité et masse salariale' },
+  // Notes 28-35, 36 (details), 37-39
+  ...[28, 29, 30, 31, 32, 33, 34, 35].map((n, i) => ({
+    id: `note${n}`, name: `NOTE ${n}`, title: `Note ${n} - ${getNoteTitle(n)}`,
+    category: 'notes' as const, order: 55 + i, required: isNoteRequired(n), hasComments: true, description: getNoteDescription(n),
+  })),
+  { id: 'note36_details', name: 'NOTE 36', title: `Note 36 - ${getNoteTitle(36)}`, category: 'notes' as const, order: 63, required: false, hasComments: true, description: getNoteDescription(36) },
+  ...[37, 38, 39].map((n, i) => ({
+    id: `note${n}`, name: `NOTE ${n}`, title: `Note ${n} - ${getNoteTitle(n)}`,
+    category: 'notes' as const, order: 64 + i, required: false, hasComments: true, description: getNoteDescription(n),
+  })),
 
   // Gardes spécifiques DGI/INS
   {
@@ -373,58 +411,114 @@ export const LIASSE_SHEETS: SheetConfig[] = [
 // Fonctions utilitaires pour les notes
 export function getNoteTitle(noteNumber: number): string {
   const noteTitles: { [key: number]: string } = {
-    1: 'Méthodes comptables',
-    2: 'Changements de méthodes',
+    1: 'Dérogations, changements de méthodes',
+    2: 'Événements postérieurs',
     3: 'Immobilisations',
-    4: 'État des créances et dettes',
-    5: 'Provisions',
-    6: 'Capitaux propres',
-    7: 'Tableau de variation des capitaux propres',
-    8: 'Charges et produits',
-    9: 'Engagements hors bilan',
-    10: 'Événements postérieurs',
-    11: 'Informations sectorielles',
-    12: 'Effectif et charges de personnel',
-    13: 'Rémunération des dirigeants',
-    14: 'Impôts et taxes',
-    15: 'Tableau de détermination du résultat fiscal',
-    16: 'Affectation du résultat',
-    17: 'Tableau des soldes intermédiaires de gestion',
-    18: 'Capacité d\'autofinancement',
-    19: 'État des stocks',
-    20: 'État des amortissements',
-    21: 'Plus et moins-values',
-    22: 'État des provisions',
-    23: 'Crédit-bail',
-    24: 'Échéancier des créances et dettes',
-    25: 'Charges à payer et produits à recevoir',
-    26: 'Charges et produits constatés d\'avance',
-    27: 'Composition du capital social',
-    28: 'Filiales et participations',
-    29: 'Opérations avec les entreprises liées',
-    30: 'Intégration fiscale',
-    31: 'Tableau de passage',
-    32: 'Informations diverses',
-    33: 'État de rapprochement',
-    34: 'Tableau de répartition des bénéfices',
-    35: 'État des déficits',
+    4: 'Immobilisations financières',
+    5: 'Actif circulant et dettes circulantes HAO',
+    6: 'Stocks et en-cours',
+    7: 'Clients',
+    8: 'Autres créances',
+    9: 'Titres de placement',
+    10: 'Valeurs à encaisser',
+    11: 'Disponibilités',
+    12: 'Écarts de conversion et transferts de charges',
+    13: 'Capital',
+    14: 'Primes et réserves',
+    15: 'Subventions et fonds propres',
+    16: 'Dettes financières et retraite',
+    17: 'Fournisseurs d\'exploitation',
+    18: 'Dettes fiscales et sociales',
+    19: 'Autres dettes et provisions',
+    20: 'Banques, crédit d\'escompte et de trésorerie',
+    21: 'Chiffre d\'affaires et autres produits',
+    22: 'Achats',
+    23: 'Transports',
+    24: 'Services extérieurs',
+    25: 'Impôts et taxes',
+    26: 'Autres charges',
+    27: 'Charges de personnel',
+    28: 'Dotations et charges pour provisions',
+    29: 'Charges et revenus financiers',
+    30: 'Autres charges et produits HAO',
+    31: 'Répartition du résultat',
+    32: 'Production de l\'exercice',
+    33: 'Achats destinés à la production',
+    34: 'Fiche de synthèse des indicateurs financiers',
+    35: 'Liste des informations sociales/environnementales',
     36: 'Table des codes',
-    37: 'Informations complémentaires',
-    38: 'Déclarations spéciales',
-    39: 'Attestations et certifications'
+    37: 'Détermination impôts sur le résultat',
+    38: 'Événements postérieurs à la clôture',
+    39: 'Changements de méthodes comptables'
   }
   return noteTitles[noteNumber] || `Annexe ${noteNumber}`
 }
 
+/** Titres des sous-notes (3A-3E, 8A-8C, 15A-15B, 16A-16C, 27A-27B) */
+export function getSubNoteTitle(noteId: string): string {
+  const subNoteTitles: Record<string, string> = {
+    '3A': 'Immobilisations brutes',
+    '3B': 'Biens pris en location-acquisition',
+    '3C': 'Amortissements',
+    '3C_BIS': 'Dépréciations',
+    '3D': 'Plus et moins-values de cession',
+    '3E': 'Réévaluations et écarts',
+    '8A': 'Charges immobilisées',
+    '8B': 'Provisions pour charges',
+    '8C': 'Provisions pour engagements de retraite',
+    '15A': 'Subventions d\'investissement',
+    '15B': 'Autres fonds propres',
+    '16A': 'Dettes financières et ressources assimilées',
+    '16B': 'Engagements de retraite — Hypothèses',
+    '16B_BIS': 'Engagements de retraite — Actif/Passif',
+    '16C': 'Actifs et passifs éventuels',
+    '27A': 'Charges de personnel',
+    '27B': 'Effectifs et masse salariale',
+  }
+  return subNoteTitles[noteId] || `Annexe ${noteId}`
+}
+
 export function getNoteDescription(noteNumber: number): string {
   const noteDescriptions: { [key: number]: string } = {
-    1: 'Principes et méthodes comptables appliqués',
-    2: 'Changements de méthodes comptables et impacts',
+    1: 'Dérogations aux principes comptables et changements de méthodes',
+    2: 'Événements postérieurs à la clôture de l\'exercice',
     3: 'Détail et mouvements des immobilisations',
-    4: 'Ventilation des créances et dettes par échéance',
-    5: 'État détaillé des provisions',
-    6: 'Composition et variation des capitaux propres',
-    // ... autres descriptions
+    4: 'Titres de participation, prêts et créances non commerciales',
+    5: 'Actif circulant HAO et dettes circulantes HAO',
+    6: 'Détail des stocks et en-cours de production',
+    7: 'Créances clients et comptes rattachés',
+    8: 'Créances fiscales, sociales et autres débiteurs',
+    9: 'Titres de placement et valeurs mobilières',
+    10: 'Effets à l\'encaissement, chèques à encaisser',
+    11: 'Banques, CCP et caisse',
+    12: 'Écarts de conversion actif/passif et transferts de charges',
+    13: 'Capital social, actionnaires, capital souscrit non appelé',
+    14: 'Primes d\'émission, réserves légales et facultatives',
+    15: 'Subventions d\'investissement et autres fonds propres',
+    16: 'Emprunts, dettes financières et engagements de retraite',
+    17: 'Fournisseurs d\'exploitation et comptes rattachés',
+    18: 'Impôts, taxes et cotisations sociales à payer',
+    19: 'Autres dettes et provisions pour risques',
+    20: 'Crédits bancaires, escompte et trésorerie passive',
+    21: 'Chiffre d\'affaires, subventions et autres produits',
+    22: 'Achats de marchandises et matières',
+    23: 'Frais de transport sur achats et ventes',
+    24: 'Loyers, entretien, assurances et services extérieurs',
+    25: 'Impôts, taxes et versements assimilés',
+    26: 'Autres charges d\'exploitation',
+    27: 'Salaires, charges sociales et avantages au personnel',
+    28: 'Dotations aux amortissements, dépréciations et provisions',
+    29: 'Charges et produits financiers',
+    30: 'Charges et produits HAO',
+    31: 'Proposition d\'affectation du résultat',
+    32: 'Production immobilisée, stockée et vendue',
+    33: 'Achats de matières premières et fournitures',
+    34: 'Ratios et indicateurs financiers de synthèse',
+    35: 'Informations sociales et environnementales',
+    36: 'Nomenclature et codes comptables de référence',
+    37: 'Calcul de l\'impôt sur le résultat',
+    38: 'Événements survenus après la date de clôture',
+    39: 'Changements de principes et méthodes comptables',
   }
   return noteDescriptions[noteNumber] || `Note annexe numéro ${noteNumber}`
 }
@@ -610,7 +704,9 @@ export const REGIME_LABELS: Record<RegimeImposition, string> = {
 type SheetRequirement = 'obligatoire' | 'facultatif' | 'exclu'
 
 // Notes obligatoires selon SYSCOHADA (pour Réel Normal)
-const REQUIRED_NOTE_NUMBERS = [1, 2, 3, 4, 5, 6, 7, 8, 14, 15, 16, 17, 20, 22, 27, 31]
+const REQUIRED_NOTE_NUMBERS = [1, 2, 4, 5, 6, 7, 8, 14, 17, 20, 22, 31]
+// Sub-notes obligatoires
+const REQUIRED_SUBNOTE_IDS = ['note3a', 'note3b', 'note3c', 'note3c_bis', 'note15a', 'note16a', 'note27a', 'note27b']
 
 function getSheetRegimeRule(sheetId: string): Record<RegimeImposition, SheetRequirement> {
   // Couverture - obligatoire pour tous
@@ -685,6 +781,15 @@ function getSheetRegimeRule(sheetId: string): Record<RegimeImposition, SheetRequ
 
   // Note 36 (codes, nomenclature, details)
   if (sheetId === 'note36_codes' || sheetId === 'note36_nomenclature' || sheetId === 'note36_details') {
+    return { REEL_NORMAL: 'facultatif', REEL_SIMPLIFIE: 'exclu', FORFAITAIRE: 'exclu', MICRO: 'exclu' }
+  }
+
+  // Sub-notes (3a, 3b, 8a, 15a, 16a, 27a, etc.)
+  if (REQUIRED_SUBNOTE_IDS.includes(sheetId)) {
+    return { REEL_NORMAL: 'obligatoire', REEL_SIMPLIFIE: 'facultatif', FORFAITAIRE: 'exclu', MICRO: 'exclu' }
+  }
+  const subNoteMatch = sheetId.match(/^note\d+[a-c]/)
+  if (subNoteMatch) {
     return { REEL_NORMAL: 'facultatif', REEL_SIMPLIFIE: 'exclu', FORFAITAIRE: 'exclu', MICRO: 'exclu' }
   }
 

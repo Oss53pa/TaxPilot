@@ -20,7 +20,7 @@ import RecevabiliteSYSCOHADABase from './RecevabiliteSYSCOHADA'
 // Notes spécifiques
 import Note1SYSCOHADABase from './Note1SYSCOHADA'
 import Note2SYSCOHADABase from './Note2SYSCOHADA'
-import Note3SYSCOHADABase from './Note3SYSCOHADA'
+import Note3ASYSCOHADABase from './Note3SYSCOHADA'
 import Note5SYSCOHADABase from './Note5SYSCOHADA'
 import Note6SYSCOHADABase from './Note6SYSCOHADA'
 import Note8SYSCOHADABase from './Note8SYSCOHADA'
@@ -64,6 +64,23 @@ import {
   Note38SYSCOHADA as Note38SYSCOHADABase,
   Note39SYSCOHADA as Note39SYSCOHADABase,
   NotesDgiInsSYSCOHADA as NotesDgiInsSYSCOHADABase,
+  // Sous-notes
+  Note3BSYSCOHADA as Note3BSYSCOHADABase,
+  Note3CSYSCOHADA as Note3CSYSCOHADABase,
+  Note3CBISSYSCOHADA as Note3CBISSYSCOHADABase,
+  Note3DSYSCOHADA as Note3DSYSCOHADABase,
+  Note3ESYSCOHADA as Note3ESYSCOHADABase,
+  Note8ASYSCOHADA as Note8ASYSCOHADABase,
+  Note8BSYSCOHADA as Note8BSYSCOHADABase,
+  Note8CSYSCOHADA as Note8CSYSCOHADABase,
+  Note15ASYSCOHADA as Note15ASYSCOHADABase,
+  Note15BSYSCOHADA as Note15BSYSCOHADABase,
+  Note16ASYSCOHADA as Note16ASYSCOHADABase,
+  Note16BSYSCOHADA as Note16BSYSCOHADABase,
+  Note16BBISSYSCOHADA as Note16BBISSYSCOHADABase,
+  Note16CSYSCOHADA as Note16CSYSCOHADABase,
+  Note27ASYSCOHADA as Note27ASYSCOHADABase,
+  Note27BSYSCOHADA as Note27BSYSCOHADABase,
 } from './NotesRestantes'
 
 // Pages de garde génériques
@@ -127,7 +144,7 @@ export const RecevabiliteSYSCOHADA = withBackendData(RecevabiliteSYSCOHADABase)
 // Notes
 export const Note1SYSCOHADA = withBackendData(Note1SYSCOHADABase)
 export const Note2SYSCOHADA = withBackendData(Note2SYSCOHADABase)
-export const Note3SYSCOHADA = withBackendData(Note3SYSCOHADABase)
+export const Note3ASYSCOHADA = withBackendData(Note3ASYSCOHADABase)
 export const Note5SYSCOHADA = withBackendData(Note5SYSCOHADABase)
 export const Note6SYSCOHADA = withBackendData(Note6SYSCOHADABase)
 export const Note8SYSCOHADA = withBackendData(Note8SYSCOHADABase)
@@ -170,6 +187,24 @@ export const Note37SYSCOHADA = withBackendData(Note37SYSCOHADABase)
 export const Note38SYSCOHADA = withBackendData(Note38SYSCOHADABase)
 export const Note39SYSCOHADA = withBackendData(Note39SYSCOHADABase)
 export const NotesDgiInsSYSCOHADA = withBackendData(NotesDgiInsSYSCOHADABase)
+
+// Sous-notes (wrapped with withBackendData)
+export const Note3BSYSCOHADA = withBackendData(Note3BSYSCOHADABase)
+export const Note3CSYSCOHADA = withBackendData(Note3CSYSCOHADABase)
+export const Note3CBISSYSCOHADA = withBackendData(Note3CBISSYSCOHADABase)
+export const Note3DSYSCOHADA = withBackendData(Note3DSYSCOHADABase)
+export const Note3ESYSCOHADA = withBackendData(Note3ESYSCOHADABase)
+export const Note8ASYSCOHADA = withBackendData(Note8ASYSCOHADABase)
+export const Note8BSYSCOHADA = withBackendData(Note8BSYSCOHADABase)
+export const Note8CSYSCOHADA = withBackendData(Note8CSYSCOHADABase)
+export const Note15ASYSCOHADA = withBackendData(Note15ASYSCOHADABase)
+export const Note15BSYSCOHADA = withBackendData(Note15BSYSCOHADABase)
+export const Note16ASYSCOHADA = withBackendData(Note16ASYSCOHADABase)
+export const Note16BSYSCOHADA = withBackendData(Note16BSYSCOHADABase)
+export const Note16BBISSYSCOHADA = withBackendData(Note16BBISSYSCOHADABase)
+export const Note16CSYSCOHADA = withBackendData(Note16CSYSCOHADABase)
+export const Note27ASYSCOHADA = withBackendData(Note27ASYSCOHADABase)
+export const Note27BSYSCOHADA = withBackendData(Note27BSYSCOHADABase)
 
 // Pages de garde génériques
 export const GardeDgiIns = withBackendData(GardeDgiInsBase)
@@ -231,7 +266,7 @@ export default {
   // Notes détaillées
   Note1SYSCOHADA,
   Note2SYSCOHADA,
-  Note3SYSCOHADA,
+  Note3ASYSCOHADA,
   Note5SYSCOHADA,
   Note6SYSCOHADA,
   Note8SYSCOHADA,

@@ -25,7 +25,7 @@ import {
   Note36Tables,
   Note1SYSCOHADA,
   Note2SYSCOHADA,
-  Note3SYSCOHADA,
+  Note3ASYSCOHADA,
   Note4SYSCOHADA,
   Note5SYSCOHADA,
   Note6SYSCOHADA,
@@ -65,6 +65,24 @@ import {
   Note39SYSCOHADA,
   NotesDgiInsSYSCOHADA,
   NotesRestantes,
+  // Sous-notes
+  Note3BSYSCOHADA,
+  Note3CSYSCOHADA,
+  Note3CBISSYSCOHADA,
+  Note3DSYSCOHADA,
+  Note3ESYSCOHADA,
+  Note8ASYSCOHADA,
+  Note8BSYSCOHADA,
+  Note8CSYSCOHADA,
+  Note15ASYSCOHADA,
+  Note15BSYSCOHADA,
+  Note16ASYSCOHADA,
+  Note16BSYSCOHADA,
+  Note16BBISSYSCOHADA,
+  Note16CSYSCOHADA,
+  Note27ASYSCOHADA,
+  Note27BSYSCOHADA,
+  // Compléments et suppléments
   ComplementCharges,
   ComplementProduits,
   SupplementTVA,
@@ -119,7 +137,7 @@ const COMPONENT_REGISTRY: Record<string, React.ComponentType<any>> = {
   Note36Tables,
   Note1SYSCOHADA,
   Note2SYSCOHADA,
-  Note3SYSCOHADA,
+  Note3ASYSCOHADA,
   Note5SYSCOHADA,
   Note6SYSCOHADA,
   Note8SYSCOHADA,
@@ -162,6 +180,24 @@ const COMPONENT_REGISTRY: Record<string, React.ComponentType<any>> = {
   NotesDgiInsSYSCOHADA,
   NotesRestantes,
 
+  // Sous-notes
+  Note3BSYSCOHADA,
+  Note3CSYSCOHADA,
+  Note3CBISSYSCOHADA,
+  Note3DSYSCOHADA,
+  Note3ESYSCOHADA,
+  Note8ASYSCOHADA,
+  Note8BSYSCOHADA,
+  Note8CSYSCOHADA,
+  Note15ASYSCOHADA,
+  Note15BSYSCOHADA,
+  Note16ASYSCOHADA,
+  Note16BSYSCOHADA,
+  Note16BBISSYSCOHADA,
+  Note16CSYSCOHADA,
+  Note27ASYSCOHADA,
+  Note27BSYSCOHADA,
+
   // Supplements
   TablesCalculImpots,
   TableauxSupplementaires,
@@ -194,7 +230,7 @@ const DgiHeader: React.FC<{ page: LiassePage }> = ({ page }) => (
       {page.label}
     </Typography>
     <Typography sx={{ fontSize: '10px', color: P.primary400 }}>
-      Page {page.pageNum} / 74
+      Page {page.pageNum} / 87
     </Typography>
   </Box>
 )

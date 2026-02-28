@@ -17,6 +17,39 @@ export type StatutSession = 'EN_ATTENTE' | 'EN_COURS' | 'TERMINEE' | 'ERREUR' | 
 
 export type StatutControle = 'OK' | 'ANOMALIE' | 'NON_APPLICABLE' | 'ERREUR_EXEC'
 
+export type StatutBalance = 'brute' | 'auditee' | 'corrigee' | 'validee' | 'deployee'
+
+export interface ExerciceConfig {
+  year: number
+  date_debut: string
+  date_fin: string
+  type: 'N' | 'N-1'
+}
+
+export interface RapportPartie2Item {
+  ref: string
+  nom: string
+  severiteV1: Severite
+  severiteV2: Severite
+  evolution: 'corrige' | 'non_corrige' | 'nouveau'
+}
+
+export interface RapportPartie2 {
+  id: string
+  sessionAvantId: string
+  sessionApresId: string
+  dateGeneration: string
+  items: RapportPartie2Item[]
+  comptesModifies: CompteModifie[]
+  synthese: {
+    corriges: number
+    nonCorriges: number
+    nouveaux: number
+    bloquantsRestants: number
+    conforme: boolean
+  }
+}
+
 // --- Noms de niveaux ---
 
 export const NIVEAUX_NOMS: Record<NiveauControle, string> = {

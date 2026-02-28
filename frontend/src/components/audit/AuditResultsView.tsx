@@ -29,6 +29,10 @@ import {
   IconButton,
   Tooltip,
   Collapse,
+  Card,
+  CardContent,
+  alpha,
+  useTheme,
 } from '@mui/material'
 import {
   ExpandMore as ExpandMoreIcon,
@@ -38,6 +42,7 @@ import {
   Error as ErrorIcon,
   Warning as WarningIcon,
   Info as InfoIcon,
+  Build as BuildIcon,
 } from '@mui/icons-material'
 import type { ResultatControle, Severite, NiveauControle } from '@/types/audit.types'
 import { NIVEAUX_NOMS } from '@/types/audit.types'
@@ -66,6 +71,7 @@ const severiteIcon = (sev: Severite, size: 'small' | 'medium' = 'small') => {
 }
 
 const AuditResultsView: React.FC<AuditResultsViewProps> = ({ resultats }) => {
+  const theme = useTheme()
   const [searchText, setSearchText] = useState('')
   const [severiteFilter, setSeveriteFilter] = useState<Severite | ''>('')
   const [niveauFilter, setNiveauFilter] = useState<NiveauControle | -1>(-1)
@@ -111,8 +117,33 @@ const AuditResultsView: React.FC<AuditResultsViewProps> = ({ resultats }) => {
     navigator.clipboard.writeText(text)
   }
 
+  const anomaliesWithSuggestion = useMemo(
+    () => resultats.filter(r => r.statut === 'ANOMALIE' && (r.suggestion || (r.ecrituresCorrectives && r.ecrituresCorrectives.length > 0))),
+    [resultats]
+  )
+
   return (
     <Box>
+      {/* Compteur de corrections suggerees */}
+      {anomaliesWithSuggestion.length > 0 && (
+        <Card elevation={0} sx={{ mb: 3, border: `1px solid ${alpha(theme.palette.info.main, 0.3)}`, bgcolor: alpha(theme.palette.info.main, 0.04) }}>
+          <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+            <Stack direction="row" alignItems="center" spacing={2}>
+              <BuildIcon color="info" />
+              <Box sx={{ flex: 1 }}>
+                <Typography variant="subtitle2" fontWeight={600}>
+                  {anomaliesWithSuggestion.length} anomalie(s) avec correction suggeree
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  Consultez les suggestions de correction pour chaque anomalie ci-dessous
+                </Typography>
+              </Box>
+              <Chip label={`${anomaliesWithSuggestion.filter(r => r.ecrituresCorrectives?.length).length} ecritures`} size="small" color="info" variant="outlined" />
+            </Stack>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Barre de filtres */}
       <Stack direction="row" spacing={2} sx={{ mb: 3 }} alignItems="center" flexWrap="wrap" useFlexGap>
         <TextField
@@ -226,10 +257,20 @@ const AuditResultsView: React.FC<AuditResultsViewProps> = ({ resultats }) => {
                     />
                   </Box>
                   {r.statut === 'ANOMALIE' && r.suggestion && (
-                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mt: 1, ml: 4, pl: '60px' }}>
-                      <Typography variant="body2" sx={{ color: 'info.main', fontWeight: 500, fontSize: '0.8rem' }}>
-                        Correction : {r.suggestion}
+                    <Box sx={{
+                      mt: 1, ml: 4, pl: '60px', py: 0.5, px: 1.5,
+                      bgcolor: alpha(theme.palette.info.main, 0.06),
+                      borderLeft: `3px solid ${theme.palette.info.main}`,
+                      borderRadius: '0 4px 4px 0',
+                    }}>
+                      <Typography variant="body2" sx={{ color: 'info.main', fontWeight: 600, fontSize: '0.8rem' }}>
+                        Correction suggeree : {r.suggestion}
                       </Typography>
+                      {r.ecrituresCorrectives && r.ecrituresCorrectives.length > 0 && (
+                        <Typography variant="caption" sx={{ color: 'info.dark' }}>
+                          {r.ecrituresCorrectives.length} ecriture(s) corrective(s) disponible(s) — cliquez pour voir
+                        </Typography>
+                      )}
                     </Box>
                   )}
                 </Box>

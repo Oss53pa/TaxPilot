@@ -1,5 +1,6 @@
 /**
- * Note 3 - Immobilisations Corporelles SYSCOHADA
+ * Note 3A - Immobilisations brutes SYSCOHADA
+ * (anciennement Note 3 - renommée pour alignement Excel)
  */
 
 import React from 'react'
@@ -29,7 +30,7 @@ import EditableToolbar from '../shared/EditableToolbar'
 import { useEditableTable } from '@/hooks/useEditableTable'
 import { useBalanceData } from '@/hooks/useBalanceData'
 
-const Note3SYSCOHADA: React.FC = () => {
+const Note3ASYSCOHADA: React.FC = () => {
   const theme = useTheme()
   const { isEditMode, toggleEditMode, handleCellChange, getCellValue, hasChanges, handleSave } = useEditableTable()
 
@@ -82,7 +83,7 @@ const Note3SYSCOHADA: React.FC = () => {
     <Box sx={{ p: 3 }}>
       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
         <Typography variant="h4" sx={{ fontWeight: 700, color: theme.palette.primary.main }}>
-          Note 3 - Immobilisations Corporelles (en FCFA)
+          Note 3A - Immobilisations brutes (en FCFA)
         </Typography>
         <EditableToolbar
           isEditMode={isEditMode}
@@ -245,53 +246,23 @@ const Note3SYSCOHADA: React.FC = () => {
               <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'primary.main' }}>
                 Mouvements de l'exercice
               </Typography>
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="body2" sx={{ fontWeight: 600, color: 'success.main' }}>
-                  Principales acquisitions :
-                </Typography>
-                <Typography variant="body2">• Équipement industriel : 2 000 000 FCFA</Typography>
-                <Typography variant="body2">• Matériel informatique : 1 200 000 FCFA</Typography>
-                <Typography variant="body2">• Autres équipements : 500 000 FCFA</Typography>
-              </Box>
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="body2" sx={{ fontWeight: 600, color: 'error.main' }}>
-                  Cessions de l'exercice :
-                </Typography>
-                <Typography variant="body2">• Véhicule utilitaire :</Typography>
-                <Typography variant="body2" sx={{ pl: 2 }}>
-                  - Valeur brute : 1 500 000 FCFA
-                </Typography>
-                <Typography variant="body2" sx={{ pl: 2 }}>
-                  - Amortissements : 1 200 000 FCFA
-                </Typography>
-                <Typography variant="body2" sx={{ pl: 2 }}>
-                  - Prix de cession : 400 000 FCFA
-                </Typography>
-                <Typography variant="body2" sx={{ pl: 2, color: 'success.main' }}>
-                  - Plus-value : 100 000 FCFA
-                </Typography>
-              </Box>
+              <Typography variant="body2" color="text.secondary">
+                Les acquisitions et cessions de l'exercice sont détaillées dans le tableau ci-dessus.
+                Les plus et moins-values de cession sont présentées dans la Note 3D.
+              </Typography>
             </CardContent>
           </Card>
         </Grid>
       </Grid>
 
       {/* Section Commentaires et Observations */}
-      <CommentairesSection 
-        titre="Commentaires et Observations - Note 3"
-        noteId="note3" 
-        commentairesInitiaux={[
-          {
-            id: '1',
-            auteur: 'Expert-comptable',
-            date: new Date().toLocaleDateString('fr-FR'),
-            contenu: 'Les immobilisations corporelles sont correctement valorisées et amorties.\n\nPoints d\'attention :\n- Les durées d\'amortissement appliquées sont conformes aux usages sectoriels\n- La cession du véhicule utilitaire génère une plus-value de 100 000 FCFA\n- Aucune dépréciation supplémentaire à constater',
-            type: 'note'
-          }
-        ]}
+      <CommentairesSection
+        titre="Commentaires et Observations - Note 3A"
+        noteId="note3a"
+        commentairesInitiaux={[]}
       />
     </Box>
   )
 }
 
-export default Note3SYSCOHADA
+export default Note3ASYSCOHADA

@@ -9,6 +9,9 @@ import { arrondiFCFA } from '@/config/taux-fiscaux-ci'
 import { liasseDataService } from './liasseDataService'
 import type { TypeLiasse } from '../types'
 import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
+import { createLiasseArchive, type LiasseArchiveRecord } from './archiveService'
+import type { StoredBalance } from './balanceStorageService'
+import type { SessionAudit, RapportPartie2 } from '@/types/audit.types'
 
 // ============================================================
 // Libellés SYSCOHADA pour les références
@@ -342,4 +345,38 @@ export function exportLiassePDF(
     w.document.write(html)
     w.document.close()
   }
+}
+
+// ============================================================
+// EXPORT WITH ARCHIVE — Excel + JSON archive with integrity hash
+// ============================================================
+
+export async function exportLiasseWithArchive(
+  entreprise: { raison_sociale: string; numero_contribuable: string },
+  exercice: string,
+  typeLiasse: TypeLiasse = 'SN',
+  balance: StoredBalance,
+  auditSession?: SessionAudit,
+  rapportP2?: RapportPartie2
+): Promise<{ filename: string; archive: LiasseArchiveRecord }> {
+  // Generate Excel export
+  const filename = exportLiasseExcel(entreprise, exercice, typeLiasse)
+
+  // Collect liasse data for archive
+  const liasseData: Record<string, unknown> = {
+    actif: liasseDataService.generateBilanActif(typeLiasse),
+    passif: liasseDataService.generateBilanPassif(typeLiasse),
+    compteResultat: liasseDataService.generateCompteResultat(typeLiasse),
+    sig: liasseDataService.generateSIG(),
+    tft: liasseDataService.generateTFT(),
+    tafire: liasseDataService.generateTAFIRE(),
+    entreprise,
+    exercice,
+    typeLiasse,
+  }
+
+  // Create archive with integrity hash
+  const archive = await createLiasseArchive(balance, liasseData, auditSession, rapportP2)
+
+  return { filename, archive }
 }

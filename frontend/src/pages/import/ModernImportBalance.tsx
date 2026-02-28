@@ -9,7 +9,8 @@ import { balanceService } from '@/services'
 import { useBackendData } from '@/hooks/useBackendData'
 import { importBalanceFile } from '@/services/balanceParserService'
 import type { ImportPipelineResult } from '@/services/balanceParserService'
-import { saveImportedBalance, saveImportedBalanceN1, saveImportRecord } from '@/services/balanceStorageService'
+import { saveImportedBalance, saveImportedBalanceN1, saveImportRecord, hasExistingBalance } from '@/services/balanceStorageService'
+import type { ExerciceConfig } from '@/types/audit.types'
 import { liasseDataService } from '@/services/liasseDataService'
 import { downloadBalanceTemplate } from '@/services/balanceTemplateService'
 import {
@@ -37,9 +38,7 @@ import {
   TableHead,
   TableRow,
   TablePagination,
-  IconButton,
   Chip,
-  LinearProgress,
   List,
   ListItem,
   ListItemIcon,
@@ -64,7 +63,6 @@ import {
   Error as ErrorIcon,
   Warning as WarningIcon,
   Save as SaveIcon,
-  Edit as EditIcon,
   TrendingUp as TrendingUpIcon,
   TrendingDown as TrendingDownIcon,
   AccountTree,
@@ -190,6 +188,17 @@ const ModernImportBalance: React.FC = () => {
     tolerance: 0.01 // 1 centime de tolérance
   })
   
+  // Exercice configuration (Step 0)
+  const currentYear = new Date().getFullYear()
+  const [exerciceConfig, setExerciceConfig] = useState<ExerciceConfig>({
+    year: currentYear,
+    date_debut: `${currentYear}-01-01`,
+    date_fin: `${currentYear}-12-31`,
+    type: 'N',
+  })
+  const [exerciceConfigured, setExerciceConfigured] = useState(false)
+  const [reimportInfo, setReimportInfo] = useState<{ exists: boolean; version: number }>({ exists: false, version: 0 })
+
   // Parsed N-1 entries from the same file
   const [parsedEntriesN1, setParsedEntriesN1] = useState<import('@/services/liasseDataService').BalanceEntry[]>([])
 
@@ -199,7 +208,6 @@ const ModernImportBalance: React.FC = () => {
 
   // État pour la comparaison N-1
   const [comparisonData, setComparisonData] = useState<Comparison[]>([])
-  const [previousYearData] = useState<BalanceAccount[]>([])
   
   // Timer pour EX-IMPORT-009
   const [, setImportStartTime] = useState<Date | null>(null)
@@ -323,15 +331,16 @@ const ModernImportBalance: React.FC = () => {
       validateBalance(accounts)
       generateMappingSuggestions(accounts)
 
-      if (previousYearData.length > 0) {
-        compareWithPreviousYear(accounts)
+      // Build N-1 comparison from parsed entries
+      if (result.entriesN1.length > 0) {
+        compareWithN1(accounts, result.entriesN1)
       }
 
       const endTime = performance.now()
       setProcessingTime(endTime)
       generateImportReport(accounts, file.name, endTime)
 
-      setImportStep(2)
+      setImportStep(3)
     } catch (error: any) {
       logger.error('Erreur parsing fichier:', error)
       setErrorMessage(error?.message || 'Erreur inconnue lors du parsing du fichier.')
@@ -470,55 +479,59 @@ const ModernImportBalance: React.FC = () => {
     return null
   }
 
-  // EX-IMPORT-008: Comparaison avec N-1
-  const compareWithPreviousYear = (currentData: BalanceAccount[]) => {
+  // EX-IMPORT-008: Comparaison N vs N-1 using parsedEntriesN1
+  const compareWithN1 = (
+    currentData: BalanceAccount[],
+    n1Entries: import('@/services/liasseDataService').BalanceEntry[]
+  ) => {
     const comparisons: Comparison[] = []
-    
+    const n1Map = new Map(n1Entries.map(e => [e.compte, e]))
+
     currentData.forEach(current => {
-      const previous = previousYearData.find(p => p.accountNumber === current.accountNumber)
-      
-      if (previous) {
-        const currentBalance = (current.debitClosing || 0) - (current.creditClosing || 0)
-        const previousBalance = (previous.debitClosing || 0) - (previous.creditClosing || 0)
+      const prev = n1Map.get(current.accountNumber)
+      const currentBalance = (current.debitClosing || 0) - (current.creditClosing || 0)
+
+      if (prev) {
+        const previousBalance = (prev.solde_debit || 0) - (prev.solde_credit || 0)
         const variation = currentBalance - previousBalance
-        const variationPercent = previousBalance !== 0 ? (variation / previousBalance) * 100 : 0
-        
+        const variationPercent = previousBalance !== 0 ? (variation / Math.abs(previousBalance)) * 100 : (currentBalance !== 0 ? 100 : 0)
+
         comparisons.push({
           account: current.accountNumber,
           currentYear: currentBalance,
           previousYear: previousBalance,
           variation,
           variationPercent,
-          alert: Math.abs(variationPercent) > 50 
+          alert: Math.abs(variationPercent) > 50
             ? variationPercent > 0 ? 'significant_increase' : 'significant_decrease'
             : undefined
         })
+        n1Map.delete(current.accountNumber)
       } else {
         comparisons.push({
           account: current.accountNumber,
-          currentYear: (current.debitClosing || 0) - (current.creditClosing || 0),
+          currentYear: currentBalance,
           previousYear: 0,
-          variation: (current.debitClosing || 0) - (current.creditClosing || 0),
-          variationPercent: 100,
+          variation: currentBalance,
+          variationPercent: currentBalance !== 0 ? 100 : 0,
           alert: 'new_account'
         })
       }
     })
-    
-    // Comptes manquants
-    previousYearData.forEach(previous => {
-      if (!currentData.find(c => c.accountNumber === previous.accountNumber)) {
-        comparisons.push({
-          account: previous.accountNumber,
-          currentYear: 0,
-          previousYear: (previous.debitClosing || 0) - (previous.creditClosing || 0),
-          variation: -((previous.debitClosing || 0) - (previous.creditClosing || 0)),
-          variationPercent: -100,
-          alert: 'missing_account'
-        })
-      }
+
+    // Comptes présents en N-1 mais absents en N
+    n1Map.forEach((prev, compte) => {
+      const previousBalance = (prev.solde_debit || 0) - (prev.solde_credit || 0)
+      comparisons.push({
+        account: compte,
+        currentYear: 0,
+        previousYear: previousBalance,
+        variation: -previousBalance,
+        variationPercent: -100,
+        alert: 'missing_account'
+      })
     })
-    
+
     setComparisonData(comparisons)
   }
 
@@ -592,7 +605,7 @@ const ModernImportBalance: React.FC = () => {
             validateBalance(accounts)
             generateMappingSuggestions(accounts)
             generateImportReport(accounts, 'Import API', 0)
-            setImportStep(2)
+            setImportStep(3)
           }
         }
       } else {
@@ -743,10 +756,13 @@ const ModernImportBalance: React.FC = () => {
               
               <Stepper activeStep={importStep} orientation="vertical">
                 <Step>
-                  <StepLabel>Sélection du fichier</StepLabel>
+                  <StepLabel>Selection exercice</StepLabel>
                 </Step>
                 <Step>
-                  <StepLabel>Détection de structure</StepLabel>
+                  <StepLabel>Selection du fichier</StepLabel>
+                </Step>
+                <Step>
+                  <StepLabel>Detection de structure</StepLabel>
                 </Step>
                 <Step>
                   <StepLabel>Mapping des comptes</StepLabel>
@@ -823,6 +839,96 @@ const ModernImportBalance: React.FC = () => {
         <Grid item xs={12} lg={9}>
           <Card elevation={0} sx={{ border: `1px solid ${alpha(theme.palette.divider, 0.08)}` }}>
             {importStep === 0 && (
+              /* Étape 0: Sélection de l'exercice */
+              <CardContent sx={{ p: 3 }}>
+                <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
+                  Configuration de l'exercice
+                </Typography>
+
+                <Grid container spacing={3}>
+                  <Grid item xs={12} md={4}>
+                    <FormControl fullWidth>
+                      <InputLabel>Exercice</InputLabel>
+                      <Select
+                        value={exerciceConfig.year}
+                        label="Exercice"
+                        onChange={(e) => {
+                          const year = Number(e.target.value)
+                          const newConfig: ExerciceConfig = {
+                            ...exerciceConfig,
+                            year,
+                            date_debut: `${year}-01-01`,
+                            date_fin: `${year}-12-31`,
+                          }
+                          setExerciceConfig(newConfig)
+                          setReimportInfo(hasExistingBalance(String(year)))
+                        }}
+                      >
+                        {[currentYear, currentYear - 1, currentYear - 2].map(y => (
+                          <MenuItem key={y} value={y}>{y}</MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={12} md={4}>
+                    <TextField
+                      fullWidth
+                      label="Date debut"
+                      type="date"
+                      value={exerciceConfig.date_debut}
+                      onChange={(e) => setExerciceConfig(prev => ({ ...prev, date_debut: e.target.value }))}
+                      InputLabelProps={{ shrink: true }}
+                    />
+                  </Grid>
+                  <Grid item xs={12} md={4}>
+                    <TextField
+                      fullWidth
+                      label="Date fin"
+                      type="date"
+                      value={exerciceConfig.date_fin}
+                      onChange={(e) => setExerciceConfig(prev => ({ ...prev, date_fin: e.target.value }))}
+                      InputLabelProps={{ shrink: true }}
+                    />
+                  </Grid>
+                  <Grid item xs={12} md={4}>
+                    <FormControl fullWidth>
+                      <InputLabel>Type</InputLabel>
+                      <Select
+                        value={exerciceConfig.type}
+                        label="Type"
+                        onChange={(e) => setExerciceConfig(prev => ({ ...prev, type: e.target.value as 'N' | 'N-1' }))}
+                      >
+                        <MenuItem value="N">N (exercice courant)</MenuItem>
+                        <MenuItem value="N-1">N-1 (exercice precedent)</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                </Grid>
+
+                {reimportInfo.exists && (
+                  <Alert severity="warning" sx={{ mt: 3 }}>
+                    <AlertTitle>Re-import detecte</AlertTitle>
+                    Une balance existe deja pour l'exercice {exerciceConfig.year} (version {reimportInfo.version}).
+                    La version {reimportInfo.version + 1} sera creee automatiquement.
+                  </Alert>
+                )}
+
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
+                  <Button
+                    variant="contained"
+                    onClick={() => {
+                      setExerciceConfigured(true)
+                      setReimportInfo(hasExistingBalance(String(exerciceConfig.year)))
+                      setImportStep(1)
+                    }}
+                  >
+                    Suivant
+                  </Button>
+                </Box>
+              </CardContent>
+            )}
+
+            {importStep === 1 && (
               /* Étape 1: Sélection du fichier */
               <CardContent sx={{ p: 3 }}>
                 <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
@@ -891,7 +997,7 @@ const ModernImportBalance: React.FC = () => {
               </CardContent>
             )}
 
-            {importStep === 1 && fileStructure && (
+            {importStep === 2 && fileStructure && (
               /* Étape 2: Détection de structure */
               <CardContent sx={{ p: 3 }}>
                 <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
@@ -980,7 +1086,7 @@ const ModernImportBalance: React.FC = () => {
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
                   <Button
                     variant="outlined"
-                    onClick={() => setImportStep(0)}
+                    onClick={() => setImportStep(1)}
                   >
                     Retour
                   </Button>
@@ -995,7 +1101,7 @@ const ModernImportBalance: React.FC = () => {
               </CardContent>
             )}
 
-            {importStep === 2 && (
+            {importStep === 3 && (
               /* Étape 3: Mapping et validation */
               <CardContent sx={{ p: 3 }}>
                 <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
@@ -1013,87 +1119,68 @@ const ModernImportBalance: React.FC = () => {
                     <Table size="small">
                       <TableHead>
                         <TableRow sx={{ backgroundColor: alpha(theme.palette.primary.main, 0.02) }}>
-                          <TableCell sx={{ fontWeight: 600 }}>Statut</TableCell>
-                          <TableCell sx={{ fontWeight: 600 }}>N° Compte</TableCell>
-                          <TableCell sx={{ fontWeight: 600 }}>Libellé</TableCell>
-                          <TableCell align="right" sx={{ fontWeight: 600 }}>Débit</TableCell>
-                          <TableCell align="right" sx={{ fontWeight: 600 }}>Crédit</TableCell>
-                          <TableCell sx={{ fontWeight: 600 }}>Mapping SYSCOHADA</TableCell>
-                          <TableCell sx={{ fontWeight: 600 }}>Confiance</TableCell>
-                          <TableCell sx={{ fontWeight: 600 }}>Actions</TableCell>
+                          <TableCell sx={{ fontWeight: 600, fontSize: '0.75rem' }}>N° Compte</TableCell>
+                          <TableCell sx={{ fontWeight: 600, fontSize: '0.75rem' }}>Intitulé</TableCell>
+                          <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem', backgroundColor: alpha(theme.palette.primary.main, 0.04) }}>Débit</TableCell>
+                          <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem', backgroundColor: alpha(theme.palette.primary.main, 0.04) }}>Crédit</TableCell>
+                          <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem', backgroundColor: alpha(theme.palette.primary.main, 0.04) }}>Solde Débiteur</TableCell>
+                          <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem', backgroundColor: alpha(theme.palette.primary.main, 0.04) }}>Solde Créditeur</TableCell>
+                          <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem', backgroundColor: alpha(theme.palette.grey[500], 0.04) }}>Débit N-1</TableCell>
+                          <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem', backgroundColor: alpha(theme.palette.grey[500], 0.04) }}>Crédit N-1</TableCell>
+                          <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem', backgroundColor: alpha(theme.palette.grey[500], 0.04) }}>SD N-1</TableCell>
+                          <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem', backgroundColor: alpha(theme.palette.grey[500], 0.04) }}>SC N-1</TableCell>
+                          <TableCell sx={{ fontWeight: 600, fontSize: '0.75rem' }}>Statut</TableCell>
                         </TableRow>
                       </TableHead>
                       <TableBody>
                         {importedData
                           .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                          .map((account) => (
+                          .map((account) => {
+                            const n1 = parsedEntriesN1.find(e => e.compte === account.accountNumber)
+                            return (
                             <TableRow key={account.accountNumber} hover>
+                              <TableCell>
+                                <Typography variant="body2" sx={{ fontFamily: 'monospace', fontWeight: 600 }}>
+                                  {account.accountNumber}
+                                </Typography>
+                              </TableCell>
+                              <TableCell>
+                                <Typography variant="body2" noWrap sx={{ maxWidth: 200 }}>
+                                  {account.accountName}
+                                </Typography>
+                              </TableCell>
+                              <TableCell align="right" sx={{ fontFamily: 'monospace' }}>
+                                {(account.debitMovements || 0) > 0 ? (account.debitMovements || 0).toLocaleString('fr-FR') : '-'}
+                              </TableCell>
+                              <TableCell align="right" sx={{ fontFamily: 'monospace' }}>
+                                {(account.creditMovements || 0) > 0 ? (account.creditMovements || 0).toLocaleString('fr-FR') : '-'}
+                              </TableCell>
+                              <TableCell align="right" sx={{ fontFamily: 'monospace', fontWeight: 600 }}>
+                                {(account.debitClosing || 0) > 0 ? (account.debitClosing || 0).toLocaleString('fr-FR') : '-'}
+                              </TableCell>
+                              <TableCell align="right" sx={{ fontFamily: 'monospace', fontWeight: 600 }}>
+                                {(account.creditClosing || 0) > 0 ? (account.creditClosing || 0).toLocaleString('fr-FR') : '-'}
+                              </TableCell>
+                              <TableCell align="right" sx={{ fontFamily: 'monospace', color: 'text.secondary' }}>
+                                {(n1?.debit || 0) > 0 ? (n1?.debit || 0).toLocaleString('fr-FR') : '-'}
+                              </TableCell>
+                              <TableCell align="right" sx={{ fontFamily: 'monospace', color: 'text.secondary' }}>
+                                {(n1?.credit || 0) > 0 ? (n1?.credit || 0).toLocaleString('fr-FR') : '-'}
+                              </TableCell>
+                              <TableCell align="right" sx={{ fontFamily: 'monospace', color: 'text.secondary' }}>
+                                {(n1?.solde_debit || 0) > 0 ? (n1?.solde_debit || 0).toLocaleString('fr-FR') : '-'}
+                              </TableCell>
+                              <TableCell align="right" sx={{ fontFamily: 'monospace', color: 'text.secondary' }}>
+                                {(n1?.solde_credit || 0) > 0 ? (n1?.solde_credit || 0).toLocaleString('fr-FR') : '-'}
+                              </TableCell>
                               <TableCell>
                                 {account.status === 'valid' && <CheckIcon color="success" fontSize="small" />}
                                 {account.status === 'warning' && <WarningIcon color="warning" fontSize="small" />}
                                 {account.status === 'error' && <ErrorIcon color="error" fontSize="small" />}
                               </TableCell>
-                              <TableCell>
-                                <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
-                                  {account.accountNumber}
-                                </Typography>
-                              </TableCell>
-                              <TableCell>{account.accountName}</TableCell>
-                              <TableCell align="right">
-                                {account.debitClosing?.toLocaleString()}
-                              </TableCell>
-                              <TableCell align="right">
-                                {account.creditClosing?.toLocaleString()}
-                              </TableCell>
-                              <TableCell>
-                                {account.mappedAccount ? (
-                                  <Chip
-                                    label={account.mappedAccount}
-                                    size="small"
-                                    color="primary"
-                                    variant="outlined"
-                                  />
-                                ) : (
-                                  <Chip
-                                    label="Non mappé"
-                                    size="small"
-                                    color="error"
-                                    variant="outlined"
-                                  />
-                                )}
-                              </TableCell>
-                              <TableCell>
-                                <LinearProgress
-                                  variant="determinate"
-                                  value={account.mappingConfidence || 0}
-                                  sx={{
-                                    height: 6,
-                                    borderRadius: 3,
-                                    backgroundColor: alpha(theme.palette.divider, 0.1),
-                                    '& .MuiLinearProgress-bar': {
-                                      backgroundColor: 
-                                        (account.mappingConfidence || 0) >= 80 ? theme.palette.success.main :
-                                        (account.mappingConfidence || 0) >= 50 ? theme.palette.warning.main :
-                                        theme.palette.error.main
-                                    }
-                                  }}
-                                />
-                                <Typography variant="caption">
-                                  {account.mappingConfidence || 0}%
-                                </Typography>
-                              </TableCell>
-                              <TableCell>
-                                <IconButton 
-                                  size="small"
-                                  onClick={() => {
-                                    // Ouvrir dialog de correction
-                                  }}
-                                >
-                                  <EditIcon fontSize="small" />
-                                </IconButton>
-                              </TableCell>
                             </TableRow>
-                          ))}
+                            )
+                          })}
                       </TableBody>
                     </Table>
                     <TablePagination
@@ -1123,153 +1210,218 @@ const ModernImportBalance: React.FC = () => {
                   <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
                     Suggestions de mapping intelligent
                   </Typography>
-                  
-                  <List>
-                    {mappingSuggestions.map((suggestion, index) => (
-                      <React.Fragment key={index}>
-                        <ListItem>
-                          <ListItemIcon>
-                            {suggestion.basedOn === 'ai' && <SmartIcon color="primary" />}
-                            {suggestion.basedOn === 'history' && <HistoryIcon color="success" />}
-                            {suggestion.basedOn === 'rules' && <AccountTree color="info" />}
-                          </ListItemIcon>
-                          <ListItemText
-                            primary={
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
-                                  {suggestion.sourceAccount}
-                                </Typography>
-                                <ArrowIcon />
-                                <Chip
-                                  label={suggestion.suggestedAccount}
-                                  size="small"
-                                  color="primary"
-                                />
-                              </Box>
-                            }
-                            secondary={
-                              <Box>
-                                <Typography variant="caption" color="text.secondary">
-                                  {suggestion.reason}
-                                </Typography>
-                                <LinearProgress
-                                  variant="determinate"
-                                  value={suggestion.confidence}
-                                  sx={{
-                                    height: 4,
-                                    borderRadius: 2,
-                                    mt: 1,
-                                    backgroundColor: alpha(theme.palette.divider, 0.1)
-                                  }}
-                                />
-                              </Box>
-                            }
-                          />
-                          <ListItemSecondaryAction>
-                            <Stack direction="row" spacing={1}>
-                              <Button size="small" color="success">
-                                Accepter
-                              </Button>
-                              <Button size="small" color="error">
-                                Refuser
-                              </Button>
-                            </Stack>
-                          </ListItemSecondaryAction>
-                        </ListItem>
-                        {index < mappingSuggestions.length - 1 && <Divider />}
-                      </React.Fragment>
-                    ))}
-                  </List>
 
-                  <Alert severity="info" sx={{ mt: 3 }}>
-                    <AlertTitle>Apprentissage automatique activé</AlertTitle>
-                    Le système apprend de vos choix pour améliorer les suggestions futures.
-                  </Alert>
+                  {mappingSuggestions.length === 0 ? (
+                    <Alert severity="success">
+                      Tous les comptes sont mappés avec une confiance suffisante. Aucune suggestion nécessaire.
+                    </Alert>
+                  ) : (
+                    <List>
+                      {mappingSuggestions.map((suggestion, index) => (
+                        <React.Fragment key={index}>
+                          <ListItem>
+                            <ListItemIcon>
+                              {suggestion.basedOn === 'ai' && <SmartIcon color="primary" />}
+                              {suggestion.basedOn === 'history' && <HistoryIcon color="success" />}
+                              {suggestion.basedOn === 'rules' && <AccountTree color="info" />}
+                            </ListItemIcon>
+                            <ListItemText
+                              primary={
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                  <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
+                                    {suggestion.sourceAccount}
+                                  </Typography>
+                                  <ArrowIcon />
+                                  <Chip
+                                    label={suggestion.suggestedAccount}
+                                    size="small"
+                                    color="primary"
+                                  />
+                                  <Typography variant="caption" color="text.secondary">
+                                    ({suggestion.confidence.toFixed(0)}%)
+                                  </Typography>
+                                </Box>
+                              }
+                              secondary={suggestion.reason}
+                            />
+                            <ListItemSecondaryAction>
+                              <Stack direction="row" spacing={1}>
+                                <Button
+                                  size="small"
+                                  color="success"
+                                  variant="outlined"
+                                  onClick={() => {
+                                    // Apply mapping to the account
+                                    setImportedData(prev => prev.map(acc =>
+                                      acc.accountNumber === suggestion.sourceAccount
+                                        ? { ...acc, mappedAccount: suggestion.suggestedAccount, mappingConfidence: suggestion.confidence }
+                                        : acc
+                                    ))
+                                    // Remove this suggestion
+                                    setMappingSuggestions(prev => prev.filter((_, i) => i !== index))
+                                  }}
+                                >
+                                  Accepter
+                                </Button>
+                                <Button
+                                  size="small"
+                                  color="error"
+                                  variant="outlined"
+                                  onClick={() => {
+                                    // Remove suggestion without applying
+                                    setMappingSuggestions(prev => prev.filter((_, i) => i !== index))
+                                  }}
+                                >
+                                  Refuser
+                                </Button>
+                              </Stack>
+                            </ListItemSecondaryAction>
+                          </ListItem>
+                          {index < mappingSuggestions.length - 1 && <Divider />}
+                        </React.Fragment>
+                      ))}
+                    </List>
+                  )}
+
+                  {mappingSuggestions.length > 0 && (
+                    <Stack direction="row" spacing={2} sx={{ mt: 3 }}>
+                      <Button
+                        variant="contained"
+                        color="success"
+                        onClick={() => {
+                          // Accept all suggestions
+                          setImportedData(prev => {
+                            const updated = [...prev]
+                            mappingSuggestions.forEach(s => {
+                              const acc = updated.find(a => a.accountNumber === s.sourceAccount)
+                              if (acc) {
+                                acc.mappedAccount = s.suggestedAccount
+                                acc.mappingConfidence = s.confidence
+                              }
+                            })
+                            return updated
+                          })
+                          setMappingSuggestions([])
+                        }}
+                      >
+                        Tout accepter ({mappingSuggestions.length})
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        color="error"
+                        onClick={() => setMappingSuggestions([])}
+                      >
+                        Tout refuser
+                      </Button>
+                    </Stack>
+                  )}
                 </TabPanel>
 
                 <TabPanel value={activeTab} index={2}>
                   {/* Comparaison N-1 */}
                   <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
-                    Analyse comparative avec l'exercice précédent
+                    Analyse comparative N / N-1
                   </Typography>
-                  
+
                   {comparisonData.length > 0 ? (
-                    <TableContainer component={Paper} elevation={0}>
-                      <Table size="small">
-                        <TableHead>
-                          <TableRow>
-                            <TableCell>Compte</TableCell>
-                            <TableCell align="right">N-1</TableCell>
-                            <TableCell align="right">N</TableCell>
-                            <TableCell align="right">Variation</TableCell>
-                            <TableCell align="right">%</TableCell>
-                            <TableCell>Alerte</TableCell>
-                          </TableRow>
-                        </TableHead>
-                        <TableBody>
-                          {comparisonData
-                            .filter(c => c.alert)
-                            .map((comparison) => (
-                              <TableRow key={comparison.account}>
-                                <TableCell>{comparison.account}</TableCell>
-                                <TableCell align="right">
-                                  {comparison.previousYear.toLocaleString()}
+                    <>
+                      {/* Résumé alertes */}
+                      {(() => {
+                        const alerts = comparisonData.filter(c => c.alert)
+                        const newAccounts = alerts.filter(c => c.alert === 'new_account').length
+                        const missing = alerts.filter(c => c.alert === 'missing_account').length
+                        const significant = alerts.filter(c => c.alert === 'significant_increase' || c.alert === 'significant_decrease').length
+                        return alerts.length > 0 ? (
+                          <Alert severity="warning" sx={{ mb: 3 }}>
+                            <AlertTitle>{alerts.length} anomalie(s) détectée(s)</AlertTitle>
+                            {significant > 0 && <div>{significant} variation(s) significative(s) (&gt;50%)</div>}
+                            {newAccounts > 0 && <div>{newAccounts} nouveau(x) compte(s) en N</div>}
+                            {missing > 0 && <div>{missing} compte(s) disparu(s) depuis N-1</div>}
+                          </Alert>
+                        ) : (
+                          <Alert severity="success" sx={{ mb: 3 }}>
+                            Aucune variation significative détectée entre N et N-1.
+                          </Alert>
+                        )
+                      })()}
+
+                      <TableContainer component={Paper} elevation={0}>
+                        <Table size="small">
+                          <TableHead>
+                            <TableRow sx={{ backgroundColor: alpha(theme.palette.primary.main, 0.02) }}>
+                              <TableCell sx={{ fontWeight: 600 }}>Compte</TableCell>
+                              <TableCell align="right" sx={{ fontWeight: 600 }}>Solde N</TableCell>
+                              <TableCell align="right" sx={{ fontWeight: 600 }}>Solde N-1</TableCell>
+                              <TableCell align="right" sx={{ fontWeight: 600 }}>Variation</TableCell>
+                              <TableCell align="right" sx={{ fontWeight: 600 }}>%</TableCell>
+                              <TableCell sx={{ fontWeight: 600 }}>Alerte</TableCell>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {comparisonData.map((c) => (
+                              <TableRow
+                                key={c.account}
+                                hover
+                                sx={c.alert ? { backgroundColor: alpha(theme.palette.warning.main, 0.04) } : undefined}
+                              >
+                                <TableCell>
+                                  <Typography variant="body2" sx={{ fontFamily: 'monospace', fontWeight: 600 }}>
+                                    {c.account}
+                                  </Typography>
+                                </TableCell>
+                                <TableCell align="right" sx={{ fontFamily: 'monospace' }}>
+                                  {c.currentYear !== 0 ? c.currentYear.toLocaleString('fr-FR') : '-'}
+                                </TableCell>
+                                <TableCell align="right" sx={{ fontFamily: 'monospace', color: 'text.secondary' }}>
+                                  {c.previousYear !== 0 ? c.previousYear.toLocaleString('fr-FR') : '-'}
+                                </TableCell>
+                                <TableCell align="right" sx={{ fontFamily: 'monospace' }}>
+                                  {c.variation !== 0 && (
+                                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 0.5 }}>
+                                      {c.variation > 0 ? (
+                                        <TrendingUpIcon color="success" sx={{ fontSize: 16 }} />
+                                      ) : (
+                                        <TrendingDownIcon color="error" sx={{ fontSize: 16 }} />
+                                      )}
+                                      {Math.abs(c.variation).toLocaleString('fr-FR')}
+                                    </Box>
+                                  )}
+                                  {c.variation === 0 && '-'}
                                 </TableCell>
                                 <TableCell align="right">
-                                  {comparison.currentYear.toLocaleString()}
-                                </TableCell>
-                                <TableCell align="right">
-                                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 1 }}>
-                                    {comparison.variation > 0 ? (
-                                      <TrendingUpIcon color="success" fontSize="small" />
-                                    ) : (
-                                      <TrendingDownIcon color="error" fontSize="small" />
-                                    )}
-                                    {Math.abs(comparison.variation).toLocaleString()}
-                                  </Box>
-                                </TableCell>
-                                <TableCell align="right">
-                                  <Chip
-                                    label={`${comparison.variationPercent.toFixed(1)}%`}
-                                    size="small"
-                                    color={Math.abs(comparison.variationPercent) > 50 ? 'warning' : 'default'}
-                                  />
+                                  {c.variationPercent !== 0 ? (
+                                    <Chip
+                                      label={`${c.variationPercent > 0 ? '+' : ''}${c.variationPercent.toFixed(1)}%`}
+                                      size="small"
+                                      color={Math.abs(c.variationPercent) > 50 ? 'warning' : 'default'}
+                                      variant="outlined"
+                                    />
+                                  ) : '-'}
                                 </TableCell>
                                 <TableCell>
-                                  {comparison.alert === 'significant_increase' && (
-                                    <Chip label="Hausse importante" size="small" color="warning" />
+                                  {c.alert === 'significant_increase' && (
+                                    <Chip label="Hausse" size="small" color="warning" />
                                   )}
-                                  {comparison.alert === 'significant_decrease' && (
-                                    <Chip label="Baisse importante" size="small" color="warning" />
+                                  {c.alert === 'significant_decrease' && (
+                                    <Chip label="Baisse" size="small" color="warning" />
                                   )}
-                                  {comparison.alert === 'new_account' && (
-                                    <Chip label="Nouveau compte" size="small" color="info" />
+                                  {c.alert === 'new_account' && (
+                                    <Chip label="Nouveau" size="small" color="info" />
                                   )}
-                                  {comparison.alert === 'missing_account' && (
-                                    <Chip label="Compte manquant" size="small" color="error" />
+                                  {c.alert === 'missing_account' && (
+                                    <Chip label="Disparu" size="small" color="error" />
                                   )}
                                 </TableCell>
                               </TableRow>
                             ))}
-                        </TableBody>
-                      </Table>
-                    </TableContainer>
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                    </>
                   ) : (
                     <Alert severity="info">
-                      Aucune donnée N-1 disponible. Importez un fichier contenant les colonnes N-1 (ex: "Débit N-1", "Crédit N-1").
-                      <Button
-                        size="small"
-                        sx={{ mt: 1 }}
-                        onClick={() => {
-                          setImportStep(0)
-                          setImportedData([])
-                          setParsedEntriesN1([])
-                          setSelectedFile(null)
-                          setFileStructure(null)
-                        }}
-                      >
-                        Nouvel import
-                      </Button>
+                      Aucune donnée N-1 détectée dans le fichier importé.
+                      Importez un fichier Excel contenant les colonnes N-1 (ex: "Débit N-1", "Crédit N-1", "SD N-1", "SC N-1") pour activer la comparaison.
                     </Alert>
                   )}
                 </TabPanel>
@@ -1416,9 +1568,11 @@ const ModernImportBalance: React.FC = () => {
                               }))
 
                               // Save N balance
-                              saveImportedBalance(
+                              const savedBalance = saveImportedBalance(
                                 entries,
                                 importReport?.fileName || 'Import balance',
+                                exerciceConfigured ? String(exerciceConfig.year) : undefined,
+                                exerciceConfigured ? exerciceConfig : undefined,
                               )
                               liasseDataService.loadBalance(entries)
 
@@ -1441,8 +1595,12 @@ const ModernImportBalance: React.FC = () => {
                                 importReport?.warnings || 0,
                               )
 
-                              // Redirect
-                              window.location.href = '/balance'
+                              // Redirect: re-import goes to audit, first import goes to balance
+                              if (savedBalance.version > 1) {
+                                window.location.href = '/audit'
+                              } else {
+                                window.location.href = '/balance'
+                              }
                             } catch (error: any) {
                               logger.error('Erreur validation import:', error)
                               setErrorMessage(error?.message || 'Erreur lors de la sauvegarde.')

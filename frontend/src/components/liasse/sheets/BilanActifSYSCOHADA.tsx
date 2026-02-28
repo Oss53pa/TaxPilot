@@ -4,7 +4,7 @@ import { logger } from '@/utils/logger'
  * Respecte le style et la charte graphique TaxPilot
  */
 
-import React, { useState, useEffect, useMemo, memo } from 'react'
+import React, { useState, useEffect, memo } from 'react'
 import {
   Box,
   Paper,
@@ -125,13 +125,11 @@ const BilanActifSYSCOHADA: React.FC<BilanActifProps> = ({ onNoteClick }) => {
   }, [isAutoMode])
 
   const loadDataFromBalance = () => {
-    // Simuler le chargement depuis la balance
-    // En production, cela viendrait de l'état Redux ou d'une API
     const balanceData = liasseDataService.generateBilanActif()
-    
-    const newData: BilanActifData = {}
+
+    const d: BilanActifData = {}
     balanceData.forEach((item: any) => {
-      newData[item.ref] = {
+      d[item.ref] = {
         brut: item.brut || 0,
         amortProv: item.amortProv || 0,
         net: item.net || 0,
@@ -139,65 +137,39 @@ const BilanActifSYSCOHADA: React.FC<BilanActifProps> = ({ onNoteClick }) => {
         note: ''
       }
     })
-    
-    setData(newData)
-  }
 
-  // Calculer les totaux automatiquement
-  const calculateTotals = useMemo(() => {
-    const totals: BilanActifData = {}
-    
-    // Calculer les totaux des groupes
-    // Cherche d'abord dans totals (pour les sous-totaux déjà calculés), puis dans data
-    const calculateGroup = (refs: string[]) => {
+    // Compute all group/total rows directly
+    const sum = (refs: string[]) => {
       let brut = 0, amortProv = 0, net = 0, netN1 = 0
-      refs.forEach(ref => {
-        const source = totals[ref] || data[ref]
-        if (source) {
-          brut += source.brut || 0
-          amortProv += source.amortProv || 0
-          net += source.net || 0
-          netN1 += source.netN1 || 0
+      refs.forEach(r => {
+        if (d[r]) {
+          brut += d[r].brut || 0
+          amortProv += d[r].amortProv || 0
+          net += d[r].net || 0
+          netN1 += d[r].netN1 || 0
         }
       })
       return { brut, amortProv, net, netN1 }
     }
-    
-    // Charges immobilisées (AX)
-    totals.AX = calculateGroup(['AQ', 'AR', 'AS'])
-    
-    // Immobilisations incorporelles (AC)
-    totals.AC = calculateGroup(['AD', 'AE', 'AF', 'AG'])
-    
-    // Immobilisations corporelles (AI)
-    totals.AI = calculateGroup(['AJ', 'AK', 'AL', 'AM', 'AN'])
-    
-    // Immobilisations financières (AW)
-    totals.AW = calculateGroup(['AT', 'AU'])
-    
-    // Total Actif Immobilisé (AZ)
-    totals.AZ = calculateGroup(['AX', 'AC', 'AI', 'AP', 'AW'])
-    
-    // Stocks (BB)
-    totals.BB = calculateGroup(['BC', 'BD', 'BE', 'BF', 'BG'])
-    
-    // Créances (BH)
-    totals.BH = calculateGroup(['BI', 'BJ', 'BK'])
-    
-    // Total Actif Circulant (BL)
-    totals.BL = calculateGroup(['BA', 'BB', 'BH'])
-    
-    // Total Trésorerie Actif (BT)
-    totals.BT = calculateGroup(['BQ', 'BR', 'BS'])
-    
-    // Total Général (BZ)
-    totals.BZ = calculateGroup(['AZ', 'BL', 'BT', 'BU'])
-    
-    return totals
-  }, [data])
 
-  // Fusionner les données avec les totaux calculés
-  const mergedData = { ...data, ...calculateTotals }
+    // Sub-groups
+    d.AX = sum(['AQ', 'AR', 'AS'])
+    d.AC = sum(['AD', 'AE', 'AF', 'AG'])
+    d.AI = sum(['AJ', 'AK', 'AL', 'AM', 'AN'])
+    d.AW = sum(['AT', 'AU'])
+    d.BB = sum(['BC', 'BD', 'BE', 'BF', 'BG'])
+    d.BH = sum(['BI', 'BJ', 'BK'])
+
+    // Totals (use already-computed sub-groups)
+    d.AZ = sum(['AX', 'AC', 'AI', 'AP', 'AW'])
+    d.BL = sum(['BA', 'BB', 'BH'])
+    d.BT = sum(['BQ', 'BR', 'BS'])
+    d.BZ = sum(['AZ', 'BL', 'BT', 'BU'])
+
+    setData(d)
+  }
+
+  const mergedData = data
 
   const handleCellChange = (ref: string, field: string, value: string) => {
     const numValue = parseFloat(value) || 0

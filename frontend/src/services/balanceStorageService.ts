@@ -4,6 +4,7 @@
  */
 
 import type { BalanceEntry } from './liasseDataService'
+import type { StatutBalance, ExerciceConfig } from '@/types/audit.types'
 
 const PREFIX = 'fiscasync_balance_'
 const MAX_BALANCES = 5
@@ -18,6 +19,11 @@ export interface StoredBalance {
   totalCredit: number
   ecart: number
   accountCount: number
+  version: number
+  statut: StatutBalance
+  exerciceConfig?: ExerciceConfig
+  previousVersionId?: string
+  auditSessionId?: string
 }
 
 export interface ImportRecord {
@@ -51,21 +57,33 @@ function setItem<T>(key: string, value: T): void {
 export function saveImportedBalance(
   entries: BalanceEntry[],
   fileName: string,
-  exercice?: string
+  exercice?: string,
+  exerciceConfig?: ExerciceConfig
 ): StoredBalance {
   const totalDebit = entries.reduce((s, e) => s + e.solde_debit, 0)
   const totalCredit = entries.reduce((s, e) => s + e.solde_credit, 0)
+  const targetExercice = exercice || String(new Date().getFullYear())
+
+  // Detect re-import for same exercice
+  const existing = getBalancesForExercice(targetExercice)
+  const latestExisting = existing.length > 0 ? existing[0] : null
+  const version = latestExisting ? latestExisting.version + 1 : 1
+  const statut: StatutBalance = version > 1 ? 'corrigee' : 'brute'
 
   const balance: StoredBalance = {
     id: Date.now().toString(36) + Math.random().toString(36).substring(2, 6),
     fileName,
     importDate: new Date().toISOString(),
-    exercice: exercice || String(new Date().getFullYear()),
+    exercice: targetExercice,
     entries,
     totalDebit,
     totalCredit,
     ecart: Math.abs(totalDebit - totalCredit),
     accountCount: entries.length,
+    version,
+    statut,
+    exerciceConfig,
+    previousVersionId: latestExisting?.id,
   }
 
   // Maintain list of max N balances
@@ -152,6 +170,8 @@ export function saveImportedBalanceN1(
     totalCredit,
     ecart: Math.abs(totalDebit - totalCredit),
     accountCount: entries.length,
+    version: 1,
+    statut: 'brute',
   }
 
   setItem('latest_n1', balance)
@@ -160,4 +180,47 @@ export function saveImportedBalanceN1(
 
 export function getLatestBalanceN1(): StoredBalance | null {
   return getItem<StoredBalance>('latest_n1')
+}
+
+// ────────── Versioning & Exercice ──────────
+
+export function getBalancesForExercice(exercice: string): StoredBalance[] {
+  const list = getItem<StoredBalance[]>('list') || []
+  return list.filter(b => b.exercice === exercice).sort((a, b) => (b.version || 1) - (a.version || 1))
+}
+
+export function hasExistingBalance(exercice: string): { exists: boolean; version: number } {
+  const balances = getBalancesForExercice(exercice)
+  if (balances.length === 0) return { exists: false, version: 0 }
+  return { exists: true, version: balances[0].version || 1 }
+}
+
+export function updateBalanceStatut(id: string, statut: StatutBalance): void {
+  const list = getItem<StoredBalance[]>('list') || []
+  const balance = list.find(b => b.id === id)
+  if (balance) {
+    balance.statut = statut
+    setItem('list', list)
+    const latest = getItem<StoredBalance>('latest')
+    if (latest?.id === id) {
+      latest.statut = statut
+      setItem('latest', latest)
+    }
+  }
+}
+
+export function linkAuditSession(balanceId: string, sessionId: string): void {
+  const list = getItem<StoredBalance[]>('list') || []
+  const balance = list.find(b => b.id === balanceId)
+  if (balance) {
+    balance.auditSessionId = sessionId
+    if (balance.statut === 'brute') balance.statut = 'auditee'
+    setItem('list', list)
+    const latest = getItem<StoredBalance>('latest')
+    if (latest?.id === balanceId) {
+      latest.auditSessionId = sessionId
+      latest.statut = balance.statut
+      setItem('latest', latest)
+    }
+  }
 }

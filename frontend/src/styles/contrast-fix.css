@@ -7,8 +7,28 @@
   color: #ffffff !important;
 }
 
-/* Chips with dark backgrounds */
-.MuiChip-colorPrimary,
-.MuiChip-colorSecondary {
+/* Filled chips with dark backgrounds need white text */
+.MuiChip-filled.MuiChip-colorPrimary,
+.MuiChip-filled.MuiChip-colorSecondary {
   color: #ffffff !important;
+}
+
+/* Outlined chips need dark/colored text on light background */
+.MuiChip-outlined.MuiChip-colorPrimary {
+  color: #171717 !important;
+}
+.MuiChip-outlined.MuiChip-colorSecondary {
+  color: #171717 !important;
+}
+.MuiChip-outlined.MuiChip-colorSuccess {
+  color: #16a34a !important;
+}
+.MuiChip-outlined.MuiChip-colorError {
+  color: #ef4444 !important;
+}
+.MuiChip-outlined.MuiChip-colorWarning {
+  color: #92400e !important;
+}
+.MuiChip-outlined.MuiChip-colorInfo {
+  color: #3b82f6 !important;
 }

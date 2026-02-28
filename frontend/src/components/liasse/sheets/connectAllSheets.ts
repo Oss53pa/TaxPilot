@@ -16,7 +16,7 @@ export const SYSCOHADA_SHEETS = [
   'NotesAnnexesSYSCOHADA',
   'Note1SYSCOHADA',
   'Note2SYSCOHADA',
-  'Note3SYSCOHADA',
+  'Note3ASYSCOHADA',
   'Note5SYSCOHADA',
   'Note6SYSCOHADA',
   'Note8SYSCOHADA',

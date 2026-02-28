@@ -9,9 +9,11 @@ import type {
   SessionAudit,
   ResultatControle,
   RapportCorrection,
+  RapportPartie2,
   Severite,
   NiveauControle,
   PhaseAudit,
+  ExerciceConfig,
 } from '@/types/audit.types'
 
 interface AuditState {
@@ -25,7 +27,10 @@ interface AuditState {
   currentSession: SessionAudit | null
   resultats: ResultatControle[]
   correctionReport: RapportCorrection | null
+  rapportPartie2: RapportPartie2 | null
   phaseActive: PhaseAudit
+  deployReady: boolean
+  selectedExercice: ExerciceConfig | null
 
   filters: {
     type?: 'ERROR' | 'WARNING' | 'INFO'
@@ -66,7 +71,10 @@ const initialState: AuditState = {
   currentSession: null,
   resultats: [],
   correctionReport: null,
+  rapportPartie2: null,
   phaseActive: 'PHASE_1',
+  deployReady: false,
+  selectedExercice: null,
 
   filters: {},
   isRunning: false,
@@ -136,6 +144,15 @@ const auditSlice = createSlice({
     },
     setCorrectionReport: (state, action: PayloadAction<RapportCorrection | null>) => {
       state.correctionReport = action.payload
+    },
+    setRapportPartie2: (state, action: PayloadAction<RapportPartie2 | null>) => {
+      state.rapportPartie2 = action.payload
+    },
+    setDeployReady: (state, action: PayloadAction<boolean>) => {
+      state.deployReady = action.payload
+    },
+    setSelectedExercice: (state, action: PayloadAction<ExerciceConfig | null>) => {
+      state.selectedExercice = action.payload
     },
 
     // --- Actions filtres ---
@@ -215,6 +232,9 @@ export const {
   addResultats,
   setPhase,
   setCorrectionReport,
+  setRapportPartie2,
+  setDeployReady,
+  setSelectedExercice,
   setAuditFilters,
   clearAuditFilters,
   startAudit,

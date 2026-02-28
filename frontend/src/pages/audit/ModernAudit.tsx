@@ -22,6 +22,7 @@ import {
   alpha,
   Stack,
   Divider,
+  Tooltip,
 } from '@mui/material'
 import {
   Security as SecurityIcon,
@@ -33,6 +34,7 @@ import {
   Info as InfoIcon,
   TrendingUp as TrendingUpIcon,
   History as HistoryIcon,
+  Publish as DeployIcon,
 } from '@mui/icons-material'
 
 import { useAppDispatch, useAppSelector } from '@/store'
@@ -59,15 +61,19 @@ import { getLatestBalance, getLatestBalanceN1 } from '@/services/balanceStorageS
 import AuditProgressDialog from '@/components/audit/AuditProgressDialog'
 import AuditResultsView from '@/components/audit/AuditResultsView'
 import CorrectionReportView from '@/components/audit/CorrectionReportView'
+import RapportPartie2View from '@/components/audit/RapportPartie2View'
+import { deployToLiasse } from '@/services/deployService'
 
 // --- Composant principal ---
 
 const ModernAudit: React.FC = () => {
   const theme = useTheme()
   const dispatch = useAppDispatch()
-  const { currentSession, resultats, correctionReport, isRunning } = useAppSelector((s) => s.audit)
+  const { currentSession, resultats, correctionReport, isRunning, rapportPartie2 } = useAppSelector((s) => s.audit)
 
   const [activeTab, setActiveTab] = useState(0)
+  const [deploying, setDeploying] = useState(false)
+  const [deployError, setDeployError] = useState<string | null>(null)
   const [progressOpen, setProgressOpen] = useState(false)
   const [progressResultats, setProgressResultats] = useState<ResultatControle[]>([])
   const [progressNiveau, setProgressNiveau] = useState<NiveauControle>(0)
@@ -177,6 +183,24 @@ const ModernAudit: React.FC = () => {
   const resume = currentSession?.resume
   const score = resume?.scoreGlobal ?? 0
 
+  // Deploy balance to liasse
+  const bloquantsRestants = resume?.bloquantsRestants ?? -1
+  const deployReady = currentSession && bloquantsRestants === 0
+
+  const handleDeploy = useCallback(async () => {
+    if (!importedBalance || !deployReady) return
+    setDeploying(true)
+    setDeployError(null)
+    try {
+      await deployToLiasse(importedBalance, 'SN')
+      window.location.href = '/liasse'
+    } catch (err) {
+      setDeployError(err instanceof Error ? err.message : 'Erreur lors du deploiement')
+    } finally {
+      setDeploying(false)
+    }
+  }, [importedBalance, deployReady])
+
   const TabPanel: React.FC<{ children: React.ReactNode; value: number; index: number }> = ({
     children, value, index,
   }) => (
@@ -199,7 +223,16 @@ const ModernAudit: React.FC = () => {
             </Typography>
           </Box>
 
-          <Stack direction="row" spacing={2}>
+          <Stack direction="row" spacing={2} alignItems="center">
+            {/* Indicateur exercice/version/statut */}
+            {importedBalance && (
+              <Stack direction="row" spacing={1}>
+                <Chip label={`Exercice ${exerciceToAudit}`} size="small" variant="outlined" />
+                <Chip label={`V${importedBalance.version || 1}`} size="small" variant="outlined" color="info" />
+                <Chip label={importedBalance.statut || 'brute'} size="small" variant="outlined"
+                  color={importedBalance.statut === 'deployee' ? 'success' : importedBalance.statut === 'corrigee' ? 'warning' : 'default'} />
+              </Stack>
+            )}
             <Button
               variant="outlined"
               startIcon={<ExportIcon />}
@@ -214,6 +247,23 @@ const ModernAudit: React.FC = () => {
             >
               Rapport
             </Button>
+            <Tooltip title={
+              !currentSession ? 'Lancez un audit d\'abord'
+                : bloquantsRestants > 0 ? `${bloquantsRestants} anomalie(s) bloquante(s) restante(s) — corrigez-les avant le deploiement`
+                : 'Deployer la balance dans la liasse fiscale'
+            }>
+              <span>
+                <Button
+                  variant="contained"
+                  color="success"
+                  startIcon={<DeployIcon />}
+                  onClick={handleDeploy}
+                  disabled={!deployReady || deploying}
+                >
+                  {deploying ? 'Deploiement...' : 'Deployer en liasse'}
+                </Button>
+              </span>
+            </Tooltip>
             <Button
               variant="contained"
               startIcon={<PlayIcon />}
@@ -271,6 +321,26 @@ const ModernAudit: React.FC = () => {
         ))}
       </Grid>
 
+      {/* Alerte conforme / non conforme */}
+      {currentSession && resume && (
+        resume.bloquantsRestants === 0 ? (
+          <Alert severity="success" sx={{ mb: 2 }} icon={<CheckIcon />}>
+            Balance CONFORME — 0 anomalie bloquante. Vous pouvez deployer en liasse.
+          </Alert>
+        ) : (
+          <Alert severity="error" sx={{ mb: 2 }} icon={<ErrorIcon />}>
+            Balance NON CONFORME — {resume.bloquantsRestants} anomalie(s) bloquante(s) a corriger.
+          </Alert>
+        )
+      )}
+
+      {/* Erreur deploiement */}
+      {deployError && (
+        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setDeployError(null)}>
+          {deployError}
+        </Alert>
+      )}
+
       {/* Barre de progression si audit en cours */}
       {currentSession && (
         <Box sx={{ mb: 3 }}>
@@ -304,6 +374,7 @@ const ModernAudit: React.FC = () => {
             <Tab label="Tableau de bord" />
             <Tab label={`Anomalies (${resultats.filter((r) => r.statut === 'ANOMALIE').length})`} />
             <Tab label="Rapport corrections" disabled={!correctionReport} />
+            <Tab label="Rapport V1/V2" disabled={!rapportPartie2} />
             <Tab label="Historique" />
           </Tabs>
         </Box>
@@ -401,8 +472,22 @@ const ModernAudit: React.FC = () => {
           </CardContent>
         </TabPanel>
 
-        {/* Tab 3: Historique */}
+        {/* Tab 3: Rapport V1/V2 (Partie 2) */}
         <TabPanel value={activeTab} index={3}>
+          <CardContent sx={{ p: 3 }}>
+            {rapportPartie2 ? (
+              <RapportPartie2View rapport={rapportPartie2} />
+            ) : (
+              <Alert severity="info">
+                Le rapport V1/V2 sera disponible apres une reimportation de balance corrigee.
+                Importez une balance corrigee pour le meme exercice pour generer ce rapport.
+              </Alert>
+            )}
+          </CardContent>
+        </TabPanel>
+
+        {/* Tab 4: Historique */}
+        <TabPanel value={activeTab} index={4}>
           <CardContent sx={{ p: 3 }}>
             <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
               Sessions precedentes

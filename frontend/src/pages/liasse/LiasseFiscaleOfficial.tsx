@@ -84,7 +84,7 @@ import FicheR4SYSCOHADA from '../../components/liasse/sheets/FicheR4SYSCOHADA'
 // Notes annexes
 import Note1SYSCOHADA from '../../components/liasse/sheets/Note1SYSCOHADA'
 import Note2SYSCOHADA from '../../components/liasse/sheets/Note2SYSCOHADA'
-import Note3SYSCOHADA from '../../components/liasse/sheets/Note3SYSCOHADA'
+import Note3ASYSCOHADA from '../../components/liasse/sheets/Note3SYSCOHADA'
 import Note5SYSCOHADA from '../../components/liasse/sheets/Note5SYSCOHADA'
 import Note6SYSCOHADA from '../../components/liasse/sheets/Note6SYSCOHADA'
 import Note8SYSCOHADA from '../../components/liasse/sheets/Note8SYSCOHADA'
@@ -387,7 +387,7 @@ const LiasseFiscaleOfficial: React.FC = () => {
       // Notes annexes - composants spécifiques
       case 'note1': return <Note1SYSCOHADA />
       case 'note2': return <Note2SYSCOHADA />
-      case 'note3': return <Note3SYSCOHADA />
+      case 'note3': return <Note3ASYSCOHADA />
       case 'note5': return <Note5SYSCOHADA />
       case 'note6': return <Note6SYSCOHADA />
       case 'note8': return <Note8SYSCOHADA />

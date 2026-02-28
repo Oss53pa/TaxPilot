@@ -1061,6 +1061,245 @@ export class LiasseDataService {
       hasN1: this.hasN1,
     }
   }
+
+  // ────────── Helper public pour les Notes ──────────
+
+  isLoaded(): boolean {
+    return this.balance.length > 0
+  }
+
+  /** Somme des soldes débiteurs pour des préfixes (actifs/charges) */
+  sumDebit(prefixes: string[]): number {
+    let total = 0
+    prefixes.forEach(prefix => {
+      this.mappingCache.forEach((value, key) => {
+        if (key === prefix || key.startsWith(prefix)) {
+          if (value > 0) total += value
+        }
+      })
+    })
+    return total
+  }
+
+  /** Somme des soldes créditeurs (abs) pour des préfixes (passif/amort/produits) */
+  sumCredit(prefixes: string[]): number {
+    let total = 0
+    prefixes.forEach(prefix => {
+      this.mappingCache.forEach((value, key) => {
+        if (key === prefix || key.startsWith(prefix)) {
+          if (value < 0) total += Math.abs(value)
+        }
+      })
+    })
+    return total
+  }
+
+  /** Solde net (débit - crédit) pour des préfixes */
+  getNetBalance(prefixes: string[]): number {
+    return this.sumSoldes(prefixes)
+  }
+
+  // ────────── Génération Note 3A - Immobilisations (Brutes) ──────────
+
+  generateNote3A(): any[] {
+    const IMMO_MAP: Record<string, { label: string; categorie: string; prefixes: string[]; amortPrefixes: string[] }> = {
+      'frais_etabl': { label: 'Frais d\'établissement', categorie: 'incorporelles', prefixes: ['201'], amortPrefixes: ['2801'] },
+      'brevets': { label: 'Brevets, licences, logiciels', categorie: 'incorporelles', prefixes: ['212', '213', '214'], amortPrefixes: ['2812', '2813', '2814'] },
+      'fonds_commercial': { label: 'Fonds commercial', categorie: 'incorporelles', prefixes: ['215', '216'], amortPrefixes: ['2815', '2816'] },
+      'autres_incorp': { label: 'Autres immobilisations incorporelles', categorie: 'incorporelles', prefixes: ['211', '217', '218', '219'], amortPrefixes: ['2811', '2817', '2818', '2819'] },
+      'terrains': { label: 'Terrains', categorie: 'corporelles', prefixes: ['22'], amortPrefixes: ['282'] },
+      'constructions': { label: 'Bâtiments, constructions', categorie: 'corporelles', prefixes: ['231', '232', '233', '234'], amortPrefixes: ['2831', '2832', '2833', '2834'] },
+      'installations': { label: 'Installations techniques', categorie: 'corporelles', prefixes: ['235', '237', '238'], amortPrefixes: ['2835', '2837', '2838'] },
+      'materiel': { label: 'Matériel et outillage', categorie: 'corporelles', prefixes: ['241', '242', '243', '244'], amortPrefixes: ['2841', '2842', '2843', '2844'] },
+      'transport': { label: 'Matériel de transport', categorie: 'corporelles', prefixes: ['245'], amortPrefixes: ['2845'] },
+      'titres_participation': { label: 'Titres de participation', categorie: 'financieres', prefixes: ['26'], amortPrefixes: ['296'] },
+      'autres_financieres': { label: 'Autres immobilisations financières', categorie: 'financieres', prefixes: ['271', '272', '273', '274', '275', '276', '277'], amortPrefixes: ['297'] },
+      'avances': { label: 'Avances et acomptes', categorie: 'avances', prefixes: ['251', '252'], amortPrefixes: [] },
+    }
+
+    const lines: any[] = []
+    Object.entries(IMMO_MAP).forEach(([key, { label, categorie, prefixes, amortPrefixes }]) => {
+      const brut = this.sumDebit(prefixes)
+      const amort = amortPrefixes.length > 0 ? this.sumCredit(amortPrefixes) : 0
+      if (brut === 0 && amort === 0) return
+      lines.push({ id: key, categorie, designation: label, valeurBrute: brut, amortissements: amort, valeurNette: brut - amort })
+    })
+    return lines
+  }
+
+  // ────────── Génération Note 3C - Amortissements ──────────
+
+  generateNote3C(): any[] {
+    const AMORT_MAP: Record<string, { label: string; prefixes: string[] }> = {
+      'frais_etabl': { label: 'Frais d\'établissement', prefixes: ['2801', '2901'] },
+      'brevets': { label: 'Brevets, licences, logiciels', prefixes: ['2812', '2813', '2814'] },
+      'fonds_commercial': { label: 'Fonds commercial', prefixes: ['2815', '2816'] },
+      'terrains': { label: 'Terrains', prefixes: ['282'] },
+      'constructions': { label: 'Bâtiments', prefixes: ['2831', '2832', '2833', '2834'] },
+      'installations': { label: 'Installations techniques', prefixes: ['2835', '2837', '2838'] },
+      'materiel': { label: 'Matériel et outillage', prefixes: ['2841', '2842', '2843', '2844'] },
+      'transport': { label: 'Matériel de transport', prefixes: ['2845'] },
+    }
+
+    const lines: any[] = []
+    Object.entries(AMORT_MAP).forEach(([key, { label, prefixes }]) => {
+      const cumulDebut = 0 // N-1 amort not tracked separately
+      const dotation = this.sumCredit(prefixes)
+      if (dotation === 0) return
+      lines.push({ id: key, designation: label, cumulDebut, dotation, reprises: 0, cumulFin: dotation })
+    })
+    return lines
+  }
+
+  // ────────── Génération Note 3C BIS - Dépréciations ──────────
+
+  generateNote3CBis(): any[] {
+    const DEPREC_MAP: Record<string, { label: string; prefixes: string[] }> = {
+      'incorp': { label: 'Immobilisations incorporelles', prefixes: ['291', '292'] },
+      'corp': { label: 'Immobilisations corporelles', prefixes: ['293', '294'] },
+      'fin': { label: 'Immobilisations financières', prefixes: ['296', '297'] },
+    }
+
+    const lines: any[] = []
+    Object.entries(DEPREC_MAP).forEach(([key, { label, prefixes }]) => {
+      const montant = this.sumCredit(prefixes)
+      if (montant === 0) return
+      lines.push({ id: key, designation: label, cumulDebut: 0, dotation: montant, reprises: 0, cumulFin: montant })
+    })
+    return lines
+  }
+
+  // ────────── Génération Note 6 - Immobilisations corporelles ──────────
+
+  generateNote6(): any[] {
+    const CORP_MAP: Record<string, { label: string; categorie: string; prefixes: string[]; amortPrefixes: string[] }> = {
+      'terrains': { label: 'Terrains', categorie: 'terrains', prefixes: ['22'], amortPrefixes: ['282', '292'] },
+      'constructions': { label: 'Bâtiments, constructions', categorie: 'constructions', prefixes: ['231', '232', '233', '234'], amortPrefixes: ['2831', '2832', '2833', '2834'] },
+      'installations': { label: 'Installations techniques', categorie: 'installations', prefixes: ['235', '237', '238'], amortPrefixes: ['2835', '2837', '2838'] },
+      'materiel_outillage': { label: 'Matériel et outillage', categorie: 'materiel_outillage', prefixes: ['241', '242', '243', '244'], amortPrefixes: ['2841', '2842', '2843', '2844'] },
+      'materiel_transport': { label: 'Matériel de transport', categorie: 'materiel_transport', prefixes: ['245'], amortPrefixes: ['2845', '2945'] },
+    }
+
+    const lines: any[] = []
+    Object.entries(CORP_MAP).forEach(([key, { label, categorie, prefixes, amortPrefixes }]) => {
+      const brut = this.sumDebit(prefixes)
+      const amort = this.sumCredit(amortPrefixes)
+      if (brut === 0 && amort === 0) return
+      lines.push({ id: key, categorie, label, valeurBrute: brut, amortissements: amort, valeurNette: brut - amort })
+    })
+    return lines
+  }
+
+  // ────────── Génération Note 8 - Stocks ──────────
+
+  generateNote8(): any[] {
+    const STOCK_MAP: Record<string, { label: string; categorie: string; prefixes: string[]; provPrefixes: string[] }> = {
+      'matieres': { label: 'Matières premières', categorie: 'matieres_premieres', prefixes: ['31'], provPrefixes: ['391'] },
+      'en_cours': { label: 'Produits en cours', categorie: 'en_cours', prefixes: ['34', '35'], provPrefixes: ['394', '395'] },
+      'produits_finis': { label: 'Produits finis', categorie: 'produits_finis', prefixes: ['36', '37'], provPrefixes: ['396', '397'] },
+      'marchandises': { label: 'Marchandises', categorie: 'marchandises', prefixes: ['38'], provPrefixes: ['398'] },
+      'autres': { label: 'Autres approvisionnements', categorie: 'autres', prefixes: ['32', '33'], provPrefixes: ['392', '393'] },
+    }
+
+    const lines: any[] = []
+    Object.entries(STOCK_MAP).forEach(([key, { label, categorie, prefixes, provPrefixes }]) => {
+      const brut = this.sumDebit(prefixes)
+      const provision = this.sumCredit(provPrefixes)
+      if (brut === 0 && provision === 0) return
+      lines.push({ id: key, categorie, designation: label, valeurComptable: brut, provision, valeurNette: brut - provision })
+    })
+    return lines
+  }
+
+  // ────────── Génération Note 11 - Capitaux propres ──────────
+
+  generateNote11(): any[] {
+    const CAPITAUX_MAP: Record<string, { label: string; prefixes: string[] }> = {
+      'capital': { label: 'Capital social', prefixes: ['101', '102', '103', '104'] },
+      'primes': { label: 'Primes liées au capital', prefixes: ['105'] },
+      'reserves': { label: 'Réserves', prefixes: ['106'] },
+      'capital_non_appele': { label: 'Capital non appelé (-)', prefixes: ['109'] },
+      'ecart_reevaluation': { label: 'Écart de réévaluation', prefixes: ['111', '112', '113', '118'] },
+      'report_nouveau': { label: 'Report à nouveau', prefixes: ['12'] },
+      'resultat_net': { label: 'Résultat net de l\'exercice', prefixes: ['13'] },
+      'subventions': { label: 'Subventions d\'investissement', prefixes: ['14'] },
+      'provisions_reglementees': { label: 'Provisions réglementées', prefixes: ['15'] },
+    }
+
+    const lines: any[] = []
+    Object.entries(CAPITAUX_MAP).forEach(([key, { label, prefixes }]) => {
+      // Most capital accounts are credit-balance
+      const debit = this.sumDebit(prefixes)
+      const credit = this.sumCredit(prefixes)
+      const montant = key === 'capital_non_appele' ? debit : credit
+      if (montant === 0 && debit === 0) return
+      lines.push({ id: key, designation: label, montantN: montant, montantN1: 0 })
+    })
+    return lines
+  }
+
+  // ────────── Génération Note 14 - Dettes financières ──────────
+
+  generateNote14(): any[] {
+    const DETTES_MAP: Record<string, { label: string; categorie: string; prefixes: string[] }> = {
+      'emprunts_obligataires': { label: 'Emprunts obligataires', categorie: 'long_terme', prefixes: ['161'] },
+      'emprunts_creditbail': { label: 'Emprunts et dettes de crédit-bail', categorie: 'long_terme', prefixes: ['162', '163', '164'] },
+      'emprunts_autres': { label: 'Autres emprunts et dettes', categorie: 'long_terme', prefixes: ['165', '166', '168'] },
+      'dettes_credit': { label: 'Dettes de crédit-bail immobilier', categorie: 'moyen_terme', prefixes: ['17'] },
+      'dettes_diverses': { label: 'Dettes financières diverses', categorie: 'court_terme', prefixes: ['181', '182', '183', '184', '185', '186'] },
+      'provisions': { label: 'Provisions pour risques et charges', categorie: 'provisions', prefixes: ['19'] },
+    }
+
+    const lines: any[] = []
+    Object.entries(DETTES_MAP).forEach(([key, { label, categorie, prefixes }]) => {
+      const montant = this.sumCredit(prefixes)
+      if (montant === 0) return
+      lines.push({ id: key, categorie, designation: label, montantN: montant, montantN1: 0, echeanceCT: 0, echeanceLT: montant })
+    })
+    return lines
+  }
+
+  // ────────── Génération Note 17 - Chiffre d'affaires ──────────
+
+  generateNote17(): any[] {
+    const CA_MAP: Record<string, { label: string; categorie: string; prefixes: string[] }> = {
+      'ventes_marchandises': { label: 'Ventes de marchandises', categorie: 'ventes', prefixes: ['701'] },
+      'ventes_produits': { label: 'Ventes de produits fabriqués', categorie: 'ventes', prefixes: ['702', '703'] },
+      'prestations_services': { label: 'Prestations de services', categorie: 'services', prefixes: ['704', '705', '706'] },
+      'produits_accessoires': { label: 'Produits accessoires', categorie: 'accessoires', prefixes: ['707'] },
+      'production_stockee': { label: 'Production stockée', categorie: 'production', prefixes: ['73'] },
+      'production_immobilisee': { label: 'Production immobilisée', categorie: 'production', prefixes: ['72'] },
+      'subventions': { label: 'Subventions d\'exploitation', categorie: 'subventions', prefixes: ['71'] },
+    }
+
+    const lines: any[] = []
+    Object.entries(CA_MAP).forEach(([key, { label, categorie, prefixes }]) => {
+      // Revenue accounts have credit balance
+      const montant = this.sumCredit(prefixes)
+      if (montant === 0) return
+      lines.push({ id: key, categorie, designation: label, montantN: montant, montantN1: 0 })
+    })
+    return lines
+  }
+
+  // ────────── Génération Note 19 - Charges de personnel ──────────
+
+  generateNote19(): any[] {
+    const PERSONNEL_MAP: Record<string, { label: string; prefixes: string[] }> = {
+      'salaires': { label: 'Salaires et traitements', prefixes: ['641', '642'] },
+      'charges_sociales': { label: 'Charges sociales', prefixes: ['643', '644', '645', '646'] },
+      'autres_charges': { label: 'Autres charges de personnel', prefixes: ['647', '648'] },
+      'impots_salaires': { label: 'Impôts sur salaires', prefixes: ['637'] },
+    }
+
+    const lines: any[] = []
+    Object.entries(PERSONNEL_MAP).forEach(([key, { label, prefixes }]) => {
+      const montant = this.sumDebit(prefixes)
+      if (montant === 0) return
+      lines.push({ id: key, designation: label, montantN: montant, montantN1: 0 })
+    })
+    return lines
+  }
 }
 
 // Instance singleton du service

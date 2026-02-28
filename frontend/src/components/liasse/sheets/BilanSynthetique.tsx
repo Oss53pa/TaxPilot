@@ -164,32 +164,155 @@ const BilanSynthetique: React.FC<BilanSynthetiqueProps> = ({
   const theme = useTheme()
 
   // ── Données calculées depuis la balance importée ──────────────────────
+  // Le service retourne des refs SN (Système Normal) qui diffèrent des refs
+  // du Bilan Synthétique. On remappe puis on calcule groupes et totaux.
   const { actifData, passifData } = useMemo(() => {
     const actifRows = liasseDataService.generateBilanActif()
     const passifRows = liasseDataService.generateBilanPassif()
 
-    // Convertir les rows générés en Record<ref, values>
-    const actif: Record<string, ActifValues> = {}
+    // ── Build SN data keyed by ref ──
+    const snA: Record<string, ActifValues> = {}
     actifRows.forEach((row: any) => {
       if (row.ref) {
-        actif[row.ref] = {
+        snA[row.ref] = {
           brut: row.brut || 0,
-          amort: row.amort || 0,
+          amort: row.amortProv || 0,
           netN: row.net || 0,
           netN1: row.net_n1 || 0,
         }
       }
     })
 
-    const passif: Record<string, PassifValues> = {}
+    const snP: Record<string, PassifValues> = {}
     passifRows.forEach((row: any) => {
       if (row.ref) {
-        passif[row.ref] = {
+        snP[row.ref] = {
           netN: row.montant || 0,
           netN1: row.montant_n1 || 0,
         }
       }
     })
+
+    // ── Helpers ──
+    const A0: ActifValues = { brut: 0, amort: 0, netN: 0, netN1: 0 }
+    const P0: PassifValues = { netN: 0, netN1: 0 }
+    const getA = (ref: string) => snA[ref] || A0
+    const getP = (ref: string) => snP[ref] || P0
+
+    const sumAV = (...vals: ActifValues[]): ActifValues => vals.reduce(
+      (a, v) => ({ brut: a.brut + v.brut, amort: a.amort + v.amort, netN: a.netN + v.netN, netN1: a.netN1 + v.netN1 }),
+      { ...A0 },
+    )
+    const sumPV = (...vals: PassifValues[]): PassifValues => vals.reduce(
+      (a, v) => ({ netN: a.netN + v.netN, netN1: a.netN1 + v.netN1 }),
+      { ...P0 },
+    )
+
+    // ══════════ ACTIF: Remap SN → Synthétique ══════════
+    // Les refs SN et Synthétique ont des significations différentes.
+    // Ex: SN BK = Autres créances (43-47), Synth BK = TOTAL ACTIF CIRCULANT.
+
+    // Immobilisations incorporelles
+    const AE = getA('AD')   // SN:AD (211,212) → Frais de développement
+    const AF = getA('AE')   // SN:AE (213-215) → Brevets, logiciels
+    const AG = getA('AF')   // SN:AF (216,217) → Fonds commercial
+    const AH = sumAV(getA('AG'), getA('AQ'), getA('AR'), getA('AS'))  // SN:AG(218,219) + charges immo(201,202,206)
+    const AD = sumAV(AE, AF, AG, AH)
+
+    // Immobilisations corporelles
+    const AJ = getA('AJ')
+    const AK = getA('AK')
+    const AL = getA('AL')
+    const AM = getA('AM')
+    const AN = getA('AN')
+    const AI = sumAV(AJ, AK, AL, AM, AN)
+
+    // Avances et acomptes
+    const AP = getA('AP')
+
+    // Immobilisations financières
+    const AR = getA('AT')   // SN:AT (26) → Titres de participation
+    const AS = getA('AU')   // SN:AU (271-277) → Autres immo financières
+    const AQ = sumAV(AR, AS)
+
+    // TOTAL ACTIF IMMOBILISÉ
+    const AZ = sumAV(AD, AI, AP, AQ)
+
+    // Actif circulant
+    const BA = getA('BA')
+    const BB = sumAV(getA('BC'), getA('BD'), getA('BE'), getA('BF'), getA('BG'))  // Tous les stocks SN
+    const BH = getA('BI')   // SN:BI (409) → Fournisseurs avances
+    const BI = getA('BJ')   // SN:BJ (411-418) → Clients
+    const BJ = getA('BK')   // SN:BK (43-47) → Autres créances
+    const BG = sumAV(BH, BI, BJ)
+    const BK = sumAV(BA, BB, BG)
+
+    // Trésorerie actif
+    const BQ = getA('BQ')
+    const BR = getA('BR')
+    const BS = getA('BS')
+    const BT = sumAV(BQ, BR, BS)
+
+    // Écart de conversion & total général
+    const BU = getA('BU')
+    const BZ = sumAV(AZ, BK, BT, BU)
+
+    const actif: Record<string, ActifValues> = {
+      AE, AF, AG, AH, AD, AJ, AK, AL, AM, AN, AI, AP, AR, AS, AQ, AZ,
+      BA, BB, BH, BI, BJ, BG, BK, BQ, BR, BS, BT, BU, BZ,
+    }
+
+    // ══════════ PASSIF: Remap SN → Synthétique ══════════
+
+    // Capitaux propres (les refs SN sont décalées par rapport au Synthétique)
+    const CA = getP('CA')
+    const CB = getP('CB')
+    const CD = getP('CC')   // SN:CC (104,105) → Primes liées au capital
+    const CE = getP('CE')   // SN:CE (111,112) → Écarts de réévaluation
+    const CF = getP('CF')   // SN:CF (113,118) → Réserves indisponibles
+    const CG = getP('CD')   // SN:CD (106) → Réserves libres
+    const CH = getP('CG')   // SN:CG (12) → Report à nouveau (+/-)
+    const CJ = getP('CH')   // SN:CH (13/CdR) → Résultat net
+    const CL = getP('CI')   // SN:CI (14) → Subventions d'investissement
+    const CM = getP('CJ')   // SN:CJ (15) → Provisions réglementées
+
+    // CP = CA - CB + CD + CE + CF + CG + CH + CJ + CL + CM
+    const CP: PassifValues = {
+      netN: CA.netN - CB.netN + CD.netN + CE.netN + CF.netN + CG.netN + CH.netN + CJ.netN + CL.netN + CM.netN,
+      netN1: CA.netN1 - CB.netN1 + CD.netN1 + CE.netN1 + CF.netN1 + CG.netN1 + CH.netN1 + CJ.netN1 + CL.netN1 + CM.netN1,
+    }
+
+    // Dettes financières
+    const DA = sumPV(getP('DA'), getP('DE'))   // SN:DA (161) + SN:DE (181-186)
+    const DB = sumPV(getP('DB'), getP('DD'))   // SN:DB (162-164) + SN:DD (17)
+    const DC = sumPV(getP('DC'), getP('DF'))   // SN:DC (165-168) + SN:DF (19)
+    const DD = sumPV(DA, DB, DC)
+    const DF = sumPV(CP, DD)
+
+    // Passif circulant
+    const DH = getP('DH')
+    const DI = getP('DI')
+    const DJ = getP('DJ')
+    const DK = getP('DK')
+    const DM = sumPV(getP('DL'), getP('DM'))  // SN:DL (421-428) + SN:DM (499)
+    const DN: PassifValues = { ...P0 }
+    const DP = sumPV(DH, DI, DJ, DK, DM, DN)
+
+    // Trésorerie passif
+    const DQ = getP('DQ')
+    const DR = getP('DR')
+    const DT = sumPV(DQ, DR)
+
+    // Écart de conversion & total général
+    const DV = getP('DT')   // SN:DT (479) → Écart de conversion passif
+    const DZ = sumPV(DF, DP, DT, DV)
+
+    const passif: Record<string, PassifValues> = {
+      CA, CB, CD, CE, CF, CG, CH, CJ, CL, CM, CP,
+      DA, DB, DC, DD, DF,
+      DH, DI, DJ, DK, DM, DN, DP,
+      DQ, DR, DT, DV, DZ,
+    }
 
     return { actifData: actif, passifData: passif }
   }, [])
