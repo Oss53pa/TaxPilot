@@ -21,6 +21,7 @@ const ModernDashboard = React.lazy(() => import('@/pages/dashboard/ModernDashboa
 const AppDashboard = React.lazy(() => import('@/pages/dashboard/AppDashboard'))
 const Parametrage = React.lazy(() => import('@/pages/Parametrage'))
 const ModernImportBalance = React.lazy(() => import('@/pages/import/ModernImportBalance'))
+const ImportHistoryPage = React.lazy(() => import('@/pages/import/ImportHistoryPage'))
 const ModernBalance = React.lazy(() => import('@/pages/balance/ModernBalance'))
 const PlanSYSCOHADARevise = React.lazy(() => import('@/pages/plans/PlanSYSCOHADARevise'))
 const OperationsSpecifiques = React.lazy(() => import('@/pages/plans/OperationsSpecifiques'))
@@ -79,6 +80,7 @@ function App() {
           <Route path="/dashboard" element={<S><AppDashboard /></S>} />
           <Route path="/parametrage/*" element={<S><Parametrage /></S>} />
           <Route path="/import-balance" element={<S><ModernImportBalance /></S>} />
+          <Route path="/import-history" element={<S><ImportHistoryPage /></S>} />
           <Route path="/balance" element={<S><ModernBalance /></S>} />
           <Route path="/plans-comptables" element={<S><PlanSYSCOHADARevise /></S>} />
           <Route path="/plan-syscohada" element={<S><PlanSYSCOHADARevise /></S>} />

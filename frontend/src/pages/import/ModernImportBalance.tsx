@@ -10,6 +10,7 @@ import { useBackendData } from '@/hooks/useBackendData'
 import { importBalanceFile } from '@/services/balanceParserService'
 import type { ImportPipelineResult } from '@/services/balanceParserService'
 import { saveImportedBalance, saveImportedBalanceN1, saveImportRecord, hasExistingBalance } from '@/services/balanceStorageService'
+import { useNavigate } from 'react-router-dom'
 import type { ExerciceConfig } from '@/types/audit.types'
 import { liasseDataService } from '@/services/liasseDataService'
 import { downloadBalanceTemplate } from '@/services/balanceTemplateService'
@@ -167,6 +168,7 @@ interface ImportReport {
 
 const ModernImportBalance: React.FC = () => {
   const theme = useTheme()
+  const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
   const [importStep, setImportStep] = useState(0)
   const [importedData, setImportedData] = useState<BalanceAccount[]>([])
@@ -654,6 +656,7 @@ const ModernImportBalance: React.FC = () => {
             <Button
               variant="outlined"
               startIcon={<HistoryIcon />}
+              onClick={() => navigate('/import-history')}
             >
               Historique
             </Button>

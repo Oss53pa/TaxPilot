@@ -38,6 +38,7 @@ import {
   CloudUpload,
   Analytics,
   Home as HomeIcon,
+  History as HistoryIcon,
 } from '@mui/icons-material'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
@@ -86,6 +87,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     { text: 'Points de Contrôle IA', icon: <Security />, path: '/control-points' },
 
     { text: 'Import Balance', icon: <CloudUpload />, path: '/import-balance', divider: 'Import & Contrôle' },
+    { text: 'Journal des Imports', icon: <HistoryIcon />, path: '/import-history' },
     { text: 'Consultation Balance', icon: <AccountBalance />, path: '/balance' },
     { text: 'Audit & Corrections', icon: <Security />, path: '/audit' },
 
