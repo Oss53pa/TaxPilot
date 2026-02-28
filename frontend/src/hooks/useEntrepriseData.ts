@@ -26,6 +26,17 @@ export interface EntrepriseData {
   exerciceDebut: string
   exerciceFin: string
   centreImpots: string
+  sigle: string
+  codeApe: string
+  brancheActivite: string
+  codeSecteur: string
+  categorieImposition: string
+  effectifDebut: number
+  effectifFin: number
+  isGroupe: boolean
+  hasDeclaration301: boolean
+  hasDeclaration302: boolean
+  dateCreationEntreprise: string
 }
 
 export function useEntrepriseData(): EntrepriseData {
@@ -51,6 +62,17 @@ export function useEntrepriseData(): EntrepriseData {
       exerciceDebut: ent?.exercice_debut || '',
       exerciceFin: ent?.exercice_fin || '',
       centreImpots: ent?.centre_impots || '',
+      sigle: ent?.sigle || '',
+      codeApe: ent?.code_ape || '',
+      brancheActivite: ent?.branche_activite || '',
+      codeSecteur: ent?.code_secteur || '',
+      categorieImposition: ent?.categorie_imposition || '',
+      effectifDebut: ent?.effectif_debut || 0,
+      effectifFin: ent?.effectif_fin || 0,
+      isGroupe: ent?.is_groupe || false,
+      hasDeclaration301: ent?.has_declaration_301 || false,
+      hasDeclaration302: ent?.has_declaration_302 || false,
+      dateCreationEntreprise: ent?.date_creation_entreprise || '',
     }
   }, [])
 }

@@ -54,6 +54,16 @@ export interface Entreprise {
   exercice_fin?: string
   date_depot?: string
   telephone_dirigeant?: string
+  sigle?: string
+  code_ape?: string
+  branche_activite?: string
+  categorie_imposition?: string
+  effectif_debut?: number
+  effectif_fin?: number
+  code_secteur?: string
+  has_declaration_301?: boolean
+  has_declaration_302?: boolean
+  date_creation_entreprise?: string
   // R1 - Effectifs & Groupe
   nombre_etablissements?: number
   effectif_permanent?: number

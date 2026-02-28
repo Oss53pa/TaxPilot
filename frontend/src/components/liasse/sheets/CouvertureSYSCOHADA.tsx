@@ -1,9 +1,9 @@
-import { logger } from '@/utils/logger'
 /**
  * Page de Couverture - Liasse Fiscale SYSCOHADA
+ * Donnees pre-remplies depuis Parametrage > Entreprise
  */
 
-import React, { useState } from 'react'
+import React from 'react'
 import {
   Box,
   Paper,
@@ -12,65 +12,89 @@ import {
   Stack,
   Card,
   CardContent,
-  TextField,
   Divider,
+  Alert,
   useTheme,
   alpha,
 } from '@mui/material'
 import {
   AccountBalance,
   CalendarToday as CalendarIcon,
+  Info as InfoIcon,
 } from '@mui/icons-material'
-import EditableToolbar from '../shared/EditableToolbar'
 import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
 
-const CouvertureSYSCOHADA: React.FC = () => {
+// 18 pays OHADA avec nom officiel et devise
+const PAYS_OHADA_DETAILS: Record<string, { nomOfficiel: string; devise: string }> = {
+  BJ: { nomOfficiel: 'REPUBLIQUE DU BENIN', devise: 'Union - Discipline - Travail' },
+  BF: { nomOfficiel: 'BURKINA FASO', devise: 'Unite - Progres - Justice' },
+  CM: { nomOfficiel: 'REPUBLIQUE DU CAMEROUN', devise: 'Paix - Travail - Patrie' },
+  CF: { nomOfficiel: 'REPUBLIQUE CENTRAFRICAINE', devise: 'Unite - Dignite - Travail' },
+  KM: { nomOfficiel: 'UNION DES COMORES', devise: 'Unite - Solidarite - Developpement' },
+  CG: { nomOfficiel: 'REPUBLIQUE DU CONGO', devise: 'Unite - Travail - Progres' },
+  CI: { nomOfficiel: "REPUBLIQUE DE COTE D'IVOIRE", devise: 'Union - Discipline - Travail' },
+  DJ: { nomOfficiel: 'REPUBLIQUE DE DJIBOUTI', devise: 'Unite - Egalite - Paix' },
+  GA: { nomOfficiel: 'REPUBLIQUE GABONAISE', devise: 'Union - Travail - Justice' },
+  GN: { nomOfficiel: 'REPUBLIQUE DE GUINEE', devise: 'Travail - Justice - Solidarite' },
+  GW: { nomOfficiel: 'REPUBLIQUE DE GUINEE-BISSAU', devise: 'Unite - Lutte - Progres' },
+  GQ: { nomOfficiel: 'REPUBLIQUE DE GUINEE EQUATORIALE', devise: 'Unidad - Paz - Justicia' },
+  ML: { nomOfficiel: 'REPUBLIQUE DU MALI', devise: 'Un Peuple - Un But - Une Foi' },
+  NE: { nomOfficiel: 'REPUBLIQUE DU NIGER', devise: 'Fraternite - Travail - Progres' },
+  CD: { nomOfficiel: 'REPUBLIQUE DEMOCRATIQUE DU CONGO', devise: 'Justice - Paix - Travail' },
+  SN: { nomOfficiel: 'REPUBLIQUE DU SENEGAL', devise: 'Un Peuple - Un But - Une Foi' },
+  TD: { nomOfficiel: 'REPUBLIQUE DU TCHAD', devise: 'Unite - Travail - Progres' },
+  TG: { nomOfficiel: 'REPUBLIQUE TOGOLAISE', devise: 'Travail - Liberte - Patrie' },
+}
+
+const REGIME_LABELS: Record<string, string> = {
+  REEL_NORMAL: 'SYSTEME NORMAL',
+  REEL_SIMPLIFIE: 'SYSTEME MINIMAL DE TRESORERIE',
+  FORFAITAIRE: 'REGIME FORFAITAIRE',
+  MICRO: 'REGIME MICRO-ENTREPRISE',
+}
+
+function formatDate(dateStr?: string): string {
+  if (!dateStr) return '\u2014'
+  try {
+    const d = new Date(dateStr)
+    return d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' })
+  } catch {
+    return dateStr
+  }
+}
+
+const v = (val: any): string => val || '\u2014'
+
+const CouvertureSYSCOHADA: React.FC<{ entreprise?: any }> = ({ entreprise }) => {
   const theme = useTheme()
-  const currentYear = new Date().getFullYear()
-  const [isEditMode, setIsEditMode] = useState(false)
-  const [hasChanges, setHasChanges] = useState(false)
+  const ent = entreprise || {}
 
-  const [coverData, setCoverData] = useState({
-    pays: 'RÉPUBLIQUE DU CAMEROUN',
-    devise: 'Paix - Travail - Patrie',
-    regime: 'SYSTÈME NORMAL',
-    systeme: 'SYSTÈME COMPTABLE OHADA RÉVISÉ',
-    dateDebut: `01/01/${currentYear}`,
-    dateFin: `31/12/${currentYear}`,
-  })
+  // Derive from entreprise data
+  const paysInfo = PAYS_OHADA_DETAILS[ent.pays] || { nomOfficiel: v(ent.pays), devise: '' }
+  const regimeLabel = REGIME_LABELS[ent.regime_imposition] || v(ent.regime_imposition)
+  const dateDebut = formatDate(ent.exercice_debut)
+  const dateFin = formatDate(ent.exercice_fin)
+  const exerciceYear = ent.exercice_fin
+    ? new Date(ent.exercice_fin).getFullYear()
+    : new Date().getFullYear()
 
-  const updateField = (field: string, value: string) => {
-    setCoverData(prev => ({ ...prev, [field]: value }))
-    setHasChanges(true)
-  }
-
-  const renderField = (field: string, value: string, variant: 'h6' | 'body2' | 'h5' | 'h4' = 'body2', sx?: object) => {
-    if (isEditMode) {
-      return (
-        <TextField
-          value={value}
-          onChange={(e) => updateField(field, e.target.value)}
-          size="small"
-          fullWidth
-          variant="outlined"
-          sx={{ ...sx }}
-        />
-      )
-    }
-    return <Typography variant={variant} sx={sx}>{value}</Typography>
-  }
+  const infoRow = (label: string, value: string) => (
+    <Grid container sx={{ py: 0.5 }}>
+      <Grid item xs={5}>
+        <Typography variant="body2" sx={{ fontWeight: 600, color: theme.palette.text.secondary }}>{label}</Typography>
+      </Grid>
+      <Grid item xs={7}>
+        <Typography variant="body2">{value}</Typography>
+      </Grid>
+    </Grid>
+  )
 
   return (
     <Box sx={{ p: 3 }}>
-      {/* Toolbar */}
-      <Stack direction="row" justifyContent="flex-end" sx={{ mb: 2 }}>
-        <EditableToolbar
-          isEditMode={isEditMode}
-          onToggleEdit={() => setIsEditMode(!isEditMode)}
-          hasChanges={hasChanges}
-          onSave={() => { logger.debug('Sauvegarde couverture', coverData); setHasChanges(false) }}
-        />
-      </Stack>
+      {/* Info banner */}
+      <Alert severity="info" icon={<InfoIcon />} sx={{ mb: 2 }}>
+        Les donnees de cette page proviennent de <strong>Parametrage &gt; Entreprise</strong>. Modifiez-les depuis ce menu pour mettre a jour la couverture.
+      </Alert>
 
       <Paper
         elevation={0}
@@ -86,12 +110,16 @@ const CouvertureSYSCOHADA: React.FC = () => {
           alignItems: 'center',
         }}
       >
-        {/* En-tête officiel */}
+        {/* En-tete officiel */}
         <Box sx={{ position: 'absolute', top: 40, width: '100%', textAlign: 'center' }}>
-          {renderField('pays', coverData.pays, 'h6', { fontWeight: 600, letterSpacing: 1 })}
-          <Box sx={{ mt: 1 }}>
-            {renderField('devise', coverData.devise, 'body2')}
-          </Box>
+          <Typography variant="h6" sx={{ fontWeight: 600, letterSpacing: 1 }}>
+            {paysInfo.nomOfficiel}
+          </Typography>
+          {paysInfo.devise && (
+            <Box sx={{ mt: 1 }}>
+              <Typography variant="body2">{paysInfo.devise}</Typography>
+            </Box>
+          )}
           <Divider sx={{ mt: 2, mx: 'auto', width: '60%' }} />
         </Box>
 
@@ -115,14 +143,13 @@ const CouvertureSYSCOHADA: React.FC = () => {
               LIASSE FISCALE
             </Typography>
             <Box sx={{ mt: 2, textAlign: 'center' }}>
-              {renderField('regime', coverData.regime, 'h4', {
-                fontWeight: 500,
-                color: theme.palette.text.secondary,
-              })}
+              <Typography variant="h4" sx={{ fontWeight: 500, color: theme.palette.text.secondary }}>
+                {regimeLabel}
+              </Typography>
             </Box>
           </Box>
 
-          {/* Système comptable */}
+          {/* Systeme comptable */}
           <Card sx={{
             width: '80%',
             backgroundColor: alpha(theme.palette.info.main, 0.05),
@@ -132,12 +159,35 @@ const CouvertureSYSCOHADA: React.FC = () => {
               <Stack direction="row" spacing={2} alignItems="center" justifyContent="center">
                 <AccountBalance sx={{ fontSize: 40, color: theme.palette.info.main }} />
                 <Box>
-                  {renderField('systeme', coverData.systeme, 'h5', { fontWeight: 600 })}
+                  <Typography variant="h5" sx={{ fontWeight: 600 }}>
+                    SYSTEME COMPTABLE OHADA REVISE
+                  </Typography>
                   <Typography variant="body2" color="textSecondary">
-                    Acte uniforme relatif au droit comptable et à l'information financière
+                    Acte uniforme relatif au droit comptable et a l'information financiere
                   </Typography>
                 </Box>
               </Stack>
+            </CardContent>
+          </Card>
+
+          {/* Identification entreprise */}
+          <Card sx={{ width: '80%' }}>
+            <CardContent>
+              <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1.5, textAlign: 'center' }}>
+                IDENTIFICATION DE L'ENTREPRISE
+              </Typography>
+              <Divider sx={{ mb: 1.5 }} />
+              {infoRow('Raison sociale', v(ent.raison_sociale))}
+              {ent.sigle && infoRow('Sigle / Enseigne', ent.sigle)}
+              {infoRow('Forme juridique', v(ent.forme_juridique))}
+              {infoRow('N° Compte contribuable (NCC)', v(ent.numero_contribuable))}
+              {infoRow('RCCM', v(ent.rccm))}
+              {infoRow('Secteur d\'activite', v(ent.secteur_activite))}
+              {infoRow('Adresse', v(ent.adresse_ligne1 || ent.adresse))}
+              {ent.ville && infoRow('Ville', ent.ville)}
+              {ent.telephone && infoRow('Telephone', ent.telephone)}
+              {ent.capital_social != null && infoRow('Capital social', `${Number(ent.capital_social).toLocaleString('fr-FR')} FCFA`)}
+              {ent.nom_dirigeant && infoRow('Dirigeant', `${ent.nom_dirigeant}${ent.fonction_dirigeant ? ` (${ent.fonction_dirigeant})` : ''}`)}
             </CardContent>
           </Card>
 
@@ -148,47 +198,27 @@ const CouvertureSYSCOHADA: React.FC = () => {
                 <Stack direction="row" spacing={2} alignItems="center" justifyContent="center">
                   <CalendarIcon color="primary" />
                   <Typography variant="h6">
-                    EXERCICE FISCAL {currentYear}
+                    EXERCICE FISCAL {exerciceYear}
                   </Typography>
                 </Stack>
                 <Divider />
                 <Grid container spacing={2}>
                   <Grid item xs={6}>
-                    {isEditMode ? (
-                      <TextField
-                        label="Du"
-                        value={coverData.dateDebut}
-                        onChange={(e) => updateField('dateDebut', e.target.value)}
-                        size="small"
-                        fullWidth
-                      />
-                    ) : (
-                      <Typography variant="body2" color="textSecondary">
-                        Du : {coverData.dateDebut}
-                      </Typography>
-                    )}
+                    <Typography variant="body2" color="textSecondary">
+                      Du : {dateDebut}
+                    </Typography>
                   </Grid>
                   <Grid item xs={6}>
-                    {isEditMode ? (
-                      <TextField
-                        label="Au"
-                        value={coverData.dateFin}
-                        onChange={(e) => updateField('dateFin', e.target.value)}
-                        size="small"
-                        fullWidth
-                      />
-                    ) : (
-                      <Typography variant="body2" color="textSecondary">
-                        Au : {coverData.dateFin}
-                      </Typography>
-                    )}
+                    <Typography variant="body2" color="textSecondary">
+                      Au : {dateFin}
+                    </Typography>
                   </Grid>
                 </Grid>
               </Stack>
             </CardContent>
           </Card>
 
-          {/* Informations de conformité */}
+          {/* Informations de conformite */}
           <Box sx={{
             mt: 4,
             p: 3,
@@ -198,23 +228,23 @@ const CouvertureSYSCOHADA: React.FC = () => {
             width: '80%'
           }}>
             <Typography variant="h6" sx={{ mb: 2, textAlign: 'center' }}>
-              DÉCLARATION CONFORME
+              DECLARATION CONFORME
             </Typography>
             <Grid container spacing={2}>
               <Grid item xs={6}>
                 <Typography variant="body2">
-                  • Loi de Finances {currentYear}
+                  {'\u2022'} Loi de Finances {exerciceYear}
                 </Typography>
                 <Typography variant="body2">
-                  • Code Général des Impôts
+                  {'\u2022'} Code General des Impots
                 </Typography>
               </Grid>
               <Grid item xs={6}>
                 <Typography variant="body2">
-                  • Système Comptable OHADA Révisé
+                  {'\u2022'} Systeme Comptable OHADA Revise
                 </Typography>
                 <Typography variant="body2">
-                  • Acte Uniforme OHADA
+                  {'\u2022'} Acte Uniforme OHADA
                 </Typography>
               </Grid>
             </Grid>
@@ -225,7 +255,7 @@ const CouvertureSYSCOHADA: React.FC = () => {
         <Box sx={{ position: 'absolute', bottom: 40, width: '100%', textAlign: 'center' }}>
           <Divider sx={{ mb: 2, mx: 'auto', width: '60%' }} />
           <Typography variant="caption" color="textSecondary">
-            Direction Générale des Impôts - Ministère des Finances
+            Direction Generale des Impots - Ministere des Finances
           </Typography>
         </Box>
       </Paper>

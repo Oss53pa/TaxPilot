@@ -37,6 +37,8 @@ import {
   Paper,
   Stack,
   InputAdornment,
+  Checkbox,
+  FormControlLabel,
 } from '@mui/material'
 import {
   Save,
@@ -233,6 +235,17 @@ const EntrepriseSettings: React.FC = () => {
       expert_nom: '',
       expert_adresse: '',
       expert_numero_inscription: '',
+      sigle: '',
+      code_ape: '',
+      date_creation_entreprise: '',
+      categorie_imposition: '',
+      has_declaration_301: false,
+      has_declaration_302: false,
+      effectif_debut: 0,
+      effectif_fin: 0,
+      is_groupe: false,
+      code_secteur: '',
+      branche_activite: '',
     } as any,
   })
 
@@ -284,6 +297,17 @@ const EntrepriseSettings: React.FC = () => {
       expert_nom: entreprise.expert_nom || '',
       expert_adresse: entreprise.expert_adresse || '',
       expert_numero_inscription: entreprise.expert_numero_inscription || '',
+      sigle: (entreprise as any).sigle || '',
+      code_ape: (entreprise as any).code_ape || '',
+      date_creation_entreprise: (entreprise as any).date_creation_entreprise || '',
+      categorie_imposition: (entreprise as any).categorie_imposition || '',
+      has_declaration_301: (entreprise as any).has_declaration_301 || false,
+      has_declaration_302: (entreprise as any).has_declaration_302 || false,
+      effectif_debut: (entreprise as any).effectif_debut || 0,
+      effectif_fin: (entreprise as any).effectif_fin || 0,
+      is_groupe: (entreprise as any).is_groupe || false,
+      code_secteur: (entreprise as any).code_secteur || '',
+      branche_activite: (entreprise as any).branche_activite || '',
     })
 
     // Load array data
@@ -475,6 +499,21 @@ const EntrepriseSettings: React.FC = () => {
                     <TextField {...field} fullWidth label="N° Comptable" />
                   )} />
                 </Grid>
+                <Grid item xs={12} md={4}>
+                  <Controller name="sigle" control={control} render={({ field }) => (
+                    <TextField {...field} fullWidth label="Sigle / Enseigne commerciale" />
+                  )} />
+                </Grid>
+                <Grid item xs={12} md={4}>
+                  <Controller name="code_ape" control={control} render={({ field }) => (
+                    <TextField {...field} fullWidth label="Code APE / NAF" />
+                  )} />
+                </Grid>
+                <Grid item xs={12} md={4}>
+                  <Controller name="date_creation_entreprise" control={control} render={({ field }) => (
+                    <TextField {...field} fullWidth label="Date de creation de l'entreprise" type="date" InputLabelProps={{ shrink: true }} />
+                  )} />
+                </Grid>
               </Grid>
             </TabPanel>
 
@@ -534,6 +573,37 @@ const EntrepriseSettings: React.FC = () => {
                     <TextField {...field} fullWidth label="Centre des Impôts" />
                   )} />
                 </Grid>
+                <Grid item xs={12} md={6}>
+                  <Controller name="categorie_imposition" control={control} render={({ field }) => (
+                    <FormControl fullWidth>
+                      <InputLabel>Categorie d'imposition</InputLabel>
+                      <Select {...field} label="Categorie d'imposition">
+                        <MenuItem value="">--</MenuItem>
+                        <MenuItem value="BIC">BIC - Benefices Industriels et Commerciaux</MenuItem>
+                        <MenuItem value="BNC">BNC - Benefices Non Commerciaux</MenuItem>
+                        <MenuItem value="BA">BA - Benefices Agricoles</MenuItem>
+                      </Select>
+                    </FormControl>
+                  )} />
+                </Grid>
+                {watch('regime_imposition') === 'REEL_NORMAL' && (
+                  <Grid item xs={12}>
+                    <Stack direction="row" spacing={3}>
+                      <Controller name="has_declaration_301" control={control} render={({ field }) => (
+                        <FormControlLabel
+                          control={<Checkbox checked={!!field.value} onChange={field.onChange} />}
+                          label="Etat 301 (Honoraires, Commissions)"
+                        />
+                      )} />
+                      <Controller name="has_declaration_302" control={control} render={({ field }) => (
+                        <FormControlLabel
+                          control={<Checkbox checked={!!field.value} onChange={field.onChange} />}
+                          label="Etat 302 (Fournisseurs)"
+                        />
+                      )} />
+                    </Stack>
+                  </Grid>
+                )}
                 <Grid item xs={12}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1, mb: 0.5 }}>
                     <CalendarToday fontSize="small" color="primary" />
@@ -663,6 +733,16 @@ const EntrepriseSettings: React.FC = () => {
                   )} />
                 </Grid>
                 <Grid item xs={12} md={3}>
+                  <Controller name="effectif_debut" control={control} render={({ field }) => (
+                    <TextField {...field} fullWidth label="Effectif debut exercice" type="number" />
+                  )} />
+                </Grid>
+                <Grid item xs={12} md={3}>
+                  <Controller name="effectif_fin" control={control} render={({ field }) => (
+                    <TextField {...field} fullWidth label="Effectif fin exercice" type="number" />
+                  )} />
+                </Grid>
+                <Grid item xs={12} md={3}>
                   <Controller name="effectif_permanent" control={control} render={({ field }) => (
                     <TextField {...field} fullWidth label="Effectif permanent" type="number" />
                   )} />
@@ -683,7 +763,26 @@ const EntrepriseSettings: React.FC = () => {
                   )} />
                 </Grid>
 
+                <Grid item xs={12} md={4}>
+                  <Controller name="code_secteur" control={control} render={({ field }) => (
+                    <TextField {...field} fullWidth label="Code secteur" />
+                  )} />
+                </Grid>
+                <Grid item xs={12} md={4}>
+                  <Controller name="branche_activite" control={control} render={({ field }) => (
+                    <TextField {...field} fullWidth label="Branche d'activite" />
+                  )} />
+                </Grid>
+
                 <Grid item xs={12} sx={{ mt: 2 }}><Typography variant="subtitle1" sx={{ fontWeight: 600 }}>Appartenance à un Groupe</Typography></Grid>
+                <Grid item xs={12}>
+                  <Controller name="is_groupe" control={control} render={({ field }) => (
+                    <FormControlLabel
+                      control={<Checkbox checked={!!field.value} onChange={field.onChange} />}
+                      label="L'entreprise fait partie d'un groupe"
+                    />
+                  )} />
+                </Grid>
                 <Grid item xs={12} md={6}>
                   <Controller name="nom_groupe" control={control} render={({ field }) => (
                     <TextField {...field} fullWidth label="Nom du groupe (si applicable)" />

@@ -60,6 +60,10 @@ export interface EntrepriseInfo {
   adresse?: string
   ville?: string
   rccm?: string
+  sigle?: string
+  telephone?: string
+  capital_social?: number
+  nom_dirigeant?: string
 }
 
 export interface LiassePrintTemplateProps {
@@ -366,11 +370,17 @@ const LiassePrintTemplate: React.FC<LiassePrintTemplateProps> = ({ regime, entre
           <Box className="liasse-page" sx={{ pageBreakAfter: 'always', textAlign: 'center', pt: '80mm' }}>
             <Typography sx={{ fontSize: 24, fontWeight: 700, mb: 2 }}>LIASSE FISCALE SYSCOHADA</Typography>
             <Typography sx={{ fontSize: 18, fontWeight: 600, mb: 1 }}>{entreprise.raison_sociale}</Typography>
+            {entreprise.sigle && <Typography sx={{ fontSize: 14, mb: 0.5, color: 'text.secondary' }}>{entreprise.sigle}</Typography>}
             <Typography sx={{ fontSize: 14, mb: 0.5 }}>N° Contribuable : {entreprise.numero_contribuable}</Typography>
             {entreprise.forme_juridique && <Typography sx={{ fontSize: 14, mb: 0.5 }}>{entreprise.forme_juridique}</Typography>}
-            {entreprise.adresse && <Typography sx={{ fontSize: 14, mb: 0.5 }}>{entreprise.adresse}{entreprise.ville ? ` — ${entreprise.ville}` : ''}</Typography>}
+            {entreprise.adresse && <Typography sx={{ fontSize: 14, mb: 0.5 }}>{entreprise.adresse}{entreprise.ville ? ` \u2014 ${entreprise.ville}` : ''}</Typography>}
+            {entreprise.telephone && <Typography sx={{ fontSize: 14, mb: 0.5 }}>Tel : {entreprise.telephone}</Typography>}
+            {entreprise.capital_social != null && entreprise.capital_social > 0 && (
+              <Typography sx={{ fontSize: 14, mb: 0.5 }}>Capital : {entreprise.capital_social.toLocaleString('fr-FR')} FCFA</Typography>
+            )}
+            {entreprise.nom_dirigeant && <Typography sx={{ fontSize: 14, mb: 0.5 }}>Dirigeant : {entreprise.nom_dirigeant}</Typography>}
             <Typography sx={{ fontSize: 14, mt: 2 }}>Exercice clos le {exercice}</Typography>
-            <Typography sx={{ fontSize: 14, mt: 1 }}>{REGIME_LABELS[configRegime]} — {allPages.length} pages</Typography>
+            <Typography sx={{ fontSize: 14, mt: 1 }}>{REGIME_LABELS[configRegime]} \u2014 {allPages.length} pages</Typography>
           </Box>
 
           {/* All pages */}

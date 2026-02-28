@@ -77,17 +77,21 @@ function generateCoverHTML(regime: RegimeFiscal, entreprise: EntrepriseInfo, exe
 
   return `
     <div class="cover">
-      <p style="font-size:12px;color:#737373;">REPUBLIQUE DE COTE D'IVOIRE</p>
-      <p style="font-size:10px;color:#737373;">Direction Generale des Impots</p>
+      <p style="font-size:12px;color:#737373;">Direction Generale des Impots</p>
       <div class="cover-box">
         <h1>LIASSE FISCALE</h1>
         <p style="font-size:14px;font-weight:600;color:#404040;">${regimeLabels[regime]}</p>
         <hr/>
         <p style="font-size:16px;font-weight:700;">${entreprise.raison_sociale}</p>
+        ${entreprise.sigle ? `<p style="font-size:12px;color:#404040;">${entreprise.sigle}</p>` : ''}
         <p>N° Contribuable : ${entreprise.numero_contribuable}</p>
         ${entreprise.rccm ? `<p>RCCM : ${entreprise.rccm}</p>` : ''}
         ${entreprise.forme_juridique ? `<p>Forme juridique : ${entreprise.forme_juridique}</p>` : ''}
         ${entreprise.secteur_activite ? `<p>Activite : ${entreprise.secteur_activite}</p>` : ''}
+        ${entreprise.adresse ? `<p>Adresse : ${entreprise.adresse}${entreprise.ville ? ' — ' + entreprise.ville : ''}</p>` : ''}
+        ${entreprise.telephone ? `<p>Tel : ${entreprise.telephone}</p>` : ''}
+        ${entreprise.capital_social ? `<p>Capital : ${entreprise.capital_social.toLocaleString('fr-FR')} FCFA</p>` : ''}
+        ${entreprise.nom_dirigeant ? `<p>Dirigeant : ${entreprise.nom_dirigeant}</p>` : ''}
         <hr/>
         <p style="font-size:13px;font-weight:600;">Exercice clos le ${exercice}</p>
       </div>

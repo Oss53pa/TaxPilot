@@ -61,11 +61,19 @@ export function withBackendData<P extends object>(
           // No DataProvider context and no backend — read from localStorage
           if (!liasseData || liasseData.comptes.length === 0) {
             let localEntreprise = null
+            // Priority: fiscasync_entreprise_settings (source of truth from Parametrage)
             try {
-              const raw = localStorage.getItem('fiscasync_db_entreprises')
-              const list = raw ? JSON.parse(raw) : []
-              if (list.length > 0) localEntreprise = list[0]
+              const settingsRaw = localStorage.getItem('fiscasync_entreprise_settings')
+              if (settingsRaw) localEntreprise = JSON.parse(settingsRaw)
             } catch { /* ignore */ }
+            // Fallback: fiscasync_db_entreprises (seed/demo data)
+            if (!localEntreprise) {
+              try {
+                const raw = localStorage.getItem('fiscasync_db_entreprises')
+                const list = raw ? JSON.parse(raw) : []
+                if (list.length > 0) localEntreprise = list[0]
+              } catch { /* ignore */ }
+            }
             setEnhancedData({
               entreprise: localEntreprise,
               balance: null,
