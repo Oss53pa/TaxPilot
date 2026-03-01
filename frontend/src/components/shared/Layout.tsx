@@ -23,7 +23,8 @@ import {
   ListItemText,
   useTheme,
   useMediaQuery,
-  Divider
+  Divider,
+  Tooltip
 } from '@mui/material'
 import {
   Menu as MenuIcon,
@@ -39,12 +40,15 @@ import {
   Analytics,
   Home as HomeIcon,
   History as HistoryIcon,
+  ChevronLeft as ChevronLeftIcon,
+  ChevronRight as ChevronRightIcon,
 } from '@mui/icons-material'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
 import NotificationCenter from '../notifications/NotificationCenter'
 
 const DRAWER_WIDTH = 270
+const DRAWER_WIDTH_COLLAPSED = 68
 
 interface LayoutProps {
   children: React.ReactNode
@@ -59,7 +63,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { user, logout } = useAuthStore()
 
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [collapsed, setCollapsed] = useState(false)
   const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null)
+
+  const drawerWidth = collapsed ? DRAWER_WIDTH_COLLAPSED : DRAWER_WIDTH
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen)
@@ -100,39 +107,56 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     { text: 'Reporting', icon: <Analytics />, path: '/reporting' },
   ]
 
-  const drawerContent = (
+  const renderDrawerContent = (isCollapsed: boolean) => (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
       {/* Logo + Accueil */}
-      <Toolbar sx={{ px: 2.5, py: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
-        <Typography
-          variant="h6"
-          sx={{
-            fontFamily: "'Grand Hotel', cursive",
-            fontSize: '1.6rem',
-            fontWeight: 400,
-            color: P.white,
-            letterSpacing: 0.5,
-          }}
-        >
-          TaxPilot
-        </Typography>
-        <IconButton
-          onClick={() => navigate('/')}
-          size="small"
-          sx={{
-            color: P.primary500,
-            '&:hover': { color: P.white, bgcolor: P.primary800 },
-          }}
-          title="Page d'accueil"
-        >
-          <HomeIcon fontSize="small" />
-        </IconButton>
+      <Toolbar sx={{ px: isCollapsed ? 1 : 2.5, py: 1, display: 'flex', justifyContent: isCollapsed ? 'center' : 'space-between', alignItems: 'center', flexShrink: 0, minHeight: '56px !important' }}>
+        {!isCollapsed && (
+          <Typography
+            variant="h6"
+            sx={{
+              fontFamily: "'Grand Hotel', cursive",
+              fontSize: '1.6rem',
+              fontWeight: 400,
+              color: P.white,
+              letterSpacing: 0.5,
+            }}
+          >
+            TaxPilot
+          </Typography>
+        )}
+        {isCollapsed ? (
+          <Tooltip title="TaxPilot — Accueil" placement="right">
+            <IconButton
+              onClick={() => navigate('/')}
+              size="small"
+              sx={{
+                color: P.white,
+                '&:hover': { color: P.white, bgcolor: P.primary800 },
+              }}
+            >
+              <HomeIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        ) : (
+          <IconButton
+            onClick={() => navigate('/')}
+            size="small"
+            sx={{
+              color: P.primary500,
+              '&:hover': { color: P.white, bgcolor: P.primary800 },
+            }}
+            title="Page d'accueil"
+          >
+            <HomeIcon fontSize="small" />
+          </IconButton>
+        )}
       </Toolbar>
 
-      <List sx={{ px: 0.5, overflowY: 'auto', flexGrow: 1 }}>
+      <List sx={{ px: isCollapsed ? 0.25 : 0.5, overflowY: 'auto', flexGrow: 1 }}>
         {menuItems.map((item, index) => (
           <React.Fragment key={item.text}>
-            {item.divider && index > 0 && (
+            {item.divider && index > 0 && !isCollapsed && (
               <>
                 <Divider sx={{ my: 1.5, mx: 2, borderColor: P.primary700, opacity: 0.5 }} />
                 <ListItem sx={{ py: 0.5, px: 2 }}>
@@ -151,51 +175,77 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </ListItem>
               </>
             )}
+            {item.divider && index > 0 && isCollapsed && (
+              <Divider sx={{ my: 1, mx: 1, borderColor: P.primary700, opacity: 0.5 }} />
+            )}
 
             <ListItem disablePadding>
-              <ListItemButton
-                selected={location.pathname === item.path || (item.path !== '/dashboard' && location.pathname.startsWith(item.path))}
-                onClick={() => {
-                  navigate(item.path)
-                  if (isMobile) setMobileOpen(false)
-                }}
-                sx={{
-                  borderRadius: 3,
-                  mx: 1,
-                  my: 0.25,
-                  py: 0.75,
-                  color: P.primary300,
-                  '&:hover': {
-                    backgroundColor: P.primary800,
-                    color: P.white,
-                    '& .MuiListItemIcon-root': { color: P.white },
-                  },
-                  '&.Mui-selected': {
-                    backgroundColor: P.primary700,
-                    color: P.white,
-                    '& .MuiListItemIcon-root': { color: P.white },
-                    '& .MuiListItemText-primary': { color: P.white, fontWeight: 600 },
-                    '&:hover': { backgroundColor: P.primary600 },
-                  },
-                  '& .MuiListItemIcon-root': { color: P.primary400 },
-                  '& .MuiListItemText-primary': { color: P.primary300 },
-                }}
-              >
-                <ListItemIcon>{item.icon}</ListItemIcon>
-                <ListItemText
-                  primary={item.text}
-                  sx={{
-                    '& .MuiTypography-root': {
-                      fontSize: '0.85rem',
-                      fontWeight: 500,
-                    }
+              <Tooltip title={isCollapsed ? item.text : ''} placement="right" arrow>
+                <ListItemButton
+                  selected={location.pathname === item.path || (item.path !== '/dashboard' && location.pathname.startsWith(item.path))}
+                  onClick={() => {
+                    navigate(item.path)
+                    if (isMobile) setMobileOpen(false)
                   }}
-                />
-              </ListItemButton>
+                  sx={{
+                    borderRadius: 3,
+                    mx: isCollapsed ? 0.5 : 1,
+                    my: 0.25,
+                    py: 0.75,
+                    px: isCollapsed ? 1.5 : 2,
+                    justifyContent: isCollapsed ? 'center' : 'flex-start',
+                    color: P.primary300,
+                    '&:hover': {
+                      backgroundColor: P.primary800,
+                      color: P.white,
+                      '& .MuiListItemIcon-root': { color: P.white },
+                    },
+                    '&.Mui-selected': {
+                      backgroundColor: P.primary700,
+                      color: P.white,
+                      '& .MuiListItemIcon-root': { color: P.white },
+                      '& .MuiListItemText-primary': { color: P.white, fontWeight: 600 },
+                      '&:hover': { backgroundColor: P.primary600 },
+                    },
+                    '& .MuiListItemIcon-root': { color: P.primary400, minWidth: isCollapsed ? 0 : 40 },
+                    '& .MuiListItemText-primary': { color: P.primary300 },
+                  }}
+                >
+                  <ListItemIcon>{item.icon}</ListItemIcon>
+                  {!isCollapsed && (
+                    <ListItemText
+                      primary={item.text}
+                      sx={{
+                        '& .MuiTypography-root': {
+                          fontSize: '0.85rem',
+                          fontWeight: 500,
+                        }
+                      }}
+                    />
+                  )}
+                </ListItemButton>
+              </Tooltip>
             </ListItem>
           </React.Fragment>
         ))}
       </List>
+
+      {/* Collapse toggle button — desktop only */}
+      {!isMobile && (
+        <Box sx={{ flexShrink: 0, p: 1, display: 'flex', justifyContent: 'center' }}>
+          <IconButton
+            onClick={() => setCollapsed(c => !c)}
+            size="small"
+            sx={{
+              color: P.primary400,
+              '&:hover': { color: P.white, bgcolor: P.primary800 },
+            }}
+            title={isCollapsed ? 'Déplier le menu' : 'Replier le menu'}
+          >
+            {isCollapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+          </IconButton>
+        </Box>
+      )}
     </Box>
   )
 
@@ -206,12 +256,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         position="fixed"
         elevation={0}
         sx={{
-          width: { md: `calc(100% - ${DRAWER_WIDTH}px)` },
-          ml: { md: `${DRAWER_WIDTH}px` },
+          width: { md: `calc(100% - ${drawerWidth}px)` },
+          ml: { md: `${drawerWidth}px` },
           bgcolor: 'background.paper',
           color: 'text.primary',
           borderBottom: `1px solid ${P.primary200}`,
           zIndex: theme.zIndex.drawer + 1,
+          transition: 'width 0.25s ease, margin-left 0.25s ease',
         }}
       >
         <Toolbar sx={{ bgcolor: 'background.paper', color: 'text.primary' }}>
@@ -281,7 +332,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       {/* Sidebar */}
       <Box
         component="nav"
-        sx={{ width: { md: DRAWER_WIDTH }, flexShrink: { md: 0 } }}
+        sx={{ width: { md: drawerWidth }, flexShrink: { md: 0 }, transition: 'width 0.25s ease' }}
       >
         <Drawer
           variant="temporary"
@@ -298,7 +349,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             },
           }}
         >
-          {drawerContent}
+          {renderDrawerContent(false)}
         </Drawer>
 
         <Drawer
@@ -307,16 +358,18 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             display: { xs: 'none', md: 'block' },
             '& .MuiDrawer-paper': {
               boxSizing: 'border-box',
-              width: DRAWER_WIDTH,
+              width: drawerWidth,
               position: 'relative',
               backgroundColor: P.primary900,
               height: '100vh',
               borderRight: 'none',
+              transition: 'width 0.25s ease',
+              overflowX: 'hidden',
             },
           }}
           open
         >
-          {drawerContent}
+          {renderDrawerContent(collapsed)}
         </Drawer>
       </Box>
 
@@ -325,12 +378,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         component="main"
         sx={{
           flexGrow: 1,
-          width: { md: `calc(100% - ${DRAWER_WIDTH}px)` },
+          width: { md: `calc(100% - ${drawerWidth}px)` },
           height: '100vh',
           display: 'flex',
           flexDirection: 'column',
           bgcolor: 'grey.50',
           overflow: 'hidden',
+          transition: 'width 0.25s ease',
         }}
       >
         <Toolbar />
