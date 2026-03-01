@@ -78,7 +78,7 @@ const componentCache = new Map<string, React.LazyExoticComponent<React.Component
 function getLazyComponent(componentFile: string): React.LazyExoticComponent<React.ComponentType<any>> {
   let cached = componentCache.get(componentFile)
   if (!cached) {
-    cached = React.lazy(() => import(`@/modules/liasse-fiscale/components/pages/${componentFile}`))
+    cached = React.lazy(() => import(`../../../modules/liasse-fiscale/components/pages/${componentFile}`))
     componentCache.set(componentFile, cached)
   }
   return cached
