@@ -31,3 +31,7 @@ export {
   calculerAgregats,
 } from './predictiveAnalysis'
 export type { Agregats } from './predictiveAnalysis'
+
+export {
+  handleConditionalDiagnostic,
+} from './conditionalReasoning'

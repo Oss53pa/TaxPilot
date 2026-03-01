@@ -7,29 +7,8 @@
  *   - Sheet 34: NOTE 12 (9 cols)  - Ecarts de conversion et transferts de charges
  */
 
-import { SheetData, Row, emptyRow, rowAt, m, headerRows } from './helpers'
+import { SheetData, Row, emptyRow, rowAt, m, headerRows, exerciceYear, exerciceYearN1, variationPct } from './helpers'
 import type { EntrepriseData, ExerciceData, BalanceEntry } from './helpers'
-
-// ════════════════════════════════════════════════════════════════════════════
-// Helpers
-// ════════════════════════════════════════════════════════════════════════════
-
-function exerciceYear(ex: ExerciceData): string {
-  if (!ex.dateFin) return 'N'
-  const d = new Date(ex.dateFin)
-  return isNaN(d.getTime()) ? 'N' : String(d.getFullYear())
-}
-
-function exerciceYearN1(ex: ExerciceData): string {
-  if (!ex.dateFin) return 'N-1'
-  const d = new Date(ex.dateFin)
-  return isNaN(d.getTime()) ? 'N-1' : String(d.getFullYear() - 1)
-}
-
-function variationPct(n: number, n1: number): number {
-  if (n1 === 0) return 0
-  return ((n - n1) / Math.abs(n1)) * 100
-}
 
 // ════════════════════════════════════════════════════════════════════════════
 // Shared: push a data row with Libellés(A:D), Année N(E:F), Année N-1(G:H),

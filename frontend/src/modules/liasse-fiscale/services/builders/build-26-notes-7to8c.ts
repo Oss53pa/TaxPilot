@@ -8,29 +8,8 @@
  *   - Sheet 30: NOTE 8C  (9 cols)  - Provisions pour engagements de retraite
  */
 
-import { SheetData, Row, emptyRow, rowAt, m, headerRows } from './helpers'
+import { SheetData, Row, emptyRow, rowAt, m, headerRows, exerciceYear, exerciceYearN1, variationPct } from './helpers'
 import type { EntrepriseData, ExerciceData, BalanceEntry } from './helpers'
-
-// ════════════════════════════════════════════════════════════════════════════
-// Local helpers
-// ════════════════════════════════════════════════════════════════════════════
-
-function exerciceYear(ex: ExerciceData): string {
-  if (!ex.dateFin) return 'N'
-  const d = new Date(ex.dateFin)
-  return isNaN(d.getTime()) ? 'N' : String(d.getFullYear())
-}
-
-function exerciceYearN1(ex: ExerciceData): string {
-  if (!ex.dateFin) return 'N-1'
-  const d = new Date(ex.dateFin)
-  return isNaN(d.getTime()) ? 'N-1' : String(d.getFullYear() - 1)
-}
-
-function variationPct(n: number, n1: number): number {
-  if (n1 === 0) return 0
-  return ((n - n1) / Math.abs(n1)) * 100
-}
 
 /** Push a data row with label merged A:D and values at specific columns */
 function pushDataRow10(

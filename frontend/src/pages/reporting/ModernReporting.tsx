@@ -15,7 +15,6 @@ import {
   CardHeader,
   Button,
   Chip,
-  LinearProgress,
   List,
   ListItem,
   ListItemIcon,
@@ -46,7 +45,6 @@ import {
   Speed,
   FactCheck as ControleIcon,
   Send as SendIcon,
-  Error as ErrorIcon,
 } from '@mui/icons-material'
 import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
 import { useBalanceData } from '@/hooks/useBalanceData'

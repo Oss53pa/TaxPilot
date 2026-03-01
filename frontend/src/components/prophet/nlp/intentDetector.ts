@@ -4,7 +4,7 @@
  */
 
 import type { ParsedQuery, Intent, ConversationContext } from '../types'
-import { normalize, tokenize, extractNumericValue } from './normalize'
+import { normalize, tokenize, extractNumericValue, detectNegation, detectTemporal } from './normalize'
 import { canonicalize, hasCanonical } from './synonyms'
 import { fuzzyFind } from './fuzzyMatch'
 
@@ -87,7 +87,14 @@ interface ScoredIntent {
   score: number
 }
 
-function scoreIntents(normalized: string, _tokens: string[], canonTokens: string[]): ScoredIntent[] {
+function scoreIntents(
+  normalized: string,
+  _tokens: string[],
+  canonTokens: string[],
+  negation: boolean,
+  temporal: 'current' | 'previous' | 'comparison' | undefined,
+  ctx: ConversationContext,
+): ScoredIntent[] {
   const scores: ScoredIntent[] = []
 
   function add(intent: Intent, score: number) {
@@ -209,6 +216,10 @@ function scoreIntents(normalized: string, _tokens: string[], canonTokens: string
     if (hasPrediction && /\b(general|global|complet|situation|sante|diagnostic|synthese)\b/.test(normalized)) {
       add('PREDICTION_GENERAL', 75)
     }
+    // Conditional diagnostic (regime-aware, deductibility, seuils)
+    if (/\b(diagnostic|conseil|recommandation|optimis|regime.*adapt|quel regime|mon regime|seuil|deductib.*analyse|obligations?\s*fiscal|bilan fiscal|situation fiscal)\b/.test(normalized)) {
+      add('CONDITIONAL_DIAGNOSTIC', 88)
+    }
     // Bare "analyse" or "prediction" without specific sub-domain
     if (hasPrediction) {
       add('PREDICTION_GENERAL', 50)
@@ -235,6 +246,58 @@ function scoreIntents(normalized: string, _tokens: string[], canonTokens: string
     add('ACCOUNT_SEARCH', 70)
   }
 
+  // ── Negation adjustments ──
+  if (negation) {
+    // "pas deductible" / "non deductible" → boost deductibility intent
+    if (/\b(deductib|conforme|valide)\b/.test(normalized)) {
+      add('FISCAL_DEDUCTIBILITY', 90)
+    }
+    // "pas coherent" / "incoherent" → boost coherence
+    if (/\b(coherent|equilibr|correct)\b/.test(normalized)) {
+      add('PREDICTION_COHERENCE', 90)
+    }
+    // "pas conforme" → boost anomaly detection
+    if (/\b(conforme|normal|regulier)\b/.test(normalized)) {
+      add('PREDICTION_ANOMALY', 85)
+    }
+  }
+
+  // ── Temporal adjustments ──
+  if (temporal === 'comparison' || temporal === 'previous') {
+    // Boost trend analysis for temporal queries
+    add('PREDICTION_TREND', 88)
+  }
+
+  // ── Contextual follow-up boosting ──
+  if (ctx.lastIntent) {
+    const isShort = normalized.split(' ').length <= 4
+    if (isShort) {
+      // "et la TVA?" after PREDICTION_IS → boost PREDICTION_TVA
+      if (ctx.lastIntent.startsWith('PREDICTION_') && /\b(tva)\b/.test(normalized)) {
+        add('PREDICTION_TVA', 92)
+      }
+      if (ctx.lastIntent.startsWith('PREDICTION_') && /\b(is|impot)\b/.test(normalized)) {
+        add('PREDICTION_IS', 92)
+      }
+      if (ctx.lastIntent.startsWith('PREDICTION_') && /\b(ratio)\b/.test(normalized)) {
+        add('PREDICTION_RATIOS', 92)
+      }
+      if (ctx.lastIntent.startsWith('PREDICTION_') && /\b(coherence)\b/.test(normalized)) {
+        add('PREDICTION_COHERENCE', 92)
+      }
+      // "et l'audit?" after any analysis
+      if (ctx.lastIntent.startsWith('PREDICTION_') && /\b(audit)\b/.test(normalized)) {
+        add('AUDIT_EXECUTE', 92)
+      }
+    }
+  }
+
+  // ── Compound query escalation ──
+  // "analyse complete", "tout verifier", "diagnostic complet"
+  if (/\b(complet|tout|global|synthese complete|tout verifier|full|bilan complet)\b/.test(normalized) && hasPrediction) {
+    add('PREDICTION_GENERAL', 90)
+  }
+
   return scores
 }
 
@@ -255,6 +318,8 @@ export function detectIntent(input: string, ctx: ConversationContext): ParsedQue
   const fiscalCategory = extractFiscalCategory(normalized)
   const numericValue = extractNumericValue(normalized)
   const posteRef = extractPosteRef(input)
+  const negation = detectNegation(input)
+  const temporal = detectTemporal(input)
 
   const base: ParsedQuery = {
     intent: 'UNKNOWN',
@@ -271,6 +336,8 @@ export function detectIntent(input: string, ctx: ConversationContext): ParsedQue
     fiscalCategory,
     numericValue,
     posteRef,
+    negation,
+    temporal,
   }
 
   // ── Contextual follow-ups (check before scoring) ──
@@ -290,12 +357,26 @@ export function detectIntent(input: string, ctx: ConversationContext): ParsedQue
   }
 
   // Score all intents
-  const scores = scoreIntents(normalized, tokens, canonTokens)
+  const scores = scoreIntents(normalized, tokens, canonTokens, negation, temporal, ctx)
 
-  // If we have scores, pick the highest
+  // If we have scores, pick the highest + extract secondary intents
   if (scores.length > 0) {
     scores.sort((a, b) => b.score - a.score)
     base.intent = scores[0].intent
+
+    // Multi-intent: detect compound queries with "et", "aussi", "egalement"
+    if (/\b(et\s+(?:aussi|egalement)?|aussi|egalement|ainsi que|plus)\b/.test(normalized) && scores.length >= 2) {
+      // Collect unique secondary intents (different from primary, score >= 70)
+      const secondaries = scores
+        .filter((s, i) => i > 0 && s.intent !== base.intent && s.score >= 70)
+        .map(s => s.intent)
+        .filter((v, i, a) => a.indexOf(v) === i) // unique
+        .slice(0, 2)
+      if (secondaries.length > 0) {
+        base.secondaryIntents = secondaries
+      }
+    }
+
     return base
   }
 

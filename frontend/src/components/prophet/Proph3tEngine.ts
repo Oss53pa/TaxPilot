@@ -29,6 +29,7 @@ import {
   handlePredictionAnomaly,
   handleCoherenceCheck,
   handlePredictionGeneral,
+  handleConditionalDiagnostic,
 } from './knowledge'
 
 // ── Keyword → chapter mapping (still used by OPERATION_SEARCH) ───────
@@ -74,7 +75,7 @@ function greetingResponse(): Proph3tResponse {
 
 function helpResponse(): Proph3tResponse {
   return {
-    text: "Voici ce que je peux faire pour vous :\n\n**SYSCOHADA**\n- Recherche de comptes : tapez un numero (`601`) ou un mot-cle (`fournisseur`)\n- Fonctionnement debit/credit : `fonctionnement 401`\n- Chapitres d'operations : `chapitre 12`\n- Classes du plan : `classe 4`\n- Validation : `valide 4011`\n- Statistiques : `statistiques`\n\n**Fiscalite CI**\n- Taux : `taux IS`, `taux TVA`, `taux CNPS`\n- Calculs : `calculer IS sur 50 millions`, `calculer TVA sur 10M`\n- Deductibilite : `charges deductibles`\n- Calendrier : `calendrier fiscal`\n\n**Liasse Fiscale**\n- Feuillets : `Note 15`, `feuillet actif`\n- Regimes : `regime reel normal`\n- Categories : `etats financiers`\n- Mapping : `ou va le compte 213`, `poste AD`, `mapping actif`\n\n**Audit**\n- Controle : `controle FI-003`\n- Niveau : `niveau 3`\n- Vue d'ensemble : `audit`\n- Lancer l'audit : `lance un audit`, `audite ma balance`\n\n**Analyse Predictive** (necessite une balance importee)\n- IS : `estimation IS`\n- TVA : `prediction TVA`\n- Ratios : `mes ratios financiers`\n- Anomalies : `detection anomalies`\n- Coherence : `controle coherence`\n- Synthese : `analyse ma situation`",
+    text: "Voici ce que je peux faire pour vous :\n\n**SYSCOHADA**\n- Recherche de comptes : tapez un numero (`601`) ou un mot-cle (`fournisseur`)\n- Fonctionnement debit/credit : `fonctionnement 401`\n- Chapitres d'operations : `chapitre 12`\n- Classes du plan : `classe 4`\n- Validation : `valide 4011`\n- Statistiques : `statistiques`\n\n**Fiscalite CI**\n- Taux : `taux IS`, `taux TVA`, `taux CNPS`\n- Calculs : `calculer IS sur 50 millions`, `calculer TVA sur 10M`\n- Deductibilite : `charges deductibles`\n- Calendrier : `calendrier fiscal`\n\n**Liasse Fiscale**\n- Feuillets : `Note 15`, `feuillet actif`\n- Regimes : `regime reel normal`\n- Categories : `etats financiers`\n- Mapping : `ou va le compte 213`, `poste AD`, `mapping actif`\n\n**Audit**\n- Controle : `controle FI-003`\n- Niveau : `niveau 3`\n- Vue d'ensemble : `audit`\n- Lancer l'audit : `lance un audit`, `audite ma balance`\n\n**Analyse Predictive** (necessite une balance importee)\n- IS : `estimation IS`\n- TVA : `prediction TVA`\n- Ratios : `mes ratios financiers`\n- Anomalies : `detection anomalies`\n- Coherence : `controle coherence`\n- Synthese : `analyse ma situation`\n- Diagnostic fiscal : `diagnostic`, `mon regime`, `obligations fiscales`",
     suggestions: [
       'Compte 601',
       'Taux IS',
@@ -514,6 +515,11 @@ export async function processQuery(
     case 'PREDICTION_GENERAL':
       if (!context.balanceData?.balanceN) { response = noBalanceResponse(); break }
       response = handlePredictionGeneral(context.balanceData.balanceN, context.balanceData.balanceN1)
+      break
+
+    case 'CONDITIONAL_DIAGNOSTIC':
+      if (!context.balanceData?.balanceN) { response = noBalanceResponse(); break }
+      response = handleConditionalDiagnostic(context.balanceData.balanceN, context.regime, context.entreprise)
       break
 
     default:

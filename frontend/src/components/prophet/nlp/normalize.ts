@@ -30,6 +30,26 @@ export function tokenize(text: string): string[] {
     .filter(w => w.length > 1 && !STOP_WORDS.has(w))
 }
 
+/**
+ * Detecte la presence d'une negation dans le texte brut
+ * AVANT normalisation (pour ne pas perdre "ne" et "pas" dans les stop words)
+ */
+export function detectNegation(text: string): boolean {
+  const lower = text.toLowerCase()
+  return /\b(ne\s+\w+\s+pas|n\s*'\w+\s+pas|pas\s+de|non\s+|pas\s+|aucun|jamais|sans\s+)\b/.test(lower)
+}
+
+/**
+ * Detecte les marqueurs temporels
+ */
+export function detectTemporal(text: string): 'current' | 'previous' | 'comparison' | undefined {
+  const lower = text.toLowerCase()
+  if (/\b(compar|vs|versus|par rapport|entre.*n.*n-1|n\s*et\s*n-1|evolution|progression|variation)\b/.test(lower)) return 'comparison'
+  if (/\b(n-1|n ?minus|precedent|dernier|passe|ancien|avant|exercice precedent)\b/.test(lower)) return 'previous'
+  if (/\b(actuel|courant|en cours|cette annee|cet exercice)\b/.test(lower)) return 'current'
+  return undefined
+}
+
 export function extractNumericValue(text: string): number | undefined {
   // "10M", "10 millions" → 10_000_000
   const millionMatch = text.match(/(\d[\d\s.,]*)\s*(?:millions?|m)\b/i)

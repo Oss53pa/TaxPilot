@@ -99,6 +99,25 @@ export function headerRows(
   return rows
 }
 
+// ── Extract exercice year from dateFin ──
+export function exerciceYear(ex: ExerciceData): string {
+  if (!ex.dateFin) return 'N'
+  const d = new Date(ex.dateFin)
+  return isNaN(d.getTime()) ? 'N' : String(d.getFullYear())
+}
+
+export function exerciceYearN1(ex: ExerciceData): string {
+  if (!ex.dateFin) return 'N-1'
+  const d = new Date(ex.dateFin)
+  return isNaN(d.getTime()) ? 'N-1' : String(d.getFullYear() - 1)
+}
+
+// ── Variation percentage: (N - N-1) / |N-1| * 100 ──
+export function variationPct(n: number, n1: number): number {
+  if (n1 === 0) return 0
+  return ((n - n1) / Math.abs(n1)) * 100
+}
+
 // ── Re-exports for convenience ──
 export {
   getActifBrut, getAmortProv, getPassif,

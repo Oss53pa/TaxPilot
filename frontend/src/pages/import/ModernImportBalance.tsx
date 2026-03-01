@@ -1558,7 +1558,7 @@ const ModernImportBalance: React.FC = () => {
                           variant="contained"
                           startIcon={<SaveIcon />}
                           fullWidth
-                          onClick={() => {
+                          onClick={async () => {
                             try {
                               // Convert to BalanceEntry[] for liasseDataService
                               const entries = importedData.map(acc => ({
@@ -1597,6 +1597,24 @@ const ModernImportBalance: React.FC = () => {
                                 importReport?.errors || 0,
                                 importReport?.warnings || 0,
                               )
+
+                              // Update workflow state: balance imported, reset downstream steps
+                              try {
+                                const { updateWorkflowState } = await import('@/services/workflowStateService')
+                                updateWorkflowState({
+                                  balanceImported: true,
+                                  controleDone: false,
+                                  controleScore: 0,
+                                  controleBloquants: 0,
+                                  controleResult: 'not_run',
+                                  generationDone: false,
+                                  generationDate: null,
+                                  generationRegime: null,
+                                  teledeclarationStatus: 'not_started',
+                                  teledeclarationDate: null,
+                                  teledeclarationReference: null,
+                                })
+                              } catch { /* ignore */ }
 
                               // Redirect: re-import goes to audit, first import goes to balance
                               if (savedBalance.version > 1) {

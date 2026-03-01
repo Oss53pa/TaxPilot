@@ -5,6 +5,7 @@ import CloseIcon from '@mui/icons-material/Close'
 import Proph3tMessageBubble, { TypingIndicator } from './Proph3tMessageBubble'
 import { processQuery } from './Proph3tEngine'
 import { balanceService } from '@/services/balanceService'
+import { getEntreprise } from '@/services/entrepriseStorageService'
 import type { Balance } from '@/types'
 import type { ChatMessage, ConversationContext } from './types'
 import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
@@ -70,6 +71,22 @@ export default function Proph3tChatPanel({ open, onClose }: Props) {
       }
     }
     loadBalance()
+
+    // Load entreprise settings
+    const ent = getEntreprise()
+    if (ent) {
+      contextRef.current = {
+        ...contextRef.current,
+        regime: ent.regime_imposition,
+        entreprise: {
+          nom: ent.raison_sociale,
+          regime_imposition: ent.regime_imposition,
+          capital: (ent as any).capital_social,
+          effectifs: (ent as any).effectifs,
+          secteur_activite: ent.secteur_activite,
+        },
+      }
+    }
   }, [])
 
   // Auto-scroll to bottom

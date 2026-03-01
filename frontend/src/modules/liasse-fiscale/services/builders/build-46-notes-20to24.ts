@@ -8,17 +8,8 @@
  *   - Sheet 50: NOTE 24 (8 cols)  - Services exterieurs
  */
 
-import { SheetData, Row, emptyRow, rowAt, m, headerRows } from './helpers'
+import { SheetData, Row, emptyRow, rowAt, m, headerRows, variationPct } from './helpers'
 import type { EntrepriseData, ExerciceData, BalanceEntry } from './helpers'
-
-// ════════════════════════════════════════════════════════════════════════════
-// Helper: variation percentage
-// ════════════════════════════════════════════════════════════════════════════
-
-function variationPct(n: number, n1: number): number {
-  if (n1 === 0) return 0
-  return ((n - n1) / Math.abs(n1)) * 100
-}
 
 // ── EUR conversion rate ──
 const EUR_RATE = 655.957

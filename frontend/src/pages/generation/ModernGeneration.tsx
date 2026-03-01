@@ -31,7 +31,6 @@ import {
   Error as ErrorIcon,
   ArrowBack,
   ArrowForward as ArrowForwardIcon,
-  Assignment as AssignmentIcon,
 } from '@mui/icons-material'
 import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
 import { getWorkflowState, updateWorkflowState } from '@/services/workflowStateService'

@@ -42,6 +42,8 @@ import { useNavigate } from 'react-router-dom'
 import { fiscasyncPalette } from '@/theme/fiscasyncTheme'
 import { useEntrepriseData } from '@/hooks/useEntrepriseData'
 import { useBalanceData } from '@/hooks/useBalanceData'
+import { getWorkflowState } from '@/services/workflowStateService'
+import type { WorkflowState } from '@/services/workflowStateService'
 
 // ─── Palette tokens (derived from central theme) ─────────────────────
 const C = {
@@ -102,8 +104,10 @@ const AppDashboard: React.FC = () => {
   const [loading, setLoading] = useState(true)
   const ent = useEntrepriseData()
   const bal = useBalanceData()
+  const [ws, setWs] = useState<WorkflowState | null>(null)
 
   useEffect(() => {
+    setWs(getWorkflowState())
     setLoading(false)
   }, [])
 
@@ -126,28 +130,29 @@ const AppDashboard: React.FC = () => {
     }
   }, [bal])
 
-  // ── KPIs (computed from balance or show —) ──
+  // ── KPIs (computed from balance + workflow state) ──
+  const workflowSteps = ws ? [ws.configurationDone, ws.balanceImported, ws.controleDone, ws.generationDone].filter(Boolean).length : 0
   const kpis: KPI[] = [
     {
       label: 'Avancement Liasse',
-      value: '\u2014',
-      subtitle: 'Aucune donnée',
+      value: ws ? `${workflowSteps}/4` : '\u2014',
+      subtitle: ws?.generationDone ? 'Liasse generee' : ws?.controleDone ? 'Controle termine' : ws?.balanceImported ? 'Balance importee' : 'Non demarre',
       trend: 0,
       trendLabel: '',
       icon: <Assignment sx={{ fontSize: 20 }} />,
     },
     {
-      label: 'Conformité Fiscale',
-      value: '\u2014',
-      subtitle: 'Aucune donnée',
+      label: 'Score Conformite',
+      value: ws?.controleDone ? `${ws.controleScore}%` : '\u2014',
+      subtitle: ws?.controleDone ? (ws.controleResult === 'passed' ? 'Tous controles OK' : ws.controleResult === 'passed_with_warnings' ? 'Avertissements' : `${ws.controleBloquants} bloquant(s)`) : 'Controle non lance',
       trend: 0,
       trendLabel: '',
       icon: <Security sx={{ fontSize: 20 }} />,
     },
     {
-      label: 'Anomalies Détectées',
-      value: '\u2014',
-      subtitle: 'Aucune donnée',
+      label: 'Bloquants',
+      value: ws?.controleDone ? String(ws.controleBloquants) : '\u2014',
+      subtitle: ws?.controleDone ? (ws.controleBloquants === 0 ? 'Aucun bloquant' : 'Action requise') : 'Controle non lance',
       trend: 0,
       trendLabel: '',
       icon: <WarningIcon sx={{ fontSize: 20 }} />,
@@ -155,21 +160,21 @@ const AppDashboard: React.FC = () => {
     {
       label: 'Comptes Balance',
       value: bal.entries.length ? String(bal.entries.length) : '\u2014',
-      subtitle: bal.entries.length ? 'Balance importée' : 'Aucune balance importée',
+      subtitle: bal.entries.length ? 'Balance importee' : 'Aucune balance importee',
       trend: 0,
       trendLabel: '',
       icon: <AccountBalance sx={{ fontSize: 20 }} />,
     },
   ]
 
-  // ── Workflow ──
+  // ── Workflow (dynamic from workflowState) ──
   const workflow: WorkflowStep[] = [
-    { label: 'Configuration', status: ent.hasEntreprise ? 'done' : 'pending', path: '/parametrage' },
-    { label: 'Import Balance', status: bal.usingImported ? 'done' : 'pending', path: '/import-balance' },
-    { label: 'Contrôle & Audit', status: bal.usingImported ? 'active' : 'pending', path: '/audit' },
-    { label: 'Production Liasse', status: bal.usingImported ? 'active' : 'pending', path: '/direct-liasse' },
-    { label: 'Validation', status: 'pending', path: '/validation-liasse' },
-    { label: 'Télédéclaration', status: 'pending', path: '/teledeclaration' },
+    { label: 'Configuration', status: ws?.configurationDone ? 'done' : ent.hasEntreprise ? 'done' : 'pending', path: '/parametrage' },
+    { label: 'Import Balance', status: ws?.balanceImported ? 'done' : bal.usingImported ? 'done' : 'pending', path: '/import-balance' },
+    { label: 'Controle', status: ws?.controleDone ? 'done' : ws?.balanceImported ? 'active' : 'pending', path: '/validation-liasse' },
+    { label: 'Generation', status: ws?.generationDone ? 'done' : ws?.controleDone ? 'active' : 'pending', path: '/generation' },
+    { label: 'Liasse Fiscale', status: ws?.generationDone ? 'active' : 'pending', path: '/liasse-fiscale' },
+    { label: 'Teledeclaration', status: ws?.teledeclarationStatus === 'submitted' || ws?.teledeclarationStatus === 'accepted' ? 'done' : ws?.generationDone ? 'active' : 'pending', path: '/teledeclaration' },
   ]
 
   // ── Deadlines (generic fiscal calendar — static reference data) ──
@@ -243,7 +248,7 @@ const AppDashboard: React.FC = () => {
             variant="contained"
             size="small"
             startIcon={<Assignment />}
-            onClick={() => navigate('/direct-liasse')}
+            onClick={() => navigate('/liasse-fiscale')}
             sx={{
               bgcolor: C.text,
               color: C.white,
@@ -632,11 +637,11 @@ const AppDashboard: React.FC = () => {
           <Grid container spacing={1.5}>
             {[
               { label: 'Import Balance', icon: <CloudUpload />, path: '/import-balance' },
-              { label: 'Liasse SYSCOHADA', icon: <Assignment />, path: '/direct-liasse' },
-              { label: 'Audit & Contrôle', icon: <Security />, path: '/audit' },
-              { label: 'Génération Auto', icon: <Description />, path: '/generation' },
-              { label: 'Validation Liasse', icon: <CheckCircle />, path: '/validation-liasse' },
-              { label: 'Télédéclaration', icon: <Analytics />, path: '/teledeclaration' },
+              { label: 'Controle Balance', icon: <Security />, path: '/validation-liasse' },
+              { label: 'Generation Auto', icon: <Description />, path: '/generation' },
+              { label: 'Liasse Fiscale', icon: <Assignment />, path: '/liasse-fiscale' },
+              { label: 'Templates Export', icon: <CheckCircle />, path: '/templates' },
+              { label: 'Teledeclaration', icon: <Analytics />, path: '/teledeclaration' },
               { label: 'Reporting', icon: <BarChart />, path: '/reporting' },
               { label: 'Plans Comptables', icon: <AccountBalance />, path: '/plans-comptables' },
             ].map((m) => (

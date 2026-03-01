@@ -91,10 +91,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     { text: 'Consultation Balance', icon: <AccountBalance />, path: '/balance' },
     { text: 'Audit & Corrections', icon: <Security />, path: '/audit' },
 
-    { text: 'Liasses SYSCOHADA', icon: <Assignment />, path: '/direct-liasse', divider: 'Production Liasse' },
-    { text: 'Liasse Fiscale', icon: <Description />, path: '/liasse-fiscale' },
-    { text: 'Génération Auto', icon: <Description />, path: '/generation' },
-    { text: 'Contrôle de Liasse', icon: <Security />, path: '/validation-liasse' },
+    { text: 'Liasse Fiscale', icon: <Assignment />, path: '/liasse-fiscale', divider: 'Production Liasse' },
+    { text: 'Controle de Liasse', icon: <Security />, path: '/validation-liasse' },
+    { text: 'Generation Auto', icon: <Description />, path: '/generation' },
     { text: 'Templates Export', icon: <CloudUpload />, path: '/templates' },
 
     { text: 'Télédéclaration', icon: <Analytics />, path: '/teledeclaration', divider: 'Finalisation' },

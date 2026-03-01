@@ -38,6 +38,8 @@ export type Intent =
   | 'PREDICTION_ANOMALY'
   | 'PREDICTION_COHERENCE'
   | 'PREDICTION_GENERAL'
+  // Conditional reasoning
+  | 'CONDITIONAL_DIAGNOSTIC'
   | 'UNKNOWN'
 
 // ── Parsed query ─────────────────────────────────────────────────────
@@ -57,6 +59,9 @@ export interface ParsedQuery {
   auditLevel?: number
   numericValue?: number
   posteRef?: string
+  negation?: boolean
+  temporal?: 'current' | 'previous' | 'comparison'
+  secondaryIntents?: Intent[]
 }
 
 // ── Rich content blocks for assistant messages ───────────────────────
@@ -182,4 +187,13 @@ export interface ConversationContext {
   balanceData?: { balanceN: Balance[]; balanceN1?: Balance[] }
   lastFiscalCategory?: string
   lastAuditLevel?: number
+  lastIntent?: Intent
+  regime?: string
+  entreprise?: {
+    nom?: string
+    regime_imposition?: string
+    capital?: number
+    effectifs?: number
+    secteur_activite?: string
+  }
 }
