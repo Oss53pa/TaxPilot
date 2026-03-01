@@ -62,7 +62,10 @@ function IC001(ctx: AuditContext): ResultatControle {
       {
         comptes: anomalies, ecart: anomalies.length,
         montants: { totalValeurBrute: totalBrut, totalAmortissements: totalAmort, categoriesAnormales: anomalies.length },
-        description: `${anomalies.length} categorie(s) d'immobilisations ont des amortissements cumules superieurs a la valeur brute d\'acquisition. C\'est comptablement impossible: un bien ne peut etre amorti au-dela de sa valeur d\'origine. Causes possibles: amortissements non soldes apres cession, erreur de calcul des dotations, ou confusion entre amortissements et depreciations.`
+        description: `${anomalies.length} categorie(s) d'immobilisations ont des amortissements cumules superieurs a la valeur brute d\'acquisition. C\'est comptablement impossible: un bien ne peut etre amorti au-dela de sa valeur d\'origine. Causes possibles: amortissements non soldes apres cession, erreur de calcul des dotations, ou confusion entre amortissements et depreciations.`,
+        attendu: 'Amortissements cumules (28x) <= valeur brute (2x) pour chaque categorie',
+        constate: `${anomalies.length} categorie(s) avec amortissements > valeur brute`,
+        impactFiscal: 'Amortissements excessifs = charges deduites en trop = resultat fiscal sous-estime = risque de redressement.',
       },
       'Regulariser les amortissements: solder les amortissements des immobilisations cedees ou sorties, verifier les plans d\'amortissement, et corriger les ecritures erronees.',
       'Art. 45 Acte Uniforme OHADA - Amortissements')
@@ -91,7 +94,10 @@ function IC002(ctx: AuditContext): ResultatControle {
       {
         comptes: sansAmort,
         montants: { categoriesSansAmort: sansAmort.length },
-        description: `${sansAmort.length} categorie(s) d'immobilisations amortissables ne disposent pas de comptes d\'amortissement correspondants (28x). L\'absence d\'amortissement sur des immobilisations amortissables (corporelles et incorporelles) constitue une non-conformite comptable et fiscale.`
+        description: `${sansAmort.length} categorie(s) d'immobilisations amortissables ne disposent pas de comptes d\'amortissement correspondants (28x). L\'absence d\'amortissement sur des immobilisations amortissables (corporelles et incorporelles) constitue une non-conformite comptable et fiscale.`,
+        attendu: 'Chaque immobilisation amortissable dispose d\'un compte d\'amortissement (28x)',
+        constate: `${sansAmort.length} categorie(s) sans amortissement correspondant`,
+        impactFiscal: 'Amortissements non comptabilises = charges deductibles non utilisees = resultat fiscal sur-estime.',
       },
       'Comptabiliser les dotations aux amortissements manquantes. Verifier les plans d\'amortissement pour chaque categorie d\'immobilisation.',
       'Art. 44-46 Acte Uniforme OHADA - Amortissements obligatoires')
@@ -117,7 +123,10 @@ function IC003(ctx: AuditContext): ResultatControle {
       {
         comptes: orphelins.slice(0, 10),
         montants: { amortissementsOrphelins: orphelins.length },
-        description: `${orphelins.length} comptes d'amortissement (28x) n'ont pas d'immobilisation correspondante au bilan. Ces amortissements "orphelins" peuvent resulter d\'immobilisations cedees ou mises au rebut dont les amortissements n\'ont pas ete soldes.`
+        description: `${orphelins.length} comptes d'amortissement (28x) n'ont pas d'immobilisation correspondante au bilan. Ces amortissements "orphelins" peuvent resulter d\'immobilisations cedees ou mises au rebut dont les amortissements n\'ont pas ete soldes.`,
+        attendu: 'Chaque compte d\'amortissement (28x) a une immobilisation brute (2x) correspondante',
+        constate: `${orphelins.length} amortissement(s) orphelin(s)`,
+        impactFiscal: 'Amortissements orphelins faussent la valeur nette des immobilisations et les dotations futures.',
       },
       'Solder les amortissements orphelins par une ecriture de regularisation: debiter 28x et crediter 2x pour la valeur residuelle, ou passer l\'ecriture de sortie d\'immobilisation.',
       'Art. 45 Acte Uniforme OHADA')
@@ -137,7 +146,10 @@ function IC004(ctx: AuditContext): ResultatControle {
       'Amortissements au bilan sans dotation au resultat (681/682)',
       {
         montants: { dotations: 0, amortissementsBilan: amortBilan },
-        description: `Des amortissements cumules de ${amortBilan.toLocaleString('fr-FR')} FCFA figurent au bilan (28x) mais aucune dotation (681/682) n\'est comptabilisee au compte de resultat. Cela peut indiquer que les dotations de l\'exercice n\'ont pas ete passees, ou que la balance est pre-cloture.`
+        description: `Des amortissements cumules de ${amortBilan.toLocaleString('fr-FR')} FCFA figurent au bilan (28x) mais aucune dotation (681/682) n\'est comptabilisee au compte de resultat. Cela peut indiquer que les dotations de l\'exercice n\'ont pas ete passees, ou que la balance est pre-cloture.`,
+        attendu: 'Dotations aux amortissements (681/682) comptabilisees si amortissements au bilan',
+        constate: `Amortissements bilan: ${amortBilan.toLocaleString('fr-FR')}, dotations exercice: 0`,
+        impactFiscal: 'Dotations omises = charges deductibles perdues (non reportables) = resultat fiscal sur-estime.',
       },
       'Comptabiliser les dotations aux amortissements de l\'exercice (debit 681x, credit 28x). Verifier les plans d\'amortissement.',
       'Art. 44 Acte Uniforme OHADA - Dotations aux amortissements')
@@ -167,7 +179,10 @@ function IC005(ctx: AuditContext): ResultatControle {
       {
         comptes: problemes,
         montants: { categoriesAnormales: problemes.length },
-        description: `${problemes.length} categorie(s) d'actifs ont des depreciations (29x/39x/49x) superieures a la valeur brute. Une depreciation ne peut exceder 100% de la valeur d\'origine de l\'actif. Causes possibles: depreciation non soldee apres sortie d\'actif, ou cumul de depreciations errone.`
+        description: `${problemes.length} categorie(s) d'actifs ont des depreciations (29x/39x/49x) superieures a la valeur brute. Une depreciation ne peut exceder 100% de la valeur d\'origine de l\'actif. Causes possibles: depreciation non soldee apres sortie d\'actif, ou cumul de depreciations errone.`,
+        attendu: 'Depreciations (29x/39x/49x) <= valeur brute de chaque categorie d\'actif',
+        constate: `${problemes.length} categorie(s) avec depreciation excedant la valeur brute`,
+        impactFiscal: 'Depreciations excessives = charges deduites en trop = risque de redressement fiscal.',
       },
       'Regulariser les depreciations excessives: solder les depreciations des actifs sortis et verifier les taux de depreciation appliques.',
       'Art. 46 Acte Uniforme OHADA - Depreciations')
@@ -186,7 +201,10 @@ function IC006(ctx: AuditContext): ResultatControle {
       `Provisions au bilan (${prov.toLocaleString('fr-FR')}) sans dotation (691/697)`,
       {
         montants: { provisions: prov, dotations: 0 },
-        description: `Des provisions de ${prov.toLocaleString('fr-FR')} FCFA figurent au bilan (19x) mais aucune dotation (691/697) n\'est comptabilisee au resultat de l\'exercice. Cela peut indiquer des provisions anterieures sans mouvement cette annee, ou des dotations oubliees.`
+        description: `Des provisions de ${prov.toLocaleString('fr-FR')} FCFA figurent au bilan (19x) mais aucune dotation (691/697) n\'est comptabilisee au resultat de l\'exercice. Cela peut indiquer des provisions anterieures sans mouvement cette annee, ou des dotations oubliees.`,
+        attendu: 'Dotations (691/697) comptabilisees si provisions au bilan (19x)',
+        constate: `Provisions bilan: ${prov.toLocaleString('fr-FR')}, dotations exercice: 0`,
+        impactFiscal: 'Provisions sans mouvement a justifier individuellement pour eviter la reintegration fiscale.',
       },
       'Verifier si de nouvelles provisions doivent etre comptabilisees (691/697) ou si des reprises sont a passer (791/797). Justifier chaque provision au bilan.',
       'Art. 48 Acte Uniforme OHADA - Provisions pour risques et charges')
@@ -205,7 +223,10 @@ function IC007(ctx: AuditContext): ResultatControle {
       `Provisions (${prov.toLocaleString('fr-FR')}) > 10% du bilan (${tb.toLocaleString('fr-FR')})`,
       {
         montants: { provisions: prov, totalBilan: tb, ratioPct: Math.round(ratio) },
-        description: `Les provisions pour risques et charges (19x) representent ${ratio.toFixed(1)}% du total bilan, ce qui est un niveau eleve. Un montant important de provisions peut indiquer des litiges significatifs, des restructurations en cours, ou des risques majeurs identifies. Chaque provision doit etre individuellement justifiee.`
+        description: `Les provisions pour risques et charges (19x) representent ${ratio.toFixed(1)}% du total bilan, ce qui est un niveau eleve. Un montant important de provisions peut indiquer des litiges significatifs, des restructurations en cours, ou des risques majeurs identifies. Chaque provision doit etre individuellement justifiee.`,
+        attendu: 'Provisions pour risques et charges < 10% du total bilan',
+        constate: `Provisions: ${prov.toLocaleString('fr-FR')} (${ratio.toFixed(1)}% du bilan)`,
+        impactFiscal: 'Provisions excessives ou injustifiees = risque de reintegration fiscale et redressement.',
       },
       'Documenter et justifier chaque provision dans les notes annexes (nature du risque, montant, echeance estimee). Verifier qu\'aucune provision n\'est devenue sans objet.')
   }
@@ -226,7 +247,10 @@ function IC008(ctx: AuditContext): ResultatControle {
       `Variation stocks bilan (${variationBilan.toLocaleString('fr-FR')}) incoherente avec compte 603 (${var603.toLocaleString('fr-FR')})`,
       {
         ecart, montants: { variationBilan, variation603: var603, stocksN, stocksN1 },
-        description: `L'ecart entre la variation de stocks au bilan (${variationBilan.toLocaleString('fr-FR')} = stocks N ${stocksN.toLocaleString('fr-FR')} - stocks N-1 ${stocksN1.toLocaleString('fr-FR')}) et le compte 603 (${var603.toLocaleString('fr-FR')}) est de ${ecart.toLocaleString('fr-FR')} FCFA. La variation de stocks au bilan et la variation de stocks au resultat doivent etre symetriques.`
+        description: `L'ecart entre la variation de stocks au bilan (${variationBilan.toLocaleString('fr-FR')} = stocks N ${stocksN.toLocaleString('fr-FR')} - stocks N-1 ${stocksN1.toLocaleString('fr-FR')}) et le compte 603 (${var603.toLocaleString('fr-FR')}) est de ${ecart.toLocaleString('fr-FR')} FCFA. La variation de stocks au bilan et la variation de stocks au resultat doivent etre symetriques.`,
+        attendu: 'Variation stocks bilan = -variation stocks resultat (603)',
+        constate: `Variation bilan: ${variationBilan.toLocaleString('fr-FR')}, compte 603: ${var603.toLocaleString('fr-FR')}, ecart: ${ecart.toLocaleString('fr-FR')}`,
+        impactFiscal: 'Variation de stocks incoherente fausse le cout des marchandises vendues et le resultat fiscal.',
       },
       'Verifier les ecritures de variation de stocks (603/31x-32x-33x). Recalculer la variation sur la base de l\'inventaire physique.',
       'Art. 43 Acte Uniforme OHADA - Evaluation des stocks')
@@ -244,7 +268,10 @@ function IC009(ctx: AuditContext): ResultatControle {
       `Charges de personnel (${chargesPerso.toLocaleString('fr-FR')}) sans dettes sociales (42x)`,
       {
         montants: { chargesPersonnel: chargesPerso },
-        description: `Des charges de personnel de ${chargesPerso.toLocaleString('fr-FR')} FCFA sont comptabilisees (classe 66) mais aucune dette sociale n\'apparait au bilan (42x). En situation normale, le dernier mois de salaire et les cotisations sociales doivent etre provisionnes au passif.`
+        description: `Des charges de personnel de ${chargesPerso.toLocaleString('fr-FR')} FCFA sont comptabilisees (classe 66) mais aucune dette sociale n\'apparait au bilan (42x). En situation normale, le dernier mois de salaire et les cotisations sociales doivent etre provisionnes au passif.`,
+        attendu: 'Dettes sociales (42x) presentes si charges de personnel comptabilisees',
+        constate: `Charges personnel: ${chargesPerso.toLocaleString('fr-FR')}, dettes sociales: 0`,
+        impactFiscal: 'Dettes sociales omises = passif sous-estime = ecritures de cloture incompletes.',
       },
       'Verifier que les dettes sociales de fin d\'exercice (salaires a payer, cotisations dues) sont bien comptabilisees au compte 42x.')
   }
@@ -261,7 +288,10 @@ function IC010(ctx: AuditContext): ResultatControle {
       `CA de ${ca.toLocaleString('fr-FR')} sans creances clients (411x)`,
       {
         montants: { chiffreAffaires: ca },
-        description: `Un chiffre d\'affaires de ${ca.toLocaleString('fr-FR')} FCFA est comptabilise sans aucune creance client au bilan. Sauf activite de vente au comptant exclusivement, des creances clients en cours (factures non encore reglees) devraient normalement exister en fin d\'exercice.`
+        description: `Un chiffre d\'affaires de ${ca.toLocaleString('fr-FR')} FCFA est comptabilise sans aucune creance client au bilan. Sauf activite de vente au comptant exclusivement, des creances clients en cours (factures non encore reglees) devraient normalement exister en fin d\'exercice.`,
+        attendu: 'Creances clients (411x) presentes si CA > 0',
+        constate: `CA: ${ca.toLocaleString('fr-FR')}, creances clients: 0`,
+        impactFiscal: 'Absence de creances peut indiquer des produits non declares ou un cut-off defaillant.',
       },
       'Verifier si l\'activite est exclusivement au comptant. Sinon, comptabiliser les creances clients en attente de reglement.')
   }
@@ -278,7 +308,10 @@ function IC011(ctx: AuditContext): ResultatControle {
       `Achats de ${achats.toLocaleString('fr-FR')} sans dettes fournisseurs (401x)`,
       {
         montants: { achats },
-        description: `Des achats de ${achats.toLocaleString('fr-FR')} FCFA sont comptabilises sans aucune dette fournisseur au bilan. Des factures fournisseurs en attente de reglement devraient normalement exister en fin d\'exercice, sauf si tous les achats sont regles au comptant.`
+        description: `Des achats de ${achats.toLocaleString('fr-FR')} FCFA sont comptabilises sans aucune dette fournisseur au bilan. Des factures fournisseurs en attente de reglement devraient normalement exister en fin d\'exercice, sauf si tous les achats sont regles au comptant.`,
+        attendu: 'Dettes fournisseurs (401x) presentes si achats > 0',
+        constate: `Achats: ${achats.toLocaleString('fr-FR')}, fournisseurs: 0`,
+        impactFiscal: 'Absence de dettes fournisseurs peut indiquer des factures non parvenues omises (charges sous-estimees).',
       },
       'Verifier la completude des dettes fournisseurs. Comptabiliser les factures non parvenues (FNP) si applicable.')
   }
@@ -295,7 +328,10 @@ function IC012(ctx: AuditContext): ResultatControle {
       `Charges financieres (${interets.toLocaleString('fr-FR')}) sans emprunts (16x)`,
       {
         montants: { chargesFinancieres: interets },
-        description: `Des charges financieres de ${interets.toLocaleString('fr-FR')} FCFA sont comptabilisees (67x) sans aucun emprunt au bilan (16x). Les charges financieres peuvent provenir de decouverts bancaires (concours bancaires courants) ou d\'emprunts deja rembourses dans l\'exercice.`
+        description: `Des charges financieres de ${interets.toLocaleString('fr-FR')} FCFA sont comptabilisees (67x) sans aucun emprunt au bilan (16x). Les charges financieres peuvent provenir de decouverts bancaires (concours bancaires courants) ou d\'emprunts deja rembourses dans l\'exercice.`,
+        attendu: 'Emprunts (16x) au bilan si charges financieres comptabilisees',
+        constate: `Charges financieres: ${interets.toLocaleString('fr-FR')}, emprunts: 0`,
+        impactFiscal: 'Charges financieres sans dette sous-jacente a justifier pour la deductibilite fiscale.',
       },
       'Verifier l\'origine des charges financieres: agios de decouverts, interets sur comptes courants associes, ou emprunts integralement rembourses.')
   }
@@ -312,7 +348,10 @@ function IC013(ctx: AuditContext): ResultatControle {
       `Immobilisations (${immob.toLocaleString('fr-FR')}) sans dotations (681/682)`,
       {
         montants: { immobilisations: immob, dotations: 0 },
-        description: `Des immobilisations de ${immob.toLocaleString('fr-FR')} FCFA figurent au bilan mais aucune dotation aux amortissements (681/682) n\'est comptabilisee au resultat. L\'amortissement est obligatoire pour toutes les immobilisations corporelles et incorporelles a duree de vie limitee.`
+        description: `Des immobilisations de ${immob.toLocaleString('fr-FR')} FCFA figurent au bilan mais aucune dotation aux amortissements (681/682) n\'est comptabilisee au resultat. L\'amortissement est obligatoire pour toutes les immobilisations corporelles et incorporelles a duree de vie limitee.`,
+        attendu: 'Dotations aux amortissements (681/682) > 0 si immobilisations au bilan',
+        constate: `Immobilisations: ${immob.toLocaleString('fr-FR')}, dotations: 0`,
+        impactFiscal: 'Dotations omises = charges deductibles perdues (amortissements non reportables).',
       },
       'Comptabiliser les dotations aux amortissements de l\'exercice. Etablir ou verifier les plans d\'amortissement pour chaque immobilisation.',
       'Art. 44-46 Acte Uniforme OHADA - Amortissements obligatoires')
@@ -322,7 +361,10 @@ function IC013(ctx: AuditContext): ResultatControle {
       `Dotations (${dotations.toLocaleString('fr-FR')}) > 50% des immobilisations (${immob.toLocaleString('fr-FR')})`,
       {
         montants: { immobilisations: immob, dotations, ratioPct: Math.round(dotations / immob * 100) },
-        description: `Les dotations aux amortissements representent ${(dotations / immob * 100).toFixed(0)}% des immobilisations brutes. Un ratio aussi eleve peut indiquer des durees d\'amortissement tres courtes, des immobilisations anciennes presque totalement amorties, ou une erreur dans les plans d\'amortissement.`
+        description: `Les dotations aux amortissements representent ${(dotations / immob * 100).toFixed(0)}% des immobilisations brutes. Un ratio aussi eleve peut indiquer des durees d\'amortissement tres courtes, des immobilisations anciennes presque totalement amorties, ou une erreur dans les plans d\'amortissement.`,
+        attendu: 'Dotations / immobilisations brutes < 50%',
+        constate: `Ratio: ${(dotations / immob * 100).toFixed(0)}%`,
+        impactFiscal: 'Dotations excessives = charges deduites en trop = risque de reintegration fiscale.',
       },
       'Verifier les durees et taux d\'amortissement appliques. S\'assurer de la coherence avec les durees d\'utilite des actifs.',
       'Art. 45 Acte Uniforme OHADA - Duree d\'amortissement')
@@ -340,7 +382,10 @@ function IC014(ctx: AuditContext): ResultatControle {
       `Resultat beneficiaire (${resultat.toLocaleString('fr-FR')}) sans impot (89x)`,
       {
         montants: { resultat },
-        description: `Un resultat beneficiaire de ${resultat.toLocaleString('fr-FR')} FCFA est constate sans aucune charge d\'impot (89x). Un benefice doit normalement generer un impot sur les societes ou au minimum le minimum forfaitaire (IMF). L\'absence d\'impot peut indiquer un oubli de comptabilisation ou un exercice en cours.`
+        description: `Un resultat beneficiaire de ${resultat.toLocaleString('fr-FR')} FCFA est constate sans aucune charge d\'impot (89x). Un benefice doit normalement generer un impot sur les societes ou au minimum le minimum forfaitaire (IMF). L\'absence d\'impot peut indiquer un oubli de comptabilisation ou un exercice en cours.`,
+        attendu: 'Impot (89x) comptabilise si resultat beneficiaire',
+        constate: `Resultat: ${resultat.toLocaleString('fr-FR')}, impot: 0`,
+        impactFiscal: 'IS non comptabilise = dette fiscale non provisionnee = etats financiers non conformes.',
       },
       'Calculer et comptabiliser l\'impot sur les societes (IS) ou le minimum forfaitaire. Verifier les reports deficitaires eventuels.',
       'CGI - Impot sur les societes')
@@ -358,7 +403,10 @@ function IC015(ctx: AuditContext): ResultatControle {
       `CA de ${ca.toLocaleString('fr-FR')} sans TVA collectee (443x)`,
       {
         montants: { ca, tvaCollectee: 0 },
-        description: `Un chiffre d\'affaires de ${ca.toLocaleString('fr-FR')} FCFA est realise sans aucune TVA collectee. Sauf regime d\'exoneration (exports, zone franche, activites medicales), la TVA est normalement due sur les ventes de biens et services.`
+        description: `Un chiffre d\'affaires de ${ca.toLocaleString('fr-FR')} FCFA est realise sans aucune TVA collectee. Sauf regime d\'exoneration (exports, zone franche, activites medicales), la TVA est normalement due sur les ventes de biens et services.`,
+        attendu: 'TVA collectee (443x) > 0 si CA > 0 (sauf exoneration)',
+        constate: `CA: ${ca.toLocaleString('fr-FR')}, TVA collectee: 0`,
+        impactFiscal: 'TVA non collectee = dette TVA potentielle + penalites si assujetti.',
       },
       'Verifier le regime de TVA applicable. Si l\'entreprise est assujettie, comptabiliser la TVA collectee (443x) sur les ventes.',
       'CGI - Regime de TVA')
@@ -370,7 +418,10 @@ function IC015(ctx: AuditContext): ResultatControle {
         `Ratio TVA/CA atypique: ${ratio.toFixed(1)}%`,
         {
           montants: { ca, tvaCollectee, ratioPct: Math.round(ratio) },
-          description: `Le ratio TVA collectee / CA est de ${ratio.toFixed(1)}%, ce qui est en dehors de la fourchette habituelle (10-25%). Avec un taux normal de 18%, le ratio attendu est autour de 18%. Un ratio faible peut indiquer des operations exonerees; un ratio eleve peut signaler une erreur de calcul.`
+          description: `Le ratio TVA collectee / CA est de ${ratio.toFixed(1)}%, ce qui est en dehors de la fourchette habituelle (10-25%). Avec un taux normal de 18%, le ratio attendu est autour de 18%. Un ratio faible peut indiquer des operations exonerees; un ratio eleve peut signaler une erreur de calcul.`,
+          attendu: 'Ratio TVA/CA entre 10% et 25% (taux normal 18%)',
+          constate: `Ratio: ${ratio.toFixed(1)}%`,
+          impactFiscal: 'Ratio anormal peut indiquer une TVA mal calculee = risque de redressement TVA.',
         },
         'Verifier le taux de TVA applique et identifier les operations exonerees ou a taux reduit.',
         'CGI - Taux de TVA')
@@ -389,7 +440,10 @@ function IC016(ctx: AuditContext): ResultatControle {
       `Achats/services (${achats.toLocaleString('fr-FR')}) sans TVA deductible (445x)`,
       {
         montants: { achats, tvaDeductible: 0 },
-        description: `Des achats et services de ${achats.toLocaleString('fr-FR')} FCFA sont comptabilises sans TVA deductible (445x). Si l\'entreprise est assujettie a la TVA, elle doit normalement recuperer la TVA sur ses achats. L\'absence peut indiquer un regime d\'exoneration ou un oubli de comptabilisation.`
+        description: `Des achats et services de ${achats.toLocaleString('fr-FR')} FCFA sont comptabilises sans TVA deductible (445x). Si l\'entreprise est assujettie a la TVA, elle doit normalement recuperer la TVA sur ses achats. L\'absence peut indiquer un regime d\'exoneration ou un oubli de comptabilisation.`,
+        attendu: 'TVA deductible (445x) > 0 si achats > 0 (sauf exoneration)',
+        constate: `Achats/services: ${achats.toLocaleString('fr-FR')}, TVA deductible: 0`,
+        impactFiscal: 'TVA deductible non comptabilisee = droit a deduction perdu = surcout fiscal.',
       },
       'Verifier si l\'entreprise est assujettie a la TVA. Si oui, comptabiliser la TVA deductible sur les achats et services eligibles.')
   }
@@ -406,7 +460,10 @@ function IC017(ctx: AuditContext): ResultatControle {
       `Effets a recevoir (${effets.toLocaleString('fr-FR')}) sans clients (411x)`,
       {
         montants: { effetsRecevoir: effets },
-        description: `Des effets a recevoir (412x) de ${effets.toLocaleString('fr-FR')} FCFA existent sans creances clients (411x). Les effets a recevoir resultent normalement de la mobilisation de creances clients par traites ou billets a ordre.`
+        description: `Des effets a recevoir (412x) de ${effets.toLocaleString('fr-FR')} FCFA existent sans creances clients (411x). Les effets a recevoir resultent normalement de la mobilisation de creances clients par traites ou billets a ordre.`,
+        attendu: 'Creances clients (411x) presentes si effets a recevoir (412x)',
+        constate: `Effets a recevoir: ${effets.toLocaleString('fr-FR')}, clients: 0`,
+        impactFiscal: 'Effets sans contrepartie client a justifier pour eviter la requalification fiscale.',
       },
       'Verifier l\'origine des effets a recevoir et leur coherence avec le poste clients.')
   }
@@ -423,7 +480,10 @@ function IC018(ctx: AuditContext): ResultatControle {
       `Effets a payer (${effets.toLocaleString('fr-FR')}) sans fournisseurs (401x)`,
       {
         montants: { effetsPayer: effets },
-        description: `Des effets a payer (402x) de ${effets.toLocaleString('fr-FR')} FCFA existent sans dettes fournisseurs (401x). Les effets a payer sont des traites acceptees en reglement de dettes fournisseurs.`
+        description: `Des effets a payer (402x) de ${effets.toLocaleString('fr-FR')} FCFA existent sans dettes fournisseurs (401x). Les effets a payer sont des traites acceptees en reglement de dettes fournisseurs.`,
+        attendu: 'Dettes fournisseurs (401x) presentes si effets a payer (402x)',
+        constate: `Effets a payer: ${effets.toLocaleString('fr-FR')}, fournisseurs: 0`,
+        impactFiscal: 'Effets sans contrepartie fournisseur a justifier pour eviter la requalification.',
       },
       'Verifier l\'origine des effets a payer et leur coherence avec le poste fournisseurs.')
   }
@@ -440,7 +500,10 @@ function IC019(ctx: AuditContext): ResultatControle {
       `Subventions au bilan (${subvBilan.toLocaleString('fr-FR')}) sans reprise au resultat (71x)`,
       {
         montants: { subventionsBilan: subvBilan },
-        description: `Des subventions d\'investissement de ${subvBilan.toLocaleString('fr-FR')} FCFA figurent au bilan (14x) mais aucune reprise n\'est comptabilisee au resultat (71x). Les subventions d\'investissement doivent etre reprises au resultat au rythme des amortissements des biens qu\'elles ont permis d\'acquerir.`
+        description: `Des subventions d\'investissement de ${subvBilan.toLocaleString('fr-FR')} FCFA figurent au bilan (14x) mais aucune reprise n\'est comptabilisee au resultat (71x). Les subventions d\'investissement doivent etre reprises au resultat au rythme des amortissements des biens qu\'elles ont permis d\'acquerir.`,
+        attendu: 'Reprise de subventions (71x) au rythme des amortissements des biens subventionnes',
+        constate: `Subventions bilan: ${subvBilan.toLocaleString('fr-FR')}, reprises: 0`,
+        impactFiscal: 'Reprises de subventions omises = produits imposables non declares = resultat fiscal sous-estime.',
       },
       'Comptabiliser la quote-part de reprise de subventions au resultat (debit 14x, credit 71x) au prorata des amortissements des biens subventionnes.',
       'Art. 47 Acte Uniforme OHADA - Subventions d\'investissement')

@@ -61,7 +61,10 @@ function AR001(ctx: AuditContext): ResultatControle {
       `Balance N-1 differente de l'archive: ecarts D=${ecartD.toLocaleString('fr-FR')}, C=${ecartC.toLocaleString('fr-FR')}`,
       {
         montants: { totalN1Debit: totalN1D, archiveDebit: totalArchD, totalN1Credit: totalN1C, archiveCredit: totalArchC },
-        description: `La balance N-1 importee ne correspond pas a la liasse N-1 archivee. Ecarts: Debits ${ecartD.toLocaleString('fr-FR')}, Credits ${ecartC.toLocaleString('fr-FR')}. Cela peut indiquer que le fichier N-1 importe n\'est pas la version definitive, ou que des modifications ont ete apportees apres l\'archivage. La continuite des exercices est compromise.`
+        description: `La balance N-1 importee ne correspond pas a la liasse N-1 archivee. Ecarts: Debits ${ecartD.toLocaleString('fr-FR')}, Credits ${ecartC.toLocaleString('fr-FR')}. Cela peut indiquer que le fichier N-1 importe n\'est pas la version definitive, ou que des modifications ont ete apportees apres l\'archivage. La continuite des exercices est compromise.`,
+        attendu: 'Balance N-1 identique a la liasse N-1 archivee (ecart = 0)',
+        constate: `Ecarts detectes: Debits ${ecartD.toLocaleString('fr-FR')}, Credits ${ecartC.toLocaleString('fr-FR')}`,
+        impactFiscal: 'Incoherence entre balance N-1 et archive compromet la fiabilite des comparatifs et du report a nouveau.',
       },
       'Utiliser la balance N-1 issue de l\'archive officielle. Si des corrections post-cloture ont eu lieu, re-archiver la version definitive.',
       'Art. 8 Acte Uniforme OHADA - Permanence des methodes et continuite')
@@ -91,7 +94,10 @@ function AR002(ctx: AuditContext): ResultatControle {
       {
         comptes: variations,
         montants: { variationsDetectees: variations.length, capitalActuel: capitalN },
-        description: `${variations.length} variation(s) de capital ont ete detectees en comparant l\'exercice courant avec les exercices archives. Chaque modification du capital social doit resulter d\'une decision formelle en assemblee generale (augmentation, reduction, fusion). La continuite du capital est un indicateur cle de la stabilite juridique de l\'entreprise.`
+        description: `${variations.length} variation(s) de capital ont ete detectees en comparant l\'exercice courant avec les exercices archives. Chaque modification du capital social doit resulter d\'une decision formelle en assemblee generale (augmentation, reduction, fusion). La continuite du capital est un indicateur cle de la stabilite juridique de l\'entreprise.`,
+        attendu: 'Capital social stable sur l\'ensemble des exercices archives',
+        constate: `${variations.length} variation(s) de capital detectee(s) vs capital actuel de ${capitalN.toLocaleString('fr-FR')}`,
+        impactFiscal: 'Variations de capital non justifiees peuvent entrainer des droits d\'enregistrement supplementaires et des penalites.',
       },
       'Justifier chaque variation de capital par le PV d\'AG correspondant. Verifier la concordance avec les actes notaries et les publications legales.',
       'Art. 8 Acte Uniforme OHADA - Permanence des methodes')
@@ -125,7 +131,10 @@ function AR003(ctx: AuditContext): ResultatControle {
         {
           comptes: derniers.map((r) => `${r.exercice}: ${r.resultat.toLocaleString('fr-FR')}`),
           montants: { exercicesDeficitaires: derniers.length, totalDeficitsCumules: totalDeficits },
-          description: `L\'entreprise est en deficit sur ${derniers.length} exercices consecutifs pour un total cumule de ${totalDeficits.toLocaleString('fr-FR')} FCFA. Des deficits repetes signalent un probleme structurel de rentabilite et peuvent remettre en cause la continuite d\'exploitation. Si les capitaux propres deviennent inferieurs a la moitie du capital, une AG extraordinaire doit statuer.`
+          description: `L\'entreprise est en deficit sur ${derniers.length} exercices consecutifs pour un total cumule de ${totalDeficits.toLocaleString('fr-FR')} FCFA. Des deficits repetes signalent un probleme structurel de rentabilite et peuvent remettre en cause la continuite d\'exploitation. Si les capitaux propres deviennent inferieurs a la moitie du capital, une AG extraordinaire doit statuer.`,
+        attendu: 'Resultat beneficiaire ou deficit isole justifie',
+        constate: `${derniers.length} exercices consecutifs deficitaires, total: ${totalDeficits.toLocaleString('fr-FR')}`,
+        impactFiscal: 'Deficits reportables sur 5 exercices uniquement. IMF reste du meme si deficit. Risque de remise en cause de la continuite d\'exploitation.',
         },
         'Evaluer la situation de continuite d\'exploitation. Envisager un plan de redressement ou une restructuration. Verifier si les capitaux propres restent superieurs a la moitie du capital.',
         'Art. 8 Acte Uniforme OHADA / Art. 664 AUSCGIE')
@@ -156,7 +165,10 @@ function AR004(ctx: AuditContext): ResultatControle {
       {
         comptes: ruptures,
         montants: { rupturesDetectees: ruptures.length, exercicesArchives: exercices.length },
-        description: `${ruptures.length} rupture(s) ont ete detectees dans la serie des exercices archives. Des exercices manquants empechent l\'analyse de tendance complete et compromettent la verification de la continuite des reports a nouveau sur la periode concernee.`
+        description: `${ruptures.length} rupture(s) ont ete detectees dans la serie des exercices archives. Des exercices manquants empechent l\'analyse de tendance complete et compromettent la verification de la continuite des reports a nouveau sur la periode concernee.`,
+        attendu: 'Serie continue d\'exercices archives sans interruption',
+        constate: `${ruptures.length} rupture(s) dans la serie des ${exercices.length} exercices archives`,
+        impactFiscal: 'Exercices manquants empechent la verification des reports deficitaires et la continuite des methodes.',
       },
       'Archiver les exercices manquants pour reconstituer la serie complete. La conservation des balances sur au moins 5 exercices est recommandee.',
       'Art. 8 Acte Uniforme OHADA - Conservation des documents comptables')
@@ -187,7 +199,10 @@ function AR005(ctx: AuditContext): ResultatControle {
       {
         comptes: incoherences,
         montants: { incoherences: incoherences.length, exercicesVerifies: archives.length },
-        description: `${incoherences.length} incoherence(s) de report a nouveau detectees dans les exercices archives. Le RAN de chaque exercice doit correspondre au resultat (ou au resultat diminue des distributions) de l\'exercice precedent. Des ecarts non justifies remettent en cause la fiabilite de la chaine comptable sur plusieurs exercices.`
+        description: `${incoherences.length} incoherence(s) de report a nouveau detectees dans les exercices archives. Le RAN de chaque exercice doit correspondre au resultat (ou au resultat diminue des distributions) de l\'exercice precedent. Des ecarts non justifies remettent en cause la fiabilite de la chaine comptable sur plusieurs exercices.`,
+        attendu: 'RAN de chaque exercice = resultat de l\'exercice precedent (ajuste des distributions)',
+        constate: `${incoherences.length} incoherence(s) sur ${archives.length} exercices verifies`,
+        impactFiscal: 'Chaine des RAN rompue = capitaux propres potentiellement errones = base de calcul de l\'IS faussee.',
       },
       'Reconstituer la chaine des reports a nouveau. Pour chaque ecart, identifier s\'il s\'agit de dividendes distribues, de mises en reserves, ou d\'erreurs. Corriger les archives si necessaire.',
       'Art. 8 Acte Uniforme OHADA - Permanence des methodes')
@@ -217,7 +232,10 @@ function AR006(ctx: AuditContext): ResultatControle {
       {
         comptes: [...nouveaux.map((p) => `+${p}`), ...supprimes.map((p) => `-${p}`)],
         montants: { nouveauxPrefixes: nouveaux.length, prefixesSupprimes: supprimes.length },
-        description: `La structure du plan de comptes a evolue par rapport au dernier exercice archive: ${nouveaux.length} nouveaux prefixes et ${supprimes.length} supprimes. Le principe de permanence des methodes impose de maintenir la meme nomenclature comptable d\'un exercice a l\'autre, sauf changement reglementaire justifie.`
+        description: `La structure du plan de comptes a evolue par rapport au dernier exercice archive: ${nouveaux.length} nouveaux prefixes et ${supprimes.length} supprimes. Le principe de permanence des methodes impose de maintenir la meme nomenclature comptable d\'un exercice a l\'autre, sauf changement reglementaire justifie.`,
+        attendu: 'Nomenclature comptable stable entre exercices archives et exercice courant',
+        constate: `+${nouveaux.length} prefixes, -${supprimes.length} prefixes vs dernier exercice archive`,
+        impactFiscal: 'Changement de methode non documente = risque de rejet de la liasse et de redressement fiscal.',
       },
       'Documenter les raisons des changements de nomenclature dans l\'annexe. S\'assurer de la comparabilite des etats financiers entre exercices.',
       'Art. 8 Acte Uniforme OHADA - Permanence des methodes')
@@ -244,7 +262,10 @@ function AR007(ctx: AuditContext): ResultatControle {
       `Ajustement retrospectif detecte: ${ecart.toLocaleString('fr-FR')} (RAN - Resultat archive)`,
       {
         montants: { ranN, resultatArchive: resultatArch, ajustement: ecart },
-        description: `Un ecart de ${ecart.toLocaleString('fr-FR')} FCFA est detecte entre le report a nouveau de l\'exercice courant (${ranN.toLocaleString('fr-FR')}) et le resultat de la derniere archive (${resultatArch.toLocaleString('fr-FR')}). Cet ecart peut resulter d\'un ajustement retrospectif (correction d\'erreur sur exercice anterieur, changement de methode comptable) ou d\'une distribution de dividendes/mise en reserves.`
+        description: `Un ecart de ${ecart.toLocaleString('fr-FR')} FCFA est detecte entre le report a nouveau de l\'exercice courant (${ranN.toLocaleString('fr-FR')}) et le resultat de la derniere archive (${resultatArch.toLocaleString('fr-FR')}). Cet ecart peut resulter d\'un ajustement retrospectif (correction d\'erreur sur exercice anterieur, changement de methode comptable) ou d\'une distribution de dividendes/mise en reserves.`,
+        attendu: 'RAN courant = resultat de la derniere archive (hors distributions)',
+        constate: `RAN: ${ranN.toLocaleString('fr-FR')}, Resultat archive: ${resultatArch.toLocaleString('fr-FR')}, ajustement: ${ecart.toLocaleString('fr-FR')}`,
+        impactFiscal: 'Ajustement retrospectif peut modifier le resultat fiscal des exercices anterieurs et necessiter des declarations rectificatives.',
       },
       'Documenter l\'ajustement retrospectif dans l\'annexe aux etats financiers (nature, motif, impact sur les exercices anterieurs). S\'assurer de la conformite avec IAS 8 / SYSCOHADA.',
       'Art. 8 Acte Uniforme OHADA - Changements de methodes / IAS 8')

@@ -133,7 +133,10 @@ function EF001(ctx: AuditContext): ResultatControle {
       `Bilan desequilibre: Actif=${balDirect.actif.toLocaleString('fr-FR')}, Passif=${balDirect.passif.toLocaleString('fr-FR')} (ecart: ${ecartDirect.toLocaleString('fr-FR')})`,
       {
         ecart: ecartDirect, montants: { actif: balDirect.actif, passif: balDirect.passif, actifMapping: actif, passifMapping: passif },
-        description: `Le bilan est desequilibre de ${ecartDirect.toLocaleString('fr-FR')} FCFA. L'actif (soldes debiteurs classes 1-5 = ${balDirect.actif.toLocaleString('fr-FR')}) ne correspond pas au passif (soldes crediteurs classes 1-5 = ${balDirect.passif.toLocaleString('fr-FR')}). Cela peut provenir d'un desequilibre dans la balance source ou d'ecritures de cloture incompletes.`
+        description: `Le bilan est desequilibre de ${ecartDirect.toLocaleString('fr-FR')} FCFA. L'actif (soldes debiteurs classes 1-5 = ${balDirect.actif.toLocaleString('fr-FR')}) ne correspond pas au passif (soldes crediteurs classes 1-5 = ${balDirect.passif.toLocaleString('fr-FR')}). Cela peut provenir d'un desequilibre dans la balance source ou d'ecritures de cloture incompletes.`,
+        attendu: 'Actif = Passif (ecart = 0)',
+        constate: `Actif: ${balDirect.actif.toLocaleString('fr-FR')}, Passif: ${balDirect.passif.toLocaleString('fr-FR')}, ecart: ${ecartDirect.toLocaleString('fr-FR')}`,
+        impactFiscal: 'Bilan desequilibre = liasse fiscale non deposable = rejet par l\'administration fiscale.',
       },
       'Verifier l\'equilibre de la balance source (controle F-001). Si la balance est equilibree, verifier l\'affectation du resultat (compte 13x).',
       undefined,
@@ -146,7 +149,10 @@ function EF001(ctx: AuditContext): ResultatControle {
       `Bilan equilibre mais ecart mapping: Actif mapping=${actif.toLocaleString('fr-FR')}, Passif mapping=${passif.toLocaleString('fr-FR')}`,
       {
         ecart: ecartMapping, montants: { actif, passif, actifBalance: balDirect.actif, passifBalance: balDirect.passif },
-        description: `Le bilan est equilibre (${balDirect.actif.toLocaleString('fr-FR')}) mais le mapping SYSCOHADA presente un ecart de ${ecartMapping.toLocaleString('fr-FR')} FCFA. Certains comptes peuvent ne pas etre couverts par le mapping, ce qui affectera la presentation des etats financiers sans impacter l'equilibre.`
+        description: `Le bilan est equilibre (${balDirect.actif.toLocaleString('fr-FR')}) mais le mapping SYSCOHADA presente un ecart de ${ecartMapping.toLocaleString('fr-FR')} FCFA. Certains comptes peuvent ne pas etre couverts par le mapping, ce qui affectera la presentation des etats financiers sans impacter l'equilibre.`,
+        attendu: 'Ecart mapping SYSCOHADA < 5% du total actif',
+        constate: `Ecart mapping: ${ecartMapping.toLocaleString('fr-FR')}`,
+        impactFiscal: 'Comptes non mappes = postes manquants dans la liasse = presentation incomplete.',
       },
       'Verifier que tous les comptes de bilan sont correctement affectes dans le mapping SYSCOHADA (controle C-006).')
   }
@@ -168,7 +174,10 @@ function EF002(ctx: AuditContext): ResultatControle {
     return anomalie(ref, nom, 'BLOQUANT', `Sous-total actif immobilise negatif: ${totalImmob.toLocaleString('fr-FR')}`,
       {
         montants: { actifImmobilise: totalImmob, immobilisationsBrutes: brutImmo, amortissements: amortImmo, actifCirculant: totalCirc },
-        description: `L\'actif immobilise net est negatif (${totalImmob.toLocaleString('fr-FR')} FCFA), ce qui signifie que les amortissements cumules (${amortImmo.toLocaleString('fr-FR')}) depassent la valeur brute des immobilisations (${brutImmo.toLocaleString('fr-FR')}). C\'est comptablement impossible et indique des amortissements non soldes apres cession d\'immobilisations.`
+        description: `L\'actif immobilise net est negatif (${totalImmob.toLocaleString('fr-FR')} FCFA), ce qui signifie que les amortissements cumules (${amortImmo.toLocaleString('fr-FR')}) depassent la valeur brute des immobilisations (${brutImmo.toLocaleString('fr-FR')}). C\'est comptablement impossible et indique des amortissements non soldes apres cession d\'immobilisations.`,
+        attendu: 'Actif immobilise net >= 0 (amortissements <= valeur brute)',
+        constate: `Actif immobilise net: ${totalImmob.toLocaleString('fr-FR')} (Brut: ${brutImmo.toLocaleString('fr-FR')}, Amort: ${amortImmo.toLocaleString('fr-FR')})`,
+        impactFiscal: 'Actif immobilise negatif = liasse non conforme = rejet par l\'administration.',
       },
       'Solder les amortissements des immobilisations cedees ou mises au rebut. Verifier les plans d\'amortissement pour chaque categorie d\'immobilisation.',
       undefined,
@@ -189,7 +198,10 @@ function EF003(ctx: AuditContext): ResultatControle {
       `Capitaux propres negatifs dans les etats financiers: ${cp.toLocaleString('fr-FR')}`,
       {
         montants: { capitauxPropres: cp, dettesFinancieres: dettesF, dettesCourantes: dettesC },
-        description: `Les capitaux propres consolides (comptes 10-14) sont negatifs a ${cp.toLocaleString('fr-FR')} FCFA dans la presentation des etats financiers. L\'entreprise est en situation de fonds propres negatifs, ce qui implique des obligations legales de regularisation.`
+        description: `Les capitaux propres consolides (comptes 10-14) sont negatifs a ${cp.toLocaleString('fr-FR')} FCFA dans la presentation des etats financiers. L\'entreprise est en situation de fonds propres negatifs, ce qui implique des obligations legales de regularisation.`,
+        attendu: 'Capitaux propres positifs (CP > 0)',
+        constate: `CP: ${cp.toLocaleString('fr-FR')} (Dettes financieres: ${dettesF.toLocaleString('fr-FR')}, Dettes courantes: ${dettesC.toLocaleString('fr-FR')})`,
+        impactFiscal: 'CP negatifs = obligation de regularisation sous 2 ans (Art. 664 AUSCGIE) = dissolution possible si non regularise.',
       },
       'Regulariser les capitaux propres par augmentation de capital, incorporation de comptes courants, ou abandon de creances.',
       undefined,
@@ -210,7 +222,10 @@ function EF004(ctx: AuditContext): ResultatControle {
       `Ecart entre bilan mapping et balance: ${ecart.toLocaleString('fr-FR')} (${actifBalance > 0 ? (ecart / actifBalance * 100).toFixed(1) : '0'}%)`,
       {
         ecart, montants: { bilanMapping: actifMapping, bilanBalance: actifBalance },
-        description: `L'ecart de ${ecart.toLocaleString('fr-FR')} FCFA entre le bilan issu du mapping SYSCOHADA (${actifMapping.toLocaleString('fr-FR')}) et la balance directe (${actifBalance.toLocaleString('fr-FR')}) depasse 10%. Des comptes de bilan ne sont pas couverts par le mapping, ce qui produira des etats financiers potentiellement incomplets.`
+        description: `L'ecart de ${ecart.toLocaleString('fr-FR')} FCFA entre le bilan issu du mapping SYSCOHADA (${actifMapping.toLocaleString('fr-FR')}) et la balance directe (${actifBalance.toLocaleString('fr-FR')}) depasse 10%. Des comptes de bilan ne sont pas couverts par le mapping, ce qui produira des etats financiers potentiellement incomplets.`,
+        attendu: 'Ecart bilan mapping vs balance < 10%',
+        constate: `Mapping: ${actifMapping.toLocaleString('fr-FR')}, Balance: ${actifBalance.toLocaleString('fr-FR')}, ecart: ${ecart.toLocaleString('fr-FR')} (${actifBalance > 0 ? (ecart / actifBalance * 100).toFixed(1) : '0'}%)`,
+        impactFiscal: 'Etats financiers incomplets = liasse potentiellement non conforme = risque de rejet.',
       },
       'Identifier les comptes non couverts par le mapping SYSCOHADA et les affecter aux postes correspondants du bilan.',
       undefined,
@@ -239,7 +254,10 @@ function EF005(ctx: AuditContext): ResultatControle {
       `Resultat CdR (${resultatCdR.toLocaleString('fr-FR')}) != Resultat bilan (${resultatBilan.toLocaleString('fr-FR')})`,
       {
         ecart, montants: { resultatCdR, resultatBilan, produits, charges, haoNet, impot: impot89 },
-        description: `Le resultat net calcule (produits ${produits.toLocaleString('fr-FR')} - charges ${charges.toLocaleString('fr-FR')} + HAO ${haoNet.toLocaleString('fr-FR')} - IS ${impot89.toLocaleString('fr-FR')} = ${resultatCdR.toLocaleString('fr-FR')}) differe du resultat inscrit au bilan (compte 13x = ${resultatBilan.toLocaleString('fr-FR')}). Les deux montants doivent etre strictement identiques.`
+        description: `Le resultat net calcule (produits ${produits.toLocaleString('fr-FR')} - charges ${charges.toLocaleString('fr-FR')} + HAO ${haoNet.toLocaleString('fr-FR')} - IS ${impot89.toLocaleString('fr-FR')} = ${resultatCdR.toLocaleString('fr-FR')}) differe du resultat inscrit au bilan (compte 13x = ${resultatBilan.toLocaleString('fr-FR')}). Les deux montants doivent etre strictement identiques.`,
+        attendu: 'Resultat CdR = Resultat bilan (ecart = 0)',
+        constate: `CdR: ${resultatCdR.toLocaleString('fr-FR')}, Bilan: ${resultatBilan.toLocaleString('fr-FR')}, ecart: ${ecart.toLocaleString('fr-FR')}`,
+        impactFiscal: 'Incoherence resultat = liasse non deposable = rejet par l\'administration fiscale.',
       },
       'Verifier les ecritures de determination du resultat. Le solde du compte 13x doit correspondre exactement au resultat net (produits - charges + HAO - IS).',
       [{
@@ -272,7 +290,10 @@ function EF006(ctx: AuditContext): ResultatControle {
       `Marge brute negative: ${margeBrute.toLocaleString('fr-FR')}`,
       {
         montants: { ventes: ventesMses, achats: achatsMses, variationStocks: varStocksMses, margeBrute },
-        description: `La marge brute sur marchandises est negative (${margeBrute.toLocaleString('fr-FR')} FCFA). Le cout des marchandises vendues (achats ${achatsMses.toLocaleString('fr-FR')} + variation stocks ${varStocksMses.toLocaleString('fr-FR')}) depasse les ventes de marchandises (${ventesMses.toLocaleString('fr-FR')}). Cela peut indiquer des ventes a perte, une erreur de valorisation des stocks, ou un probleme de classification comptable.`
+        description: `La marge brute sur marchandises est negative (${margeBrute.toLocaleString('fr-FR')} FCFA). Le cout des marchandises vendues (achats ${achatsMses.toLocaleString('fr-FR')} + variation stocks ${varStocksMses.toLocaleString('fr-FR')}) depasse les ventes de marchandises (${ventesMses.toLocaleString('fr-FR')}). Cela peut indiquer des ventes a perte, une erreur de valorisation des stocks, ou un probleme de classification comptable.`,
+        attendu: 'Marge brute positive (ventes > cout des marchandises)',
+        constate: `Marge brute: ${margeBrute.toLocaleString('fr-FR')} (Ventes: ${ventesMses.toLocaleString('fr-FR')}, Achats: ${achatsMses.toLocaleString('fr-FR')}, Var.stocks: ${varStocksMses.toLocaleString('fr-FR')})`,
+        impactFiscal: 'Marge brute negative = activite commerciale deficitaire = revue de la politique de prix necessaire.',
       },
       'Verifier la coherence entre ventes (701x), achats (601x) et variation de stocks (6031x). S\'assurer que les comptes de charges et de produits sont correctement classes.',
       undefined,
@@ -292,7 +313,10 @@ function EF007(ctx: AuditContext): ResultatControle {
       `Valeur ajoutee negative: ${va.toLocaleString('fr-FR')}`,
       {
         montants: { production: ca, consommations: consomm, valeurAjoutee: va },
-        description: `La valeur ajoutee est negative (${va.toLocaleString('fr-FR')} FCFA): les consommations intermediaires (${consomm.toLocaleString('fr-FR')}) depassent la production (${ca.toLocaleString('fr-FR')}). L\'entreprise consomme plus de richesse qu\'elle n\'en cree. C\'est une situation critique qui remet en cause la viabilite du modele economique.`
+        description: `La valeur ajoutee est negative (${va.toLocaleString('fr-FR')} FCFA): les consommations intermediaires (${consomm.toLocaleString('fr-FR')}) depassent la production (${ca.toLocaleString('fr-FR')}). L\'entreprise consomme plus de richesse qu\'elle n\'en cree. C\'est une situation critique qui remet en cause la viabilite du modele economique.`,
+        attendu: 'Valeur ajoutee positive (production > consommations)',
+        constate: `VA: ${va.toLocaleString('fr-FR')} (Production: ${ca.toLocaleString('fr-FR')}, Consommations: ${consomm.toLocaleString('fr-FR')})`,
+        impactFiscal: 'VA negative = modele economique non viable = risque de continuite d\'exploitation.',
       },
       'Analyser la structure des couts: identifier les postes de consommation excessifs (achats, services exterieurs). Evaluer la politique de prix et la pertinence du modele economique.',
       undefined,
@@ -323,7 +347,10 @@ function EF008(ctx: AuditContext): ResultatControle {
       {
         ecart,
         montants: { resultatAO: rao, resultatHAO: hao, impotSocietes: impot, resultatNetCalcule: resultatNet, resultatComptabilise: resultat13 },
-        description: `La cascade du resultat n'est pas coherente: Resultat AO (${rao.toLocaleString('fr-FR')}) + Resultat HAO (${hao.toLocaleString('fr-FR')}) - IS (${impot.toLocaleString('fr-FR')}) = ${resultatNet.toLocaleString('fr-FR')}, mais le compte 13x affiche ${resultat13.toLocaleString('fr-FR')}. L'ecart de ${ecart.toLocaleString('fr-FR')} FCFA indique une erreur dans la determination du resultat.`
+        description: `La cascade du resultat n'est pas coherente: Resultat AO (${rao.toLocaleString('fr-FR')}) + Resultat HAO (${hao.toLocaleString('fr-FR')}) - IS (${impot.toLocaleString('fr-FR')}) = ${resultatNet.toLocaleString('fr-FR')}, mais le compte 13x affiche ${resultat13.toLocaleString('fr-FR')}. L'ecart de ${ecart.toLocaleString('fr-FR')} FCFA indique une erreur dans la determination du resultat.`,
+        attendu: 'RAO + HAO - IS = Resultat net (compte 13x)',
+        constate: `RAO: ${rao.toLocaleString('fr-FR')}, HAO: ${hao.toLocaleString('fr-FR')}, IS: ${impot.toLocaleString('fr-FR')}, Net calcule: ${resultatNet.toLocaleString('fr-FR')}, 13x: ${resultat13.toLocaleString('fr-FR')}`,
+        impactFiscal: 'Cascade incoherente = resultat fiscal potentiellement faux = risque de redressement.',
       },
       'Reconstituer la cascade du resultat etape par etape. Verifier les ecritures d\'IS et les operations HAO. S\'assurer que le compte 13x reflette le resultat net final.',
       undefined,
@@ -364,7 +391,10 @@ function EF009(ctx: AuditContext): ResultatControle {
       {
         ecart,
         montants: { cafAdditive: cafAdd, cafSoustractive: cafSoustr, resultat, dotations, reprises, ebe },
-        description: `L\'ecart de ${ecart.toLocaleString('fr-FR')} FCFA entre la CAF additive (resultat + dotations - reprises = ${cafAdd.toLocaleString('fr-FR')}) et la CAF soustractive (a partir de l\'EBE = ${cafSoustr.toLocaleString('fr-FR')}) indique une incoherence dans la classification des charges et produits calcules vs decaisses.`
+        description: `L\'ecart de ${ecart.toLocaleString('fr-FR')} FCFA entre la CAF additive (resultat + dotations - reprises = ${cafAdd.toLocaleString('fr-FR')}) et la CAF soustractive (a partir de l\'EBE = ${cafSoustr.toLocaleString('fr-FR')}) indique une incoherence dans la classification des charges et produits calcules vs decaisses.`,
+        attendu: 'CAF additive = CAF soustractive (ecart < 5%)',
+        constate: `CAF additive: ${cafAdd.toLocaleString('fr-FR')}, CAF soustractive: ${cafSoustr.toLocaleString('fr-FR')}, ecart: ${ecart.toLocaleString('fr-FR')}`,
+        impactFiscal: 'Incoherence CAF = classification charges/produits erronee = impact potentiel sur le resultat fiscal.',
       },
       'Verifier la classification des charges et produits entre elements calcules (dotations, reprises) et decaisses. Les deux methodes de calcul de la CAF doivent donner le meme resultat.',
       undefined,
@@ -385,7 +415,10 @@ function EF010(ctx: AuditContext): ResultatControle {
       `Tresorerie nette negative a la cloture: ${tresoNette.toLocaleString('fr-FR')}`,
       {
         montants: { tresoNette, tresoActif, tresoPassif },
-        description: `La tresorerie nette de cloture est negative (${tresoNette.toLocaleString('fr-FR')} FCFA). La tresorerie-actif (${tresoActif.toLocaleString('fr-FR')}) est inferieure a la tresorerie-passif (${tresoPassif.toLocaleString('fr-FR')}), ce qui indique une dependance aux concours bancaires courants.`
+        description: `La tresorerie nette de cloture est negative (${tresoNette.toLocaleString('fr-FR')} FCFA). La tresorerie-actif (${tresoActif.toLocaleString('fr-FR')}) est inferieure a la tresorerie-passif (${tresoPassif.toLocaleString('fr-FR')}), ce qui indique une dependance aux concours bancaires courants.`,
+        attendu: 'Tresorerie nette positive (actif treso > passif treso)',
+        constate: `Treso nette: ${tresoNette.toLocaleString('fr-FR')} (Actif: ${tresoActif.toLocaleString('fr-FR')}, Passif: ${tresoPassif.toLocaleString('fr-FR')})`,
+        impactFiscal: 'Tresorerie negative = dependance bancaire = risque de cessation de paiements.',
       },
       'Analyser les causes de la tresorerie negative: BFR excessif, insuffisance du fonds de roulement, ou investissements non finances.',
       undefined,
@@ -408,7 +441,10 @@ function EF011(ctx: AuditContext): ResultatControle {
       `CAF negative (${cafEstimee.toLocaleString('fr-FR')}) malgre un resultat positif (${resultat.toLocaleString('fr-FR')})`,
       {
         montants: { cafEstimee, resultat, dotations, reprises },
-        description: `La capacite d\'autofinancement estimee est negative (${cafEstimee.toLocaleString('fr-FR')}) alors que le resultat est positif (${resultat.toLocaleString('fr-FR')}). Les reprises sur provisions/depreciations (${reprises.toLocaleString('fr-FR')}) depassent les dotations (${dotations.toLocaleString('fr-FR')}), ce qui gonfle le resultat sans generer de tresorerie.`
+        description: `La capacite d\'autofinancement estimee est negative (${cafEstimee.toLocaleString('fr-FR')}) alors que le resultat est positif (${resultat.toLocaleString('fr-FR')}). Les reprises sur provisions/depreciations (${reprises.toLocaleString('fr-FR')}) depassent les dotations (${dotations.toLocaleString('fr-FR')}), ce qui gonfle le resultat sans generer de tresorerie.`,
+        attendu: 'CAF positive quand le resultat est positif',
+        constate: `CAF: ${cafEstimee.toLocaleString('fr-FR')}, Resultat: ${resultat.toLocaleString('fr-FR')}, Dotations: ${dotations.toLocaleString('fr-FR')}, Reprises: ${reprises.toLocaleString('fr-FR')}`,
+        impactFiscal: 'CAF negative = tresorerie d\'exploitation insuffisante = risque de difficultes de paiement de l\'IS.',
       },
       'Analyser l\'impact des reprises de provisions sur le resultat. S\'assurer que la tresorerie d\'exploitation couvre les besoins courants.',
       undefined,
@@ -433,7 +469,10 @@ function EF012(ctx: AuditContext): ResultatControle {
       `Variation de tresorerie significative: ${variation > 0 ? '+' : ''}${variation.toLocaleString('fr-FR')} (${pctVar > 0 ? '+' : ''}${pctVar.toFixed(0)}%)`,
       {
         montants: { tresoN, tresoN1, variation, variationPct: Math.round(pctVar) },
-        description: `La tresorerie a varie de ${pctVar.toFixed(0)}% entre N-1 (${tresoN1.toLocaleString('fr-FR')}) et N (${tresoN.toLocaleString('fr-FR')}). Une variation de plus de 50% merite une analyse: flux d\'exploitation, investissements, financement.`
+        description: `La tresorerie a varie de ${pctVar.toFixed(0)}% entre N-1 (${tresoN1.toLocaleString('fr-FR')}) et N (${tresoN.toLocaleString('fr-FR')}). Une variation de plus de 50% merite une analyse: flux d\'exploitation, investissements, financement.`,
+        attendu: 'Variation tresorerie < 50% entre exercices consecutifs',
+        constate: `Variation de ${pctVar.toFixed(0)}% (N-1: ${tresoN1.toLocaleString('fr-FR')}, N: ${tresoN.toLocaleString('fr-FR')})`,
+        impactFiscal: 'Variation significative de tresorerie peut reveler des operations non declarees ou des anomalies de flux.',
       },
       'Analyser l\'origine de la variation de tresorerie dans le TFT: flux d\'exploitation, flux d\'investissement, flux de financement.')
   }
@@ -456,7 +495,10 @@ function EF013(ctx: AuditContext): ResultatControle {
       `Variation CP (${variation.toLocaleString('fr-FR')}) significativement differente du resultat (${resultatN.toLocaleString('fr-FR')})`,
       {
         montants: { variationCP: variation, resultat: resultatN, cpN, cpN1 },
-        description: `La variation des capitaux propres (${variation.toLocaleString('fr-FR')} = CP N ${cpN.toLocaleString('fr-FR')} - CP N-1 ${cpN1.toLocaleString('fr-FR')}) differe significativement du resultat de l\'exercice (${resultatN.toLocaleString('fr-FR')}). L\'ecart de ${ecart.toLocaleString('fr-FR')} peut s\'expliquer par des dividendes distribues, une augmentation/reduction de capital, ou des mouvements de reserves.`
+        description: `La variation des capitaux propres (${variation.toLocaleString('fr-FR')} = CP N ${cpN.toLocaleString('fr-FR')} - CP N-1 ${cpN1.toLocaleString('fr-FR')}) differe significativement du resultat de l\'exercice (${resultatN.toLocaleString('fr-FR')}). L\'ecart de ${ecart.toLocaleString('fr-FR')} peut s\'expliquer par des dividendes distribues, une augmentation/reduction de capital, ou des mouvements de reserves.`,
+        attendu: 'Variation CP proche du resultat de l\'exercice (ecart < 20%)',
+        constate: `Variation CP: ${variation.toLocaleString('fr-FR')}, Resultat: ${resultatN.toLocaleString('fr-FR')}, ecart: ${ecart.toLocaleString('fr-FR')}`,
+        impactFiscal: 'Mouvements de CP non justifies peuvent affecter les droits d\'enregistrement et la base de l\'IRVM.',
       },
       'Identifier les operations ayant affecte les capitaux propres en dehors du resultat: dividendes, augmentation de capital, incorporation de reserves, etc. Verifier le tableau de variation des capitaux propres.')
   }
@@ -475,7 +517,10 @@ function EF014(ctx: AuditContext): ResultatControle {
       `Immobilisations nettes negatives: Brut(${immobBrut.toLocaleString('fr-FR')}) - Amort(${amort.toLocaleString('fr-FR')}) = ${immobNet.toLocaleString('fr-FR')}`,
       {
         montants: { immobBrut, amortissements: amort, immobNet },
-        description: 'Les amortissements cumules depassent la valeur brute des immobilisations dans la note 3A. Les valeurs nettes comptables seraient negatives, ce qui est impossible.'
+        description: 'Les amortissements cumules depassent la valeur brute des immobilisations dans la note 3A. Les valeurs nettes comptables seraient negatives, ce qui est impossible.',
+        attendu: 'Amortissements cumules <= valeur brute des immobilisations',
+        constate: `Brut: ${immobBrut.toLocaleString('fr-FR')}, Amort: ${amort.toLocaleString('fr-FR')}, Net: ${immobNet.toLocaleString('fr-FR')}`,
+        impactFiscal: 'Immobilisations nettes negatives = note 3A non conforme = liasse rejetee.',
       },
       'Solder les amortissements des immobilisations sorties. Verifier la coherence du tableau des immobilisations.',
       undefined,
@@ -494,7 +539,10 @@ function EF015(ctx: AuditContext): ResultatControle {
       `Amortissements cumules (${amort.toLocaleString('fr-FR')}) sans dotation de l'exercice`,
       {
         montants: { amortissementsCumules: amort, dotationsExercice: dotations },
-        description: `Des amortissements cumules de ${amort.toLocaleString('fr-FR')} FCFA existent au bilan mais aucune dotation n\'a ete passee dans l\'exercice. La note 3B sera incomplete sans les mouvements de l\'exercice.`
+        description: `Des amortissements cumules de ${amort.toLocaleString('fr-FR')} FCFA existent au bilan mais aucune dotation n\'a ete passee dans l\'exercice. La note 3B sera incomplete sans les mouvements de l\'exercice.`,
+        attendu: 'Dotation aux amortissements de l\'exercice > 0 si amortissements cumules > 0',
+        constate: `Amort. cumules: ${amort.toLocaleString('fr-FR')}, Dotations exercice: ${dotations.toLocaleString('fr-FR')}`,
+        impactFiscal: 'Dotations manquantes = charges deductibles non comptabilisees = resultat fiscal surestime.',
       },
       'Comptabiliser les dotations aux amortissements de l\'exercice pour completer le tableau des amortissements (note 3B).')
   }
@@ -514,7 +562,10 @@ function EF016(ctx: AuditContext): ResultatControle {
       `Depreciations creances (${depreciations.toLocaleString('fr-FR')}) > total creances (${totalCreances.toLocaleString('fr-FR')})`,
       {
         montants: { totalCreances, clients: creancesClients, fiscales: creancesFiscales, autres: autresCreances, depreciations },
-        description: 'Les depreciations de creances depassent le montant total des creances, ce qui donnerait des creances nettes negatives dans la note 3H.'
+        description: 'Les depreciations de creances depassent le montant total des creances, ce qui donnerait des creances nettes negatives dans la note 3H.',
+        attendu: 'Depreciations creances <= total creances brutes',
+        constate: `Creances brutes: ${totalCreances.toLocaleString('fr-FR')}, Depreciations: ${depreciations.toLocaleString('fr-FR')}`,
+        impactFiscal: 'Depreciations excessives = charges non deductibles = risque de redressement fiscal.',
       },
       'Regulariser les depreciations de creances: solder les depreciations des creances abandonnees ou recouvrees.')
   }
@@ -536,7 +587,10 @@ function EF017(ctx: AuditContext): ResultatControle {
         `Aucune dette au bilan malgre un CA de ${ca.toLocaleString('fr-FR')}`,
         {
           montants: { totalDettes: 0, chiffreAffaires: ca },
-          description: 'L\'absence totale de dettes (fournisseurs, fiscales, sociales) est inhabituelle pour une entreprise en activite. Les dettes de fin d\'exercice (fournisseurs, charges a payer) devraient normalement exister.'
+          description: 'L\'absence totale de dettes (fournisseurs, fiscales, sociales) est inhabituelle pour une entreprise en activite. Les dettes de fin d\'exercice (fournisseurs, charges a payer) devraient normalement exister.',
+          attendu: 'Dettes de fin d\'exercice presentes si activite significative',
+          constate: `Aucune dette au bilan, CA: ${ca.toLocaleString('fr-FR')}`,
+          impactFiscal: 'Absence de dettes fiscales et sociales = ecritures de cloture potentiellement manquantes.',
         },
         'Verifier la completude des ecritures de cloture: factures non parvenues, charges a payer, dettes fiscales et sociales.')
     }
@@ -567,7 +621,10 @@ function EF019(ctx: AuditContext): ResultatControle {
       `Charges de personnel (${chargesPerso.toLocaleString('fr-FR')}) - verifier que les effectifs sont renseignes en annexe`,
       {
         montants: { chargesPersonnel: chargesPerso },
-        description: `Des charges de personnel de ${chargesPerso.toLocaleString('fr-FR')} FCFA sont comptabilisees. L\'annexe aux etats financiers doit obligatoirement mentionner les effectifs moyens de l\'exercice (cadres, agents de maitrise, employes) et la masse salariale.`
+        description: `Des charges de personnel de ${chargesPerso.toLocaleString('fr-FR')} FCFA sont comptabilisees. L\'annexe aux etats financiers doit obligatoirement mentionner les effectifs moyens de l\'exercice (cadres, agents de maitrise, employes) et la masse salariale.`,
+        attendu: 'Effectifs renseignes en annexe si charges de personnel > 0',
+        constate: `Charges personnel: ${chargesPerso.toLocaleString('fr-FR')} - effectifs a verifier en annexe`,
+        impactFiscal: 'Annexe incomplete = non-conformite OHADA = risque de rejet de la liasse.',
       },
       'Renseigner les effectifs et la masse salariale dans la note 30 de l\'annexe. Indiquer la repartition par categorie professionnelle.',
       undefined,

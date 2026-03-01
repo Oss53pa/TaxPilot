@@ -42,7 +42,10 @@ function NN001(ctx: AuditContext): ResultatControle {
       `RAN (${ran.toLocaleString('fr-FR')}) != Resultat N-1 (${resultatN1.toLocaleString('fr-FR')})`,
       {
         ecart, montants: { ran, resultatN1 },
-        description: `Le report a nouveau (compte 12x = ${ran.toLocaleString('fr-FR')}) ne correspond pas au resultat N-1 (compte 13x = ${resultatN1.toLocaleString('fr-FR')}). Ecart: ${ecart.toLocaleString('fr-FR')} FCFA. L\'ecart peut s\'expliquer par une distribution de dividendes, une mise en reserves, ou une erreur d\'affectation. Si aucune operation sur les capitaux propres n\'a eu lieu, le RAN doit etre exactement egal au resultat N-1.`
+        description: `Le report a nouveau (compte 12x = ${ran.toLocaleString('fr-FR')}) ne correspond pas au resultat N-1 (compte 13x = ${resultatN1.toLocaleString('fr-FR')}). Ecart: ${ecart.toLocaleString('fr-FR')} FCFA. L\'ecart peut s\'expliquer par une distribution de dividendes, une mise en reserves, ou une erreur d\'affectation. Si aucune operation sur les capitaux propres n\'a eu lieu, le RAN doit etre exactement egal au resultat N-1.`,
+        attendu: 'RAN (compte 12x) egal au resultat de l\'exercice precedent (compte 13x)',
+        constate: `RAN = ${ran.toLocaleString('fr-FR')}, Resultat N-1 = ${resultatN1.toLocaleString('fr-FR')}, ecart de ${ecart.toLocaleString('fr-FR')}`,
+        impactFiscal: 'Un ecart non justifie affecte les capitaux propres et peut generer des anomalies dans le tableau de variation des capitaux propres.',
       },
       'Verifier le PV d\'affectation du resultat N-1. Reconstituer l\'ecriture d\'affectation: 13x -> 12x (RAN), 11x (reserves), 46x (dividendes).',
       [{
@@ -80,7 +83,10 @@ function NN002(ctx: AuditContext): ResultatControle {
       `Variation totale du bilan de ${variation.toFixed(0)}% entre N-1 et N - possibles erreurs de report`,
       {
         montants: { totalBilanN, totalBilanN1, variationPct: Math.round(variation) },
-        description: `Le total du bilan a varie de ${variation.toFixed(0)}% entre N-1 et N, ce qui est anormalement eleve. Une variation de plus de 100% indique generalement des erreurs de report des soldes d\'ouverture, un fichier N-1 incorrect, ou un changement de perimetre majeur (fusion, apport partiel d\'actif).`
+        description: `Le total du bilan a varie de ${variation.toFixed(0)}% entre N-1 et N, ce qui est anormalement eleve. Une variation de plus de 100% indique generalement des erreurs de report des soldes d\'ouverture, un fichier N-1 incorrect, ou un changement de perimetre majeur (fusion, apport partiel d\'actif).`,
+        attendu: 'Variation du bilan < 100% entre deux exercices consecutifs',
+        constate: `Variation de ${variation.toFixed(0)}% (N: ${totalBilanN.toLocaleString('fr-FR')}, N-1: ${totalBilanN1.toLocaleString('fr-FR')})`,
+        impactFiscal: 'Erreurs de report impactent la fiabilite de tous les etats financiers et des comparaisons N/N-1.',
       },
       'Verifier la coherence des soldes d\'ouverture N avec les soldes de cloture N-1. Rapprocher les deux balances compte par compte pour identifier les ecarts.',
       undefined,
@@ -106,7 +112,10 @@ function NN003(ctx: AuditContext): ResultatControle {
       {
         comptes: [...nouveaux.slice(0, 5).map((p) => `+${p}`), ...supprimes.slice(0, 5).map((p) => `-${p}`)],
         montants: { nouveauxPrefixes: nouveaux.length, prefixesSupprimes: supprimes.length, prefixesN: prefixesN.size, prefixesN1: prefixesN1.size },
-        description: `La structure du plan de comptes a significativement change entre N-1 et N: ${nouveaux.length} nouveaux prefixes et ${supprimes.length} prefixes supprimes. Le principe de permanence des methodes impose de conserver la meme structure comptable d\'un exercice a l\'autre. Un changement doit etre justifie et documente dans l\'annexe.`
+        description: `La structure du plan de comptes a significativement change entre N-1 et N: ${nouveaux.length} nouveaux prefixes et ${supprimes.length} prefixes supprimes. Le principe de permanence des methodes impose de conserver la meme structure comptable d\'un exercice a l\'autre. Un changement doit etre justifie et documente dans l\'annexe.`,
+        attendu: 'Structure du plan comptable stable entre N et N-1 (< 10 changements de prefixes)',
+        constate: `${nouveaux.length} nouveaux prefixes, ${supprimes.length} supprimes`,
+        impactFiscal: 'Changement de nomenclature non documente = risque de rejet de la liasse par l\'administration fiscale.',
       },
       'Documenter les changements de nomenclature dans l\'annexe aux etats financiers. S\'assurer que les comparaisons N/N-1 restent pertinentes.',
       undefined,
@@ -127,7 +136,10 @@ function NN004(ctx: AuditContext): ResultatControle {
       `Capital modifie: ${capitalN1.toLocaleString('fr-FR')} -> ${capitalN.toLocaleString('fr-FR')}`,
       {
         montants: { capitalN, capitalN1, variation },
-        description: `Le capital social a varie de ${variation.toLocaleString('fr-FR')} FCFA entre N-1 et N. Toute modification du capital (augmentation, reduction) doit resulter d\'une decision en assemblee generale et etre formalisee par un acte notarie. Verifier la coherence avec les PV d\'AG.`
+        description: `Le capital social a varie de ${variation.toLocaleString('fr-FR')} FCFA entre N-1 et N. Toute modification du capital (augmentation, reduction) doit resulter d\'une decision en assemblee generale et etre formalisee par un acte notarie. Verifier la coherence avec les PV d\'AG.`,
+        attendu: 'Capital social stable sauf operation juridique formelle',
+        constate: `Capital N-1: ${capitalN1.toLocaleString('fr-FR')}, Capital N: ${capitalN.toLocaleString('fr-FR')}, variation: ${variation.toLocaleString('fr-FR')}`,
+        impactFiscal: 'Modification du capital sans justification peut affecter les droits d\'enregistrement et la base de l\'IRVM.',
       },
       'Justifier la variation du capital par le PV de l\'AG correspondant. Verifier la coherence avec les primes d\'emission (compte 105x) et les frais d\'augmentation de capital.',
       undefined,
@@ -168,7 +180,10 @@ function NN005(ctx: AuditContext): ResultatControle {
       {
         comptes: variations,
         montants: detailMontants,
-        description: `${variations.length} postes comptables presentent une variation superieure a 50% entre N-1 et N. Des variations aussi importantes meritent une attention particuliere: elles peuvent reveler une erreur comptable, un changement d\'activite, ou un evenement exceptionnel. Chaque variation significative doit etre justifiee.`
+        description: `${variations.length} postes comptables presentent une variation superieure a 50% entre N-1 et N. Des variations aussi importantes meritent une attention particuliere: elles peuvent reveler une erreur comptable, un changement d\'activite, ou un evenement exceptionnel. Chaque variation significative doit etre justifiee.`,
+        attendu: 'Variations par poste < 50% entre exercices consecutifs',
+        constate: `${variations.length} poste(s) avec variation > 50%`,
+        impactFiscal: 'Variations non justifiees peuvent masquer des erreurs de comptabilisation affectant le resultat fiscal.',
       },
       'Analyser et justifier chaque variation significative. Documenter les explications dans l\'annexe aux etats financiers (Note 12 - Evenements significatifs).')
   }
@@ -188,7 +203,10 @@ function NN006(ctx: AuditContext): ResultatControle {
         `Total bilan varie de ${pct > 0 ? '+' : ''}${pct.toFixed(1)}%`,
         {
           montants: { totalBilanN: tbN, totalBilanN1: tbN1, variationPct: Math.round(pct) },
-          description: `Le total bilan a varie de ${pct.toFixed(1)}% entre N-1 (${tbN1.toLocaleString('fr-FR')}) et N (${tbN.toLocaleString('fr-FR')}). Une variation de plus de 30% est inhabituelle et peut resulter d\'investissements majeurs, de cessions, d\'augmentation de capital, ou d\'un changement d\'activite. En l\'absence de justification, cela peut indiquer une erreur.`
+          description: `Le total bilan a varie de ${pct.toFixed(1)}% entre N-1 (${tbN1.toLocaleString('fr-FR')}) et N (${tbN.toLocaleString('fr-FR')}). Une variation de plus de 30% est inhabituelle et peut resulter d\'investissements majeurs, de cessions, d\'augmentation de capital, ou d\'un changement d\'activite. En l\'absence de justification, cela peut indiquer une erreur.`,
+        attendu: 'Variation du total bilan < 30% entre exercices consecutifs',
+        constate: `Variation de ${pct.toFixed(1)}% (N-1: ${tbN1.toLocaleString('fr-FR')}, N: ${tbN.toLocaleString('fr-FR')})`,
+        impactFiscal: 'Variation anormale du bilan affecte la fiabilite globale des etats financiers et des ratios de solvabilite.',
         },
         'Identifier les postes a l\'origine de la variation et documenter les explications dans l\'annexe.')
     }
@@ -218,7 +236,10 @@ function NN007(ctx: AuditContext): ResultatControle {
       {
         comptes: disparus.slice(0, 10),
         montants: { comptesDisparus: disparus.length },
-        description: `${disparus.length} comptes de gestion (charges/produits) qui avaient un montant significatif (>1 000) en N-1 sont a zero ou absents en N. La disparition d\'un poste de gestion recurrent peut indiquer un changement d\'activite, un oubli de comptabilisation, ou un reclassement dans un autre compte.`
+        description: `${disparus.length} comptes de gestion (charges/produits) qui avaient un montant significatif (>1 000) en N-1 sont a zero ou absents en N. La disparition d\'un poste de gestion recurrent peut indiquer un changement d\'activite, un oubli de comptabilisation, ou un reclassement dans un autre compte.`,
+        attendu: 'Continuite des comptes de gestion significatifs entre N-1 et N',
+        constate: `${disparus.length} compte(s) > 1 000 en N-1 absent(s) en N`,
+        impactFiscal: 'Charges ou produits omis impactent directement le resultat fiscal et la base imposable.',
       },
       'Verifier si l\'absence de ces comptes est justifiee par un changement d\'activite ou si des ecritures ont ete oubliees.')
   }
@@ -243,7 +264,10 @@ function NN008(ctx: AuditContext): ResultatControle {
         `Diminution immobilisations (${variation.toLocaleString('fr-FR')}) sans cession comptabilisee`,
         {
           montants: { immobN: immobBrutN, immobN1: immobBrutN1, variation },
-          description: `Les immobilisations brutes ont diminue de ${Math.abs(variation).toLocaleString('fr-FR')} FCFA entre N-1 et N sans qu\'aucune cession ne soit comptabilisee au resultat (81x/654x). Une diminution d\'immobilisations doit normalement s\'accompagner d\'une ecriture de cession (produit de cession et valeur nette comptable). L\'absence de cession peut indiquer une mise au rebut non comptabilisee.`
+          description: `Les immobilisations brutes ont diminue de ${Math.abs(variation).toLocaleString('fr-FR')} FCFA entre N-1 et N sans qu\'aucune cession ne soit comptabilisee au resultat (81x/654x). Une diminution d\'immobilisations doit normalement s\'accompagner d\'une ecriture de cession (produit de cession et valeur nette comptable). L\'absence de cession peut indiquer une mise au rebut non comptabilisee.`,
+        attendu: 'Diminution d\'immobilisations accompagnee d\'ecritures de cession (81x/654x)',
+        constate: `Diminution de ${Math.abs(variation).toLocaleString('fr-FR')} sans cession comptabilisee`,
+        impactFiscal: 'Sortie d\'immobilisation sans cession = plus ou moins-value non constatee = resultat fiscal fausse.',
         },
         'Verifier les mouvements d\'immobilisations: comptabiliser les cessions, mises au rebut ou transferts. Mettre a jour le tableau des immobilisations (Note 3A).',
         undefined,

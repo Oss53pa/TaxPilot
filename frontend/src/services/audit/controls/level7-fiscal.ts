@@ -31,7 +31,10 @@ function FI001(ctx: AuditContext): ResultatControle {
       `Resultat deficitaire: ${resultat.toLocaleString('fr-FR')}`,
       {
         montants: { resultatNet: resultat },
-        description: `Le resultat de l\'exercice est deficitaire (${resultat.toLocaleString('fr-FR')} FCFA). Un deficit est reportable sur les 5 exercices suivants (sauf amortissements reputes differes). L\'entreprise reste neanmoins redevable du minimum forfaitaire d\'imposition (IMF). Le deficit doit etre justifie et documente dans la declaration fiscale.`
+        description: `Le resultat de l\'exercice est deficitaire (${resultat.toLocaleString('fr-FR')} FCFA). Un deficit est reportable sur les 5 exercices suivants (sauf amortissements reputes differes). L\'entreprise reste neanmoins redevable du minimum forfaitaire d\'imposition (IMF). Le deficit doit etre justifie et documente dans la declaration fiscale.`,
+        attendu: 'Resultat beneficiaire ou deficit justifie',
+        constate: `Resultat deficitaire de ${resultat.toLocaleString('fr-FR')} FCFA`,
+        impactFiscal: 'Deficit reportable sur 5 exercices. IMF reste du meme si deficit. Report illimite pour amortissements reputes differes.',
       },
       'Constituer le dossier de report deficitaire. S\'assurer du paiement du minimum forfaitaire (IMF). Documenter les causes du deficit dans la liasse fiscale.',
       undefined,
@@ -52,7 +55,10 @@ function FI002(ctx: AuditContext): ResultatControle {
       `Vehicules de tourisme: ${valeurVehicules.toLocaleString('fr-FR')} (plafond fiscal: 25 000 000)`,
       {
         montants: { valeurVehicules, plafond: 25000000, excesAReintegrer: exces },
-        description: `La valeur des vehicules de tourisme (${valeurVehicules.toLocaleString('fr-FR')} FCFA) depasse le plafond fiscal de 25 000 000 FCFA. L\'amortissement sur la fraction excedentaire (${exces.toLocaleString('fr-FR')}) n\'est pas deductible fiscalement et doit etre reintegre dans le resultat fiscal.`
+        description: `La valeur des vehicules de tourisme (${valeurVehicules.toLocaleString('fr-FR')} FCFA) depasse le plafond fiscal de 25 000 000 FCFA. L\'amortissement sur la fraction excedentaire (${exces.toLocaleString('fr-FR')}) n\'est pas deductible fiscalement et doit etre reintegre dans le resultat fiscal.`,
+        attendu: 'Valeur individuelle vehicules tourisme <= 25 000 000 FCFA',
+        constate: `Valeur vehicules: ${valeurVehicules.toLocaleString('fr-FR')}, exces: ${exces.toLocaleString('fr-FR')}`,
+        impactFiscal: `Reintegration estimee de ${Math.round(exces * 0.2).toLocaleString('fr-FR')} FCFA (amortissement sur base excedentaire).`,
       },
       `Reintegrer dans le tableau de determination du resultat fiscal la fraction d\'amortissement calculee sur l\'exces de ${exces.toLocaleString('fr-FR')} FCFA au-dela du plafond.`,
       [{
@@ -78,7 +84,10 @@ function FI003(ctx: AuditContext): ResultatControle {
       `Receptions et cadeaux (${receptions.toLocaleString('fr-FR')}) > 1% du CA (${ca.toLocaleString('fr-FR')})`,
       {
         montants: { receptions, ca, ratioPct: Math.round(ratio * 10) / 10, excedentAReintegrer: excedent },
-        description: `Les charges de receptions et cadeaux (627x) representent ${ratio.toFixed(1)}% du chiffre d\'affaires, depassant le seuil de 1%. L\'excedent de ${excedent.toLocaleString('fr-FR')} FCFA n\'est pas deductible fiscalement et doit etre reintegre dans le resultat fiscal.`
+        description: `Les charges de receptions et cadeaux (627x) representent ${ratio.toFixed(1)}% du chiffre d\'affaires, depassant le seuil de 1%. L\'excedent de ${excedent.toLocaleString('fr-FR')} FCFA n\'est pas deductible fiscalement et doit etre reintegre dans le resultat fiscal.`,
+        attendu: 'Charges de receptions et cadeaux < 1% du CA',
+        constate: `Ratio: ${ratio.toFixed(1)}%, excedent: ${excedent.toLocaleString('fr-FR')}`,
+        impactFiscal: `Reintegration de ${excedent.toLocaleString('fr-FR')} FCFA dans le resultat fiscal.`,
       },
       `Reintegrer l'excedent de ${excedent.toLocaleString('fr-FR')} FCFA dans le tableau de passage du resultat comptable au resultat fiscal.`,
       [{
@@ -100,7 +109,10 @@ function FI004(ctx: AuditContext): ResultatControle {
       `Amendes et penalites: ${amendes.toLocaleString('fr-FR')} (non deductibles)`,
       {
         montants: { amendes },
-        description: `Des amendes et penalites de ${amendes.toLocaleString('fr-FR')} FCFA sont comptabilisees (6471x/6478x). Ces charges sont integralement non deductibles du resultat fiscal et doivent etre reintegrees dans le tableau de passage au resultat fiscal.`
+        description: `Des amendes et penalites de ${amendes.toLocaleString('fr-FR')} FCFA sont comptabilisees (6471x/6478x). Ces charges sont integralement non deductibles du resultat fiscal et doivent etre reintegrees dans le tableau de passage au resultat fiscal.`,
+        attendu: 'Aucune amende ou penalite, ou reintegration fiscale effectuee',
+        constate: `Amendes et penalites: ${amendes.toLocaleString('fr-FR')} FCFA`,
+        impactFiscal: `Reintegration obligatoire de ${amendes.toLocaleString('fr-FR')} FCFA (100% non deductible).`,
       },
       `Reintegrer la totalite des amendes (${amendes.toLocaleString('fr-FR')} FCFA) dans le resultat fiscal. Documenter la nature et l'origine de chaque penalite.`,
       [{
@@ -125,7 +137,10 @@ function FI005(ctx: AuditContext): ResultatControle {
       `Dons (${dons.toLocaleString('fr-FR')}) > plafond 1‰ du CA (${plafond.toLocaleString('fr-FR')})`,
       {
         montants: { dons, plafond, ca, excesAReintegrer: exces },
-        description: `Les dons et liberalites (6234x) de ${dons.toLocaleString('fr-FR')} FCFA depassent le plafond de deductibilite de 1 pour mille du CA (${plafond.toLocaleString('fr-FR')} FCFA). L'excedent de ${exces.toLocaleString('fr-FR')} FCFA doit etre reintegre au resultat fiscal.`
+        description: `Les dons et liberalites (6234x) de ${dons.toLocaleString('fr-FR')} FCFA depassent le plafond de deductibilite de 1 pour mille du CA (${plafond.toLocaleString('fr-FR')} FCFA). L'excedent de ${exces.toLocaleString('fr-FR')} FCFA doit etre reintegre au resultat fiscal.`,
+        attendu: `Dons et liberalites <= 1‰ du CA (${plafond.toLocaleString('fr-FR')})`,
+        constate: `Dons: ${dons.toLocaleString('fr-FR')}, plafond: ${plafond.toLocaleString('fr-FR')}, exces: ${exces.toLocaleString('fr-FR')}`,
+        impactFiscal: `Reintegration de ${exces.toLocaleString('fr-FR')} FCFA dans le resultat fiscal.`,
       },
       `Reintegrer l'excedent de ${exces.toLocaleString('fr-FR')} FCFA dans le tableau de passage au resultat fiscal.`,
       undefined,
@@ -143,7 +158,10 @@ function FI006(ctx: AuditContext): ResultatControle {
       `Dotations aux provisions: ${provisions.toLocaleString('fr-FR')} - verifier la deductibilite`,
       {
         montants: { dotationsProvisions: provisions },
-        description: `Des dotations aux provisions de ${provisions.toLocaleString('fr-FR')} FCFA sont comptabilisees (691/697). Certaines provisions ne sont pas deductibles fiscalement: provisions pour propre assurance, provisions a caractere de reserves, provisions sans objet precis. Chaque provision doit etre examinee individuellement pour determiner sa deductibilite.`
+        description: `Des dotations aux provisions de ${provisions.toLocaleString('fr-FR')} FCFA sont comptabilisees (691/697). Certaines provisions ne sont pas deductibles fiscalement: provisions pour propre assurance, provisions a caractere de reserves, provisions sans objet precis. Chaque provision doit etre examinee individuellement pour determiner sa deductibilite.`,
+        attendu: 'Provisions individuellement justifiees et deductibles',
+        constate: `Dotations aux provisions: ${provisions.toLocaleString('fr-FR')} FCFA a verifier`,
+        impactFiscal: 'Provisions non deductibles a reintegrer dans le resultat fiscal. Risque de redressement si non justifiees.',
       },
       'Examiner chaque provision individuellement. Reintegrer les provisions non deductibles dans le resultat fiscal. Justifier les provisions deductibles par des elements probants.',
       undefined,
@@ -168,7 +186,10 @@ function FI007(ctx: AuditContext): ResultatControle {
           `IS comptabilise (${isComptabilise.toLocaleString('fr-FR')}) significativement different de l'estime (${isEstime.toLocaleString('fr-FR')} @ ${taux.IS.taux_normal * 100}%)`,
           {
             montants: { isComptabilise, isEstime, resultat, ecart, tauxIS: taux.IS.taux_normal * 100 },
-            description: `L'IS comptabilise (${isComptabilise.toLocaleString('fr-FR')}) differe de ${ecart.toLocaleString('fr-FR')} FCFA par rapport a l'estimation au taux normal de ${taux.IS.taux_normal * 100}% (${isEstime.toLocaleString('fr-FR')}). L\'ecart peut s\'expliquer par des reintegrations, des deductions fiscales, un taux reduit, ou une erreur de calcul.`
+            description: `L'IS comptabilise (${isComptabilise.toLocaleString('fr-FR')}) differe de ${ecart.toLocaleString('fr-FR')} FCFA par rapport a l'estimation au taux normal de ${taux.IS.taux_normal * 100}% (${isEstime.toLocaleString('fr-FR')}). L\'ecart peut s\'expliquer par des reintegrations, des deductions fiscales, un taux reduit, ou une erreur de calcul.`,
+            attendu: `IS proche de ${isEstime.toLocaleString('fr-FR')} (taux ${taux.IS.taux_normal * 100}%)`,
+            constate: `IS comptabilise: ${isComptabilise.toLocaleString('fr-FR')}, ecart: ${ecart.toLocaleString('fr-FR')}`,
+            impactFiscal: 'IS mal calcule = risque de complement d\'impot, majorations et penalites de retard.',
           },
           'Verifier le calcul de l\'IS: reintegrations extracomptables, deductions, credits d\'impot, et reports deficitaires. S\'assurer que le taux applique est correct.')
       }
@@ -177,7 +198,10 @@ function FI007(ctx: AuditContext): ResultatControle {
         `Resultat beneficiaire (${resultat.toLocaleString('fr-FR')}) sans IS comptabilise (89x)`,
         {
           montants: { resultat, isEstime: resultat * taux.IS.taux_normal },
-          description: `Un resultat beneficiaire de ${resultat.toLocaleString('fr-FR')} FCFA est constate sans aucun impot comptabilise (89x). L\'IS estime au taux normal de ${taux.IS.taux_normal * 100}% serait de ${(resultat * taux.IS.taux_normal).toLocaleString('fr-FR')} FCFA.`
+          description: `Un resultat beneficiaire de ${resultat.toLocaleString('fr-FR')} FCFA est constate sans aucun impot comptabilise (89x). L\'IS estime au taux normal de ${taux.IS.taux_normal * 100}% serait de ${(resultat * taux.IS.taux_normal).toLocaleString('fr-FR')} FCFA.`,
+          attendu: `IS comptabilise de ${(resultat * taux.IS.taux_normal).toLocaleString('fr-FR')} (taux ${taux.IS.taux_normal * 100}%)`,
+          constate: 'Aucun IS comptabilise (89x = 0)',
+          impactFiscal: `IS non comptabilise = dette fiscale potentielle de ${(resultat * taux.IS.taux_normal).toLocaleString('fr-FR')} FCFA + penalites.`,
         },
         `Comptabiliser l'impot sur les societes. IS estime: ${(resultat * taux.IS.taux_normal).toLocaleString('fr-FR')} FCFA au taux de ${taux.IS.taux_normal * 100}%.`)
     }
@@ -198,7 +222,10 @@ function FI008(ctx: AuditContext): ResultatControle {
         `IS (${isComptabilise.toLocaleString('fr-FR')}) < IMF (${imf.toLocaleString('fr-FR')}) = ${taux.IMF.taux * 100}% du CA (min ${taux.IMF.minimum.toLocaleString('fr-FR')})`,
         {
           montants: { isComptabilise, imf, ca, complement: imf - isComptabilise },
-          description: `L'impot comptabilise (${isComptabilise.toLocaleString('fr-FR')}) est inferieur au minimum forfaitaire d\'imposition (IMF = ${imf.toLocaleString('fr-FR')} FCFA, soit ${taux.IMF.taux * 100}% du CA avec un minimum de ${taux.IMF.minimum.toLocaleString('fr-FR')}). L\'entreprise doit payer au minimum l\'IMF, soit un complement de ${(imf - isComptabilise).toLocaleString('fr-FR')} FCFA.`
+          description: `L'impot comptabilise (${isComptabilise.toLocaleString('fr-FR')}) est inferieur au minimum forfaitaire d\'imposition (IMF = ${imf.toLocaleString('fr-FR')} FCFA, soit ${taux.IMF.taux * 100}% du CA avec un minimum de ${taux.IMF.minimum.toLocaleString('fr-FR')}). L\'entreprise doit payer au minimum l\'IMF, soit un complement de ${(imf - isComptabilise).toLocaleString('fr-FR')} FCFA.`,
+          attendu: `IS >= IMF de ${imf.toLocaleString('fr-FR')} (${taux.IMF.taux * 100}% du CA)`,
+          constate: `IS: ${isComptabilise.toLocaleString('fr-FR')}, IMF: ${imf.toLocaleString('fr-FR')}, complement: ${(imf - isComptabilise).toLocaleString('fr-FR')}`,
+          impactFiscal: `Complement d'IS de ${(imf - isComptabilise).toLocaleString('fr-FR')} FCFA a payer au titre de l'IMF.`,
         },
         `Ajuster l'IS au montant de l'IMF: comptabiliser un complement de ${(imf - isComptabilise).toLocaleString('fr-FR')} FCFA.`,
         undefined,
@@ -221,7 +248,10 @@ function FI009(ctx: AuditContext): ResultatControle {
         `TVA due theorique (${soldeTheorique.toLocaleString('fr-FR')}) non comptabilisee (444x)`,
         {
           montants: { tvaCollectee, tvaDeductible, soldeTheorique },
-          description: `La TVA collectee (${tvaCollectee.toLocaleString('fr-FR')}) depasse la TVA deductible (${tvaDeductible.toLocaleString('fr-FR')}), generant un solde de TVA a reverser de ${soldeTheorique.toLocaleString('fr-FR')} FCFA qui n\'est pas comptabilise au compte 444x. Ce montant doit etre declare et paye a l\'administration fiscale.`
+          description: `La TVA collectee (${tvaCollectee.toLocaleString('fr-FR')}) depasse la TVA deductible (${tvaDeductible.toLocaleString('fr-FR')}), generant un solde de TVA a reverser de ${soldeTheorique.toLocaleString('fr-FR')} FCFA qui n\'est pas comptabilise au compte 444x. Ce montant doit etre declare et paye a l\'administration fiscale.`,
+          attendu: 'TVA due (444x) = TVA collectee (443x) - TVA deductible (445x)',
+          constate: `TVA due: 0, solde theorique: ${soldeTheorique.toLocaleString('fr-FR')}`,
+          impactFiscal: `TVA non reversee de ${soldeTheorique.toLocaleString('fr-FR')} FCFA = dette fiscale + penalites de retard.`,
         },
         'Comptabiliser la TVA due au compte 444x. Verifier la concordance avec les declarations mensuelles de TVA.',
         [{
@@ -248,7 +278,10 @@ function FI010(ctx: AuditContext): ResultatControle {
       `Charges de personnel (${chargesPerso.toLocaleString('fr-FR')}) sans cotisations sociales (664x/6413x)`,
       {
         montants: { chargesPersonnel: chargesPerso },
-        description: `Des charges de personnel de ${chargesPerso.toLocaleString('fr-FR')} FCFA sont comptabilisees sans aucune cotisation sociale patronale. L\'employeur est tenu de declarer et payer les cotisations CNPS (ou equivalent) sur les salaires verses.`
+        description: `Des charges de personnel de ${chargesPerso.toLocaleString('fr-FR')} FCFA sont comptabilisees sans aucune cotisation sociale patronale. L\'employeur est tenu de declarer et payer les cotisations CNPS (ou equivalent) sur les salaires verses.`,
+        attendu: 'Cotisations sociales comptabilisees en coherence avec les charges de personnel',
+        constate: `Charges personnel: ${chargesPerso.toLocaleString('fr-FR')}, cotisations: 0`,
+        impactFiscal: 'Cotisations non declarees = risque de redressement CNPS + majorations + charges non deductibles.',
       },
       'Verifier les declarations sociales (CNPS/NSIF/CSS). Comptabiliser les cotisations patronales au compte 664x.')
   }
@@ -259,7 +292,10 @@ function FI010(ctx: AuditContext): ResultatControle {
         `Ratio cotisations/salaires faible: ${ratio.toFixed(1)}%`,
         {
           montants: { chargesPersonnel: chargesPerso, cotisations, ratioPct: Math.round(ratio * 10) / 10 },
-          description: `Le ratio cotisations sociales / charges de personnel est de ${ratio.toFixed(1)}%, ce qui est inhabituellement bas. Les taux de cotisations patronales (CNPS, prevoyance, accidents du travail) representent generalement 15-25% de la masse salariale brute.`
+          description: `Le ratio cotisations sociales / charges de personnel est de ${ratio.toFixed(1)}%, ce qui est inhabituellement bas. Les taux de cotisations patronales (CNPS, prevoyance, accidents du travail) representent generalement 15-25% de la masse salariale brute.`,
+          attendu: 'Ratio cotisations/salaires entre 15% et 25%',
+          constate: `Ratio: ${ratio.toFixed(1)}%`,
+          impactFiscal: 'Cotisations sous-estimees = risque de redressement CNPS et charges patronales non deductibles.',
         },
         'Verifier l\'exhaustivite des cotisations sociales: prestations familiales, accidents du travail, retraite. S\'assurer que les declarations CNPS sont a jour.')
     }
@@ -280,7 +316,10 @@ function FI011(ctx: AuditContext): ResultatControle {
       `Dons (${dons.toLocaleString('fr-FR')}) > plafond 5‰ CA (${plafond.toLocaleString('fr-FR')}), exces: ${exces.toLocaleString('fr-FR')}`,
       {
         montants: { dons, plafond, ca, exces },
-        description: `Les dons comptabilises au compte 658 (${dons.toLocaleString('fr-FR')} FCFA) depassent le plafond de deductibilite de 5 pour mille du CA (${plafond.toLocaleString('fr-FR')} FCFA). L'excedent de ${exces.toLocaleString('fr-FR')} FCFA est fiscalement non deductible.`
+        description: `Les dons comptabilises au compte 658 (${dons.toLocaleString('fr-FR')} FCFA) depassent le plafond de deductibilite de 5 pour mille du CA (${plafond.toLocaleString('fr-FR')} FCFA). L'excedent de ${exces.toLocaleString('fr-FR')} FCFA est fiscalement non deductible.`,
+        attendu: `Dons (658x) <= 5‰ du CA (${plafond.toLocaleString('fr-FR')})`,
+        constate: `Dons: ${dons.toLocaleString('fr-FR')}, exces: ${exces.toLocaleString('fr-FR')}`,
+        impactFiscal: `Reintegration de ${exces.toLocaleString('fr-FR')} FCFA dans le resultat fiscal.`,
       },
       `Reintegrer l'excedent de ${exces.toLocaleString('fr-FR')} FCFA dans le resultat fiscal.`,
       undefined,
@@ -298,7 +337,10 @@ function FI012(ctx: AuditContext): ResultatControle {
       `Charges somptuaires: ${somptuaires.toLocaleString('fr-FR')} (100% non deductibles)`,
       {
         montants: { somptuaires },
-        description: `Des charges somptuaires de ${somptuaires.toLocaleString('fr-FR')} FCFA sont comptabilisees au compte 6257. Ces depenses de luxe (residence personnelle, chasse, peche, yacht, etc.) sont integralement non deductibles du resultat fiscal.`
+        description: `Des charges somptuaires de ${somptuaires.toLocaleString('fr-FR')} FCFA sont comptabilisees au compte 6257. Ces depenses de luxe (residence personnelle, chasse, peche, yacht, etc.) sont integralement non deductibles du resultat fiscal.`,
+        attendu: 'Aucune charge somptuaire ou reintegration fiscale effectuee',
+        constate: `Charges somptuaires (6257): ${somptuaires.toLocaleString('fr-FR')} FCFA`,
+        impactFiscal: `Reintegration obligatoire de ${somptuaires.toLocaleString('fr-FR')} FCFA (100% non deductible).`,
       },
       `Reintegrer la totalite (${somptuaires.toLocaleString('fr-FR')} FCFA) dans le resultat fiscal. Documenter la nature des depenses somptuaires.`,
       undefined,

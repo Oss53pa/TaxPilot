@@ -180,18 +180,7 @@ export const loadBalance = (): BalanceEntry[] => {
     }
   } catch { /* try next */ }
 
-  try {
-    const raw = localStorage.getItem('fiscasync_db_balance_entries')
-    if (raw) {
-      const items = JSON.parse(raw)
-      if (Array.isArray(items) && items.length > 0) {
-        console.log(`[Liasse] Balance loaded from "fiscasync_db_balance_entries": ${items.length} comptes`)
-        return parseEntries(items)
-      }
-    }
-  } catch { /* ignore */ }
-
-  console.warn('[Liasse] Aucune balance trouvee dans localStorage. Cles cherchees: fiscasync_balance_latest, fiscasync_balance_list, fiscasync_db_balance_entries')
+  console.warn('[Liasse] Aucune balance trouvee dans localStorage. Importez votre balance via le menu Import.')
   return []
 }
 

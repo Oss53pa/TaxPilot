@@ -63,11 +63,28 @@ const S: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <WithSidebar>{children}</WithSidebar>
 )
 
+// Purge seed/mock data from FiscaSync-Lite on first run
+function purgeSeedData() {
+  const PURGED_KEY = 'fiscasync_seed_purged'
+  if (localStorage.getItem(PURGED_KEY)) return
+  const keysToRemove: string[] = []
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i)
+    if (key && key.startsWith('fiscasync_db_')) keysToRemove.push(key)
+  }
+  if (keysToRemove.length > 0) {
+    keysToRemove.forEach(k => localStorage.removeItem(k))
+    console.log(`[FiscaSync] Purged ${keysToRemove.length} seed data keys:`, keysToRemove)
+  }
+  localStorage.setItem(PURGED_KEY, new Date().toISOString())
+}
+
 function App() {
   const { checkAuth } = useAuthStore()
 
   React.useEffect(() => {
     checkAuth()
+    purgeSeedData()
   }, [checkAuth])
 
   return (

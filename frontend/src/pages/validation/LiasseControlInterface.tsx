@@ -100,14 +100,6 @@ function loadBalanceFromStorage(): BalanceData | null {
     }
   } catch { /* next */ }
 
-  // Fallback: fiscasync_db_balance_entries
-  try {
-    const raw = localStorage.getItem('fiscasync_db_balance_entries')
-    if (raw) {
-      const items = JSON.parse(raw)
-      if (Array.isArray(items) && items.length > 0) return { entries: items }
-    }
-  } catch { /* ignore */ }
   return null
 }
 
