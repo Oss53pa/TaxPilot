@@ -262,7 +262,7 @@ export const fiscasyncTheme = createTheme({
     MuiTableBody: {
       styleOverrides: {
         root: {
-          '& .MuiTableRow-root': {
+          '& .MuiTableRow-root:not(.total-row)': {
             '&:nth-of-type(odd)': { backgroundColor: fiscasyncPalette.primary50 },
             '&:nth-of-type(even)': { backgroundColor: fiscasyncPalette.white },
             '&:hover': { backgroundColor: fiscasyncPalette.primary100 },

@@ -5,6 +5,7 @@
  */
 
 import React from 'react'
+import { useRegimeImposition } from '@/config/regimeContext'
 import {
   Box,
   Paper,
@@ -186,7 +187,7 @@ function formatExercice(ent: any): string {
 }
 
 // Resolves a field label to a value from entreprise data
-function resolveField(label: string, ent: any): string {
+function resolveField(label: string, ent: any, regimeOverride?: string): string {
   if (!ent) return ''
 
   // Common fields shared across most garde pages
@@ -228,7 +229,7 @@ function resolveField(label: string, ent: any): string {
     return formatExercice(ent)
 
   if (normalizedLabel.includes('regime d\'imposition') || normalizedLabel.includes('regime d\'imposition'))
-    return REGIME_DISPLAY[ent.regime_imposition] || ent.regime_imposition || ''
+    return REGIME_DISPLAY[regimeOverride || ''] || REGIME_DISPLAY[ent.regime_imposition] || ent.regime_imposition || ''
 
   if (normalizedLabel.includes('date de creation'))
     return formatDateFR(ent.date_creation_entreprise) || ''
@@ -256,6 +257,7 @@ function resolveField(label: string, ent: any): string {
 
 const GenericGardePage: React.FC<{ configKey: string; entreprise?: any }> = ({ configKey, entreprise }) => {
   const theme = useTheme()
+  const ctxRegime = useRegimeImposition()
   const config = GARDE_CONFIGS[configKey]
 
   if (!config) return null
@@ -289,7 +291,7 @@ const GenericGardePage: React.FC<{ configKey: string; entreprise?: any }> = ({ c
           <Table size="small">
             <TableBody>
               {config.champs.map((champ, idx) => {
-                const autoValue = resolveField(champ.label, entreprise)
+                const autoValue = resolveField(champ.label, entreprise, ctxRegime)
                 return (
                   <TableRow key={idx} sx={{ '&:nth-of-type(odd)': { backgroundColor: theme.palette.grey[50] } }}>
                     <TableCell

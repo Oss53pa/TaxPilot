@@ -1,9 +1,9 @@
 /**
  * Interface de Contrôle de Liasse Fiscale
- * Validation avancée avant soumission hiérarchique et télédéclaration
+ * Lance l'audit sur la balance importée et affiche les résultats
  */
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useCallback } from 'react'
 import {
   Box,
   Grid,
@@ -19,423 +19,316 @@ import {
   TableHead,
   TableRow,
   Chip,
-  // Alert,
   LinearProgress,
-  Divider,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
+  Alert,
 } from '@mui/material'
 import {
   CheckCircle as ValidIcon,
   Warning as WarningIcon,
   Error as ErrorIcon,
-  Assignment as LiasseIcon,
+  PlayArrow as RunIcon,
   Speed as ScoreIcon,
-  Visibility as PreviewIcon,
-  Send as SubmitIcon,
-  Comment as CommentIcon,
-  // History as HistoryIcon,
 } from '@mui/icons-material'
-import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
 
-interface ValidationResult {
-  id: number
-  liasse_id: string
-  score_validation: number
-  nb_erreurs_critiques: number
-  nb_avertissements: number
-  nb_controles_reussis: number
-  prete_validation: boolean
-  prete_teledeclaration: boolean
-  date_validation: string
+import { auditOrchestrator } from '@/services/audit'
+import type { SessionAudit, Severite, NiveauControle } from '@/types/audit.types'
+import { NIVEAUX_NOMS } from '@/types/audit.types'
+
+const SEVERITE_CONFIG: Record<Severite, { color: string; label: string }> = {
+  BLOQUANT: { color: '#dc2626', label: 'Bloquant' },
+  MAJEUR: { color: '#ea580c', label: 'Majeur' },
+  MINEUR: { color: '#d97706', label: 'Mineur' },
+  INFO: { color: '#3b82f6', label: 'Info' },
+  OK: { color: '#16a34a', label: 'OK' },
 }
 
-interface PreComment {
-  section: string
-  titre: string
-  commentaire: string
-  type: 'POSITIF' | 'ATTENTION' | 'INFORMATIF' | 'TECHNIQUE'
-  auto_genere: boolean
+function loadBalanceFromStorage(): { entries: { compte: string; intitule?: string; libelle?: string; debit: number; credit: number; solde_debit: number; solde_credit: number }[] } | null {
+  for (const key of ['fiscasync_balance_latest', 'fiscasync_balance_list']) {
+    try {
+      const raw = localStorage.getItem(key)
+      if (!raw) continue
+      const parsed = JSON.parse(raw)
+      if (key === 'fiscasync_balance_list' && Array.isArray(parsed) && parsed.length > 0) {
+        if (Array.isArray(parsed[0]?.entries) && parsed[0].entries.length > 0) return parsed[0]
+      } else if (Array.isArray(parsed?.entries) && parsed.entries.length > 0) {
+        return parsed
+      }
+    } catch { /* next */ }
+  }
+  try {
+    const raw = localStorage.getItem('fiscasync_db_balance_entries')
+    if (raw) {
+      const items = JSON.parse(raw)
+      if (Array.isArray(items) && items.length > 0) return { entries: items }
+    }
+  } catch { /* ignore */ }
+  return null
 }
 
 const LiasseControlInterface: React.FC = () => {
-  const [liasses, setLiasses] = useState<ValidationResult[]>([])
-  const [selectedLiasse, setSelectedLiasse] = useState<ValidationResult | null>(null)
-  const [validationDialog, setValidationDialog] = useState(false)
-  const [preComments, setPreComments] = useState<PreComment[]>([])
+  const [session, setSession] = useState<SessionAudit | null>(null)
+  const [running, setRunning] = useState(false)
+  const [progress, setProgress] = useState(0)
+  const [progressLabel, setProgressLabel] = useState('')
+  const [error, setError] = useState<string | null>(null)
+  const [filterSeverite, setFilterSeverite] = useState<Severite | 'ALL'>('ALL')
+  const [filterNiveau, setFilterNiveau] = useState<NiveauControle | -1>(-1)
 
-  useEffect(() => {
-    // Pas de données fictives — la liste se remplit lorsque l'utilisateur
-    // crée et valide des liasses via le module de production.
-    setLiasses([])
-    setPreComments([])
+  const handleRunAudit = useCallback(async () => {
+    setError(null)
+    const balData = loadBalanceFromStorage()
+    if (!balData || balData.entries.length === 0) {
+      setError('Aucune balance trouvée. Importez une balance avant de lancer le contrôle.')
+      return
+    }
+
+    const balanceN = balData.entries.map(e => ({
+      compte: String(e.compte || ''),
+      intitule: String(e.intitule || e.libelle || ''),
+      debit: Number(e.debit) || 0,
+      credit: Number(e.credit) || 0,
+      solde_debit: Number(e.solde_debit) || 0,
+      solde_credit: Number(e.solde_credit) || 0,
+    }))
+
+    setRunning(true)
+    setProgress(0)
+    setProgressLabel('Initialisation...')
+    setSession(null)
+
+    try {
+      const result = await auditOrchestrator.startPhase1Audit(
+        balanceN,
+        undefined,
+        undefined,
+        {
+          onProgress: (_niveau, index, total) => {
+            setProgress(Math.round((index / Math.max(total, 1)) * 100))
+          },
+          onLevelStart: (niveau, nom) => {
+            setProgressLabel(`Niveau ${niveau} : ${nom}`)
+          },
+          onLevelEnd: () => {},
+          onComplete: () => {
+            setProgress(100)
+            setProgressLabel('Terminé')
+          },
+        }
+      )
+
+      // Also run phase 3 (financial statements)
+      const fullResult = await auditOrchestrator.startPhase3Audit(
+        balanceN,
+        result,
+        {
+          onLevelStart: (niveau, nom) => {
+            setProgressLabel(`Niveau ${niveau} : ${nom}`)
+          },
+        }
+      )
+
+      setSession(fullResult)
+    } catch (err) {
+      setError(`Erreur lors de l'audit : ${err instanceof Error ? err.message : String(err)}`)
+    } finally {
+      setRunning(false)
+    }
   }, [])
 
-  const handleValidateLiasse = (liasse: ValidationResult) => {
-    setSelectedLiasse(liasse)
-    setValidationDialog(true)
-  }
+  const filteredResults = session?.resultats.filter(r => {
+    if (filterSeverite !== 'ALL' && r.severite !== filterSeverite) return false
+    if (filterNiveau !== -1 && r.niveau !== filterNiveau) return false
+    return true
+  }) || []
 
   const getScoreColor = (score: number) => {
-    if (score >= 95) return '#22c55e' // Vert
-    if (score >= 85) return '#f59e0b' // Orange
-    return '#ef4444' // Rouge
-  }
-
-  const getStatutChip = (liasse: ValidationResult) => {
-    if (liasse.prete_teledeclaration) {
-      return <Chip label="Prêt Télédéclaration" color="success" size="small" />
-    } else if (liasse.prete_validation) {
-      return <Chip label="Prêt Validation" color="warning" size="small" />
-    } else {
-      return <Chip label="Corrections Requises" color="error" size="small" />
-    }
+    if (score >= 90) return '#16a34a'
+    if (score >= 70) return '#d97706'
+    return '#dc2626'
   }
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4" gutterBottom sx={{ color: 'text.primary' }}>
-        🔍 Contrôle de Liasse Fiscale
+    <Box>
+      <Typography variant="h5" gutterBottom fontWeight={600}>
+        Contrôle de Liasse Fiscale
       </Typography>
-      
-      <Typography variant="h6" color="text.secondary" gutterBottom sx={{ color: 'text.secondary' }}>
-        Validation avancée avant soumission hiérarchique et télédéclaration
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+        Validation avancée : 113 contrôles sur 9 niveaux (structurel, OHADA, fiscal, inter-états)
       </Typography>
 
-      <Paper 
-        sx={{ 
-          p: 3, 
-          mb: 3, 
-          bgcolor: 'grey.300',
-          borderRadius: 2
-        }}
-      >
-        <Typography variant="subtitle1" gutterBottom sx={{ color: 'text.primary', fontWeight: 600 }}>
-          🎯 Processus de Validation de Liasse
-        </Typography>
-        <Typography variant="body2" sx={{ color: 'text.primary' }}>
-          <strong>1.</strong> Vérification affectation balance → tableaux • 
-          <strong>2.</strong> Contrôle exactitude calculs • 
-          <strong>3.</strong> Validation cohérence inter-états • 
-          <strong>4.</strong> Génération pré-commentaires • 
-          <strong>5.</strong> Autorisation validation/télédéclaration
-        </Typography>
+      {error && <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>{error}</Alert>}
+
+      {/* Bouton principal + progression */}
+      <Paper sx={{ p: 2.5, mb: 3 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Button
+            variant="contained"
+            size="large"
+            startIcon={<RunIcon />}
+            onClick={handleRunAudit}
+            disabled={running}
+            sx={{ fontWeight: 600, px: 4 }}
+          >
+            {running ? 'Contrôle en cours...' : 'Lancer le contrôle'}
+          </Button>
+
+          {session && !running && (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <ScoreIcon sx={{ color: getScoreColor(session.resume.scoreGlobal) }} />
+              <Typography variant="h5" fontWeight={700} sx={{ color: getScoreColor(session.resume.scoreGlobal) }}>
+                {session.resume.scoreGlobal}/100
+              </Typography>
+              <Chip label={`${session.resume.totalControles} contrôles`} size="small" />
+              {session.resume.bloquantsRestants > 0 && (
+                <Chip label={`${session.resume.bloquantsRestants} bloquants`} size="small" color="error" />
+              )}
+            </Box>
+          )}
+        </Box>
+
+        {running && (
+          <Box sx={{ mt: 2 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+              <Typography variant="caption" color="text.secondary">{progressLabel}</Typography>
+              <Typography variant="caption" color="text.secondary">{progress}%</Typography>
+            </Box>
+            <LinearProgress variant="determinate" value={progress} sx={{ height: 6, borderRadius: 3 }} />
+          </Box>
+        )}
       </Paper>
 
-      <Grid container spacing={3}>
-        {/* Panel gauche - Liste des liasses */}
-        <Grid item xs={12} md={8}>
-          <Paper sx={{ bgcolor: 'grey.100', p: 3 }}>
-            <Typography variant="h6" gutterBottom sx={{ color: 'text.primary' }}>
-              Liasses en Validation
-            </Typography>
+      {/* Résultats */}
+      {session && (
+        <>
+          {/* Cartes résumé par sévérité */}
+          <Grid container spacing={2} sx={{ mb: 3 }}>
+            {(['OK', 'INFO', 'MINEUR', 'MAJEUR', 'BLOQUANT'] as Severite[]).map(sev => {
+              const count = session.resume.parSeverite[sev] || 0
+              const cfg = SEVERITE_CONFIG[sev]
+              return (
+                <Grid item xs={6} sm key={sev}>
+                  <Card
+                    onClick={() => setFilterSeverite(filterSeverite === sev ? 'ALL' : sev)}
+                    sx={{
+                      cursor: 'pointer',
+                      textAlign: 'center',
+                      border: filterSeverite === sev ? `2px solid ${cfg.color}` : '2px solid transparent',
+                      '&:hover': { bgcolor: 'grey.50' },
+                    }}
+                  >
+                    <CardContent sx={{ py: 1.5, '&:last-child': { pb: 1.5 } }}>
+                      <Typography variant="h4" fontWeight={700} sx={{ color: cfg.color }}>
+                        {count}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary" fontWeight={600}>
+                        {cfg.label}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              )
+            })}
+          </Grid>
 
-            <TableContainer>
-              <Table>
-                <TableHead sx={{ bgcolor: 'grey.300' }}>
+          {/* Filtres par niveau */}
+          <Box sx={{ display: 'flex', gap: 0.5, mb: 2, flexWrap: 'wrap' }}>
+            <Chip
+              label="Tous"
+              size="small"
+              variant={filterNiveau === -1 ? 'filled' : 'outlined'}
+              onClick={() => setFilterNiveau(-1)}
+              sx={{ fontWeight: 600 }}
+            />
+            {Object.entries(session.resume.parNiveau).map(([niv, data]) => (
+              <Chip
+                key={niv}
+                label={`N${niv}: ${NIVEAUX_NOMS[Number(niv) as NiveauControle] || niv} (${data.anomalies}/${data.total})`}
+                size="small"
+                variant={filterNiveau === Number(niv) ? 'filled' : 'outlined'}
+                color={data.anomalies > 0 ? 'warning' : 'success'}
+                onClick={() => setFilterNiveau(filterNiveau === Number(niv) ? -1 : Number(niv) as NiveauControle)}
+              />
+            ))}
+          </Box>
+
+          {/* Tableau des résultats */}
+          <Paper>
+            <TableContainer sx={{ maxHeight: 500 }}>
+              <Table stickyHeader size="small">
+                <TableHead>
                   <TableRow>
-                    <TableCell sx={{ color: 'text.primary', fontWeight: 600 }}>Liasse</TableCell>
-                    <TableCell sx={{ color: 'text.primary', fontWeight: 600 }}>Score</TableCell>
-                    <TableCell sx={{ color: 'text.primary', fontWeight: 600 }}>Contrôles</TableCell>
-                    <TableCell sx={{ color: 'text.primary', fontWeight: 600 }}>Statut</TableCell>
-                    <TableCell sx={{ color: 'text.primary', fontWeight: 600 }}>Actions</TableCell>
+                    <TableCell sx={{ fontWeight: 600, width: 80 }}>Réf</TableCell>
+                    <TableCell sx={{ fontWeight: 600, width: 70 }}>Niveau</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Contrôle</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Résultat</TableCell>
+                    <TableCell sx={{ fontWeight: 600, width: 90 }}>Sévérité</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {liasses.map((liasse, index) => (
-                    <TableRow 
-                      key={liasse.id}
-                      sx={{ 
-                        bgcolor: index % 2 === 0 ? P.primary50 : P.primary100,
-                        '&:hover': { bgcolor: `${P.primary200}30` }
-                      }}
-                    >
-                      <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <LiasseIcon sx={{ color: 'text.primary', mr: 1 }} />
-                          <Typography variant="body2" sx={{ color: 'text.primary', fontWeight: 500 }}>
-                            {liasse.liasse_id}
-                          </Typography>
-                        </Box>
-                      </TableCell>
-                      <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <ScoreIcon sx={{ color: getScoreColor(liasse.score_validation), mr: 1 }} />
-                          <Typography 
-                            variant="h6" 
-                            sx={{ 
-                              color: getScoreColor(liasse.score_validation),
-                              fontWeight: 600 
+                  {filteredResults.map((r) => {
+                    const cfg = SEVERITE_CONFIG[r.severite]
+                    const isOk = r.statut === 'OK'
+                    return (
+                      <TableRow key={r.ref} sx={{ '&:hover': { bgcolor: 'grey.50' } }}>
+                        <TableCell>
+                          <Typography variant="caption" fontWeight={600} fontFamily="monospace">{r.ref}</Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Chip label={`N${r.niveau}`} size="small" variant="outlined" sx={{ fontSize: '0.65rem', height: 20 }} />
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="body2" fontWeight={500}>{r.nom}</Typography>
+                          {!isOk && r.message && (
+                            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.25 }}>
+                              {r.message}
+                            </Typography>
+                          )}
+                          {!isOk && r.suggestion && (
+                            <Typography variant="caption" sx={{ color: '#3b82f6', display: 'block' }}>
+                              → {r.suggestion}
+                            </Typography>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {isOk ? (
+                            <ValidIcon sx={{ color: '#16a34a', fontSize: 20 }} />
+                          ) : r.severite === 'BLOQUANT' || r.severite === 'MAJEUR' ? (
+                            <ErrorIcon sx={{ color: cfg.color, fontSize: 20 }} />
+                          ) : (
+                            <WarningIcon sx={{ color: cfg.color, fontSize: 20 }} />
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <Chip
+                            label={cfg.label}
+                            size="small"
+                            sx={{
+                              bgcolor: `${cfg.color}15`,
+                              color: cfg.color,
+                              fontWeight: 600,
+                              fontSize: '0.65rem',
+                              height: 22,
                             }}
-                          >
-                            {liasse.score_validation}/100
-                          </Typography>
-                        </Box>
-                      </TableCell>
-                      <TableCell>
-                        <Box>
-                          <Typography variant="caption" sx={{ color: 'success.main' }}>
-                            ✓ {liasse.nb_controles_reussis} réussis
-                          </Typography>
-                          {liasse.nb_avertissements > 0 && (
-                            <Typography variant="caption" sx={{ color: 'warning.main', display: 'block' }}>
-                              ⚠ {liasse.nb_avertissements} avertissements
-                            </Typography>
-                          )}
-                          {liasse.nb_erreurs_critiques > 0 && (
-                            <Typography variant="caption" sx={{ color: 'error.main', display: 'block' }}>
-                              ✗ {liasse.nb_erreurs_critiques} erreurs critiques
-                            </Typography>
-                          )}
-                        </Box>
-                      </TableCell>
-                      <TableCell>
-                        {getStatutChip(liasse)}
-                      </TableCell>
-                      <TableCell>
-                        <Button
-                          size="small"
-                          startIcon={<PreviewIcon />}
-                          onClick={() => handleValidateLiasse(liasse)}
-                          sx={{ 
-                            color: 'text.primary',
-                            '&:hover': { bgcolor: `${P.primary200}30` }
-                          }}
-                        >
-                          Valider
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                          />
+                        </TableCell>
+                      </TableRow>
+                    )
+                  })}
                 </TableBody>
               </Table>
             </TableContainer>
+            <Box sx={{ p: 1.5, borderTop: '1px solid', borderColor: 'divider', display: 'flex', justifyContent: 'space-between' }}>
+              <Typography variant="caption" color="text.secondary">
+                {filteredResults.length} contrôle{filteredResults.length > 1 ? 's' : ''} affiché{filteredResults.length > 1 ? 's' : ''}
+                {filterSeverite !== 'ALL' || filterNiveau !== -1 ? ' (filtré)' : ''}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                Score global : {session.resume.scoreGlobal}/100
+              </Typography>
+            </Box>
           </Paper>
-        </Grid>
-
-        {/* Panel droite - Statistiques */}
-        <Grid item xs={12} md={4}>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <Card sx={{ bgcolor: 'grey.100', textAlign: 'center' }}>
-                <CardContent>
-                  <ValidIcon sx={{ fontSize: 40, color: 'success.main', mb: 1 }} />
-                  <Typography variant="h4" sx={{ color: 'text.primary' }}>
-                    {liasses.length > 0 ? `${Math.round(liasses.reduce((s, l) => s + l.score_validation, 0) / liasses.length)}%` : '—'}
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                    Taux de Validation Moyen
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-
-            <Grid item xs={12}>
-              <Card sx={{ bgcolor: 'grey.100', textAlign: 'center' }}>
-                <CardContent>
-                  <WarningIcon sx={{ fontSize: 40, color: 'warning.main', mb: 1 }} />
-                  <Typography variant="h4" sx={{ color: 'text.primary' }}>
-                    {liasses.filter(l => l.prete_teledeclaration).length}
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                    Prêtes Télédéclaration
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-
-            <Grid item xs={12}>
-              <Card sx={{ bgcolor: 'grey.100', textAlign: 'center' }}>
-                <CardContent>
-                  <ErrorIcon sx={{ fontSize: 40, color: 'error.main', mb: 1 }} />
-                  <Typography variant="h4" sx={{ color: 'text.primary' }}>
-                    {liasses.filter(l => !l.prete_validation).length}
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                    Corrections Requises
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          </Grid>
-        </Grid>
-      </Grid>
-
-      {/* Dialog de validation détaillée */}
-      <Dialog 
-        open={validationDialog} 
-        onClose={() => setValidationDialog(false)}
-        maxWidth="lg"
-        fullWidth
-      >
-        <DialogTitle sx={{ bgcolor: 'text.primary', color: 'white' }}>
-          Validation Liasse {selectedLiasse?.liasse_id}
-        </DialogTitle>
-        <DialogContent sx={{ bgcolor: 'grey.50', mt: 2 }}>
-          {selectedLiasse && (
-            <Grid container spacing={3}>
-              {/* Score global */}
-              <Grid item xs={12}>
-                <Card sx={{ bgcolor: 'grey.100', p: 2 }}>
-                  <Typography variant="h6" sx={{ color: 'text.primary', mb: 2 }}>
-                    Score de Validation Global
-                  </Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                    <LinearProgress 
-                      variant="determinate" 
-                      value={selectedLiasse.score_validation} 
-                      sx={{ 
-                        flexGrow: 1, 
-                        mr: 2,
-                        height: 8,
-                        borderRadius: 4,
-                        '& .MuiLinearProgress-bar': {
-                          bgcolor: getScoreColor(selectedLiasse.score_validation)
-                        }
-                      }} 
-                    />
-                    <Typography 
-                      variant="h6" 
-                      sx={{ 
-                        color: getScoreColor(selectedLiasse.score_validation),
-                        fontWeight: 600 
-                      }}
-                    >
-                      {selectedLiasse.score_validation}/100
-                    </Typography>
-                  </Box>
-                  
-                  <Grid container spacing={2}>
-                    <Grid item xs={4}>
-                      <Box sx={{ textAlign: 'center' }}>
-                        <Typography variant="h4" sx={{ color: 'success.main' }}>
-                          {selectedLiasse.nb_controles_reussis}
-                        </Typography>
-                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                          Contrôles Réussis
-                        </Typography>
-                      </Box>
-                    </Grid>
-                    <Grid item xs={4}>
-                      <Box sx={{ textAlign: 'center' }}>
-                        <Typography variant="h4" sx={{ color: 'warning.main' }}>
-                          {selectedLiasse.nb_avertissements}
-                        </Typography>
-                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                          Avertissements
-                        </Typography>
-                      </Box>
-                    </Grid>
-                    <Grid item xs={4}>
-                      <Box sx={{ textAlign: 'center' }}>
-                        <Typography variant="h4" sx={{ color: 'error.main' }}>
-                          {selectedLiasse.nb_erreurs_critiques}
-                        </Typography>
-                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                          Erreurs Critiques
-                        </Typography>
-                      </Box>
-                    </Grid>
-                  </Grid>
-                </Card>
-              </Grid>
-
-              {/* Pré-commentaires générés */}
-              <Grid item xs={12}>
-                <Card sx={{ bgcolor: 'grey.100', p: 2 }}>
-                  <Typography variant="h6" sx={{ color: 'text.primary', mb: 2 }}>
-                    📝 Pré-commentaires Générés par IA
-                  </Typography>
-                  
-                  <List>
-                    {preComments.map((comment, index) => (
-                      <ListItem key={index} sx={{ bgcolor: 'grey.50', mb: 1, borderRadius: 1 }}>
-                        <ListItemIcon>
-                          <CommentIcon sx={{ color: 'text.primary' }} />
-                        </ListItemIcon>
-                        <ListItemText 
-                          primary={comment.titre}
-                          secondary={comment.commentaire}
-                          primaryTypographyProps={{ 
-                            fontWeight: 500,
-                            color: 'text.primary' 
-                          }}
-                          secondaryTypographyProps={{ 
-                            color: 'text.secondary',
-                            fontSize: '0.875rem' 
-                          }}
-                        />
-                        <Chip 
-                          label={comment.type}
-                          size="small"
-                          sx={{ 
-                            bgcolor: comment.type === 'POSITIF' ? P.primary100 : P.primary200,
-                            color: comment.type === 'POSITIF' ? '#22c55e' : P.primary900
-                          }}
-                        />
-                      </ListItem>
-                    ))}
-                  </List>
-
-                  <Divider sx={{ my: 2 }} />
-                  
-                  <TextField
-                    fullWidth
-                    label="Commentaires additionnels"
-                    multiline
-                    rows={3}
-                    placeholder="Ajoutez vos commentaires complémentaires..."
-                    sx={{ mb: 2 }}
-                  />
-                </Card>
-              </Grid>
-            </Grid>
-          )}
-        </DialogContent>
-        
-        <DialogActions sx={{ bgcolor: 'grey.50', p: 2 }}>
-          <Button 
-            onClick={() => setValidationDialog(false)}
-            sx={{ color: 'text.secondary' }}
-          >
-            Fermer
-          </Button>
-          
-          {selectedLiasse?.prete_validation && (
-            <Button 
-              variant="contained"
-              startIcon={<SubmitIcon />}
-              sx={{ 
-                bgcolor: 'text.primary',
-                '&:hover': { bgcolor: 'grey.900' },
-                mr: 1
-              }}
-            >
-              Soumettre Validation
-            </Button>
-          )}
-          
-          {selectedLiasse?.prete_teledeclaration && (
-            <Button 
-              variant="contained"
-              startIcon={<SubmitIcon />}
-              sx={{ 
-                bgcolor: 'success.main',
-                '&:hover': { bgcolor: 'success.main' }
-              }}
-            >
-              Télédéclarer
-            </Button>
-          )}
-        </DialogActions>
-      </Dialog>
+        </>
+      )}
     </Box>
   )
 }

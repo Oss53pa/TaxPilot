@@ -360,22 +360,27 @@ const TableauFluxTresorerieSYSCOHADA: FC<TFTProps> = ({ onNoteClick }) => {
     return (
       <TableRow
         key={ref}
+        className={isTotal || isGrandTotal || isSubtotal ? 'total-row' : undefined}
         sx={{
           backgroundColor: isGrandTotal
-            ? alpha(theme.palette.primary.main, 0.05)
+            ? '#1a1a1a'
             : isTotal
-              ? alpha(theme.palette.warning.main, 0.04)
+              ? '#2d2d2d'
               : isSubtotal
-                ? alpha(theme.palette.info.main, 0.03)
+                ? '#4a4a4a'
                 : 'transparent',
-          '&:hover': { backgroundColor: alpha(theme.palette.action.hover, 0.05) },
+          ...(isGrandTotal && { borderTop: '2px solid #333', borderBottom: '2px solid #333' }),
+          ...(isTotal && { borderTop: '1.5px solid #555' }),
+          ...(isSubtotal && { borderTop: '1px solid #666' }),
+          '&:hover': { backgroundColor: isGrandTotal ? '#222' : isTotal ? '#383838' : isSubtotal ? '#555' : alpha(theme.palette.action.hover, 0.05) },
         }}
       >
         {/* Réf */}
         <TableCell sx={{
           width: 60,
-          fontWeight: isTotal || isGrandTotal || isSubtotal ? 600 : 400,
-          color: isGrandTotal ? theme.palette.primary.main : isTotal ? theme.palette.warning.dark : 'inherit',
+          fontWeight: isTotal || isGrandTotal || isSubtotal ? 700 : 400,
+          color: isGrandTotal || isTotal || isSubtotal ? '#fff' : 'inherit',
+          borderColor: isGrandTotal || isTotal || isSubtotal ? '#444' : undefined,
         }}>
           {ref}
         </TableCell>
@@ -383,8 +388,10 @@ const TableauFluxTresorerieSYSCOHADA: FC<TFTProps> = ({ onNoteClick }) => {
         {/* Libellé */}
         <TableCell sx={{
           pl: indent * 3,
-          fontWeight: isTotal || isGrandTotal ? 700 : isSubtotal ? 600 : 400,
-          fontSize: isGrandTotal ? '0.95rem' : isTotal ? '0.9rem' : '0.875rem',
+          fontWeight: isTotal || isGrandTotal || isSubtotal ? 700 : 400,
+          fontSize: isGrandTotal ? '0.95rem' : isTotal || isSubtotal ? '0.9rem' : '0.875rem',
+          color: isGrandTotal || isTotal || isSubtotal ? '#fff' : 'inherit',
+          borderColor: isGrandTotal || isTotal || isSubtotal ? '#444' : undefined,
         }}>
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             {item.label}
@@ -414,7 +421,8 @@ const TableauFluxTresorerieSYSCOHADA: FC<TFTProps> = ({ onNoteClick }) => {
         {/* Exercice N */}
         <TableCell align="right" sx={{
           width: 150,
-          backgroundColor: alpha(theme.palette.info.main, 0.05),
+          backgroundColor: isGrandTotal ? '#1a1a1a' : isTotal ? '#2d2d2d' : isSubtotal ? '#4a4a4a' : alpha(theme.palette.info.main, 0.05),
+          borderColor: isTotal || isGrandTotal || isSubtotal ? '#444' : undefined,
         }}>
           {isEditable ? (
             <TextField
@@ -430,7 +438,7 @@ const TableauFluxTresorerieSYSCOHADA: FC<TFTProps> = ({ onNoteClick }) => {
               variant="body2"
               sx={{
                 fontWeight: isTotal || isGrandTotal || isSubtotal ? 700 : 400,
-                color: getResultColor(rowData.montant),
+                color: isTotal || isGrandTotal || isSubtotal ? '#fff' : getResultColor(rowData.montant),
               }}
             >
               {formatNumber(rowData.montant, isGrandTotal)}
@@ -439,7 +447,11 @@ const TableauFluxTresorerieSYSCOHADA: FC<TFTProps> = ({ onNoteClick }) => {
         </TableCell>
 
         {/* Exercice N-1 */}
-        <TableCell align="right" sx={{ width: 150 }}>
+        <TableCell align="right" sx={{
+          width: 150,
+          backgroundColor: isGrandTotal ? '#1a1a1a' : isTotal ? '#2d2d2d' : isSubtotal ? '#4a4a4a' : undefined,
+          borderColor: isTotal || isGrandTotal || isSubtotal ? '#444' : undefined,
+        }}>
           {isEditable ? (
             <TextField
               size="small"
@@ -452,6 +464,7 @@ const TableauFluxTresorerieSYSCOHADA: FC<TFTProps> = ({ onNoteClick }) => {
           ) : (
             <Typography variant="body2" sx={{
               fontWeight: isTotal || isGrandTotal || isSubtotal ? 700 : 400,
+              color: isTotal || isGrandTotal || isSubtotal ? '#fff' : undefined,
             }}>
               {formatNumber(rowData.montantN1)}
             </Typography>

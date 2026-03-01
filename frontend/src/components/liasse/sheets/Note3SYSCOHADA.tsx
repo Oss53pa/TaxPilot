@@ -187,18 +187,18 @@ const Note3ASYSCOHADA: React.FC = () => {
                 }
               }, { valeurBruteDebut: 0, acquisitions: 0, cessions: 0, reevaluations: 0, valeurBruteFin: 0, amortissements: 0, valeurNette: 0 })
               return (
-                <TableRow sx={{ backgroundColor: theme.palette.grey[100], borderTop: '2px solid ' + theme.palette.primary.main }}>
-                  <TableCell sx={{ fontWeight: 700, fontSize: '1.1rem' }}>TOTAL</TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 700 }}>{formatMontant(computedTotal.valeurBruteDebut)}</TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 700, color: 'success.main' }}>{formatMontant(computedTotal.acquisitions)}</TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 700, color: 'error.main' }}>{formatMontant(computedTotal.cessions)}</TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 700 }}>{formatMontant(computedTotal.reevaluations)}</TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 700 }}>{formatMontant(computedTotal.valeurBruteFin)}</TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 700, color: 'warning.main' }}>{formatMontant(computedTotal.amortissements)}</TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 700, fontSize: '1.1rem', color: 'primary.main' }}>
+                <TableRow className="total-row" sx={{ backgroundColor: '#1a1a1a', borderTop: '2px solid #333', borderBottom: '2px solid #333' }}>
+                  <TableCell sx={{ fontWeight: 700, fontSize: '1.1rem', color: '#fff', borderColor: '#444' }}>TOTAL</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 700, color: '#fff', borderColor: '#444' }}>{formatMontant(computedTotal.valeurBruteDebut)}</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 700, color: '#fff', borderColor: '#444' }}>{formatMontant(computedTotal.acquisitions)}</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 700, color: '#fff', borderColor: '#444' }}>{formatMontant(computedTotal.cessions)}</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 700, color: '#fff', borderColor: '#444' }}>{formatMontant(computedTotal.reevaluations)}</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 700, color: '#fff', borderColor: '#444' }}>{formatMontant(computedTotal.valeurBruteFin)}</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 700, color: '#fff', borderColor: '#444' }}>{formatMontant(computedTotal.amortissements)}</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 700, fontSize: '1.1rem', color: '#fff', borderColor: '#444' }}>
                     {formatMontant(computedTotal.valeurNette)}
                   </TableCell>
-                  <TableCell align="center">
+                  <TableCell align="center" sx={{ borderColor: '#444' }}>
                     {getVariationIcon(computedTotal.acquisitions, computedTotal.cessions)}
                   </TableCell>
                 </TableRow>

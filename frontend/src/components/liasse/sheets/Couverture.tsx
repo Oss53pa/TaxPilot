@@ -27,6 +27,7 @@ import {
   Person as PersonIcon,
 } from '@mui/icons-material'
 import type { Entreprise } from '@/types'
+import { useRegimeImposition } from '@/config/regimeContext'
 
 // Dictionnaires de mapping code → label
 const formesJuridiquesMap: Record<string, string> = {
@@ -108,11 +109,16 @@ interface CouvertureProps {
 const Couverture: React.FC<CouvertureProps> = ({ data = {}, entreprise }) => {
   const theme = useTheme()
   const currentYear = new Date().getFullYear()
+  const selectedRegime = useRegimeImposition()
 
   // Si props.entreprise existe (venant du backend), mapper vers les champs d'affichage
   // Sinon, utiliser data (ancien format) puis les valeurs hardcodées en dernier recours
   const ent = entreprise
   const hasEntreprise = !!ent
+
+  // Priorité : contexte régime > entreprise.regime_imposition > fallback
+  const regimeCode = selectedRegime || ent?.regime_imposition || ''
+  const regimeDisplay = regimesImpositionMap[regimeCode] || regimeCode || 'Régime du Système Normal'
 
   const displayData = {
     entreprise: {
@@ -143,9 +149,7 @@ const Couverture: React.FC<CouvertureProps> = ({ data = {}, entreprise }) => {
     },
     declaration: {
       type: data.declaration?.type || 'DÉCLARATION STATISTIQUE ET FISCALE',
-      regime: ent
-        ? (regimesImpositionMap[ent.regime_imposition] || ent.regime_imposition)
-        : (data.declaration?.regime || 'Régime du Système Normal'),
+      regime: regimeDisplay,
       centreImpots: ent?.centre_impots || '',
       dateDepot: ent?.date_depot
         ? formatDateFR(ent.date_depot)

@@ -860,22 +860,31 @@ export class LiasseDataService {
   // ────────── Génération TFT (Tableau des Flux de Trésorerie) ──────────
 
   generateTFT(): any {
+    // ── Helpers N et N-1 ──
+    const cN1 = (comptes: string[]) => this.hasN1 ? this.calculateChargesN1(comptes) : 0
+    const pN1 = (comptes: string[]) => this.hasN1 ? this.calculateProduitsN1(comptes) : 0
+
     // FA = Résultat net depuis CdR
     const FA = this.getResultatFromCompteResultat()
+    const FA_N1 = this.hasN1 ? this.getResultatFromCompteResultatN1() : 0
 
     // FB = Dotations aux amortissements et provisions (charges non décaissées)
     const FB = this.calculateCharges(['681', '687', '691', '697'])
+    const FB_N1 = cN1(['681', '687', '691', '697'])
 
     // FC = Reprises (produits non encaissés)
     const FC = this.calculateProduits(['791', '797', '798', '799', '787'])
+    const FC_N1 = pN1(['791', '797', '798', '799', '787'])
 
     // FD = Plus/moins-values de cession (produit non encaissé à éliminer)
     const produitsCessions = this.calculateProduits(['82'])
     const VNCCessions = this.calculateCharges(['81'])
     const FD = produitsCessions - VNCCessions
+    const FD_N1 = pN1(['82']) - cN1(['81'])
 
     // FE = CAFG (Capacité d'Autofinancement Globale)
     const FE = FA + FB - FC - FD
+    const FE_N1 = FA_N1 + FB_N1 - FC_N1 - FD_N1
 
     // FF = Variation du BFR
     let FF = 0
@@ -893,13 +902,17 @@ export class LiasseDataService {
 
       FF = -(bfrN - bfrN1) // Augmentation BFR = emploi = négatif pour la trésorerie
     }
+    // FF N-1 nécessiterait la balance N-2 (non disponible)
+    const FF_N1 = 0
 
     // FG = Flux de trésorerie opérationnels
     const FG = FE + FF
+    const FG_N1 = FE_N1 + FF_N1
 
     // Investissement
     let FH = 0 // Acquisitions immo
     const FI = produitsCessions // Cessions = encaissements
+    const FI_N1 = pN1(['82'])
     let FJ = 0 // Variation immo financières
     if (this.hasN1) {
       // FH = Immobilisations brutes N - Immobilisations brutes N-1 + VNC cessions
@@ -912,7 +925,11 @@ export class LiasseDataService {
       const immoFinN1 = this.calculateActifBrutN1(['26', '27'])
       FJ = immoFinN - immoFinN1
     }
+    // FH/FJ N-1 nécessiteraient la balance N-2
+    const FH_N1 = 0
+    const FJ_N1 = 0
     const FK = -FH + FI - FJ
+    const FK_N1 = -FH_N1 + FI_N1 - FJ_N1
 
     // Financement
     let FL = 0 // Augmentation capital
@@ -930,10 +947,14 @@ export class LiasseDataService {
       FM = Math.max(0, deltaDettes)
       FN = Math.max(0, -deltaDettes)
     }
+    // FL/FM/FN N-1 nécessiteraient la balance N-2
+    const FL_N1 = 0, FM_N1 = 0, FN_N1 = 0, FO_N1 = 0
     const FP = FL + FM - FN - FO
+    const FP_N1 = FL_N1 + FM_N1 - FN_N1 - FO_N1
 
     // Synthèse
     const FQ = FG + FK + FP
+    const FQ_N1 = FG_N1 + FK_N1 + FP_N1
 
     // Trésorerie fin d'exercice (calculable depuis la balance courante)
     const tresoActif = this.calculateActifBrut(['50', '51', '52', '53', '54', '55', '56', '57', '58'])
@@ -942,18 +963,27 @@ export class LiasseDataService {
 
     // Trésorerie début = Trésorerie fin N-1
     let FR = 0
+    let FS_N1 = 0
     if (this.hasN1) {
       const tresoActifN1 = this.calculateActifBrutN1(['50', '51', '52', '53', '54', '55', '56', '57', '58'])
       const tresoPassifN1 = this.calculatePassifReciprocalN1(['52', '561', '564', '565'])
       FR = tresoActifN1 - tresoPassifN1
+      FS_N1 = FR // Trésorerie fin N-1 = Trésorerie début N
     }
+    const FR_N1 = 0 // Trésorerie début N-1 nécessiterait N-2
     const FT = FS - FR - FQ  // Contrôle : devrait être 0
+    const FT_N1 = FS_N1 - FR_N1 - FQ_N1
 
     return {
       FA, FB, FC, FD, FE, FF, FG,
       FH, FI, FJ, FK,
       FL, FM, FN, FO, FP,
       FQ, FR, FS, FT,
+      // Valeurs N-1
+      FA_N1, FB_N1, FC_N1, FD_N1, FE_N1, FF_N1, FG_N1,
+      FH_N1, FI_N1, FJ_N1, FK_N1,
+      FL_N1, FM_N1, FN_N1, FO_N1, FP_N1,
+      FQ_N1, FR_N1, FS_N1, FT_N1,
       tresoActif, tresoPassif,
       hasN1: this.hasN1
     }

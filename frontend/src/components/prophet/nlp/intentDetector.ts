@@ -178,8 +178,11 @@ function scoreIntents(normalized: string, _tokens: string[], canonTokens: string
     if (/\b(tendance|evolution|comparaison|compare|progression)\b/.test(normalized)) {
       add('PREDICTION_TREND', 80)
     }
-    if (/\b(anomalie|alerte|risque|probleme|irregularite|incoherence)\b/.test(normalized)) {
+    if (/\b(anomalie|alerte|risque|probleme|irregularite)\b/.test(normalized)) {
       add('PREDICTION_ANOMALY', 80)
+    }
+    if (/\b(coherence|coherent|equilibre|equilibr|verif.*coherence|controle.*coherence|incoherence|bilan.*passif|actif.*passif)\b/.test(normalized)) {
+      add('PREDICTION_COHERENCE', 85)
     }
     if (hasPrediction && /\b(general|global|complet|situation|sante|diagnostic|synthese)\b/.test(normalized)) {
       add('PREDICTION_GENERAL', 75)

@@ -222,31 +222,37 @@ const BilanActifSYSCOHADA: React.FC<BilanActifProps> = ({ onNoteClick }) => {
     const indent = item.indent || 0
 
     return (
-      <TableRow 
+      <TableRow
         key={item.ref}
+        className={isTotal || isGrandTotal ? 'total-row' : undefined}
         sx={{
-          backgroundColor: isGrandTotal 
-            ? alpha(theme.palette.error.main, 0.05)
-            : isTotal 
-            ? alpha(theme.palette.warning.main, 0.05)
+          backgroundColor: isGrandTotal
+            ? '#1a1a1a'
+            : isTotal
+            ? '#2d2d2d'
             : 'transparent',
+          ...(isGrandTotal && { borderTop: '2px solid #333', borderBottom: '2px solid #333' }),
+          ...(isTotal && { borderTop: '1.5px solid #555' }),
           '&:hover': {
-            backgroundColor: alpha(theme.palette.action.hover, 0.05)
+            backgroundColor: isGrandTotal ? '#222' : isTotal ? '#383838' : alpha(theme.palette.action.hover, 0.05)
           }
         }}
       >
-        <TableCell sx={{ 
+        <TableCell sx={{
           width: '60px',
-          fontWeight: isTotal || isGrandTotal ? 600 : 400,
-          color: isGrandTotal ? theme.palette.error.main : isTotal ? theme.palette.warning.dark : 'inherit'
+          fontWeight: isTotal || isGrandTotal ? 700 : 400,
+          color: isGrandTotal || isTotal ? '#fff' : 'inherit',
+          borderColor: isGrandTotal || isTotal ? '#444' : undefined,
         }}>
           {item.ref}
         </TableCell>
-        
-        <TableCell sx={{ 
+
+        <TableCell sx={{
           pl: indent * 3,
-          fontWeight: isTotal || isGrandTotal ? 600 : item.type === 'group' ? 500 : 400,
-          fontSize: isGrandTotal ? '0.95rem' : isTotal ? '0.9rem' : '0.875rem'
+          fontWeight: isTotal || isGrandTotal ? 700 : item.type === 'group' ? 500 : 400,
+          fontSize: isGrandTotal ? '0.95rem' : isTotal ? '0.9rem' : '0.875rem',
+          color: isGrandTotal || isTotal ? '#fff' : 'inherit',
+          borderColor: isGrandTotal || isTotal ? '#444' : undefined,
         }}>
           {item.label}
         </TableCell>
@@ -277,7 +283,7 @@ const BilanActifSYSCOHADA: React.FC<BilanActifProps> = ({ onNoteClick }) => {
           ) : null}
         </TableCell>
         
-        <TableCell align="right" sx={{ width: '150px' }}>
+        <TableCell align="right" sx={{ width: '150px', borderColor: isTotal || isGrandTotal ? '#444' : undefined }}>
           {isEditable ? (
             <TextField
               size="small"
@@ -291,13 +297,13 @@ const BilanActifSYSCOHADA: React.FC<BilanActifProps> = ({ onNoteClick }) => {
               }}
             />
           ) : (
-            <Typography variant="body2" sx={{ fontWeight: isTotal || isGrandTotal ? 600 : 400 }}>
+            <Typography variant="body2" sx={{ fontWeight: isTotal || isGrandTotal ? 700 : 400, color: isTotal || isGrandTotal ? '#fff' : 'inherit' }}>
               {formatNumber(rowData.brut)}
             </Typography>
           )}
         </TableCell>
-        
-        <TableCell align="right" sx={{ width: '150px' }}>
+
+        <TableCell align="right" sx={{ width: '150px', borderColor: isTotal || isGrandTotal ? '#444' : undefined }}>
           {isEditable ? (
             <TextField
               size="small"
@@ -311,21 +317,22 @@ const BilanActifSYSCOHADA: React.FC<BilanActifProps> = ({ onNoteClick }) => {
               }}
             />
           ) : (
-            <Typography variant="body2" sx={{ fontWeight: isTotal || isGrandTotal ? 600 : 400 }}>
+            <Typography variant="body2" sx={{ fontWeight: isTotal || isGrandTotal ? 700 : 400, color: isTotal || isGrandTotal ? '#fff' : 'inherit' }}>
               {formatNumber(rowData.amortProv)}
             </Typography>
           )}
         </TableCell>
-        
-        <TableCell align="right" sx={{ 
+
+        <TableCell align="right" sx={{
           width: '150px',
-          backgroundColor: alpha(theme.palette.info.main, 0.05)
+          backgroundColor: isTotal || isGrandTotal ? undefined : alpha(theme.palette.info.main, 0.05),
+          borderColor: isTotal || isGrandTotal ? '#444' : undefined,
         }}>
-          <Typography 
-            variant="body2" 
-            sx={{ 
-              fontWeight: isTotal || isGrandTotal ? 600 : 400,
-              color: isGrandTotal ? theme.palette.error.main : 'inherit'
+          <Typography
+            variant="body2"
+            sx={{
+              fontWeight: isTotal || isGrandTotal ? 700 : 400,
+              color: isTotal || isGrandTotal ? '#fff' : 'inherit'
             }}
           >
             {formatNumber(rowData.net)}

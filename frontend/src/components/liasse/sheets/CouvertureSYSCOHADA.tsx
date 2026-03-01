@@ -4,6 +4,7 @@
  */
 
 import React from 'react'
+import { useRegimeImposition } from '@/config/regimeContext'
 import {
   Box,
   Paper,
@@ -71,7 +72,8 @@ const CouvertureSYSCOHADA: React.FC<{ entreprise?: any }> = ({ entreprise }) => 
 
   // Derive from entreprise data
   const paysInfo = PAYS_OHADA_DETAILS[ent.pays] || { nomOfficiel: v(ent.pays), devise: '' }
-  const regimeLabel = REGIME_LABELS[ent.regime_imposition] || v(ent.regime_imposition)
+  const ctxRegime = useRegimeImposition()
+  const regimeLabel = REGIME_LABELS[ctxRegime] || REGIME_LABELS[ent.regime_imposition] || v(ent.regime_imposition)
   const dateDebut = formatDate(ent.exercice_debut)
   const dateFin = formatDate(ent.exercice_fin)
   const exerciceYear = ent.exercice_fin

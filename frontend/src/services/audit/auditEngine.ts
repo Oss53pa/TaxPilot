@@ -150,8 +150,13 @@ export function computeResume(resultats: ResultatControle[]): ResumeAudit {
   }
 
   const totalControles = resultats.length
-  const totalOK = resultats.filter((r) => r.statut === 'OK').length
-  const scoreGlobal = totalControles > 0 ? Math.round((totalOK / totalControles) * 100) : 0
+  // Weighted score: BLOQUANT=-10, MAJEUR=-5, MINEUR=-2, INFO=-1, OK=0
+  // Start at 100 and deduct based on severity
+  const penalites = parSeverite.BLOQUANT * 10 + parSeverite.MAJEUR * 5 + parSeverite.MINEUR * 2 + parSeverite.INFO * 1
+  const maxPenalite = totalControles * 10  // Maximum possible penalty
+  const scoreGlobal = totalControles > 0
+    ? Math.max(0, Math.min(100, Math.round(100 - (penalites / maxPenalite) * 100)))
+    : 0
 
   return {
     totalControles,

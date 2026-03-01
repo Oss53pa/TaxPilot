@@ -26,6 +26,7 @@ const ModernBalance = React.lazy(() => import('@/pages/balance/ModernBalance'))
 const PlanSYSCOHADARevise = React.lazy(() => import('@/pages/plans/PlanSYSCOHADARevise'))
 const OperationsSpecifiques = React.lazy(() => import('@/pages/plans/OperationsSpecifiques'))
 const LiasseFiscaleOfficial = React.lazy(() => import('@/pages/liasse/LiasseFiscaleOfficial'))
+const LiasseFiscale = React.lazy(() => import('@/pages/liasse/LiasseFiscale'))
 const ModernDocuments = React.lazy(() => import('@/pages/documents/ModernDocuments'))
 const ModernGeneration = React.lazy(() => import('@/pages/generation/ModernGeneration'))
 const ModernAudit = React.lazy(() => import('@/pages/audit/ModernAudit'))
@@ -90,6 +91,7 @@ function App() {
           <Route path="/production-liasse" element={<S><LiasseDataProvider><LiasseFiscaleOfficial /></LiasseDataProvider></S>} />
           <Route path="/liasse-complete" element={<S><LiasseDataProvider><LiasseFiscaleOfficial /></LiasseDataProvider></S>} />
           <Route path="/direct-liasse" element={<S><LiasseDataProvider><LiasseFiscaleOfficial /></LiasseDataProvider></S>} />
+          <Route path="/liasse-fiscale" element={<S><LiasseFiscale /></S>} />
           <Route path="/documents" element={<S><ModernDocuments /></S>} />
           <Route path="/generation" element={<S><ModernGeneration /></S>} />
 

@@ -411,8 +411,8 @@ export const LIASSE_SHEETS: SheetConfig[] = [
 // Fonctions utilitaires pour les notes
 export function getNoteTitle(noteNumber: number): string {
   const noteTitles: { [key: number]: string } = {
-    1: 'Dérogations, changements de méthodes',
-    2: 'Événements postérieurs',
+    1: 'Dettes garanties par des sûretés réelles et les engagements',
+    2: 'Informations obligatoires',
     3: 'Immobilisations',
     4: 'Immobilisations financières',
     5: 'Actif circulant et dettes circulantes HAO',
@@ -429,7 +429,7 @@ export function getNoteTitle(noteNumber: number): string {
     16: 'Dettes financières et retraite',
     17: 'Fournisseurs d\'exploitation',
     18: 'Dettes fiscales et sociales',
-    19: 'Autres dettes et provisions',
+    19: 'Autres dettes et provisions pour risques et charges',
     20: 'Banques, crédit d\'escompte et de trésorerie',
     21: 'Chiffre d\'affaires et autres produits',
     22: 'Achats',
@@ -438,18 +438,18 @@ export function getNoteTitle(noteNumber: number): string {
     25: 'Impôts et taxes',
     26: 'Autres charges',
     27: 'Charges de personnel',
-    28: 'Dotations et charges pour provisions',
+    28: 'Dotations et charges pour provisions et dépréciations',
     29: 'Charges et revenus financiers',
     30: 'Autres charges et produits HAO',
-    31: 'Répartition du résultat',
+    31: 'Répartition du résultat et autres éléments caractéristiques',
     32: 'Production de l\'exercice',
     33: 'Achats destinés à la production',
-    34: 'Fiche de synthèse des indicateurs financiers',
-    35: 'Liste des informations sociales/environnementales',
+    34: 'Fiche de synthèse des principaux indicateurs financiers',
+    35: 'Liste des informations sociales, environnementales et sociétales',
     36: 'Table des codes',
     37: 'Détermination impôts sur le résultat',
-    38: 'Événements postérieurs à la clôture',
-    39: 'Changements de méthodes comptables'
+    38: 'Événements postérieurs à la clôture de l\'exercice',
+    39: 'Changements de méthodes comptables, d\'estimations comptables et d\'erreurs'
   }
   return noteTitles[noteNumber] || `Annexe ${noteNumber}`
 }
@@ -457,31 +457,31 @@ export function getNoteTitle(noteNumber: number): string {
 /** Titres des sous-notes (3A-3E, 8A-8C, 15A-15B, 16A-16C, 27A-27B) */
 export function getSubNoteTitle(noteId: string): string {
   const subNoteTitles: Record<string, string> = {
-    '3A': 'Immobilisations brutes',
-    '3B': 'Biens pris en location-acquisition',
-    '3C': 'Amortissements',
-    '3C_BIS': 'Dépréciations',
-    '3D': 'Plus et moins-values de cession',
-    '3E': 'Réévaluations et écarts',
-    '8A': 'Charges immobilisées',
-    '8B': 'Provisions pour charges',
-    '8C': 'Provisions pour engagements de retraite',
-    '15A': 'Subventions d\'investissement',
+    '3A': 'Immobilisations (brutes)',
+    '3B': 'Biens pris en location acquisition',
+    '3C': 'Immobilisations (amortissements)',
+    '3C_BIS': 'Immobilisations (dépréciations)',
+    '3D': 'Immobilisations (plus-values et moins-values de cession)',
+    '3E': 'Informations sur les réévaluations effectuées par l\'entité',
+    '8A': 'Tableau d\'étalement des charges immobilisées',
+    '8B': 'Tableau d\'étalement de provisions pour charges à répartir',
+    '8C': 'Tableau d\'étalement de provisions pour engagements de retraite',
+    '15A': 'Subventions d\'investissement et provisions réglementées',
     '15B': 'Autres fonds propres',
     '16A': 'Dettes financières et ressources assimilées',
-    '16B': 'Engagements de retraite — Hypothèses',
-    '16B_BIS': 'Engagements de retraite — Actif/Passif',
+    '16B': 'Engagements de retraite et avantages assimilés : hypothèses',
+    '16B_BIS': 'Engagements de retraite et avantages assimilés : actif/passif',
     '16C': 'Actifs et passifs éventuels',
     '27A': 'Charges de personnel',
-    '27B': 'Effectifs et masse salariale',
+    '27B': 'Effectifs, masse salariale et personnel extérieur',
   }
   return subNoteTitles[noteId] || `Annexe ${noteId}`
 }
 
 export function getNoteDescription(noteNumber: number): string {
   const noteDescriptions: { [key: number]: string } = {
-    1: 'Dérogations aux principes comptables et changements de méthodes',
-    2: 'Événements postérieurs à la clôture de l\'exercice',
+    1: 'Dettes garanties par des sûretés réelles et engagements hors bilan',
+    2: 'Informations obligatoires : conformité SYSCOHADA, règles et méthodes comptables',
     3: 'Détail et mouvements des immobilisations',
     4: 'Titres de participation, prêts et créances non commerciales',
     5: 'Actif circulant HAO et dettes circulantes HAO',
@@ -494,11 +494,11 @@ export function getNoteDescription(noteNumber: number): string {
     12: 'Écarts de conversion actif/passif et transferts de charges',
     13: 'Capital social, actionnaires, capital souscrit non appelé',
     14: 'Primes d\'émission, réserves légales et facultatives',
-    15: 'Subventions d\'investissement et autres fonds propres',
+    15: 'Subventions d\'investissement, provisions réglementées et autres fonds propres',
     16: 'Emprunts, dettes financières et engagements de retraite',
     17: 'Fournisseurs d\'exploitation et comptes rattachés',
     18: 'Impôts, taxes et cotisations sociales à payer',
-    19: 'Autres dettes et provisions pour risques',
+    19: 'Autres dettes et provisions pour risques et charges',
     20: 'Crédits bancaires, escompte et trésorerie passive',
     21: 'Chiffre d\'affaires, subventions et autres produits',
     22: 'Achats de marchandises et matières',
@@ -510,15 +510,15 @@ export function getNoteDescription(noteNumber: number): string {
     28: 'Dotations aux amortissements, dépréciations et provisions',
     29: 'Charges et produits financiers',
     30: 'Charges et produits HAO',
-    31: 'Proposition d\'affectation du résultat',
+    31: 'Répartition du résultat et autres éléments caractéristiques',
     32: 'Production immobilisée, stockée et vendue',
     33: 'Achats de matières premières et fournitures',
-    34: 'Ratios et indicateurs financiers de synthèse',
-    35: 'Informations sociales et environnementales',
+    34: 'Principaux indicateurs et ratios financiers de synthèse',
+    35: 'Informations sociales, environnementales et sociétales',
     36: 'Nomenclature et codes comptables de référence',
     37: 'Calcul de l\'impôt sur le résultat',
-    38: 'Événements survenus après la date de clôture',
-    39: 'Changements de principes et méthodes comptables',
+    38: 'Événements postérieurs à la clôture de l\'exercice',
+    39: 'Changements de méthodes comptables, d\'estimations et d\'erreurs',
   }
   return noteDescriptions[noteNumber] || `Note annexe numéro ${noteNumber}`
 }

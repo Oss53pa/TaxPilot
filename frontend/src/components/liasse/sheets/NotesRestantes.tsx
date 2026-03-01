@@ -861,15 +861,17 @@ const NotesRestantes: React.FC<NoteRestanteProps> = ({
                 return (
                   <TableRow
                     key={rowIdx}
+                    className={isTotal ? 'total-row' : undefined}
                     sx={{
                       backgroundColor: isTotal
-                        ? theme.palette.grey[100]
+                        ? '#1a1a1a'
                         : isHeader
                         ? theme.palette.grey[50]
                         : rowIdx % 2 === 0
                         ? 'white'
                         : theme.palette.grey[50],
-                      borderTop: isTotal ? `2px solid ${theme.palette.primary.main}` : undefined,
+                      borderTop: isTotal ? '2px solid #333' : undefined,
+                      borderBottom: isTotal ? '2px solid #333' : undefined,
                     }}
                   >
                     {ligne.map((cell, cellIdx) => {
@@ -883,8 +885,8 @@ const NotesRestantes: React.FC<NoteRestanteProps> = ({
                             fontWeight: isTotal || isHeader ? 700 : 400,
                             fontStyle: isHeader ? 'italic' : 'normal',
                             fontSize: isTotal ? '0.9rem' : '0.85rem',
-                            color: isTotal && cellIdx > 0 ? theme.palette.primary.main : 'inherit',
-                            border: `1px solid ${P.primary200}`,
+                            color: isTotal ? '#fff' : 'inherit',
+                            border: `1px solid ${isTotal ? '#444' : P.primary200}`,
                             whiteSpace: 'nowrap',
                             pl: cell.startsWith('  ') ? 4 : undefined,
                             p: isEditable ? 0.5 : undefined,

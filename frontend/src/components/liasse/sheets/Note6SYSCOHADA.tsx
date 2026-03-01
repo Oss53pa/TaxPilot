@@ -112,12 +112,12 @@ const Note6SYSCOHADA: React.FC = () => {
                   </TableRow>
                 )
               })}
-              <TableRow sx={{ backgroundColor: alpha(theme.palette.primary.main, 0.1) }}>
-                <TableCell sx={{ fontWeight: 600 }}>TOTAL</TableCell>
-                <TableCell align="right" sx={{ fontWeight: 600, fontFamily: 'monospace' }}>{fmtC(totaux.valeurBrute)}</TableCell>
-                <TableCell align="right" sx={{ fontWeight: 600, fontFamily: 'monospace', color: 'error.main' }}>{fmtC(totaux.amortissements)}</TableCell>
-                <TableCell align="right" sx={{ fontWeight: 600, fontFamily: 'monospace' }}>{fmtC(totaux.valeurNette)}</TableCell>
-                <TableCell align="right" sx={{ fontWeight: 600 }}>{totaux.valeurBrute > 0 ? `${(totaux.amortissements / totaux.valeurBrute * 100).toFixed(1)}%` : '-'}</TableCell>
+              <TableRow className="total-row" sx={{ backgroundColor: '#1a1a1a', borderTop: '2px solid #333', borderBottom: '2px solid #333' }}>
+                <TableCell sx={{ fontWeight: 700, color: '#fff', borderColor: '#444' }}>TOTAL</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 700, fontFamily: 'monospace', color: '#fff', borderColor: '#444' }}>{fmtC(totaux.valeurBrute)}</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 700, fontFamily: 'monospace', color: '#fff', borderColor: '#444' }}>{fmtC(totaux.amortissements)}</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 700, fontFamily: 'monospace', color: '#fff', borderColor: '#444' }}>{fmtC(totaux.valeurNette)}</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 700, color: '#fff', borderColor: '#444' }}>{totaux.valeurBrute > 0 ? `${(totaux.amortissements / totaux.valeurBrute * 100).toFixed(1)}%` : '-'}</TableCell>
               </TableRow>
             </TableBody>
           </Table></TableContainer>

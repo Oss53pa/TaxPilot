@@ -387,11 +387,14 @@ const BilanSynthetique: React.FC<BilanSynthetiqueProps> = ({
         }
       case 'total':
         return {
-          backgroundColor: alpha(theme.palette.warning.main, 0.06),
+          backgroundColor: '#2d2d2d',
+          borderTop: '1.5px solid #555',
         }
       case 'grandtotal':
         return {
-          backgroundColor: alpha(theme.palette.error.main, 0.06),
+          backgroundColor: '#1a1a1a',
+          borderTop: '2px solid #333',
+          borderBottom: '2px solid #333',
         }
       default:
         return {
@@ -405,13 +408,12 @@ const BilanSynthetique: React.FC<BilanSynthetiqueProps> = ({
     return {
       fontWeight: bold ? 700 : type === 'group' ? 600 : 400,
       fontSize: type === 'grandtotal' ? '0.95rem' : type === 'section' || type === 'total' ? '0.9rem' : '0.85rem',
-      color: type === 'section'
+      color: type === 'total' || type === 'grandtotal'
+        ? '#fff'
+        : type === 'section'
         ? theme.palette.primary.dark
-        : type === 'grandtotal'
-        ? theme.palette.error.dark
-        : type === 'total'
-        ? theme.palette.warning.dark
         : 'inherit',
+      borderColor: type === 'total' || type === 'grandtotal' ? '#444' : undefined,
     }
   }
 
@@ -440,14 +442,14 @@ const BilanSynthetique: React.FC<BilanSynthetiqueProps> = ({
     }
 
     return (
-      <TableRow key={row.ref || `actif-${index}`} sx={getRowSx(row.type)}>
-        <TableCell sx={{ width: 50, ...getLabelSx(row.type), color: row.type === 'grandtotal' ? theme.palette.error.dark : row.type === 'total' ? theme.palette.warning.dark : 'text.secondary' }}>
+      <TableRow key={row.ref || `actif-${index}`} className={row.type === 'total' || row.type === 'grandtotal' ? 'total-row' : undefined} sx={getRowSx(row.type)}>
+        <TableCell sx={{ width: 50, ...getLabelSx(row.type) }}>
           {row.ref}
         </TableCell>
         <TableCell sx={{ pl: getIndent(row.type), ...getLabelSx(row.type) }}>
           {row.label}
         </TableCell>
-        <TableCell align="center" sx={{ width: 50 }}>
+        <TableCell align="center" sx={{ width: 50, borderColor: row.type === 'total' || row.type === 'grandtotal' ? '#444' : undefined }}>
           {row.note && (
             <Chip
               label={row.note}
@@ -460,16 +462,16 @@ const BilanSynthetique: React.FC<BilanSynthetiqueProps> = ({
             />
           )}
         </TableCell>
-        <TableCell align="right" sx={{ width: 120, fontWeight: getValueWeight(row.type) }}>
+        <TableCell align="right" sx={{ width: 120, fontWeight: getValueWeight(row.type), color: row.type === 'total' || row.type === 'grandtotal' ? '#fff' : 'inherit', borderColor: row.type === 'total' || row.type === 'grandtotal' ? '#444' : undefined }}>
           {formatMontant(values?.brut)}
         </TableCell>
-        <TableCell align="right" sx={{ width: 120, fontWeight: getValueWeight(row.type) }}>
+        <TableCell align="right" sx={{ width: 120, fontWeight: getValueWeight(row.type), color: row.type === 'total' || row.type === 'grandtotal' ? '#fff' : 'inherit', borderColor: row.type === 'total' || row.type === 'grandtotal' ? '#444' : undefined }}>
           {formatMontant(values?.amort)}
         </TableCell>
-        <TableCell align="right" sx={{ width: 120, fontWeight: getValueWeight(row.type), backgroundColor: alpha(theme.palette.info.main, 0.04), color: row.type === 'grandtotal' ? theme.palette.error.dark : 'inherit' }}>
+        <TableCell align="right" sx={{ width: 120, fontWeight: getValueWeight(row.type), color: row.type === 'total' || row.type === 'grandtotal' ? '#fff' : 'inherit', borderColor: row.type === 'total' || row.type === 'grandtotal' ? '#444' : undefined }}>
           {formatMontant(values?.netN)}
         </TableCell>
-        <TableCell align="right" sx={{ width: 120, fontWeight: getValueWeight(row.type) }}>
+        <TableCell align="right" sx={{ width: 120, fontWeight: getValueWeight(row.type), color: row.type === 'total' || row.type === 'grandtotal' ? '#fff' : 'inherit', borderColor: row.type === 'total' || row.type === 'grandtotal' ? '#444' : undefined }}>
           {formatMontant(values?.netN1)}
         </TableCell>
       </TableRow>
@@ -490,14 +492,14 @@ const BilanSynthetique: React.FC<BilanSynthetiqueProps> = ({
     }
 
     return (
-      <TableRow key={row.ref || `passif-${index}`} sx={getRowSx(row.type)}>
-        <TableCell sx={{ width: 50, ...getLabelSx(row.type), color: row.type === 'grandtotal' ? theme.palette.error.dark : row.type === 'total' ? theme.palette.warning.dark : 'text.secondary' }}>
+      <TableRow key={row.ref || `passif-${index}`} className={row.type === 'total' || row.type === 'grandtotal' ? 'total-row' : undefined} sx={getRowSx(row.type)}>
+        <TableCell sx={{ width: 50, ...getLabelSx(row.type) }}>
           {row.ref}
         </TableCell>
         <TableCell sx={{ pl: getIndent(row.type), ...getLabelSx(row.type) }}>
           {row.label}
         </TableCell>
-        <TableCell align="center" sx={{ width: 50 }}>
+        <TableCell align="center" sx={{ width: 50, borderColor: row.type === 'total' || row.type === 'grandtotal' ? '#444' : undefined }}>
           {row.note && (
             <Chip
               label={row.note}
@@ -510,10 +512,10 @@ const BilanSynthetique: React.FC<BilanSynthetiqueProps> = ({
             />
           )}
         </TableCell>
-        <TableCell align="right" sx={{ width: 140, fontWeight: getValueWeight(row.type), backgroundColor: alpha(theme.palette.info.main, 0.04), color: row.type === 'grandtotal' ? theme.palette.error.dark : 'inherit' }}>
+        <TableCell align="right" sx={{ width: 140, fontWeight: getValueWeight(row.type), color: row.type === 'total' || row.type === 'grandtotal' ? '#fff' : 'inherit', borderColor: row.type === 'total' || row.type === 'grandtotal' ? '#444' : undefined }}>
           {formatMontant(values?.netN)}
         </TableCell>
-        <TableCell align="right" sx={{ width: 140, fontWeight: getValueWeight(row.type) }}>
+        <TableCell align="right" sx={{ width: 140, fontWeight: getValueWeight(row.type), color: row.type === 'total' || row.type === 'grandtotal' ? '#fff' : 'inherit', borderColor: row.type === 'total' || row.type === 'grandtotal' ? '#444' : undefined }}>
           {formatMontant(values?.netN1)}
         </TableCell>
       </TableRow>

@@ -92,6 +92,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     { text: 'Audit & Corrections', icon: <Security />, path: '/audit' },
 
     { text: 'Liasses SYSCOHADA', icon: <Assignment />, path: '/direct-liasse', divider: 'Production Liasse' },
+    { text: 'Liasse Fiscale', icon: <Description />, path: '/liasse-fiscale' },
     { text: 'Génération Auto', icon: <Description />, path: '/generation' },
     { text: 'Contrôle de Liasse', icon: <Security />, path: '/validation-liasse' },
     { text: 'Templates Export', icon: <CloudUpload />, path: '/templates' },
@@ -101,9 +102,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   ]
 
   const drawerContent = (
-    <Box>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
       {/* Logo + Accueil */}
-      <Toolbar sx={{ px: 2.5, py: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <Toolbar sx={{ px: 2.5, py: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
         <Typography
           variant="h6"
           sx={{
@@ -129,7 +130,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         </IconButton>
       </Toolbar>
 
-      <List sx={{ px: 0.5 }}>
+      <List sx={{ px: 0.5, overflowY: 'auto', flexGrow: 1 }}>
         {menuItems.map((item, index) => (
           <React.Fragment key={item.text}>
             {item.divider && index > 0 && (
@@ -326,14 +327,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         sx={{
           flexGrow: 1,
           width: { md: `calc(100% - ${DRAWER_WIDTH}px)` },
-          minHeight: '100vh',
+          height: '100vh',
           display: 'flex',
           flexDirection: 'column',
           bgcolor: 'grey.50',
+          overflow: 'hidden',
         }}
       >
         <Toolbar />
-        <Box sx={{ flexGrow: 1, p: 3, overflow: 'auto' }}>
+        <Box sx={{ flexGrow: 1, p: 3, overflow: 'auto', minHeight: 0 }}>
           {children}
         </Box>
       </Box>

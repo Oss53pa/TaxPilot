@@ -75,11 +75,32 @@ export interface Entreprise extends BaseEntity {
   expert_nom?: string
   expert_adresse?: string
   expert_numero_inscription?: string
+  // R1 - Champs DGI (ZA-ZW)
+  greffe?: string
+  numero_repertoire_entites?: string
+  numero_caisse_sociale?: string
+  numero_code_importateur?: string
+  boite_postale?: string
+  code_ville?: string
+  pourcentage_capacite_production?: number
+  numero_teledeclarant?: string
+  date_arrete_comptes?: string
+  exercice_precedent_fin?: string
+  duree_exercice_precedent?: number
+  personne_contact?: string
+  etats_financiers_approuves?: boolean
+  date_signature_etats?: string
+  domiciliations_bancaires?: DomiciliationBancaire[]
   // R2 - Dirigeants & Commissaires
   dirigeants?: DirigeantEntry[]
   commissaires_comptes?: CommissaireEntry[]
   // R3 - Participations
   participations_filiales?: ParticipationEntry[]
+}
+
+export interface DomiciliationBancaire {
+  banque: string
+  numero_compte: string
 }
 
 // Types pour les données R2 (Dirigeants)

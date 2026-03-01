@@ -302,33 +302,40 @@ const CompteResultatSYSCOHADA: React.FC<CompteResultatProps> = ({ onNoteClick })
     }
 
     return (
-      <TableRow 
+      <TableRow
         key={item.ref}
+        className={isTotal || isGrandTotal || isSubtotal ? 'total-row' : undefined}
         sx={{
-          backgroundColor: isGrandTotal 
-            ? alpha(theme.palette.primary.main, 0.05)
-            : isTotal 
-            ? alpha(theme.palette.warning.main, 0.03)
+          backgroundColor: isGrandTotal
+            ? '#1a1a1a'
+            : isTotal
+            ? '#2d2d2d'
             : isSubtotal
-            ? alpha(theme.palette.info.main, 0.03)
+            ? '#4a4a4a'
             : 'transparent',
+          ...(isGrandTotal && { borderTop: '2px solid #333', borderBottom: '2px solid #333' }),
+          ...(isTotal && { borderTop: '1.5px solid #555' }),
+          ...(isSubtotal && { borderTop: '1px solid #666' }),
           '&:hover': {
-            backgroundColor: alpha(theme.palette.action.hover, 0.05)
+            backgroundColor: isGrandTotal ? '#222' : isTotal ? '#383838' : isSubtotal ? '#555' : alpha(theme.palette.action.hover, 0.05)
           }
         }}
       >
-        <TableCell sx={{ 
+        <TableCell sx={{
           width: '60px',
-          fontWeight: isTotal || isGrandTotal || isSubtotal ? 600 : 400,
-          color: getResultColor()
+          fontWeight: isTotal || isGrandTotal || isSubtotal ? 700 : 400,
+          color: isGrandTotal || isTotal || isSubtotal ? '#fff' : getResultColor(),
+          borderColor: isGrandTotal || isTotal || isSubtotal ? '#444' : undefined,
         }}>
           {item.ref}
         </TableCell>
-        
-        <TableCell sx={{ 
+
+        <TableCell sx={{
           pl: indent * 3,
-          fontWeight: isTotal || isGrandTotal ? 600 : isSubtotal ? 500 : 400,
-          fontSize: isGrandTotal ? '0.95rem' : isTotal ? '0.9rem' : '0.875rem'
+          fontWeight: isTotal || isGrandTotal || isSubtotal ? 700 : 400,
+          fontSize: isGrandTotal ? '0.95rem' : isTotal || isSubtotal ? '0.9rem' : '0.875rem',
+          color: isGrandTotal || isTotal || isSubtotal ? '#fff' : 'inherit',
+          borderColor: isGrandTotal || isTotal || isSubtotal ? '#444' : undefined,
         }}>
           <Stack direction="row" alignItems="center" spacing={1}>
             <span>{item.label}</span>
@@ -358,9 +365,10 @@ const CompteResultatSYSCOHADA: React.FC<CompteResultatProps> = ({ onNoteClick })
           )}
         </TableCell>
         
-        <TableCell align="right" sx={{ 
+        <TableCell align="right" sx={{
           width: '150px',
-          backgroundColor: alpha(theme.palette.info.main, 0.05)
+          backgroundColor: isTotal || isGrandTotal || isSubtotal ? undefined : alpha(theme.palette.info.main, 0.05),
+          borderColor: isTotal || isGrandTotal || isSubtotal ? '#444' : undefined,
         }}>
           {isEditable ? (
             <TextField
@@ -375,19 +383,19 @@ const CompteResultatSYSCOHADA: React.FC<CompteResultatProps> = ({ onNoteClick })
               }}
             />
           ) : (
-            <Typography 
-              variant="body2" 
-              sx={{ 
-                fontWeight: isTotal || isGrandTotal || isSubtotal ? 600 : 400,
-                color: getResultColor()
+            <Typography
+              variant="body2"
+              sx={{
+                fontWeight: isTotal || isGrandTotal || isSubtotal ? 700 : 400,
+                color: isTotal || isGrandTotal || isSubtotal ? '#fff' : getResultColor()
               }}
             >
               {formatNumber(rowData.montant, isGrandTotal)}
             </Typography>
           )}
         </TableCell>
-        
-        <TableCell align="right" sx={{ width: '150px' }}>
+
+        <TableCell align="right" sx={{ width: '150px', borderColor: isTotal || isGrandTotal || isSubtotal ? '#444' : undefined }}>
           {isEditable ? (
             <TextField
               size="small"
@@ -401,7 +409,7 @@ const CompteResultatSYSCOHADA: React.FC<CompteResultatProps> = ({ onNoteClick })
               }}
             />
           ) : (
-            <Typography variant="body2" sx={{ fontWeight: isTotal || isGrandTotal || isSubtotal ? 600 : 400 }}>
+            <Typography variant="body2" sx={{ fontWeight: isTotal || isGrandTotal || isSubtotal ? 700 : 400, color: isTotal || isGrandTotal || isSubtotal ? '#fff' : 'inherit' }}>
               {formatNumber(rowData.montantN1)}
             </Typography>
           )}

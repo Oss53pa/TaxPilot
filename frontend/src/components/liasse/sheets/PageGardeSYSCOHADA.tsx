@@ -38,6 +38,7 @@ import {
 } from '@mui/icons-material'
 import type { Entreprise } from '@/types'
 import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
+import { useRegimeImposition } from '@/config/regimeContext'
 
 // Dictionnaires de mapping code → label (partagés avec Couverture.tsx)
 const formesJuridiquesMap: Record<string, string> = {
@@ -258,7 +259,8 @@ const PageGardeSYSCOHADA: React.FC<PageGardeSYSCOHADAProps> = ({ variant = 'defa
   const dateFin = ent?.exercice_fin || `${new Date().getFullYear()}-12-31`
   const exerciceComptable = dateDebut.substring(0, 4)
   const dureeExercice = calcDureeMois(dateDebut, dateFin)
-  const regimeFiscal = regimesMap[ent?.regime_imposition || ''] || ent?.regime_imposition || ''
+  const selectedRegime = useRegimeImposition()
+  const regimeFiscal = regimesMap[selectedRegime] || regimesMap[ent?.regime_imposition || ''] || ent?.regime_imposition || ''
   const centreImpots = ent?.centre_impots || ''
   const dateDepot = ent?.date_depot || ''
   const nomDeclarant = ent?.nom_dirigeant || ''

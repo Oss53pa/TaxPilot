@@ -120,17 +120,17 @@ const Note5SYSCOHADA: React.FC = () => {
                 </TableCell>
               </TableRow>
             ))}
-            <TableRow sx={{ backgroundColor: theme.palette.grey[100], borderTop: '2px solid ' + theme.palette.primary.main }}>
-              <TableCell sx={{ fontWeight: 700, fontSize: '1.1rem' }}>TOTAL</TableCell>
-              <TableCell align="right" sx={{ fontWeight: 700 }}>{formatMontant(total.stockInitial)}</TableCell>
-              <TableCell align="right" sx={{ fontWeight: 700, color: 'success.main' }}>{formatMontant(total.entrees)}</TableCell>
-              <TableCell align="right" sx={{ fontWeight: 700, color: 'info.main' }}>{formatMontant(total.sorties)}</TableCell>
-              <TableCell align="right" sx={{ fontWeight: 700 }}>{formatMontant(total.stockFinalBrut)}</TableCell>
-              <TableCell align="right" sx={{ fontWeight: 700, color: 'error.main' }}>{formatMontant(total.provisions)}</TableCell>
-              <TableCell align="right" sx={{ fontWeight: 700, fontSize: '1.1rem', color: 'primary.main' }}>
+            <TableRow className="total-row" sx={{ backgroundColor: '#1a1a1a', borderTop: '2px solid #333', borderBottom: '2px solid #333' }}>
+              <TableCell sx={{ fontWeight: 700, fontSize: '1.1rem', color: '#fff', borderColor: '#444' }}>TOTAL</TableCell>
+              <TableCell align="right" sx={{ fontWeight: 700, color: '#fff', borderColor: '#444' }}>{formatMontant(total.stockInitial)}</TableCell>
+              <TableCell align="right" sx={{ fontWeight: 700, color: '#fff', borderColor: '#444' }}>{formatMontant(total.entrees)}</TableCell>
+              <TableCell align="right" sx={{ fontWeight: 700, color: '#fff', borderColor: '#444' }}>{formatMontant(total.sorties)}</TableCell>
+              <TableCell align="right" sx={{ fontWeight: 700, color: '#fff', borderColor: '#444' }}>{formatMontant(total.stockFinalBrut)}</TableCell>
+              <TableCell align="right" sx={{ fontWeight: 700, color: '#fff', borderColor: '#444' }}>{formatMontant(total.provisions)}</TableCell>
+              <TableCell align="right" sx={{ fontWeight: 700, fontSize: '1.1rem', color: '#fff', borderColor: '#444' }}>
                 {formatMontant(total.stockFinalNet)}
               </TableCell>
-              <TableCell align="center">-</TableCell>
+              <TableCell align="center" sx={{ color: '#fff', borderColor: '#444' }}>-</TableCell>
             </TableRow>
           </TableBody>
         </Table>

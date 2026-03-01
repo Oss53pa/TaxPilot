@@ -25,6 +25,7 @@ import {
   handlePredictionRatios,
   handlePredictionTrend,
   handlePredictionAnomaly,
+  handleCoherenceCheck,
   handlePredictionGeneral,
 } from './knowledge'
 
@@ -71,7 +72,7 @@ function greetingResponse(): Proph3tResponse {
 
 function helpResponse(): Proph3tResponse {
   return {
-    text: "Voici ce que je peux faire pour vous :\n\n**SYSCOHADA**\n- Recherche de comptes : tapez un numero (`601`) ou un mot-cle (`fournisseur`)\n- Fonctionnement debit/credit : `fonctionnement 401`\n- Chapitres d'operations : `chapitre 12`\n- Classes du plan : `classe 4`\n- Validation : `valide 4011`\n- Statistiques : `statistiques`\n\n**Fiscalite CI**\n- Taux : `taux IS`, `taux TVA`, `taux CNPS`\n- Calculs : `calculer IS sur 50 millions`, `calculer TVA sur 10M`\n- Deductibilite : `charges deductibles`\n- Calendrier : `calendrier fiscal`\n\n**Liasse Fiscale**\n- Feuillets : `Note 15`, `feuillet actif`\n- Regimes : `regime reel normal`\n- Categories : `etats financiers`\n\n**Audit**\n- Controle : `controle FI-003`\n- Niveau : `niveau 3`\n- Vue d'ensemble : `audit`\n\n**Analyse Predictive** (necessite une balance importee)\n- IS : `estimation IS`\n- TVA : `prediction TVA`\n- Ratios : `mes ratios financiers`\n- Anomalies : `detection anomalies`\n- Synthese : `analyse ma situation`",
+    text: "Voici ce que je peux faire pour vous :\n\n**SYSCOHADA**\n- Recherche de comptes : tapez un numero (`601`) ou un mot-cle (`fournisseur`)\n- Fonctionnement debit/credit : `fonctionnement 401`\n- Chapitres d'operations : `chapitre 12`\n- Classes du plan : `classe 4`\n- Validation : `valide 4011`\n- Statistiques : `statistiques`\n\n**Fiscalite CI**\n- Taux : `taux IS`, `taux TVA`, `taux CNPS`\n- Calculs : `calculer IS sur 50 millions`, `calculer TVA sur 10M`\n- Deductibilite : `charges deductibles`\n- Calendrier : `calendrier fiscal`\n\n**Liasse Fiscale**\n- Feuillets : `Note 15`, `feuillet actif`\n- Regimes : `regime reel normal`\n- Categories : `etats financiers`\n\n**Audit**\n- Controle : `controle FI-003`\n- Niveau : `niveau 3`\n- Vue d'ensemble : `audit`\n\n**Analyse Predictive** (necessite une balance importee)\n- IS : `estimation IS`\n- TVA : `prediction TVA`\n- Ratios : `mes ratios financiers`\n- Anomalies : `detection anomalies`\n- Coherence : `controle coherence`\n- Synthese : `analyse ma situation`",
     suggestions: [
       'Compte 601',
       'Taux IS',
@@ -492,6 +493,11 @@ export async function processQuery(
     case 'PREDICTION_ANOMALY':
       if (!context.balanceData?.balanceN) { response = noBalanceResponse(); break }
       response = handlePredictionAnomaly(context.balanceData.balanceN)
+      break
+
+    case 'PREDICTION_COHERENCE':
+      if (!context.balanceData?.balanceN) { response = noBalanceResponse(); break }
+      response = handleCoherenceCheck(context.balanceData.balanceN)
       break
 
     case 'PREDICTION_GENERAL':

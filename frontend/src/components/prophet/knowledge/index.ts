@@ -24,5 +24,8 @@ export {
   handlePredictionRatios,
   handlePredictionTrend,
   handlePredictionAnomaly,
+  handleCoherenceCheck,
   handlePredictionGeneral,
+  calculerAgregats,
 } from './predictiveAnalysis'
+export type { Agregats } from './predictiveAnalysis'

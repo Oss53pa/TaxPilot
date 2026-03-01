@@ -94,11 +94,11 @@ const Note17SYSCOHADA: React.FC = () => {
                 </TableRow>
               )
             })}
-            <TableRow sx={{ backgroundColor: alpha(theme.palette.primary.main, 0.1) }}>
-              <TableCell sx={{ fontWeight: 700 }}>TOTAL PRODUITS</TableCell>
-              <TableCell align="right" sx={{ fontWeight: 700, fontFamily: 'monospace' }}>{fmt(totalN)}</TableCell>
-              <TableCell align="right" sx={{ fontWeight: 700, fontFamily: 'monospace', color: 'text.secondary' }}>{fmt(lignes.reduce((s, l) => s + l.montantN1, 0))}</TableCell>
-              <TableCell align="right" sx={{ fontWeight: 700 }}>100.0%</TableCell>
+            <TableRow className="total-row" sx={{ backgroundColor: '#1a1a1a', borderTop: '2px solid #333', borderBottom: '2px solid #333' }}>
+              <TableCell sx={{ fontWeight: 700, color: '#fff', borderColor: '#444' }}>TOTAL PRODUITS</TableCell>
+              <TableCell align="right" sx={{ fontWeight: 700, fontFamily: 'monospace', color: '#fff', borderColor: '#444' }}>{fmt(totalN)}</TableCell>
+              <TableCell align="right" sx={{ fontWeight: 700, fontFamily: 'monospace', color: '#fff', borderColor: '#444' }}>{fmt(lignes.reduce((s, l) => s + l.montantN1, 0))}</TableCell>
+              <TableCell align="right" sx={{ fontWeight: 700, color: '#fff', borderColor: '#444' }}>100.0%</TableCell>
             </TableRow>
           </TableBody>
         </Table></TableContainer>

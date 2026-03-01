@@ -385,7 +385,7 @@ const LiassePrintTemplate: React.FC<LiassePrintTemplateProps> = ({ regime, entre
 
           {/* All pages */}
           {allPages.map((page) => (
-            <Box key={page.id} className="liasse-page" sx={{ pageBreakAfter: 'always' }}>
+            <Box key={page.id} className={`liasse-page${page.orientation === 'landscape' ? ' landscape' : ''}`} sx={{ pageBreakAfter: 'always' }}>
               <PageRenderer page={page} showHeader />
             </Box>
           ))}
@@ -429,13 +429,13 @@ const LiassePrintTemplate: React.FC<LiassePrintTemplateProps> = ({ regime, entre
           }}
         >
           <Box sx={{
-            width: '210mm',
-            maxWidth: '210mm',
+            width: currentPage?.orientation === 'landscape' ? '297mm' : '210mm',
+            maxWidth: currentPage?.orientation === 'landscape' ? '297mm' : '210mm',
             mx: 'auto',
             backgroundColor: P.white,
             borderRadius: 1,
             boxShadow: '0 2px 8px rgba(0,0,0,0.10)',
-            minHeight: '297mm',
+            minHeight: currentPage?.orientation === 'landscape' ? '210mm' : '297mm',
           }}>
             {currentPage && (
               <PageRenderer key={currentPage.id} page={currentPage} showHeader />

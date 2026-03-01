@@ -24,7 +24,7 @@ import FicheR3SYSCOHADA from '../components/liasse/sheets/FicheR3SYSCOHADA'
 import FicheR4SYSCOHADA from '../components/liasse/sheets/FicheR4SYSCOHADA'
 import TablesCalculImpots from '../components/liasse/sheets/TablesCalculImpots'
 import TableauxSupplementaires from '../components/liasse/sheets/TableauxSupplementaires'
-import Note12SYSCOHADA from '../components/liasse/sheets/Note12SYSCOHADA'
+import { Note12SYSCOHADA } from '../components/liasse/sheets'
 
 // Import des suppléments
 import ComplementCharges from '../components/liasse/sheets/ComplementCharges'

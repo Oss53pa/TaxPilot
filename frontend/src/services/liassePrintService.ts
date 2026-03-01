@@ -61,6 +61,9 @@ const printCSS = `
   .sig td { font-weight: bold; background: #f5f5f5; }
   .grandtotal td { font-weight: bold; background: #171717; color: #fff; }
   .page-break { page-break-after: always; }
+  @page { size: A4 portrait; }
+  @page landscape-page { size: A4 landscape; }
+  .landscape { page: landscape-page; }
   @media print { .no-print { display: none; } body { margin: 10mm; } }
   .footer { text-align: center; margin-top: 30px; font-size: 8px; color: #a3a3a3; border-top: 1px solid #e5e5e5; padding-top: 8px; }
 `

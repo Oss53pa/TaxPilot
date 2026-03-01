@@ -100,7 +100,15 @@ function F003(ctx: AuditContext): ResultatControle {
   const charges = findByPrefix(ctx.balanceN, '6')
   const totalProduits = produits.reduce((s, l) => s + (l.credit - l.debit), 0)
   const totalCharges = charges.reduce((s, l) => s + (l.debit - l.credit), 0)
-  const resultatCalcule = totalProduits - totalCharges
+
+  // Include HAO (class 8 excluding 89) and IS (89) for complete net result
+  const hao8 = ctx.balanceN.filter(l => {
+    const c = l.compte.toString()
+    return c.startsWith('8') && !c.startsWith('89')
+  })
+  const haoNet = hao8.reduce((s, l) => s + (l.credit - l.debit), 0)
+  const impot89 = findByPrefix(ctx.balanceN, '89').reduce((s, l) => s + (l.debit - l.credit), 0)
+  const resultatCalcule = totalProduits - totalCharges + haoNet - impot89
 
   const comptes13 = findByPrefix(ctx.balanceN, '13')
   const resultatComptabilise = comptes13.reduce((s, l) => s + (l.credit - l.debit), 0)
@@ -111,10 +119,10 @@ function F003(ctx: AuditContext): ResultatControle {
       `Ecart de ${ecart.toLocaleString('fr-FR')} entre resultat calcule et compte 13x`,
       {
         ecart,
-        montants: { resultatCalcule, resultatComptabilise, produits: totalProduits, charges: totalCharges },
-        description: `Le resultat calcule (produits classe 7 - charges classe 6 = ${resultatCalcule.toLocaleString('fr-FR')}) ne correspond pas au solde du compte 13x (${resultatComptabilise.toLocaleString('fr-FR')}). Ecart: ${ecart.toLocaleString('fr-FR')}. Causes possibles: affectation du resultat en cours, ecritures de cloture manquantes, ou erreur dans les a-nouveaux.`
+        montants: { resultatCalcule, resultatComptabilise, produits: totalProduits, charges: totalCharges, haoNet, impot: impot89 },
+        description: `Le resultat net calcule (produits ${totalProduits.toLocaleString('fr-FR')} - charges ${totalCharges.toLocaleString('fr-FR')} + HAO ${haoNet.toLocaleString('fr-FR')} - IS ${impot89.toLocaleString('fr-FR')} = ${resultatCalcule.toLocaleString('fr-FR')}) ne correspond pas au solde du compte 13x (${resultatComptabilise.toLocaleString('fr-FR')}). Ecart: ${ecart.toLocaleString('fr-FR')}. Causes possibles: affectation du resultat en cours, ecritures de cloture manquantes, ou erreur dans les a-nouveaux.`
       },
-      'Verifier les ecritures d\'affectation du resultat et les operations de cloture. Le compte 13x doit refleter exactement la difference entre produits et charges.',
+      'Verifier les ecritures d\'affectation du resultat et les operations de cloture. Le compte 13x doit refleter exactement le resultat net (produits - charges + HAO - IS).',
       resultatCalcule > resultatComptabilise ? [{
         journal: 'OD', date: new Date().toISOString().slice(0, 10),
         lignes: [
@@ -126,10 +134,10 @@ function F003(ctx: AuditContext): ResultatControle {
       'Art. 34 Acte Uniforme OHADA')
   }
   if (comptes13.length === 0) {
-    return anomalie(ref, nom, 'MINEUR',
-      `Resultat calcule: ${resultatCalcule.toLocaleString('fr-FR')} mais pas de compte 13x`,
+    return anomalie(ref, nom, 'INFO',
+      `Resultat calcule: ${resultatCalcule.toLocaleString('fr-FR')} (pas de compte 13x - balance pre-cloture)`,
       {
-        montants: { resultatCalcule, produits: totalProduits, charges: totalCharges },
+        montants: { resultatCalcule, produits: totalProduits, charges: totalCharges, haoNet, impot: impot89 },
         description: 'Aucun compte de resultat (13x) n\'est present dans la balance. Pour une balance pre-cloture (en cours d\'exercice), c\'est normal car le resultat n\'est pas encore affecte. Pour une balance de cloture, le compte 13x est obligatoire.'
       },
       'Si la balance est post-cloture, ajouter le compte 131000 (benefice) ou 139000 (perte) avec le resultat de l\'exercice.')
@@ -350,27 +358,32 @@ function F011(ctx: AuditContext): ResultatControle {
 function F012(ctx: AuditContext): ResultatControle {
   const ref = 'F-012', nom = 'Solde sans mouvement'
 
-  const anomalies = ctx.balanceN.filter((l) => {
+  const anomaliesList = ctx.balanceN.filter((l) => {
     const hasSolde = (l.solde_debit || 0) !== 0 || (l.solde_credit || 0) !== 0
     const hasMouvement = (l.debit || 0) !== 0 || (l.credit || 0) !== 0
     return hasSolde && !hasMouvement
   })
 
-  if (anomalies.length > 0) {
-    const totalNonJustifie = anomalies.reduce(
+  if (anomaliesList.length > 0) {
+    const totalNonJustifie = anomaliesList.reduce(
       (s, l) => s + (l.solde_debit || 0) + (l.solde_credit || 0), 0
     )
-    return anomalie(ref, nom, 'BLOQUANT',
-      `${anomalies.length} compte(s) avec solde sans aucun mouvement comptable. ` +
-      `Montant total non justifie: ${totalNonJustifie.toLocaleString('fr-FR')} FCFA`,
+    // Many balance exports use period-only movements (debit/credit) while solde
+    // includes opening balances. This is a format issue, not necessarily an error.
+    // Only flag as MAJEUR if it affects a very large portion of accounts.
+    const pctAffected = (anomaliesList.length / ctx.balanceN.length) * 100
+    const severity: ResultatControle['severite'] = pctAffected > 50 ? 'MAJEUR' : 'MINEUR'
+    return anomalie(ref, nom, severity,
+      `${anomaliesList.length} compte(s) avec solde sans mouvement de la periode (${pctAffected.toFixed(0)}% des comptes)`,
       {
-        comptes: anomalies.map((l) => `${l.compte} (${l.intitule || 'N/A'}): SD=${(l.solde_debit||0).toLocaleString('fr-FR')}, SC=${(l.solde_credit||0).toLocaleString('fr-FR')}`),
-        montants: { nombreComptes: anomalies.length, totalNonJustifie },
-        description: 'Un solde ne peut exister sans mouvement comptable. Causes possibles: ' +
-          'report a nouveau inscrit directement en colonne Solde au lieu d\'etre passe en ecriture d\'ouverture, ' +
-          'colonnes Mouvement mal renseignees lors de l\'export, ou balance incomplete.'
+        comptes: anomaliesList.slice(0, 15).map((l) => `${l.compte} (${l.intitule || 'N/A'}): SD=${(l.solde_debit||0).toLocaleString('fr-FR')}, SC=${(l.solde_credit||0).toLocaleString('fr-FR')}`),
+        montants: { nombreComptes: anomaliesList.length, totalNonJustifie, pctAffected: Math.round(pctAffected) },
+        description: `${anomaliesList.length} compte(s) presentent un solde sans mouvement comptable dans la periode. ` +
+          'Cela est frequent dans les balances ou les colonnes Debit/Credit ne contiennent que les mouvements de la periode ' +
+          '(hors a-nouveaux), tandis que les colonnes Solde incluent les reports d\'ouverture. ' +
+          'Si le format de balance inclut les a-nouveaux dans les mouvements, verifier la completude de l\'import.'
       },
-      'Corriger la balance source: chaque compte avec un solde doit disposer de mouvements correspondants, puis reimporter la balance corrigee.',
+      'Verifier le format d\'export de la balance: si les mouvements incluent les a-nouveaux, corriger la source. Sinon, ce constat est informatif et n\'impacte pas la fiabilite des etats financiers.',
       undefined,
       'Art. 19 et 20 Acte Uniforme OHADA relatif au droit comptable'
     )
@@ -393,7 +406,7 @@ export function registerLevel1Controls(): void {
     ['F-009', 'Nombre de comptes suffisant', 'Verifie au moins 50 comptes', 'MINEUR', F009],
     ['F-010', 'Comptes a solde nul', 'Signale les comptes a solde nul', 'INFO', F010],
     ['F-011', 'Comptes collectifs', 'Verifie le detail des comptes collectifs', 'MINEUR', F011],
-    ['F-012', 'Solde sans mouvement', 'Verifie que tout compte avec solde a des mouvements', 'BLOQUANT', F012],
+    ['F-012', 'Solde sans mouvement', 'Verifie que tout compte avec solde a des mouvements', 'MINEUR', F012],
   ]
 
   for (const [ref, nom, desc, sev, fn] of defs) {

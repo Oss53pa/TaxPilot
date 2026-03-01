@@ -3,7 +3,7 @@ import { logger } from '@/utils/logger'
  * Note 1 - Référentiel comptable et présentation des comptes
  */
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   Box,
   Paper,
@@ -35,6 +35,14 @@ import {
   Gavel as RuleIcon,
 } from '@mui/icons-material'
 import CommentairesSection from '../shared/CommentairesSection'
+import { useRegimeImposition } from '@/config/regimeContext'
+
+const REGIME_SYSTEME_MAP: Record<string, string> = {
+  REEL_NORMAL: 'Système normal OHADA',
+  REEL_SIMPLIFIE: 'Système minimal de trésorerie (SMT)',
+  FORFAITAIRE: 'Système forfaitaire',
+  MICRO: 'Système micro-entreprise',
+}
 
 interface ReferentielData {
   referentielUtilise: string
@@ -74,12 +82,14 @@ interface ReferentielData {
 
 const Note1SYSCOHADA: React.FC = () => {
   const theme = useTheme()
+  const selectedRegime = useRegimeImposition()
+  const regimeLabel = REGIME_SYSTEME_MAP[selectedRegime] || 'Système normal OHADA'
   const [data, setData] = useState<ReferentielData>({
     referentielUtilise: 'SYSCOHADA révisé',
     dateApplication: '2018-01-01',
     changementsReferentiel: '',
     impactChangements: '',
-    
+
     principesAppliques: {
       prudence: true,
       continuite: true,
@@ -88,13 +98,13 @@ const Note1SYSCOHADA: React.FC = () => {
       permanence: true,
       transparence: true,
     },
-    
+
     conventionsComptables: {
       monnaieCompte: 'XOF (Franc CFA)',
       langueEtablissement: 'Français',
       periodeReferenceExercice: '12 mois',
       methodesEvaluation: ['Coût historique', 'Amortissement linéaire', 'Coût moyen pondéré'],
-      reglesPresentationEtats: 'Système normal OHADA'
+      reglesPresentationEtats: regimeLabel
     },
     
     derogations: {
@@ -106,7 +116,18 @@ const Note1SYSCOHADA: React.FC = () => {
     
     commentaires: ''
   })
-  
+
+  // Mettre à jour quand le régime change via le contexte
+  useEffect(() => {
+    setData(prev => ({
+      ...prev,
+      conventionsComptables: {
+        ...prev.conventionsComptables,
+        reglesPresentationEtats: regimeLabel
+      }
+    }))
+  }, [regimeLabel])
+
   const [hasChanges, setHasChanges] = useState(false)
 
   const handleFieldChange = (field: keyof ReferentielData, value: any) => {

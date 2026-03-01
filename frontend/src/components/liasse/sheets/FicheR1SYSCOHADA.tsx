@@ -5,6 +5,7 @@
  */
 
 import React from 'react'
+import { useRegimeImposition } from '@/config/regimeContext'
 import {
   Box,
   Paper,
@@ -132,8 +133,9 @@ const FicheR1SYSCOHADA: React.FC<FicheR1SYSCOHADAProps> = ({ entreprise }) => {
   const dureeExercice = calcDureeMois(dateOuverture, dateCloture)
   const nombreEtablissements = ent?.nombre_etablissements || 1
 
-  // Section 4: Régime fiscal
-  const regimeFiscal = regimesMap[ent?.regime_imposition || ''] || ent?.regime_imposition || ''
+  // Section 4: Régime fiscal (priorité au contexte)
+  const selectedRegime = useRegimeImposition()
+  const regimeFiscal = regimesMap[selectedRegime] || regimesMap[ent?.regime_imposition || ''] || ent?.regime_imposition || ''
   const centreImpots = ent?.centre_impots || ''
 
   // Section 5: Effectifs

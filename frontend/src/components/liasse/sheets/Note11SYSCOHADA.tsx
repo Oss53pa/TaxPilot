@@ -354,18 +354,18 @@ const Note11SYSCOHADA: React.FC = () => {
               })}
               
               {/* Ligne de total */}
-              <TableRow sx={{ backgroundColor: alpha(theme.palette.primary.main, 0.1), fontWeight: 600 }}>
-                <TableCell sx={{ fontWeight: 600 }} colSpan={3}>TOTAL</TableCell>
-                <TableCell align="right" sx={{ fontWeight: 600 }}>
+              <TableRow className="total-row" sx={{ backgroundColor: '#1a1a1a', borderTop: '2px solid #333', borderBottom: '2px solid #333' }}>
+                <TableCell sx={{ fontWeight: 700, color: '#fff', borderColor: '#444' }} colSpan={3}>TOTAL</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 700, color: '#fff', borderColor: '#444' }}>
                   {formatNumber(totalActions)}
                 </TableCell>
-                <TableCell align="right" sx={{ fontWeight: 600 }}>-</TableCell>
-                <TableCell align="right" sx={{ fontWeight: 600 }}>
+                <TableCell align="right" sx={{ fontWeight: 700, color: '#fff', borderColor: '#444' }}>-</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 700, color: '#fff', borderColor: '#444' }}>
                   {formatCurrency(totalCapital)}
                 </TableCell>
-                <TableCell align="right" sx={{ fontWeight: 600 }}>100.00%</TableCell>
-                <TableCell align="right" sx={{ fontWeight: 600 }}>100.00%</TableCell>
-                <TableCell />
+                <TableCell align="right" sx={{ fontWeight: 700, color: '#fff', borderColor: '#444' }}>100.00%</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 700, color: '#fff', borderColor: '#444' }}>100.00%</TableCell>
+                <TableCell sx={{ borderColor: '#444' }} />
               </TableRow>
             </TableBody>
           </Table>

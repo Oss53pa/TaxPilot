@@ -47,20 +47,65 @@ function sumSoldeForPrefixes(bal: BalanceEntry[], prefixes: string[]): number {
   return total
 }
 
-// Helper: calcule actif et passif a partir du mapping
+// Helper: sum only debit-side balances (solde > 0) for actif brut
+function sumDebitSoldes(bal: BalanceEntry[], prefixes: string[]): number {
+  let total = 0
+  for (const l of bal) {
+    for (const p of prefixes) {
+      if (l.compte.toString().startsWith(p)) {
+        const s = solde(l)
+        if (s > 0) total += s
+        break
+      }
+    }
+  }
+  return total
+}
+
+// Helper: sum only credit-side balances (solde < 0) returned as positive
+function sumCreditSoldes(bal: BalanceEntry[], prefixes: string[]): number {
+  let total = 0
+  for (const l of bal) {
+    for (const p of prefixes) {
+      if (l.compte.toString().startsWith(p)) {
+        const s = solde(l)
+        if (s < 0) total -= s // make positive
+        break
+      }
+    }
+  }
+  return total
+}
+
+// Helper: calcule actif et passif a partir du mapping (sign-aware)
+// Uses debit/credit sense to properly handle dual-nature accounts (e.g. bank 52x)
 function calcBilanFromMapping(bal: BalanceEntry[]): { actif: number; passif: number } {
   let actif = 0, passif = 0
   const mapping = SYSCOHADA_MAPPING
 
   for (const [, poste] of Object.entries(mapping.actif)) {
-    const brut = sumForPrefixes(bal, poste.comptes)
-    const amort = sumForPrefixes(bal, poste.amortComptes || [])
+    const brut = sumDebitSoldes(bal, poste.comptes)
+    const amort = sumCreditSoldes(bal, poste.amortComptes || [])
     actif += brut - amort
   }
   for (const [, poste] of Object.entries(mapping.passif)) {
-    passif += sumForPrefixes(bal, poste.comptes)
+    passif += sumCreditSoldes(bal, poste.comptes)
   }
-  return { actif: Math.abs(actif), passif: Math.abs(passif) }
+  return { actif: Math.max(0, actif), passif }
+}
+
+// Helper: calcule actif/passif directement depuis la balance (sans mapping)
+function calcBilanFromBalance(bal: BalanceEntry[]): { actif: number; passif: number } {
+  let actif = 0, passif = 0
+  for (const l of bal) {
+    const cl = parseInt(l.compte.toString().charAt(0))
+    if (cl >= 1 && cl <= 5) {
+      const s = solde(l)
+      if (s > 0) actif += s
+      else if (s < 0) passif -= s
+    }
+  }
+  return { actif, passif }
 }
 
 // EF-001: Bilan equilibre
@@ -70,25 +115,43 @@ function EF001(ctx: AuditContext): ResultatControle {
 
   // Pour les types sectoriels, certains controles EF sont adaptes
   if (['BANQUE', 'ASSURANCE', 'MICROFINANCE', 'EBNL'].includes(typeLiasse)) {
-    // Verification simplifiee par classes comptables
     const totalActifClasses = sumForPrefixes(ctx.balanceN, ['1', '2', '3', '4', '5'])
     return ok(ref, nom, `Controle adapte au type ${typeLiasse} - balance totale: ${Math.abs(totalActifClasses).toLocaleString('fr-FR')}`)
   }
 
+  // Primary check: balance directe (debit vs credit soldes classes 1-5)
+  const balDirect = calcBilanFromBalance(ctx.balanceN)
+  const ecartDirect = Math.abs(balDirect.actif - balDirect.passif)
+
+  // Secondary check: mapping-based
   const { actif, passif } = calcBilanFromMapping(ctx.balanceN)
-  const ecart = Math.abs(actif - passif)
-  if (ecart > 1) {
+  const ecartMapping = Math.abs(actif - passif)
+
+  // Use balance-based check as primary (most reliable)
+  if (ecartDirect > 1) {
     return anomalie(ref, nom, 'BLOQUANT',
-      `Bilan desequilibre: Actif=${actif.toLocaleString('fr-FR')}, Passif=${passif.toLocaleString('fr-FR')} (ecart: ${ecart.toLocaleString('fr-FR')})`,
+      `Bilan desequilibre: Actif=${balDirect.actif.toLocaleString('fr-FR')}, Passif=${balDirect.passif.toLocaleString('fr-FR')} (ecart: ${ecartDirect.toLocaleString('fr-FR')})`,
       {
-        ecart, montants: { actif, passif },
-        description: `Le bilan genere a partir du mapping SYSCOHADA est desequilibre de ${ecart.toLocaleString('fr-FR')} FCFA. L\'actif (${actif.toLocaleString('fr-FR')}) ne correspond pas au passif (${passif.toLocaleString('fr-FR')}). Cela peut provenir de comptes non mappes, d\'un mapping incorrect, ou d\'un desequilibre dans la balance source.`
+        ecart: ecartDirect, montants: { actif: balDirect.actif, passif: balDirect.passif, actifMapping: actif, passifMapping: passif },
+        description: `Le bilan est desequilibre de ${ecartDirect.toLocaleString('fr-FR')} FCFA. L'actif (soldes debiteurs classes 1-5 = ${balDirect.actif.toLocaleString('fr-FR')}) ne correspond pas au passif (soldes crediteurs classes 1-5 = ${balDirect.passif.toLocaleString('fr-FR')}). Cela peut provenir d'un desequilibre dans la balance source ou d'ecritures de cloture incompletes.`
       },
-      'Verifier que tous les comptes de bilan sont correctement affectes dans le mapping. Identifier les comptes non mappes (controle C-006) et les erreurs d\'affectation actif/passif.',
+      'Verifier l\'equilibre de la balance source (controle F-001). Si la balance est equilibree, verifier l\'affectation du resultat (compte 13x).',
       undefined,
       'Art. 29 Acte Uniforme OHADA - Equilibre du bilan')
   }
-  return ok(ref, nom, `Bilan equilibre: ${actif.toLocaleString('fr-FR')}`)
+
+  // If balance is balanced but mapping shows gap, report as INFO (mapping coverage issue)
+  if (ecartMapping > Math.max(actif * 0.05, 10000)) {
+    return anomalie(ref, nom, 'INFO',
+      `Bilan equilibre mais ecart mapping: Actif mapping=${actif.toLocaleString('fr-FR')}, Passif mapping=${passif.toLocaleString('fr-FR')}`,
+      {
+        ecart: ecartMapping, montants: { actif, passif, actifBalance: balDirect.actif, passifBalance: balDirect.passif },
+        description: `Le bilan est equilibre (${balDirect.actif.toLocaleString('fr-FR')}) mais le mapping SYSCOHADA presente un ecart de ${ecartMapping.toLocaleString('fr-FR')} FCFA. Certains comptes peuvent ne pas etre couverts par le mapping, ce qui affectera la presentation des etats financiers sans impacter l'equilibre.`
+      },
+      'Verifier que tous les comptes de bilan sont correctement affectes dans le mapping SYSCOHADA (controle C-006).')
+  }
+
+  return ok(ref, nom, `Bilan equilibre: ${balDirect.actif.toLocaleString('fr-FR')}`)
 }
 
 // EF-002: Sous-totaux actif
@@ -138,21 +201,22 @@ function EF003(ctx: AuditContext): ResultatControle {
 // EF-004: Total bilan coherent avec balance
 function EF004(ctx: AuditContext): ResultatControle {
   const ref = 'EF-004', nom = 'Bilan vs balance'
-  const { actif } = calcBilanFromMapping(ctx.balanceN)
-  const totalBilanBalance = ctx.balanceN.filter((l) => { const cl = parseInt(l.compte.charAt(0)); return cl >= 1 && cl <= 5 }).reduce((s, l) => s + Math.max(0, solde(l)), 0)
-  const ecart = Math.abs(actif - totalBilanBalance)
-  if (ecart > totalBilanBalance * 0.05 && ecart > 10000) {
-    return anomalie(ref, nom, 'BLOQUANT',
-      `Ecart significatif entre bilan mapping et bilan balance: ${ecart.toLocaleString('fr-FR')}`,
+  const { actif: actifMapping } = calcBilanFromMapping(ctx.balanceN)
+  const { actif: actifBalance } = calcBilanFromBalance(ctx.balanceN)
+  const ecart = Math.abs(actifMapping - actifBalance)
+  // Use 10% tolerance — mapping may not cover all accounts (e.g., contra accounts, special prefixes)
+  if (ecart > actifBalance * 0.10 && ecart > 50000) {
+    return anomalie(ref, nom, 'MAJEUR',
+      `Ecart entre bilan mapping et balance: ${ecart.toLocaleString('fr-FR')} (${actifBalance > 0 ? (ecart / actifBalance * 100).toFixed(1) : '0'}%)`,
       {
-        ecart, montants: { bilanMapping: actif, bilanBalance: totalBilanBalance },
-        description: `L\'ecart de ${ecart.toLocaleString('fr-FR')} FCFA entre le bilan issu du mapping (${actif.toLocaleString('fr-FR')}) et la balance brute (${totalBilanBalance.toLocaleString('fr-FR')}) depasse 5%. Des comptes de bilan ne sont pas correctement affectes dans le mapping SYSCOHADA, ce qui produira des etats financiers incomplets.`
+        ecart, montants: { bilanMapping: actifMapping, bilanBalance: actifBalance },
+        description: `L'ecart de ${ecart.toLocaleString('fr-FR')} FCFA entre le bilan issu du mapping SYSCOHADA (${actifMapping.toLocaleString('fr-FR')}) et la balance directe (${actifBalance.toLocaleString('fr-FR')}) depasse 10%. Des comptes de bilan ne sont pas couverts par le mapping, ce qui produira des etats financiers potentiellement incomplets.`
       },
-      'Identifier les comptes non mappes (voir controle C-006) et completer le mapping. Verifier que les amortissements et depreciations sont correctement affectes.',
+      'Identifier les comptes non couverts par le mapping SYSCOHADA et les affecter aux postes correspondants du bilan.',
       undefined,
       'Art. 29 Acte Uniforme OHADA')
   }
-  return ok(ref, nom, 'Bilan et balance coherents')
+  return ok(ref, nom, `Bilan mapping (${actifMapping.toLocaleString('fr-FR')}) coherent avec balance (${actifBalance.toLocaleString('fr-FR')})`)
 }
 
 // EF-005: Resultat CdR = Resultat bilan
@@ -160,17 +224,24 @@ function EF005(ctx: AuditContext): ResultatControle {
   const ref = 'EF-005', nom = 'Resultat CdR = Resultat bilan'
   const produits = find(ctx.balanceN, '7').reduce((s, l) => s + (l.credit - l.debit), 0)
   const charges = find(ctx.balanceN, '6').reduce((s, l) => s + (l.debit - l.credit), 0)
-  const resultatCdR = produits - charges
+  // Include HAO (class 8 excluding 89) and IS (89) for complete net result
+  const hao8 = ctx.balanceN.filter(l => {
+    const c = l.compte.toString()
+    return c.startsWith('8') && !c.startsWith('89')
+  })
+  const haoNet = hao8.reduce((s, l) => s + (l.credit - l.debit), 0)
+  const impot89 = find(ctx.balanceN, '89').reduce((s, l) => s + (l.debit - l.credit), 0)
+  const resultatCdR = produits - charges + haoNet - impot89
   const resultatBilan = find(ctx.balanceN, '13').reduce((s, l) => s + (l.credit - l.debit), 0)
   const ecart = Math.abs(resultatCdR - resultatBilan)
   if (ecart > 1 && find(ctx.balanceN, '13').length > 0) {
     return anomalie(ref, nom, 'BLOQUANT',
       `Resultat CdR (${resultatCdR.toLocaleString('fr-FR')}) != Resultat bilan (${resultatBilan.toLocaleString('fr-FR')})`,
       {
-        ecart, montants: { resultatCdR, resultatBilan, produits, charges },
-        description: `Le resultat calcule a partir du compte de resultat (produits ${produits.toLocaleString('fr-FR')} - charges ${charges.toLocaleString('fr-FR')} = ${resultatCdR.toLocaleString('fr-FR')}) differe du resultat inscrit au bilan (compte 13x = ${resultatBilan.toLocaleString('fr-FR')}). Les deux montants doivent etre strictement identiques. L\'ecart indique une incoherence dans les ecritures de cloture.`
+        ecart, montants: { resultatCdR, resultatBilan, produits, charges, haoNet, impot: impot89 },
+        description: `Le resultat net calcule (produits ${produits.toLocaleString('fr-FR')} - charges ${charges.toLocaleString('fr-FR')} + HAO ${haoNet.toLocaleString('fr-FR')} - IS ${impot89.toLocaleString('fr-FR')} = ${resultatCdR.toLocaleString('fr-FR')}) differe du resultat inscrit au bilan (compte 13x = ${resultatBilan.toLocaleString('fr-FR')}). Les deux montants doivent etre strictement identiques.`
       },
-      'Verifier les ecritures de determination du resultat. Le solde du compte 13x doit correspondre exactement a la difference entre les produits (classe 7) et les charges (classe 6).',
+      'Verifier les ecritures de determination du resultat. Le solde du compte 13x doit correspondre exactement au resultat net (produits - charges + HAO - IS).',
       [{
         journal: 'OD', date: new Date().toISOString().slice(0, 10),
         lignes: resultatCdR > resultatBilan
@@ -186,7 +257,7 @@ function EF005(ctx: AuditContext): ResultatControle {
       }],
       'Art. 34 Acte Uniforme OHADA')
   }
-  return ok(ref, nom, `Resultat coherent: ${resultatCdR.toLocaleString('fr-FR')}`)
+  return ok(ref, nom, `Resultat net coherent: ${resultatCdR.toLocaleString('fr-FR')}`)
 }
 
 // EF-006: SIG coherents (Marge brute)
@@ -235,8 +306,14 @@ function EF008(ctx: AuditContext): ResultatControle {
   const ref = 'EF-008', nom = 'Cascade resultat'
   const rao = find(ctx.balanceN, '7').reduce((s, l) => s + (l.credit - l.debit), 0)
     - find(ctx.balanceN, '6').reduce((s, l) => s + (l.debit - l.credit), 0)
-  const hao = find(ctx.balanceN, '8').reduce((s, l) => s + (l.credit - l.debit), 0)
-  const impot = sumForPrefixes(ctx.balanceN, ['89'])
+  // HAO: class 8 EXCLUDING 89 (IS) to avoid double-counting
+  const hao8 = ctx.balanceN.filter(l => {
+    const c = l.compte.toString()
+    return c.startsWith('8') && !c.startsWith('89')
+  })
+  const hao = hao8.reduce((s, l) => s + (l.credit - l.debit), 0)
+  // IS: use signed value (debit - credit) since IS is a debit charge
+  const impot = find(ctx.balanceN, '89').reduce((s, l) => s + (l.debit - l.credit), 0)
   const resultatNet = rao + hao - impot
   const resultat13 = find(ctx.balanceN, '13').reduce((s, l) => s + (l.credit - l.debit), 0)
   const ecart = Math.abs(resultatNet - resultat13)
@@ -246,7 +323,7 @@ function EF008(ctx: AuditContext): ResultatControle {
       {
         ecart,
         montants: { resultatAO: rao, resultatHAO: hao, impotSocietes: impot, resultatNetCalcule: resultatNet, resultatComptabilise: resultat13 },
-        description: `La cascade du resultat n\'est pas coherente: Resultat AO (${rao.toLocaleString('fr-FR')}) + Resultat HAO (${hao.toLocaleString('fr-FR')}) - IS (${impot.toLocaleString('fr-FR')}) = ${resultatNet.toLocaleString('fr-FR')}, mais le compte 13x affiche ${resultat13.toLocaleString('fr-FR')}. L\'ecart de ${ecart.toLocaleString('fr-FR')} FCFA indique une erreur dans la determination du resultat.`
+        description: `La cascade du resultat n'est pas coherente: Resultat AO (${rao.toLocaleString('fr-FR')}) + Resultat HAO (${hao.toLocaleString('fr-FR')}) - IS (${impot.toLocaleString('fr-FR')}) = ${resultatNet.toLocaleString('fr-FR')}, mais le compte 13x affiche ${resultat13.toLocaleString('fr-FR')}. L'ecart de ${ecart.toLocaleString('fr-FR')} FCFA indique une erreur dans la determination du resultat.`
       },
       'Reconstituer la cascade du resultat etape par etape. Verifier les ecritures d\'IS et les operations HAO. S\'assurer que le compte 13x reflette le resultat net final.',
       undefined,
@@ -506,7 +583,7 @@ export function registerLevel6Controls(): void {
     ['EF-001', 'Bilan equilibre', 'Verifie l\'equilibre du bilan via mapping', 'BLOQUANT', EF001],
     ['EF-002', 'Sous-totaux actif', 'Verifie les sous-totaux de l\'actif', 'BLOQUANT', EF002],
     ['EF-003', 'Sous-totaux passif', 'Verifie les sous-totaux du passif', 'BLOQUANT', EF003],
-    ['EF-004', 'Bilan vs balance', 'Coherence bilan mapping vs balance', 'BLOQUANT', EF004],
+    ['EF-004', 'Bilan vs balance', 'Coherence bilan mapping vs balance', 'MAJEUR', EF004],
     ['EF-005', 'Resultat CdR = Resultat bilan', 'Coherence resultat CdR et bilan', 'BLOQUANT', EF005],
     ['EF-006', 'SIG - Marge brute', 'Verifie la marge brute', 'MINEUR', EF006],
     ['EF-007', 'SIG - Valeur ajoutee', 'Verifie la valeur ajoutee', 'MAJEUR', EF007],

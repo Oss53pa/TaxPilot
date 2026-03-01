@@ -61,49 +61,46 @@ import { useLiasseData } from '../../components/liasse/DataProvider'
 
 // Configuration
 import {
-  LIASSE_SHEETS, SHEET_CATEGORIES, getNoteTitle, getNoteDescription,
+  LIASSE_SHEETS, SHEET_CATEGORIES, getNoteTitle, getNoteDescription, getSubNoteTitle,
   RegimeImposition, REGIME_LABELS, getSheetRequirement, getVisibleSheets, getSheetCounts,
 } from '../../config/liasseFiscaleSheets'
+import { RegimeContext } from '../../config/regimeContext'
 
-// Composants SYSCOHADA - États financiers
-import BilanActifSYSCOHADA from '../../components/liasse/sheets/BilanActifSYSCOHADA'
-import BilanPassifSYSCOHADA from '../../components/liasse/sheets/BilanPassifSYSCOHADA'
-import CompteResultatSYSCOHADA from '../../components/liasse/sheets/CompteResultatSYSCOHADA'
-import TableauFluxTresorerieSYSCOHADA from '../../components/liasse/sheets/TableauFluxTresorerieSYSCOHADA'
-import BilanSynthetique from '../../components/liasse/sheets/BilanSynthetique'
-
-// Pages de garde et fiches
-import Couverture from '../../components/liasse/sheets/Couverture'
-import PageGardeSYSCOHADA from '../../components/liasse/sheets/PageGardeSYSCOHADA'
-import RecevabiliteSYSCOHADA from '../../components/liasse/sheets/RecevabiliteSYSCOHADA'
-import FicheR1SYSCOHADA from '../../components/liasse/sheets/FicheR1SYSCOHADA'
-import FicheR2SYSCOHADA from '../../components/liasse/sheets/FicheR2SYSCOHADA'
-import FicheR3SYSCOHADA from '../../components/liasse/sheets/FicheR3SYSCOHADA'
-import FicheR4SYSCOHADA from '../../components/liasse/sheets/FicheR4SYSCOHADA'
-
-// Notes annexes
-import Note1SYSCOHADA from '../../components/liasse/sheets/Note1SYSCOHADA'
-import Note2SYSCOHADA from '../../components/liasse/sheets/Note2SYSCOHADA'
-import Note3ASYSCOHADA from '../../components/liasse/sheets/Note3SYSCOHADA'
-import Note5SYSCOHADA from '../../components/liasse/sheets/Note5SYSCOHADA'
-import Note6SYSCOHADA from '../../components/liasse/sheets/Note6SYSCOHADA'
-import Note8SYSCOHADA from '../../components/liasse/sheets/Note8SYSCOHADA'
-import Note11SYSCOHADA from '../../components/liasse/sheets/Note11SYSCOHADA'
-import Note12SYSCOHADA from '../../components/liasse/sheets/Note12SYSCOHADA'
-import Note14SYSCOHADA from '../../components/liasse/sheets/Note14SYSCOHADA'
-import Note15SYSCOHADA from '../../components/liasse/sheets/Note15SYSCOHADA'
-import Note17SYSCOHADA from '../../components/liasse/sheets/Note17SYSCOHADA'
-import Note19SYSCOHADA from '../../components/liasse/sheets/Note19SYSCOHADA'
-import Note36Tables from '../../components/liasse/sheets/Note36Tables'
-import NotesRestantes from '../../components/liasse/sheets/NotesRestantes'
-
-// Compléments, suppléments et tableaux
-import TablesCalculImpots from '../../components/liasse/sheets/TablesCalculImpots'
-import TableauxSupplementaires from '../../components/liasse/sheets/TableauxSupplementaires'
-import ComplementCharges from '../../components/liasse/sheets/ComplementCharges'
-import SupplementTVA from '../../components/liasse/sheets/SupplementTVA'
-import SupplementImpotSociete from '../../components/liasse/sheets/SupplementImpotSociete'
-import SupplementAvantagesFiscaux from '../../components/liasse/sheets/SupplementAvantagesFiscaux'
+// Composants SYSCOHADA - importés via index.ts pour bénéficier du HOC withBackendData
+import {
+  BilanActifSYSCOHADA,
+  BilanPassifSYSCOHADA,
+  CompteResultatSYSCOHADA,
+  TableauFluxTresorerieSYSCOHADA,
+  BilanSynthetique,
+  Couverture,
+  PageGardeSYSCOHADA,
+  RecevabiliteSYSCOHADA,
+  FicheR1SYSCOHADA,
+  FicheR2SYSCOHADA,
+  FicheR3SYSCOHADA,
+  FicheR4SYSCOHADA,
+  Note1SYSCOHADA,
+  Note2SYSCOHADA,
+  Note3ASYSCOHADA,
+  Note5SYSCOHADA,
+  Note6SYSCOHADA,
+  Note8SYSCOHADA,
+  Note11SYSCOHADA,
+  Note12SYSCOHADA,
+  Note14SYSCOHADA,
+  Note15SYSCOHADA,
+  Note17SYSCOHADA,
+  Note19SYSCOHADA,
+  Note36Tables,
+  NotesRestantes,
+  TablesCalculImpots,
+  TableauxSupplementaires,
+  ComplementCharges,
+  SupplementTVA,
+  SupplementImpotSociete,
+  SupplementAvantagesFiscaux,
+} from '../../components/liasse/sheets'
 
 // Styles
 import '../../styles/liasse-fixes.css'
@@ -387,16 +384,41 @@ const LiasseFiscaleOfficial: React.FC = () => {
       // Notes annexes - composants spécifiques
       case 'note1': return <Note1SYSCOHADA />
       case 'note2': return <Note2SYSCOHADA />
-      case 'note3': return <Note3ASYSCOHADA />
+      case 'note3': case 'note3a': return <Note3ASYSCOHADA />
       case 'note5': return <Note5SYSCOHADA />
       case 'note6': return <Note6SYSCOHADA />
       case 'note8': return <Note8SYSCOHADA />
       case 'note11': return <Note11SYSCOHADA />
       case 'note12': return <Note12SYSCOHADA />
       case 'note14': return <Note14SYSCOHADA />
-      case 'note15': return <Note15SYSCOHADA />
+      case 'note15': case 'note15a': return <Note15SYSCOHADA />
       case 'note17': return <Note17SYSCOHADA />
       case 'note19': return <Note19SYSCOHADA />
+
+      // Sous-notes 3B-3E
+      case 'note3b': return <NotesRestantes numeroNote="3B" titre={getSubNoteTitle('3B')} description="" contenuPrevu={[]} priorite="haute" />
+      case 'note3c': return <NotesRestantes numeroNote="3C" titre={getSubNoteTitle('3C')} description="" contenuPrevu={[]} priorite="haute" />
+      case 'note3c_bis': return <NotesRestantes numeroNote="3C_BIS" titre={getSubNoteTitle('3C_BIS')} description="" contenuPrevu={[]} priorite="haute" />
+      case 'note3d': return <NotesRestantes numeroNote="3D" titre={getSubNoteTitle('3D')} description="" contenuPrevu={[]} priorite="moyenne" />
+      case 'note3e': return <NotesRestantes numeroNote="3E" titre={getSubNoteTitle('3E')} description="" contenuPrevu={[]} priorite="moyenne" />
+
+      // Sous-notes 8A-8C
+      case 'note8a': return <NotesRestantes numeroNote="8A" titre={getSubNoteTitle('8A')} description="" contenuPrevu={[]} priorite="moyenne" />
+      case 'note8b': return <NotesRestantes numeroNote="8B" titre={getSubNoteTitle('8B')} description="" contenuPrevu={[]} priorite="moyenne" />
+      case 'note8c': return <NotesRestantes numeroNote="8C" titre={getSubNoteTitle('8C')} description="" contenuPrevu={[]} priorite="moyenne" />
+
+      // Sous-note 15B
+      case 'note15b': return <NotesRestantes numeroNote="15B" titre={getSubNoteTitle('15B')} description="" contenuPrevu={[]} priorite="moyenne" />
+
+      // Sous-notes 16A-16C
+      case 'note16a': return <NotesRestantes numeroNote="16A" titre={getSubNoteTitle('16A')} description="" contenuPrevu={[]} priorite="haute" />
+      case 'note16b': return <NotesRestantes numeroNote="16B" titre={getSubNoteTitle('16B')} description="" contenuPrevu={[]} priorite="moyenne" />
+      case 'note16b_bis': return <NotesRestantes numeroNote="16B_BIS" titre={getSubNoteTitle('16B_BIS')} description="" contenuPrevu={[]} priorite="moyenne" />
+      case 'note16c': return <NotesRestantes numeroNote="16C" titre={getSubNoteTitle('16C')} description="" contenuPrevu={[]} priorite="moyenne" />
+
+      // Sous-notes 27A-27B
+      case 'note27a': return <NotesRestantes numeroNote="27A" titre={getSubNoteTitle('27A')} description="" contenuPrevu={[]} priorite="haute" />
+      case 'note27b': return <NotesRestantes numeroNote="27B" titre={getSubNoteTitle('27B')} description="" contenuPrevu={[]} priorite="haute" />
 
       // Note 36 - tables et nomenclature
       case 'note36_codes': return <Note36Tables initialTab={0} />
@@ -458,7 +480,7 @@ const LiasseFiscaleOfficial: React.FC = () => {
 
   // ========== RENDER PRINCIPAL ==========
   return (
-    <Box sx={{ display: 'flex', gap: 2 }}>
+    <Box sx={{ display: 'flex', gap: 2, height: '100%', overflow: 'hidden' }}>
       {/* Sidebar Navigation */}
       {drawerOpen && (
         <Paper
@@ -468,10 +490,7 @@ const LiasseFiscaleOfficial: React.FC = () => {
             flexShrink: 0,
             border: `1px solid ${P.primary200}`,
             borderRadius: 3,
-            overflow: 'auto',
-            maxHeight: 'calc(100vh - 120px)',
-            position: 'sticky',
-            top: 80,
+            overflowY: 'auto',
           }}
         >
           <Box sx={{ p: 2 }}>
@@ -486,7 +505,27 @@ const LiasseFiscaleOfficial: React.FC = () => {
               <Select
                 value={selectedRegime}
                 label="Régime d'imposition"
-                onChange={(e) => setSelectedRegime(e.target.value as RegimeImposition)}
+                onChange={(e) => {
+                  const newRegime = e.target.value as RegimeImposition
+                  // Mettre à jour localStorage pour que les composants (via withBackendData) reflètent le changement
+                  try {
+                    const settingsRaw = localStorage.getItem('fiscasync_entreprise_settings')
+                    if (settingsRaw) {
+                      const settings = JSON.parse(settingsRaw)
+                      settings.regime_imposition = newRegime
+                      localStorage.setItem('fiscasync_entreprise_settings', JSON.stringify(settings))
+                    }
+                    const dbRaw = localStorage.getItem('fiscasync_db_entreprises')
+                    if (dbRaw) {
+                      const list = JSON.parse(dbRaw)
+                      if (list.length > 0) {
+                        list[0].regime_imposition = newRegime
+                        localStorage.setItem('fiscasync_db_entreprises', JSON.stringify(list))
+                      }
+                    }
+                  } catch { /* ignore */ }
+                  setSelectedRegime(newRegime)
+                }}
               >
                 {(Object.keys(REGIME_LABELS) as RegimeImposition[]).map((regime) => (
                   <MenuItem key={regime} value={regime}>{REGIME_LABELS[regime]}</MenuItem>
@@ -593,9 +632,9 @@ const LiasseFiscaleOfficial: React.FC = () => {
       )}
 
       {/* Contenu Principal */}
-      <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+      <Box sx={{ flexGrow: 1, minWidth: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {/* En-tête */}
-        <Box sx={{ mb: 3 }}>
+        <Box sx={{ mb: 2, flexShrink: 0 }}>
           <Button
             startIcon={<ArrowBack />}
             onClick={() => navigate('/dashboard')}
@@ -617,7 +656,7 @@ const LiasseFiscaleOfficial: React.FC = () => {
         </Box>
 
         {/* Barre d'actions */}
-        <Paper sx={{ p: 2, mb: 3 }}>
+        <Paper sx={{ p: 2, mb: 2, flexShrink: 0 }}>
           <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
             <Button
               variant="contained"
@@ -652,17 +691,19 @@ const LiasseFiscaleOfficial: React.FC = () => {
         </Paper>
 
         {/* Contenu de l'onglet sélectionné */}
-        <Paper sx={{ p: 3, minHeight: 600 }}>
-          {loading ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-              <CircularProgress />
-            </Box>
-          ) : error ? (
-            <Alert severity="error">{error?.message || 'Une erreur est survenue'}</Alert>
-          ) : (
-            renderSheetComponent()
-          )}
-        </Paper>
+        <RegimeContext.Provider value={selectedRegime}>
+          <Paper sx={{ p: 3, flexGrow: 1, overflowY: 'auto', minHeight: 0 }}>
+            {loading ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+                <CircularProgress />
+              </Box>
+            ) : error ? (
+              <Alert severity="error">{error?.message || 'Une erreur est survenue'}</Alert>
+            ) : (
+              renderSheetComponent()
+            )}
+          </Paper>
+        </RegimeContext.Provider>
       </Box>
 
       {/* Dialog Production Automatique */}
