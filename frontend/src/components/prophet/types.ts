@@ -199,4 +199,8 @@ export interface ConversationContext {
     effectifs?: number
     secteur_activite?: string
   }
+  /** ID de la page liasse actuellement affichée (ex: 'note-15', 'bilan', 'actif') */
+  currentLiassePage?: string
+  /** True si une balance a été importée et chargée */
+  balanceLoaded?: boolean
 }

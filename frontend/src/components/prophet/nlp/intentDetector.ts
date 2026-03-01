@@ -195,7 +195,7 @@ function scoreIntents(
   const hasPrediction = hasCanonical(canonTokens, 'prevision') || hasCanonical(canonTokens, 'ratio') ||
     /\b(analyser|analyse|prediction|prevision|situation|sante|diagnostic|prospectif)\b/.test(normalized)
 
-  if (hasPrediction || /\b(ratio|indicateur|tendance|anomalie)\b/.test(normalized)) {
+  if (hasPrediction || /\b(ratio|indicateur|tendance|anomalie|sig|soldes?\s*intermediaires?|ebe|marge\s*commerciale|cafg|seuil\s*(?:de\s+)?rentabilite|point\s*mort|break\s*even|breakeven|bfr|besoin\s*(?:en\s+)?fonds?\s*(?:de\s+)?roulement|dso|dpo|dsi|cycle\s*(?:de\s+)?cash|cycle\s*(?:de\s+)?tresorerie|fonds?\s*(?:de\s+)?roulement)\b/.test(normalized)) {
     if (/\b(is|impot|benefice|resultat\s*fiscal)\b/.test(normalized) && hasPrediction) {
       add('PREDICTION_IS', 80)
     }
@@ -219,11 +219,11 @@ function scoreIntents(
       add('PREDICTION_SIG', 85)
     }
     // Seuil de rentabilite / breakeven
-    if (/\b(seuil\s*rentabilite|point\s*mort|break\s*even|breakeven|seuil\s*equilibre|charges?\s*fixes?\s*variables?)\b/.test(normalized)) {
-      add('PREDICTION_BREAKEVEN', 85)
+    if (/\b(seuil\s*(?:de\s+)?rentabilite|point\s*mort|break\s*even|breakeven|seuil\s*(?:d\s*)?equilibre|charges?\s*fixes?\s*(?:et\s+)?variables?)\b/.test(normalized)) {
+      add('PREDICTION_BREAKEVEN', 92)
     }
     // BFR
-    if (/\b(bfr|besoin\s*fonds?\s*roulement|dso|dpo|dsi|cycle\s*cash|cycle\s*tresorerie|tresorerie\s*nette|fonds?\s*roulement)\b/.test(normalized)) {
+    if (/\b(bfr|besoin\s*(?:en\s+)?fonds?\s*(?:de\s+)?roulement|dso|dpo|dsi|cycle\s*(?:de\s+)?cash|cycle\s*(?:de\s+)?tresorerie|tresorerie\s*nette|fonds?\s*(?:de\s+)?roulement)\b/.test(normalized)) {
       add('PREDICTION_BFR', 85)
     }
     if (hasPrediction && /\b(general|global|complet|situation|sante|diagnostic|synthese)\b/.test(normalized)) {

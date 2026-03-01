@@ -95,6 +95,9 @@ export function saveImportedBalance(
   // Also store as "latest" for quick access
   setItem('latest', balance)
 
+  // Notify Proph3t and other listeners that balance data changed
+  window.dispatchEvent(new CustomEvent('fiscasync:balance-imported'))
+
   return balance
 }
 

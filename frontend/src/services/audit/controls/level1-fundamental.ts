@@ -55,7 +55,10 @@ function F001(ctx: AuditContext): ResultatControle {
       `Desequilibre de ${ecart.toLocaleString('fr-FR')}`,
       {
         ecart, montants: { totalDebit: totalD, totalCredit: totalC },
-        description: `La balance generale presente un desequilibre de ${ecart.toLocaleString('fr-FR')} FCFA. Le principe de la partie double impose que la somme des debits soit strictement egale a la somme des credits. Ce desequilibre bloque la production des etats financiers et invalide tous les controles de coherence.`
+        description: `La balance generale presente un desequilibre de ${ecart.toLocaleString('fr-FR')} FCFA. Le principe de la partie double impose que la somme des debits soit strictement egale a la somme des credits. Ce desequilibre bloque la production des etats financiers et invalide tous les controles de coherence.`,
+        attendu: 'Total debits = Total credits (ecart < 0.01 FCFA)',
+        constate: `Desequilibre de ${ecart.toLocaleString('fr-FR')} FCFA (D=${totalD.toLocaleString('fr-FR')}, C=${totalC.toLocaleString('fr-FR')})`,
+        impactFiscal: 'Balance desequilibree rendant la liasse fiscale incoherente - depot impossible',
       },
       'Identifier l\'origine du desequilibre: erreur d\'import, ecriture incomplete, ou solde d\'ouverture mal reporte. Corriger la balance source puis reimporter.',
       [{
@@ -84,7 +87,10 @@ function F002(ctx: AuditContext): ResultatControle {
       `Desequilibre N-1 de ${ecart.toLocaleString('fr-FR')}`,
       {
         ecart, montants: { totalDebitN1: totalD, totalCreditN1: totalC },
-        description: `La balance N-1 presente un desequilibre de ${ecart.toLocaleString('fr-FR')} FCFA. Cela compromet tous les controles comparatifs inter-exercices et remet en cause la fiabilite des donnees N-1.`
+        description: `La balance N-1 presente un desequilibre de ${ecart.toLocaleString('fr-FR')} FCFA. Cela compromet tous les controles comparatifs inter-exercices et remet en cause la fiabilite des donnees N-1.`,
+        attendu: 'Total debits N-1 = Total credits N-1',
+        constate: `Desequilibre N-1 de ${ecart.toLocaleString('fr-FR')} FCFA`,
+        impactFiscal: 'Controles comparatifs inter-exercices non fiables',
       },
       'Verifier la balance N-1 importee. Si elle provient d\'un autre logiciel, s\'assurer que l\'export est complet et equilibre.',
       undefined,
@@ -120,7 +126,10 @@ function F003(ctx: AuditContext): ResultatControle {
       {
         ecart,
         montants: { resultatCalcule, resultatComptabilise, produits: totalProduits, charges: totalCharges, haoNet, impot: impot89 },
-        description: `Le resultat net calcule (produits ${totalProduits.toLocaleString('fr-FR')} - charges ${totalCharges.toLocaleString('fr-FR')} + HAO ${haoNet.toLocaleString('fr-FR')} - IS ${impot89.toLocaleString('fr-FR')} = ${resultatCalcule.toLocaleString('fr-FR')}) ne correspond pas au solde du compte 13x (${resultatComptabilise.toLocaleString('fr-FR')}). Ecart: ${ecart.toLocaleString('fr-FR')}. Causes possibles: affectation du resultat en cours, ecritures de cloture manquantes, ou erreur dans les a-nouveaux.`
+        description: `Le resultat net calcule (produits ${totalProduits.toLocaleString('fr-FR')} - charges ${totalCharges.toLocaleString('fr-FR')} + HAO ${haoNet.toLocaleString('fr-FR')} - IS ${impot89.toLocaleString('fr-FR')} = ${resultatCalcule.toLocaleString('fr-FR')}) ne correspond pas au solde du compte 13x (${resultatComptabilise.toLocaleString('fr-FR')}). Ecart: ${ecart.toLocaleString('fr-FR')}. Causes possibles: affectation du resultat en cours, ecritures de cloture manquantes, ou erreur dans les a-nouveaux.`,
+        attendu: 'Resultat = Produits - Charges + HAO - IS = Compte 13x',
+        constate: `Resultat calcule: ${resultatCalcule.toLocaleString('fr-FR')}, Compte 13x: ${resultatComptabilise.toLocaleString('fr-FR')} (ecart: ${ecart.toLocaleString('fr-FR')})`,
+        impactFiscal: 'Resultat fiscal errone - base IS potentiellement fausse',
       },
       'Verifier les ecritures d\'affectation du resultat et les operations de cloture. Le compte 13x doit refleter exactement le resultat net (produits - charges + HAO - IS).',
       resultatCalcule > resultatComptabilise ? [{
@@ -138,7 +147,10 @@ function F003(ctx: AuditContext): ResultatControle {
       `Resultat calcule: ${resultatCalcule.toLocaleString('fr-FR')} (pas de compte 13x - balance pre-cloture)`,
       {
         montants: { resultatCalcule, produits: totalProduits, charges: totalCharges, haoNet, impot: impot89 },
-        description: 'Aucun compte de resultat (13x) n\'est present dans la balance. Pour une balance pre-cloture (en cours d\'exercice), c\'est normal car le resultat n\'est pas encore affecte. Pour une balance de cloture, le compte 13x est obligatoire.'
+        description: 'Aucun compte de resultat (13x) n\'est present dans la balance. Pour une balance pre-cloture (en cours d\'exercice), c\'est normal car le resultat n\'est pas encore affecte. Pour une balance de cloture, le compte 13x est obligatoire.',
+        attendu: 'Resultat calcule coherent avec produits - charges + HAO - IS',
+        constate: `Resultat calcule: ${resultatCalcule.toLocaleString('fr-FR')} (pas de compte 13x)`,
+        impactFiscal: 'Aucun impact si balance pre-cloture - sinon resultat non affecte',
       },
       'Si la balance est post-cloture, ajouter le compte 131000 (benefice) ou 139000 (perte) avec le resultat de l\'exercice.')
   }
@@ -174,7 +186,10 @@ function F004(ctx: AuditContext): ResultatControle {
       `Desequilibre bilan: Actif=${totalActif.toLocaleString('fr-FR')}, Passif=${totalPassif.toLocaleString('fr-FR')} (ecart: ${ecart.toLocaleString('fr-FR')})`,
       {
         ecart, montants: { totalActif, totalPassif, ...parClasse },
-        description: `Le bilan est desequilibre de ${ecart.toLocaleString('fr-FR')} FCFA. L\'actif (soldes debiteurs) et le passif (soldes crediteurs) des classes 1 a 5 doivent etre egaux. Ce desequilibre peut provenir d\'une erreur d\'affectation du resultat, de comptes mal classes, ou d\'ecritures incompletes.`
+        description: `Le bilan est desequilibre de ${ecart.toLocaleString('fr-FR')} FCFA. L\'actif (soldes debiteurs) et le passif (soldes crediteurs) des classes 1 a 5 doivent etre egaux. Ce desequilibre peut provenir d\'une erreur d\'affectation du resultat, de comptes mal classes, ou d\'ecritures incompletes.`,
+        attendu: 'Actif (soldes debiteurs) = Passif (soldes crediteurs)',
+        constate: `Actif: ${totalActif.toLocaleString('fr-FR')}, Passif: ${totalPassif.toLocaleString('fr-FR')} (ecart: ${ecart.toLocaleString('fr-FR')})`,
+        impactFiscal: 'Bilan desequilibre rendant la liasse fiscale non deposable',
       },
       'Verifier l\'affectation du resultat (compte 13x), le classement des comptes de bilan, et les ecritures de regularisation.',
       undefined,
@@ -199,7 +214,10 @@ function F005(ctx: AuditContext): ResultatControle {
       {
         comptes: manquantes.map(c => `Classe ${c}: ${nomsClasses[c]}`),
         montants: { classesPresentes: classesPresentes.size, classesRequises: requises.length, classesManquantes: manquantes.length },
-        description: `${manquantes.length} classe(s) comptable(s) essentielle(s) absente(s). Une balance complete en SYSCOHADA doit comporter les classes 1 (Capitaux), 2 (Immobilisations), 4 (Tiers), 5 (Tresorerie), 6 (Charges) et 7 (Produits). L\'absence d\'une classe indique un import incomplet ou une activite tres specifique.`
+        description: `${manquantes.length} classe(s) comptable(s) essentielle(s) absente(s). Une balance complete en SYSCOHADA doit comporter les classes 1 (Capitaux), 2 (Immobilisations), 4 (Tiers), 5 (Tresorerie), 6 (Charges) et 7 (Produits). L\'absence d\'une classe indique un import incomplet ou une activite tres specifique.`,
+        attendu: 'Au minimum les classes 1, 2, 4, 5, 6, 7 presentes',
+        constate: `${manquantes.length} classe(s) manquante(s): ${manquantes.join(', ')}`,
+        impactFiscal: 'Etats financiers incomplets - postes manquants dans le bilan ou le CdR',
       },
       'Verifier l\'exhaustivite de l\'import. Si l\'absence est justifiee (ex: pas de stocks pour une societe de services), documenter dans l\'annexe.',
       undefined,
@@ -217,7 +235,10 @@ function F006(ctx: AuditContext): ResultatControle {
       'Aucun compte de capital social (101x) trouve',
       {
         description: 'Aucun compte de capital social (101x) n\'est present dans la balance. Le capital est un element obligatoire du passif pour toute societe commerciale. Son absence peut indiquer un import partiel, un plan de comptes non conforme, ou une entreprise individuelle.',
-        montants: { comptesCapital: 0 }
+        montants: { comptesCapital: 0 },
+        attendu: 'Au moins un compte 101x (capital) avec solde > 0',
+        constate: 'Aucun compte de capital social (101x) dans la balance',
+        impactFiscal: 'Bilan sans capitaux propres - liasse non conforme',
       },
       'Ajouter le compte 101000 (Capital social) ou verifier que la balance est complete.',
       undefined,
@@ -236,7 +257,10 @@ function F007(ctx: AuditContext): ResultatControle {
       'Aucun compte de resultat (13x) trouve',
       {
         description: 'Aucun compte de resultat de l\'exercice (13x) n\'est present. Pour une balance en cours d\'exercice (pre-cloture), c\'est normal. Pour une balance de cloture, le compte 131 (benefice) ou 139 (perte) doit etre renseigne.',
-        montants: { comptesResultat: 0 }
+        montants: { comptesResultat: 0 },
+        attendu: 'Compte 131 (benefice) ou 139 (perte) renseigne',
+        constate: 'Aucun compte de resultat (13x) dans la balance',
+        impactFiscal: 'Aucun impact si balance pre-cloture - resultat non encore affecte',
       },
       'Si la balance est post-cloture, comptabiliser le resultat dans le compte 131 ou 139.',
       undefined,
@@ -261,7 +285,10 @@ function F008(ctx: AuditContext): ResultatControle {
       'Pas de report a nouveau (12x) alors que la balance N-1 a un resultat',
       {
         montants: { reportANouveau: 0, resultatN1: montantResN1 },
-        description: `Le resultat N-1 de ${montantResN1.toLocaleString('fr-FR')} n'a pas ete reporte dans le compte 12x en N. L\'affectation du resultat est une operation obligatoire d\'ouverture d\'exercice.`
+        description: `Le resultat N-1 de ${montantResN1.toLocaleString('fr-FR')} n'a pas ete reporte dans le compte 12x en N. L\'affectation du resultat est une operation obligatoire d\'ouverture d\'exercice.`,
+        attendu: 'Report a nouveau (12x) alimente par le resultat N-1',
+        constate: `Resultat N-1: ${montantResN1.toLocaleString('fr-FR')}, RAN: 0 FCFA`,
+        impactFiscal: 'Affectation du resultat manquante - capitaux propres potentiellement errones',
       },
       'Passer l\'ecriture d\'affectation du resultat: debiter 13x et crediter 12x (ou 11x pour les reserves).',
       undefined,
@@ -278,7 +305,10 @@ function F008(ctx: AuditContext): ResultatControle {
       `Report a nouveau (${montantRAN.toLocaleString('fr-FR')}) != Resultat N-1 (${montantResultatN1.toLocaleString('fr-FR')})`,
       {
         ecart, montants: { reportANouveau: montantRAN, resultatN1: montantResultatN1 },
-        description: `L\'ecart de ${ecart.toLocaleString('fr-FR')} entre le report a nouveau (12x) et le resultat N-1 (13x) peut s\'expliquer par: distribution de dividendes, mise en reserve, ou erreur d\'affectation. Si une distribution a eu lieu, l\'ecart doit correspondre aux dividendes distribues.`
+        description: `L\'ecart de ${ecart.toLocaleString('fr-FR')} entre le report a nouveau (12x) et le resultat N-1 (13x) peut s\'expliquer par: distribution de dividendes, mise en reserve, ou erreur d\'affectation. Si une distribution a eu lieu, l\'ecart doit correspondre aux dividendes distribues.`,
+        attendu: 'Report a nouveau = Resultat N-1 (hors distributions)',
+        constate: `RAN: ${montantRAN.toLocaleString('fr-FR')}, Resultat N-1: ${montantResultatN1.toLocaleString('fr-FR')} (ecart: ${ecart.toLocaleString('fr-FR')})`,
+        impactFiscal: 'Affectation du resultat a verifier - dividendes potentiellement non declares',
       },
       'Verifier l\'ecriture d\'affectation du resultat. Le RAN doit correspondre au resultat N-1 diminue des distributions et mises en reserve.',
       undefined,
@@ -296,7 +326,10 @@ function F009(ctx: AuditContext): ResultatControle {
       `Seulement ${count} comptes (une balance complete comporte generalement 50+)`,
       {
         montants: { nombreComptes: count, seuilRecommande: 50 },
-        description: 'Une balance comptable standard pour une entreprise en activite comporte generalement plus de 50 comptes. Un nombre insuffisant peut indiquer un import partiel, une balance synthetique (comptes agreges), ou une micro-entreprise.'
+        description: 'Une balance comptable standard pour une entreprise en activite comporte generalement plus de 50 comptes. Un nombre insuffisant peut indiquer un import partiel, une balance synthetique (comptes agreges), ou une micro-entreprise.',
+        attendu: 'Balance avec au moins 50 comptes pour une activite normale',
+        constate: `Seulement ${count} comptes dans la balance`,
+        impactFiscal: 'Aucun impact fiscal direct - detail potentiellement insuffisant pour les annexes',
       },
       'Verifier que l\'export est au niveau de detail le plus fin (comptes auxiliaires inclus). Utiliser une balance detaillee plutot que synthetique.')
   }
@@ -317,7 +350,10 @@ function F010(ctx: AuditContext): ResultatControle {
       {
         comptes: nuls.slice(0, 10).map((l) => l.compte),
         montants: { comptesNuls: nuls.length, totalComptes: ctx.balanceN.length, pctNuls: parseFloat(pct) },
-        description: 'Ces comptes ont un debit, credit, solde debiteur et solde crediteur tous egaux a zero. Ils n\'impactent pas les calculs mais alourdissent la balance. Leur presence peut indiquer des comptes crees mais jamais utilises.'
+        description: 'Ces comptes ont un debit, credit, solde debiteur et solde crediteur tous egaux a zero. Ils n\'impactent pas les calculs mais alourdissent la balance. Leur presence peut indiquer des comptes crees mais jamais utilises.',
+        attendu: 'Moins de 10% de comptes a solde nul',
+        constate: `${nuls.length} compte(s) a solde nul (${pct}%)`,
+        impactFiscal: 'Aucun impact fiscal direct - comptes dormants a nettoyer',
       },
       'Supprimer les comptes a solde nul de la balance pour plus de lisibilite, sauf si des mouvements sont prevus.')
   }
@@ -345,7 +381,10 @@ function F011(ctx: AuditContext): ResultatControle {
       {
         comptes: problemes,
         montants: { comptesCollectifsNonDetailles: problemes.length },
-        description: 'Les comptes collectifs (401 Fournisseurs, 411 Clients) sont utilises sans sous-comptes auxiliaires. En SYSCOHADA, ces comptes doivent etre ventiles par tiers pour permettre le suivi individuel des creances et dettes. L\'absence de detail empeche la justification des soldes.'
+        description: 'Les comptes collectifs (401 Fournisseurs, 411 Clients) sont utilises sans sous-comptes auxiliaires. En SYSCOHADA, ces comptes doivent etre ventiles par tiers pour permettre le suivi individuel des creances et dettes. L\'absence de detail empeche la justification des soldes.',
+        attendu: 'Comptes collectifs 401/411 ventiles en sous-comptes auxiliaires',
+        constate: `Comptes collectifs non detailles: ${problemes.join(', ')}`,
+        impactFiscal: 'Justification des creances/dettes impossible - risque lors d\'un controle fiscal',
       },
       'Creer des sous-comptes par tiers (ex: 4110001 Client A, 4110002 Client B) pour permettre le lettrage et le suivi individuel.',
       undefined,
@@ -381,7 +420,10 @@ function F012(ctx: AuditContext): ResultatControle {
         description: `${anomaliesList.length} compte(s) presentent un solde sans mouvement comptable dans la periode. ` +
           'Cela est frequent dans les balances ou les colonnes Debit/Credit ne contiennent que les mouvements de la periode ' +
           '(hors a-nouveaux), tandis que les colonnes Solde incluent les reports d\'ouverture. ' +
-          'Si le format de balance inclut les a-nouveaux dans les mouvements, verifier la completude de l\'import.'
+          'Si le format de balance inclut les a-nouveaux dans les mouvements, verifier la completude de l\'import.',
+        attendu: 'Chaque compte avec solde dispose de mouvements comptables',
+        constate: `${anomaliesList.length} compte(s) avec solde sans mouvement (${pctAffected.toFixed(0)}%)`,
+        impactFiscal: 'Aucun impact si format de balance avec a-nouveaux separes',
       },
       'Verifier le format d\'export de la balance: si les mouvements incluent les a-nouveaux, corriger la source. Sinon, ce constat est informatif et n\'impacte pas la fiabilite des etats financiers.',
       undefined,

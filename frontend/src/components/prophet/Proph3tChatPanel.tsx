@@ -1,11 +1,12 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react'
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { Box, Typography, TextField, IconButton, Chip, Grow, Tooltip } from '@mui/material'
 import SendIcon from '@mui/icons-material/Send'
 import CloseIcon from '@mui/icons-material/Close'
 import AddCommentOutlinedIcon from '@mui/icons-material/AddCommentOutlined'
+import { useLocation } from 'react-router-dom'
 import Proph3tMessageBubble, { TypingIndicator } from './Proph3tMessageBubble'
 import { processQuery } from './Proph3tEngine'
-import { balanceService } from '@/services/balanceService'
+import { getLatestBalance, getLatestBalanceN1 } from '@/services/balanceStorageService'
 import { getEntreprise } from '@/services/entrepriseStorageService'
 import type { Balance } from '@/types'
 import type { ChatMessage, ConversationContext } from './types'
@@ -34,28 +35,71 @@ function persistMessages(messages: ChatMessage[]) {
   } catch { /* storage full — ignore */ }
 }
 
-// ── Quick action chips ───────────────────────────────────────────────
-const QUICK_ACTIONS = [
-  'Chercher un compte',
-  'Taux fiscaux CI',
-  'Analyse predictive',
-  'Controles audit',
-  'Liasse fiscale',
-  'Aide',
-]
+// ── Convert BalanceEntry → Balance for the engine ────────────────────
+function loadBalanceAsEngineFormat(): { balanceN: Balance[]; balanceN1?: Balance[] } | null {
+  const stored = getLatestBalance()
+  if (!stored?.entries?.length) return null
+
+  const toBalance = (entries: typeof stored.entries, exercice: string): Balance[] =>
+    entries.map(e => ({
+      id: e.compte,
+      exercice,
+      compte: e.compte,
+      debit: e.debit ?? 0,
+      credit: e.credit ?? 0,
+      solde: (e.solde_debit ?? 0) - (e.solde_credit ?? 0),
+      libelle_compte: e.intitule || '',
+      created_at: '',
+      updated_at: '',
+      is_active: true,
+    }))
+
+  const balanceN = toBalance(stored.entries, stored.exercice || '')
+
+  let balanceN1: Balance[] | undefined
+  const storedN1 = getLatestBalanceN1()
+  if (storedN1?.entries?.length) {
+    balanceN1 = toBalance(storedN1.entries, storedN1.exercice || '')
+  }
+
+  return { balanceN, balanceN1 }
+}
+
+// ── Detect liasse page from URL ──────────────────────────────────────
+function detectLiassePage(pathname: string): string | undefined {
+  if (!pathname.startsWith('/liasse-fiscale')) return undefined
+  // /liasse-fiscale → module root
+  // The page ID is tracked internally by the module, not in URL
+  // Return 'module' to indicate user is in the liasse module
+  return 'liasse-module'
+}
+
+// ── Dynamic quick actions ────────────────────────────────────────────
+function getQuickActions(hasBalance: boolean, onLiasse: boolean): string[] {
+  if (onLiasse && hasBalance) {
+    return ['Analyse generale', 'SIG', 'Mes ratios', 'Estimation IS', 'Audit']
+  }
+  if (onLiasse) {
+    return ['Liasse fiscale', 'Note 15', 'Taux fiscaux CI', 'Controles audit', 'Aide']
+  }
+  if (hasBalance) {
+    return ['Analyse generale', 'Mes ratios', 'SIG', 'BFR', 'Estimation IS', 'Audit']
+  }
+  return ['Chercher un compte', 'Taux fiscaux CI', 'Controles audit', 'Liasse fiscale', 'Aide']
+}
 
 // ── Welcome message ──────────────────────────────────────────────────
-function makeWelcome(): ChatMessage {
+function makeWelcome(hasBalance: boolean): ChatMessage {
+  const balanceMsg = hasBalance
+    ? '\n\nBalance importee detectee — analyses predictives disponibles.'
+    : ''
   return {
     id: 'welcome',
     role: 'assistant',
-    text: "Bonjour ! Je suis **Proph3t**, votre assistant expert.\n\nJe maitrise **5 domaines** : SYSCOHADA, fiscalite CI, liasse fiscale, audit et analyse predictive.\n\nComment puis-je vous aider ?",
-    suggestions: [
-      'Taux IS',
-      'Note 15',
-      'Audit',
-      'Mes ratios',
-    ],
+    text: `Bonjour ! Je suis **Proph3t**, votre assistant expert.\n\nJe maitrise **5 domaines** : SYSCOHADA, fiscalite CI, liasse fiscale, audit et analyse predictive.${balanceMsg}\n\nComment puis-je vous aider ?`,
+    suggestions: hasBalance
+      ? ['Analyse generale', 'SIG', 'Mes ratios', 'Estimation IS']
+      : ['Taux IS', 'Note 15', 'Audit', 'Aide'],
     timestamp: Date.now(),
   }
 }
@@ -67,53 +111,71 @@ interface Props {
 }
 
 export default function Proph3tChatPanel({ open, onClose }: Props) {
+  const location = useLocation()
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
-    return loadPersistedMessages() || [makeWelcome()]
+    return loadPersistedMessages() || [makeWelcome(!!getLatestBalance()?.entries?.length)]
   })
   const [input, setInput] = useState('')
   const [typing, setTyping] = useState(false)
+  const [balanceLoaded, setBalanceLoaded] = useState(false)
   const contextRef = useRef<ConversationContext>({})
   const scrollRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  // ── Load balance data from service ──
-  useEffect(() => {
-    async function loadBalance() {
-      try {
-        const raw = await balanceService.getBalances({ page_size: 100 }) as Record<string, any>
-        const balances = raw?.results || raw?.data || []
-        if (balances.length > 0) {
-          const details = await balanceService.getLignesBalance(balances[0].id, { page_size: 5000 }) as any
-          const lignes: Balance[] = details?.results || details?.lignes || details?.data || []
-          if (lignes.length > 0) {
-            contextRef.current = {
-              ...contextRef.current,
-              balanceData: { balanceN: lignes },
-            }
-          }
-        }
-      } catch {
-        // Balance not available — predictive features will show appropriate message
-      }
-    }
-    loadBalance()
-
-    // Load entreprise settings
+  // ── Load balance data directly from localStorage ──
+  const refreshContext = useCallback(() => {
+    const balData = loadBalanceAsEngineFormat()
     const ent = getEntreprise()
-    if (ent) {
-      contextRef.current = {
-        ...contextRef.current,
-        regime: ent.regime_imposition,
-        entreprise: {
-          nom: ent.raison_sociale,
-          regime_imposition: ent.regime_imposition,
-          capital: (ent as any).capital_social,
-          effectifs: (ent as any).effectifs,
-          secteur_activite: ent.secteur_activite,
-        },
+    const liassePage = detectLiassePage(location.pathname)
+
+    contextRef.current = {
+      ...contextRef.current,
+      balanceData: balData ?? undefined,
+      balanceLoaded: !!balData,
+      currentLiassePage: liassePage,
+      regime: ent?.regime_imposition,
+      entreprise: ent ? {
+        nom: ent.raison_sociale,
+        regime_imposition: ent.regime_imposition,
+        capital: (ent as any).capital_social,
+        effectifs: (ent as any).effectifs,
+        secteur_activite: ent.secteur_activite,
+      } : undefined,
+    }
+
+    setBalanceLoaded(!!balData)
+  }, [location.pathname])
+
+  // Load on mount + refresh when panel opens or route changes
+  useEffect(() => {
+    refreshContext()
+  }, [refreshContext, open])
+
+  // Listen for balance changes via storage events (cross-tab) + custom event
+  useEffect(() => {
+    const onStorageChange = (e: StorageEvent) => {
+      if (e.key?.startsWith('fiscasync_balance_')) {
+        refreshContext()
       }
     }
-  }, [])
+    const onBalanceImport = () => refreshContext()
+
+    window.addEventListener('storage', onStorageChange)
+    window.addEventListener('fiscasync:balance-imported', onBalanceImport)
+    return () => {
+      window.removeEventListener('storage', onStorageChange)
+      window.removeEventListener('fiscasync:balance-imported', onBalanceImport)
+    }
+  }, [refreshContext])
+
+  // Detect liasse page on route change
+  const onLiasse = location.pathname.startsWith('/liasse-fiscale')
+
+  // Dynamic quick actions
+  const quickActions = useMemo(
+    () => getQuickActions(balanceLoaded, onLiasse),
+    [balanceLoaded, onLiasse]
+  )
 
   // Persist messages to localStorage
   useEffect(() => {
@@ -139,6 +201,9 @@ export default function Proph3tChatPanel({ open, onClose }: Props) {
   const sendMessage = useCallback(async (text: string) => {
     const trimmed = text.trim()
     if (!trimmed) return
+
+    // Refresh context before each query to catch new imports
+    refreshContext()
 
     // Add user message
     const userMsg: ChatMessage = {
@@ -180,7 +245,7 @@ export default function Proph3tChatPanel({ open, onClose }: Props) {
     } finally {
       setTyping(false)
     }
-  }, [])
+  }, [refreshContext])
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -194,12 +259,12 @@ export default function Proph3tChatPanel({ open, onClose }: Props) {
   }, [sendMessage])
 
   const handleNewConversation = useCallback(() => {
-    contextRef.current = {}
-    const welcome = makeWelcome()
+    refreshContext()
+    const welcome = makeWelcome(!!contextRef.current.balanceData)
     setMessages([welcome])
     persistMessages([welcome])
     setInput('')
-  }, [])
+  }, [refreshContext])
 
   return (
     <Grow in={open} style={{ transformOrigin: 'bottom right' }}>
@@ -246,6 +311,7 @@ export default function Proph3tChatPanel({ open, onClose }: Props) {
             </Typography>
             <Typography variant="caption" sx={{ color: 'text.disabled' }}>
               Assistant SYSCOHADA & Fiscal CI
+              {balanceLoaded && ' — Balance connectee'}
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', gap: 0.5 }}>
@@ -296,7 +362,7 @@ export default function Proph3tChatPanel({ open, onClose }: Props) {
             '&::-webkit-scrollbar': { height: 0 },
           }}
         >
-          {QUICK_ACTIONS.map(action => (
+          {quickActions.map(action => (
             <Chip
               key={action}
               label={action}

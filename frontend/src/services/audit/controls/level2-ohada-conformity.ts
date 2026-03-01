@@ -411,7 +411,10 @@ function C010(ctx: AuditContext): ResultatControle {
       {
         comptes: inversions.slice(0, 10),
         montants: { comptesInverses: inversions.length },
-        description: 'Quelques comptes presentent un solde inverse. En faible nombre, cela peut etre normal (ex: fournisseur debiteur pour un avoir, banque creditrice pour un decouvert).'
+        description: 'Quelques comptes presentent un solde inverse. En faible nombre, cela peut etre normal (ex: fournisseur debiteur pour un avoir, banque creditrice pour un decouvert).',
+        attendu: 'Soldes conformes au sens prevu par le plan SYSCOHADA',
+        constate: `${inversions.length} compte(s) avec solde inverse (nombre faible, potentiellement normal)`,
+        impactFiscal: 'Aucun impact direct si les inversions sont justifiees (avoirs, decouverts)',
       })
   }
   return ok(ref, nom, 'Sens des comptes conformes aux attentes OHADA')

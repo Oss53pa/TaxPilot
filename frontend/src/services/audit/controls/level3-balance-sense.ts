@@ -65,7 +65,10 @@ function checkSensClasse(ctx: AuditContext, ref: string, nom: string, prefix: st
       {
         comptes: inverses.slice(0, 10),
         montants: { totalMontantInverse: totalInverse, totalClasse, pctInverse: Math.round(pctInverse), comptesInverses: inverses.length },
-        description: `${inverses.length} comptes de la classe ${prefix}x (${nomsClasses[prefix] || prefix}) presentent un solde ${sensAttendu === 'DEBITEUR' ? 'crediteur' : 'debiteur'} pour un total de ${totalInverse.toLocaleString('fr-FR')} FCFA (${pctInverse.toFixed(1)}% du total classe). Un solde inverse peut indiquer une erreur de comptabilisation ou un reclassement necessaire.`
+        description: `${inverses.length} comptes de la classe ${prefix}x (${nomsClasses[prefix] || prefix}) presentent un solde ${sensAttendu === 'DEBITEUR' ? 'crediteur' : 'debiteur'} pour un total de ${totalInverse.toLocaleString('fr-FR')} FCFA (${pctInverse.toFixed(1)}% du total classe). Un solde inverse peut indiquer une erreur de comptabilisation ou un reclassement necessaire.`,
+        attendu: `Solde ${sensAttendu === 'DEBITEUR' ? 'debiteur' : 'crediteur'} pour les comptes ${prefix}x`,
+        constate: `${inverses.length} compte(s) ${prefix}x a solde inverse pour ${totalInverse.toLocaleString('fr-FR')} FCFA (${pctInverse.toFixed(1)}%)`,
+        impactFiscal: 'Presentation erronee des etats financiers - reclassements a effectuer avant generation de la liasse',
       },
       `Les comptes ${prefix}x sont normalement ${sensAttendu === 'DEBITEUR' ? 'debiteurs' : 'crediteurs'}. Verifier les ecritures et effectuer les reclassements necessaires.`,
       undefined,
@@ -112,7 +115,10 @@ function SS005(ctx: AuditContext): ResultatControle {
       `${crediteurs.length} client(s) crediteur(s) pour ${montantReclass.toLocaleString('fr-FR')}`,
       {
         comptes: crediteurs, montants: { montantReclassement: montantReclass, clientsCrediteurs: crediteurs.length },
-        description: `${crediteurs.length} comptes clients (411x) presentent un solde crediteur pour un total de ${montantReclass.toLocaleString('fr-FR')} FCFA. Un client crediteur signifie que l\'entreprise doit au client (avoirs non imputes, trop-percus, avances recues). Ces montants doivent etre reclasses au passif du bilan (compte 419) pour une presentation conforme.`
+        description: `${crediteurs.length} comptes clients (411x) presentent un solde crediteur pour un total de ${montantReclass.toLocaleString('fr-FR')} FCFA. Un client crediteur signifie que l\'entreprise doit au client (avoirs non imputes, trop-percus, avances recues). Ces montants doivent etre reclasses au passif du bilan (compte 419) pour une presentation conforme.`,
+        attendu: 'Comptes clients (411x) a solde debiteur',
+        constate: `${crediteurs.length} client(s) crediteur(s) pour ${montantReclass.toLocaleString('fr-FR')} FCFA`,
+        impactFiscal: 'Non-respect du principe de non-compensation - reclassement au passif (419) obligatoire',
       },
       'Reclasser les clients crediteurs au passif (compte 419 - Clients crediteurs) ou imputer les avoirs en attente. Verifier l\'origine de chaque solde crediteur.',
       [{
@@ -146,7 +152,10 @@ function SS006(ctx: AuditContext): ResultatControle {
       `${debiteurs.length} fournisseur(s) debiteur(s) pour ${montantReclass.toLocaleString('fr-FR')}`,
       {
         comptes: debiteurs, montants: { montantReclassement: montantReclass, fournisseursDebiteurs: debiteurs.length },
-        description: `${debiteurs.length} comptes fournisseurs (401x) presentent un solde debiteur pour un total de ${montantReclass.toLocaleString('fr-FR')} FCFA. Un fournisseur debiteur signifie que le fournisseur doit a l\'entreprise (avances versees, avoirs en attente, trop-payes). Ces montants doivent etre reclasses a l\'actif du bilan (compte 409).`
+        description: `${debiteurs.length} comptes fournisseurs (401x) presentent un solde debiteur pour un total de ${montantReclass.toLocaleString('fr-FR')} FCFA. Un fournisseur debiteur signifie que le fournisseur doit a l\'entreprise (avances versees, avoirs en attente, trop-payes). Ces montants doivent etre reclasses a l\'actif du bilan (compte 409).`,
+        attendu: 'Comptes fournisseurs (401x) a solde crediteur',
+        constate: `${debiteurs.length} fournisseur(s) debiteur(s) pour ${montantReclass.toLocaleString('fr-FR')} FCFA`,
+        impactFiscal: 'Non-respect du principe de non-compensation - reclassement a l\'actif (409) obligatoire',
       },
       'Reclasser les fournisseurs debiteurs a l\'actif (compte 409 - Fournisseurs debiteurs) ou imputer les avoirs. Verifier l\'origine de chaque solde debiteur.',
       [{
@@ -180,7 +189,10 @@ function SS007(ctx: AuditContext): ResultatControle {
       `${creditrices.length} banque(s) creditrice(s) pour ${montantReclass.toLocaleString('fr-FR')} (decouvert)`,
       {
         comptes: creditrices, montants: { montantReclassement: montantReclass, banquesCreditrices: creditrices.length },
-        description: `${creditrices.length} comptes bancaires (52x) presentent un solde crediteur pour un total de ${montantReclass.toLocaleString('fr-FR')} FCFA. Un solde crediteur sur un compte banque indique un decouvert bancaire. Ces montants doivent etre reclasses en tresorerie-passif pour une presentation correcte du bilan.`
+        description: `${creditrices.length} comptes bancaires (52x) presentent un solde crediteur pour un total de ${montantReclass.toLocaleString('fr-FR')} FCFA. Un solde crediteur sur un compte banque indique un decouvert bancaire. Ces montants doivent etre reclasses en tresorerie-passif pour une presentation correcte du bilan.`,
+        attendu: 'Comptes bancaires (52x) a solde debiteur (tresorerie active)',
+        constate: `${creditrices.length} banque(s) en decouvert pour ${montantReclass.toLocaleString('fr-FR')} FCFA`,
+        impactFiscal: 'Reclassement en tresorerie-passif obligatoire - decouverts a presenter en concours bancaires courants',
       },
       'Reclasser les soldes crediteurs en tresorerie-passif (concours bancaires courants). Verifier les releves bancaires et la concordance des soldes.',
       [{
@@ -219,7 +231,10 @@ function SS009(ctx: AuditContext): ResultatControle {
       {
         comptes: inverses.slice(0, 10),
         montants: { provisionsInverses: inverses.length },
-        description: `${inverses.length} comptes de provisions (29x, 39x, 49x) presentent un solde debiteur au lieu du solde crediteur attendu. Les provisions doivent etre creditrices car elles representent une depreciation (diminution de valeur) des actifs correspondants.`
+        description: `${inverses.length} comptes de provisions (29x, 39x, 49x) presentent un solde debiteur au lieu du solde crediteur attendu. Les provisions doivent etre creditrices car elles representent une depreciation (diminution de valeur) des actifs correspondants.`,
+        attendu: 'Comptes de provisions (29x, 39x, 49x) a solde crediteur',
+        constate: `${inverses.length} provision(s) a solde debiteur (sens inverse)`,
+        impactFiscal: 'Depreciations incorrectement presentees - risque de surestimation des actifs dans les etats financiers',
       },
       'Corriger le sens des provisions. Un solde debiteur sur un compte de provision est anormal et peut indiquer une reprise excedant la dotation initiale.',
       undefined,
@@ -238,7 +253,10 @@ function SS010(ctx: AuditContext): ResultatControle {
       `Capital social negatif: ${montant.toLocaleString('fr-FR')}`,
       {
         montants: { capitalSocial: montant },
-        description: `Le capital social est negatif (${montant.toLocaleString('fr-FR')} FCFA), ce qui est juridiquement impossible. Cela indique une erreur de comptabilisation (debit/credit inverses) ou une confusion avec un autre compte. Le capital doit toujours etre crediteur (solde du cote du passif).`
+        description: `Le capital social est negatif (${montant.toLocaleString('fr-FR')} FCFA), ce qui est juridiquement impossible. Cela indique une erreur de comptabilisation (debit/credit inverses) ou une confusion avec un autre compte. Le capital doit toujours etre crediteur (solde du cote du passif).`,
+        attendu: 'Capital social positif (solde crediteur au passif)',
+        constate: `Capital social negatif: ${montant.toLocaleString('fr-FR')} FCFA`,
+        impactFiscal: 'Anomalie bloquante - un capital negatif rend la liasse fiscale incoherente et juridiquement invalide',
       },
       'Verifier le sens des ecritures sur le compte 101x. Corriger l\'inversion debit/credit si necessaire.',
       undefined,
@@ -267,7 +285,10 @@ function MA001(ctx: AuditContext): ResultatControle {
       {
         comptes: concentres,
         montants: { comptesConcentres: concentres.length, totalBilan: tb },
-        description: `${concentres.length} compte(s) de bilan represente(nt) individuellement plus de 50% du total bilan (${tb.toLocaleString('fr-FR')} FCFA). Une concentration excessive sur un seul poste augmente le risque d\'erreur significative et merite une attention particuliere lors de la revision.`
+        description: `${concentres.length} compte(s) de bilan represente(nt) individuellement plus de 50% du total bilan (${tb.toLocaleString('fr-FR')} FCFA). Une concentration excessive sur un seul poste augmente le risque d\'erreur significative et merite une attention particuliere lors de la revision.`,
+        attendu: 'Repartition equilibree des postes de bilan',
+        constate: `${concentres.length} compte(s) representant individuellement plus de 50% du total bilan`,
+        impactFiscal: 'Risque d\'erreur significative sur un poste majeur - attention renforcee de l\'administration fiscale',
       },
       'Verifier la repartition des postes de bilan. Une forte concentration peut etre normale (ex: immobilier pour une SCI) mais doit etre justifiee dans l\'annexe.')
   }
@@ -294,7 +315,10 @@ function MA002(ctx: AuditContext): ResultatControle {
       {
         comptes: suspects.slice(0, 10),
         montants: { montantsSuspects: suspects.length },
-        description: `${suspects.length} montants se terminent par .01 ou .99 FCFA. En zone FCFA, les montants sont generalement en nombres entiers (pas de centimes). Des centimes a .01 ou .99 peuvent indiquer des erreurs d\'arrondi, des conversions de devises mal calibrees, ou des ajustements automatiques.`
+        description: `${suspects.length} montants se terminent par .01 ou .99 FCFA. En zone FCFA, les montants sont generalement en nombres entiers (pas de centimes). Des centimes a .01 ou .99 peuvent indiquer des erreurs d\'arrondi, des conversions de devises mal calibrees, ou des ajustements automatiques.`,
+        attendu: 'Montants en nombres entiers (zone FCFA sans centimes)',
+        constate: `${suspects.length} montant(s) avec centimes suspects (.01 ou .99 FCFA)`,
+        impactFiscal: 'Aucun impact direct - anomalie technique liee a l\'arrondi ou a la conversion de devises',
       },
       'Verifier l\'origine de ces centimes. Arrondir les montants si necessaire, surtout en zone FCFA ou les centimes n\'ont pas cours.')
   }
@@ -316,7 +340,10 @@ function MA003(ctx: AuditContext): ResultatControle {
       {
         comptes: negatifs.slice(0, 10),
         montants: { lignesNegatives: negatifs.length },
-        description: `${negatifs.length} lignes contiennent des montants negatifs dans les colonnes debit ou credit. En comptabilite en partie double, les montants sont toujours positifs - c\'est le sens (debit ou credit) qui determine la nature de l\'operation. Un montant negatif indique un export non conforme ou des extournes mal encodees.`
+        description: `${negatifs.length} lignes contiennent des montants negatifs dans les colonnes debit ou credit. En comptabilite en partie double, les montants sont toujours positifs - c\'est le sens (debit ou credit) qui determine la nature de l\'operation. Un montant negatif indique un export non conforme ou des extournes mal encodees.`,
+        attendu: 'Montants debit et credit strictement positifs en partie double',
+        constate: `${negatifs.length} ligne(s) avec montants negatifs en debit ou credit`,
+        impactFiscal: 'Export non conforme - risque d\'erreur de calcul dans les etats financiers generes',
       },
       'Convertir les montants negatifs en ecritures au sens oppose (un debit negatif = un credit, et inversement). Verifier le parametre d\'export du logiciel comptable.',
       undefined,
@@ -336,7 +363,10 @@ function MA004(ctx: AuditContext): ResultatControle {
       `Deficit (${resultat.toLocaleString('fr-FR')}) depasse 50% du capital (${capital.toLocaleString('fr-FR')})`,
       {
         montants: { resultat, capital, ratioPct: Math.round(ratio) },
-        description: `Le deficit de l\'exercice (${resultat.toLocaleString('fr-FR')} FCFA) represente ${ratio.toFixed(0)}% du capital social (${capital.toLocaleString('fr-FR')} FCFA). Un deficit superieur a 50% du capital est un signal d\'alerte sur la continuite d\'exploitation et peut necessiter une decision en assemblee generale.`
+        description: `Le deficit de l\'exercice (${resultat.toLocaleString('fr-FR')} FCFA) represente ${ratio.toFixed(0)}% du capital social (${capital.toLocaleString('fr-FR')} FCFA). Un deficit superieur a 50% du capital est un signal d\'alerte sur la continuite d\'exploitation et peut necessiter une decision en assemblee generale.`,
+        attendu: 'Deficit inferieur a 50% du capital social',
+        constate: `Deficit de ${resultat.toLocaleString('fr-FR')} FCFA soit ${ratio.toFixed(0)}% du capital`,
+        impactFiscal: 'Signal d\'alerte sur la continuite d\'exploitation - obligation legale d\'AGE si capitaux propres < 50% du capital',
       },
       'Evaluer la situation de continuite d\'exploitation. Si les capitaux propres deviennent inferieurs a la moitie du capital, une AG extraordinaire doit statuer sur la poursuite de l\'activite.',
       undefined,
@@ -358,7 +388,10 @@ function MA005(ctx: AuditContext): ResultatControle {
       `Capitaux propres negatifs: ${capitauxPropres.toLocaleString('fr-FR')}`,
       {
         montants: { capitauxPropres },
-        description: `Les capitaux propres sont negatifs (${capitauxPropres.toLocaleString('fr-FR')} FCFA), ce qui signifie que les dettes depassent les actifs nets de l\'entreprise. C\'est une situation d\'alerte majeure qui impose legalement la tenue d\'une assemblee generale extraordinaire dans les 4 mois suivant l\'approbation des comptes. Les associes doivent decider de la poursuite ou de la dissolution de la societe.`
+        description: `Les capitaux propres sont negatifs (${capitauxPropres.toLocaleString('fr-FR')} FCFA), ce qui signifie que les dettes depassent les actifs nets de l\'entreprise. C\'est une situation d\'alerte majeure qui impose legalement la tenue d\'une assemblee generale extraordinaire dans les 4 mois suivant l\'approbation des comptes. Les associes doivent decider de la poursuite ou de la dissolution de la societe.`,
+        attendu: 'Capitaux propres positifs (actif net superieur aux dettes)',
+        constate: `Capitaux propres negatifs: ${capitauxPropres.toLocaleString('fr-FR')} FCFA`,
+        impactFiscal: 'Obligation legale de convoquer une AGE sous 4 mois - risque de dissolution judiciaire si non regularise sous 2 ans',
       },
       'Convoquer une AGE pour statuer sur la poursuite de l\'activite. Si la decision est de poursuivre, regulariser les capitaux propres dans les 2 ans (augmentation de capital, abandon de creances, etc.).',
       undefined,
@@ -380,7 +413,10 @@ function MA006(ctx: AuditContext): ResultatControle {
       `Tresorerie nette tres negative: ${tresoNette.toLocaleString('fr-FR')} (${pctBilan.toFixed(1)}% du bilan)`,
       {
         montants: { tresoNette, tresoActif, tresoPassif, totalBilan: tb, pctBilanPct: Math.round(pctBilan) },
-        description: `La tresorerie nette est negative de ${Math.abs(tresoNette).toLocaleString('fr-FR')} FCFA, soit ${pctBilan.toFixed(1)}% du total bilan. L\'entreprise est en situation de dependance bancaire elevee (concours bancaires > disponibilites). Cela peut impacter la capacite a honorer les engagements a court terme.`
+        description: `La tresorerie nette est negative de ${Math.abs(tresoNette).toLocaleString('fr-FR')} FCFA, soit ${pctBilan.toFixed(1)}% du total bilan. L\'entreprise est en situation de dependance bancaire elevee (concours bancaires > disponibilites). Cela peut impacter la capacite a honorer les engagements a court terme.`,
+        attendu: 'Tresorerie nette positive ou faiblement negative',
+        constate: `Tresorerie nette negative de ${Math.abs(tresoNette).toLocaleString('fr-FR')} FCFA (${pctBilan.toFixed(1)}% du bilan)`,
+        impactFiscal: 'Aucun impact fiscal direct - situation de dependance bancaire a signaler dans l\'annexe',
       },
       'Analyser la structure de financement: verifier le fonds de roulement et le besoin en fonds de roulement. Envisager un renforcement des fonds propres ou une renagociation des lignes de credit.')
   }
