@@ -45,6 +45,7 @@ import {
 import PageRenderer from './PageRenderer'
 import { exportLiasseExcel } from '@/services/exportService'
 import { PrintModeProvider } from '@/components/liasse/PrintModeContext'
+import { useLiasseFiscaleData } from '@/hooks/useLiasseFiscaleData'
 import './PrintLayout.css'
 
 // ── Types ──
@@ -283,6 +284,8 @@ const Toolbar: React.FC<ToolbarProps> = ({
 const LiassePrintTemplate: React.FC<LiassePrintTemplateProps> = ({ regime, entreprise, exercice, initialPageId }) => {
   const configRegime = REGIME_MAP[regime]
   const allPages = getPagesForRegime(configRegime)
+  // Load data once for all pages (avoids N individual hook calls in print mode)
+  const liasseData = useLiasseFiscaleData()
   const [currentPageIndex, setCurrentPageIndex] = useState(0)
   const [printMode, setPrintMode] = useState(false)
   const [unfoldTabs, setUnfoldTabs] = useState(true)
@@ -386,7 +389,7 @@ const LiassePrintTemplate: React.FC<LiassePrintTemplateProps> = ({ regime, entre
           {/* All pages */}
           {allPages.map((page) => (
             <Box key={page.id} className={`liasse-page${page.orientation === 'landscape' ? ' landscape' : ''}`} sx={{ pageBreakAfter: 'always' }}>
-              <PageRenderer page={page} showHeader />
+              <PageRenderer page={page} showHeader sharedData={liasseData} />
             </Box>
           ))}
         </Box>
@@ -438,7 +441,7 @@ const LiassePrintTemplate: React.FC<LiassePrintTemplateProps> = ({ regime, entre
             minHeight: currentPage?.orientation === 'landscape' ? '210mm' : '297mm',
           }}>
             {currentPage && (
-              <PageRenderer key={currentPage.id} page={currentPage} showHeader />
+              <PageRenderer key={currentPage.id} page={currentPage} showHeader sharedData={liasseData} />
             )}
           </Box>
         </Box>

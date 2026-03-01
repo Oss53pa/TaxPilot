@@ -6,6 +6,7 @@ import type {
   Proph3tResponse,
   ConversationContext,
   RichContent,
+  Intent,
 } from './types'
 import { normalize, detectIntent } from './nlp'
 import {
@@ -29,6 +30,9 @@ import {
   handlePredictionAnomaly,
   handleCoherenceCheck,
   handlePredictionGeneral,
+  handlePredictionSIG,
+  handlePredictionBreakeven,
+  handlePredictionBFR,
   handleConditionalDiagnostic,
 } from './knowledge'
 
@@ -178,9 +182,18 @@ async function operationSearchResponse(query: string): Promise<Proph3tResponse> 
     if (normalized.includes(kw)) {
       const chapitre = await loadChapitre(chapNum)
       if (chapitre) {
+        const content: RichContent[] = [{ type: 'chapitre', chapitre }]
+        // Add EcritureCards from chapter's example écritures
+        for (const section of chapitre.sections) {
+          if (section.ecritures) {
+            for (const ecr of section.ecritures.slice(0, 2)) {
+              content.push({ type: 'ecriture', description: ecr.description, ecriture: ecr })
+            }
+          }
+        }
         return {
           text: `Pour **${query.trim()}**, consultez le **Chapitre ${chapitre.numero}** — ${chapitre.titre}`,
-          content: [{ type: 'chapitre', chapitre }],
+          content,
           suggestions: [
             `Details chapitre ${chapitre.numero}`,
             ...chapitre.comptesLies.slice(0, 2).map(c => `Compte ${c}`),
@@ -193,9 +206,18 @@ async function operationSearchResponse(query: string): Promise<Proph3tResponse> 
   const results = await searchOperations(query)
   if (results.length > 0) {
     const top = results[0]
+    const content: RichContent[] = [{ type: 'chapitre', chapitre: top }]
+    // Add EcritureCards from top result's example écritures
+    for (const section of top.sections) {
+      if (section.ecritures) {
+        for (const ecr of section.ecritures.slice(0, 2)) {
+          content.push({ type: 'ecriture', description: ecr.description, ecriture: ecr })
+        }
+      }
+    }
     return {
       text: `J'ai trouve **${results.length} chapitre${results.length > 1 ? 's' : ''}** correspondant a votre recherche.\n\nLe plus pertinent : **Chapitre ${top.numero}** — ${top.titre}`,
-      content: [{ type: 'chapitre', chapitre: top }],
+      content,
       suggestions: results.slice(1, 4).map(r => `Chapitre ${r.numero}`),
     }
   }
@@ -512,6 +534,21 @@ export async function processQuery(
       response = handleCoherenceCheck(context.balanceData.balanceN)
       break
 
+    case 'PREDICTION_SIG':
+      if (!context.balanceData?.balanceN) { response = noBalanceResponse(); break }
+      response = handlePredictionSIG(context.balanceData.balanceN)
+      break
+
+    case 'PREDICTION_BREAKEVEN':
+      if (!context.balanceData?.balanceN) { response = noBalanceResponse(); break }
+      response = handlePredictionBreakeven(context.balanceData.balanceN)
+      break
+
+    case 'PREDICTION_BFR':
+      if (!context.balanceData?.balanceN) { response = noBalanceResponse(); break }
+      response = handlePredictionBFR(context.balanceData.balanceN)
+      break
+
     case 'PREDICTION_GENERAL':
       if (!context.balanceData?.balanceN) { response = noBalanceResponse(); break }
       response = handlePredictionGeneral(context.balanceData.balanceN, context.balanceData.balanceN1)
@@ -526,5 +563,116 @@ export async function processQuery(
       response = await unknownResponse(input)
   }
 
+  // ── Track last intent for contextual follow-ups ──
+  newContext.lastIntent = query.intent
+
+  // ── Multi-intent: process secondary intents and merge ──
+  if (query.secondaryIntents && query.secondaryIntents.length > 0) {
+    const secondaryResponses = await processSecondaryIntents(
+      query.secondaryIntents, input, context
+    )
+    if (secondaryResponses.length > 0) {
+      response = mergeResponses(response, secondaryResponses)
+    }
+  }
+
   return { response, newContext }
+}
+
+// ── Secondary intent processing ─────────────────────────────────────
+
+async function processSecondaryIntents(
+  intents: Intent[],
+  _input: string,
+  context: ConversationContext,
+): Promise<Proph3tResponse[]> {
+  const results: Proph3tResponse[] = []
+  const balance = context.balanceData?.balanceN
+  const balanceN1 = context.balanceData?.balanceN1
+
+  for (const intent of intents) {
+    let resp: Proph3tResponse | null = null
+
+    switch (intent) {
+      case 'PREDICTION_IS':
+        if (balance) resp = handlePredictionIS(balance)
+        break
+      case 'PREDICTION_TVA':
+        if (balance) resp = handlePredictionTVA(balance)
+        break
+      case 'PREDICTION_RATIOS':
+        if (balance) resp = handlePredictionRatios(balance)
+        break
+      case 'PREDICTION_TREND':
+        if (balance) resp = handlePredictionTrend(balance, balanceN1)
+        break
+      case 'PREDICTION_ANOMALY':
+        if (balance) resp = handlePredictionAnomaly(balance)
+        break
+      case 'PREDICTION_COHERENCE':
+        if (balance) resp = handleCoherenceCheck(balance)
+        break
+      case 'PREDICTION_SIG':
+        if (balance) resp = handlePredictionSIG(balance)
+        break
+      case 'PREDICTION_BREAKEVEN':
+        if (balance) resp = handlePredictionBreakeven(balance)
+        break
+      case 'PREDICTION_BFR':
+        if (balance) resp = handlePredictionBFR(balance)
+        break
+      case 'PREDICTION_GENERAL':
+        if (balance) resp = handlePredictionGeneral(balance, balanceN1)
+        break
+      case 'CONDITIONAL_DIAGNOSTIC':
+        if (balance) resp = handleConditionalDiagnostic(balance, context.regime, context.entreprise)
+        break
+      case 'AUDIT_EXECUTE':
+        if (balance) resp = handleAuditExecute(balance, balanceN1)
+        break
+      case 'FISCAL_TAX_RATE':
+        resp = handleFiscalTaxRate([], undefined)
+        break
+      case 'FISCAL_DEDUCTIBILITY':
+        resp = handleFiscalDeductibility([])
+        break
+      case 'FISCAL_CALENDAR':
+        resp = handleFiscalCalendar()
+        break
+      case 'FISCAL_GENERAL':
+        resp = handleFiscalGeneral([])
+        break
+      case 'AUDIT_GENERAL':
+        resp = handleAuditGeneral()
+        break
+      default:
+        break
+    }
+
+    if (resp) results.push(resp)
+  }
+
+  return results
+}
+
+function mergeResponses(primary: Proph3tResponse, secondaries: Proph3tResponse[]): Proph3tResponse {
+  const allContent: RichContent[] = [...(primary.content || [])]
+  const allSuggestions: string[] = [...(primary.suggestions || [])]
+  const textParts = [primary.text]
+
+  for (const sec of secondaries) {
+    textParts.push('\n\n---\n\n' + sec.text)
+    if (sec.content) allContent.push(...sec.content)
+    if (sec.suggestions) {
+      for (const s of sec.suggestions) {
+        if (!allSuggestions.includes(s)) allSuggestions.push(s)
+      }
+    }
+  }
+
+  return {
+    text: textParts.join(''),
+    content: allContent.length > 0 ? allContent : undefined,
+    suggestions: allSuggestions.length > 0 ? allSuggestions.slice(0, 6) : undefined,
+  }
 }

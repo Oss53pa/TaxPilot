@@ -1,7 +1,7 @@
 import React from 'react'
 import { Box, Typography, Chip, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material'
 import type {
-  ChatMessage, RichContent, AccountCard, FonctionnementCard, ChapitreCard,
+  ChatMessage, RichContent, AccountCard, FonctionnementCard, ChapitreCard, EcritureCard,
   SearchResultCard, StatsCard, FiscalInfoCard, LiasseSheetCard, AuditControlCard, PredictionCard,
 } from './types'
 import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
@@ -458,6 +458,42 @@ function PredictionCardView({ data }: { data: PredictionCard }) {
   )
 }
 
+// ── Ecriture card ───────────────────────────────────────────────────
+function EcritureCardView({ data }: { data: EcritureCard }) {
+  const { ecriture } = data
+  return (
+    <Box sx={{ mt: 1, p: 1.5, borderRadius: 2, border: `1px solid ${P.primary200}`, bgcolor: 'grey.50' }}>
+      <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.primary', display: 'block', mb: 0.5 }}>
+        {data.description}
+      </Typography>
+      <Table size="small" sx={{ '& td, & th': { py: 0.3, px: 0.75, fontSize: '0.7rem', borderBottom: '1px solid #f0f0f0' } }}>
+        <TableHead>
+          <TableRow sx={{ '& th': { fontWeight: 700, color: 'text.secondary', fontSize: '0.65rem' } }}>
+            <TableCell>Compte</TableCell>
+            <TableCell>Libelle</TableCell>
+            <TableCell align="right">Debit</TableCell>
+            <TableCell align="right">Credit</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {ecriture.lignes.map((l, k) => (
+            <TableRow key={k}>
+              <TableCell sx={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 600 }}>{l.compte}</TableCell>
+              <TableCell>{l.libelleCompte}</TableCell>
+              <TableCell align="right" sx={{ color: l.sens === 'D' ? '#dc2626' : 'transparent', fontFamily: "'JetBrains Mono', monospace" }}>
+                {l.sens === 'D' ? 'X' : ''}
+              </TableCell>
+              <TableCell align="right" sx={{ color: l.sens === 'C' ? '#16a34a' : 'transparent', fontFamily: "'JetBrains Mono', monospace" }}>
+                {l.sens === 'C' ? 'X' : ''}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </Box>
+  )
+}
+
 // ── Rich content renderer ────────────────────────────────────────────
 function RichContentView({ content, onSelect }: { content: RichContent; onSelect: (q: string) => void }) {
   switch (content.type) {
@@ -480,7 +516,7 @@ function RichContentView({ content, onSelect }: { content: RichContent; onSelect
     case 'prediction':
       return <PredictionCardView data={content} />
     case 'ecriture':
-      return null
+      return <EcritureCardView data={content} />
     default:
       return null
   }

@@ -29,13 +29,21 @@ function S001(ctx: AuditContext): ResultatControle {
   const ref = 'S-001', nom = 'Fichier lisible'
   if (!ctx.balanceN || !Array.isArray(ctx.balanceN)) {
     return anomalie(ref, nom, 'BLOQUANT', 'La balance est absente ou illisible',
-      { description: 'Le fichier importe n\'a pas pu etre converti en tableau de donnees comptables. Sans balance lisible, aucun controle d\'audit ne peut etre execute.' },
+      { description: 'Le fichier importe n\'a pas pu etre converti en tableau de donnees comptables. Sans balance lisible, aucun controle d\'audit ne peut etre execute.',
+        attendu: 'Balance non vide avec au moins un compte lisible',
+        constate: 'La balance est absente ou illisible - aucune donnee exploitable',
+        impactFiscal: 'Liasse fiscale non generable sans donnees de balance',
+      },
       'Reimporter le fichier balance en format Excel (.xlsx) ou CSV avec les colonnes standard (Compte, Libelle, Debit, Credit)',
       'Art. 19 Acte Uniforme OHADA relatif au droit comptable')
   }
   if (ctx.balanceN.length === 0) {
     return anomalie(ref, nom, 'BLOQUANT', 'La balance ne contient aucune ligne',
-      { montants: { nombreLignes: 0 }, description: 'Le fichier a ete lu mais ne contient aucune ligne de donnees. L\'audit est impossible sans donnees comptables.' },
+      { montants: { nombreLignes: 0 }, description: 'Le fichier a ete lu mais ne contient aucune ligne de donnees. L\'audit est impossible sans donnees comptables.',
+        attendu: 'Balance contenant au moins une ligne comptable',
+        constate: 'Balance vide - 0 ligne de donnees',
+        impactFiscal: 'Liasse fiscale non generable sans donnees de balance',
+      },
       'Reimporter un fichier balance contenant des donnees comptables',
       'Art. 19 Acte Uniforme OHADA relatif au droit comptable')
   }
@@ -61,7 +69,10 @@ function S002(ctx: AuditContext): ResultatControle {
     return anomalie(ref, nom, 'BLOQUANT', `Colonnes manquantes: ${missing.join(', ')}`,
       {
         montants: { colonnesRequises: 4, colonnesTrouvees: colonnesTrouvees.length, colonnesManquantes: missing.length },
-        description: `Les colonnes obligatoires ${missing.join(', ')} n'ont pas ete identifiees dans le fichier. Colonnes detectees: ${colonnesTrouvees.join(', ')}. Le mapping automatique des colonnes a echoue.`
+        description: `Les colonnes obligatoires ${missing.join(', ')} n'ont pas ete identifiees dans le fichier. Colonnes detectees: ${colonnesTrouvees.join(', ')}. Le mapping automatique des colonnes a echoue.`,
+        attendu: 'Colonnes compte, intitule, debit, credit presentes',
+        constate: `${missing.length} colonne(s) manquante(s): ${missing.join(', ')}`,
+        impactFiscal: 'Balance inexploitable - aucun etat financier generable',
       },
       'Verifier que le fichier contient les colonnes: Compte, Libelle, Debit, Credit. Renommer les en-tetes si necessaire.',
       'Art. 19 Acte Uniforme OHADA')
@@ -87,7 +98,10 @@ function S003(ctx: AuditContext): ResultatControle {
       {
         comptes: invalides.slice(0, 20),
         montants: { totalLignes: total, comptesInvalides: invalides.length, pctValide: Math.round(pctValide) },
-        description: `Sur ${total} lignes, ${invalides.length} contiennent des numeros de compte invalides (lettres, caracteres speciaux, ou longueur hors norme). Cela indique generalement un probleme de format du fichier source ou une colonne mal identifiee.`
+        description: `Sur ${total} lignes, ${invalides.length} contiennent des numeros de compte invalides (lettres, caracteres speciaux, ou longueur hors norme). Cela indique generalement un probleme de format du fichier source ou une colonne mal identifiee.`,
+        attendu: 'Numeros de compte au format 2 a 12 chiffres (norme SYSCOHADA)',
+        constate: `${invalides.length} compte(s) invalide(s) sur ${total} - seulement ${pctValide.toFixed(1)}% valides`,
+        impactFiscal: 'Comptes non traitables exclus des etats financiers generes',
       },
       'Verifier le format des numeros de compte (2 a 12 chiffres uniquement). Corriger le fichier source ou revoir le mapping des colonnes.',
       'Plan SYSCOHADA Revise 2017 - Nomenclature des comptes')
@@ -98,7 +112,10 @@ function S003(ctx: AuditContext): ResultatControle {
       {
         comptes: invalides.slice(0, 10),
         montants: { totalLignes: total, comptesInvalides: invalides.length, pctValide: Math.round(pctValide) },
-        description: `${invalides.length} numeros de compte ne respectent pas le format SYSCOHADA (2 a 12 chiffres). Ces comptes pourraient ne pas etre correctement traites lors de la generation des etats financiers.`
+        description: `${invalides.length} numeros de compte ne respectent pas le format SYSCOHADA (2 a 12 chiffres). Ces comptes pourraient ne pas etre correctement traites lors de la generation des etats financiers.`,
+        attendu: 'Numeros de compte au format 2 a 12 chiffres',
+        constate: `${invalides.length} compte(s) avec format non standard sur ${total}`,
+        impactFiscal: 'Aucun impact direct - comptes potentiellement mal mappes dans les etats financiers',
       },
       'Corriger les numeros de compte non standard (format attendu: 2 a 12 chiffres)',
       'Plan SYSCOHADA Revise 2017 - Nomenclature des comptes')
@@ -123,7 +140,10 @@ function S004(ctx: AuditContext): ResultatControle {
       {
         comptes: nonNumeriques.slice(0, 10),
         montants: { totalLignes: ctx.balanceN.length, lignesNonNumeriques: nonNumeriques.length },
-        description: 'Les colonnes debit et/ou credit contiennent des valeurs non numeriques (texte, caracteres speciaux, cellules vides non converties). Les calculs d\'audit ne peuvent pas etre effectues sur ces lignes.'
+        description: 'Les colonnes debit et/ou credit contiennent des valeurs non numeriques (texte, caracteres speciaux, cellules vides non converties). Les calculs d\'audit ne peuvent pas etre effectues sur ces lignes.',
+        attendu: 'Montants debit et credit strictement numeriques',
+        constate: `${nonNumeriques.length} ligne(s) avec montants non numeriques (${pct}%)`,
+        impactFiscal: 'Calculs d\'audit fausses - etats financiers potentiellement errones',
       },
       'Verifier que les colonnes debit et credit contiennent uniquement des montants numeriques. Supprimer les separateurs de milliers non standard et utiliser le point comme separateur decimal.',
       'Art. 19 Acte Uniforme OHADA')
@@ -139,7 +159,10 @@ function S005(ctx: AuditContext): ResultatControle {
       `Seulement ${ctx.balanceN.length} comptes (minimum requis: 10)`,
       {
         montants: { nombreComptes: ctx.balanceN.length, seuilMinimum: 10 },
-        description: 'Une balance comptable complete comporte au minimum les comptes de capital, resultat, tresorerie, charges et produits. Moins de 10 comptes indique un import partiel ou un fichier tronque.'
+        description: 'Une balance comptable complete comporte au minimum les comptes de capital, resultat, tresorerie, charges et produits. Moins de 10 comptes indique un import partiel ou un fichier tronque.',
+        attendu: 'Balance avec au moins 10 comptes (classes 1 a 7)',
+        constate: `Seulement ${ctx.balanceN.length} compte(s) dans la balance`,
+        impactFiscal: 'Balance incomplete - etats financiers partiels et non conformes',
       },
       'Verifier que l\'import est complet. Une balance standard comporte au minimum les classes 1 a 7.',
       'Art. 14 Acte Uniforme OHADA - Plan de comptes')
@@ -165,7 +188,10 @@ function S006(ctx: AuditContext): ResultatControle {
       {
         comptes: detailDoublons,
         montants: { comptesUniques: comptesVus.size, doublons: doublons.length, totalOccurrencesDoublons: doublons.reduce((s, c) => s + (comptesVus.get(c) || 0), 0) },
-        description: 'Des numeros de compte apparaissent plusieurs fois dans la balance. Les doublons faussent les totaux et provoquent des doubles comptages dans les etats financiers. Causes possibles: export multi-journaux non consolide, lignes de sous-totaux, ou erreur de saisie.'
+        description: 'Des numeros de compte apparaissent plusieurs fois dans la balance. Les doublons faussent les totaux et provoquent des doubles comptages dans les etats financiers. Causes possibles: export multi-journaux non consolide, lignes de sous-totaux, ou erreur de saisie.',
+        attendu: 'Un seul enregistrement par numero de compte',
+        constate: `${doublons.length} compte(s) en doublon detecte(s)`,
+        impactFiscal: 'Risque de double comptage dans les etats financiers - montants potentiellement multiplies',
       },
       'Fusionner les lignes en doublon (additionner les mouvements) ou supprimer les doublons avant audit. Verifier le parametre d\'export de votre logiciel comptable.',
       'Art. 19 Acte Uniforme OHADA')
@@ -190,7 +216,10 @@ function S007(ctx: AuditContext): ResultatControle {
       {
         comptes: problemes.slice(0, 5),
         montants: { libellesAffectes: problemes.length, totalLignes: ctx.balanceN.length },
-        description: 'Des caracteres accentues sont mal encodes (ex: "Ã©" au lieu de "e", "Ã " au lieu de "a"). Cela affecte la lisibilite des libelles dans les etats financiers generes mais n\'impacte pas les calculs.'
+        description: 'Des caracteres accentues sont mal encodes (ex: "Ã©" au lieu de "e", "Ã " au lieu de "a"). Cela affecte la lisibilite des libelles dans les etats financiers generes mais n\'impacte pas les calculs.',
+        attendu: 'Libelles correctement encodes en UTF-8',
+        constate: `${problemes.length} libelle(s) avec encodage suspect (${pct}%)`,
+        impactFiscal: 'Aucun impact fiscal direct - libelles illisibles dans les notes annexes',
       },
       'Exporter le fichier source en encodage UTF-8. Dans Excel: Enregistrer sous > CSV UTF-8.')
   }
@@ -214,7 +243,10 @@ function S008(ctx: AuditContext): ResultatControle {
       {
         comptes: totaux.slice(0, 5),
         montants: { lignesTotaux: totaux.length, totalLignes: ctx.balanceN.length },
-        description: 'Des lignes de totaux ou sous-totaux sont presentes dans la balance. Leur inclusion dans les calculs provoque un double comptage des montants, faussant les controles d\'equilibre et les etats financiers.'
+        description: 'Des lignes de totaux ou sous-totaux sont presentes dans la balance. Leur inclusion dans les calculs provoque un double comptage des montants, faussant les controles d\'equilibre et les etats financiers.',
+        attendu: 'Balance sans lignes de totaux ou sous-totaux',
+        constate: `${totaux.length} ligne(s) de totaux detectee(s) dans la balance`,
+        impactFiscal: 'Double comptage des montants - bilan et CdR potentiellement gonfles',
       },
       'Exclure les lignes de totaux avant import. Dans votre logiciel comptable, decocher l\'option "Inclure les totaux" lors de l\'export.')
   }
@@ -229,7 +261,10 @@ function S009(ctx: AuditContext): ResultatControle {
       'Balance N-1 non fournie - les controles comparatifs seront limites',
       {
         montants: { controlesDesactives: 8 },
-        description: 'Sans la balance de l\'exercice precedent (N-1), les 8 controles de niveau 5 (comparaison inter-exercices) seront desactives: report a nouveau, continuite des soldes, permanence des methodes, variations anormales, etc. L\'analyse comparative est essentielle pour detecter des anomalies.'
+        description: 'Sans la balance de l\'exercice precedent (N-1), les 8 controles de niveau 5 (comparaison inter-exercices) seront desactives: report a nouveau, continuite des soldes, permanence des methodes, variations anormales, etc. L\'analyse comparative est essentielle pour detecter des anomalies.',
+        attendu: 'Balance N-1 fournie pour les controles comparatifs',
+        constate: 'Balance N-1 non fournie - 8 controles comparatifs desactives',
+        impactFiscal: 'Aucun impact fiscal direct - analyse comparative non disponible',
       },
       'Fournir la balance N-1 pour activer les controles de variation inter-exercices')
   }
@@ -257,7 +292,10 @@ function S010(ctx: AuditContext): ResultatControle {
       {
         comptes: [...dansNPasDansN1.slice(0, 5).map(c => `N seul: ${c}`), ...dansN1PasDansN.slice(0, 5).map(c => `N-1 seul: ${c}`)],
         montants: { comptesN: comptesN.size, comptesN1: comptesN1.size, communs, tauxCommunPct: Math.round(tauxCommun) },
-        description: 'Le taux de comptes communs entre N et N-1 est anormalement faible. Cela peut indiquer que les deux fichiers ne correspondent pas a la meme entreprise, ou qu\'un changement majeur de plan comptable a eu lieu sans table de correspondance.'
+        description: 'Le taux de comptes communs entre N et N-1 est anormalement faible. Cela peut indiquer que les deux fichiers ne correspondent pas a la meme entreprise, ou qu\'un changement majeur de plan comptable a eu lieu sans table de correspondance.',
+        attendu: 'Au moins 50% de comptes communs entre N et N-1',
+        constate: `Seulement ${tauxCommun.toFixed(0)}% de comptes communs entre N et N-1`,
+        impactFiscal: 'Controles comparatifs fausses - variations inter-exercices non fiables',
       },
       'Verifier que les fichiers N et N-1 correspondent a la meme entreprise et au meme plan de comptes',
       'Art. 40 Acte Uniforme OHADA - Permanence des methodes')
@@ -267,7 +305,10 @@ function S010(ctx: AuditContext): ResultatControle {
       `${dansNPasDansN1.length} nouveaux comptes en N, ${dansN1PasDansN.length} disparus`,
       {
         montants: { nouveauxN: dansNPasDansN1.length, disparusN1: dansN1PasDansN.length, communs, tauxCommunPct: Math.round(tauxCommun) },
-        description: `Sur ${comptesN.size} comptes en N et ${comptesN1.size} en N-1, ${dansNPasDansN1.length} comptes sont nouveaux et ${dansN1PasDansN.length} ont disparu. Des ecarts importants peuvent signaler un changement de nomenclature ou des operations exceptionnelles.`
+        description: `Sur ${comptesN.size} comptes en N et ${comptesN1.size} en N-1, ${dansNPasDansN1.length} comptes sont nouveaux et ${dansN1PasDansN.length} ont disparu. Des ecarts importants peuvent signaler un changement de nomenclature ou des operations exceptionnelles.`,
+        attendu: 'Plan de comptes stable entre N et N-1',
+        constate: `${dansNPasDansN1.length} nouveaux comptes en N, ${dansN1PasDansN.length} disparus de N-1`,
+        impactFiscal: 'Aucun impact fiscal direct - variations a documenter dans l\'annexe',
       },
       'Verifier la correspondance des plans de comptes entre les deux exercices. Documenter les changements dans l\'annexe.',
       'Art. 40 Acte Uniforme OHADA - Permanence des methodes')

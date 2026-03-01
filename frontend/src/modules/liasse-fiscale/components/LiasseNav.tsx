@@ -2,8 +2,9 @@ import React, { useState, useMemo } from 'react'
 import { Box, List, ListItemButton, ListItemText, Collapse, Typography, Select, MenuItem, Chip, IconButton } from '@mui/material'
 import type { SelectChangeEvent } from '@mui/material'
 import { ExpandLess, ExpandMore, Description as DescriptionIcon, ChevronLeft } from '@mui/icons-material'
+import { getPagesForRegime } from '@/config/liasse-pages-config'
 import { PAGES } from '../config'
-import { SECTION_LABELS, REGIMES, getRegime, type SectionKey, type RegimeImposition } from '../types'
+import { SECTION_LABELS, REGIMES, getRegime, toConfigRegime, type SectionKey, type RegimeImposition } from '../types'
 
 interface LiasseNavProps {
   currentPageId: string
@@ -26,8 +27,17 @@ const LiasseNav: React.FC<LiasseNavProps> = ({ currentPageId, onPageSelect, regi
 
   const regimeDef = useMemo(() => getRegime(regime), [regime])
 
-  const obligatoireCount = regimeDef.obligatoires.size
-  const facultatifCount = PAGES.length - obligatoireCount
+  // Filter pages by regime using the master config
+  const filteredPages = useMemo(() => {
+    const configRegime = toConfigRegime(regime)
+    const allowedIds = new Set(getPagesForRegime(configRegime).map(p => p.moduleId))
+    return PAGES.filter(p => allowedIds.has(p.id))
+  }, [regime])
+
+  const obligatoireCount = useMemo(() => {
+    return filteredPages.filter(p => regimeDef.obligatoires.has(p.id)).length
+  }, [filteredPages, regimeDef])
+  const facultatifCount = filteredPages.length - obligatoireCount
 
   const toggleSection = (section: string) => {
     setOpenSections(prev => ({ ...prev, [section]: !prev[section] }))
@@ -64,7 +74,7 @@ const LiasseNav: React.FC<LiasseNavProps> = ({ currentPageId, onPageSelect, regi
         </Box>
 
         <Typography sx={{ fontSize: '0.65rem', color: '#a3a3a3', mb: 0.5, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-          Régime d'imposition
+          Regime d'imposition
         </Typography>
         <Select
           value={regime}
@@ -123,7 +133,7 @@ const LiasseNav: React.FC<LiasseNavProps> = ({ currentPageId, onPageSelect, regi
           Navigation
         </Typography>
         <Typography variant="caption" sx={{ color: '#a3a3a3' }}>
-          {PAGES.length} pages
+          {filteredPages.length} pages
         </Typography>
       </Box>
 
@@ -136,7 +146,7 @@ const LiasseNav: React.FC<LiasseNavProps> = ({ currentPageId, onPageSelect, regi
       }}>
       <List dense disablePadding>
         {SECTION_ORDER.map(section => {
-          const sectionPages = PAGES.filter(p => p.section === section)
+          const sectionPages = filteredPages.filter(p => p.section === section)
           if (sectionPages.length === 0) return null
 
           return (

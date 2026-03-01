@@ -1,217 +1,15 @@
 /**
- * PageRenderer — Route chaque page de la liasse vers son composant existant
- * ou affiche un placeholder structure pour les pages non encore implementees.
+ * PageRenderer — Renders a liasse page using the module liasse components.
+ * Uses dynamic imports from modules/liasse-fiscale/components/pages/.
+ * Data is either provided via sharedData prop (print mode) or loaded via useLiasseFiscaleData.
  */
 
-import React, { Suspense } from 'react'
+import React, { Suspense, useMemo } from 'react'
 import { Box, Typography, CircularProgress } from '@mui/material'
 import type { LiassePage } from '@/config/liasse-pages-config'
 import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
-
-// Import existing sheet components directly (they're already wrapped with withBackendData)
-import {
-  CouvertureSYSCOHADA,
-  PageGardeSYSCOHADA,
-  RecevabiliteSYSCOHADA,
-  FicheR1SYSCOHADA,
-  FicheR2SYSCOHADA,
-  FicheR3SYSCOHADA,
-  FicheR4SYSCOHADA,
-  BilanSynthetique,
-  BilanActifSYSCOHADA,
-  BilanPassifSYSCOHADA,
-  CompteResultatSYSCOHADA,
-  TableauFluxTresorerieSYSCOHADA,
-  Note36Tables,
-  Note1SYSCOHADA,
-  Note2SYSCOHADA,
-  Note3ASYSCOHADA,
-  Note4SYSCOHADA,
-  Note5SYSCOHADA,
-  Note6SYSCOHADA,
-  Note7SYSCOHADA,
-  Note8SYSCOHADA,
-  Note9SYSCOHADA,
-  Note10SYSCOHADA,
-  Note11SYSCOHADA,
-  Note12SYSCOHADA,
-  Note13SYSCOHADA,
-  Note14SYSCOHADA,
-  Note15SYSCOHADA,
-  Note16SYSCOHADA,
-  Note17SYSCOHADA,
-  Note18SYSCOHADA,
-  Note19SYSCOHADA,
-  Note20SYSCOHADA,
-  Note21SYSCOHADA,
-  Note22SYSCOHADA,
-  Note23SYSCOHADA,
-  Note24SYSCOHADA,
-  Note25SYSCOHADA,
-  Note26SYSCOHADA,
-  Note27SYSCOHADA,
-  Note28SYSCOHADA,
-  Note29SYSCOHADA,
-  Note30SYSCOHADA,
-  Note31SYSCOHADA,
-  Note32SYSCOHADA,
-  Note33SYSCOHADA,
-  Note34SYSCOHADA,
-  Note35SYSCOHADA,
-  Note36SYSCOHADA_NR,
-  Note36NomenclatureSYSCOHADA,
-  Note37SYSCOHADA,
-  Note38SYSCOHADA,
-  Note39SYSCOHADA,
-  NotesDgiInsSYSCOHADA,
-  NotesRestantes,
-  // Sous-notes
-  Note3BSYSCOHADA,
-  Note3CSYSCOHADA,
-  Note3CBISSYSCOHADA,
-  Note3DSYSCOHADA,
-  Note3ESYSCOHADA,
-  Note8ASYSCOHADA,
-  Note8BSYSCOHADA,
-  Note8CSYSCOHADA,
-  Note15ASYSCOHADA,
-  Note15BSYSCOHADA,
-  Note16ASYSCOHADA,
-  Note16BSYSCOHADA,
-  Note16BBISSYSCOHADA,
-  Note16CSYSCOHADA,
-  Note27ASYSCOHADA,
-  Note27BSYSCOHADA,
-  // Compléments et suppléments
-  ComplementCharges,
-  ComplementProduits,
-  SupplementTVA,
-  SupplementImpotSociete,
-  SupplementAvantagesFiscaux,
-  TablesCalculImpots,
-  TableauxSupplementaires,
-  GardeDgiIns,
-  GardeBic,
-  GardeBnc,
-  GardeBa,
-  Garde301,
-  Garde302,
-  Garde3,
-  Suppl4,
-  Suppl5,
-  Suppl6,
-  Suppl7,
-  CompTva2,
-} from '@/components/liasse/sheets'
-
-// ── Component registry ──
-// Maps componentKey from liasse-pages-config.ts to actual React components
-
-const COMPONENT_REGISTRY: Record<string, React.ComponentType<any>> = {
-  // Couverture & Garde
-  CouvertureSYSCOHADA,
-  PageGardeSYSCOHADA,
-  RecevabiliteSYSCOHADA,
-  GardeDgiIns,
-  GardeBic,
-  GardeBnc,
-  GardeBa,
-  Garde301,
-  Garde302,
-  Garde3,
-
-  // Fiches R
-  FicheR1SYSCOHADA,
-  FicheR2SYSCOHADA,
-  FicheR3SYSCOHADA,
-  FicheR4SYSCOHADA,
-
-  // Etats financiers
-  BilanSynthetique,
-  BilanActifSYSCOHADA,
-  BilanPassifSYSCOHADA,
-  CompteResultatSYSCOHADA,
-  TableauFluxTresorerieSYSCOHADA,
-
-  // Notes existantes (dedicated components)
-  Note36Tables,
-  Note1SYSCOHADA,
-  Note2SYSCOHADA,
-  Note3ASYSCOHADA,
-  Note5SYSCOHADA,
-  Note6SYSCOHADA,
-  Note8SYSCOHADA,
-  Note11SYSCOHADA,
-  Note12SYSCOHADA,
-  Note14SYSCOHADA,
-  Note15SYSCOHADA,
-  Note17SYSCOHADA,
-  Note19SYSCOHADA,
-
-  // Notes via factory (NotesRestantes)
-  Note4SYSCOHADA,
-  Note7SYSCOHADA,
-  Note9SYSCOHADA,
-  Note10SYSCOHADA,
-  Note13SYSCOHADA,
-  Note16SYSCOHADA,
-  Note18SYSCOHADA,
-  Note20SYSCOHADA,
-  Note21SYSCOHADA,
-  Note22SYSCOHADA,
-  Note23SYSCOHADA,
-  Note24SYSCOHADA,
-  Note25SYSCOHADA,
-  Note26SYSCOHADA,
-  Note27SYSCOHADA,
-  Note28SYSCOHADA,
-  Note29SYSCOHADA,
-  Note30SYSCOHADA,
-  Note31SYSCOHADA,
-  Note32SYSCOHADA,
-  Note33SYSCOHADA,
-  Note34SYSCOHADA,
-  Note35SYSCOHADA,
-  Note36SYSCOHADA: Note36SYSCOHADA_NR,
-  Note36NomenclatureSYSCOHADA,
-  Note37SYSCOHADA,
-  Note38SYSCOHADA,
-  Note39SYSCOHADA,
-  NotesDgiInsSYSCOHADA,
-  NotesRestantes,
-
-  // Sous-notes
-  Note3BSYSCOHADA,
-  Note3CSYSCOHADA,
-  Note3CBISSYSCOHADA,
-  Note3DSYSCOHADA,
-  Note3ESYSCOHADA,
-  Note8ASYSCOHADA,
-  Note8BSYSCOHADA,
-  Note8CSYSCOHADA,
-  Note15ASYSCOHADA,
-  Note15BSYSCOHADA,
-  Note16ASYSCOHADA,
-  Note16BSYSCOHADA,
-  Note16BBISSYSCOHADA,
-  Note16CSYSCOHADA,
-  Note27ASYSCOHADA,
-  Note27BSYSCOHADA,
-
-  // Supplements
-  TablesCalculImpots,
-  TableauxSupplementaires,
-  ComplementCharges,
-  ComplementProduits,
-  SupplementTVA,
-  SupplementImpotSociete,
-  SupplementAvantagesFiscaux,
-  Suppl4,
-  Suppl5,
-  Suppl6,
-  Suppl7,
-  CompTva2,
-}
+import { useLiasseFiscaleData, type LiasseFiscaleData } from '@/hooks/useLiasseFiscaleData'
+import { LiasseRegimeContext } from '@/modules/liasse-fiscale/components/LiasseHeader'
 
 // ── DGI Header ──
 
@@ -230,7 +28,7 @@ const DgiHeader: React.FC<{ page: LiassePage }> = ({ page }) => (
       {page.label}
     </Typography>
     <Typography sx={{ fontSize: '10px', color: P.primary400 }}>
-      Page {page.pageNum} / 87
+      Page {page.pageNum} / 84
     </Typography>
   </Box>
 )
@@ -265,47 +63,6 @@ const PagePlaceholder: React.FC<{ page: LiassePage }> = ({ page }) => (
   </Box>
 )
 
-// ── Commentaire page ──
-
-const CommentairePage: React.FC = () => {
-  const [text, setText] = React.useState(() => {
-    try {
-      return localStorage.getItem('fiscasync_liasse_commentaire') || ''
-    } catch { return '' }
-  })
-
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setText(e.target.value)
-    try { localStorage.setItem('fiscasync_liasse_commentaire', e.target.value) } catch { /* */ }
-  }
-
-  return (
-    <Box sx={{ p: 2 }}>
-      <Typography sx={{ fontSize: '15px', fontWeight: 700, mb: 1.5 }}>
-        COMMENTAIRES GENERAUX
-      </Typography>
-      <textarea
-        value={text}
-        onChange={handleChange}
-        placeholder="Saisissez vos commentaires ici..."
-        style={{
-          width: '100%',
-          minHeight: 400,
-          padding: 12,
-          border: `1px solid ${P.primary200}`,
-          borderRadius: 4,
-          fontSize: 12,
-          fontFamily: '"Segoe UI", Arial, sans-serif',
-          resize: 'vertical',
-        }}
-      />
-    </Box>
-  )
-}
-
-// Add Commentaire to registry
-COMPONENT_REGISTRY['Commentaire'] = CommentairePage
-
 // ── Loading fallback ──
 
 const LoadingFallback: React.FC = () => (
@@ -314,29 +71,61 @@ const LoadingFallback: React.FC = () => (
   </Box>
 )
 
+// ── Component cache to avoid re-creating lazy components on every render ──
+
+const componentCache = new Map<string, React.LazyExoticComponent<React.ComponentType<any>>>()
+
+function getLazyComponent(componentFile: string): React.LazyExoticComponent<React.ComponentType<any>> {
+  let cached = componentCache.get(componentFile)
+  if (!cached) {
+    cached = React.lazy(() => import(`@/modules/liasse-fiscale/components/pages/${componentFile}`))
+    componentCache.set(componentFile, cached)
+  }
+  return cached
+}
+
 // ══════════════════════════════════════════
 // MAIN COMPONENT
 // ══════════════════════════════════════════
 
-interface PageRendererProps {
+export interface PageRendererProps {
   page: LiassePage
   showHeader?: boolean
+  /** Pre-loaded data (used in print mode to avoid N hook calls) */
+  sharedData?: LiasseFiscaleData
 }
 
-const PageRenderer: React.FC<PageRendererProps> = ({ page, showHeader = true }) => {
-  const Component = COMPONENT_REGISTRY[page.componentKey]
+const PageRenderer: React.FC<PageRendererProps> = ({ page, showHeader = true, sharedData }) => {
+  // Use shared data if provided, otherwise load via hook
+  const hookData = useLiasseFiscaleData()
+  const data = sharedData || hookData
+
+  const Component = useMemo(() => {
+    try {
+      return getLazyComponent(page.componentFile)
+    } catch {
+      return null
+    }
+  }, [page.componentFile])
 
   if (!Component) {
     return <PagePlaceholder page={page} />
   }
 
   return (
-    <Box className="liasse-page">
-      {showHeader && <DgiHeader page={page} />}
-      <Suspense fallback={<LoadingFallback />}>
-        <Component />
-      </Suspense>
-    </Box>
+    <LiasseRegimeContext.Provider value={data.regime}>
+      <Box className="liasse-page">
+        {showHeader && <DgiHeader page={page} />}
+        <Suspense fallback={<LoadingFallback />}>
+          <Component
+            entreprise={data.entreprise}
+            balance={data.balance}
+            balanceN1={data.balanceN1}
+            regime={data.regime}
+          />
+        </Suspense>
+      </Box>
+    </LiasseRegimeContext.Provider>
   )
 }
 

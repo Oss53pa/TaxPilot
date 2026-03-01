@@ -28,6 +28,22 @@ const SYNONYM_GROUPS: [string, string[]][] = [
   ['patente', ['patente', 'contribution patente', 'droit patente']],
   ['retenue', ['retenue', 'retenues', 'prelevement', 'prelevements', 'retenue source']],
   ['deductible', ['deductible', 'deductibilite', 'deduction', 'non deductible', 'deductibles']],
+  // ── Phase 9A — Groupes supplementaires ──
+  ['ca', ['ca', 'chiffre affaires', 'ventes totales', 'revenus', 'produits exploitation']],
+  ['bfr', ['bfr', 'besoin fonds roulement', 'besoin en fonds de roulement', 'working capital', 'fonds roulement']],
+  ['ebe', ['ebe', 'excedent brut exploitation', 'ebitda', 'excedent brut']],
+  ['sig', ['sig', 'soldes intermediaires', 'soldes intermediaires gestion', 'cascade sig']],
+  ['marge', ['marge', 'marges', 'marge commerciale', 'marge brute', 'marge nette', 'marge exploitation']],
+  ['seuil', ['seuil', 'seuil rentabilite', 'point mort', 'break even', 'breakeven', 'equilibre']],
+  ['rentabilite', ['rentabilite', 'rendement', 'profitabilite', 'roe', 'roa', 'roce']],
+  ['endettement', ['endettement', 'leverage', 'levier', 'gearing', 'dette ratio']],
+  ['imf', ['imf', 'impot minimum forfaitaire', 'minimum forfaitaire', 'minimum fiscal']],
+  ['tft', ['tft', 'tableau flux tresorerie', 'flux tresorerie', 'cash flow', 'tableau tresorerie']],
+  ['tafire', ['tafire', 'tableau financier ressources emplois', 'ressources emplois']],
+  ['annexe', ['annexe', 'annexes', 'notes annexes', 'note annexe', 'etats annexes']],
+  ['ecriture', ['ecriture', 'ecritures', 'ecriture comptable', 'ecritures comptables', 'journal', 'journaux']],
+  ['consolidation', ['consolidation', 'consolide', 'consolider', 'groupe', 'comptes consolides']],
+  ['cloture', ['cloture', 'cloturer', 'cloture exercice', 'arrete', 'arrete comptes', 'fin exercice']],
 ]
 
 const TOKEN_TO_CANONICAL = new Map<string, string>()

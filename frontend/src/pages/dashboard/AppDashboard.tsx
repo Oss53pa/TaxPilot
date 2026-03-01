@@ -37,6 +37,7 @@ import {
   AccessTime,
   BarChart,
   Refresh,
+  Settings,
 } from '@mui/icons-material'
 import { useNavigate } from 'react-router-dom'
 import { fiscasyncPalette } from '@/theme/fiscasyncTheme'
@@ -106,26 +107,32 @@ const AppDashboard: React.FC = () => {
   const bal = useBalanceData()
   const [ws, setWs] = useState<WorkflowState | null>(null)
 
-  useEffect(() => {
+  const loadData = () => {
     setWs(getWorkflowState())
     setLoading(false)
+  }
+
+  useEffect(() => {
+    loadData()
   }, [])
 
   const fmt = (n: number) => n.toLocaleString('fr-FR')
 
   // ── Balance Summary (computed from real data) ──
   const balanceSummary = useMemo(() => {
-    const totalDebit = bal.entries.reduce((s, e) => s + (e.solde_debit || 0), 0)
-    const totalCredit = bal.entries.reduce((s, e) => s + (e.solde_credit || 0), 0)
+    const totalDebit = bal.entries.reduce((s, e) => s + (e.solde_debit ?? 0), 0)
+    const totalCredit = bal.entries.reduce((s, e) => s + (e.solde_credit ?? 0), 0)
     const ca = bal.c(['70', '71', '72', '73'])
     const charges = bal.d(['60', '61', '62', '63', '64', '65', '66', '67', '68', '69'])
     const produits = bal.c(['70', '71', '72', '73', '74', '75', '76', '77', '78', '79'])
+    const resultat = produits - charges
     return {
-      totalDebit: bal.entries.length ? fmt(totalDebit) : '\u2014',
-      totalCredit: bal.entries.length ? fmt(totalCredit) : '\u2014',
+      totalDebit: bal.entries.length ? fmt(Math.round(totalDebit)) : '\u2014',
+      totalCredit: bal.entries.length ? fmt(Math.round(totalCredit)) : '\u2014',
       nbComptes: bal.entries.length,
       chiffreAffaires: bal.entries.length ? fmt(ca) : '\u2014',
-      resultatNet: bal.entries.length ? fmt(produits - charges) : '\u2014',
+      resultatNet: bal.entries.length ? fmt(resultat) : '\u2014',
+      resultatPositif: resultat >= 0,
       ecart: Math.abs(totalDebit - totalCredit),
     }
   }, [bal])
@@ -177,16 +184,122 @@ const AppDashboard: React.FC = () => {
     { label: 'Teledeclaration', status: ws?.teledeclarationStatus === 'submitted' || ws?.teledeclarationStatus === 'accepted' ? 'done' : ws?.generationDone ? 'active' : 'pending', path: '/teledeclaration' },
   ]
 
-  // ── Deadlines (generic fiscal calendar — static reference data) ──
-  const deadlines: Deadline[] = [
-    { label: 'Déclaration TVA mensuelle', date: '15 du mois', daysLeft: 0, type: 'normal', description: 'DGI - Formulaire DSF' },
-    { label: 'Dépôt Liasse Fiscale SYSCOHADA', date: '31 Mars', daysLeft: 0, type: 'warning', description: 'États financiers annuels' },
-    { label: 'Déclaration IS - Acompte T1', date: '15 Avril', daysLeft: 0, type: 'normal', description: 'Impôt sur les sociétés' },
-    { label: 'Patente annuelle', date: '30 Juin', daysLeft: 0, type: 'normal', description: 'Contribution des patentes' },
-  ]
+  // ── Deadlines (fiscal calendar with dynamic daysLeft) ──
+  const deadlines: Deadline[] = useMemo(() => {
+    const now = new Date()
+    const year = now.getFullYear()
+    const month = now.getMonth() // 0-based
 
-  // ── Activity (empty — real activity log doesn't exist yet) ──
-  const activities: Activity[] = []
+    // TVA: 15th of next month
+    const tvaDate = new Date(year, month + 1, 15)
+    const tvaDays = Math.ceil((tvaDate.getTime() - now.getTime()) / 86400000)
+
+    // Liasse SYSCOHADA: 31 March
+    let liasseDate = new Date(year, 2, 31)
+    if (liasseDate < now) liasseDate = new Date(year + 1, 2, 31)
+    const liasseDays = Math.ceil((liasseDate.getTime() - now.getTime()) / 86400000)
+
+    // IS Acompte T1: 15 April
+    let isDate = new Date(year, 3, 15)
+    if (isDate < now) isDate = new Date(year + 1, 3, 15)
+    const isDays = Math.ceil((isDate.getTime() - now.getTime()) / 86400000)
+
+    // Patente: 30 June
+    let patenteDate = new Date(year, 5, 30)
+    if (patenteDate < now) patenteDate = new Date(year + 1, 5, 30)
+    const patenteDays = Math.ceil((patenteDate.getTime() - now.getTime()) / 86400000)
+
+    const typeFor = (days: number): 'urgent' | 'warning' | 'normal' =>
+      days <= 7 ? 'urgent' : days <= 30 ? 'warning' : 'normal'
+
+    return [
+      { label: 'Déclaration TVA mensuelle', date: `15/${String(month + 2).padStart(2, '0')}`, daysLeft: tvaDays, type: typeFor(tvaDays), description: 'DGI - Formulaire DSF' },
+      { label: 'Dépôt Liasse Fiscale SYSCOHADA', date: `31/03/${liasseDate.getFullYear()}`, daysLeft: liasseDays, type: typeFor(liasseDays), description: 'États financiers annuels' },
+      { label: 'Déclaration IS - Acompte T1', date: `15/04/${isDate.getFullYear()}`, daysLeft: isDays, type: typeFor(isDays), description: 'Impôt sur les sociétés' },
+      { label: 'Patente annuelle', date: `30/06/${patenteDate.getFullYear()}`, daysLeft: patenteDays, type: typeFor(patenteDays), description: 'Contribution des patentes' },
+    ].sort((a, b) => a.daysLeft - b.daysLeft)
+  }, [])
+
+  // ── Activity (built from localStorage traces) ──
+  const activities: Activity[] = useMemo(() => {
+    const acts: Activity[] = []
+    const timeAgo = (dateStr: string | null): string => {
+      if (!dateStr) return ''
+      const diff = Date.now() - new Date(dateStr).getTime()
+      const mins = Math.floor(diff / 60000)
+      if (mins < 1) return "À l'instant"
+      if (mins < 60) return `Il y a ${mins} min`
+      const hours = Math.floor(mins / 60)
+      if (hours < 24) return `Il y a ${hours}h`
+      const days = Math.floor(hours / 24)
+      return `Il y a ${days}j`
+    }
+
+    // Balance import
+    try {
+      const balRaw = localStorage.getItem('fiscasync_balance_latest')
+      if (balRaw) {
+        const balData = JSON.parse(balRaw)
+        const nbEntries = balData?.entries?.length || 0
+        const importDate = balData?.importDate || balData?.date || null
+        if (nbEntries > 0) {
+          acts.push({
+            action: 'Balance importée',
+            detail: `${nbEntries} comptes chargés`,
+            time: importDate ? timeAgo(importDate) : '',
+            icon: <CloudUpload sx={{ fontSize: 16 }} />,
+          })
+        }
+      }
+    } catch { /* ignore */ }
+
+    // Workflow state events
+    if (ws) {
+      if (ws.controleDone) {
+        acts.push({
+          action: 'Contrôle exécuté',
+          detail: ws.controleResult === 'passed' ? 'Tous les contrôles OK' : ws.controleResult === 'passed_with_warnings' ? `Score ${ws.controleScore}% — avertissements` : `Score ${ws.controleScore}% — ${ws.controleBloquants} bloquant(s)`,
+          time: '',
+          icon: <Security sx={{ fontSize: 16 }} />,
+        })
+      }
+      if (ws.generationDone && ws.generationDate) {
+        acts.push({
+          action: 'Liasse générée',
+          detail: ws.generationRegime || 'Système Normal',
+          time: timeAgo(ws.generationDate),
+          icon: <Description sx={{ fontSize: 16 }} />,
+        })
+      }
+      if (ws.lastExportDate) {
+        acts.push({
+          action: 'Export effectué',
+          detail: ws.lastExportFormat ? `Format ${ws.lastExportFormat.toUpperCase()}` : 'Fichier exporté',
+          time: timeAgo(ws.lastExportDate),
+          icon: <Analytics sx={{ fontSize: 16 }} />,
+        })
+      }
+      if (ws.teledeclarationStatus !== 'not_started' && ws.teledeclarationDate) {
+        const statusLabels: Record<string, string> = { draft: 'Brouillon', submitted: 'Soumise', accepted: 'Acceptée' }
+        acts.push({
+          action: 'Télédéclaration',
+          detail: statusLabels[ws.teledeclarationStatus] || ws.teledeclarationStatus,
+          time: timeAgo(ws.teledeclarationDate),
+          icon: <Analytics sx={{ fontSize: 16 }} />,
+        })
+      }
+      if (ws.configurationDone) {
+        acts.push({
+          action: 'Configuration entreprise',
+          detail: ent.nom || 'Paramètres enregistrés',
+          time: '',
+          icon: <Settings sx={{ fontSize: 16 }} />,
+        })
+      }
+    }
+
+    return acts
+  }, [ws, ent.nom])
 
   if (loading) {
     return (
@@ -226,21 +339,23 @@ const AppDashboard: React.FC = () => {
               {ent.nom || '\u2014'}
             </Typography>
             <Chip
-              label={ent.exerciceDebut ? `Exercice ${ent.exerciceDebut.substring(0, 4)}` : 'Exercice \u2014'}
+              label={ent.exerciceFin ? `Exercice ${ent.exerciceFin.substring(0, 4)}` : ent.exerciceDebut ? `Exercice ${ent.exerciceDebut.substring(0, 4)}` : 'Exercice \u2014'}
               size="small"
               sx={{ height: 22, fontSize: '0.75rem', fontWeight: 600, bgcolor: C.card, color: C.label, border: `1px solid ${C.border}` }}
             />
-            <Chip
-              label="Système Normal"
-              size="small"
-              variant="outlined"
-              sx={{ height: 22, fontSize: '0.75rem', borderColor: C.border, color: C.secondary }}
-            />
+            {ent.regimeImposition && (
+              <Chip
+                label={ent.regimeImposition}
+                size="small"
+                variant="outlined"
+                sx={{ height: 22, fontSize: '0.75rem', borderColor: C.border, color: C.secondary }}
+              />
+            )}
           </Stack>
         </Box>
         <Stack direction="row" spacing={1}>
           <Tooltip title="Actualiser">
-            <IconButton size="small" sx={{ bgcolor: C.surface, border: `1px solid ${C.border}` }}>
+            <IconButton size="small" onClick={() => { setLoading(true); setTimeout(loadData, 300) }} sx={{ bgcolor: C.surface, border: `1px solid ${C.border}` }}>
               <Refresh fontSize="small" sx={{ color: C.secondary }} />
             </IconButton>
           </Tooltip>
@@ -494,6 +609,15 @@ const AppDashboard: React.FC = () => {
                         {d.date} — {d.description}
                       </Typography>
                     </Box>
+                    <Chip
+                      label={d.daysLeft <= 0 ? 'Échu' : d.daysLeft === 1 ? 'Demain' : `${d.daysLeft}j`}
+                      size="small"
+                      sx={{
+                        height: 22, fontSize: '0.65rem', fontWeight: 700, flexShrink: 0,
+                        bgcolor: d.type === 'urgent' ? '#fecaca' : d.type === 'warning' ? '#fde68a' : C.border,
+                        color: d.type === 'urgent' ? '#991b1b' : d.type === 'warning' ? '#92400e' : C.label,
+                      }}
+                    />
                   </Box>
                 ))}
               </Stack>
@@ -557,14 +681,14 @@ const AppDashboard: React.FC = () => {
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
-                  <Box sx={{ p: 1.5, borderRadius: 3, bgcolor: 'info.50', textAlign: 'center', border: '1px solid #bfdbfe' }}>
-                    <Typography variant="caption" sx={{ color: '#1e40af', fontSize: '0.7rem', display: 'block' }}>
+                  <Box sx={{ p: 1.5, borderRadius: 3, bgcolor: balanceSummary.resultatPositif ? 'success.50' : '#fef2f2', textAlign: 'center', border: `1px solid ${balanceSummary.resultatPositif ? '#bbf7d0' : '#fecaca'}` }}>
+                    <Typography variant="caption" sx={{ color: balanceSummary.resultatPositif ? '#166534' : '#991b1b', fontSize: '0.7rem', display: 'block' }}>
                       Résultat Net
                     </Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 700, fontSize: '0.9rem', color: '#1e40af', mt: 0.5 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 700, fontSize: '0.9rem', color: balanceSummary.resultatPositif ? '#166534' : '#991b1b', mt: 0.5 }}>
                       {balanceSummary.resultatNet}
                     </Typography>
-                    <Typography variant="caption" sx={{ color: '#1e40af', fontSize: '0.65rem' }}></Typography>
+                    <Typography variant="caption" sx={{ color: balanceSummary.resultatPositif ? '#166534' : '#991b1b', fontSize: '0.65rem' }}></Typography>
                   </Box>
                 </Grid>
               </Grid>
@@ -597,32 +721,46 @@ const AppDashboard: React.FC = () => {
                 <AccessTime sx={{ color: C.placeholder, fontSize: 20 }} />
               </Stack>
 
-              <Stack spacing={0}>
-                {activities.map((act, i) => (
-                  <Box
-                    key={i}
-                    sx={{
-                      display: 'flex', alignItems: 'flex-start', gap: 1.5, py: 1.5,
-                      borderBottom: i < activities.length - 1 ? `1px solid ${C.border}` : 'none',
-                    }}
-                  >
-                    <Avatar sx={{ width: 32, height: 32, bgcolor: C.card, color: C.label, mt: 0.25 }}>
-                      {act.icon}
-                    </Avatar>
-                    <Box sx={{ flex: 1, minWidth: 0 }}>
-                      <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.85rem', color: C.text }}>
-                        {act.action}
-                      </Typography>
-                      <Typography variant="caption" sx={{ color: C.secondary, fontSize: '0.75rem' }}>
-                        {act.detail}
-                      </Typography>
+              {activities.length === 0 ? (
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', py: 4 }}>
+                  <AccessTime sx={{ fontSize: 40, color: C.border, mb: 1 }} />
+                  <Typography variant="body2" sx={{ color: C.placeholder, fontWeight: 500 }}>
+                    Aucune activité enregistrée
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: C.border }}>
+                    Importez une balance pour commencer
+                  </Typography>
+                </Box>
+              ) : (
+                <Stack spacing={0}>
+                  {activities.map((act, i) => (
+                    <Box
+                      key={i}
+                      sx={{
+                        display: 'flex', alignItems: 'flex-start', gap: 1.5, py: 1.5,
+                        borderBottom: i < activities.length - 1 ? `1px solid ${C.border}` : 'none',
+                      }}
+                    >
+                      <Avatar sx={{ width: 32, height: 32, bgcolor: C.card, color: C.label, mt: 0.25 }}>
+                        {act.icon}
+                      </Avatar>
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.85rem', color: C.text }}>
+                          {act.action}
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: C.secondary, fontSize: '0.75rem' }}>
+                          {act.detail}
+                        </Typography>
+                      </Box>
+                      {act.time && (
+                        <Typography variant="caption" sx={{ color: C.placeholder, fontSize: '0.7rem', whiteSpace: 'nowrap', mt: 0.5 }}>
+                          {act.time}
+                        </Typography>
+                      )}
                     </Box>
-                    <Typography variant="caption" sx={{ color: C.placeholder, fontSize: '0.7rem', whiteSpace: 'nowrap', mt: 0.5 }}>
-                      {act.time}
-                    </Typography>
-                  </Box>
-                ))}
-              </Stack>
+                  ))}
+                </Stack>
+              )}
             </CardContent>
           </Card>
         </Grid>

@@ -94,6 +94,7 @@ function scoreIntents(
   negation: boolean,
   temporal: 'current' | 'previous' | 'comparison' | undefined,
   ctx: ConversationContext,
+  rawInput: string,
 ): ScoredIntent[] {
   const scores: ScoredIntent[] = []
 
@@ -174,8 +175,8 @@ function scoreIntents(
   const hasAudit = hasCanonical(canonTokens, 'audit') ||
     /\b(audit|controle\s*audit|verification|inspection)\b/.test(normalized)
 
-  if (hasAudit || extractAuditRef(normalized) || extractAuditLevel(normalized) !== undefined) {
-    if (extractAuditRef(normalized)) {
+  if (hasAudit || extractAuditRef(rawInput) || extractAuditLevel(normalized) !== undefined) {
+    if (extractAuditRef(rawInput)) {
       add('AUDIT_CONTROL', 90)
     }
     if (extractAuditLevel(normalized) !== undefined) {
@@ -212,6 +213,18 @@ function scoreIntents(
     }
     if (/\b(coherence|coherent|equilibre|equilibr|verif.*coherence|controle.*coherence|incoherence|bilan.*passif|actif.*passif)\b/.test(normalized)) {
       add('PREDICTION_COHERENCE', 85)
+    }
+    // SIG
+    if (/\b(sig|soldes?\s*intermediaires?|cascade|marge\s*commerciale|valeur\s*ajoutee|ebe|excedent\s*brut|cafg)\b/.test(normalized)) {
+      add('PREDICTION_SIG', 85)
+    }
+    // Seuil de rentabilite / breakeven
+    if (/\b(seuil\s*rentabilite|point\s*mort|break\s*even|breakeven|seuil\s*equilibre|charges?\s*fixes?\s*variables?)\b/.test(normalized)) {
+      add('PREDICTION_BREAKEVEN', 85)
+    }
+    // BFR
+    if (/\b(bfr|besoin\s*fonds?\s*roulement|dso|dpo|dsi|cycle\s*cash|cycle\s*tresorerie|tresorerie\s*nette|fonds?\s*roulement)\b/.test(normalized)) {
+      add('PREDICTION_BFR', 85)
     }
     if (hasPrediction && /\b(general|global|complet|situation|sante|diagnostic|synthese)\b/.test(normalized)) {
       add('PREDICTION_GENERAL', 75)
@@ -357,7 +370,7 @@ export function detectIntent(input: string, ctx: ConversationContext): ParsedQue
   }
 
   // Score all intents
-  const scores = scoreIntents(normalized, tokens, canonTokens, negation, temporal, ctx)
+  const scores = scoreIntents(normalized, tokens, canonTokens, negation, temporal, ctx, input)
 
   // If we have scores, pick the highest + extract secondary intents
   if (scores.length > 0) {

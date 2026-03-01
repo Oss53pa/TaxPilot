@@ -226,3 +226,32 @@ export const REGIMES: RegimeDef[] = [
 
 export const getRegime = (code: RegimeImposition): RegimeDef =>
   REGIMES.find(r => r.code === code) || REGIMES[0]
+
+// ── Regime conversion utilities ──
+
+import type { Regime } from '@/config/liasse-pages-config'
+
+const REGIME_TO_CONFIG: Record<RegimeImposition, Regime> = {
+  REEL_NORMAL: 'reel_normal',
+  REEL_SIMPLIFIE: 'reel_simplifie',
+  FORFAITAIRE: 'forfaitaire',
+  MICRO_ENTREPRISE: 'micro',
+  SMT: 'micro',
+}
+
+const CONFIG_TO_REGIME: Record<Regime, RegimeImposition> = {
+  reel_normal: 'REEL_NORMAL',
+  reel_simplifie: 'REEL_SIMPLIFIE',
+  forfaitaire: 'FORFAITAIRE',
+  micro: 'MICRO_ENTREPRISE',
+}
+
+/** Convert module RegimeImposition to master config Regime */
+export function toConfigRegime(r: RegimeImposition): Regime {
+  return REGIME_TO_CONFIG[r] || 'reel_normal'
+}
+
+/** Convert master config Regime to module RegimeImposition */
+export function toRegimeImposition(r: Regime): RegimeImposition {
+  return CONFIG_TO_REGIME[r] || 'REEL_NORMAL'
+}

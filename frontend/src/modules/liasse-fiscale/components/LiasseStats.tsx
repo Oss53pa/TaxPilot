@@ -489,10 +489,163 @@ function buildNoteAnalysis(pageId: string, balN: Balance[], _balN1: Balance[], a
     return { title: 'Compte de Resultat', cards: [card] }
   }
 
-  // Notes without relevant analysis: return empty (no fake KPIs)
-  // note-01 (dettes garanties), note-02 (BPA), note-04 (HAO), note-07,
-  // note-24/25 (HAO), note-28 to note-33, note-35, note-39
-  return { title: '', cards: [] }
+  // Note 1: Dettes garanties & Engagements
+  if (pageId === 'note-01') {
+    const endettement = agg.capitauxPropres !== 0 ? agg.dettesTotal / Math.abs(agg.capitauxPropres) : 0
+    const couverture = agg.dettesTotal > 0 ? (agg.immoBrutes / agg.dettesTotal) : 0
+    const card: PredictionCard = {
+      type: 'prediction',
+      title: 'Dettes & Garanties',
+      indicators: [
+        { label: 'Dettes financieres', value: `${fmt(agg.dettesTotal)} FCFA`, status: 'bon' },
+        { label: 'Capitaux propres', value: `${fmt(agg.capitauxPropres)} FCFA`, status: agg.capitauxPropres > 0 ? 'bon' : 'critique' },
+        { label: 'Ratio endettement', value: endettement.toFixed(2), status: endettement <= 1 ? 'bon' : endettement <= 2 ? 'acceptable' : 'critique' },
+        { label: 'Couverture par actifs', value: couverture > 0 ? `${couverture.toFixed(2)}x` : 'N/A', status: couverture >= 1.5 ? 'bon' : couverture >= 1 ? 'acceptable' : 'critique' },
+        { label: 'Immobilisations brutes', value: `${fmt(agg.immoBrutes)} FCFA`, status: 'bon' },
+      ],
+      narrative: endettement <= 1
+        ? `Endettement **maitrise** (ratio ${endettement.toFixed(2)}). Les actifs couvrent ${couverture.toFixed(2)}x les dettes.`
+        : `Endettement **eleve** (ratio ${endettement.toFixed(2)}). Verifier les suretes reelles consenties.`,
+      recommendations: [
+        ...(endettement > 2 ? ['Recapitaliser pour reduire le ratio d\'endettement'] : []),
+        ...(couverture < 1 ? ['Les actifs ne couvrent pas les dettes garanties — risque en cas de liquidation'] : []),
+      ],
+    }
+    return { title: 'Analyse des Garanties', cards: [card] }
+  }
+
+  // Note 4: Immobilisations financieres
+  if (pageId === 'note-04') {
+    const card: PredictionCard = {
+      type: 'prediction',
+      title: 'Investissements Financiers',
+      indicators: [
+        { label: 'Immobilisations brutes', value: `${fmt(agg.immoBrutes)} FCFA`, status: 'bon' },
+        { label: 'Immobilisations nettes', value: `${fmt(agg.immoNettes)} FCFA`, status: agg.immoNettes > 0 ? 'bon' : 'critique' },
+        { label: 'Capitaux propres', value: `${fmt(agg.capitauxPropres)} FCFA`, status: agg.capitauxPropres > 0 ? 'bon' : 'critique' },
+        { label: 'Resultat net', value: `${fmt(agg.resultat)} FCFA`, status: agg.resultat > 0 ? 'bon' : 'critique' },
+      ],
+    }
+    return { title: 'Immobilisations Financieres', cards: [card] }
+  }
+
+  // Note 7: Autres creances
+  if (pageId === 'note-07') {
+    const delaiClients = agg.ca > 0 ? (agg.clientsNets / agg.ca) * 360 : 0
+    const card: PredictionCard = {
+      type: 'prediction',
+      title: 'Analyse des Creances',
+      indicators: [
+        { label: 'Clients nets', value: `${fmt(agg.clientsNets)} FCFA`, status: 'bon' },
+        { label: 'Delai encaissement', value: agg.ca > 0 ? `${Math.round(delaiClients)} jours` : 'N/A', status: delaiClients > 90 ? 'critique' : delaiClients > 60 ? 'acceptable' : 'bon' },
+        { label: 'Actif circulant', value: `${fmt(agg.actifCirculant)} FCFA`, status: 'bon' },
+        { label: 'CA', value: `${fmt(agg.ca)} FCFA`, status: agg.ca > 0 ? 'bon' : 'critique' },
+      ],
+      narrative: `Creances clients de **${fmt(agg.clientsNets)} FCFA** (${agg.ca > 0 ? Math.round(delaiClients) : 'N/A'} jours). Actif circulant total : **${fmt(agg.actifCirculant)} FCFA**.`,
+    }
+    return { title: 'Autres Creances', cards: [card] }
+  }
+
+  // Notes 24, 25: Services exterieurs / Impots et taxes
+  if (pageId === 'note-24' || pageId === 'note-25') {
+    const card: PredictionCard = {
+      type: 'prediction',
+      title: 'Analyse des Charges',
+      indicators: [
+        { label: 'Charges de personnel', value: `${fmt(agg.chargesPersonnel)} FCFA`, status: 'bon' },
+        { label: 'Personnel / CA', value: agg.ca > 0 ? `${((agg.chargesPersonnel / agg.ca) * 100).toFixed(1)}%` : 'N/A', status: agg.ca > 0 && (agg.chargesPersonnel / agg.ca) * 100 > 50 ? 'critique' : 'bon' },
+        { label: 'Charges financieres', value: `${fmt(agg.chargesFinancieres)} FCFA`, status: agg.ca > 0 && (agg.chargesFinancieres / agg.ca) * 100 > 5 ? 'critique' : 'bon' },
+        { label: 'Resultat net', value: `${fmt(agg.resultat)} FCFA`, status: agg.resultat > 0 ? 'bon' : 'critique' },
+      ],
+    }
+    return { title: 'Structure Charges', cards: [card] }
+  }
+
+  // Note 28: Dotations provisions
+  if (pageId === 'note-28') {
+    const card: PredictionCard = {
+      type: 'prediction',
+      title: 'Provisions & Depreciations',
+      indicators: [
+        { label: 'Amortissements cumules', value: `${fmt(agg.amortissements)} FCFA`, status: 'bon' },
+        { label: 'Taux d\'amortissement', value: agg.immoBrutes > 0 ? `${((agg.amortissements / agg.immoBrutes) * 100).toFixed(1)}%` : 'N/A', status: agg.immoBrutes > 0 && (agg.amortissements / agg.immoBrutes) > 0.8 ? 'critique' : 'bon' },
+        { label: 'Immobilisations nettes', value: `${fmt(agg.immoNettes)} FCFA`, status: agg.immoNettes > 0 ? 'bon' : 'critique' },
+        { label: 'Resultat net', value: `${fmt(agg.resultat)} FCFA`, status: agg.resultat > 0 ? 'bon' : 'critique' },
+      ],
+    }
+    return { title: 'Dotations', cards: [card] }
+  }
+
+  // Note 29: Charges et revenus financiers
+  if (pageId === 'note-29') {
+    const poidsFinCA = agg.ca > 0 ? (agg.chargesFinancieres / agg.ca) * 100 : 0
+    const card: PredictionCard = {
+      type: 'prediction',
+      title: 'Analyse Financiere',
+      indicators: [
+        { label: 'Charges financieres', value: `${fmt(agg.chargesFinancieres)} FCFA`, status: poidsFinCA > 5 ? 'critique' : 'bon' },
+        { label: 'Poids / CA', value: agg.ca > 0 ? `${poidsFinCA.toFixed(1)}%` : 'N/A', status: poidsFinCA > 5 ? 'critique' : poidsFinCA > 3 ? 'acceptable' : 'bon' },
+        { label: 'Dettes financieres', value: `${fmt(agg.dettesTotal)} FCFA`, status: 'bon' },
+        { label: 'Tresorerie nette', value: `${fmt(agg.tresorerie)} FCFA`, status: agg.tresorerie >= 0 ? 'bon' : 'critique' },
+      ],
+      narrative: `Charges financieres de **${fmt(agg.chargesFinancieres)} FCFA** (${poidsFinCA.toFixed(1)}% du CA). ${poidsFinCA > 5 ? 'Poids **excessif** — renegocier les conditions bancaires.' : 'Niveau **acceptable**.'}`,
+    }
+    return { title: 'Charges Financieres', cards: [card] }
+  }
+
+  // Note 30: Charges et produits HAO
+  if (pageId === 'note-30') {
+    const card: PredictionCard = {
+      type: 'prediction',
+      title: 'Elements Exceptionnels (HAO)',
+      indicators: [
+        { label: 'Resultat net', value: `${fmt(agg.resultat)} FCFA`, status: agg.resultat > 0 ? 'bon' : 'critique' },
+        { label: 'CA', value: `${fmt(agg.ca)} FCFA`, status: agg.ca > 0 ? 'bon' : 'critique' },
+        { label: 'Marge nette', value: agg.ca > 0 ? `${((agg.resultat / agg.ca) * 100).toFixed(1)}%` : 'N/A', status: agg.resultat > 0 ? 'bon' : 'critique' },
+      ],
+      narrative: `Les elements HAO (Hors Activites Ordinaires) sont a analyser separement du resultat d'exploitation courant.`,
+    }
+    return { title: 'HAO', cards: [card] }
+  }
+
+  // Note 31: Repartition du resultat
+  if (pageId === 'note-31') {
+    const rentaCP = agg.capitauxPropres !== 0 ? (agg.resultat / Math.abs(agg.capitauxPropres)) * 100 : 0
+    const card: PredictionCard = {
+      type: 'prediction',
+      title: 'Repartition & Resultat',
+      indicators: [
+        { label: 'Resultat net', value: `${fmt(agg.resultat)} FCFA`, status: agg.resultat > 0 ? 'bon' : 'critique' },
+        { label: 'Capitaux propres', value: `${fmt(agg.capitauxPropres)} FCFA`, status: agg.capitauxPropres > 0 ? 'bon' : 'critique' },
+        { label: 'Rentabilite CP', value: `${rentaCP.toFixed(1)}%`, status: rentaCP >= 15 ? 'excellent' : rentaCP >= 8 ? 'bon' : rentaCP >= 0 ? 'acceptable' : 'critique' },
+        { label: 'Reserves', value: `${fmt(agg.reserves)} FCFA`, status: agg.reserves >= 0 ? 'bon' : 'acceptable' },
+      ],
+      narrative: agg.resultat > 0
+        ? `Resultat distribuable de **${fmt(agg.resultat)} FCFA**. Rentabilite des capitaux propres : **${rentaCP.toFixed(1)}%**.`
+        : `**Resultat deficitaire** — pas de distribution possible. Report a nouveau negatif.`,
+    }
+    return { title: 'Affectation du Resultat', cards: [card] }
+  }
+
+  // Note 32, 33: Production / Achats
+  if (pageId === 'note-32' || pageId === 'note-33') {
+    const card: PredictionCard = {
+      type: 'prediction',
+      title: 'Analyse de l\'Exploitation',
+      indicators: [
+        { label: 'Chiffre d\'affaires', value: `${fmt(agg.ca)} FCFA`, status: agg.ca > 0 ? 'bon' : 'critique' },
+        { label: 'Stocks nets', value: `${fmt(agg.stocksNets)} FCFA`, status: agg.stocksNets >= 0 ? 'bon' : 'critique' },
+        { label: 'Rotation stocks', value: agg.ca > 0 ? `${Math.round((agg.stocksNets / agg.ca) * 360)} jours` : 'N/A', status: agg.ca > 0 && (agg.stocksNets / agg.ca) * 360 > 120 ? 'critique' : 'bon' },
+        { label: 'Resultat net', value: `${fmt(agg.resultat)} FCFA`, status: agg.resultat > 0 ? 'bon' : 'critique' },
+      ],
+    }
+    return { title: 'Production & Achats', cards: [card] }
+  }
+
+  // Notes textuelles (note-02, note-35, note-39, note36-*) — synthese globale
+  const generalResp = handlePredictionGeneral(balN)
+  const fallbackCard = generalResp.content?.find(c => c.type === 'prediction') as PredictionCard | undefined
+  return { title: 'Synthese', cards: fallbackCard ? [fallbackCard] : [] }
 }
 
 

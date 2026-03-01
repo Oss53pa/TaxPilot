@@ -7,11 +7,19 @@ import { useMemo } from 'react'
 import type { BalanceEntry } from '@/services/liasseDataService'
 import { getLatestBalance } from '@/services/balanceStorageService'
 
+function soldeD(e: BalanceEntry): number {
+  // Use solde_debit/solde_credit when available (non-zero), otherwise fall back to movements
+  const sd = e.solde_debit ?? 0
+  const sc = e.solde_credit ?? 0
+  if (sd !== 0 || sc !== 0) return sd - sc
+  return (e.debit ?? 0) - (e.credit ?? 0)
+}
+
 function sumDebit(entries: BalanceEntry[], prefixes: string[]): number {
   return Math.round(
     entries
       .filter(e => prefixes.some(p => e.compte.startsWith(p)))
-      .reduce((s, e) => s + Math.max(0, (e.solde_debit || e.debit || 0) - (e.solde_credit || e.credit || 0)), 0)
+      .reduce((s, e) => s + Math.max(0, soldeD(e)), 0)
   )
 }
 
@@ -19,7 +27,7 @@ function sumCredit(entries: BalanceEntry[], prefixes: string[]): number {
   return Math.round(
     entries
       .filter(e => prefixes.some(p => e.compte.startsWith(p)))
-      .reduce((s, e) => s + Math.max(0, (e.solde_credit || e.credit || 0) - (e.solde_debit || e.debit || 0)), 0)
+      .reduce((s, e) => s + Math.max(0, -soldeD(e)), 0)
   )
 }
 

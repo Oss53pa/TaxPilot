@@ -70,7 +70,10 @@ function C001(ctx: AuditContext): ResultatControle {
       {
         comptes: nonOHADA.slice(0, 15).map((c) => c.suggestion ? `${c.compte} -> ${c.suggestion}` : c.compte),
         montants: { comptesNonConformes: nonOHADA.length, totalComptes: ctx.balanceN.length, pctNonConformes: parseFloat(pct), suggestionsDisponibles: avecSuggestion },
-        description: `${nonOHADA.length} numeros de compte ne figurent pas dans le referentiel SYSCOHADA Revise 2017. Ces comptes ne pourront pas etre mappes correctement dans les etats financiers (bilan, compte de resultat). ${avecSuggestion} suggestion(s) de reclassement ont ete identifiees automatiquement.`
+        description: `${nonOHADA.length} numeros de compte ne figurent pas dans le referentiel SYSCOHADA Revise 2017. Ces comptes ne pourront pas etre mappes correctement dans les etats financiers (bilan, compte de resultat). ${avecSuggestion} suggestion(s) de reclassement ont ete identifiees automatiquement.`,
+        attendu: 'Tous les comptes conformes au plan SYSCOHADA Revise 2017',
+        constate: `${nonOHADA.length} compte(s) non conforme(s) au referentiel SYSCOHADA (${pct}%)`,
+        impactFiscal: 'Risque de rejet de la liasse par l\'administration fiscale - comptes non reconnus dans les etats financiers OHADA',
       },
       'Reclasser ces comptes selon le plan SYSCOHADA Revise 2017. Utiliser les suggestions de mapping proposees ou consulter le plan de comptes officiel.',
       'Art. 14 Acte Uniforme OHADA - Plan de comptes SYSCOHADA')
@@ -94,7 +97,10 @@ function C002(ctx: AuditContext): ResultatControle {
       {
         comptes: invalides.slice(0, 10),
         montants: { comptesInvalides: invalides.length, totalComptes: ctx.balanceN.length },
-        description: 'Des numeros de compte commencent par un caractere invalide (lettre, zero, ou caractere special). En SYSCOHADA, les comptes doivent obligatoirement commencer par un chiffre de 1 a 9 representant leur classe comptable.'
+        description: 'Des numeros de compte commencent par un caractere invalide (lettre, zero, ou caractere special). En SYSCOHADA, les comptes doivent obligatoirement commencer par un chiffre de 1 a 9 representant leur classe comptable.',
+        attendu: 'Tous les comptes commencant par un chiffre de classe valide (1 a 9)',
+        constate: `${invalides.length} compte(s) avec un premier caractere invalide (hors 1-9)`,
+        impactFiscal: 'Liasse fiscale non generable - comptes impossibles a classer dans les etats financiers OHADA',
       },
       'Corriger les numeros de compte pour qu\'ils commencent par un chiffre de classe valide (1 a 9).',
       'Art. 14 Acte Uniforme OHADA - Nomenclature des comptes')
@@ -124,7 +130,10 @@ function C003(ctx: AuditContext): ResultatControle {
       {
         comptes: [...courts.slice(0, 5).map(c => `Court: ${c}`), ...longs.slice(0, 5).map(c => `Long: ${c}`)],
         montants: { comptesCourts: courts.length, comptesLongs: longs.length, ...distrib },
-        description: 'Le SYSCOHADA recommande des numeros de compte de 4 a 8 chiffres. Les comptes courts (2-3 chiffres) sont des comptes de regroupement qui ne devraient pas porter de solde directement. Les comptes longs (>8 chiffres) sont souvent des sous-comptes auxiliaires specifiques au logiciel comptable.'
+        description: 'Le SYSCOHADA recommande des numeros de compte de 4 a 8 chiffres. Les comptes courts (2-3 chiffres) sont des comptes de regroupement qui ne devraient pas porter de solde directement. Les comptes longs (>8 chiffres) sont souvent des sous-comptes auxiliaires specifiques au logiciel comptable.',
+        attendu: 'Numeros de compte de 4 a 8 chiffres selon la norme SYSCOHADA',
+        constate: `${courts.length} compte(s) court(s) (<4 chiffres) et ${longs.length} compte(s) long(s) (>8 chiffres)`,
+        impactFiscal: 'Aucun impact direct - les comptes courts peuvent neanmoins fausser le detail des etats financiers',
       },
       'Ventiler les comptes courts en sous-comptes detailles. Les comptes longs sont generalement acceptables s\'ils correspondent a des auxiliaires.')
   }
@@ -156,7 +165,10 @@ function C004(ctx: AuditContext): ResultatControle {
       {
         comptes: trouves,
         montants: { comptesObsoletes: trouves.length },
-        description: 'Des comptes de l\'ancien plan SYSCOA (avant la reforme 2017) sont encore utilises. Le SYSCOHADA Revise a modifie ou supprime ces comptes. Leur utilisation rend les etats financiers non conformes et peut entrainer un rejet par l\'administration fiscale.'
+        description: 'Des comptes de l\'ancien plan SYSCOA (avant la reforme 2017) sont encore utilises. Le SYSCOHADA Revise a modifie ou supprime ces comptes. Leur utilisation rend les etats financiers non conformes et peut entrainer un rejet par l\'administration fiscale.',
+        attendu: 'Utilisation exclusive des comptes du plan SYSCOHADA Revise 2017',
+        constate: `${trouves.length} compte(s) de l'ancien SYSCOA encore present(s) dans la balance`,
+        impactFiscal: 'Rejet probable de la liasse fiscale - comptes supprimes depuis la reforme SYSCOHADA 2017',
       },
       'Migrer vers les comptes du SYSCOHADA Revise 2017 en utilisant la table de correspondance officielle. Contacter votre editeur de logiciel comptable pour mettre a jour le plan de comptes.',
       'SYSCOHADA Revise 2017 - Guide de migration')
@@ -177,7 +189,10 @@ function C005(ctx: AuditContext): ResultatControle {
       {
         comptes: tafire.map((l) => `${l.compte}: ${l.intitule}`),
         montants: { comptesTafire: tafire.length },
-        description: 'Le Tableau Financier des Ressources et des Emplois (TAFIRE) a ete supprime dans le SYSCOHADA Revise 2017 et remplace par le Tableau des Flux de Tresorerie (TFT). Les comptes associes (694x, 884x, 894x) ne doivent plus etre utilises.'
+        description: 'Le Tableau Financier des Ressources et des Emplois (TAFIRE) a ete supprime dans le SYSCOHADA Revise 2017 et remplace par le Tableau des Flux de Tresorerie (TFT). Les comptes associes (694x, 884x, 894x) ne doivent plus etre utilises.',
+        attendu: 'Absence de comptes TAFIRE (694x, 884x, 894x) - utilisation du TFT',
+        constate: `${tafire.length} compte(s) TAFIRE encore utilise(s) dans la balance`,
+        impactFiscal: 'Non-conformite au SYSCOHADA Revise - le TAFIRE n\'est plus un etat financier reconnu depuis 2017',
       },
       'Supprimer ces comptes et utiliser la methode du TFT pour l\'etat des flux de tresorerie.',
       'SYSCOHADA Revise 2017 - Suppression du TAFIRE')
@@ -229,7 +244,10 @@ function C006(ctx: AuditContext): ResultatControle {
       {
         comptes: nonMappes.slice(0, 15),
         montants: { comptesNonMappes: nonMappes.length, totalComptesBilan: ctx.balanceN.filter(l => { const cl = parseInt(l.compte.charAt(0)); return cl >= 1 && cl <= 5 }).length },
-        description: `${nonMappes.length} comptes de bilan (classes 1 a 5) n'ont pas de correspondance dans le mapping des etats financiers ${typeLiasse}. Leurs montants ne seront pas repris dans le bilan genere, ce qui provoquera un desequilibre entre la balance et les etats financiers.`
+        description: `${nonMappes.length} comptes de bilan (classes 1 a 5) n'ont pas de correspondance dans le mapping des etats financiers ${typeLiasse}. Leurs montants ne seront pas repris dans le bilan genere, ce qui provoquera un desequilibre entre la balance et les etats financiers.`,
+        attendu: `Tous les comptes de bilan (classes 1-5) mappes vers les postes ${typeLiasse}`,
+        constate: `${nonMappes.length} compte(s) de bilan sans correspondance dans le mapping ${typeLiasse}`,
+        impactFiscal: 'Desequilibre du bilan genere - montants omis des etats financiers pouvant declencher un controle fiscal',
       },
       `Verifier le mapping des comptes vers les postes du bilan ${typeLiasse}. Ajouter les comptes manquants au referentiel de mapping.`,
       'Art. 29 Acte Uniforme OHADA - Presentation du bilan')
@@ -240,7 +258,10 @@ function C006(ctx: AuditContext): ResultatControle {
       {
         comptes: nonMappes,
         montants: { comptesNonMappes: nonMappes.length },
-        description: `${nonMappes.length} comptes de bilan n'ont pas de correspondance dans le mapping ${typeLiasse}. Impact limite mais a corriger pour une generation complete des etats financiers.`
+        description: `${nonMappes.length} comptes de bilan n'ont pas de correspondance dans le mapping ${typeLiasse}. Impact limite mais a corriger pour une generation complete des etats financiers.`,
+        attendu: `Totalite des comptes de bilan mappes vers les postes ${typeLiasse}`,
+        constate: `${nonMappes.length} compte(s) non mappe(s) dans le referentiel ${typeLiasse}`,
+        impactFiscal: 'Impact limite - legere sous-evaluation possible de certains postes du bilan',
       })
   }
   return ok(ref, nom, `Tous les comptes de bilan sont mappables (${typeLiasse})`)
@@ -256,7 +277,10 @@ function C007(ctx: AuditContext): ResultatControle {
       {
         comptes: deuxChiffres.map((l) => `${l.compte}: ${l.intitule}`),
         montants: { comptesDeuxChiffres: deuxChiffres.length },
-        description: 'Les comptes a 2 chiffres representent des regroupements de classe (ex: "10" pour "Capitaux propres"). Ils ne doivent pas porter de solde directement. Un solde a ce niveau indique un plan de comptes trop synthetique ou un probleme de mapping.'
+        description: 'Les comptes a 2 chiffres representent des regroupements de classe (ex: "10" pour "Capitaux propres"). Ils ne doivent pas porter de solde directement. Un solde a ce niveau indique un plan de comptes trop synthetique ou un probleme de mapping.',
+        attendu: 'Comptes detailles a 4 chiffres minimum portant les soldes',
+        constate: `${deuxChiffres.length} compte(s) de regroupement (2 chiffres) portant un solde directement`,
+        impactFiscal: 'Ventilation insuffisante dans les etats financiers - detail des postes incomplet',
       },
       'Ventiler ces comptes en sous-comptes detailles (minimum 4 chiffres). Ex: "10" -> "1010" Capital social, "1040" Primes liees au capital.',
       'Plan SYSCOHADA Revise 2017 - Hierarchie des comptes')
