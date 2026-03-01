@@ -65,15 +65,14 @@ const KEYWORD_CHAPITRE_MAP: Record<string, number> = {
 
 // ── Response builders ────────────────────────────────────────────────
 
-function greetingResponse(): Proph3tResponse {
+function greetingResponse(context?: ConversationContext): Proph3tResponse {
+  const hasBalance = !!context?.balanceData?.balanceN && context.balanceData.balanceN.length > 0
+
   return {
-    text: "Bonjour ! Je suis **Proph3t**, votre assistant expert.\n\nJe maitrise **5 domaines** :\n\n- **SYSCOHADA** — 1 005 comptes, fonctionnement debit/credit, 41 chapitres d'operations\n- **Fiscalite CI** — Taux, calculs IS/TVA/Patente, deductibilite, calendrier\n- **Liasse Fiscale** — 75+ feuillets, notes annexes, regimes d'imposition\n- **Audit** — 108 controles sur 9 niveaux\n- **Analyse Predictive** — Ratios, estimation IS/TVA, detection d'anomalies\n\nComment puis-je vous aider ?",
-    suggestions: [
-      'Chercher un compte',
-      'Taux fiscaux CI',
-      'Analyse predictive',
-      'Controles audit',
-    ],
+    text: "Bonjour ! Je suis **Proph3t**, votre assistant expert.\n\nJe maitrise **5 domaines** :\n\n- **SYSCOHADA** — 1 005 comptes, fonctionnement debit/credit, 41 chapitres d'operations\n- **Fiscalite CI** — Taux, calculs IS/TVA/Patente, deductibilite, calendrier\n- **Liasse Fiscale** — 75+ feuillets, notes annexes, regimes d'imposition\n- **Audit** — 108 controles sur 9 niveaux\n- **Analyse Predictive** — SIG, BFR, seuil rentabilite, ratios, estimation IS/TVA\n\nComment puis-je vous aider ?",
+    suggestions: hasBalance
+      ? ['Analyse generale', 'SIG', 'BFR', 'Mes ratios', 'Estimation IS']
+      : ['Chercher un compte', 'Taux fiscaux CI', 'Liasse fiscale', 'Controles audit'],
   }
 }
 
@@ -360,207 +359,216 @@ export async function processQuery(
 
   let response: Proph3tResponse
 
-  switch (query.intent) {
-    case 'GREETING':
-      response = greetingResponse()
-      break
+  try {
+    switch (query.intent) {
+      case 'GREETING':
+        response = greetingResponse(context)
+        break
 
-    case 'HELP':
-      response = helpResponse()
-      break
+      case 'HELP':
+        response = helpResponse()
+        break
 
-    case 'STATS':
-      response = statsResponse()
-      break
+      case 'STATS':
+        response = statsResponse()
+        break
 
-    case 'ACCOUNT_LOOKUP':
-      if (query.accountNumber) {
-        newContext.lastAccountNumber = query.accountNumber
-        response = await accountLookupResponse(query.accountNumber)
-      } else {
+      case 'ACCOUNT_LOOKUP':
+        if (query.accountNumber) {
+          newContext.lastAccountNumber = query.accountNumber
+          response = await accountLookupResponse(query.accountNumber)
+        } else {
+          response = await unknownResponse(input)
+        }
+        break
+
+      case 'FONCTIONNEMENT':
+        if (query.accountNumber) {
+          newContext.lastAccountNumber = query.accountNumber
+          response = await fonctionnementResponse(query.accountNumber)
+        } else {
+          response = await unknownResponse(input)
+        }
+        break
+
+      case 'CHAPITRE_LOOKUP':
+        if (query.chapitreNumber !== undefined) {
+          newContext.lastChapitreNumber = query.chapitreNumber
+          response = await chapitreLookupResponse(query.chapitreNumber)
+        } else {
+          response = await unknownResponse(input)
+        }
+        break
+
+      case 'OPERATION_SEARCH':
+        response = await operationSearchResponse(input)
+        break
+
+      case 'ACCOUNT_SEARCH':
+        response = await accountSearchResponse(input)
+        break
+
+      case 'CLASS_INFO':
+        if (query.classeNumber !== undefined) {
+          newContext.lastClasseNumber = query.classeNumber
+          response = classInfoResponse(query.classeNumber)
+        } else {
+          response = await unknownResponse(input)
+        }
+        break
+
+      case 'VALIDATE_ACCOUNT':
+        if (query.accountNumber) {
+          response = await validateAccountResponse(query.accountNumber)
+        } else {
+          response = await unknownResponse(input)
+        }
+        break
+
+      // ── Fiscal ──
+      case 'FISCAL_TAX_RATE':
+        newContext.lastFiscalCategory = query.fiscalCategory
+        response = handleFiscalTaxRate(query.keywords, query.fiscalCategory)
+        break
+
+      case 'FISCAL_CALCULATION':
+        response = handleFiscalCalculation(query.keywords, query.numericValue)
+        break
+
+      case 'FISCAL_DEDUCTIBILITY':
+        response = handleFiscalDeductibility(query.keywords)
+        break
+
+      case 'FISCAL_CALENDAR':
+        response = handleFiscalCalendar()
+        break
+
+      case 'FISCAL_GENERAL':
+        response = handleFiscalGeneral(query.keywords)
+        break
+
+      // ── Liasse ──
+      case 'LIASSE_SHEET':
+        response = handleLiasseSheet(query.sheetId, query.noteNumber, query.keywords)
+        break
+
+      case 'LIASSE_REGIME':
+        response = handleLiasseRegime(query.regimeName)
+        break
+
+      case 'LIASSE_CATEGORY': {
+        // Map French terms to English category IDs
+        const catMap: Record<string, string> = {
+          'couverture': 'cover', 'garde': 'guards', 'gardes': 'guards',
+          'fiche': 'fiches', 'fiches': 'fiches', 'renseignement': 'fiches',
+          'etat': 'statements', 'etats': 'statements', 'financier': 'statements', 'financiers': 'statements', 'bilan': 'statements', 'resultat': 'statements',
+          'note': 'notes', 'notes': 'notes', 'annexe': 'notes', 'annexes': 'notes',
+          'supplement': 'supplements', 'supplements': 'supplements', 'complementaire': 'supplements',
+          'commentaire': 'comments', 'commentaires': 'comments',
+          'cover': 'cover', 'guards': 'guards', 'statements': 'statements', 'comments': 'comments',
+        }
+        const catKeyword = query.keywords.find(k => catMap[k])
+        response = handleLiasseCategory(catKeyword ? catMap[catKeyword] : undefined)
+        break
+      }
+
+      case 'LIASSE_MAPPING':
+        response = handleLiasseMapping(query.accountNumber, query.posteRef, query.keywords)
+        break
+
+      // ── Audit ──
+      case 'AUDIT_CONTROL':
+        if (query.auditRef) {
+          response = handleAuditControl(query.auditRef)
+        } else {
+          response = handleAuditGeneral()
+        }
+        break
+
+      case 'AUDIT_LEVEL':
+        if (query.auditLevel !== undefined) {
+          newContext.lastAuditLevel = query.auditLevel
+          response = handleAuditLevel(query.auditLevel)
+        } else {
+          response = handleAuditGeneral()
+        }
+        break
+
+      case 'AUDIT_GENERAL':
+        response = handleAuditGeneral()
+        break
+
+      case 'AUDIT_EXECUTE':
+        if (!context.balanceData?.balanceN) { response = noBalanceResponse(); break }
+        response = handleAuditExecute(context.balanceData.balanceN, context.balanceData.balanceN1)
+        break
+
+      // ── Predictions ──
+      case 'PREDICTION_IS':
+        if (!context.balanceData?.balanceN) { response = noBalanceResponse(); break }
+        response = handlePredictionIS(context.balanceData.balanceN)
+        break
+
+      case 'PREDICTION_TVA':
+        if (!context.balanceData?.balanceN) { response = noBalanceResponse(); break }
+        response = handlePredictionTVA(context.balanceData.balanceN)
+        break
+
+      case 'PREDICTION_RATIOS':
+        if (!context.balanceData?.balanceN) { response = noBalanceResponse(); break }
+        response = handlePredictionRatios(context.balanceData.balanceN)
+        break
+
+      case 'PREDICTION_TREND':
+        if (!context.balanceData?.balanceN) { response = noBalanceResponse(); break }
+        response = handlePredictionTrend(context.balanceData.balanceN, context.balanceData.balanceN1)
+        break
+
+      case 'PREDICTION_ANOMALY':
+        if (!context.balanceData?.balanceN) { response = noBalanceResponse(); break }
+        response = handlePredictionAnomaly(context.balanceData.balanceN)
+        break
+
+      case 'PREDICTION_COHERENCE':
+        if (!context.balanceData?.balanceN) { response = noBalanceResponse(); break }
+        response = handleCoherenceCheck(context.balanceData.balanceN)
+        break
+
+      case 'PREDICTION_SIG':
+        if (!context.balanceData?.balanceN) { response = noBalanceResponse(); break }
+        response = handlePredictionSIG(context.balanceData.balanceN)
+        break
+
+      case 'PREDICTION_BREAKEVEN':
+        if (!context.balanceData?.balanceN) { response = noBalanceResponse(); break }
+        response = handlePredictionBreakeven(context.balanceData.balanceN)
+        break
+
+      case 'PREDICTION_BFR':
+        if (!context.balanceData?.balanceN) { response = noBalanceResponse(); break }
+        response = handlePredictionBFR(context.balanceData.balanceN)
+        break
+
+      case 'PREDICTION_GENERAL':
+        if (!context.balanceData?.balanceN) { response = noBalanceResponse(); break }
+        response = handlePredictionGeneral(context.balanceData.balanceN, context.balanceData.balanceN1)
+        break
+
+      case 'CONDITIONAL_DIAGNOSTIC':
+        if (!context.balanceData?.balanceN) { response = noBalanceResponse(); break }
+        response = handleConditionalDiagnostic(context.balanceData.balanceN, context.regime, context.entreprise)
+        break
+
+      default:
         response = await unknownResponse(input)
-      }
-      break
-
-    case 'FONCTIONNEMENT':
-      if (query.accountNumber) {
-        newContext.lastAccountNumber = query.accountNumber
-        response = await fonctionnementResponse(query.accountNumber)
-      } else {
-        response = await unknownResponse(input)
-      }
-      break
-
-    case 'CHAPITRE_LOOKUP':
-      if (query.chapitreNumber !== undefined) {
-        newContext.lastChapitreNumber = query.chapitreNumber
-        response = await chapitreLookupResponse(query.chapitreNumber)
-      } else {
-        response = await unknownResponse(input)
-      }
-      break
-
-    case 'OPERATION_SEARCH':
-      response = await operationSearchResponse(input)
-      break
-
-    case 'ACCOUNT_SEARCH':
-      response = await accountSearchResponse(input)
-      break
-
-    case 'CLASS_INFO':
-      if (query.classeNumber !== undefined) {
-        newContext.lastClasseNumber = query.classeNumber
-        response = classInfoResponse(query.classeNumber)
-      } else {
-        response = await unknownResponse(input)
-      }
-      break
-
-    case 'VALIDATE_ACCOUNT':
-      if (query.accountNumber) {
-        response = await validateAccountResponse(query.accountNumber)
-      } else {
-        response = await unknownResponse(input)
-      }
-      break
-
-    // ── Fiscal ──
-    case 'FISCAL_TAX_RATE':
-      newContext.lastFiscalCategory = query.fiscalCategory
-      response = handleFiscalTaxRate(query.keywords, query.fiscalCategory)
-      break
-
-    case 'FISCAL_CALCULATION':
-      response = handleFiscalCalculation(query.keywords, query.numericValue)
-      break
-
-    case 'FISCAL_DEDUCTIBILITY':
-      response = handleFiscalDeductibility(query.keywords)
-      break
-
-    case 'FISCAL_CALENDAR':
-      response = handleFiscalCalendar()
-      break
-
-    case 'FISCAL_GENERAL':
-      response = handleFiscalGeneral(query.keywords)
-      break
-
-    // ── Liasse ──
-    case 'LIASSE_SHEET':
-      response = handleLiasseSheet(query.sheetId, query.noteNumber, query.keywords)
-      break
-
-    case 'LIASSE_REGIME':
-      response = handleLiasseRegime(query.regimeName)
-      break
-
-    case 'LIASSE_CATEGORY': {
-      // Map French terms to English category IDs
-      const catMap: Record<string, string> = {
-        'couverture': 'cover', 'garde': 'guards', 'gardes': 'guards',
-        'fiche': 'fiches', 'fiches': 'fiches', 'renseignement': 'fiches',
-        'etat': 'statements', 'etats': 'statements', 'financier': 'statements', 'financiers': 'statements', 'bilan': 'statements', 'resultat': 'statements',
-        'note': 'notes', 'notes': 'notes', 'annexe': 'notes', 'annexes': 'notes',
-        'supplement': 'supplements', 'supplements': 'supplements', 'complementaire': 'supplements',
-        'commentaire': 'comments', 'commentaires': 'comments',
-        'cover': 'cover', 'guards': 'guards', 'statements': 'statements', 'comments': 'comments',
-      }
-      const catKeyword = query.keywords.find(k => catMap[k])
-      response = handleLiasseCategory(catKeyword ? catMap[catKeyword] : undefined)
-      break
     }
-
-    case 'LIASSE_MAPPING':
-      response = handleLiasseMapping(query.accountNumber, query.posteRef, query.keywords)
-      break
-
-    // ── Audit ──
-    case 'AUDIT_CONTROL':
-      if (query.auditRef) {
-        response = handleAuditControl(query.auditRef)
-      } else {
-        response = handleAuditGeneral()
-      }
-      break
-
-    case 'AUDIT_LEVEL':
-      if (query.auditLevel !== undefined) {
-        newContext.lastAuditLevel = query.auditLevel
-        response = handleAuditLevel(query.auditLevel)
-      } else {
-        response = handleAuditGeneral()
-      }
-      break
-
-    case 'AUDIT_GENERAL':
-      response = handleAuditGeneral()
-      break
-
-    case 'AUDIT_EXECUTE':
-      if (!context.balanceData?.balanceN) { response = noBalanceResponse(); break }
-      response = handleAuditExecute(context.balanceData.balanceN, context.balanceData.balanceN1)
-      break
-
-    // ── Predictions ──
-    case 'PREDICTION_IS':
-      if (!context.balanceData?.balanceN) { response = noBalanceResponse(); break }
-      response = handlePredictionIS(context.balanceData.balanceN)
-      break
-
-    case 'PREDICTION_TVA':
-      if (!context.balanceData?.balanceN) { response = noBalanceResponse(); break }
-      response = handlePredictionTVA(context.balanceData.balanceN)
-      break
-
-    case 'PREDICTION_RATIOS':
-      if (!context.balanceData?.balanceN) { response = noBalanceResponse(); break }
-      response = handlePredictionRatios(context.balanceData.balanceN)
-      break
-
-    case 'PREDICTION_TREND':
-      if (!context.balanceData?.balanceN) { response = noBalanceResponse(); break }
-      response = handlePredictionTrend(context.balanceData.balanceN, context.balanceData.balanceN1)
-      break
-
-    case 'PREDICTION_ANOMALY':
-      if (!context.balanceData?.balanceN) { response = noBalanceResponse(); break }
-      response = handlePredictionAnomaly(context.balanceData.balanceN)
-      break
-
-    case 'PREDICTION_COHERENCE':
-      if (!context.balanceData?.balanceN) { response = noBalanceResponse(); break }
-      response = handleCoherenceCheck(context.balanceData.balanceN)
-      break
-
-    case 'PREDICTION_SIG':
-      if (!context.balanceData?.balanceN) { response = noBalanceResponse(); break }
-      response = handlePredictionSIG(context.balanceData.balanceN)
-      break
-
-    case 'PREDICTION_BREAKEVEN':
-      if (!context.balanceData?.balanceN) { response = noBalanceResponse(); break }
-      response = handlePredictionBreakeven(context.balanceData.balanceN)
-      break
-
-    case 'PREDICTION_BFR':
-      if (!context.balanceData?.balanceN) { response = noBalanceResponse(); break }
-      response = handlePredictionBFR(context.balanceData.balanceN)
-      break
-
-    case 'PREDICTION_GENERAL':
-      if (!context.balanceData?.balanceN) { response = noBalanceResponse(); break }
-      response = handlePredictionGeneral(context.balanceData.balanceN, context.balanceData.balanceN1)
-      break
-
-    case 'CONDITIONAL_DIAGNOSTIC':
-      if (!context.balanceData?.balanceN) { response = noBalanceResponse(); break }
-      response = handleConditionalDiagnostic(context.balanceData.balanceN, context.regime, context.entreprise)
-      break
-
-    default:
-      response = await unknownResponse(input)
+  } catch (err) {
+    const intentLabel = query.intent || 'UNKNOWN'
+    const errMsg = err instanceof Error ? err.message : String(err)
+    response = {
+      text: `**Erreur lors du traitement** (${intentLabel})\n\nUne erreur inattendue s'est produite : ${errMsg}\n\nEssayez de reformuler votre question ou choisissez une suggestion ci-dessous.`,
+      suggestions: ['Aide', 'Taux fiscaux', 'Mes ratios', 'Audit'],
+    }
   }
 
   // ── Track last intent for contextual follow-ups ──
@@ -568,11 +576,15 @@ export async function processQuery(
 
   // ── Multi-intent: process secondary intents and merge ──
   if (query.secondaryIntents && query.secondaryIntents.length > 0) {
-    const secondaryResponses = await processSecondaryIntents(
-      query.secondaryIntents, input, context
-    )
-    if (secondaryResponses.length > 0) {
-      response = mergeResponses(response, secondaryResponses)
+    try {
+      const secondaryResponses = await processSecondaryIntents(
+        query.secondaryIntents, input, context
+      )
+      if (secondaryResponses.length > 0) {
+        response = mergeResponses(response, secondaryResponses)
+      }
+    } catch {
+      // Secondary intent failed — keep primary response
     }
   }
 

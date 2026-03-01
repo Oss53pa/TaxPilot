@@ -304,7 +304,10 @@ function C008(ctx: AuditContext): ResultatControle {
       {
         comptes: classe8.map((l) => `${l.compte}: ${l.intitule}`).slice(0, 10),
         montants: { totalHAO: totalMontant, nombreComptes: classe8.length, ...ventilation },
-        description: `${classe8.length} comptes d'operations Hors Activites Ordinaires (HAO) sont presents pour un total de ${totalMontant.toLocaleString('fr-FR')} FCFA. Les operations HAO (cessions d\'immobilisations, sinistres, restructurations) doivent etre exceptionnelles et documentees dans l\'annexe.`
+        description: `${classe8.length} comptes d'operations Hors Activites Ordinaires (HAO) sont presents pour un total de ${totalMontant.toLocaleString('fr-FR')} FCFA. Les operations HAO (cessions d\'immobilisations, sinistres, restructurations) doivent etre exceptionnelles et documentees dans l\'annexe.`,
+        attendu: 'Operations HAO exceptionnelles et justifiees dans les notes annexes',
+        constate: `${classe8.length} compte(s) HAO pour un total de ${totalMontant.toLocaleString('fr-FR')} FCFA`,
+        impactFiscal: 'Aucun impact direct si les operations sont correctement documentees dans l\'annexe',
       },
       'Justifier chaque operation HAO dans les notes annexes. Verifier qu\'elles ne correspondent pas a des operations courantes mal classees.',
       'Art. 48 Acte Uniforme OHADA - Operations HAO')
@@ -337,7 +340,10 @@ function C009(ctx: AuditContext): ResultatControle {
       {
         comptes: interdits.slice(0, 15),
         montants: { comptesInterdits: interdits.length },
-        description: 'Des comptes marques comme "INTERDIT" dans le plan SYSCOHADA Revise sont utilises dans la balance. Ces comptes ont ete supprimes ou remplaces lors de la reforme 2017 et ne doivent plus recevoir de mouvements. Leur utilisation rend les etats financiers non conformes.'
+        description: 'Des comptes marques comme "INTERDIT" dans le plan SYSCOHADA Revise sont utilises dans la balance. Ces comptes ont ete supprimes ou remplaces lors de la reforme 2017 et ne doivent plus recevoir de mouvements. Leur utilisation rend les etats financiers non conformes.',
+        attendu: 'Aucun compte a usage interdit dans la balance',
+        constate: `${interdits.length} compte(s) a usage interdit encore mouvemente(s)`,
+        impactFiscal: 'Rejet de la liasse fiscale - utilisation de comptes formellement interdits par le SYSCOHADA Revise',
       },
       'Remplacer ces comptes par les comptes autorises correspondants selon la table de correspondance du SYSCOHADA Revise 2017.',
       'Plan SYSCOHADA Revise 2017 - Regles d\'utilisation des comptes')
@@ -391,7 +397,10 @@ function C010(ctx: AuditContext): ResultatControle {
       {
         comptes: inversions.slice(0, 15),
         montants: { comptesInverses: inversions.length, totalMontantInverse: totalInverse },
-        description: `${inversions.length} comptes presentent un solde dans le sens oppose a celui prevu par le plan SYSCOHADA (ex: un actif crediteur ou un passif debiteur). Cela peut indiquer des erreurs de comptabilisation ou des reclassements necessaires (ex: clients crediteurs a reclasser au passif).`
+        description: `${inversions.length} comptes presentent un solde dans le sens oppose a celui prevu par le plan SYSCOHADA (ex: un actif crediteur ou un passif debiteur). Cela peut indiquer des erreurs de comptabilisation ou des reclassements necessaires (ex: clients crediteurs a reclasser au passif).`,
+        attendu: 'Soldes conformes au sens prevu par le plan SYSCOHADA (debiteur ou crediteur)',
+        constate: `${inversions.length} compte(s) avec solde inverse pour un total de ${totalInverse.toLocaleString('fr-FR')} FCFA`,
+        impactFiscal: 'Reclassements necessaires dans les etats financiers - presentation erronee de l\'actif et du passif',
       },
       'Verifier chaque solde inverse. Corriger les erreurs de comptabilisation et effectuer les reclassements necessaires pour les etats financiers.',
       'Plan SYSCOHADA Revise 2017 - Sens des comptes')

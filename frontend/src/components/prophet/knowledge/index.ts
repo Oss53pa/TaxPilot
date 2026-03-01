@@ -28,6 +28,9 @@ export {
   handlePredictionAnomaly,
   handleCoherenceCheck,
   handlePredictionGeneral,
+  handlePredictionSIG,
+  handlePredictionBreakeven,
+  handlePredictionBFR,
   calculerAgregats,
 } from './predictiveAnalysis'
 export type { Agregats } from './predictiveAnalysis'

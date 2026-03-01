@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react'
-import { Box, Typography, TextField, IconButton, Chip, Grow } from '@mui/material'
+import { Box, Typography, TextField, IconButton, Chip, Grow, Tooltip } from '@mui/material'
 import SendIcon from '@mui/icons-material/Send'
 import CloseIcon from '@mui/icons-material/Close'
+import AddCommentOutlinedIcon from '@mui/icons-material/AddCommentOutlined'
 import Proph3tMessageBubble, { TypingIndicator } from './Proph3tMessageBubble'
 import { processQuery } from './Proph3tEngine'
 import { balanceService } from '@/services/balanceService'
@@ -9,6 +10,29 @@ import { getEntreprise } from '@/services/entrepriseStorageService'
 import type { Balance } from '@/types'
 import type { ChatMessage, ConversationContext } from './types'
 import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
+
+// ── Persistence constants ────────────────────────────────────────────
+const CHAT_STORAGE_KEY = 'fiscasync_prophet_chat'
+const MAX_PERSISTED_MESSAGES = 50
+
+function loadPersistedMessages(): ChatMessage[] | null {
+  try {
+    const raw = localStorage.getItem(CHAT_STORAGE_KEY)
+    if (raw) {
+      const msgs: ChatMessage[] = JSON.parse(raw)
+      if (Array.isArray(msgs) && msgs.length > 0) return msgs
+    }
+  } catch { /* corrupt data — ignore */ }
+  return null
+}
+
+function persistMessages(messages: ChatMessage[]) {
+  try {
+    // Keep only the last MAX messages (FIFO)
+    const toSave = messages.slice(-MAX_PERSISTED_MESSAGES)
+    localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(toSave))
+  } catch { /* storage full — ignore */ }
+}
 
 // ── Quick action chips ───────────────────────────────────────────────
 const QUICK_ACTIONS = [
@@ -43,7 +67,9 @@ interface Props {
 }
 
 export default function Proph3tChatPanel({ open, onClose }: Props) {
-  const [messages, setMessages] = useState<ChatMessage[]>([makeWelcome()])
+  const [messages, setMessages] = useState<ChatMessage[]>(() => {
+    return loadPersistedMessages() || [makeWelcome()]
+  })
   const [input, setInput] = useState('')
   const [typing, setTyping] = useState(false)
   const contextRef = useRef<ConversationContext>({})
@@ -88,6 +114,13 @@ export default function Proph3tChatPanel({ open, onClose }: Props) {
       }
     }
   }, [])
+
+  // Persist messages to localStorage
+  useEffect(() => {
+    if (messages.length > 0) {
+      persistMessages(messages)
+    }
+  }, [messages])
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -160,6 +193,14 @@ export default function Proph3tChatPanel({ open, onClose }: Props) {
     sendMessage(text)
   }, [sendMessage])
 
+  const handleNewConversation = useCallback(() => {
+    contextRef.current = {}
+    const welcome = makeWelcome()
+    setMessages([welcome])
+    persistMessages([welcome])
+    setInput('')
+  }, [])
+
   return (
     <Grow in={open} style={{ transformOrigin: 'bottom right' }}>
       <Box
@@ -207,9 +248,16 @@ export default function Proph3tChatPanel({ open, onClose }: Props) {
               Assistant SYSCOHADA & Fiscal CI
             </Typography>
           </Box>
-          <IconButton onClick={onClose} size="small" sx={{ color: 'text.disabled', '&:hover': { color: P.white } }}>
-            <CloseIcon fontSize="small" />
-          </IconButton>
+          <Box sx={{ display: 'flex', gap: 0.5 }}>
+            <Tooltip title="Nouvelle conversation">
+              <IconButton onClick={handleNewConversation} size="small" sx={{ color: 'text.disabled', '&:hover': { color: P.white } }}>
+                <AddCommentOutlinedIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+            <IconButton onClick={onClose} size="small" sx={{ color: 'text.disabled', '&:hover': { color: P.white } }}>
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          </Box>
         </Box>
 
         {/* ── Messages ────────────────────────────────────────── */}

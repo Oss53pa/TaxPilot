@@ -4,8 +4,10 @@
 
 import { calculerIS } from '@/config/taux-fiscaux-ci'
 import { calculerPassageFiscal } from '@/services/passageFiscalService'
+import { generateAnnexeData } from '@/services/annexeDataService'
 import type { Balance } from '@/types'
 import type { Proph3tResponse, PredictionCard, FiscalInfoCard } from '../types'
+import type { BalanceEntry } from '@/services/liasseDataService'
 
 function fmt(n: number): string {
   return Math.round(n).toLocaleString('fr-FR')
@@ -478,16 +480,21 @@ export function handlePredictionRatios(balance: Balance[]): Proph3tResponse {
     { label: 'Rotation stocks (Stocks/Achats x 360)', value: `${Math.round(rotationStocks)} jours` },
     { label: 'Cycle d\'exploitation (Cl + St - Fr)', value: `${Math.round(cycleExploitation)} jours` },
     { label: 'Intensite capitalistique (Immo/CA)', value: `${intensiteCapitalistique.toFixed(1)}%` },
+
+    { label: '── RATIOS COMPLEMENTAIRES ──', value: '' },
+    { label: 'Couverture emplois stables (CP/Immo nettes)', value: couvertureImmo.toFixed(2) },
+    { label: 'Capacite remboursement (Dettes/CAF)', value: `${capaciteRemboursement.toFixed(1)} ans` },
+    { label: 'Taux marge EBE (EBE/CA)', value: `${(ext.produitsExploitation > 0 ? ((ext.produitsExploitation - ext.chargesExploitation + ext.dotationsAmort) / agg.ca) * 100 : 0).toFixed(1)}%` },
   ]
 
   const detailCard: FiscalInfoCard = {
     type: 'fiscal_info',
-    category: 'Analyse Financiere Complete — 24 Ratios',
+    category: 'Analyse Financiere Complete — 27 Ratios',
     items: detailItems,
   }
 
   return {
-    text: `**Analyse Financiere Complete** — 24 ratios calcules depuis votre balance`,
+    text: `**Analyse Financiere Complete** — 27 ratios calcules depuis votre balance`,
     content: [summaryCard, detailCard],
     suggestions: ['Estimation IS', 'Detection anomalies', 'Controle coherence', 'Tendances'],
   }
@@ -882,6 +889,67 @@ export function handleCoherenceCheck(balance: Balance[]): Proph3tResponse {
     })
   }
 
+  // ── C09-C11 — Cross-statement controls (balance vs annexes) ──
+  try {
+    const annexeEntries = toBalanceEntries(balance)
+    const annexes = generateAnnexeData(annexeEntries)
+
+    // C09: Immobilisations bilan vs Note 4
+    if (annexes[4]?.tableau) {
+      const note4Total = annexes[4].tableau.lignes?.reduce((s: number, l: any) => s + (l.brut_n || 0), 0) || 0
+      if (note4Total > 0) {
+        const ecartImmo = Math.abs(agg.immoBrutes - note4Total)
+        controles.push({
+          id: 'C09',
+          description: 'Immo brutes bilan vs Note 4',
+          statut: evalEcart(agg.immoBrutes, note4Total, 1000),
+          valeur1: `Bilan (20-27): ${fmt(agg.immoBrutes)}`,
+          valeur2: `Note 4: ${fmt(note4Total)}`,
+          ecart: ecartImmo,
+          recommandation: ecartImmo > 1000 ? 'Ecart entre immobilisations du bilan et Note 4 — verifier les mouvements' : undefined,
+        })
+      }
+    }
+
+    // C10: Clients bilan vs Note 7
+    if (annexes[7]?.tableau) {
+      const note7Total = annexes[7].tableau.lignes?.reduce((s: number, l: any) => s + (l.brut_n || l.net_n || 0), 0) || 0
+      if (note7Total > 0) {
+        const ecartClients = Math.abs(agg.clientsNets - note7Total)
+        controles.push({
+          id: 'C10',
+          description: 'Clients bilan vs Note 7',
+          statut: evalEcart(agg.clientsNets, note7Total, 1000),
+          valeur1: `Bilan (41): ${fmt(agg.clientsNets)}`,
+          valeur2: `Note 7: ${fmt(note7Total)}`,
+          ecart: ecartClients,
+          recommandation: ecartClients > 1000 ? 'Ecart entre creances clients et Note 7 — verifier les provisions pour depreciation' : undefined,
+        })
+      }
+    }
+  } catch {
+    // Annexe generation failed — skip cross-statement controls
+  }
+
+  // C11: Total CA = somme comptes 70-75
+  {
+    let ca7075 = 0
+    for (const line of balance) {
+      if (/^7[0-5]/.test(line.compte)) ca7075 += Math.max(0, -line.solde)
+    }
+    if (ca7075 > 0) {
+      controles.push({
+        id: 'C11',
+        description: 'CA total = somme comptes 70 a 75',
+        statut: agg.ca === ca7075 ? 'CONFORME' : 'ECART',
+        valeur1: `Agregat CA: ${fmt(agg.ca)}`,
+        valeur2: `Somme 70-75: ${fmt(ca7075)}`,
+        ecart: Math.abs(agg.ca - ca7075),
+        recommandation: agg.ca !== ca7075 ? 'Ecart dans le calcul du CA — verifier la methode d\'agregation' : undefined,
+      })
+    }
+  }
+
   // ── Build response ──
   const conformes = controles.filter(c => c.statut === 'CONFORME').length
   const ecarts = controles.filter(c => c.statut === 'ECART').length
@@ -964,6 +1032,7 @@ export function handlePredictionGeneral(balanceN: Balance[], _balanceN1?: Balanc
   if (!balanceN || balanceN.length === 0) return noBalanceResponse()
 
   const agg = calculerAgregats(balanceN)
+  const ext = calculerAgregatsEtendus(balanceN)
 
   // Health score (0-100)
   let score = 50
@@ -1001,6 +1070,32 @@ export function handlePredictionGeneral(balanceN: Balance[], _balanceN1?: Balanc
   if (fr > 0) { score += 5; forces.push('Fonds de roulement positif') }
   else { score -= 5; risques.push('Fonds de roulement negatif') }
 
+  // BFR check
+  const bfr = agg.actifCirculant - agg.passifCirculant
+  const tresoNette = fr - bfr
+  if (bfr > fr && fr > 0) { score -= 5; risques.push('BFR > Fonds de roulement') }
+  else if (bfr <= 0) { score += 3; forces.push('BFR maitrise') }
+
+  // EBE check (simple)
+  const entries = toBalanceEntries(balanceN)
+  const ventesM = sigProduits(entries, ['701'])
+  const achatsM = sigCharges(entries, ['601'])
+  const mc = ventesM - achatsM
+  const prodVendue = sigProduits(entries, ['702', '703', '704', '705', '706', '707'])
+  const production = prodVendue + sigProduits(entries, ['73', '72'])
+  const va = mc + production - sigCharges(entries, ['602', '604', '605', '608', '61', '62', '63', '6032', '6033'])
+  const ebe = va + sigProduits(entries, ['71']) - sigCharges(entries, ['64']) - sigCharges(entries, ['66'])
+  if (ebe > 0) { score += 3; forces.push(`EBE positif (${fmt(ebe)} FCFA)`) }
+  else if (ebe < 0) { score -= 5; risques.push('EBE negatif') }
+
+  // Seuil de rentabilité check
+  const cf = agg.chargesPersonnel + ext.dotationsAmort + agg.chargesFinancieres + ext.chargesExternes
+  const cv = ext.achats + ext.impotsTaxes
+  const tauxMCV = agg.ca > 0 ? 1 - (cv / agg.ca) : 0
+  const seuil = tauxMCV > 0 ? cf / tauxMCV : 0
+  if (agg.ca > seuil && seuil > 0) { score += 3; forces.push('CA > seuil de rentabilite') }
+  else if (seuil > 0) { score -= 5; risques.push('CA < seuil de rentabilite') }
+
   score = Math.max(0, Math.min(100, score))
 
   const healthStatus: Status = score >= 75 ? 'excellent' : score >= 50 ? 'bon' : score >= 30 ? 'acceptable' : 'critique'
@@ -1012,11 +1107,13 @@ export function handlePredictionGeneral(balanceN: Balance[], _balanceN1?: Balanc
       { label: 'Score sante', value: `${score}/100`, status: healthStatus },
       { label: 'Chiffre d\'affaires', value: `${fmt(agg.ca)} FCFA`, status: agg.ca > 0 ? 'bon' : 'critique' },
       { label: 'Resultat', value: `${fmt(agg.resultat)} FCFA`, status: agg.resultat > 0 ? 'bon' : 'critique' },
-      { label: 'Tresorerie', value: `${fmt(agg.tresorerie)} FCFA`, status: agg.tresorerie >= 0 ? 'bon' : 'critique' },
-      { label: 'Capitaux propres', value: `${fmt(agg.capitauxPropres)} FCFA`, status: agg.capitauxPropres > 0 ? 'bon' : 'critique' },
+      { label: 'EBE', value: `${fmt(ebe)} FCFA`, status: ebe > 0 ? 'bon' : 'critique' },
+      { label: 'BFR', value: `${fmt(bfr)} FCFA`, status: bfr <= fr ? 'bon' : 'critique' },
+      { label: 'Tresorerie nette', value: `${fmt(tresoNette)} FCFA`, status: tresoNette >= 0 ? 'bon' : 'critique' },
+      { label: 'Seuil rentabilite', value: seuil > 0 ? `${fmt(seuil)} FCFA` : 'N/A', status: agg.ca > seuil ? 'bon' : 'critique' },
       { label: 'Liquidite', value: liquidite.toFixed(2), status: liquidite >= 1 ? 'bon' : 'critique' },
     ],
-    narrative: `Score de sante financiere : **${score}/100** (${healthStatus}). ${forces.length > 0 ? 'Points forts : ' + forces.slice(0, 3).join(', ') + '.' : ''} ${risques.length > 0 ? 'Risques : ' + risques.slice(0, 3).join(', ') + '.' : ''}`,
+    narrative: `Score de sante financiere : **${score}/100** (${healthStatus}). ${forces.length > 0 ? 'Points forts : ' + forces.slice(0, 4).join(', ') + '.' : ''} ${risques.length > 0 ? 'Risques : ' + risques.slice(0, 4).join(', ') + '.' : ''}`,
     recommendations: [
       ...risques.slice(0, 3).map(r => `Corriger : ${r}`),
       ...(score >= 50 ? ['Maintenir la bonne gestion'] : ['Attention — situation financiere fragile']),
@@ -1026,6 +1123,402 @@ export function handlePredictionGeneral(balanceN: Balance[], _balanceN1?: Balanc
   return {
     text: `**Diagnostic Financier Global**`,
     content: [card],
-    suggestions: ['Mes ratios', 'Estimation IS', 'Detection anomalies', 'Tendances'],
+    suggestions: ['SIG', 'BFR', 'Seuil de rentabilite', 'Mes ratios', 'Estimation IS'],
   }
+}
+
+// ── Bridge Balance[] → BalanceEntry[] for liasseDataService ─────────
+
+function toBalanceEntries(balance: Balance[]): BalanceEntry[] {
+  return balance.map(b => ({
+    compte: b.compte,
+    intitule: b.libelle_compte || '',
+    debit: b.debit,
+    credit: b.credit,
+    solde_debit: Math.max(0, b.solde),
+    solde_credit: Math.max(0, -b.solde),
+  }))
+}
+
+// ── SIG helpers ─────────────────────────────────────────────────────
+
+function sigProduits(entries: BalanceEntry[], prefixes: string[]): number {
+  let total = 0
+  for (const e of entries) {
+    for (const p of prefixes) {
+      if (e.compte.startsWith(p)) { total += e.solde_credit; break }
+    }
+  }
+  return total
+}
+
+function sigCharges(entries: BalanceEntry[], prefixes: string[]): number {
+  let total = 0
+  for (const e of entries) {
+    for (const p of prefixes) {
+      if (e.compte.startsWith(p)) { total += e.solde_debit; break }
+    }
+  }
+  return total
+}
+
+// ── PREDICTION_SIG ──────────────────────────────────────────────────
+
+export function handlePredictionSIG(balance: Balance[]): Proph3tResponse {
+  if (!balance || balance.length === 0) return noBalanceResponse()
+
+  const entries = toBalanceEntries(balance)
+
+  // Marge Commerciale = Ventes marchandises (701) - Achats marchandises (601) - Var stocks (6031)
+  const ventesM = sigProduits(entries, ['701'])
+  const achatsM = sigCharges(entries, ['601'])
+  const varStocksM = sigCharges(entries, ['6031'])
+  const margeCommerciale = ventesM - achatsM - varStocksM
+
+  // Production de l'Exercice = Prod vendue (702-707) + Prod stockée (73) + Prod immobilisée (72)
+  const prodVendue = sigProduits(entries, ['702', '703', '704', '705', '706', '707'])
+  const prodStockee = sigProduits(entries, ['73'])
+  const prodImmobilisee = sigProduits(entries, ['72'])
+  const production = prodVendue + prodStockee + prodImmobilisee
+
+  // Valeur Ajoutée = MC + Prod - Achats matières (602) - Var stocks mat (6032,6033) - Services ext (604-63)
+  const achatsMat = sigCharges(entries, ['602'])
+  const varStocksMat = sigCharges(entries, ['6032', '6033'])
+  const servicesExt = sigCharges(entries, ['604', '605', '608', '61', '62', '63'])
+  const valeurAjoutee = margeCommerciale + production - achatsMat - varStocksMat - servicesExt
+
+  // EBE = VA + Subventions expl (71) - Impôts/taxes (64) - Charges personnel (66)
+  const subventions = sigProduits(entries, ['71'])
+  const impotsTaxes = sigCharges(entries, ['64'])
+  const chargesPersonnel = sigCharges(entries, ['66'])
+  const ebe = valeurAjoutee + subventions - impotsTaxes - chargesPersonnel
+
+  // Résultat d'Exploitation = EBE + Reprises (791,798,799) + Transferts charges (781,782) + Autres prod (75) - Dotations (681,691) - Autres charges (65)
+  const reprises = sigProduits(entries, ['791', '798', '799'])
+  const transferts = sigProduits(entries, ['781', '782'])
+  const autresProd = sigProduits(entries, ['75'])
+  const dotations = sigCharges(entries, ['681', '691'])
+  const autresCharges = sigCharges(entries, ['65'])
+  const resultatExpl = ebe + reprises + transferts + autresProd - dotations - autresCharges
+
+  // Résultat Financier = Produits financiers (77,787,797) - Charges financières (67,687,697)
+  const prodFin = sigProduits(entries, ['77', '787', '797'])
+  const chargesFin = sigCharges(entries, ['67', '687', '697'])
+  const resultatFin = prodFin - chargesFin
+
+  // RAO = Résultat exploitation + Résultat financier
+  const rao = resultatExpl + resultatFin
+
+  // Résultat HAO
+  const prodHAO = sigProduits(entries, ['82', '84', '86', '88'])
+  const chargesHAO = sigCharges(entries, ['81', '83', '85'])
+  const resultatHAO = prodHAO - chargesHAO
+
+  // Résultat Net = RAO + HAO - Impôt (87) - Participation (89)
+  const impotBenef = sigCharges(entries, ['87'])
+  const participation = sigCharges(entries, ['89'])
+  const resultatNet = rao + resultatHAO - impotBenef - participation
+
+  // CAFG = Résultat net + Dotations amort (68) - Reprises amort (78) + VNC cessions (81) - Prod cessions (82)
+  const dotationsAll = sigCharges(entries, ['68'])
+  const reprisesAll = sigProduits(entries, ['78'])
+  const vncCessions = sigCharges(entries, ['81'])
+  const prodCessions = sigProduits(entries, ['82'])
+  const cafg = resultatNet + dotationsAll - reprisesAll + vncCessions - prodCessions
+
+  const evalSIG = (v: number): Status => v > 0 ? 'bon' : v === 0 ? 'acceptable' : 'critique'
+
+  const card: PredictionCard = {
+    type: 'prediction',
+    title: 'Soldes Intermediaires de Gestion (SIG)',
+    indicators: [
+      { label: 'Marge commerciale', value: `${fmt(margeCommerciale)} FCFA`, status: evalSIG(margeCommerciale) },
+      { label: 'Valeur ajoutee', value: `${fmt(valeurAjoutee)} FCFA`, status: evalSIG(valeurAjoutee) },
+      { label: 'EBE', value: `${fmt(ebe)} FCFA`, status: evalSIG(ebe) },
+      { label: 'Resultat exploitation', value: `${fmt(resultatExpl)} FCFA`, status: evalSIG(resultatExpl) },
+      { label: 'Resultat financier', value: `${fmt(resultatFin)} FCFA`, status: evalSIG(resultatFin) },
+      { label: 'Resultat net', value: `${fmt(resultatNet)} FCFA`, status: evalSIG(resultatNet) },
+      { label: 'CAFG', value: `${fmt(cafg)} FCFA`, status: evalSIG(cafg) },
+    ],
+    narrative: buildSIGNarrative(margeCommerciale, valeurAjoutee, ebe, resultatExpl, resultatNet, cafg),
+    recommendations: buildSIGRecommendations(margeCommerciale, valeurAjoutee, ebe, resultatExpl, resultatFin, resultatNet, cafg),
+  }
+
+  // Detail card with full cascade
+  const detailItems: { label: string; value: string }[] = [
+    { label: '── ACTIVITE COMMERCIALE ──', value: '' },
+    { label: 'Ventes de marchandises (701)', value: `${fmt(ventesM)} FCFA` },
+    { label: '- Achats de marchandises (601)', value: `${fmt(achatsM)} FCFA` },
+    { label: '- Variation stocks marchandises (6031)', value: `${fmt(varStocksM)} FCFA` },
+    { label: '= MARGE COMMERCIALE', value: `${fmt(margeCommerciale)} FCFA` },
+    { label: '── PRODUCTION ──', value: '' },
+    { label: 'Production vendue (702-707)', value: `${fmt(prodVendue)} FCFA` },
+    { label: 'Production stockee (73)', value: `${fmt(prodStockee)} FCFA` },
+    { label: 'Production immobilisee (72)', value: `${fmt(prodImmobilisee)} FCFA` },
+    { label: '= PRODUCTION DE L\'EXERCICE', value: `${fmt(production)} FCFA` },
+    { label: '── VALEUR AJOUTEE ──', value: '' },
+    { label: 'MC + Production', value: `${fmt(margeCommerciale + production)} FCFA` },
+    { label: '- Consommations intermediaires', value: `${fmt(achatsMat + varStocksMat + servicesExt)} FCFA` },
+    { label: '= VALEUR AJOUTEE', value: `${fmt(valeurAjoutee)} FCFA` },
+    { label: '── EBE ──', value: '' },
+    { label: 'VA + Subventions expl (71)', value: `${fmt(valeurAjoutee + subventions)} FCFA` },
+    { label: '- Impots et taxes (64)', value: `${fmt(impotsTaxes)} FCFA` },
+    { label: '- Charges personnel (66)', value: `${fmt(chargesPersonnel)} FCFA` },
+    { label: '= EBE', value: `${fmt(ebe)} FCFA` },
+    { label: '── RESULTATS ──', value: '' },
+    { label: 'Resultat d\'exploitation', value: `${fmt(resultatExpl)} FCFA` },
+    { label: 'Resultat financier', value: `${fmt(resultatFin)} FCFA` },
+    { label: 'RAO (expl + fin)', value: `${fmt(rao)} FCFA` },
+    { label: 'Resultat HAO', value: `${fmt(resultatHAO)} FCFA` },
+    { label: 'Resultat net', value: `${fmt(resultatNet)} FCFA` },
+    { label: 'CAFG', value: `${fmt(cafg)} FCFA` },
+  ]
+
+  const detailCard: FiscalInfoCard = {
+    type: 'fiscal_info',
+    category: 'Cascade SIG Complete — SYSCOHADA Revise',
+    items: detailItems,
+  }
+
+  return {
+    text: `**Soldes Intermediaires de Gestion (SIG)** — cascade complete depuis votre balance`,
+    content: [card, detailCard],
+    suggestions: ['Seuil de rentabilite', 'BFR', 'Mes ratios', 'Estimation IS'],
+  }
+}
+
+function buildSIGNarrative(mc: number, va: number, ebe: number, rex: number, rn: number, cafg: number): string {
+  const parts: string[] = []
+  if (mc > 0) parts.push(`Marge commerciale de **${fmt(mc)} FCFA**`)
+  else if (mc === 0) parts.push('Pas d\'activite de negoce')
+  else parts.push(`Marge commerciale **negative** — achats > ventes`)
+
+  if (va > 0) parts.push(`Valeur ajoutee **${fmt(va)} FCFA** — richesse creee par l'entreprise`)
+  else parts.push(`VA **negative** — les consommations intermediaires depassent la production`)
+
+  if (ebe > 0) parts.push(`EBE positif (${fmt(ebe)} FCFA)`)
+  else parts.push(`EBE **negatif** — l'exploitation ne genere pas de tresorerie`)
+
+  if (rn !== rex) parts.push(`Ecart exploitation/net de ${fmt(Math.abs(rn - rex))} FCFA`)
+  if (cafg > 0) parts.push(`CAFG de ${fmt(cafg)} FCFA — capacite d'autofinancement`)
+
+  return parts.join('. ') + '.'
+}
+
+function buildSIGRecommendations(mc: number, va: number, ebe: number, rex: number, rf: number, rn: number, cafg: number): string[] {
+  const recs: string[] = []
+  if (mc < 0) recs.push('Marge commerciale negative — revoir la politique tarifaire ou negocier les achats')
+  if (va < 0) recs.push('VA negative — l\'entreprise detruit de la valeur, reduire les charges externes')
+  if (ebe < 0) recs.push('EBE negatif — l\'exploitation ne genere pas de cash, restructurer les charges fixes')
+  if (rex > 0 && rf < 0 && Math.abs(rf) > rex * 0.5) recs.push('Charges financieres excessives — elles absorbent plus de 50% du resultat d\'exploitation')
+  if (rn < 0) recs.push('Resultat net deficitaire — analyser les causes (exploitation, financier ou HAO)')
+  if (cafg <= 0) recs.push('CAFG nulle ou negative — aucune capacite d\'autofinancement')
+  if (cafg > 0 && va > 0) recs.push(`Taux de CAFG/VA = ${((cafg / va) * 100).toFixed(1)}% — ${cafg / va > 0.15 ? 'bon niveau' : 'a ameliorer'}`)
+  if (recs.length === 0) recs.push('Cascade SIG equilibree — bonne performance globale')
+  return recs.slice(0, 5)
+}
+
+// ── PREDICTION_BREAKEVEN (Seuil de Rentabilité) ─────────────────────
+
+export function handlePredictionBreakeven(balance: Balance[]): Proph3tResponse {
+  if (!balance || balance.length === 0) return noBalanceResponse()
+
+  const agg = calculerAgregats(balance)
+  const ext = calculerAgregatsEtendus(balance)
+
+  // Charges fixes (CF) ≈ charges personnel (66) + dotations (68) + charges financières (67) + loyers/assurances (61-62 approx)
+  const cf = agg.chargesPersonnel + ext.dotationsAmort + agg.chargesFinancieres + ext.chargesExternes
+  // Charges variables (CV) ≈ achats (60) + variations stocks + impôts taxes (63-64)
+  const cv = ext.achats + ext.impotsTaxes
+  // CA
+  const ca = agg.ca
+
+  if (ca <= 0) {
+    return {
+      text: "**Seuil de rentabilite** — Impossible a calculer sans chiffre d'affaires.\n\nImportez une balance avec des produits d'exploitation (comptes 70-75).",
+      suggestions: ['Estimation IS', 'Mes ratios', 'Aide'],
+    }
+  }
+
+  const tauxMCV = 1 - (cv / ca) // Taux de marge sur coûts variables
+  const seuil = tauxMCV > 0 ? cf / tauxMCV : 0
+  const margeSecurite = ca > 0 ? ((ca - seuil) / ca) * 100 : 0
+  const pointMortJours = ca > 0 ? (seuil / ca) * 360 : 0
+  const indiceSecurite = ca > seuil
+
+  const seuilStatus: Status = indiceSecurite ? 'bon' : 'critique'
+  const margeStatus: Status = margeSecurite > 20 ? 'excellent' : margeSecurite > 10 ? 'bon' : margeSecurite > 0 ? 'acceptable' : 'critique'
+
+  const card: PredictionCard = {
+    type: 'prediction',
+    title: 'Seuil de Rentabilite',
+    indicators: [
+      { label: 'Chiffre d\'affaires', value: `${fmt(ca)} FCFA`, status: 'bon' },
+      { label: 'Charges fixes', value: `${fmt(cf)} FCFA`, status: 'bon' },
+      { label: 'Charges variables', value: `${fmt(cv)} FCFA`, status: 'bon' },
+      { label: 'Taux MCV', value: `${(tauxMCV * 100).toFixed(1)}%`, status: tauxMCV > 0.3 ? 'bon' : 'acceptable' },
+      { label: 'Seuil de rentabilite', value: `${fmt(seuil)} FCFA`, status: seuilStatus },
+      { label: 'Marge de securite', value: `${margeSecurite.toFixed(1)}%`, status: margeStatus },
+      { label: 'Point mort', value: `${Math.round(pointMortJours)} jours`, status: pointMortJours <= 270 ? 'bon' : 'critique' },
+    ],
+    narrative: indiceSecurite
+      ? `Le CA de **${fmt(ca)} FCFA** depasse le seuil de rentabilite de **${fmt(seuil)} FCFA**. Marge de securite de **${margeSecurite.toFixed(1)}%** — le point mort est atteint au **jour ${Math.round(pointMortJours)}** de l'exercice.`
+      : `Le CA de **${fmt(ca)} FCFA** est **inferieur** au seuil de rentabilite de **${fmt(seuil)} FCFA**. L'entreprise est en zone de perte.`,
+    recommendations: buildBreakevenRecommendations(indiceSecurite, margeSecurite, cf, cv, ca, tauxMCV),
+  }
+
+  const detailItems: { label: string; value: string }[] = [
+    { label: '── DECOMPOSITION DES CHARGES ──', value: '' },
+    { label: 'Charges de personnel (66)', value: `${fmt(agg.chargesPersonnel)} FCFA` },
+    { label: 'Dotations amort/prov (68)', value: `${fmt(ext.dotationsAmort)} FCFA` },
+    { label: 'Charges financieres (67)', value: `${fmt(agg.chargesFinancieres)} FCFA` },
+    { label: 'Services exterieurs (61-62)', value: `${fmt(ext.chargesExternes)} FCFA` },
+    { label: 'Total charges fixes', value: `${fmt(cf)} FCFA` },
+    { label: 'Achats (60)', value: `${fmt(ext.achats)} FCFA` },
+    { label: 'Impots et taxes (63-64)', value: `${fmt(ext.impotsTaxes)} FCFA` },
+    { label: 'Total charges variables', value: `${fmt(cv)} FCFA` },
+    { label: '── CALCUL ──', value: '' },
+    { label: 'Taux MCV = 1 - (CV/CA)', value: `${(tauxMCV * 100).toFixed(1)}%` },
+    { label: 'Seuil = CF / Taux MCV', value: `${fmt(seuil)} FCFA` },
+    { label: 'Marge securite = (CA - Seuil) / CA', value: `${margeSecurite.toFixed(1)}%` },
+    { label: 'Point mort = (Seuil / CA) x 360', value: `${Math.round(pointMortJours)} jours` },
+  ]
+
+  const detailCard: FiscalInfoCard = {
+    type: 'fiscal_info',
+    category: 'Detail Seuil de Rentabilite',
+    items: detailItems,
+  }
+
+  return {
+    text: `**Seuil de Rentabilite** — analyse depuis votre balance`,
+    content: [card, detailCard],
+    suggestions: ['SIG', 'BFR', 'Mes ratios', 'Analyse generale'],
+  }
+}
+
+function buildBreakevenRecommendations(profitable: boolean, marge: number, cf: number, cv: number, ca: number, tauxMCV: number): string[] {
+  const recs: string[] = []
+  if (!profitable) {
+    recs.push('CA inferieur au seuil — augmenter le volume de ventes ou reduire les charges fixes')
+    recs.push('Analyser chaque poste de charges fixes pour identifier des economies possibles')
+  }
+  if (marge < 10 && profitable) recs.push('Marge de securite < 10% — situation fragile, toute baisse de CA peut entrainer des pertes')
+  if (tauxMCV < 0.2) recs.push('Taux de MCV tres faible — les charges variables absorbent l\'essentiel du CA')
+  if (cf > ca * 0.5) recs.push(`Charges fixes = ${((cf / ca) * 100).toFixed(0)}% du CA — structure trop lourde`)
+  if (cv > ca * 0.7) recs.push(`Charges variables = ${((cv / ca) * 100).toFixed(0)}% du CA — negocier les prix d'achat`)
+  if (recs.length === 0) recs.push('Bon niveau de rentabilite — maintenir la maitrise des charges')
+  return recs.slice(0, 5)
+}
+
+// ── PREDICTION_BFR ──────────────────────────────────────────────────
+
+export function handlePredictionBFR(balance: Balance[]): Proph3tResponse {
+  if (!balance || balance.length === 0) return noBalanceResponse()
+
+  const agg = calculerAgregats(balance)
+  const ext = calculerAgregatsEtendus(balance)
+
+  // DSO (Days Sales Outstanding) = Clients / CA x 360
+  const dso = agg.ca > 0 ? (agg.clientsNets / agg.ca) * 360 : 0
+  // DPO (Days Payable Outstanding) = Fournisseurs / Achats x 360
+  const dpo = ext.achats > 0 ? (agg.fournisseurs / ext.achats) * 360 : 0
+  // DSI (Days Sales of Inventory) = Stocks / Achats x 360
+  const dsi = ext.achats > 0 ? (agg.stocksNets / ext.achats) * 360 : 0
+  // Cycle de trésorerie (Cash Cycle) = DSO + DSI - DPO
+  const cycleCash = dso + dsi - dpo
+
+  // FR (Fonds de Roulement) = Capitaux propres + Dettes LT - Immobilisations nettes
+  const fr = agg.capitauxPropres + agg.dettesTotal - agg.immoNettes
+  // BFR = Actif circulant (hors trésorerie) - Passif circulant (hors trésorerie)
+  const bfr = agg.actifCirculant - agg.passifCirculant
+  // Trésorerie nette = FR - BFR
+  const tresoNette = fr - bfr
+
+  const bfrStatus: Status = bfr <= 0 ? 'excellent' : bfr < fr ? 'bon' : 'critique'
+  const frStatus: Status = fr > 0 ? 'bon' : 'critique'
+  const tresoStatus: Status = tresoNette >= 0 ? 'bon' : 'critique'
+
+  const card: PredictionCard = {
+    type: 'prediction',
+    title: 'BFR & Cycle de Tresorerie',
+    indicators: [
+      { label: 'DSO (delai clients)', value: `${Math.round(dso)} jours`, status: evalInverse(dso, [30, 60, 90]) },
+      { label: 'DPO (delai fournisseurs)', value: `${Math.round(dpo)} jours`, status: evalRatio(dpo, [60, 30, 15]) },
+      { label: 'DSI (rotation stocks)', value: `${Math.round(dsi)} jours`, status: evalInverse(dsi, [30, 60, 120]) },
+      { label: 'Cycle cash (DSO+DSI-DPO)', value: `${Math.round(cycleCash)} jours`, status: evalInverse(cycleCash, [30, 60, 90]) },
+      { label: 'Fonds de roulement', value: `${fmt(fr)} FCFA`, status: frStatus },
+      { label: 'BFR', value: `${fmt(bfr)} FCFA`, status: bfrStatus },
+      { label: 'Tresorerie nette (FR-BFR)', value: `${fmt(tresoNette)} FCFA`, status: tresoStatus },
+    ],
+    narrative: buildBFRNarrative(dso, dpo, dsi, cycleCash, fr, bfr, tresoNette),
+    recommendations: buildBFRRecommendations(dso, dpo, dsi, cycleCash, fr, bfr, tresoNette),
+  }
+
+  const detailItems: { label: string; value: string }[] = [
+    { label: '── DELAIS DE ROTATION ──', value: '' },
+    { label: 'Clients (41) / CA x 360', value: `${Math.round(dso)} jours` },
+    { label: 'Fournisseurs (40) / Achats x 360', value: `${Math.round(dpo)} jours` },
+    { label: 'Stocks (3x) / Achats x 360', value: `${Math.round(dsi)} jours` },
+    { label: 'Cycle de tresorerie', value: `${Math.round(cycleCash)} jours` },
+    { label: '── EQUILIBRE FINANCIER ──', value: '' },
+    { label: 'Capitaux propres', value: `${fmt(agg.capitauxPropres)} FCFA` },
+    { label: '+ Dettes LT (16-19)', value: `${fmt(agg.dettesTotal)} FCFA` },
+    { label: '- Immobilisations nettes', value: `${fmt(agg.immoNettes)} FCFA` },
+    { label: '= Fonds de roulement (FR)', value: `${fmt(fr)} FCFA` },
+    { label: 'Actif circulant', value: `${fmt(agg.actifCirculant)} FCFA` },
+    { label: '- Passif circulant', value: `${fmt(agg.passifCirculant)} FCFA` },
+    { label: '= BFR', value: `${fmt(bfr)} FCFA` },
+    { label: 'Tresorerie nette = FR - BFR', value: `${fmt(tresoNette)} FCFA` },
+  ]
+
+  const detailCard: FiscalInfoCard = {
+    type: 'fiscal_info',
+    category: 'Detail BFR & Cycle de Tresorerie',
+    items: detailItems,
+  }
+
+  return {
+    text: `**BFR & Cycle de Tresorerie** — analyse depuis votre balance`,
+    content: [card, detailCard],
+    suggestions: ['SIG', 'Seuil de rentabilite', 'Mes ratios', 'Analyse generale'],
+  }
+}
+
+function buildBFRNarrative(dso: number, dpo: number, dsi: number, cycle: number, fr: number, bfr: number, treso: number): string {
+  const parts: string[] = []
+
+  // Cycle
+  parts.push(`Cycle de tresorerie de **${Math.round(cycle)} jours** (clients ${Math.round(dso)}j + stocks ${Math.round(dsi)}j - fournisseurs ${Math.round(dpo)}j)`)
+
+  // FR vs BFR
+  if (fr > bfr) parts.push(`Le FR (**${fmt(fr)} FCFA**) couvre le BFR (**${fmt(bfr)} FCFA**) — equilibre financier respecte`)
+  else if (fr > 0) parts.push(`Le FR (**${fmt(fr)} FCFA**) ne couvre pas entierement le BFR (**${fmt(bfr)} FCFA**) — tension de tresorerie`)
+  else parts.push(`FR **negatif** — les immobilisations ne sont pas couvertes par les ressources permanentes`)
+
+  // Trésorerie
+  if (treso >= 0) parts.push(`Tresorerie nette positive de **${fmt(treso)} FCFA**`)
+  else parts.push(`Tresorerie nette **negative** de **${fmt(treso)} FCFA**`)
+
+  return parts.join('. ') + '.'
+}
+
+function buildBFRRecommendations(dso: number, dpo: number, dsi: number, cycle: number, fr: number, bfr: number, treso: number): string[] {
+  const recs: string[] = []
+
+  if (dso > 90) recs.push(`DSO de ${Math.round(dso)} j — relancer les impayes et durcir les conditions de paiement`)
+  else if (dso > 60) recs.push(`DSO de ${Math.round(dso)} j — surveiller les delais de paiement clients`)
+
+  if (dpo < 30 && dso > 60) recs.push('Vous payez plus vite que vous n\'encaissez — negocier des delais fournisseurs plus longs')
+
+  if (dsi > 90) recs.push(`Rotation stocks lente (${Math.round(dsi)} j) — optimiser la gestion des stocks`)
+
+  if (cycle > 90) recs.push(`Cycle de tresorerie long (${Math.round(cycle)} j) — risque de besoin de financement CT`)
+
+  if (fr < 0) recs.push('FR negatif — envisager un emprunt LT ou une augmentation de capital')
+  if (bfr > fr && fr > 0) recs.push('BFR > FR — le BFR est finance en partie par la tresorerie, situation fragile')
+  if (treso < 0) recs.push('Tresorerie nette negative — risque de cessation de paiement, negocier un credit de tresorerie')
+
+  if (recs.length === 0) recs.push('Equilibre financier sain — BFR maitrise et tresorerie positive')
+  return recs.slice(0, 6)
 }
