@@ -448,6 +448,147 @@ function IC019(ctx: AuditContext): ResultatControle {
   return ok(ref, nom, 'Subventions bilan et produits coherents')
 }
 
+// IC-020: Comptes courants associes vs charges financieres
+function IC020(ctx: AuditContext): ResultatControle {
+  const ref = 'IC-020', nom = 'Comptes courants associes'
+  const ccAssocies = absSum(find(ctx.balanceN, '455'))
+  const interets = absSum(find(ctx.balanceN, '672'))
+  if (ccAssocies > 0 && interets === 0) {
+    return anomalie(ref, nom, 'INFO',
+      `Comptes courants associes (${ccAssocies.toLocaleString('fr-FR')}) sans interets verses (672x)`,
+      {
+        montants: { compteCourant: ccAssocies },
+        description: `Des comptes courants d'associes de ${ccAssocies.toLocaleString('fr-FR')} FCFA figurent au bilan sans interets comptabilises. Si les comptes courants sont remuneres, les interets doivent etre comptabilises et declares.`,
+        attendu: 'Interets comptabilises si comptes courants remuneres',
+        constate: `Comptes courants: ${ccAssocies.toLocaleString('fr-FR')}, Interets: 0`,
+        impactFiscal: 'Les interets sur comptes courants sont deductibles dans la limite du taux legal. Verifier la convention.',
+      },
+      'Si les comptes courants sont remuneres, comptabiliser les interets au taux convenu (plafond fiscal: taux legal + 2 points).')
+  }
+  return ok(ref, nom, 'Comptes courants associes coherents')
+}
+
+// IC-021: Charges constatees d'avance vs charges
+function IC021(ctx: AuditContext): ResultatControle {
+  const ref = 'IC-021', nom = 'Charges constatees d\'avance'
+  const cca = absSum(find(ctx.balanceN, '476'))
+  const totalCharges = absSum([...find(ctx.balanceN, '6')])
+  if (cca > 0 && totalCharges > 0 && cca > totalCharges * 0.20) {
+    const ratio = (cca / totalCharges * 100).toFixed(1)
+    return anomalie(ref, nom, 'MINEUR',
+      `CCA (${cca.toLocaleString('fr-FR')}) > 20% des charges (${totalCharges.toLocaleString('fr-FR')}) — ratio ${ratio}%`,
+      {
+        montants: { cca, totalCharges, ratioPct: parseFloat(ratio) },
+        description: `Les charges constatees d'avance representent ${ratio}% du total des charges, un ratio anormalement eleve qui peut indiquer une surestimation des CCA pour ameliorer le resultat.`,
+        attendu: 'CCA < 20% des charges totales',
+        constate: `CCA: ${cca.toLocaleString('fr-FR')}, ratio: ${ratio}%`,
+        impactFiscal: 'CCA surestimees = charges de l\'exercice minorees = resultat fiscal majore artificiellement.',
+      },
+      'Justifier chaque CCA par un document probant (facture, contrat). Verifier la date de rattachement economique.',
+      'Art. 49 Acte Uniforme OHADA - Rattachement des charges')
+  }
+  return ok(ref, nom, 'Charges constatees d\'avance coherentes')
+}
+
+// IC-022: Produits constates d'avance vs produits
+function IC022(ctx: AuditContext): ResultatControle {
+  const ref = 'IC-022', nom = 'Produits constates d\'avance'
+  const pca = absSum(find(ctx.balanceN, '477'))
+  const totalProduits = absSum([...find(ctx.balanceN, '7')])
+  if (pca > 0 && totalProduits > 0 && pca > totalProduits * 0.20) {
+    const ratio = (pca / totalProduits * 100).toFixed(1)
+    return anomalie(ref, nom, 'MINEUR',
+      `PCA (${pca.toLocaleString('fr-FR')}) > 20% des produits (${totalProduits.toLocaleString('fr-FR')}) — ratio ${ratio}%`,
+      {
+        montants: { pca, totalProduits, ratioPct: parseFloat(ratio) },
+        description: `Les produits constates d'avance representent ${ratio}% du total des produits, un ratio eleve qui peut indiquer un report de chiffre d'affaires sur l'exercice suivant.`,
+        attendu: 'PCA < 20% des produits totaux',
+        constate: `PCA: ${pca.toLocaleString('fr-FR')}, ratio: ${ratio}%`,
+        impactFiscal: 'PCA surestimes = produits de l\'exercice minores = resultat fiscal minore — risque de redressement.',
+      },
+      'Justifier chaque PCA par un document probant. Verifier la date de realisation effective des produits.')
+  }
+  return ok(ref, nom, 'Produits constates d\'avance coherents')
+}
+
+// IC-023: Charges a payer vs charges
+function IC023(ctx: AuditContext): ResultatControle {
+  const ref = 'IC-023', nom = 'Charges a payer'
+  const cap = absSum(find(ctx.balanceN, '408'))  // FNP
+  const capSociales = absSum(find(ctx.balanceN, '428'))
+  const capFiscales = absSum(find(ctx.balanceN, '448'))
+  const totalCAP = cap + capSociales + capFiscales
+  const ca = absSum(find(ctx.balanceN, '70'))
+  if (ca > 1000000 && totalCAP === 0) {
+    return anomalie(ref, nom, 'MINEUR',
+      `Aucune charge a payer malgre un CA de ${ca.toLocaleString('fr-FR')}`,
+      {
+        montants: { chiffreAffaires: ca, chargesAPayer: 0 },
+        description: 'Pour une entreprise en activite, des charges a payer (factures non parvenues, charges sociales/fiscales dues) existent normalement en fin d\'exercice. Leur absence peut indiquer des ecritures de cloture incompletes.',
+        attendu: 'Charges a payer > 0 pour une entreprise en activite',
+        constate: 'Aucune charge a payer comptabilisee (408/428/448)',
+        impactFiscal: 'Charges a payer omises = charges de l\'exercice sous-estimees = resultat fiscal sur-estime.',
+      },
+      'Passer les ecritures de cloture: factures non parvenues (408), charges sociales a payer (428), charges fiscales a payer (448).',
+      'Art. 48 Acte Uniforme OHADA - Rattachement des charges')
+  }
+  return ok(ref, nom, `Charges a payer: ${totalCAP.toLocaleString('fr-FR')}`)
+}
+
+// IC-024: Transferts de charges coherents
+function IC024(ctx: AuditContext): ResultatControle {
+  const ref = 'IC-024', nom = 'Transferts de charges'
+  const transferts = absSum(find(ctx.balanceN, '78'))
+  const totalCharges = absSum([...find(ctx.balanceN, '6')])
+  if (transferts > 0 && totalCharges > 0 && transferts > totalCharges * 0.15) {
+    const ratio = (transferts / totalCharges * 100).toFixed(1)
+    return anomalie(ref, nom, 'MINEUR',
+      `Transferts de charges (${transferts.toLocaleString('fr-FR')}) > 15% des charges (ratio ${ratio}%)`,
+      {
+        montants: { transferts, totalCharges, ratioPct: parseFloat(ratio) },
+        description: `Les transferts de charges representent ${ratio}% des charges totales. Un ratio eleve peut indiquer une activation abusive de charges ou des erreurs de classification.`,
+        attendu: 'Transferts de charges < 15% des charges totales',
+        constate: `Ratio: ${ratio}%`,
+        impactFiscal: 'Transferts de charges excessifs = resultat artificiellement ameliore — risque de requalification fiscale.',
+      },
+      'Justifier chaque transfert de charges: immobilisations produites par l\'entreprise, frais de distribution capitalises, etc.')
+  }
+  return ok(ref, nom, 'Transferts de charges coherents')
+}
+
+// IC-025: Ecart de conversion coherent
+function IC025(ctx: AuditContext): ResultatControle {
+  const ref = 'IC-025', nom = 'Ecarts de conversion'
+  const ecaActif = absSum(find(ctx.balanceN, '478'))
+  const ecaPassif = absSum(find(ctx.balanceN, '479'))
+  const provECA = absSum(find(ctx.balanceN, '194'))
+  if (ecaActif > 0 && provECA === 0) {
+    return {
+      ref, nom, niveau: NIVEAU, statut: 'ANOMALIE' as const, severite: 'MINEUR' as const,
+      message: `Ecart de conversion actif (${ecaActif.toLocaleString('fr-FR')}) sans provision (194x)`,
+      details: {
+        montants: { ecartActif: ecaActif, ecartPassif: ecaPassif, provision: 0 },
+        description: `Des ecarts de conversion actif de ${ecaActif.toLocaleString('fr-FR')} FCFA (pertes latentes de change) existent sans provision correspondante. Le principe de prudence impose de provisionner les pertes latentes de change.`,
+        attendu: 'Provision >= ecart de conversion actif',
+        constate: `ECA: ${ecaActif.toLocaleString('fr-FR')}, Provision: 0`,
+        impactFiscal: 'Provision pour perte de change deductible fiscalement si correctement constituee.',
+      },
+      suggestion: 'Constituer une provision pour perte de change d\'un montant au moins egal a l\'ecart de conversion actif.',
+      ecrituresCorrectives: [{
+        journal: 'OD', date: new Date().toISOString().slice(0, 10),
+        lignes: [
+          { sens: 'D' as const, compte: '691600', libelle: 'Dotation provision perte de change', montant: ecaActif },
+          { sens: 'C' as const, compte: '194000', libelle: 'Provision perte de change', montant: ecaActif },
+        ],
+        commentaire: 'Provision perte de change sur ecarts de conversion actif'
+      }],
+      referenceReglementaire: 'Art. 54 Acte Uniforme OHADA - Ecarts de conversion',
+      timestamp: new Date().toISOString(),
+    }
+  }
+  return ok(ref, nom, `Ecarts de conversion: Actif ${ecaActif.toLocaleString('fr-FR')}, Passif ${ecaPassif.toLocaleString('fr-FR')}`)
+}
+
 // --- Enregistrement ---
 
 export function registerLevel4Controls(): void {
@@ -471,6 +612,12 @@ export function registerLevel4Controls(): void {
     ['IC-017', 'Effets a recevoir vs clients', 'Coherence effets/clients', 'INFO', IC017],
     ['IC-018', 'Effets a payer vs fournisseurs', 'Coherence effets/fournisseurs', 'INFO', IC018],
     ['IC-019', 'Subventions bilan vs produits', 'Coherence subv. bilan/resultat', 'INFO', IC019],
+    ['IC-020', 'Comptes courants associes', 'Coherence CC vs interets', 'INFO', IC020],
+    ['IC-021', 'Charges constatees d\'avance', 'CCA vs charges totales', 'MINEUR', IC021],
+    ['IC-022', 'Produits constates d\'avance', 'PCA vs produits totaux', 'MINEUR', IC022],
+    ['IC-023', 'Charges a payer', 'Presence de charges a payer', 'MINEUR', IC023],
+    ['IC-024', 'Transferts de charges', 'Coherence transferts de charges', 'MINEUR', IC024],
+    ['IC-025', 'Ecarts de conversion', 'Coherence ECA/ECP vs provisions', 'MINEUR', IC025],
   ]
 
   for (const [ref, nom, desc, sev, fn] of defs) {

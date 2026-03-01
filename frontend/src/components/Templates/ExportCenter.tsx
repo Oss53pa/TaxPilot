@@ -49,6 +49,7 @@ import {
   DateRange as YearIcon,
 } from '@mui/icons-material'
 import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
+import { exporterLiasse } from '@/modules/liasse-fiscale/services/liasse-export-excel'
 import {
   type ExportFormatId,
   type ExportProfile,
@@ -320,6 +321,95 @@ const ExportCenter: React.FC<Props> = ({ profiles }) => {
       {/* ─── FORMAT SELECTION ─── */}
       {subTab === 'format' && (
         <Box>
+          {/* Quick export: Liasse Officielle */}
+          <Card elevation={0} sx={{ border: '2px solid #16a34a', bgcolor: '#f0fdf4', mb: 3, p: 2 }}>
+            <Stack direction="row" spacing={2} alignItems="center">
+              <Box sx={{ flex: 1 }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#166534' }}>
+                  Export Liasse Officielle (84 pages)
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  Fichier Excel SYSCOHADA complet avec toutes les pages
+                </Typography>
+              </Box>
+              <Button
+                variant="contained"
+                startIcon={<ExcelIcon />}
+                onClick={() => {
+                  try {
+                    // Load balance and entreprise from localStorage
+                    const balRaw = localStorage.getItem('fiscasync_balance_latest')
+                    const bal = balRaw ? JSON.parse(balRaw) : null
+                    if (!bal?.entries?.length) {
+                      alert('Aucune balance importee. Importez une balance avant d\'exporter.')
+                      return
+                    }
+                    const entries = bal.entries.map((e: any) => ({
+                      compte: String(e.compte || ''),
+                      libelle: String(e.intitule || e.libelle || ''),
+                      debit: Number(e.debit) || 0,
+                      credit: Number(e.credit) || 0,
+                      solde_debit: Number(e.solde_debit) || 0,
+                      solde_credit: Number(e.solde_credit) || 0,
+                    }))
+                    const entRaw = localStorage.getItem('fiscasync_entreprise_settings') || localStorage.getItem('fiscasync_db_entreprise_settings')
+                    const entParsed = entRaw ? JSON.parse(entRaw) : {}
+                    const ent = Array.isArray(entParsed) ? entParsed[0] || {} : entParsed
+                    const entreprise = {
+                      denomination: ent.raison_sociale || ent.denomination || '',
+                      sigle: ent.sigle || '',
+                      adresse: [ent.adresse_ligne1, ent.ville].filter(Boolean).join(' - '),
+                      ncc: ent.numero_contribuable || '',
+                      ntd: ent.numero_teledeclarant || '',
+                      exercice_clos: ent.exercice_fin || ent.date_arrete_comptes || '',
+                      exercice_precedent_fin: ent.exercice_precedent_fin || '',
+                      duree_mois: ent.duree_exercice_precedent || 12,
+                      regime: ent.regime_imposition || '',
+                      forme_juridique: ent.forme_juridique || '',
+                      code_forme_juridique: '', code_regime: '', code_pays: '',
+                      centre_depot: '', ville: '', boite_postale: '',
+                      capital_social: ent.capital_social || 0,
+                      nom_dirigeant: '', fonction_dirigeant: '', greffe: '',
+                      numero_repertoire_entites: '', numero_caisse_sociale: '',
+                      numero_code_importateur: '', code_ville: '',
+                      pourcentage_capacite_production: 0, branche_activite: '',
+                      code_secteur: '', nombre_etablissements: 0,
+                      effectif_permanent: 0, effectif_temporaire: 0,
+                      effectif_debut: 0, effectif_fin: 0, masse_salariale: 0,
+                      nom_groupe: '', pays_siege_groupe: '',
+                      cac_nom: '', cac_adresse: '', cac_numero_inscription: '',
+                      expert_nom: '', expert_adresse: '', expert_numero_inscription: '',
+                      personne_contact: '', etats_financiers_approuves: false,
+                      date_signature_etats: '', domiciliations_bancaires: [],
+                      dirigeants: [], commissaires_comptes: [], participations_filiales: [],
+                    }
+                    const annee = parseInt((entreprise.exercice_clos || '').slice(-4)) || new Date().getFullYear()
+                    exporterLiasse(entries, [], entreprise, {
+                      annee,
+                      dateDebut: `01/01/${annee}`,
+                      dateFin: entreprise.exercice_clos || `31/12/${annee}`,
+                      dureeMois: entreprise.duree_mois || 12,
+                    })
+
+                    // Update workflow state
+                    try {
+                      const wsRaw = localStorage.getItem('fiscasync_workflow_state')
+                      const ws = wsRaw ? JSON.parse(wsRaw) : {}
+                      ws.lastExportDate = new Date().toISOString()
+                      ws.lastExportFormat = 'excel'
+                      localStorage.setItem('fiscasync_workflow_state', JSON.stringify(ws))
+                    } catch { /* ignore */ }
+                  } catch (err: any) {
+                    alert(`Erreur export: ${err?.message || err}`)
+                  }
+                }}
+                sx={{ bgcolor: '#16a34a', '&:hover': { bgcolor: '#15803d' } }}
+              >
+                Exporter Excel 84 pages
+              </Button>
+            </Stack>
+          </Card>
+
           <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>
             Selectionnez le format de sortie
           </Typography>

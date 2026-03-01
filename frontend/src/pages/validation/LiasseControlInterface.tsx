@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   Box,
   Grid,
@@ -28,11 +29,13 @@ import {
   Error as ErrorIcon,
   PlayArrow as RunIcon,
   Speed as ScoreIcon,
+  ArrowForward as ArrowForwardIcon,
 } from '@mui/icons-material'
 
 import { auditOrchestrator } from '@/services/audit'
 import type { SessionAudit, Severite, NiveauControle } from '@/types/audit.types'
 import { NIVEAUX_NOMS } from '@/types/audit.types'
+import { updateWorkflowState } from '@/services/workflowStateService'
 
 const SEVERITE_CONFIG: Record<Severite, { color: string; label: string }> = {
   BLOQUANT: { color: '#dc2626', label: 'Bloquant' },
@@ -66,6 +69,7 @@ function loadBalanceFromStorage(): { entries: { compte: string; intitule?: strin
 }
 
 const LiasseControlInterface: React.FC = () => {
+  const navigate = useNavigate()
   const [session, setSession] = useState<SessionAudit | null>(null)
   const [running, setRunning] = useState(false)
   const [progress, setProgress] = useState(0)
@@ -128,6 +132,16 @@ const LiasseControlInterface: React.FC = () => {
       )
 
       setSession(fullResult)
+
+      // Update workflow state
+      const bloquants = fullResult.resume.bloquantsRestants || 0
+      const score = fullResult.resume.scoreGlobal || 0
+      updateWorkflowState({
+        controleDone: true,
+        controleScore: score,
+        controleBloquants: bloquants,
+        controleResult: bloquants > 0 ? 'failed' : score >= 90 ? 'passed' : 'passed_with_warnings',
+      })
     } catch (err) {
       setError(`Erreur lors de l'audit : ${err instanceof Error ? err.message : String(err)}`)
     } finally {
@@ -326,6 +340,40 @@ const LiasseControlInterface: React.FC = () => {
                 Score global : {session.resume.scoreGlobal}/100
               </Typography>
             </Box>
+          </Paper>
+
+          {/* Navigation buttons */}
+          <Paper sx={{ p: 2, mt: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+            {session.resume.bloquantsRestants === 0 ? (
+              <Button
+                variant="contained"
+                color="success"
+                size="large"
+                endIcon={<ArrowForwardIcon />}
+                onClick={() => navigate('/liasse-fiscale')}
+                sx={{ fontWeight: 600 }}
+              >
+                Generer la liasse
+              </Button>
+            ) : (
+              <Button
+                variant="outlined"
+                color="warning"
+                size="large"
+                endIcon={<ArrowForwardIcon />}
+                onClick={() => {
+                  if (window.confirm(`${session.resume.bloquantsRestants} controle(s) bloquant(s) detecte(s). Continuer quand meme ?`)) {
+                    navigate('/liasse-fiscale')
+                  }
+                }}
+                sx={{ fontWeight: 600 }}
+              >
+                Forcer la generation ({session.resume.bloquantsRestants} bloquants)
+              </Button>
+            )}
+            <Typography variant="body2" color="text.secondary">
+              Score : {session.resume.scoreGlobal}/100
+            </Typography>
           </Paper>
         </>
       )}

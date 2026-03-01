@@ -23,6 +23,9 @@ import { buildNote20, buildNote21, buildNote22, buildNote23, buildNote24 } from 
 import { buildNote25, buildNote26, buildNote27A, buildNote27B, buildNote28 } from './build-51-notes-25to28'
 import { buildNote29, buildNote30, buildNote31, buildNote32 } from './build-56-notes-29to32'
 import { buildNote33, buildNote34, buildNote35, buildNote37, buildNote38, buildNote39 } from './build-60-notes-33to39'
+import { buildGardeDgiIns, buildNotesDgiIns, buildCompCharges, buildCompTva, buildCompTva2 } from './build-66-dgi-comp'
+import { buildSuppl1, buildSuppl2, buildSuppl3, buildSuppl4, buildSuppl5, buildSuppl6, buildSuppl7 } from './build-71-suppl'
+import { buildGardeBic, buildGardeBnc, buildGardeBa, buildGarde301, buildGarde302, buildGarde3, buildCommentaire } from './build-78-gardes-fin'
 
 export type BuilderFn = (
   balance: BalanceEntry[],
@@ -31,7 +34,7 @@ export type BuilderFn = (
   exercice: ExerciceData,
 ) => SheetData
 
-// Registry of all sheet builders, keyed by exact Excel tab name
+// Registry of all 84 sheet builders, keyed by exact Excel tab name
 export const BUILDERS: Record<string, BuilderFn> = {
   'COUVERTURE': buildCouverture,
   'GARDE': buildGarde,
@@ -98,5 +101,23 @@ export const BUILDERS: Record<string, BuilderFn> = {
   'NOTE 37': buildNote37,
   'NOTE 38': buildNote38,
   'NOTE 39': buildNote39,
-  // Sheets 66-84 will be added in the final batch
+  'GARDE (DGI-INS)': buildGardeDgiIns,
+  'NOTES DGI - INS': buildNotesDgiIns,
+  'COMP-CHARGES': buildCompCharges,
+  'COMP-TVA': buildCompTva,
+  'COMP-TVA (2)': buildCompTva2,
+  'SUPPL1': buildSuppl1,
+  'SUPPL2': buildSuppl2,
+  'SUPPL3': buildSuppl3,
+  'SUPPL4': buildSuppl4,
+  'SUPPL5': buildSuppl5,
+  'SUPPL6': buildSuppl6,
+  'SUPPL7': buildSuppl7,
+  'GARDE (BIC) ': buildGardeBic,
+  'GARDE (BNC)': buildGardeBnc,
+  'GARDE (BA)': buildGardeBa,
+  'GARDE (301)': buildGarde301,
+  'GARDE (302)': buildGarde302,
+  'GARDE(3)': buildGarde3,
+  'COMMENTAIRE': buildCommentaire,
 }

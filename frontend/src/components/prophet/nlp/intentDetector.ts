@@ -43,6 +43,16 @@ function extractNoteNumber(text: string): number | undefined {
   return match ? parseInt(match[1], 10) : undefined
 }
 
+function extractPosteRef(text: string): string | undefined {
+  // Match "poste AD", "ref BJ", "rubrique CA", "ligne RA"
+  const prefixed = text.match(/\b(?:poste|ref|rubrique|ligne|reference)\s+([A-Z]{2})\b/i)
+  if (prefixed) return prefixed[1].toUpperCase()
+  // Match standalone 2-letter refs in known ranges (A-D for bilan, R for charges, T for produits)
+  const standalone = text.match(/\b([A-D][A-Z]|R[A-S]|T[A-O])\b/)
+  if (standalone) return standalone[1].toUpperCase()
+  return undefined
+}
+
 function extractRegimeName(text: string): string | undefined {
   const normalized = normalize(text)
   if (/reel\s*normal/.test(normalized)) return 'REEL_NORMAL'
@@ -145,6 +155,14 @@ function scoreIntents(normalized: string, _tokens: string[], canonTokens: string
     }
   }
 
+  // ── Liasse mapping domain ──
+  if (/\b(mapping|correspondance|ventilation|ou va|quel poste|dans quel|dans la liasse|compose|composition|rubrique|dans le bilan|dans le compte de resultat|quel.* compte.* compose|quels comptes)\b/.test(normalized)) {
+    add('LIASSE_MAPPING', 85)
+  }
+  if (/\b(?:poste|ref|rubrique|ligne)\s+[a-z]{2}\b/.test(normalized)) {
+    add('LIASSE_MAPPING', 90)
+  }
+
   // ── Audit domain ──
   const hasAudit = hasCanonical(canonTokens, 'audit') ||
     /\b(audit|controle\s*audit|verification|inspection)\b/.test(normalized)
@@ -155,6 +173,10 @@ function scoreIntents(normalized: string, _tokens: string[], canonTokens: string
     }
     if (extractAuditLevel(normalized) !== undefined) {
       add('AUDIT_LEVEL', 85)
+    }
+    // Audit execution (run controls on balance)
+    if (/\b(lance|lancer|execut|audite|auditer|controler?\s*ma|verif.*balance|scanner|diagnostiqu|lance.*controle|execut.*controle|run|lancer.*audit)\b/.test(normalized)) {
+      add('AUDIT_EXECUTE', 90)
     }
     if (hasAudit) {
       add('AUDIT_GENERAL', 60)
@@ -232,6 +254,7 @@ export function detectIntent(input: string, ctx: ConversationContext): ParsedQue
   const regimeName = extractRegimeName(normalized)
   const fiscalCategory = extractFiscalCategory(normalized)
   const numericValue = extractNumericValue(normalized)
+  const posteRef = extractPosteRef(input)
 
   const base: ParsedQuery = {
     intent: 'UNKNOWN',
@@ -247,6 +270,7 @@ export function detectIntent(input: string, ctx: ConversationContext): ParsedQue
     regimeName,
     fiscalCategory,
     numericValue,
+    posteRef,
   }
 
   // ── Contextual follow-ups (check before scoring) ──

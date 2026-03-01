@@ -307,6 +307,95 @@ function FI012(ctx: AuditContext): ResultatControle {
   return ok(ref, nom, 'Aucune charge somptuaire detectee')
 }
 
+// FI-013: Interets comptes courants associes — plafond fiscal
+function FI013(ctx: AuditContext): ResultatControle {
+  const ref = 'FI-013', nom = 'Interets comptes courants'
+  const interetsCC = absSum(find(ctx.balanceN, '672'))
+  const ccAssocies = absSum(find(ctx.balanceN, '455'))
+  if (interetsCC > 0 && ccAssocies > 0) {
+    const taux = getTauxFiscaux()
+    const tauxPlafond = taux.DEDUCTIBILITE.plafond_interets_cc
+    const interetsMax = ccAssocies * tauxPlafond
+    if (interetsCC > interetsMax) {
+      const exces = interetsCC - interetsMax
+      return anomalie(ref, nom, 'MINEUR',
+        `Interets CC (${interetsCC.toLocaleString('fr-FR')}) > plafond ${(tauxPlafond * 100).toFixed(1)}% (${interetsMax.toLocaleString('fr-FR')})`,
+        {
+          montants: { interetsCC, ccAssocies, tauxPlafond: tauxPlafond * 100, interetsMax, excesAReintegrer: exces },
+          description: `Les interets sur comptes courants d'associes (${interetsCC.toLocaleString('fr-FR')}) depassent le plafond fiscal de ${(tauxPlafond * 100).toFixed(1)}% applique au solde moyen (${ccAssocies.toLocaleString('fr-FR')}). L'excedent de ${exces.toLocaleString('fr-FR')} doit etre reintegre.`,
+          attendu: `Interets <= ${(tauxPlafond * 100).toFixed(1)}% du compte courant`,
+          constate: `Interets: ${interetsCC.toLocaleString('fr-FR')}, plafond: ${interetsMax.toLocaleString('fr-FR')}`,
+          impactFiscal: `Reintegration de ${exces.toLocaleString('fr-FR')} FCFA dans le resultat fiscal.`,
+        },
+        `Reintegrer ${exces.toLocaleString('fr-FR')} FCFA (interets excedentaires) dans le resultat fiscal.`,
+        [{
+          journal: 'FISCAL', date: new Date().toISOString().slice(0, 10),
+          lignes: [{ sens: 'D' as const, compte: 'REINTEG', libelle: 'Reintegration interets CC > taux legal', montant: exces }],
+          commentaire: 'Interets comptes courants excedant le taux plafond'
+        }],
+        'CGI Art. 18 - Deductibilite interets comptes courants')
+    }
+  }
+  return ok(ref, nom, 'Interets comptes courants dans les limites')
+}
+
+// FI-014: Loyers verses vs charges locatives
+function FI014(ctx: AuditContext): ResultatControle {
+  const ref = 'FI-014', nom = 'Loyers vs occupation'
+  const loyers = absSum(find(ctx.balanceN, '622'))
+  const immobBatiments = absSum(find(ctx.balanceN, '231'))
+  if (loyers > 0 && immobBatiments > 0) {
+    return anomalie(ref, nom, 'INFO',
+      `Loyers (${loyers.toLocaleString('fr-FR')}) et batiments propres (${immobBatiments.toLocaleString('fr-FR')}) simultanement`,
+      {
+        montants: { loyers, batimentsPropres: immobBatiments },
+        description: 'L\'entreprise paie des loyers tout en possedant des batiments. Verifier la coherence: les loyers sont-ils pour des locaux supplementaires ou s\'agit-il d\'une erreur de classification?',
+        attendu: 'Justification des loyers en presence de batiments propres',
+        constate: `Loyers: ${loyers.toLocaleString('fr-FR')}, Batiments: ${immobBatiments.toLocaleString('fr-FR')}`,
+        impactFiscal: 'Aucun impact direct si justifie. Loyers entre parties liees soumis a verification.',
+      },
+      'Documenter la justification economique des loyers payes malgre la possession de batiments.')
+  }
+  return ok(ref, nom, 'Coherence loyers et occupation')
+}
+
+// FI-015: Taux effectif d'imposition
+function FI015(ctx: AuditContext): ResultatControle {
+  const ref = 'FI-015', nom = 'Taux effectif d\'imposition'
+  const resultat = find(ctx.balanceN, '13').reduce((s, l) => s + (l.credit - l.debit), 0)
+  const isComptabilise = absSum(find(ctx.balanceN, '89'))
+  if (resultat > 0 && isComptabilise > 0) {
+    const tauxEffectif = (isComptabilise / resultat) * 100
+    const taux = getTauxFiscaux()
+    const tauxNormal = taux.IS.taux_normal * 100
+    if (tauxEffectif > tauxNormal * 1.5) {
+      return anomalie(ref, nom, 'INFO',
+        `Taux effectif d'imposition eleve: ${tauxEffectif.toFixed(1)}% (taux normal: ${tauxNormal}%)`,
+        {
+          montants: { resultat, isComptabilise, tauxEffectif: Math.round(tauxEffectif * 10) / 10, tauxNormal },
+          description: `Le taux effectif d'imposition (${tauxEffectif.toFixed(1)}%) est significativement superieur au taux normal (${tauxNormal}%). Cela peut s'expliquer par des reintegrations fiscales importantes, l'impact de l'IMF, ou une erreur de calcul.`,
+          attendu: `Taux effectif proche de ${tauxNormal}%`,
+          constate: `Taux effectif: ${tauxEffectif.toFixed(1)}%`,
+          impactFiscal: `Charge fiscale potentiellement sur-estimee de ${(isComptabilise - resultat * taux.IS.taux_normal).toLocaleString('fr-FR')} FCFA.`,
+        },
+        'Analyser la determination du resultat fiscal: identifier les reintegrations et deductions. Verifier si l\'IMF s\'applique.')
+    }
+    if (tauxEffectif < tauxNormal * 0.3 && isComptabilise > 100000) {
+      return anomalie(ref, nom, 'INFO',
+        `Taux effectif d'imposition faible: ${tauxEffectif.toFixed(1)}% (taux normal: ${tauxNormal}%)`,
+        {
+          montants: { resultat, isComptabilise, tauxEffectif: Math.round(tauxEffectif * 10) / 10, tauxNormal },
+          description: `Le taux effectif d'imposition (${tauxEffectif.toFixed(1)}%) est significativement inferieur au taux normal (${tauxNormal}%). Cela peut s'expliquer par des exonerations, des reports deficitaires, ou des deductions fiscales.`,
+          attendu: `Taux effectif proche de ${tauxNormal}%`,
+          constate: `Taux effectif: ${tauxEffectif.toFixed(1)}%`,
+          impactFiscal: 'Verifier que les avantages fiscaux sont bien justifies et documentes.',
+        },
+        'Documenter les raisons du taux effectif bas: exonerations, zone franche, reports deficitaires, credits d\'impot.')
+    }
+  }
+  return ok(ref, nom, 'Taux effectif d\'imposition normal')
+}
+
 // --- Enregistrement ---
 
 export function registerLevel7Controls(): void {
@@ -323,6 +412,9 @@ export function registerLevel7Controls(): void {
     ['FI-010', 'Charges personnel vs cotisations', 'Coherence salaires/cotisations', 'INFO', FI010],
     ['FI-011', 'Dons excedentaires (658)', 'Plafond 5‰ du CA — CGI Art. 18-5', 'MINEUR', FI011],
     ['FI-012', 'Charges somptuaires (6257)', 'Depenses de luxe non deductibles — CGI Art. 18-6', 'MINEUR', FI012],
+    ['FI-013', 'Interets comptes courants', 'Plafond fiscal interets CC associes', 'MINEUR', FI013],
+    ['FI-014', 'Loyers vs occupation', 'Coherence loyers et batiments propres', 'INFO', FI014],
+    ['FI-015', 'Taux effectif d\'imposition', 'Analyse du taux effectif d\'IS', 'INFO', FI015],
   ]
 
   for (const [ref, nom, desc, sev, fn] of defs) {

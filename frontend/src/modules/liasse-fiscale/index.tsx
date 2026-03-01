@@ -1,6 +1,6 @@
 import React, { Suspense, useState, useEffect, useCallback, useMemo } from 'react'
 import {
-  Box, CircularProgress, Typography, Button, Chip, Paper, IconButton,
+  Box, CircularProgress, Typography, Button, Chip, Paper, IconButton, Alert,
 } from '@mui/material'
 import {
   ArrowBack as ArrowBackIcon,
@@ -13,9 +13,13 @@ import {
   ChevronLeft,
   TableChart as ExcelIcon,
   FactCheck as ControleIcon,
+  CheckCircle as CheckCircleIcon,
+  Warning as WarningIcon,
 } from '@mui/icons-material'
 import { useNavigate } from 'react-router-dom'
 import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
+import { getWorkflowState } from '@/services/workflowStateService'
+import type { WorkflowState } from '@/services/workflowStateService'
 import LiasseNav from './components/LiasseNav'
 import LiassePage from './components/LiassePage'
 import LiasseStats from './components/LiasseStats'
@@ -228,6 +232,7 @@ const LiasseFiscaleModule: React.FC = () => {
   const [zoom, setZoom] = useState(100)
   const [leftOpen, setLeftOpen] = useState(true)
   const [rightOpen, setRightOpen] = useState(true)
+  const [workflowState, setWorkflowState] = useState<WorkflowState | null>(null)
 
   useEffect(() => {
     const ent = loadEntreprise()
@@ -237,6 +242,7 @@ const LiasseFiscaleModule: React.FC = () => {
     setBalance(bal)
     setBalanceN1(balN1)
     setRegime(detectRegime(ent))
+    setWorkflowState(getWorkflowState())
   }, [])
 
   const handleFocus = useCallback(() => {
@@ -405,11 +411,49 @@ const LiasseFiscaleModule: React.FC = () => {
 
             <Button size="small" variant="outlined" startIcon={<ControleIcon sx={{ fontSize: 16 }} />} onClick={() => navigate('/validation-liasse')} sx={{ minWidth: 0, fontSize: '0.75rem', fontWeight: 600 }}>Contrôle</Button>
             <Button size="small" startIcon={<ExcelIcon sx={{ fontSize: 16 }} />} onClick={handleExportExcel} sx={{ minWidth: 0, fontSize: '0.75rem', color: '#16a34a', fontWeight: 600 }}>Excel</Button>
-            <Button size="small" startIcon={<DownloadIcon sx={{ fontSize: 16 }} />} sx={{ minWidth: 0, fontSize: '0.75rem' }}>PDF</Button>
+            <Button size="small" startIcon={<DownloadIcon sx={{ fontSize: 16 }} />} onClick={() => window.print()} sx={{ minWidth: 0, fontSize: '0.75rem' }}>PDF</Button>
             <Button size="small" startIcon={<PrintIcon sx={{ fontSize: 16 }} />} onClick={() => window.print()} sx={{ minWidth: 0, fontSize: '0.75rem' }}>Imprimer</Button>
-            <Button size="small" startIcon={<SendIcon sx={{ fontSize: 16 }} />} sx={{ minWidth: 0, fontSize: '0.75rem' }}>Envoyer</Button>
+            <Button size="small" startIcon={<SendIcon sx={{ fontSize: 16 }} />} onClick={() => navigate('/teledeclaration')} sx={{ minWidth: 0, fontSize: '0.75rem' }}>Envoyer</Button>
           </Box>
         </Paper>
+
+        {/* Controle status banner */}
+        {workflowState && (
+          <Box sx={{ mb: 1, '@media print': { display: 'none' } }}>
+            {workflowState.controleDone && workflowState.controleResult === 'passed' && (
+              <Alert severity="success" icon={<CheckCircleIcon />} sx={{ py: 0.25 }}
+                action={<Chip label={`${workflowState.controleScore}/100`} size="small" color="success" sx={{ fontWeight: 700 }} />}>
+                Controle de coherence valide
+              </Alert>
+            )}
+            {workflowState.controleDone && workflowState.controleResult === 'passed_with_warnings' && (
+              <Alert severity="warning" icon={<WarningIcon />} sx={{ py: 0.25 }}
+                action={<Chip label={`${workflowState.controleScore}/100`} size="small" color="warning" sx={{ fontWeight: 700 }} />}>
+                Controle valide avec avertissements
+              </Alert>
+            )}
+            {workflowState.controleDone && workflowState.controleResult === 'failed' && (
+              <Alert severity="error" sx={{ py: 0.25 }}
+                action={
+                  <Button size="small" color="inherit" onClick={() => navigate('/validation-liasse')}>
+                    Voir les bloquants
+                  </Button>
+                }>
+                {workflowState.controleBloquants} controle(s) bloquant(s) — Score: {workflowState.controleScore}/100
+              </Alert>
+            )}
+            {!workflowState.controleDone && (
+              <Alert severity="info" sx={{ py: 0.25 }}
+                action={
+                  <Button size="small" color="inherit" onClick={() => navigate('/validation-liasse')}>
+                    Lancer le controle
+                  </Button>
+                }>
+                Controle de coherence non lance
+              </Alert>
+            )}
+          </Box>
+        )}
 
         {/* Page content */}
         <Paper sx={{ p: 0, flexGrow: 1, overflowY: 'auto', minHeight: 0 }}>

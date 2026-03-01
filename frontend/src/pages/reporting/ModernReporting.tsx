@@ -15,7 +15,7 @@ import {
   CardHeader,
   Button,
   Chip,
-  // LinearProgress,
+  LinearProgress,
   List,
   ListItem,
   ListItemIcon,
@@ -23,7 +23,7 @@ import {
   Tabs,
   Tab,
   Alert,
-  // Divider,
+  Divider,
   Table,
   TableBody,
   TableCell,
@@ -31,6 +31,7 @@ import {
   TableHead,
   TableRow,
   CircularProgress,
+  Stack,
 } from '@mui/material'
 import {
   Assessment,
@@ -43,9 +44,14 @@ import {
   GetApp,
   Schedule,
   Speed,
+  FactCheck as ControleIcon,
+  Send as SendIcon,
+  Error as ErrorIcon,
 } from '@mui/icons-material'
 import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
 import { useBalanceData } from '@/hooks/useBalanceData'
+import { getWorkflowState } from '@/services/workflowStateService'
+import type { WorkflowState } from '@/services/workflowStateService'
 
 interface RatioFinancier {
   code: string
@@ -68,6 +74,7 @@ const ModernReporting = () => {
   const [lastRefresh, setLastRefresh] = useState(new Date())
   const [selectedTemplate, setSelectedTemplate] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
+  const [workflowState, setWorkflowState] = useState<WorkflowState | null>(null)
 
   const bal = useBalanceData()
 
@@ -109,6 +116,7 @@ const ModernReporting = () => {
   useEffect(() => {
     loadRatiosFinanciers()
     generateAnalyseExercice()
+    setWorkflowState(getWorkflowState())
     setLoading(false)
   }, [])
 
@@ -919,9 +927,14 @@ const ModernReporting = () => {
             icon={<Dashboard />} 
             iconPosition="start"
           />
-          <Tab 
-            label="Rapports" 
-            icon={<Assessment />} 
+          <Tab
+            label="Rapports"
+            icon={<Assessment />}
+            iconPosition="start"
+          />
+          <Tab
+            label="Audit & Conformite"
+            icon={<ControleIcon />}
             iconPosition="start"
           />
         </Tabs>
@@ -939,6 +952,124 @@ const ModernReporting = () => {
         <>
           {activeTab === 0 && renderDashboardTab()}
           {activeTab === 1 && renderReportsTab()}
+          {activeTab === 2 && workflowState && (
+            <Box>
+              <Typography variant="h5" sx={{ mb: 3, fontWeight: 600 }}>
+                Audit & Conformite
+              </Typography>
+
+              <Grid container spacing={3} sx={{ mb: 3 }}>
+                {/* Score d'audit */}
+                <Grid item xs={12} md={4}>
+                  <Card sx={{ height: '100%' }}>
+                    <CardContent sx={{ textAlign: 'center', p: 3 }}>
+                      <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 2 }}>
+                        Score d'audit
+                      </Typography>
+                      <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+                        <CircularProgress
+                          variant="determinate"
+                          value={workflowState.controleDone ? workflowState.controleScore : 0}
+                          size={100}
+                          thickness={6}
+                          sx={{
+                            color: workflowState.controleScore >= 90 ? '#16a34a'
+                              : workflowState.controleScore >= 70 ? '#d97706' : '#dc2626'
+                          }}
+                        />
+                        <Box sx={{ position: 'absolute', top: 0, left: 0, bottom: 0, right: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <Typography variant="h4" fontWeight={700}>
+                            {workflowState.controleDone ? workflowState.controleScore : '--'}
+                          </Typography>
+                        </Box>
+                      </Box>
+                      <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                        {workflowState.controleDone ? (
+                          workflowState.controleResult === 'passed' ? 'Tous les controles passes'
+                            : workflowState.controleResult === 'passed_with_warnings' ? 'Passe avec avertissements'
+                            : `${workflowState.controleBloquants} bloquant(s)`
+                        ) : 'Controle non lance'}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </Grid>
+
+                {/* Anomalies par severite */}
+                <Grid item xs={12} md={4}>
+                  <Card sx={{ height: '100%' }}>
+                    <CardContent sx={{ p: 3 }}>
+                      <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 2 }}>
+                        Anomalies detectees
+                      </Typography>
+                      {workflowState.controleDone ? (
+                        <Stack spacing={1}>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Chip label="Bloquants" size="small" sx={{ bgcolor: '#dc262620', color: '#dc2626', fontWeight: 600 }} />
+                            <Typography variant="h6" fontWeight={700} color="#dc2626">
+                              {workflowState.controleBloquants}
+                            </Typography>
+                          </Box>
+                          <Divider />
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Typography variant="body2">Resultat global</Typography>
+                            <Chip
+                              label={workflowState.controleResult === 'passed' ? 'OK' : workflowState.controleResult === 'passed_with_warnings' ? 'Avertissements' : 'Echec'}
+                              size="small"
+                              color={workflowState.controleResult === 'passed' ? 'success' : workflowState.controleResult === 'passed_with_warnings' ? 'warning' : 'error'}
+                            />
+                          </Box>
+                        </Stack>
+                      ) : (
+                        <Alert severity="info">Lancez le controle pour voir les anomalies.</Alert>
+                      )}
+                    </CardContent>
+                  </Card>
+                </Grid>
+
+                {/* Progression workflow + Teledeclaration */}
+                <Grid item xs={12} md={4}>
+                  <Card sx={{ height: '100%' }}>
+                    <CardContent sx={{ p: 3 }}>
+                      <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 2 }}>
+                        Progression du workflow
+                      </Typography>
+                      <Stack spacing={1}>
+                        {[
+                          { label: 'Configuration', done: workflowState.configurationDone },
+                          { label: 'Import balance', done: workflowState.balanceImported },
+                          { label: 'Controle', done: workflowState.controleDone },
+                          { label: 'Generation', done: workflowState.generationDone },
+                          { label: 'Teledeclaration', done: workflowState.teledeclarationStatus !== 'not_started' },
+                        ].map(step => (
+                          <Box key={step.label} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            {step.done ? <CheckCircle sx={{ fontSize: 16, color: '#16a34a' }} /> : <Box sx={{ width: 16, height: 16, borderRadius: '50%', border: '2px solid #d4d4d4' }} />}
+                            <Typography variant="body2" sx={{ flex: 1, color: step.done ? 'text.primary' : 'text.secondary' }}>{step.label}</Typography>
+                          </Box>
+                        ))}
+                      </Stack>
+                      <Divider sx={{ my: 1.5 }} />
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <SendIcon sx={{ fontSize: 16, color: workflowState.teledeclarationStatus === 'submitted' ? '#16a34a' : '#d4d4d4' }} />
+                        <Typography variant="body2">
+                          Teledeclaration: {
+                            workflowState.teledeclarationStatus === 'not_started' ? 'Non demarree'
+                            : workflowState.teledeclarationStatus === 'draft' ? 'Brouillon'
+                            : workflowState.teledeclarationStatus === 'submitted' ? 'Transmise'
+                            : 'Acceptee'
+                          }
+                        </Typography>
+                      </Box>
+                      {workflowState.teledeclarationReference && (
+                        <Typography variant="caption" color="text.secondary" sx={{ ml: 3 }}>
+                          Ref: {workflowState.teledeclarationReference}
+                        </Typography>
+                      )}
+                    </CardContent>
+                  </Card>
+                </Grid>
+              </Grid>
+            </Box>
+          )}
         </>
       )}
     </Box>

@@ -10,12 +10,14 @@ export {
   handleLiasseSheet,
   handleLiasseRegime,
   handleLiasseCategory,
+  handleLiasseMapping,
 } from './liasseKnowledge'
 
 export {
   handleAuditControl,
   handleAuditLevel,
   handleAuditGeneral,
+  handleAuditExecute,
 } from './auditKnowledge'
 
 export {

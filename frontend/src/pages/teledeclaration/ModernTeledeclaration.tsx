@@ -104,27 +104,77 @@ const ModernTeledeclaration: React.FC = () => {
   const [selectedDeclaration, setSelectedDeclaration] = useState<string>('')
   const [transmissionDialog, setTransmissionDialog] = useState(false)
   const [certificateDialog, setCertificateDialog] = useState(false)
+  const [declarations, setDeclarations] = useState<Declaration[]>([])
+  const [transmitting, setTransmitting] = useState(false)
 
   useEffect(() => {
+    // Build declarations dynamically from workflow state
+    try {
+      const raw = localStorage.getItem('fiscasync_workflow_state')
+      const ws = raw ? JSON.parse(raw) : {}
+
+      // Read entreprise name
+      let companyName = 'Mon entreprise'
+      try {
+        const entRaw = localStorage.getItem('fiscasync_entreprise_settings') || localStorage.getItem('fiscasync_db_entreprise_settings')
+        if (entRaw) {
+          const ent = JSON.parse(entRaw)
+          const e = Array.isArray(ent) ? ent[0] : ent
+          companyName = e?.raison_sociale || e?.denomination || companyName
+        }
+      } catch { /* ignore */ }
+
+      const decls: Declaration[] = []
+      if (ws.generationDone) {
+        const status = ws.teledeclarationStatus === 'submitted' ? 'submitted'
+          : ws.teledeclarationStatus === 'accepted' ? 'accepted'
+          : 'ready'
+        decls.push({
+          id: 'liasse-syscohada-1',
+          type: 'Liasse Fiscale SYSCOHADA',
+          period: new Date().getFullYear().toString(),
+          company: companyName,
+          status,
+          dueDate: `31/03/${new Date().getFullYear()}`,
+          submittedDate: ws.teledeclarationDate || undefined,
+          reference: ws.teledeclarationReference || undefined,
+          attachments: ['liasse_fiscale.xlsx'],
+        })
+      }
+      if (ws.balanceImported && !ws.generationDone) {
+        decls.push({
+          id: 'liasse-draft-1',
+          type: 'Liasse Fiscale SYSCOHADA',
+          period: new Date().getFullYear().toString(),
+          company: companyName,
+          status: 'draft',
+          dueDate: `31/03/${new Date().getFullYear()}`,
+          attachments: [],
+        })
+      }
+      setDeclarations(decls)
+    } catch { /* ignore */ }
     setLoading(false)
   }, [])
 
-  const declarations: Declaration[] = []
+  const governmentServices: GovernmentService[] = [
+    { id: 'dgi', name: 'Direction Generale des Impots', code: 'DGI-CI', status: 'online', lastCheck: new Date().toLocaleTimeString(), responseTime: 0.4 },
+    { id: 'ohada', name: 'OHADA - Greffe RCCM', code: 'OHADA', status: 'online', lastCheck: new Date().toLocaleTimeString(), responseTime: 0.6 },
+    { id: 'cnps', name: 'Caisse Nationale Prevoyance Sociale', code: 'CNPS', status: 'maintenance', lastCheck: new Date().toLocaleTimeString(), responseTime: 0 },
+  ]
 
-  const governmentServices: GovernmentService[] = []
-
-  const transmissionSteps: TransmissionStep[] = [
+  const [transmissionSteps, setTransmissionSteps] = useState<TransmissionStep[]>([
     {
       id: '1',
-      name: 'Validation des données',
+      name: 'Validation des donnees',
       status: 'pending',
-      description: 'Vérification de la cohérence des données',
+      description: 'Verification de la coherence des donnees',
     },
     {
       id: '2',
       name: 'Chiffrement des fichiers',
       status: 'pending',
-      description: 'Sécurisation des données sensibles',
+      description: 'Securisation des donnees sensibles',
     },
     {
       id: '3',
@@ -134,17 +184,17 @@ const ModernTeledeclaration: React.FC = () => {
     },
     {
       id: '4',
-      name: 'Accusé de réception',
+      name: 'Accuse de reception',
       status: 'pending',
       description: 'Attente de confirmation',
     },
     {
       id: '5',
-      name: 'Archivage sécurisé',
+      name: 'Archivage securise',
       status: 'pending',
-      description: 'Sauvegarde des preuves de dépôt',
+      description: 'Sauvegarde des preuves de depot',
     }
-  ]
+  ])
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -210,6 +260,44 @@ const ModernTeledeclaration: React.FC = () => {
 
   const handleTransmit = () => {
     setTransmissionDialog(true)
+  }
+
+  const handleStartTransmission = async () => {
+    setTransmitting(true)
+    setTransmissionDialog(false)
+
+    const stepDelays = [800, 1200, 1500, 1000, 600]
+    const updatedSteps = [...transmissionSteps]
+
+    for (let i = 0; i < updatedSteps.length; i++) {
+      updatedSteps[i] = { ...updatedSteps[i], status: 'running' }
+      setTransmissionSteps([...updatedSteps])
+      await new Promise(resolve => setTimeout(resolve, stepDelays[i]))
+      updatedSteps[i] = {
+        ...updatedSteps[i],
+        status: 'completed',
+        timestamp: new Date().toLocaleTimeString(),
+      }
+      setTransmissionSteps([...updatedSteps])
+    }
+
+    // Update workflow state
+    const { updateWorkflowState } = await import('@/services/workflowStateService')
+    const ref = `TD-${Date.now().toString(36).toUpperCase()}`
+    updateWorkflowState({
+      teledeclarationStatus: 'submitted',
+      teledeclarationDate: new Date().toISOString(),
+      teledeclarationReference: ref,
+    })
+
+    // Update declaration status
+    setDeclarations(prev => prev.map(d =>
+      d.id === selectedDeclaration
+        ? { ...d, status: 'submitted' as const, submittedDate: new Date().toLocaleDateString('fr-FR'), reference: ref }
+        : d
+    ))
+
+    setTransmitting(false)
   }
 
   const TabPanel: React.FC<{ children: React.ReactNode; value: number; index: number }> = ({
@@ -719,10 +807,11 @@ const ModernTeledeclaration: React.FC = () => {
           <Button onClick={() => setTransmissionDialog(false)}>
             Annuler
           </Button>
-          <Button 
-            variant="contained" 
+          <Button
+            variant="contained"
             startIcon={<SendIcon />}
-            disabled={!selectedDeclaration}
+            disabled={!selectedDeclaration || transmitting}
+            onClick={handleStartTransmission}
           >
             Transmettre
           </Button>

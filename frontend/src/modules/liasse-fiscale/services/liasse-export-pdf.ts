@@ -1,8 +1,8 @@
-// Export PDF - Phase ulterieure
-// Utilisera html2canvas + jsPDF pour generer un PDF
-// avec 1 page par composant rendu
+/**
+ * Export PDF via window.print() avec CSS @media print
+ * Les styles print sont deja configures dans LiassePage.tsx
+ */
 
 export const exportToPdf = async (): Promise<void> => {
-  // TODO: Implementation avec html2canvas + jsPDF
-  console.log('Export PDF: a implementer')
+  window.print()
 }

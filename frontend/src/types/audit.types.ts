@@ -92,6 +92,10 @@ export interface ResultatControle {
     montants?: Record<string, number>
     ecart?: number
     description?: string
+    // PROPH3T structured diagnostic elements
+    attendu?: string       // Expected value/situation
+    constate?: string      // Actual observed value/situation
+    impactFiscal?: string  // Fiscal impact description
   }
   suggestion?: string
   ecrituresCorrectives?: EcritureComptable[]

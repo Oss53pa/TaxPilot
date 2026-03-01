@@ -24,10 +24,12 @@ export type Intent =
   | 'LIASSE_SHEET'
   | 'LIASSE_REGIME'
   | 'LIASSE_CATEGORY'
+  | 'LIASSE_MAPPING'
   // Audit
   | 'AUDIT_CONTROL'
   | 'AUDIT_LEVEL'
   | 'AUDIT_GENERAL'
+  | 'AUDIT_EXECUTE'
   // Predictive
   | 'PREDICTION_IS'
   | 'PREDICTION_TVA'
@@ -54,6 +56,7 @@ export interface ParsedQuery {
   auditRef?: string
   auditLevel?: number
   numericValue?: number
+  posteRef?: string
 }
 
 // ── Rich content blocks for assistant messages ───────────────────────

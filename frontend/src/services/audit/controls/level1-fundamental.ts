@@ -391,6 +391,86 @@ function F012(ctx: AuditContext): ResultatControle {
   return ok(ref, nom, 'Tous les comptes avec solde disposent de mouvements comptables')
 }
 
+// F-013: Coherence soldes debiteurs/crediteurs
+function F013(ctx: AuditContext): ResultatControle {
+  const ref = 'F-013', nom = 'Coherence soldes debiteurs/crediteurs'
+  // Verify that solde_debit and solde_credit are consistent with debit-credit movements
+  const incoherents = ctx.balanceN.filter(l => {
+    const sd = l.solde_debit || 0
+    const sc = l.solde_credit || 0
+    // Both solde_debit and solde_credit non-zero is suspicious
+    return sd > 0 && sc > 0
+  })
+  if (incoherents.length > 0) {
+    return anomalie(ref, nom, 'MAJEUR',
+      `${incoherents.length} compte(s) avec solde debiteur ET crediteur simultanement`,
+      {
+        comptes: incoherents.slice(0, 10).map(l => `${l.compte}: SD=${(l.solde_debit||0).toLocaleString('fr-FR')}, SC=${(l.solde_credit||0).toLocaleString('fr-FR')}`),
+        montants: { comptesIncoherents: incoherents.length },
+        description: `${incoherents.length} compte(s) presentent un solde debiteur et un solde crediteur en meme temps. Un compte ne peut avoir qu'un seul sens de solde. Cela indique une erreur dans le format d'export de la balance.`,
+        attendu: 'Chaque compte a un solde debiteur OU crediteur, jamais les deux',
+        constate: `${incoherents.length} comptes ont les deux colonnes renseignees`,
+        impactFiscal: 'Risque de calculs errones sur tous les etats financiers et controles d\'audit.',
+      },
+      'Corriger l\'export de la balance: chaque compte doit avoir un solde debiteur OU crediteur, pas les deux.',
+      undefined,
+      'Art. 19 Acte Uniforme OHADA')
+  }
+  return ok(ref, nom, 'Soldes debiteurs et crediteurs coherents')
+}
+
+// F-014: Ecritures reciproques equilibrees
+function F014(ctx: AuditContext): ResultatControle {
+  const ref = 'F-014', nom = 'Comptes de liaison equilibres'
+  // Check compte 18x (liaison inter-etablissements) - must net to zero
+  const liaison = findByPrefix(ctx.balanceN, '18')
+  if (liaison.length > 0) {
+    const soldeNet = liaison.reduce((s, l) => s + solde(l), 0)
+    if (Math.abs(soldeNet) > 1) {
+      return anomalie(ref, nom, 'MAJEUR',
+        `Comptes de liaison (18x) desequilibres: solde net ${soldeNet.toLocaleString('fr-FR')}`,
+        {
+          comptes: liaison.map(l => `${l.compte}: ${solde(l).toLocaleString('fr-FR')}`),
+          montants: { soldeNet, nombreComptes: liaison.length },
+          description: `Les comptes de liaison inter-etablissements (18x) presentent un solde net de ${soldeNet.toLocaleString('fr-FR')} FCFA. Ces comptes doivent s'equilibrer au niveau consolide.`,
+          attendu: 'Solde net des comptes de liaison = 0',
+          constate: `Solde net: ${soldeNet.toLocaleString('fr-FR')} FCFA`,
+          impactFiscal: 'Risque d\'anomalie sur le bilan consolide et la liasse fiscale.',
+        },
+        'Verifier les ecritures de liaison entre etablissements. Rapprocher les comptes 18x pour identifier l\'ecart.',
+        undefined,
+        'Art. 76 Acte Uniforme OHADA')
+    }
+  }
+  return ok(ref, nom, 'Comptes de liaison equilibres ou absents')
+}
+
+// F-015: Coherence totaux balance
+function F015(ctx: AuditContext): ResultatControle {
+  const ref = 'F-015', nom = 'Coherence totaux balance'
+  // Verify that sum(solde_debit) - sum(solde_credit) == sum(debit) - sum(credit)
+  const totalSD = ctx.balanceN.reduce((s, l) => s + (l.solde_debit || 0), 0)
+  const totalSC = ctx.balanceN.reduce((s, l) => s + (l.solde_credit || 0), 0)
+  const totalD = sumDebit(ctx.balanceN)
+  const totalC = sumCredit(ctx.balanceN)
+  const soldeDiff = totalSD - totalSC
+  const mouvDiff = totalD - totalC
+  const ecart = Math.abs(soldeDiff - mouvDiff)
+  if (ecart > 1) {
+    return anomalie(ref, nom, 'MINEUR',
+      `Ecart entre totaux soldes et totaux mouvements: ${ecart.toLocaleString('fr-FR')}`,
+      {
+        montants: { totalSoldeDebit: totalSD, totalSoldeCredit: totalSC, totalMouvDebit: totalD, totalMouvCredit: totalC, ecart },
+        description: `La difference entre soldes debiteurs et crediteurs (${soldeDiff.toLocaleString('fr-FR')}) ne correspond pas a la difference entre mouvements debit et credit (${mouvDiff.toLocaleString('fr-FR')}). Ecart: ${ecart.toLocaleString('fr-FR')} FCFA.`,
+        attendu: 'Difference des soldes = difference des mouvements',
+        constate: `Soldes: ${soldeDiff.toLocaleString('fr-FR')}, Mouvements: ${mouvDiff.toLocaleString('fr-FR')}`,
+        impactFiscal: 'Donnees potentiellement incoherentes, impactant la fiabilite des calculs.',
+      },
+      'Verifier l\'integrite des donnees exportees. Les colonnes solde doivent etre derivees des colonnes mouvement.')
+  }
+  return ok(ref, nom, 'Totaux balance coherents')
+}
+
 // --- Enregistrement ---
 
 export function registerLevel1Controls(): void {
@@ -407,6 +487,9 @@ export function registerLevel1Controls(): void {
     ['F-010', 'Comptes a solde nul', 'Signale les comptes a solde nul', 'INFO', F010],
     ['F-011', 'Comptes collectifs', 'Verifie le detail des comptes collectifs', 'MINEUR', F011],
     ['F-012', 'Solde sans mouvement', 'Verifie que tout compte avec solde a des mouvements', 'MINEUR', F012],
+    ['F-013', 'Coherence soldes D/C', 'Verifie qu\'un compte n\'a pas SD et SC en meme temps', 'MAJEUR', F013],
+    ['F-014', 'Comptes de liaison', 'Verifie l\'equilibre des comptes de liaison 18x', 'MAJEUR', F014],
+    ['F-015', 'Coherence totaux balance', 'Verifie coherence soldes vs mouvements', 'MINEUR', F015],
   ]
 
   for (const [ref, nom, desc, sev, fn] of defs) {
