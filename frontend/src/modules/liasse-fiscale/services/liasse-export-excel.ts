@@ -110,22 +110,34 @@ export function exporterLiasse(
   entreprise: EntrepriseData,
   exercice: ExerciceData,
 ): void {
-  const wb = XLSX.utils.book_new()
+  try {
+    const wb = XLSX.utils.book_new()
 
-  for (const nom of ONGLETS) {
-    const builder = BUILDERS[nom]
-    const data: SheetData = builder
-      ? builder(balance, balanceN1, entreprise, exercice)
-      : { rows: [[]] }
+    for (const nom of ONGLETS) {
+      const builder = BUILDERS[nom]
+      let data: SheetData
+      try {
+        data = builder
+          ? builder(balance, balanceN1, entreprise, exercice)
+          : { rows: [[]] }
+      } catch (err) {
+        console.error(`[Liasse Export] Erreur builder "${nom}":`, err)
+        data = { rows: [[`ERREUR: ${nom}`]] }
+      }
 
-    const ws = XLSX.utils.aoa_to_sheet(data.rows)
-    if (data.merges) ws['!merges'] = data.merges
-    if (data.cols) ws['!cols'] = data.cols
-    XLSX.utils.book_append_sheet(wb, ws, nom)
+      const ws = XLSX.utils.aoa_to_sheet(data.rows)
+      if (data.merges) ws['!merges'] = data.merges
+      if (data.cols) ws['!cols'] = data.cols
+      XLSX.utils.book_append_sheet(wb, ws, nom)
+    }
+
+    const denom = (entreprise.denomination || 'export').replace(/[\\/:*?"<>|]/g, '_')
+    const filename = `Liasse_${denom}_${exercice.annee}.xlsx`
+    XLSX.writeFile(wb, filename)
+  } catch (err) {
+    console.error('[Liasse Export] Erreur export:', err)
+    alert(`Erreur lors de l'export Excel:\n${err instanceof Error ? err.message : String(err)}`)
   }
-
-  const filename = `Liasse_${entreprise.denomination || 'export'}_${exercice.annee}.xlsx`
-  XLSX.writeFile(wb, filename)
 }
 
 // ── Export pour usage dans le composant React ──

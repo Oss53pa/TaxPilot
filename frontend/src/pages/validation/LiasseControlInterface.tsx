@@ -329,22 +329,22 @@ const LiasseControlInterface: React.FC = () => {
   const [deploying, setDeploying] = useState(false)
   const [balanceMeta, setBalanceMeta] = useState<{ version?: number; exercice?: string; fileName?: string }>({})
 
-  // Load last session on mount
+  // Load last session on mount — only if a balance is currently imported
   useEffect(() => {
-    try {
-      const sessions = getAllSessions()
-      if (sessions.length > 0) {
-        const lastCompleted = sessions.find(s => s.statut === 'TERMINEE')
-        if (lastCompleted) {
-          setSession(lastCompleted)
-        }
-      }
-    } catch { /* ignore */ }
-
-    // Load balance metadata
     const balData = loadBalanceFromStorage()
     if (balData) {
       setBalanceMeta({ version: balData.version, exercice: balData.exercice, fileName: balData.fileName })
+
+      // Only show cached session if a balance is present
+      try {
+        const sessions = getAllSessions()
+        if (sessions.length > 0) {
+          const lastCompleted = sessions.find(s => s.statut === 'TERMINEE')
+          if (lastCompleted) {
+            setSession(lastCompleted)
+          }
+        }
+      } catch { /* ignore */ }
     }
   }, [])
 

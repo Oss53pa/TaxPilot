@@ -7,7 +7,7 @@ import type { BalanceEntry } from './liasseDataService'
 import type { StatutBalance, ExerciceConfig } from '@/types/audit.types'
 
 const PREFIX = 'fiscasync_balance_'
-const MAX_BALANCES = 5
+const MAX_BALANCES = 10
 
 export interface StoredBalance {
   id: string
@@ -225,5 +225,26 @@ export function linkAuditSession(balanceId: string, sessionId: string): void {
       latest.statut = balance.statut
       setItem('latest', latest)
     }
+  }
+}
+
+// ────────── Active Exercice Balance Switching ──────────
+
+/**
+ * Met a jour latest et latest_n1 pour pointer sur les balances d'un exercice donne.
+ * Appelee lors du changement d'exercice actif.
+ */
+export function setActiveExerciceBalance(exercice: string): void {
+  const balancesN = getBalancesForExercice(exercice)
+  if (balancesN.length > 0) {
+    setItem('latest', balancesN[0])
+  }
+
+  const anneeN1 = String(parseInt(exercice) - 1)
+  const balancesN1 = getBalancesForExercice(anneeN1)
+  if (balancesN1.length > 0) {
+    setItem('latest_n1', balancesN1[0])
+  } else {
+    localStorage.removeItem(PREFIX + 'latest_n1')
   }
 }

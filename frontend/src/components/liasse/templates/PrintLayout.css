@@ -28,7 +28,7 @@
 
   body {
     font-size: 12pt;          /* Corps = 12pt référence */
-    font-family: 'Segoe UI', Arial, sans-serif;
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     color: #000;
     line-height: 1.5;
   }
@@ -49,6 +49,13 @@
     min-height: 247mm; /* A4 minus margins */
     page-break-after: always;
     font-size: 12pt;
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  }
+
+  .liasse-page *,
+  .liasse-page .MuiTypography-root,
+  .liasse-page .MuiTableCell-root {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
   }
 
   .liasse-page.landscape {
@@ -91,7 +98,7 @@
 
   .montant {
     text-align: right;
-    font-family: 'Courier New', monospace;
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   }
 
   .ref-cell {
@@ -160,8 +167,18 @@
     width: 210mm;                      /* Largeur A4 portrait */
     font-size: 14px;                   /* Secondaire comme base de page */
     line-height: 1.5;
-    font-family: 'Segoe UI', Arial, sans-serif;
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
     overflow: hidden;
+  }
+
+  .liasse-page *,
+  .liasse-page .MuiTypography-root,
+  .liasse-page .MuiTableCell-root,
+  .liasse-page .MuiButton-root,
+  .liasse-page .MuiChip-label,
+  .liasse-page .MuiAlert-message,
+  .liasse-page .MuiInputBase-input {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
   }
 
   .liasse-page.landscape {

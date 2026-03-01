@@ -8,7 +8,7 @@
  *   - Sheet 70: COMP-TVA (2)          - TVA supportee non deductible
  */
 
-import { SheetData, Row, emptyRow, rowAt, m, headerRows } from './helpers'
+import { SheetData, Row, emptyRow, rowAt, m, headerRows, getCharges, getBalanceSolde, variationPct } from './helpers'
 import type { EntrepriseData, ExerciceData, BalanceEntry } from './helpers'
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -95,39 +95,56 @@ function compChargesPageHeader(
 // Helper: Generate detail rows for COMP-CHARGES
 // ════════════════════════════════════════════════════════════════════════════
 
-/** Add a detail row: account in col A, label in col B, values 0 in G-J */
+/** Add a detail row: account in col A, label in col B, computed values from balance */
 function addDetailRow(
   rows: Row[],
   account: string,
   label: string,
+  bal: BalanceEntry[],
+  balN1: BalanceEntry[],
+  accum: { n: number; n1: number },
 ): void {
   const C = 10
+  const valN = getCharges(bal, [account])
+  const valN1 = getCharges(balN1, [account])
+  accum.n += valN
+  accum.n1 += valN1
+  const variation = valN - valN1
+  const pct = variationPct(valN, valN1)
   rows.push(rowAt(C,
     [0, account],
     [1, label],
-    [6, 0],
-    [7, 0],
-    [8, 0],
-    [9, 0],
+    [6, valN || null],
+    [7, valN1 || null],
+    [8, variation || null],
+    [9, pct ? Math.round(pct * 100) / 100 : null],
   ))
 }
 
-/** Add a subtotal row: ref in col A, label in col C, values 0 in G-J */
+/** Add a subtotal row: ref in col A, label in col C, accumulated values */
 function addSubtotalRow(
   rows: Row[],
   merges: ReturnType<typeof m>[],
   ref: string,
   label: string,
+  accum: { n: number; n1: number },
+  grandAccum?: { n: number; n1: number },
 ): void {
   const C = 10
   const r = rows.length
+  const variation = accum.n - accum.n1
+  const pct = variationPct(accum.n, accum.n1)
+  if (grandAccum) {
+    grandAccum.n += accum.n
+    grandAccum.n1 += accum.n1
+  }
   rows.push(rowAt(C,
     [0, ref],
     [2, label],
-    [6, 0],
-    [7, 0],
-    [8, 0],
-    [9, 0],
+    [6, accum.n || null],
+    [7, accum.n1 || null],
+    [8, variation || null],
+    [9, pct ? Math.round(pct * 100) / 100 : null],
   ))
   merges.push(m(r, 2, r, 5)) // C:F merge for label
 }
@@ -255,13 +272,14 @@ function buildNotesDgiIns(
 // ────────────────────────────────────────────────────────────────────────────
 
 function buildCompCharges(
-  _bal: BalanceEntry[],
-  _balN1: BalanceEntry[],
+  bal: BalanceEntry[],
+  balN1: BalanceEntry[],
   ent: EntrepriseData,
   ex: ExerciceData,
 ): SheetData {
   const merges: ReturnType<typeof m>[] = []
   const rows: Row[] = []
+  const grand = { n: 0, n1: 0 }
 
   // ════════════════════════════════════════════════════════════════════════
   // Account sections definition
@@ -601,15 +619,18 @@ function buildCompCharges(
   compChargesPageHeader(ent, ex, 0, rows, merges)
 
   for (const section of page1Sections) {
+    const accum = { n: 0, n1: 0 }
     for (const [acct, label] of section.accounts) {
-      addDetailRow(rows, acct, label)
+      addDetailRow(rows, acct, label, bal, balN1, accum)
     }
-    addSubtotalRow(rows, merges, section.ref, section.label)
+    addSubtotalRow(rows, merges, section.ref, section.label, accum, grand)
   }
 
-  // Trailing accounts (start of Services ext\u00e9rieurs, continuing on page 2)
+  // Trailing accounts (start of Services extérieurs, continuing on page 2)
+  // These accumulate into page2's RH subtotal
+  const accumRH = { n: 0, n1: 0 }
   for (const [acct, label] of page1Trailing) {
-    addDetailRow(rows, acct, label)
+    addDetailRow(rows, acct, label, bal, balN1, accumRH)
   }
 
   // Blank separator
@@ -621,14 +642,16 @@ function buildCompCharges(
 
   compChargesPageHeader(ent, ex, 1, rows, merges)
 
+  // Continue accumulating into RH (Services extérieurs)
   for (const [acct, label] of page2Accounts) {
-    addDetailRow(rows, acct, label)
+    addDetailRow(rows, acct, label, bal, balN1, accumRH)
   }
-  addSubtotalRow(rows, merges, page2SubtotalRef, page2SubtotalLabel)
+  addSubtotalRow(rows, merges, page2SubtotalRef, page2SubtotalLabel, accumRH, grand)
 
-  // Trailing impots at end of page 2
+  // Trailing impots at end of page 2 (start of RI, continuing on page 3)
+  const accumRI = { n: 0, n1: 0 }
   for (const [acct, label] of page2TrailingImpots) {
-    addDetailRow(rows, acct, label)
+    addDetailRow(rows, acct, label, bal, balN1, accumRI)
   }
 
   // Blank separator
@@ -640,16 +663,25 @@ function buildCompCharges(
 
   compChargesPageHeader(ent, ex, 2, rows, merges)
 
-  for (const section of page3Sections) {
-    for (const [acct, label] of section.accounts) {
-      addDetailRow(rows, acct, label)
-    }
-    addSubtotalRow(rows, merges, section.ref, section.label)
+  // page3Sections[0] is RI (Impots) - continue accumulating from page 2
+  const riSection = page3Sections[0]
+  for (const [acct, label] of riSection.accounts) {
+    addDetailRow(rows, acct, label, bal, balN1, accumRI)
   }
+  addSubtotalRow(rows, merges, riSection.ref, riSection.label, accumRI, grand)
 
-  // Personnel accounts continuing to page 4
+  // page3Sections[1] is RJ (Autres charges)
+  const rjSection = page3Sections[1]
+  const accumRJ = { n: 0, n1: 0 }
+  for (const [acct, label] of rjSection.accounts) {
+    addDetailRow(rows, acct, label, bal, balN1, accumRJ)
+  }
+  addSubtotalRow(rows, merges, rjSection.ref, rjSection.label, accumRJ, grand)
+
+  // Personnel accounts continuing to page 4 (start of RK)
+  const accumRK = { n: 0, n1: 0 }
   for (const [acct, label] of page3Personnel) {
-    addDetailRow(rows, acct, label)
+    addDetailRow(rows, acct, label, bal, balN1, accumRK)
   }
 
   // Blank separator
@@ -661,23 +693,35 @@ function buildCompCharges(
 
   compChargesPageHeader(ent, ex, 3, rows, merges)
 
-  for (const section of page4Sections) {
+  // page4Sections[0] is RK (Personnel) - continue accumulating from page 3
+  const rkSection = page4Sections[0]
+  for (const [acct, label] of rkSection.accounts) {
+    addDetailRow(rows, acct, label, bal, balN1, accumRK)
+  }
+  addSubtotalRow(rows, merges, rkSection.ref, rkSection.label, accumRK, grand)
+
+  // page4Sections[1] is RM (Frais financiers)
+  for (let i = 1; i < page4Sections.length; i++) {
+    const section = page4Sections[i]
+    const accum = { n: 0, n1: 0 }
     for (const [acct, label] of section.accounts) {
-      addDetailRow(rows, acct, label)
+      addDetailRow(rows, acct, label, bal, balN1, accum)
     }
-    addSubtotalRow(rows, merges, section.ref, section.label)
+    addSubtotalRow(rows, merges, section.ref, section.label, accum, grand)
   }
 
   // TOTAL DES CHARGES ORDINAIRES
   rows.push(emptyRow(10))
   const totalR = rows.length
+  const grandVar = grand.n - grand.n1
+  const grandPct = variationPct(grand.n, grand.n1)
   rows.push(rowAt(10,
     [0, 'TOTAL'],
     [2, 'TOTAL DES CHARGES ORDINAIRES'],
-    [6, 0],
-    [7, 0],
-    [8, 0],
-    [9, 0],
+    [6, grand.n || null],
+    [7, grand.n1 || null],
+    [8, grandVar || null],
+    [9, grandPct ? Math.round(grandPct * 100) / 100 : null],
   ))
   merges.push(m(totalR, 2, totalR, 5))
 
@@ -690,8 +734,8 @@ function buildCompCharges(
 // ────────────────────────────────────────────────────────────────────────────
 
 function buildCompTva(
-  _bal: BalanceEntry[],
-  _balN1: BalanceEntry[],
+  bal: BalanceEntry[],
+  balN1: BalanceEntry[],
   ent: EntrepriseData,
   ex: ExerciceData,
 ): SheetData {
@@ -752,56 +796,138 @@ function buildCompTva(
   merges.push(m(8, 0, 8, 5)) // A9:F9
 
   // ── Helper for TVA data rows ──
-  const tvaRow = (col: number, label: string): void => {
+  // getBalanceSolde returns debit - credit; for TVA facturée (443x, credit accounts) negate
+  const tvaCreditRow = (col: number, label: string, accounts: string[]): void => {
+    const ri = rows.length
     const r = emptyRow(C)
     r[col] = label
-    r[6] = 0
-    r[7] = 0
+    // 443x are credit accounts → negate to get positive value
+    const valN = accounts.length ? -getBalanceSolde(bal, accounts) : 0
+    const valN1 = accounts.length ? -getBalanceSolde(balN1, accounts) : 0
+    r[6] = valN || null
+    r[7] = valN1 || null
     rows.push(r)
+    if (col <= 2) merges.push(m(ri, col, ri, 5))
   }
-
-  const tvaMergedRow = (col: number, label: string): void => {
+  const tvaDebitRow = (col: number, label: string, accounts: string[]): void => {
     const ri = rows.length
-    tvaRow(col, label)
+    const r = emptyRow(C)
+    r[col] = label
+    // 445x are debit accounts → positive as-is
+    const valN = accounts.length ? getBalanceSolde(bal, accounts) : 0
+    const valN1 = accounts.length ? getBalanceSolde(balN1, accounts) : 0
+    r[6] = valN || null
+    r[7] = valN1 || null
+    rows.push(r)
     if (col <= 2) merges.push(m(ri, col, ri, 5))
   }
 
-  // ── Rows 9-13 (L10-L14): TVA factur\u00e9e ──
-  tvaMergedRow(1, 'TVA factur\u00e9e sur ventes')
-  tvaMergedRow(1, 'TVA factur\u00e9e sur prestations')
-  tvaMergedRow(1, 'TVA factur\u00e9e sur travaux')
-  tvaMergedRow(1, 'TVA factur\u00e9e sur production livr\u00e9e \u00e0 soi-m\u00eame')
-  tvaMergedRow(1, 'TVA factur\u00e9e sur factures \u00e0 \u00e9tablir')
+  // TVA facturée (comptes 4431-4435)
+  tvaCreditRow(1, 'TVA factur\u00e9e sur ventes', ['4431'])
+  tvaCreditRow(1, 'TVA factur\u00e9e sur prestations', ['4432'])
+  tvaCreditRow(1, 'TVA factur\u00e9e sur travaux', ['4433'])
+  tvaCreditRow(1, 'TVA factur\u00e9e sur production livr\u00e9e \u00e0 soi-m\u00eame', ['4434'])
+  tvaCreditRow(1, 'TVA factur\u00e9e sur factures \u00e0 \u00e9tablir', ['4435'])
 
-  // ── Row 14 (L15): TVA factur\u00e9e de la p\u00e9riode ──
-  tvaMergedRow(2, 'TVA factur\u00e9e de la p\u00e9riode')
+  // Sous-total TVA facturée (negate because credit accounts)
+  const tvaFactN = -getBalanceSolde(bal, ['4431', '4432', '4433', '4434', '4435'])
+  const tvaFactN1 = -getBalanceSolde(balN1, ['4431', '4432', '4433', '4434', '4435'])
+  {
+    const ri = rows.length
+    const r = emptyRow(C)
+    r[2] = 'TVA factur\u00e9e de la p\u00e9riode'
+    r[6] = tvaFactN || null
+    r[7] = tvaFactN1 || null
+    rows.push(r)
+    merges.push(m(ri, 2, ri, 5))
+  }
 
-  // ── Row 15 (L16): TVA exigible ──
-  tvaMergedRow(2, 'TVA exigible de la p\u00e9riode')
+  // TVA exigible = TVA facturée (simplified)
+  {
+    const ri = rows.length
+    const r = emptyRow(C)
+    r[2] = 'TVA exigible de la p\u00e9riode'
+    r[6] = tvaFactN || null
+    r[7] = tvaFactN1 || null
+    rows.push(r)
+    merges.push(m(ri, 2, ri, 5))
+  }
 
-  // ── Rows 16-21 (L17-L22): TVA r\u00e9cup\u00e9rable ──
-  tvaMergedRow(1, 'TVA r\u00e9cup\u00e9rable sur immobilisations')
-  tvaMergedRow(1, 'TVA r\u00e9cup\u00e9rable sur achats')
-  tvaMergedRow(1, 'TVA r\u00e9cup\u00e9rable sur transports')
-  tvaMergedRow(1, 'TVA r\u00e9cup\u00e9rable sur services')
-  tvaMergedRow(1, 'TVA r\u00e9cup\u00e9rable sur autres charges')
-  tvaMergedRow(1, 'TVA sur factures non parvenues')
+  // TVA récupérable (comptes 4451-4456, debit accounts)
+  tvaDebitRow(1, 'TVA r\u00e9cup\u00e9rable sur immobilisations', ['4451'])
+  tvaDebitRow(1, 'TVA r\u00e9cup\u00e9rable sur achats', ['4452'])
+  tvaDebitRow(1, 'TVA r\u00e9cup\u00e9rable sur transports', ['4453'])
+  tvaDebitRow(1, 'TVA r\u00e9cup\u00e9rable sur services', ['4454'])
+  tvaDebitRow(1, 'TVA r\u00e9cup\u00e9rable sur autres charges', ['4455'])
+  tvaDebitRow(1, 'TVA sur factures non parvenues', ['4456'])
 
-  // ── Row 22 (L23): TVA R\u00e9cup\u00e9rable de la p\u00e9riode ──
-  tvaMergedRow(2, 'TVA R\u00e9cup\u00e9rable de la p\u00e9riode')
+  // Sous-total TVA récupérable
+  const tvaRecupN = getBalanceSolde(bal, ['4451', '4452', '4453', '4454', '4455', '4456'])
+  const tvaRecupN1 = getBalanceSolde(balN1, ['4451', '4452', '4453', '4454', '4455', '4456'])
+  {
+    const ri = rows.length
+    const r = emptyRow(C)
+    r[2] = 'TVA R\u00e9cup\u00e9rable de la p\u00e9riode'
+    r[6] = tvaRecupN || null
+    r[7] = tvaRecupN1 || null
+    rows.push(r)
+    merges.push(m(ri, 2, ri, 5))
+  }
 
-  // ── Row 23 (L24): TVA R\u00e9cup\u00e9r\u00e9e ──
-  tvaMergedRow(2, 'TVA R\u00e9cup\u00e9r\u00e9e de la p\u00e9riode')
+  // TVA Récupérée
+  {
+    const ri = rows.length
+    const r = emptyRow(C)
+    r[2] = 'TVA R\u00e9cup\u00e9r\u00e9e de la p\u00e9riode'
+    r[6] = tvaRecupN || null
+    r[7] = tvaRecupN1 || null
+    rows.push(r)
+    merges.push(m(ri, 2, ri, 5))
+  }
 
-  // ── Row 24 (L25): Prorata ──
-  tvaMergedRow(2, 'Prorata de d\u00e9duction')
+  // Prorata de déduction
+  {
+    const ri = rows.length
+    const r = emptyRow(C)
+    r[2] = 'Prorata de d\u00e9duction'
+    r[6] = null
+    r[7] = null
+    rows.push(r)
+    merges.push(m(ri, 2, ri, 5))
+  }
 
-  // ── Rows 25-26 (L26-L27): TVA due / Cr\u00e9dit ──
-  tvaMergedRow(1, 'Etat TVA due')
-  tvaMergedRow(1, 'Cr\u00e9dit TVA \u00e0 reporter')
+  // TVA due / Crédit
+  const tvaDueN = tvaFactN - tvaRecupN
+  const tvaDueN1 = tvaFactN1 - tvaRecupN1
+  {
+    const ri = rows.length
+    const r = emptyRow(C)
+    r[1] = 'Etat TVA due'
+    r[6] = tvaDueN > 0 ? tvaDueN : null
+    r[7] = tvaDueN1 > 0 ? tvaDueN1 : null
+    rows.push(r)
+    merges.push(m(ri, 1, ri, 5))
+  }
+  {
+    const ri = rows.length
+    const r = emptyRow(C)
+    r[1] = 'Cr\u00e9dit TVA \u00e0 reporter'
+    r[6] = tvaDueN < 0 ? Math.abs(tvaDueN) : null
+    r[7] = tvaDueN1 < 0 ? Math.abs(tvaDueN1) : null
+    rows.push(r)
+    merges.push(m(ri, 1, ri, 5))
+  }
 
-  // ── Row 27 (L28): TVA Due ou cr\u00e9dit ──
-  tvaMergedRow(2, 'TVA Due ou cr\u00e9dit')
+  // TVA Due ou crédit
+  {
+    const ri = rows.length
+    const r = emptyRow(C)
+    r[2] = 'TVA Due ou cr\u00e9dit'
+    r[6] = tvaDueN || null
+    r[7] = tvaDueN1 || null
+    rows.push(r)
+    merges.push(m(ri, 2, ri, 5))
+  }
 
   return { rows, merges }
 }
@@ -812,8 +938,8 @@ function buildCompTva(
 // ────────────────────────────────────────────────────────────────────────────
 
 function buildCompTva2(
-  _bal: BalanceEntry[],
-  _balN1: BalanceEntry[],
+  bal: BalanceEntry[],
+  balN1: BalanceEntry[],
   ent: EntrepriseData,
   ex: ExerciceData,
 ): SheetData {
@@ -875,26 +1001,33 @@ function buildCompTva2(
   merges.push(m(8, 0, 8, 5)) // A9:F9
 
   // ── Row 9 (L10): TVA sur immobilisations ──
+  // TVA non déductible sur immobilisations: comptes 6451 or estimate from 4457
+  const tvaND_immoN = getCharges(bal, ['6451'])
+  const tvaND_immoN1 = getCharges(balN1, ['6451'])
   const r9 = emptyRow(C)
   r9[1] = 'TVA support\u00e9e non d\u00e9ductible sur les immobilisations'
-  r9[6] = 0
-  r9[7] = 0
+  r9[6] = tvaND_immoN || null
+  r9[7] = tvaND_immoN1 || null
   rows.push(r9)
   merges.push(m(9, 1, 9, 5))
 
   // ── Row 10 (L11): TVA sur achats ──
+  const tvaND_achatsN = getCharges(bal, ['6452'])
+  const tvaND_achatsN1 = getCharges(balN1, ['6452'])
   const r10 = emptyRow(C)
   r10[1] = 'TVA support\u00e9e non d\u00e9ductible sur les achats'
-  r10[6] = 0
-  r10[7] = 0
+  r10[6] = tvaND_achatsN || null
+  r10[7] = tvaND_achatsN1 || null
   rows.push(r10)
   merges.push(m(10, 1, 10, 5))
 
   // ── Row 11 (L12): Total ──
+  const totalND_N = tvaND_immoN + tvaND_achatsN
+  const totalND_N1 = tvaND_immoN1 + tvaND_achatsN1
   const r11 = emptyRow(C)
   r11[2] = 'Total'
-  r11[6] = 0 // SUM(G10:G11)
-  r11[7] = 0 // SUM(H10:H11)
+  r11[6] = totalND_N || null
+  r11[7] = totalND_N1 || null
   rows.push(r11)
   merges.push(m(11, 2, 11, 5))
 

@@ -87,6 +87,13 @@ const ModernBalance: React.FC = () => {
     loadBalanceData()
   }, [])
 
+  // Reload on exercise switch
+  useEffect(() => {
+    const handler = () => loadBalanceData()
+    window.addEventListener('fiscasync:exercice-changed', handler)
+    return () => window.removeEventListener('fiscasync:exercice-changed', handler)
+  }, [])
+
   const loadBalanceData = () => {
     try {
       setLoading(true)

@@ -116,6 +116,13 @@ const AppDashboard: React.FC = () => {
     loadData()
   }, [])
 
+  // Reload on exercise switch
+  useEffect(() => {
+    const handler = () => loadData()
+    window.addEventListener('fiscasync:exercice-changed', handler)
+    return () => window.removeEventListener('fiscasync:exercice-changed', handler)
+  }, [])
+
   const fmt = (n: number) => n.toLocaleString('fr-FR')
 
   // ── Balance Summary (computed from real data) ──

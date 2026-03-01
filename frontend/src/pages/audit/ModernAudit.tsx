@@ -3,7 +3,7 @@
  * 4 onglets: Tableau de bord, Anomalies, Rapport corrections, Historique
  */
 
-import React, { useState, useCallback, useRef } from 'react'
+import React, { useState, useCallback, useRef, useEffect } from 'react'
 import {
   Box,
   Grid,
@@ -80,6 +80,17 @@ const ModernAudit: React.FC = () => {
   const [progressPct, setProgressPct] = useState(0)
   const cancelledRef = useRef(false)
   const [sessions, setSessions] = useState<SessionAudit[]>(() => getAllSessions())
+  const [, setExerciceVersion] = useState(0)
+
+  // Reload on exercise switch
+  useEffect(() => {
+    const handler = () => {
+      setSessions(getAllSessions())
+      setExerciceVersion(v => v + 1)
+    }
+    window.addEventListener('fiscasync:exercice-changed', handler)
+    return () => window.removeEventListener('fiscasync:exercice-changed', handler)
+  }, [])
 
   // Charger la balance importée (pas de fallback demo)
   const importedBalance = getLatestBalance()

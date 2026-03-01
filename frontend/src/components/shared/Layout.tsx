@@ -42,10 +42,12 @@ import {
   History as HistoryIcon,
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon,
+  Archive as ArchiveIcon,
 } from '@mui/icons-material'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
 import NotificationCenter from '../notifications/NotificationCenter'
+import ExerciceSelector from '../exercice/ExerciceSelector'
 
 const DRAWER_WIDTH = 270
 const DRAWER_WIDTH_COLLAPSED = 68
@@ -105,6 +107,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
     { text: 'Télédéclaration', icon: <Analytics />, path: '/teledeclaration', divider: 'Finalisation' },
     { text: 'Reporting', icon: <Analytics />, path: '/reporting' },
+    { text: 'Archives', icon: <ArchiveIcon />, path: '/archives' },
   ]
 
   const renderDrawerContent = (isCollapsed: boolean) => (
@@ -152,6 +155,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </IconButton>
         )}
       </Toolbar>
+
+      <ExerciceSelector collapsed={isCollapsed} />
 
       <List sx={{ px: isCollapsed ? 0.25 : 0.5, overflowY: 'auto', flexGrow: 1 }}>
         {menuItems.map((item, index) => (

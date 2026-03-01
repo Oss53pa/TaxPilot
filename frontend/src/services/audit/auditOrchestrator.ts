@@ -33,6 +33,7 @@ import { registerLevel5Controls } from './controls/level5-year-over-year'
 import { registerLevel6Controls } from './controls/level6-financial-statements'
 import { registerLevel7Controls } from './controls/level7-fiscal'
 import { registerLevel8Controls } from './controls/level8-archive'
+import { registerComparisonControls } from './controls/comparisonControls'
 
 let controlsRegistered = false
 
@@ -47,6 +48,7 @@ function ensureControlsRegistered(): void {
   registerLevel6Controls()
   registerLevel7Controls()
   registerLevel8Controls()
+  registerComparisonControls()
   controlsRegistered = true
 }
 

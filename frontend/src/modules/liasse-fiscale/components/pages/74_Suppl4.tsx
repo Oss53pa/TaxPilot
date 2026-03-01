@@ -1,21 +1,65 @@
 import React from 'react'
-import { Box, Typography } from '@mui/material'
-import LiasseHeader from '../LiasseHeader'
+import NoteTemplate from '../NoteTemplate'
 import type { PageProps } from '../../types'
+import type { Column, Row } from '../LiasseTable'
 
-const Suppl4: React.FC<PageProps> = ({ entreprise }) => {
+const Suppl4: React.FC<PageProps> = (props) => {
+  const columns: Column[] = [
+    { key: 'numero', label: 'N°', width: 35, align: 'center' },
+    { key: 'nature', label: 'Nature de l\'immobilisation', width: '22%', align: 'left' },
+    { key: 'date_acq', label: 'Date acq.', width: 80, align: 'center' },
+    { key: 'valeur_origine', label: 'Valeur d\'origine', width: '12%', align: 'right' },
+    { key: 'taux', label: 'Taux %', width: 55, align: 'right' },
+    { key: 'duree', label: 'Duree', width: 50, align: 'center' },
+    { key: 'amort_ant', label: 'Amort. anterieurs', width: '12%', align: 'right' },
+    { key: 'dotation', label: 'Dotation exercice', width: '12%', align: 'right' },
+    { key: 'amort_cum', label: 'Amort. cumule', width: '12%', align: 'right' },
+    { key: 'vnc', label: 'VNC', width: '10%', align: 'right' },
+  ]
+
+  const rows: Row[] = Array.from({ length: 30 }, (_, i) => ({
+    id: `r-${i}`,
+    cells: {
+      numero: i + 1,
+      nature: null,
+      date_acq: null,
+      valeur_origine: null,
+      taux: null,
+      duree: null,
+      amort_ant: null,
+      dotation: null,
+      amort_cum: null,
+      vnc: null,
+    },
+  }))
+
+  rows.push({
+    id: 'total',
+    cells: {
+      numero: '',
+      nature: 'TOTAL',
+      date_acq: '',
+      valeur_origine: null,
+      taux: '',
+      duree: '',
+      amort_ant: null,
+      dotation: null,
+      amort_cum: null,
+      vnc: null,
+    },
+    isTotal: true,
+    bold: true,
+  })
+
   return (
-    <Box sx={{ fontFamily: '"Courier New", Courier, monospace' }}>
-      <LiasseHeader entreprise={entreprise} pageNumber="72" />
-      <Typography sx={{ fontSize: '9pt', fontWeight: 700, textAlign: 'center', mb: 2, fontFamily: 'inherit' }}>
-        SUPPLEMENT 4
-      </Typography>
-      <Box sx={{ border: '0.5px solid #d4d4d4', minHeight: 400, p: 1 }}>
-        <Typography sx={{ fontSize: '7.5pt', color: '#737373', fontFamily: 'inherit' }}>
-          Page supplementaire a completer
-        </Typography>
-      </Box>
-    </Box>
+    <NoteTemplate
+      {...props}
+      noteLabel="SUPPL 4"
+      noteTitle="TABLEAU DES AMORTISSEMENTS ET INVENTAIRE DES IMMOBILISATIONS"
+      pageNumber="72"
+      columns={columns}
+      rows={rows}
+    />
   )
 }
 

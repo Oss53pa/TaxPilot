@@ -46,6 +46,7 @@ import PageRenderer from './PageRenderer'
 import { exportLiasseExcel } from '@/services/exportService'
 import { PrintModeProvider } from '@/components/liasse/PrintModeContext'
 import { useLiasseFiscaleData } from '@/hooks/useLiasseFiscaleData'
+import { toRegimeImposition } from '@/modules/liasse-fiscale/types'
 import './PrintLayout.css'
 
 // ── Types ──
@@ -285,7 +286,12 @@ const LiassePrintTemplate: React.FC<LiassePrintTemplateProps> = ({ regime, entre
   const configRegime = REGIME_MAP[regime]
   const allPages = getPagesForRegime(configRegime)
   // Load data once for all pages (avoids N individual hook calls in print mode)
-  const liasseData = useLiasseFiscaleData()
+  const rawLiasseData = useLiasseFiscaleData()
+  // Override the regime with the one selected by the user (not auto-detected from localStorage)
+  const liasseData = React.useMemo(() => ({
+    ...rawLiasseData,
+    regime: toRegimeImposition(configRegime),
+  }), [rawLiasseData, configRegime])
   const [currentPageIndex, setCurrentPageIndex] = useState(0)
   const [printMode, setPrintMode] = useState(false)
   const [unfoldTabs, setUnfoldTabs] = useState(true)
@@ -370,7 +376,7 @@ const LiassePrintTemplate: React.FC<LiassePrintTemplateProps> = ({ regime, entre
       <PrintModeProvider value={unfoldTabs}>
         <Box>
           {/* Cover page */}
-          <Box className="liasse-page" sx={{ pageBreakAfter: 'always', textAlign: 'center', pt: '80mm' }}>
+          <Box className="liasse-page" sx={{ pageBreakAfter: 'always', textAlign: 'center', pt: '80mm', fontFamily: '"Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important', '& *': { fontFamily: 'inherit !important' } }}>
             <Typography sx={{ fontSize: 24, fontWeight: 700, mb: 2 }}>LIASSE FISCALE SYSCOHADA</Typography>
             <Typography sx={{ fontSize: 18, fontWeight: 600, mb: 1 }}>{entreprise.raison_sociale}</Typography>
             {entreprise.sigle && <Typography sx={{ fontSize: 14, mb: 0.5, color: 'text.secondary' }}>{entreprise.sigle}</Typography>}
@@ -398,7 +404,7 @@ const LiassePrintTemplate: React.FC<LiassePrintTemplateProps> = ({ regime, entre
   }
 
   return (
-    <Box sx={{ display: 'flex', height: '100%', minHeight: 600, border: `1px solid ${P.primary200}`, borderRadius: 1, overflow: 'hidden' }}>
+    <Box sx={{ display: 'flex', height: '100%', minHeight: 600, border: `1px solid ${P.primary200}`, borderRadius: 1, overflow: 'hidden', fontFamily: '"Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', '& *': { fontFamily: 'inherit !important' } }}>
       {/* Sidebar */}
       <Sidebar
         regime={configRegime}

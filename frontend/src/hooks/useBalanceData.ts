@@ -1,9 +1,10 @@
 /**
  * Hook utilitaire pour accéder à la balance importée
  * Fournit les entries + helpers de calcul pour les composants liasse
+ * Reactif aux changements d'exercice via l'event fiscasync:exercice-changed
  */
 
-import { useMemo } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import type { BalanceEntry } from '@/services/liasseDataService'
 import { getLatestBalance } from '@/services/balanceStorageService'
 
@@ -44,6 +45,18 @@ export interface BalanceData {
 }
 
 export function useBalanceData(): BalanceData {
+  const [version, setVersion] = useState(0)
+
+  useEffect(() => {
+    const handler = () => setVersion(v => v + 1)
+    window.addEventListener('fiscasync:exercice-changed', handler)
+    window.addEventListener('fiscasync:balance-imported', handler)
+    return () => {
+      window.removeEventListener('fiscasync:exercice-changed', handler)
+      window.removeEventListener('fiscasync:balance-imported', handler)
+    }
+  }, [])
+
   return useMemo(() => {
     const stored = getLatestBalance()
     const entries = stored?.entries?.length ? stored.entries : []
@@ -55,5 +68,5 @@ export function useBalanceData(): BalanceData {
       c: (prefixes: string[]) => sumCredit(entries, prefixes),
       accounts: (prefixes: string[]) => getAccounts(entries, prefixes),
     }
-  }, [])
+  }, [version])
 }

@@ -21,6 +21,7 @@ export { registerLevel5Controls } from './controls/level5-year-over-year'
 export { registerLevel6Controls } from './controls/level6-financial-statements'
 export { registerLevel7Controls } from './controls/level7-fiscal'
 export { registerLevel8Controls } from './controls/level8-archive'
+export { registerComparisonControls } from './controls/comparisonControls'
 
 // Orchestrateur
 export { auditOrchestrator } from './auditOrchestrator'

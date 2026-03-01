@@ -38,6 +38,7 @@ const ModernFiscalCalendar = React.lazy(() => import('@/pages/calendar/ModernFis
 const ModernTemplates = React.lazy(() => import('@/pages/templates/ModernTemplates'))
 const ModernConsolidation = React.lazy(() => import('@/pages/consolidation/ModernConsolidation'))
 const ModernReporting = React.lazy(() => import('@/pages/reporting/ModernReporting'))
+const ArchivesPage = React.lazy(() => import('@/pages/archives/ArchivesPage'))
 const ModernVeilleReglementaire = React.lazy(() => import('@/pages/veille/ModernVeilleReglementaire'))
 const ModernCollaboration = React.lazy(() => import('@/pages/collaboration/ModernCollaboration'))
 const ModernIntegrations = React.lazy(() => import('@/pages/integrations/ModernIntegrations'))
@@ -48,8 +49,6 @@ const SubscriptionPage = React.lazy(() => import('@/pages/organization/Subscript
 const InvitationsPage = React.lazy(() => import('@/pages/organization/InvitationsPage'))
 
 import { useAuthStore } from './store/authStore'
-import TestComponents from './components/shared/TestComponents'
-import ButtonTest from './components/debug/ButtonTest'
 
 /** Wrapper: page avec sidebar */
 const WithSidebar: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -65,12 +64,12 @@ const S: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 
 // Purge seed/mock data from FiscaSync-Lite on first run
 function purgeSeedData() {
-  const PURGED_KEY = 'fiscasync_seed_purged'
+  const PURGED_KEY = 'fiscasync_seed_purged_v2'
   if (localStorage.getItem(PURGED_KEY)) return
   const keysToRemove: string[] = []
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i)
-    if (key && key.startsWith('fiscasync_db_')) keysToRemove.push(key)
+    if (key && (key.startsWith('fiscasync_db_') || key.startsWith('fiscasync_audit_'))) keysToRemove.push(key)
   }
   if (keysToRemove.length > 0) {
     keysToRemove.forEach(k => localStorage.removeItem(k))
@@ -122,6 +121,7 @@ function App() {
           <Route path="/templates" element={<S><ModernTemplates /></S>} />
           <Route path="/consolidation" element={<S><ModernConsolidation /></S>} />
           <Route path="/reporting" element={<S><ModernReporting /></S>} />
+          <Route path="/archives" element={<S><ArchivesPage /></S>} />
           <Route path="/veille" element={<S><ModernVeilleReglementaire /></S>} />
 
           <Route path="/collaboration" element={<S><ModernCollaboration /></S>} />
@@ -135,8 +135,7 @@ function App() {
           <Route path="/settings/subscription" element={<S><OrganizationWrapper>{(slug) => <SubscriptionPage organizationSlug={slug} />}</OrganizationWrapper></S>} />
           <Route path="/settings/invitations" element={<S><OrganizationWrapper>{(slug) => <InvitationsPage organizationSlug={slug} />}</OrganizationWrapper></S>} />
 
-          <Route path="/test" element={<S><TestComponents /></S>} />
-          <Route path="/debug" element={<S><ButtonTest /></S>} />
+          {/* Debug routes removed for production */}
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

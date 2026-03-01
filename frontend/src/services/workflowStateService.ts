@@ -1,7 +1,10 @@
 /**
  * Service central de workflow - Gestion de l'etat du workflow entre tous les modules
- * Cle localStorage : fiscasync_workflow_state
+ * Cle localStorage : fiscasync_workflow_state_{annee} (scope par exercice)
+ * Migration automatique depuis l'ancienne cle globale fiscasync_workflow_state
  */
+
+import { useExerciceStore } from '../store/exerciceStore'
 
 export interface WorkflowState {
   configurationDone: boolean
@@ -20,7 +23,9 @@ export interface WorkflowState {
   teledeclarationReference: string | null
 }
 
-const STORAGE_KEY = 'fiscasync_workflow_state'
+const STORAGE_KEY_PREFIX = 'fiscasync_workflow_state'
+const LEGACY_KEY = 'fiscasync_workflow_state'
+const MIGRATION_DONE_KEY = 'fiscasync_workflow_migrated'
 
 const DEFAULT_STATE: WorkflowState = {
   configurationDone: false,
@@ -39,9 +44,44 @@ const DEFAULT_STATE: WorkflowState = {
   teledeclarationReference: null,
 }
 
-export function getWorkflowState(): WorkflowState {
+function getActiveAnnee(): string | null {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
+    return useExerciceStore.getState().activeExercice?.annee || null
+  } catch {
+    return null
+  }
+}
+
+function storageKey(exercice?: string): string {
+  const annee = exercice || getActiveAnnee()
+  if (annee) return `${STORAGE_KEY_PREFIX}_${annee}`
+  return LEGACY_KEY
+}
+
+/** Migration one-shot: copie l'ancienne cle globale vers la cle de l'exercice courant */
+function migrateIfNeeded(exercice?: string): void {
+  if (localStorage.getItem(MIGRATION_DONE_KEY)) return
+  try {
+    const legacyRaw = localStorage.getItem(LEGACY_KEY)
+    if (legacyRaw) {
+      const annee = exercice || getActiveAnnee()
+      if (annee) {
+        const key = `${STORAGE_KEY_PREFIX}_${annee}`
+        if (!localStorage.getItem(key)) {
+          localStorage.setItem(key, legacyRaw)
+        }
+      }
+    }
+    localStorage.setItem(MIGRATION_DONE_KEY, new Date().toISOString())
+  } catch { /* ignore */ }
+}
+
+export function getWorkflowState(exercice?: string): WorkflowState {
+  migrateIfNeeded(exercice)
+
+  const key = storageKey(exercice)
+  try {
+    const raw = localStorage.getItem(key)
     if (raw) {
       return { ...DEFAULT_STATE, ...JSON.parse(raw) }
     }
@@ -50,7 +90,7 @@ export function getWorkflowState(): WorkflowState {
   // Auto-detect configuration and balance from existing localStorage keys
   const state = { ...DEFAULT_STATE }
   try {
-    const ent = localStorage.getItem('fiscasync_entreprise_settings') || localStorage.getItem('fiscasync_db_entreprise_settings')
+    const ent = localStorage.getItem('fiscasync_entreprise_settings')
     if (ent) state.configurationDone = true
   } catch { /* ignore */ }
   try {
@@ -66,14 +106,18 @@ export function getWorkflowState(): WorkflowState {
   return state
 }
 
-export function updateWorkflowState(partial: Partial<WorkflowState>): WorkflowState {
-  const current = getWorkflowState()
+export function updateWorkflowState(partial: Partial<WorkflowState>, exercice?: string): WorkflowState {
+  const current = getWorkflowState(exercice)
   const updated = { ...current, ...partial }
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
+  const key = storageKey(exercice)
+  localStorage.setItem(key, JSON.stringify(updated))
+  // Also write to legacy key for backward compatibility
+  localStorage.setItem(LEGACY_KEY, JSON.stringify(updated))
   return updated
 }
 
-export function resetWorkflow(): WorkflowState {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_STATE))
+export function resetWorkflow(exercice?: string): WorkflowState {
+  const key = storageKey(exercice)
+  localStorage.setItem(key, JSON.stringify(DEFAULT_STATE))
   return { ...DEFAULT_STATE }
 }

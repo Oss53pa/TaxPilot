@@ -231,5 +231,12 @@ export function useLiasseFiscaleData(): LiasseFiscaleData {
     refresh()
   }, [refresh])
 
+  // React to exercise changes
+  useEffect(() => {
+    const handler = () => refresh()
+    window.addEventListener('fiscasync:exercice-changed', handler)
+    return () => window.removeEventListener('fiscasync:exercice-changed', handler)
+  }, [refresh])
+
   return { entreprise, balance, balanceN1, regime, setRegime, refresh }
 }

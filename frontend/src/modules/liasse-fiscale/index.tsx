@@ -46,10 +46,14 @@ const LiasseFiscaleModule: React.FC = () => {
     setWorkflowState(getWorkflowState())
   }, [])
 
-  // Reload data on window focus
+  // Reload data on window focus or exercise change
   useEffect(() => {
     window.addEventListener('focus', refresh)
-    return () => window.removeEventListener('focus', refresh)
+    window.addEventListener('fiscasync:exercice-changed', refresh)
+    return () => {
+      window.removeEventListener('focus', refresh)
+      window.removeEventListener('fiscasync:exercice-changed', refresh)
+    }
   }, [refresh])
 
   // Filter pages by regime

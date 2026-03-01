@@ -9,7 +9,10 @@ import { balanceService } from '@/services'
 import { useBackendData } from '@/hooks/useBackendData'
 import { importBalanceFile } from '@/services/balanceParserService'
 import type { ImportPipelineResult } from '@/services/balanceParserService'
-import { saveImportedBalance, saveImportedBalanceN1, saveImportRecord, hasExistingBalance } from '@/services/balanceStorageService'
+import { saveImportedBalance, saveImportedBalanceN1, saveImportRecord, hasExistingBalance, getBalancesForExercice } from '@/services/balanceStorageService'
+import { getOrCreateExercice, markExerciceHasBalance } from '@/services/exerciceStorageService'
+import { runComparison, type ComparisonReport } from '@/services/comparisonService'
+import ComparisonResultModal from '@/components/comparison/ComparisonResultModal'
 import { useNavigate } from 'react-router-dom'
 import type { ExerciceConfig } from '@/types/audit.types'
 import { liasseDataService } from '@/services/liasseDataService'
@@ -210,7 +213,11 @@ const ModernImportBalance: React.FC = () => {
 
   // État pour la comparaison N-1
   const [comparisonData, setComparisonData] = useState<Comparison[]>([])
-  
+
+  // Rapport de comparaison N/N-1 post-import
+  const [comparisonReport, setComparisonReport] = useState<ComparisonReport | null>(null)
+  const [showComparisonModal, setShowComparisonModal] = useState(false)
+
   // Timer pour EX-IMPORT-009
   const [, setImportStartTime] = useState<Date | null>(null)
 
@@ -1616,6 +1623,30 @@ const ModernImportBalance: React.FC = () => {
                                 })
                               } catch { /* ignore */ }
 
+                              // Register exercice and check for N-1 comparison
+                              const yearStr = exerciceConfigured ? String(exerciceConfig.year) : String(currentYear)
+                              try {
+                                getOrCreateExercice(yearStr)
+                                markExerciceHasBalance(yearStr)
+                                // Activate this exercice in the store
+                                const { useExerciceStore } = await import('@/store/exerciceStore')
+                                useExerciceStore.getState().setActiveExercice(yearStr)
+                              } catch { /* ignore */ }
+
+                              // Run N vs N-1 comparison if N-1 exists
+                              const anneeN1 = String(parseInt(yearStr) - 1)
+                              const balancesN1 = getBalancesForExercice(anneeN1)
+                              if (balancesN1.length > 0 || parsedEntriesN1.length > 0) {
+                                try {
+                                  const report = runComparison(yearStr)
+                                  if (report) {
+                                    setComparisonReport(report)
+                                    setShowComparisonModal(true)
+                                    return // Don't redirect — modal handles navigation
+                                  }
+                                } catch { /* ignore, proceed to redirect */ }
+                              }
+
                               // Redirect: re-import goes to audit, first import goes to balance
                               if (savedBalance.version > 1) {
                                 window.location.href = '/audit'
@@ -1646,6 +1677,11 @@ const ModernImportBalance: React.FC = () => {
           </Card>
         </Grid>
       </Grid>
+      <ComparisonResultModal
+        open={showComparisonModal}
+        onClose={() => setShowComparisonModal(false)}
+        report={comparisonReport}
+      />
     </Box>
   )
 }
