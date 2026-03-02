@@ -16,10 +16,10 @@ function fmt(n: number): string {
 // ── Agrégats ─────────────────────────────────────────────────────────
 
 export interface Agregats {
-  capitauxPropres: number
-  capitalSocial: number
-  reserves: number
-  resultat: number
+  capitauxPropres: number  // POSITIVE in OHADA convention (negated from credit-balance)
+  capitalSocial: number    // POSITIVE in OHADA convention
+  reserves: number         // POSITIVE in OHADA convention
+  resultat: number         // POSITIVE if profitable
   immoBrutes: number
   immoNettes: number
   amortissements: number
@@ -34,7 +34,8 @@ export interface Agregats {
   chargesFinancieres: number
   actifCirculant: number
   passifCirculant: number
-  dettesTotal: number
+  dettesTotal: number      // POSITIVE (Math.abs applied)
+  provisions: number       // POSITIVE (Math.abs applied) — class 15
 }
 
 export function calculerAgregats(balance: Balance[]): Agregats {
@@ -44,7 +45,7 @@ export function calculerAgregats(balance: Balance[]): Agregats {
   let tvaCollectee = 0, tvaDeductible = 0
   let tresorerie = 0
   let ca = 0, chargesPersonnel = 0, chargesFinancieres = 0
-  let actifCirculant = 0, passifCirculant = 0, dettesTotal = 0
+  let actifCirculant = 0, passifCirculant = 0, dettesTotal = 0, provisions = 0
   let totalProduits = 0, totalCharges = 0
 
   for (const line of balance) {
@@ -83,6 +84,9 @@ export function calculerAgregats(balance: Balance[]): Agregats {
       else passifCirculant += Math.abs(solde)
     }
 
+    // Provisions (15) — credit balance
+    if (c.startsWith('15')) provisions += Math.abs(solde)
+
     // Dettes financières (16-19 only, not operating liabilities)
     if (/^1[6-9]/.test(c)) {
       dettesTotal += Math.abs(solde)
@@ -104,6 +108,14 @@ export function calculerAgregats(balance: Balance[]): Agregats {
 
   // Resultat = Produits - Charges (always computed from P&L, not account 13)
   const resultat = totalProduits - totalCharges
+
+  // Convert class 1 aggregates from credit-balance convention (negative)
+  // to OHADA presentation convention (positive for normal companies).
+  // MUST negate BEFORE adding resultat, because resultat is already in natural sign.
+  capitauxPropres = -capitauxPropres
+  capitalSocial = -capitalSocial
+  reserves = -reserves
+
   // Include P&L result in capitaux propres
   capitauxPropres += resultat
 
@@ -113,7 +125,7 @@ export function calculerAgregats(balance: Balance[]): Agregats {
     stocksNets, clientsNets, fournisseurs,
     tvaCollectee, tvaDeductible,
     tresorerie, ca, chargesPersonnel, chargesFinancieres,
-    actifCirculant, passifCirculant, dettesTotal,
+    actifCirculant, passifCirculant, dettesTotal, provisions,
   }
 }
 
@@ -364,10 +376,10 @@ function calculerAgregatsEtendus(balance: Balance[]) {
     const s = line.solde
     // Achats (60)
     if (c.startsWith('60')) achats += Math.max(0, s)
-    // Services extérieurs (61-62)
-    if (c.startsWith('61') || c.startsWith('62')) chargesExternes += Math.max(0, s)
-    // Impôts et taxes (63-64)
-    if (c.startsWith('63') || c.startsWith('64')) impotsTaxes += Math.max(0, s)
+    // Services extérieurs (61-63)
+    if (c.startsWith('61') || c.startsWith('62') || c.startsWith('63')) chargesExternes += Math.max(0, s)
+    // Impôts et taxes (64)
+    if (c.startsWith('64')) impotsTaxes += Math.max(0, s)
     // Dotations amortissements (68)
     if (c.startsWith('68')) dotationsAmort += Math.max(0, s)
     // Total charges classe 6
@@ -398,22 +410,23 @@ export function handlePredictionRatios(balance: Balance[]): Proph3tResponse {
   const liquiditeImmediate = agg.passifCirculant > 0 ? agg.tresorerie / agg.passifCirculant : 0
 
   // ── STRUCTURE & SOLVABILITÉ ──
-  const fondsRoulement = agg.capitauxPropres - agg.immoNettes
+  // FR = Ressources stables - Emplois stables = CP + Provisions + Dettes LT - Immo nettes
+  const fondsRoulement = agg.capitauxPropres + agg.provisions + agg.dettesTotal - agg.immoNettes
   const bfr = agg.actifCirculant - agg.passifCirculant
   const tresoNette = fondsRoulement - bfr
   const totalActif = agg.immoNettes + agg.actifCirculant + Math.max(0, agg.tresorerie)
-  const endettement = agg.capitauxPropres !== 0 ? agg.dettesTotal / Math.abs(agg.capitauxPropres) : 0
-  const autonomieFinanciere = totalActif > 0 ? (Math.abs(agg.capitauxPropres) / totalActif) * 100 : 0
+  const endettement = agg.capitauxPropres !== 0 ? agg.dettesTotal / agg.capitauxPropres : 0
+  const autonomieFinanciere = totalActif > 0 ? (agg.capitauxPropres / totalActif) * 100 : 0
   const solvabiliteGenerale = (agg.dettesTotal + agg.passifCirculant) > 0 ? totalActif / (agg.dettesTotal + agg.passifCirculant) : 99
   const tauxAmortissement = agg.immoBrutes > 0 ? (agg.amortissements / agg.immoBrutes) * 100 : 0
-  const couvertureImmo = agg.immoNettes > 0 ? Math.abs(agg.capitauxPropres) / agg.immoNettes : 0
+  const couvertureImmo = agg.immoNettes > 0 ? agg.capitauxPropres / agg.immoNettes : 0
   const poidsChargesFin = agg.ca > 0 ? (agg.chargesFinancieres / agg.ca) * 100 : 0
 
   // ── RENTABILITÉ ──
   const margeNette = agg.ca > 0 ? (agg.resultat / agg.ca) * 100 : 0
   const margeBrute = agg.ca > 0 ? ((agg.ca - ext.achats) / agg.ca) * 100 : 0
   const margeExploitation = agg.ca > 0 ? ((ext.produitsExploitation - ext.chargesExploitation) / agg.ca) * 100 : 0
-  const roe = agg.capitauxPropres !== 0 ? (agg.resultat / Math.abs(agg.capitauxPropres)) * 100 : 0
+  const roe = agg.capitauxPropres !== 0 ? (agg.resultat / agg.capitauxPropres) * 100 : 0
   const roa = totalActif > 0 ? (agg.resultat / totalActif) * 100 : 0
 
   // ── ACTIVITÉ & ROTATION ──
@@ -453,7 +466,7 @@ export function handlePredictionRatios(balance: Balance[]): Proph3tResponse {
     { label: 'Liquidite immediate (Treso/PC)', value: liquiditeImmediate.toFixed(2) },
 
     { label: '── STRUCTURE FINANCIERE ──', value: '' },
-    { label: 'Fonds de roulement (CP - Immo)', value: `${fmt(fondsRoulement)} FCFA` },
+    { label: 'Fonds de roulement (CP+Prov+DettesLT-Immo)', value: `${fmt(fondsRoulement)} FCFA` },
     { label: 'BFR (AC hors treso - PC hors treso)', value: `${fmt(bfr)} FCFA` },
     { label: 'Tresorerie nette (FR - BFR)', value: `${fmt(tresoNette)} FCFA` },
     { label: 'Couverture des immo (CP/Immo nettes)', value: couvertureImmo.toFixed(2) },
@@ -841,13 +854,13 @@ export function handleCoherenceCheck(balance: Balance[]): Proph3tResponse {
 
   // ── C06 — Capital social positif ──
   if (agg.capitalSocial !== 0) {
-    // Capital social doit être créditeur (solde négatif dans notre convention solde = debit - credit)
-    const capitalOK = agg.capitalSocial < 0 // Créditeur = valeur négative
+    // Capital social doit être positif (convention OHADA — les agrégats sont maintenant en valeur absolue)
+    const capitalOK = agg.capitalSocial > 0
     controles.push({
       id: 'C06',
       description: 'Capital social (compte 10) — solde crediteur attendu',
       statut: capitalOK ? 'CONFORME' : 'ERREUR',
-      valeur1: `Capital: ${fmt(Math.abs(agg.capitalSocial))} FCFA`,
+      valeur1: `Capital: ${fmt(agg.capitalSocial)} FCFA`,
       valeur2: capitalOK ? 'Crediteur (correct)' : 'Debiteur (anormal)',
       recommandation: !capitalOK ? 'ERREUR : capital social debiteur — verifier les ecritures de constitution ou d\'augmentation' : undefined,
     })
@@ -1040,7 +1053,7 @@ export function handlePredictionGeneral(balanceN: Balance[], _balanceN1?: Balanc
   const risques: string[] = []
 
   const liquidite = agg.passifCirculant > 0 ? agg.actifCirculant / agg.passifCirculant : (agg.actifCirculant > 0 ? 99 : 0)
-  const endettement = agg.capitauxPropres !== 0 ? agg.dettesTotal / Math.abs(agg.capitauxPropres) : 0
+  const endettement = agg.capitauxPropres !== 0 ? agg.dettesTotal / agg.capitauxPropres : 0
 
   // Liquidité
   if (liquidite >= 1.5) { score += 10; forces.push(`Liquidite excellente (${liquidite.toFixed(2)})`) }
@@ -1065,8 +1078,8 @@ export function handlePredictionGeneral(balanceN: Balance[], _balanceN1?: Balanc
   if (agg.ca > 0) { score += 5 }
   else { score -= 10; risques.push('Pas de chiffre d\'affaires') }
 
-  // Fonds de roulement
-  const fr = agg.capitauxPropres - agg.immoNettes
+  // Fonds de roulement = CP + Provisions + Dettes LT - Immo nettes
+  const fr = agg.capitauxPropres + agg.provisions + agg.dettesTotal - agg.immoNettes
   if (fr > 0) { score += 5; forces.push('Fonds de roulement positif') }
   else { score -= 5; risques.push('Fonds de roulement negatif') }
 
@@ -1428,8 +1441,8 @@ export function handlePredictionBFR(balance: Balance[]): Proph3tResponse {
   // Cycle de trésorerie (Cash Cycle) = DSO + DSI - DPO
   const cycleCash = dso + dsi - dpo
 
-  // FR (Fonds de Roulement) = Capitaux propres + Dettes LT - Immobilisations nettes
-  const fr = agg.capitauxPropres + agg.dettesTotal - agg.immoNettes
+  // FR (Fonds de Roulement) = CP + Provisions + Dettes LT - Immobilisations nettes
+  const fr = agg.capitauxPropres + agg.provisions + agg.dettesTotal - agg.immoNettes
   // BFR = Actif circulant (hors trésorerie) - Passif circulant (hors trésorerie)
   const bfr = agg.actifCirculant - agg.passifCirculant
   // Trésorerie nette = FR - BFR
@@ -1463,6 +1476,7 @@ export function handlePredictionBFR(balance: Balance[]): Proph3tResponse {
     { label: 'Cycle de tresorerie', value: `${Math.round(cycleCash)} jours` },
     { label: '── EQUILIBRE FINANCIER ──', value: '' },
     { label: 'Capitaux propres', value: `${fmt(agg.capitauxPropres)} FCFA` },
+    { label: '+ Provisions (15)', value: `${fmt(agg.provisions)} FCFA` },
     { label: '+ Dettes LT (16-19)', value: `${fmt(agg.dettesTotal)} FCFA` },
     { label: '- Immobilisations nettes', value: `${fmt(agg.immoNettes)} FCFA` },
     { label: '= Fonds de roulement (FR)', value: `${fmt(fr)} FCFA` },

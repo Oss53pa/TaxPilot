@@ -189,7 +189,8 @@ function EF002(ctx: AuditContext): ResultatControle {
 // EF-003: Sous-totaux passif
 function EF003(ctx: AuditContext): ResultatControle {
   const ref = 'EF-003', nom = 'Sous-totaux passif'
-  const cp = sumForPrefixes(ctx.balanceN, ['10', '11', '12', '13', '14'])
+  // CP: use signed sum (credit-balance = negative solde), then negate for OHADA convention
+  const cp = -sumSoldeForPrefixes(ctx.balanceN, ['10', '11', '12', '13', '14'])
   const dettesF = sumForPrefixes(ctx.balanceN, ['16', '17', '18'])
   const dettesC = sumForPrefixes(ctx.balanceN, ['40', '41', '42', '43', '44', '45', '46', '47', '48', '49'])
 
@@ -381,7 +382,7 @@ function EF009(ctx: AuditContext): ResultatControle {
   const autresCharges = sumForPrefixes(ctx.balanceN, ['65', '67', '68'])
   const haoNet = sumForPrefixes(ctx.balanceN, ['84', '86', '88']) - sumForPrefixes(ctx.balanceN, ['83', '85', '87'])
   const isNet = sumForPrefixes(ctx.balanceN, ['89'])
-  const cafSoustr = ebe + autresProduits - autresCharges - haoNet - isNet
+  const cafSoustr = ebe + autresProduits - autresCharges + haoNet - isNet
 
   const ecart = Math.abs(cafAdd - cafSoustr)
 
@@ -485,8 +486,9 @@ function EF013(ctx: AuditContext): ResultatControle {
   if (!ctx.balanceN1 || ctx.balanceN1.length === 0) {
     return { ref, nom, niveau: NIVEAU, statut: 'NON_APPLICABLE', severite: 'OK', message: 'N-1 absente', timestamp: new Date().toISOString() }
   }
-  const cpN = sumForPrefixes(ctx.balanceN, ['10', '11', '12', '13', '14'])
-  const cpN1 = sumForPrefixes(ctx.balanceN1, ['10', '11', '12', '13', '14'])
+  // CP: use signed sum (credit-balance = negative solde), then negate for OHADA convention
+  const cpN = -sumSoldeForPrefixes(ctx.balanceN, ['10', '11', '12', '13', '14'])
+  const cpN1 = -sumSoldeForPrefixes(ctx.balanceN1, ['10', '11', '12', '13', '14'])
   const variation = cpN - cpN1
   const resultatN = find(ctx.balanceN, '13').reduce((s, l) => s + (l.credit - l.debit), 0)
   const ecart = Math.abs(variation - resultatN)
