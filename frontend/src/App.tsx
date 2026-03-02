@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { CircularProgress, Box } from '@mui/material'
 import ModernLayout from './components/shared/Layout'
 import ErrorBoundary from './components/ui/ErrorBoundary'
+import CloudProvider from './components/cloud/CloudProvider'
 import './styles/liasse-fixes.css'
 import './styles/wcag-conformity.css'
 import './styles/liasse-text-fix.css'
@@ -88,6 +89,7 @@ function App() {
 
   return (
     <ErrorBoundary>
+      <CloudProvider>
       <Suspense fallback={<PageLoader />}>
         <Routes>
           {/* Landing page - SANS sidebar */}
@@ -141,6 +143,7 @@ function App() {
         </Routes>
       </Suspense>
       <Proph3tFloatingBall />
+      </CloudProvider>
     </ErrorBoundary>
   )
 }

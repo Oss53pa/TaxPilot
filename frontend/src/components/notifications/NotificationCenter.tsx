@@ -27,6 +27,7 @@ import {
   Error as ErrorIcon,
   Info as InfoIcon,
 } from '@mui/icons-material'
+import { useNavigate } from 'react-router-dom'
 
 interface Notification {
   id: string
@@ -42,7 +43,8 @@ interface Notification {
   }
 }
 
-const NotificationCenter: React.FC = () => {
+const NotificationCenter: React.FC<{ sx?: Record<string, unknown> }> = ({ sx }) => {
+  const navigate = useNavigate()
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
@@ -149,7 +151,7 @@ const NotificationCenter: React.FC = () => {
     <>
       <IconButton
         onClick={handleOpen}
-        sx={{ color: 'inherit' }}
+        sx={{ color: 'inherit', ...sx }}
       >
         <Badge badgeContent={unreadCount} color="error">
           <NotificationIcon />
@@ -250,8 +252,7 @@ const NotificationCenter: React.FC = () => {
                             variant="outlined"
                             sx={{ mt: 1, height: 24, fontSize: '0.75rem' }}
                             onClick={() => {
-                              // Navigate to action route
-                              window.location.hash = notification.action!.route
+                              navigate(notification.action!.route)
                               handleClose()
                             }}
                           >
