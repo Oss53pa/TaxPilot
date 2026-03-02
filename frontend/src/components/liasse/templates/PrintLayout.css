@@ -65,14 +65,6 @@
   .liasse-print-page:last-child {
     break-after: auto;
   }
-  /* Named pages: explicit portrait AND landscape for reliable orientation switching */
-  .liasse-print-page[data-orientation="portrait"] {
-    page: portrait-page;
-  }
-  .liasse-print-page[data-orientation="landscape"] {
-    page: landscape-page;
-  }
-
   /* ── Prevent table truncation ── */
   table {
     border-collapse: collapse;
@@ -181,6 +173,14 @@
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
+}
+
+/* ── Named page assignments — MUST be top-level (not inside @media) ── */
+.liasse-print-page[data-orientation="portrait"] {
+  page: portrait-page;
+}
+.liasse-print-page[data-orientation="landscape"] {
+  page: landscape-page;
 }
 
 /* ══════════════════════════════════════════════════════════════════════════

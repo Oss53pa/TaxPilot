@@ -194,17 +194,21 @@ const Bilan: React.FC<PageProps> = ({ entreprise, balance, balanceN1, onNoteClic
     <Box sx={{ fontFamily: '"Courier New", Courier, monospace' }}>
       <LiasseHeader entreprise={entreprise} noteLabel="" pageNumber="7" />
 
-      <Typography sx={{ fontSize: '10pt', fontWeight: 700, textAlign: 'center', mb: 1, fontFamily: 'inherit' }}>
+      <Typography sx={{ fontSize: '10pt', fontWeight: 700, textAlign: 'center', mb: 0.5, fontFamily: 'inherit' }}>
         BILAN AU {new Date(entreprise.exercice_clos || Date.now()).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' }).toUpperCase()}
       </Typography>
 
-      <LiasseTable columns={actifColumns} rows={actifRows} title="ACTIF" compact onNoteClick={onNoteClick} />
-
-      <Box sx={{ mt: 2 }}>
-        <LiasseTable columns={passifColumns} rows={passifRows} title="PASSIF" compact onNoteClick={onNoteClick} />
+      {/* Actif (gauche) + Passif (droite) côte à côte */}
+      <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <LiasseTable columns={actifColumns} rows={actifRows} title="ACTIF" compact onNoteClick={onNoteClick} />
+        </Box>
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <LiasseTable columns={passifColumns} rows={passifRows} title="PASSIF" compact onNoteClick={onNoteClick} />
+        </Box>
       </Box>
 
-      <Box sx={{ mt: 1, textAlign: 'center' }}>
+      <Box sx={{ mt: 0.5, textAlign: 'center' }}>
         <Typography sx={{ fontSize: '7pt', fontWeight: 700, fontFamily: 'inherit' }}>
           Controle : Total Actif (BZ) = {fmt(actifData.find(r => r.ref === 'BZ')?.net || 0)} | Total Passif (DZ) = {fmt(passifData.find(r => r.ref === 'DZ')?.montant || 0)}
         </Typography>

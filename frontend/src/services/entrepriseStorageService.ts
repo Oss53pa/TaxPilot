@@ -10,6 +10,8 @@ const STORAGE_KEY = 'fiscasync_entreprise_settings'
 export function saveEntreprise(data: Partial<Entreprise>): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
+    // Notify other components (e.g. liasse fiscale) that enterprise data changed
+    window.dispatchEvent(new Event('fiscasync:entreprise-saved'))
   } catch {
     // localStorage full or unavailable
   }

@@ -260,6 +260,7 @@ export interface EntrepriseFormData {
   logo?: File
   capital_social?: number
   numero_comptable?: string
+  numero_teledeclarant?: string
   exercice_debut?: string
   exercice_fin?: string
   date_depot?: string

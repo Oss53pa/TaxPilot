@@ -236,6 +236,7 @@ const EntrepriseSettings: React.FC = () => {
       expert_adresse: '',
       expert_numero_inscription: '',
       sigle: '',
+      numero_teledeclarant: '',
       code_ape: '',
       date_creation_entreprise: '',
       categorie_imposition: '',
@@ -298,6 +299,7 @@ const EntrepriseSettings: React.FC = () => {
       expert_adresse: entreprise.expert_adresse || '',
       expert_numero_inscription: entreprise.expert_numero_inscription || '',
       sigle: (entreprise as any).sigle || '',
+      numero_teledeclarant: (entreprise as any).numero_teledeclarant || '',
       code_ape: (entreprise as any).code_ape || '',
       date_creation_entreprise: (entreprise as any).date_creation_entreprise || '',
       categorie_imposition: (entreprise as any).categorie_imposition || '',
@@ -494,9 +496,14 @@ const EntrepriseSettings: React.FC = () => {
                     <TextField {...field} fullWidth label="Capital Social (FCFA)" type="number" InputProps={{ endAdornment: 'FCFA' }} />
                   )} />
                 </Grid>
-                <Grid item xs={12} md={6}>
+                <Grid item xs={12} md={3}>
                   <Controller name="numero_comptable" control={control} render={({ field }) => (
                     <TextField {...field} fullWidth label="N° Comptable" />
+                  )} />
+                </Grid>
+                <Grid item xs={12} md={3}>
+                  <Controller name="numero_teledeclarant" control={control} render={({ field }) => (
+                    <TextField {...field} fullWidth label="N° Teledeclarant (NTD)" />
                   )} />
                 </Grid>
                 <Grid item xs={12} md={4}>

@@ -1,7 +1,7 @@
 import React from 'react'
 import { LIASSE_PAGES } from '@/config/liasse-pages-config'
 import type { LiassePage } from '@/config/liasse-pages-config'
-import type { PageDef, SectionKey } from './types'
+import type { PageDef, PageProps, SectionKey } from './types'
 
 const lp = (name: string) => React.lazy(() => import(`./components/pages/${name}`))
 
@@ -45,11 +45,14 @@ export const PAGES: PageDef[] = LIASSE_PAGES.map(p => ({
 export const getPageById = (id: string): PageDef | undefined => PAGES.find(p => p.id === id)
 export const getPagesBySection = (section: PageDef['section']): PageDef[] => PAGES.filter(p => p.section === section)
 
-/** Preload lazy component modules so React.lazy resolves synchronously on next render */
-export async function preloadPages(pages: PageDef[]): Promise<void> {
+/** Load page component modules and return resolved components (bypasses React.lazy) */
+export async function loadPageComponents(pages: PageDef[]): Promise<Map<string, React.ComponentType<PageProps>>> {
+  const result = new Map<string, React.ComponentType<PageProps>>()
   const pageIds = new Set(pages.map(p => p.id))
-  const filesToLoad = LIASSE_PAGES
-    .filter(p => pageIds.has(p.moduleId))
-    .map(p => p.componentFile)
-  await Promise.all(filesToLoad.map(name => import(`./components/pages/${name}`)))
+  const toLoad = LIASSE_PAGES.filter(p => pageIds.has(p.moduleId))
+  await Promise.all(toLoad.map(async (p) => {
+    const mod = await import(`./components/pages/${p.componentFile}`)
+    result.set(p.moduleId, mod.default)
+  }))
+  return result
 }

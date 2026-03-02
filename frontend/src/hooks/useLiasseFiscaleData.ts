@@ -35,7 +35,12 @@ export const EMPTY_ENTREPRISE: EntrepriseData = {
 // ── Loading helpers ──
 
 export const loadEntreprise = (): EntrepriseData => {
-  const keys = ['fiscasync_entreprise_settings', 'fiscasync_db_entreprise_settings']
+  // Check multiple localStorage keys in priority order
+  const keys = [
+    'fiscasync_entreprise_settings',      // Source of truth from Parametrage form
+    'fiscasync_db_entreprise_settings',   // Legacy key
+    'fiscasync_db_entreprises',           // apiClient/localDatabase collection
+  ]
   for (const key of keys) {
     try {
       const raw = localStorage.getItem(key)
@@ -43,61 +48,67 @@ export const loadEntreprise = (): EntrepriseData => {
       const parsed = JSON.parse(raw)
       const e = Array.isArray(parsed) ? parsed[0] : parsed
       if (!e) continue
+      // Skip entries with no meaningful data
+      if (!e.raison_sociale && !e.denomination && !e.numero_contribuable) continue
       console.log(`[Liasse] Entreprise loaded from "${key}"`, e.raison_sociale || e.denomination || '(sans nom)')
-      return {
-        denomination: e.raison_sociale || e.denomination || '',
-        sigle: e.sigle || '',
-        adresse: [e.adresse_ligne1, e.adresse_ligne2, e.ville].filter(Boolean).join(' - '),
-        ncc: e.numero_contribuable || '',
-        ntd: e.numero_teledeclarant || '',
-        exercice_clos: e.exercice_fin || e.date_arrete_comptes || '',
-        exercice_precedent_fin: e.exercice_precedent_fin || '',
-        duree_mois: e.duree_exercice_precedent || 12,
-        regime: e.regime_imposition || 'Reel normal',
-        forme_juridique: e.forme_juridique || '',
-        code_forme_juridique: e.code_forme_juridique || '01',
-        code_regime: e.code_regime || '1',
-        code_pays: e.code_pays || '03',
-        centre_depot: e.centre_impots || '',
-        ville: e.ville || '',
-        boite_postale: e.boite_postale || '',
-        capital_social: e.capital_social || 0,
-        nom_dirigeant: e.nom_dirigeant || '',
-        fonction_dirigeant: e.fonction_dirigeant || '',
-        greffe: e.greffe || '',
-        numero_repertoire_entites: e.numero_repertoire_entites || '',
-        numero_caisse_sociale: e.numero_caisse_sociale || '',
-        numero_code_importateur: e.numero_code_importateur || '',
-        code_ville: e.code_ville || '',
-        pourcentage_capacite_production: e.pourcentage_capacite_production || 0,
-        branche_activite: e.branche_activite || '',
-        code_secteur: e.code_secteur || '',
-        nombre_etablissements: e.nombre_etablissements || 0,
-        effectif_permanent: e.effectif_permanent || 0,
-        effectif_temporaire: e.effectif_temporaire || 0,
-        effectif_debut: e.effectif_debut || 0,
-        effectif_fin: e.effectif_fin || 0,
-        masse_salariale: e.masse_salariale || 0,
-        nom_groupe: e.nom_groupe || '',
-        pays_siege_groupe: e.pays_siege_groupe || '',
-        cac_nom: e.cac_nom || '',
-        cac_adresse: e.cac_adresse || '',
-        cac_numero_inscription: e.cac_numero_inscription || '',
-        expert_nom: e.expert_nom || '',
-        expert_adresse: e.expert_adresse || '',
-        expert_numero_inscription: e.expert_numero_inscription || '',
-        personne_contact: e.personne_contact || '',
-        etats_financiers_approuves: e.etats_financiers_approuves || false,
-        date_signature_etats: e.date_signature_etats || '',
-        domiciliations_bancaires: e.domiciliations_bancaires || [],
-        dirigeants: e.dirigeants || [],
-        commissaires_comptes: e.commissaires_comptes || [],
-        participations_filiales: e.participations_filiales || [],
-      }
+      return mapToEntrepriseData(e)
     } catch { /* try next key */ }
   }
   console.warn('[Liasse] Aucune donnee entreprise trouvee dans localStorage')
   return EMPTY_ENTREPRISE
+}
+
+function mapToEntrepriseData(e: Record<string, any>): EntrepriseData {
+  return {
+    denomination: e.raison_sociale || e.denomination || '',
+    sigle: e.sigle || '',
+    adresse: e.adresse || [e.adresse_ligne1, e.adresse_ligne2, e.ville].filter(Boolean).join(' - ') || '',
+    ncc: e.numero_contribuable || e.ncc || '',
+    ntd: e.numero_teledeclarant || e.ntd || '',
+    exercice_clos: e.exercice_fin || e.exercice_clos || e.date_arrete_comptes || '',
+    exercice_precedent_fin: e.exercice_precedent_fin || '',
+    duree_mois: e.duree_exercice_precedent || e.duree_mois || 12,
+    regime: e.regime_imposition || e.regime || 'Reel normal',
+    forme_juridique: e.forme_juridique || '',
+    code_forme_juridique: e.code_forme_juridique || '01',
+    code_regime: e.code_regime || '1',
+    code_pays: e.code_pays || e.pays || '03',
+    centre_depot: e.centre_impots || e.centre_depot || '',
+    ville: e.ville || '',
+    boite_postale: e.boite_postale || '',
+    capital_social: e.capital_social || 0,
+    nom_dirigeant: e.nom_dirigeant || '',
+    fonction_dirigeant: e.fonction_dirigeant || '',
+    greffe: e.greffe || '',
+    numero_repertoire_entites: e.numero_repertoire_entites || '',
+    numero_caisse_sociale: e.numero_caisse_sociale || '',
+    numero_code_importateur: e.numero_code_importateur || '',
+    code_ville: e.code_ville || '',
+    pourcentage_capacite_production: e.pourcentage_capacite_production || 0,
+    branche_activite: e.branche_activite || '',
+    code_secteur: e.code_secteur || '',
+    nombre_etablissements: e.nombre_etablissements || 0,
+    effectif_permanent: e.effectif_permanent || 0,
+    effectif_temporaire: e.effectif_temporaire || 0,
+    effectif_debut: e.effectif_debut || 0,
+    effectif_fin: e.effectif_fin || 0,
+    masse_salariale: e.masse_salariale || 0,
+    nom_groupe: e.nom_groupe || '',
+    pays_siege_groupe: e.pays_siege_groupe || '',
+    cac_nom: e.cac_nom || '',
+    cac_adresse: e.cac_adresse || '',
+    cac_numero_inscription: e.cac_numero_inscription || '',
+    expert_nom: e.expert_nom || '',
+    expert_adresse: e.expert_adresse || '',
+    expert_numero_inscription: e.expert_numero_inscription || '',
+    personne_contact: e.personne_contact || '',
+    etats_financiers_approuves: e.etats_financiers_approuves || false,
+    date_signature_etats: e.date_signature_etats || '',
+    domiciliations_bancaires: e.domiciliations_bancaires || [],
+    dirigeants: e.dirigeants || [],
+    commissaires_comptes: e.commissaires_comptes || [],
+    participations_filiales: e.participations_filiales || [],
+  }
 }
 
 export const parseEntries = (entries: unknown[]): BalanceEntry[] =>
@@ -231,11 +242,17 @@ export function useLiasseFiscaleData(): LiasseFiscaleData {
     refresh()
   }, [refresh])
 
-  // React to exercise changes
+  // React to exercise changes and enterprise settings updates
   useEffect(() => {
     const handler = () => refresh()
     window.addEventListener('fiscasync:exercice-changed', handler)
-    return () => window.removeEventListener('fiscasync:exercice-changed', handler)
+    window.addEventListener('fiscasync:entreprise-saved', handler)
+    window.addEventListener('focus', handler)
+    return () => {
+      window.removeEventListener('fiscasync:exercice-changed', handler)
+      window.removeEventListener('fiscasync:entreprise-saved', handler)
+      window.removeEventListener('focus', handler)
+    }
   }, [refresh])
 
   return { entreprise, balance, balanceN1, regime, setRegime, refresh }

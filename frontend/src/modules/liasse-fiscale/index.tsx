@@ -27,11 +27,12 @@ import LiasseNav from './components/LiasseNav'
 import LiassePage from './components/LiassePage'
 import LiasseStats from './components/LiasseStats'
 import { LiasseRegimeContext } from './components/LiasseHeader'
-import { PAGES, preloadPages } from './config'
+import { PAGES, loadPageComponents } from './config'
 import { NOTE_TO_PAGE_ID, toConfigRegime } from './types'
 import { exporterLiasse } from './services/liasse-export-excel'
 import PrintDialog from './components/PrintDialog'
 import type { PrintMode } from './components/PrintDialog'
+import type { PageProps } from './types'
 import '@/components/liasse/templates/PrintLayout.css'
 
 const SIDEBAR_TRANSITION = 'width 0.3s cubic-bezier(0.4,0,0.2,1), min-width 0.3s cubic-bezier(0.4,0,0.2,1), opacity 0.3s cubic-bezier(0.4,0,0.2,1)'
@@ -47,28 +48,72 @@ const LiasseFiscaleModule: React.FC = () => {
   const [workflowState, setWorkflowState] = useState<WorkflowState | null>(null)
   const [printDialogOpen, setPrintDialogOpen] = useState(false)
   const [printMode, setPrintMode] = useState<'off' | 'current' | 'all'>('off')
+  const [printComponents, setPrintComponents] = useState<Map<string, React.ComponentType<PageProps>>>(new Map())
 
   useEffect(() => {
     setWorkflowState(getWorkflowState())
   }, [])
 
-  // When printMode is set: wait for lazy components to render, then call window.print()
+  // When printMode is set: measure each page, scale to fit A4, then print
   useEffect(() => {
-    if (printMode === 'off') return
-    // Components are already preloaded (see handlePrint), give React one frame to render
-    const timer = setTimeout(() => {
-      window.print()
-    }, 500)
+    if (printMode === 'off' || printComponents.size === 0) return
+
+    // Inject @page rules dynamically — all OUTSIDE @media print for Chrome compatibility
+    const styleEl = document.createElement('style')
+    styleEl.id = 'liasse-print-page-rules'
+    styleEl.textContent = [
+      '@page portrait-page { size: A4 portrait; margin: 15mm 10mm 15mm 10mm; }',
+      '@page landscape-page { size: A4 landscape; margin: 10mm 15mm 10mm 15mm; }',
+      // page property OUTSIDE @media print — it only affects paged media anyway
+      '.liasse-print-page[data-orientation="portrait"] { page: portrait-page; }',
+      '.liasse-print-page[data-orientation="landscape"] { page: landscape-page; }',
+    ].join('\n')
+    document.head.appendChild(styleEl)
+
+    // Wait for React to render all pages, then measure and scale
+    const raf = requestAnimationFrame(() => {
+      // Measure each .liasse-print-page and apply CSS zoom if content overflows A4
+      const pages = document.querySelectorAll('.liasse-print-page') as NodeListOf<HTMLElement>
+      pages.forEach(pageEl => {
+        const paper = pageEl.querySelector('.MuiPaper-root') as HTMLElement
+        if (!paper) return
+
+        const isLandscape = pageEl.dataset.orientation === 'landscape'
+        // Force page property via DOM (belt + suspenders)
+        pageEl.style.setProperty('page', isLandscape ? 'landscape-page' : 'portrait-page')
+        // A4 printable heights (A4 size minus @page margins top+bottom)
+        // Portrait: 297 - 15 - 15 = 267mm | Landscape: 210 - 10 - 10 = 190mm
+        const pageWidthMM = isLandscape ? 267 : 190
+        const pageHeightMM = isLandscape ? 190 : 267
+        // Compute px-per-mm from the page wrapper width
+        const pxPerMm = pageEl.clientWidth / pageWidthMM
+        const maxHeightPx = pageHeightMM * pxPerMm
+
+        const contentHeight = paper.scrollHeight
+        if (contentHeight > maxHeightPx) {
+          const scale = (maxHeightPx / contentHeight) * 0.97 // 3% safety margin
+          pageEl.style.zoom = String(scale)
+        }
+      })
+
+      // Give the browser a moment after zoom changes, then print
+      setTimeout(() => window.print(), 300)
+    })
+
     const onAfterPrint = () => {
       setPrintMode('off')
+      setPrintComponents(new Map())
       document.body.classList.remove('liasse-printing')
+      // Clean up injected style
+      const injected = document.getElementById('liasse-print-page-rules')
+      if (injected) injected.remove()
     }
     window.addEventListener('afterprint', onAfterPrint)
     return () => {
-      clearTimeout(timer)
+      cancelAnimationFrame(raf)
       window.removeEventListener('afterprint', onAfterPrint)
     }
-  }, [printMode])
+  }, [printMode, printComponents])
 
   // Reload data on window focus or exercise change
   useEffect(() => {
@@ -107,9 +152,10 @@ const LiasseFiscaleModule: React.FC = () => {
   const PageComponent = currentPage.component
 
   const handlePrint = useCallback(async (mode: PrintMode) => {
-    // Preload all lazy page components BEFORE setting printMode
     const pagesToPrint = mode === 'all' ? filteredPages : (currentPage ? [currentPage] : [])
-    await preloadPages(pagesToPrint)
+    // Load all component modules directly (bypasses React.lazy/Suspense)
+    const loaded = await loadPageComponents(pagesToPrint)
+    setPrintComponents(loaded)
     // Add body class to hide entire app shell (Layout, Proph3t, etc.)
     document.body.classList.add('liasse-printing')
     setPrintMode(mode)
@@ -147,17 +193,24 @@ const LiasseFiscaleModule: React.FC = () => {
   return (
     <LiasseRegimeContext.Provider value={regime}>
     {/* Print container — portaled to body, hidden on screen, sole visible element in @media print */}
-    {printMode !== 'off' && createPortal(
+    {printMode !== 'off' && printComponents.size > 0 && createPortal(
       <div className="liasse-print-container">
         {printPages.map(page => {
-          const Comp = page.component
+          const Comp = printComponents.get(page.id)
+          if (!Comp) return null
+          // Width = A4 printable area (A4 size minus @page margins)
+          // Portrait: 210 - 10 - 10 = 190mm | Landscape: 297 - 15 - 15 = 267mm
+          const isLandscape = page.orientation === 'landscape'
           return (
-            <div key={page.id} className="liasse-print-page">
-              <Suspense fallback={null}>
-                <LiassePage orientation={page.orientation} zoom={100}>
-                  <Comp entreprise={entreprise} balance={balance} balanceN1={balanceN1} regime={regime} onNoteClick={handleNoteClick} />
-                </LiassePage>
-              </Suspense>
+            <div
+              key={page.id}
+              className="liasse-print-page"
+              data-orientation={isLandscape ? 'landscape' : 'portrait'}
+              style={{ width: isLandscape ? '267mm' : '190mm' }}
+            >
+              <LiassePage orientation={page.orientation} zoom={100}>
+                <Comp entreprise={entreprise} balance={balance} balanceN1={balanceN1} regime={regime} onNoteClick={handleNoteClick} />
+              </LiassePage>
             </div>
           )
         })}
@@ -340,7 +393,7 @@ const LiasseFiscaleModule: React.FC = () => {
         )}
 
         {/* Page content */}
-        <Paper sx={{ p: 0, flexGrow: 1, overflowY: 'auto', minHeight: 0 }}>
+        <Paper sx={{ p: 0, flexGrow: 1, overflow: 'auto', minHeight: 0 }}>
           <Box sx={{ textAlign: 'center', py: 0.5, bgcolor: 'grey.50', borderBottom: 1, borderColor: 'divider', '@media print': { display: 'none' } }}>
             <Typography variant="caption" color="text.secondary">
               {currentPage.ongletExcel}
@@ -353,7 +406,7 @@ const LiasseFiscaleModule: React.FC = () => {
                 <CircularProgress size={32} />
               </Box>
             }>
-              <LiassePage orientation={currentPage.orientation} zoom={zoom}>
+              <LiassePage orientation={currentPage.orientation} zoom={currentPage.orientation === 'landscape' ? zoom * (210 / 297) : zoom}>
                 <PageComponent entreprise={entreprise} balance={balance} balanceN1={balanceN1} regime={regime} onNoteClick={handleNoteClick} />
               </LiassePage>
             </Suspense>

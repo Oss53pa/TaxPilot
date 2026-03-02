@@ -148,7 +148,7 @@ export const LIASSE_PAGES: LiassePage[] = [
   { id: 'NOTE_8', pageNum: 27, section: 'notes', label: `Note 8 — ${getNoteTitle(8)}`, componentKey: 'Note8SYSCOHADA', componentFile: '27_Note08', moduleId: 'note-08', regimes: NS, sourceData: 'balance' },
 
   // ── Onglet 28: NOTE 8A ──
-  { id: 'NOTE_8A', pageNum: 28, section: 'notes', label: `Note 8A — ${getSubNoteTitle('8A')}`, componentKey: 'Note8ASYSCOHADA', componentFile: '28_Note8A', moduleId: 'note-8a', regimes: NS, sourceData: 'balance' },
+  { id: 'NOTE_8A', pageNum: 28, section: 'notes', label: `Note 8A — ${getSubNoteTitle('8A')}`, componentKey: 'Note8ASYSCOHADA', componentFile: '28_Note8A', moduleId: 'note-8a', regimes: NS, sourceData: 'balance', orientation: 'landscape' },
 
   // ── Onglet 29: NOTE 8B ──
   { id: 'NOTE_8B', pageNum: 29, section: 'notes', label: `Note 8B — ${getSubNoteTitle('8B')}`, componentKey: 'Note8BSYSCOHADA', componentFile: '29_Note8B', moduleId: 'note-8b', regimes: NS, sourceData: 'balance' },
@@ -187,7 +187,7 @@ export const LIASSE_PAGES: LiassePage[] = [
   { id: 'NOTE_16B', pageNum: 40, section: 'notes', label: `Note 16B — ${getSubNoteTitle('16B')}`, componentKey: 'Note16BSYSCOHADA', componentFile: '40_Note16B', moduleId: 'note-16b', regimes: N, sourceData: 'saisie_manuelle' },
 
   // ── Onglet 41: NOTE 16B BIS ──
-  { id: 'NOTE_16B_BIS', pageNum: 41, section: 'notes', label: `Note 16B BIS — ${getSubNoteTitle('16B_BIS')}`, componentKey: 'Note16BBISSYSCOHADA', componentFile: '41_Note16BBis', moduleId: 'note-16b-bis', regimes: N, sourceData: 'saisie_manuelle' },
+  { id: 'NOTE_16B_BIS', pageNum: 41, section: 'notes', label: `Note 16B BIS — ${getSubNoteTitle('16B_BIS')}`, componentKey: 'Note16BBISSYSCOHADA', componentFile: '41_Note16BBis', moduleId: 'note-16b-bis', regimes: N, sourceData: 'saisie_manuelle', orientation: 'landscape' },
 
   // ── Onglet 42: NOTE 16C ──
   { id: 'NOTE_16C', pageNum: 42, section: 'notes', label: `Note 16C — ${getSubNoteTitle('16C')}`, componentKey: 'Note16CSYSCOHADA', componentFile: '42_Note16C', moduleId: 'note-16c', regimes: N, sourceData: 'saisie_manuelle' },
@@ -226,10 +226,10 @@ export const LIASSE_PAGES: LiassePage[] = [
   { id: 'NOTE_27A', pageNum: 53, section: 'notes', label: `Note 27A — ${getSubNoteTitle('27A')}`, componentKey: 'Note27ASYSCOHADA', componentFile: '53_Note27A', moduleId: 'note-27a', regimes: NS, sourceData: 'balance' },
 
   // ── Onglet 54: NOTE 27B ──
-  { id: 'NOTE_27B', pageNum: 54, section: 'notes', label: `Note 27B — ${getSubNoteTitle('27B')}`, componentKey: 'Note27BSYSCOHADA', componentFile: '54_Note27B', moduleId: 'note-27b', regimes: NS, sourceData: 'mixte' },
+  { id: 'NOTE_27B', pageNum: 54, section: 'notes', label: `Note 27B — ${getSubNoteTitle('27B')}`, componentKey: 'Note27BSYSCOHADA', componentFile: '54_Note27B', moduleId: 'note-27b', regimes: NS, sourceData: 'mixte', orientation: 'landscape' },
 
   // ── Onglet 55: NOTE 28 ──
-  { id: 'NOTE_28', pageNum: 55, section: 'notes', label: `Note 28 — ${getNoteTitle(28)}`, componentKey: 'Note28SYSCOHADA', componentFile: '55_Note28', moduleId: 'note-28', regimes: N, sourceData: 'balance' },
+  { id: 'NOTE_28', pageNum: 55, section: 'notes', label: `Note 28 — ${getNoteTitle(28)}`, componentKey: 'Note28SYSCOHADA', componentFile: '55_Note28', moduleId: 'note-28', regimes: N, sourceData: 'balance', orientation: 'landscape' },
 
   // ── Onglet 56: NOTE 29 ──
   { id: 'NOTE_29', pageNum: 56, section: 'notes', label: `Note 29 — ${getNoteTitle(29)}`, componentKey: 'Note29SYSCOHADA', componentFile: '56_Note29', moduleId: 'note-29', regimes: N, sourceData: 'balance' },
@@ -238,16 +238,16 @@ export const LIASSE_PAGES: LiassePage[] = [
   { id: 'NOTE_30', pageNum: 57, section: 'notes', label: `Note 30 — ${getNoteTitle(30)}`, componentKey: 'Note30SYSCOHADA', componentFile: '57_Note30', moduleId: 'note-30', regimes: N, sourceData: 'balance' },
 
   // ── Onglet 58: NOTE 31 ──
-  { id: 'NOTE_31', pageNum: 58, section: 'notes', label: `Note 31 — ${getNoteTitle(31)}`, componentKey: 'Note31SYSCOHADA', componentFile: '58_Note31', moduleId: 'note-31', regimes: NS, sourceData: 'mixte' },
+  { id: 'NOTE_31', pageNum: 58, section: 'notes', label: `Note 31 — ${getNoteTitle(31)}`, componentKey: 'Note31SYSCOHADA', componentFile: '58_Note31', moduleId: 'note-31', regimes: NS, sourceData: 'mixte', orientation: 'landscape' },
 
   // ── Onglet 59: NOTE 32 ──
-  { id: 'NOTE_32', pageNum: 59, section: 'notes', label: `Note 32 — ${getNoteTitle(32)}`, componentKey: 'Note32SYSCOHADA', componentFile: '59_Note32', moduleId: 'note-32', regimes: N, sourceData: 'balance' },
+  { id: 'NOTE_32', pageNum: 59, section: 'notes', label: `Note 32 — ${getNoteTitle(32)}`, componentKey: 'Note32SYSCOHADA', componentFile: '59_Note32', moduleId: 'note-32', regimes: N, sourceData: 'balance', orientation: 'landscape' },
 
   // ── Onglet 60: NOTE 33 ──
-  { id: 'NOTE_33', pageNum: 60, section: 'notes', label: `Note 33 — ${getNoteTitle(33)}`, componentKey: 'Note33SYSCOHADA', componentFile: '60_Note33', moduleId: 'note-33', regimes: N, sourceData: 'balance' },
+  { id: 'NOTE_33', pageNum: 60, section: 'notes', label: `Note 33 — ${getNoteTitle(33)}`, componentKey: 'Note33SYSCOHADA', componentFile: '60_Note33', moduleId: 'note-33', regimes: N, sourceData: 'balance', orientation: 'landscape' },
 
   // ── Onglet 61: NOTE 34 ──
-  { id: 'NOTE_34', pageNum: 61, section: 'notes', label: `Note 34 — ${getNoteTitle(34)}`, componentKey: 'Note34SYSCOHADA', componentFile: '61_Note34', moduleId: 'note-34', regimes: N, sourceData: 'calcul' },
+  { id: 'NOTE_34', pageNum: 61, section: 'notes', label: `Note 34 — ${getNoteTitle(34)}`, componentKey: 'Note34SYSCOHADA', componentFile: '61_Note34', moduleId: 'note-34', regimes: N, sourceData: 'calcul', orientation: 'landscape' },
 
   // ── Onglet 62: NOTE 35 ──
   { id: 'NOTE_35', pageNum: 62, section: 'notes', label: `Note 35 — ${getNoteTitle(35)}`, componentKey: 'Note35SYSCOHADA', componentFile: '62_Note35', moduleId: 'note-35', regimes: N, sourceData: 'saisie_manuelle' },
@@ -256,7 +256,7 @@ export const LIASSE_PAGES: LiassePage[] = [
   { id: 'NOTE_37', pageNum: 63, section: 'notes', label: `Note 37 — ${getNoteTitle(37)}`, componentKey: 'Note37SYSCOHADA', componentFile: '63_Note37', moduleId: 'note-37', regimes: N, sourceData: 'calcul' },
 
   // ── Onglet 64: NOTE 38 ──
-  { id: 'NOTE_38', pageNum: 64, section: 'notes', label: `Note 38 — ${getNoteTitle(38)}`, componentKey: 'Note38SYSCOHADA', componentFile: '64_Note38', moduleId: 'note-38', regimes: N, sourceData: 'saisie_manuelle' },
+  { id: 'NOTE_38', pageNum: 64, section: 'notes', label: `Note 38 — ${getNoteTitle(38)}`, componentKey: 'Note38SYSCOHADA', componentFile: '64_Note38', moduleId: 'note-38', regimes: N, sourceData: 'saisie_manuelle', orientation: 'landscape' },
 
   // ── Onglet 65: NOTE 39 ──
   { id: 'NOTE_39', pageNum: 65, section: 'notes', label: `Note 39 — ${getNoteTitle(39)}`, componentKey: 'Note39SYSCOHADA', componentFile: '65_Note39', moduleId: 'note-39', regimes: N, sourceData: 'saisie_manuelle' },
