@@ -1,5 +1,5 @@
 /**
- * Supabase Data Access Layer — TaxPilot
+ * Supabase Data Access Layer — Liass'Pilot
  * Provides typed CRUD operations for all Supabase tables.
  * Services should call these functions when BACKEND_ENABLED = true.
  */

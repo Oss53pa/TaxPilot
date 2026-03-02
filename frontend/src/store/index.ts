@@ -1,5 +1,5 @@
 /**
- * Configuration du store Redux pour TaxPilot
+ * Configuration du store Redux pour Liass'Pilot
  */
 
 import { configureStore } from '@reduxjs/toolkit'

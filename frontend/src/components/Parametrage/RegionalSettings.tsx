@@ -42,7 +42,7 @@ interface RegionalConfig {
 
 const RegionalSettings: React.FC = () => {
   const [config, setConfig] = useState<RegionalConfig>({
-    country: 'CI', // Côte d'Ivoire par défaut pour TaxPilot
+    country: 'CI', // Côte d'Ivoire par défaut pour Liass'Pilot
     currency: 'XOF', // Franc CFA
     language: 'fr',
     timezone: 'Africa/Abidjan',

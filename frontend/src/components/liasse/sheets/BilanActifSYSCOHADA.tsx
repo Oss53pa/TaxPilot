@@ -1,7 +1,7 @@
 import { logger } from '@/utils/logger'
 /**
  * Bilan Actif SYSCOHADA - Avec intégration automatique de la balance
- * Respecte le style et la charte graphique TaxPilot
+ * Respecte le style et la charte graphique Liass'Pilot
  */
 
 import React, { useState, useEffect, memo } from 'react'

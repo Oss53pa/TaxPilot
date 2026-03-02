@@ -8,7 +8,7 @@
  * - LiasseCompleteFinal (validation et contrôles)
  *
  * @version 1.0.0 - Version officielle consolidée
- * @author TaxPilot Team
+ * @author Liass'Pilot Team
  * @date 2025-01-19
  */
 

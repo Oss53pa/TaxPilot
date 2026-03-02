@@ -1,5 +1,5 @@
 /**
- * Layout principal de l'application TaxPilot
+ * Layout principal de l'application Liass'Pilot
  * Palette Grayscale monochrome
  */
 
@@ -125,11 +125,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               letterSpacing: 0.5,
             }}
           >
-            TaxPilot
+            Liass'Pilot
           </Typography>
         )}
         {isCollapsed ? (
-          <Tooltip title="TaxPilot — Accueil" placement="right">
+          <Tooltip title="Liass'Pilot — Accueil" placement="right">
             <IconButton
               onClick={() => navigate('/')}
               size="small"
@@ -287,7 +287,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             component="div"
             sx={{ flexGrow: 1, fontWeight: 600, color: 'text.primary' }}
           >
-            TaxPilot
+            Liass'Pilot
           </Typography>
 
           <NotificationCenter />

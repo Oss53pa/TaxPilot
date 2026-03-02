@@ -1,5 +1,5 @@
 /**
- * Types TypeScript pour TaxPilot
+ * Types TypeScript pour Liass'Pilot
  * Application de Génération et Édition de Liasse Fiscale SYSCOHADA/IFRS
  */
 
@@ -382,7 +382,7 @@ export interface ChartData {
 }
 
 // Types d'erreur
-export interface TaxPilotError {
+export interface LiassPilotError {
   code: string
   message: string
   details?: Record<string, unknown>

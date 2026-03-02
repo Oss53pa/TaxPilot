@@ -253,7 +253,7 @@ export default function TaxComplianceCalendar() {
   }
 
   const generateICSContent = (obligations: ObligationFiscale[]) => {
-    let ics = 'BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//TaxPilot//Calendar//FR\n'
+    let ics = 'BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//LiassPilot//Calendar//FR\n'
 
     obligations.forEach(obligation => {
       const date = new Date(obligation.date_echeance)

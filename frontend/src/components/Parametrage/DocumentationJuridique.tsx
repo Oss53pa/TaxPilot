@@ -316,7 +316,7 @@ const demoSyntheses: SyntheseSyscohada[] = [
     id: '6',
     titre: 'Principe de spécialisation des exercices (indépendance)',
     categorie: 'Principes comptables',
-    resume: 'Art. 59 Acte Uniforme - Les charges et produits doivent être rattachés à l\'exercice qui les concerne, indépendamment de leur date d\'encaissement ou de paiement. Mécanismes SYSCOHADA : charges constatées d\'avance (476), produits constatés d\'avance (477), charges à payer (408, 428, 438, 448), produits à recevoir (418, 428). L\'application stricte de ce principe est vérifiée par TaxPilot (contrôle EF-005). Erreur fréquente : comptabiliser une facture fournisseur de janvier N+1 relative à une prestation de décembre N directement en charges N+1.',
+    resume: 'Art. 59 Acte Uniforme - Les charges et produits doivent être rattachés à l\'exercice qui les concerne, indépendamment de leur date d\'encaissement ou de paiement. Mécanismes SYSCOHADA : charges constatées d\'avance (476), produits constatés d\'avance (477), charges à payer (408, 428, 438, 448), produits à recevoir (418, 428). L\'application stricte de ce principe est vérifiée par Liass\'Pilot (contrôle EF-005). Erreur fréquente : comptabiliser une facture fournisseur de janvier N+1 relative à une prestation de décembre N directement en charges N+1.',
     documentSource: 'Acte Uniforme OHADA - Art. 59',
     documentSourceId: '1',
     dateGeneration: '30/01/2024',
@@ -378,7 +378,7 @@ const demoSyntheses: SyntheseSyscohada[] = [
     id: '12',
     titre: 'Bilan SYSCOHADA : Structure et cohérence des REF codes',
     categorie: 'États financiers',
-    resume: 'Pages 981-982 SYSCOHADA Révisé - Le Bilan Actif utilise les REF AE à BZ (7 colonnes : REF, Libellé, Note, Brut, Amort/Dépréc, Net N, Net N-1). Le Bilan Passif utilise les REF CA à DZ (5 colonnes : REF, Libellé, Note, Net N, Net N-1). Contrôles obligatoires : BZ (Total Actif) = DZ (Total Passif), AZ = somme des immobilisations, BK = actif circulant, BT = trésorerie actif. TaxPilot vérifie automatiquement l\'équilibre (contrôle EF-001) et la cohérence des sous-totaux (EF-002 à EF-004).',
+    resume: 'Pages 981-982 SYSCOHADA Révisé - Le Bilan Actif utilise les REF AE à BZ (7 colonnes : REF, Libellé, Note, Brut, Amort/Dépréc, Net N, Net N-1). Le Bilan Passif utilise les REF CA à DZ (5 colonnes : REF, Libellé, Note, Net N, Net N-1). Contrôles obligatoires : BZ (Total Actif) = DZ (Total Passif), AZ = somme des immobilisations, BK = actif circulant, BT = trésorerie actif. Liass\'Pilot vérifie automatiquement l\'équilibre (contrôle EF-001) et la cohérence des sous-totaux (EF-002 à EF-004).',
     documentSource: 'SYSCOHADA Révisé - Pages 981-982',
     documentSourceId: '1',
     dateGeneration: '10/02/2024',
@@ -420,7 +420,7 @@ const demoSyntheses: SyntheseSyscohada[] = [
     id: '16',
     titre: 'Comptabilisation des contrats de location (crédit-bail)',
     categorie: 'Règles de comptabilisation',
-    resume: 'Chapitre 9 SYSCOHADA Révisé (page 610) - Le SYSCOHADA Révisé aligne le traitement sur IFRS 16 : le preneur inscrit à l\'actif un droit d\'utilisation (compte 24x) et au passif un emprunt de location-financement (compte 17x). L\'actif est amorti sur la durée du contrat. Le passif est remboursé selon un tableau d\'amortissement financier. Exception : contrats < 12 mois ou actifs de faible valeur (< 5 millions FCFA). Contrôle TaxPilot : vérification que le compte 24 a une contrepartie en 17.',
+    resume: 'Chapitre 9 SYSCOHADA Révisé (page 610) - Le SYSCOHADA Révisé aligne le traitement sur IFRS 16 : le preneur inscrit à l\'actif un droit d\'utilisation (compte 24x) et au passif un emprunt de location-financement (compte 17x). L\'actif est amorti sur la durée du contrat. Le passif est remboursé selon un tableau d\'amortissement financier. Exception : contrats < 12 mois ou actifs de faible valeur (< 5 millions FCFA). Contrôle Liass\'Pilot : vérification que le compte 24 a une contrepartie en 17.',
     documentSource: 'SYSCOHADA Révisé - Chapitre 9',
     documentSourceId: '1',
     dateGeneration: '15/01/2024',
@@ -430,7 +430,7 @@ const demoSyntheses: SyntheseSyscohada[] = [
     id: '17',
     titre: 'Traitement des écarts de conversion (opérations en devises)',
     categorie: 'Traitements spécifiques',
-    resume: 'Chapitre 24 SYSCOHADA Révisé (page 781) - Les créances et dettes en devises sont converties au cours de clôture. Écarts de conversion-Actif (pertes latentes, compte 478) : provisionnés obligatoirement (compte 194). Écarts de conversion-Passif (gains latents, compte 479) : inscrits en produits constatés d\'avance, non imposables. Les écarts doivent figurer séparément au bilan (lignes BU et DV). TaxPilot vérifie que les ECA sont provisionnés (contrôle EF-012).',
+    resume: 'Chapitre 24 SYSCOHADA Révisé (page 781) - Les créances et dettes en devises sont converties au cours de clôture. Écarts de conversion-Actif (pertes latentes, compte 478) : provisionnés obligatoirement (compte 194). Écarts de conversion-Passif (gains latents, compte 479) : inscrits en produits constatés d\'avance, non imposables. Les écarts doivent figurer séparément au bilan (lignes BU et DV). Liass\'Pilot vérifie que les ECA sont provisionnés (contrôle EF-012).',
     documentSource: 'SYSCOHADA Révisé - Chapitre 24',
     documentSourceId: '1',
     dateGeneration: '22/01/2024',
@@ -450,10 +450,10 @@ const demoSyntheses: SyntheseSyscohada[] = [
   // ─── Erreurs fréquentes ────────────────────────────────────────────────
   {
     id: '19',
-    titre: 'TOP 10 des erreurs comptables détectées par TaxPilot',
+    titre: 'TOP 10 des erreurs comptables détectées par Liass\'Pilot',
     categorie: 'Erreurs fréquentes',
     resume: '1. Balance non équilibrée (total débits ≠ crédits) - Contrôle E-001. 2. Comptes non conformes au plan SYSCOHADA - C-001. 3. Comptes de résultat avec solde inversé (charge créditrice ou produit débiteur) - S-003. 4. Écart de conversion-Actif non provisionné - EF-012. 5. Bilan déséquilibré (Actif ≠ Passif) - EF-001. 6. Capitaux propres négatifs sans mention - EF-010. 7. Résultat du bilan ≠ résultat du CdR - EF-007. 8. Absence de comptes d\'amortissement pour les immobilisations - IA-001. 9. TVA collectée sans TVA déductible correspondante - F-003. 10. Charges HAO > 10% du résultat sans justification - EF-015.',
-    documentSource: 'TaxPilot - Module Audit',
+    documentSource: 'Liass\'Pilot - Module Audit',
     documentSourceId: '1',
     dateGeneration: '15/02/2024',
     genereParIA: false,
@@ -462,7 +462,7 @@ const demoSyntheses: SyntheseSyscohada[] = [
     id: '20',
     titre: 'Erreurs de classification HAO vs exploitation',
     categorie: 'Erreurs fréquentes',
-    resume: 'Art. 60 Acte Uniforme - Les activités HAO (Hors Activités Ordinaires) sont des événements exceptionnels, non récurrents et hors du contrôle de l\'entité (catastrophes naturelles, expropriations, restructurations exceptionnelles). Erreur fréquente : classer en HAO des charges récurrentes (pertes sur créances courantes, moins-values sur cessions courantes). Conséquence : le résultat d\'exploitation est artificiellement amélioré. TaxPilot alerte si les charges HAO (comptes 83x) dépassent 10% du total des charges (contrôle EF-015).',
+    resume: 'Art. 60 Acte Uniforme - Les activités HAO (Hors Activités Ordinaires) sont des événements exceptionnels, non récurrents et hors du contrôle de l\'entité (catastrophes naturelles, expropriations, restructurations exceptionnelles). Erreur fréquente : classer en HAO des charges récurrentes (pertes sur créances courantes, moins-values sur cessions courantes). Conséquence : le résultat d\'exploitation est artificiellement amélioré. Liass\'Pilot alerte si les charges HAO (comptes 83x) dépassent 10% du total des charges (contrôle EF-015).',
     documentSource: 'Acte Uniforme OHADA - Art. 60',
     documentSourceId: '1',
     dateGeneration: '15/02/2024',
@@ -472,7 +472,7 @@ const demoSyntheses: SyntheseSyscohada[] = [
     id: '21',
     titre: 'Erreurs sur les comptes de tiers (classe 4)',
     categorie: 'Erreurs fréquentes',
-    resume: 'Erreurs les plus fréquentes sur les comptes de tiers : (1) Fournisseurs avec solde débiteur sans avance versée justifiée - vérifier les comptes 409 (avances fournisseurs). (2) Clients avec solde créditeur sans avance reçue justifiée - vérifier les comptes 419 (avances clients). (3) Absence de lettrage entre factures et règlements. (4) TVA déductible non rapprochée des factures fournisseurs. (5) Comptes courants d\'associés (compte 462) avec solde débiteur (interdit dans certaines législations). TaxPilot détecte ces anomalies via les contrôles S-003, IA-002 et IA-003.',
+    resume: 'Erreurs les plus fréquentes sur les comptes de tiers : (1) Fournisseurs avec solde débiteur sans avance versée justifiée - vérifier les comptes 409 (avances fournisseurs). (2) Clients avec solde créditeur sans avance reçue justifiée - vérifier les comptes 419 (avances clients). (3) Absence de lettrage entre factures et règlements. (4) TVA déductible non rapprochée des factures fournisseurs. (5) Comptes courants d\'associés (compte 462) avec solde débiteur (interdit dans certaines législations). Liass\'Pilot détecte ces anomalies via les contrôles S-003, IA-002 et IA-003.',
     documentSource: 'SYSCOHADA Révisé - Classe 4',
     documentSourceId: '1',
     dateGeneration: '18/02/2024',
@@ -484,7 +484,7 @@ const demoSyntheses: SyntheseSyscohada[] = [
     id: '22',
     titre: 'Fonctionnement des comptes SYSCOHADA',
     categorie: 'Référentiel SYSCOHADA',
-    resume: 'Le Titre VII, Chapitre 3 du SYSCOHADA Révisé (pages 277-542, ~265 pages) décrit pour chaque compte les règles précises de fonctionnement : quand le compte est débité, quand il est crédité, les contreparties habituelles, les subdivisions possibles, les exclusions (comptes à ne pas confondre) et les éléments de contrôle. Ces règles constituent la base normative de toute comptabilisation conforme au référentiel OHADA. TaxPilot intègre ces données pour 67 comptes principaux couvrant les 9 classes.',
+    resume: 'Le Titre VII, Chapitre 3 du SYSCOHADA Révisé (pages 277-542, ~265 pages) décrit pour chaque compte les règles précises de fonctionnement : quand le compte est débité, quand il est crédité, les contreparties habituelles, les subdivisions possibles, les exclusions (comptes à ne pas confondre) et les éléments de contrôle. Ces règles constituent la base normative de toute comptabilisation conforme au référentiel OHADA. Liass\'Pilot intègre ces données pour 67 comptes principaux couvrant les 9 classes.',
     documentSource: 'SYSCOHADA Révisé 2017 - Titre VII, Chapitre 3',
     documentSourceId: '1',
     dateGeneration: '13/02/2026',
@@ -649,7 +649,7 @@ const demoRegles: RegleValidation[] = [
     id: '18', code: 'CC-001', libelle: 'Variation N/N-1 cohérente (<30%)',
     categorie: 'Contrôles de cohérence', severite: 'MINEUR',
     articleReference: 'Art. 33 Acte Uniforme OHADA - Importance significative',
-    description: 'Les variations significatives (>30%) entre N et N-1 sur les postes principaux du bilan et du compte de résultat doivent être justifiées dans les Notes annexes. TaxPilot identifie automatiquement ces variations pour alerter le comptable.',
+    description: 'Les variations significatives (>30%) entre N et N-1 sur les postes principaux du bilan et du compte de résultat doivent être justifiées dans les Notes annexes. Liass\'Pilot identifie automatiquement ces variations pour alerter le comptable.',
     controleAssocie: 'YOY-002', actif: true,
   },
   {
@@ -686,7 +686,7 @@ const demoRegles: RegleValidation[] = [
     id: '23', code: 'OF-003', libelle: 'Dépôt dans les délais légaux',
     categorie: 'Obligations fiscales', severite: 'INFO',
     articleReference: 'Codes des impôts nationaux',
-    description: 'La liasse fiscale doit être déposée dans les délais légaux du pays (généralement 30 avril N+1 pour les exercices clos au 31/12). TaxPilot affiche un compte à rebours dans le calendrier fiscal.',
+    description: 'La liasse fiscale doit être déposée dans les délais légaux du pays (généralement 30 avril N+1 pour les exercices clos au 31/12). Liass\'Pilot affiche un compte à rebours dans le calendrier fiscal.',
     controleAssocie: '-', actif: true,
   },
 ]
@@ -1350,7 +1350,7 @@ const DocumentationJuridique: React.FC = () => {
           {/* En-tête avec stats */}
           <Alert severity="info" sx={{ mb: 3 }} icon={<Shield />}>
             <Typography variant="body2">
-              TaxPilot applique <strong>{reglesStats.total} règles de validation</strong> basées sur l'Acte Uniforme OHADA et le SYSCOHADA Révisé 2017.
+              Liass'Pilot applique <strong>{reglesStats.total} règles de validation</strong> basées sur l'Acte Uniforme OHADA et le SYSCOHADA Révisé 2017.
               Dont <strong>{reglesStats.bloquants} bloquantes</strong> et <strong>{reglesStats.majeurs} majeures</strong>.
               Chaque règle est liée à un article officiel. Vous pouvez activer/désactiver les contrôles non bloquants.
             </Typography>
@@ -1735,11 +1735,11 @@ const DocumentationJuridique: React.FC = () => {
                   </Paper>
                 </Box>
 
-                {/* Contrôle TaxPilot associé */}
+                {/* Contrôle Liass'Pilot associé */}
                 {regleDetail.controleAssocie && regleDetail.controleAssocie !== '-' && (
                   <Box>
                     <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                      Contrôle TaxPilot associé
+                      Contrôle Liass'Pilot associé
                     </Typography>
                     <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 0.5 }}>
                       <Chip

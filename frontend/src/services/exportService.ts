@@ -1,5 +1,5 @@
 /**
- * Service d'export — TaxPilot
+ * Service d'export — Liass'Pilot
  * Export Excel (format DGI) et PDF pour la liasse fiscale SYSCOHADA
  */
 
@@ -334,7 +334,7 @@ export function exportLiassePDF(
 </table>
 
 <div class="footer">
-  <p>Généré par TaxPilot — &copy; ${new Date().getFullYear()} Atlas Studio. Tous droits réservés.</p>
+  <p>Généré par Liass'Pilot — &copy; ${new Date().getFullYear()} Atlas Studio. Tous droits réservés.</p>
 </div>
 
 <script class="no-print">window.onload = () => window.print();</script>

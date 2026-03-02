@@ -57,7 +57,7 @@ function computeResultat(bal: BalanceEntry[]) {
   const RP = -getCharges(bal, ['83', '85'])
   const XH = TN + TO + RO + RP
 
-  const RQ = 0
+  const RQ = -getCharges(bal, ['87'])
   const RS = -getCharges(bal, ['89'])
   const XI = XG + XH + RQ + RS
 

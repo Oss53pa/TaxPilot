@@ -1,6 +1,6 @@
 import { logger } from '@/utils/logger'
 /**
- * Supabase Client — TaxPilot
+ * Supabase Client — Liass'Pilot
  * Single instance used throughout the app
  */
 

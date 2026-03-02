@@ -282,7 +282,7 @@ class BackupService {
     ]
   }
 
-  // Obtenir les modules TaxPilot
+  // Obtenir les modules Liass'Pilot
   getModules() {
     return [
       { value: 'BALANCE', label: 'Balance' },

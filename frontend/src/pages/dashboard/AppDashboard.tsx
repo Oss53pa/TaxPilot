@@ -1,5 +1,5 @@
 /**
- * TaxPilot - Tableau de bord principal
+ * Liass'Pilot - Tableau de bord principal
  * Dashboard fiscal - Palette Grayscale monochrome
  */
 

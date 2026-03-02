@@ -136,9 +136,9 @@ export const useAuthStore = create<AuthState>()(
           user: user || {
             id: 1,
             username: 'admin',
-            email: 'admin@taxpilot.com',
+            email: 'admin@liasspilot.com',
             first_name: 'Admin',
-            last_name: 'TaxPilot',
+            last_name: 'LiassPilot',
             is_staff: true,
             is_superuser: true,
           },

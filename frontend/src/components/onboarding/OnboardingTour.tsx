@@ -1,5 +1,5 @@
 /**
- * Tour guidé interactif pour nouveaux utilisateurs TaxPilot
+ * Tour guidé interactif pour nouveaux utilisateurs Liass\u2019Pilot
  * Améliore l'adoption et l'autonomie utilisateur
  */
 
@@ -62,7 +62,7 @@ const OnboardingTour: React.FC = () => {
   const tourSteps: TourStep[] = [
     {
       id: 0,
-      title: 'Bienvenue dans TaxPilot !',
+      title: 'Bienvenue dans Liass\u2019Pilot !',
       description: 'Solution complète de comptabilité SYSCOHADA avec IA intégrée',
       icon: <DashboardIcon color="primary" />,
       route: '/dashboard',
@@ -205,7 +205,7 @@ const OnboardingTour: React.FC = () => {
         <Box sx={{ mb: 4 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
             <Typography variant="h5" sx={{ fontWeight: 600 }}>
-              Tour de découverte TaxPilot
+              Tour de découverte Liass{'\u2019'}Pilot
             </Typography>
             <Chip 
               label={`${activeStep + 1}/${tourSteps.length}`} 
@@ -321,7 +321,7 @@ const OnboardingTour: React.FC = () => {
         {/* Message de fin */}
         {isLastStep && (
           <Alert severity="success" sx={{ mt: 3 }}>
-            <strong>Félicitations !</strong> Vous êtes maintenant prêt à utiliser TaxPilot. 
+            <strong>Félicitations !</strong> Vous êtes maintenant prêt à utiliser Liass{'\u2019'}Pilot. 
             Notre équipe support est disponible si vous avez des questions.
           </Alert>
         )}

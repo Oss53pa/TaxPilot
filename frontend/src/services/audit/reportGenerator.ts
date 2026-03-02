@@ -71,7 +71,7 @@ class ReportGenerator {
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Rapport d'Audit - TaxPilot</title>
+  <title>Rapport d'Audit - Liass'Pilot</title>
   <style>
     body { font-family: 'Segoe UI', Tahoma, sans-serif; max-width: 1000px; margin: 0 auto; padding: 20px; color: #333; }
     h1 { color: #1a237e; border-bottom: 3px solid #1a237e; padding-bottom: 12px; }
@@ -119,7 +119,7 @@ class ReportGenerator {
 
   <hr style="margin-top:40px">
   <p style="color:#999;font-size:12px;text-align:center">
-    Rapport genere par TaxPilot - Moteur d'audit 108 points SYSCOHADA Revise
+    Rapport genere par Liass'Pilot - Moteur d'audit 108 points SYSCOHADA Revise
     <br>Date de generation: ${new Date().toLocaleString('fr-FR')}
   </p>
 </body>

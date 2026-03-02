@@ -628,12 +628,12 @@ const KeyboardNavigation: React.FC = () => {
         >
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
             <Keyboard sx={{ mr: 2 }} color="primary" />
-            <Typography variant="h5">Raccourcis Clavier TaxPilot</Typography>
+            <Typography variant="h5">Raccourcis Clavier Liass'Pilot</Typography>
           </Box>
           
           <Alert severity="info" sx={{ mb: 3 }}>
             <Typography variant="body2">
-              TaxPilot est entièrement navigable au clavier selon les standards WCAG 2.1 AA.
+              Liass'Pilot est entièrement navigable au clavier selon les standards WCAG 2.1 AA.
               Tous les éléments sont accessibles sans souris.
             </Typography>
           </Alert>

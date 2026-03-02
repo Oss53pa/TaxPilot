@@ -20,6 +20,7 @@ function computeSIG(bal: BalanceEntry[]) {
 
   // 2. Production
   const productionVendue = p(['702','703','704','705','706'])
+  const produitsAccessoires = p(['707'])
   const productionStockee = -s(['73'])
   const productionImmobilisee = p(['72'])
 
@@ -30,7 +31,8 @@ function computeSIG(bal: BalanceEntry[]) {
   const servicesExterieurs = c(['62','63'])
 
   // 4. Valeur ajoutee
-  const valeurAjoutee = margeBrute + productionVendue + productionStockee + productionImmobilisee
+  const valeurAjoutee = margeBrute + productionVendue + produitsAccessoires
+    + productionStockee + productionImmobilisee
     - achatsMatieres - autresAchats - transports - servicesExterieurs
 
   // 5. EBE
@@ -41,15 +43,20 @@ function computeSIG(bal: BalanceEntry[]) {
 
   // 6. Resultat d'exploitation
   const autresProduits = p(['75'])
+  const transfertsChargesExploit = p(['781'])
   const autresCharges = c(['65'])
   const dotationsAmortProv = c(['681','691'])
   const reprisesAmortProv = p(['791','798','799'])
-  const resultatExploitation = ebe + autresProduits - autresCharges - dotationsAmortProv + reprisesAmortProv
+  const resultatExploitation = ebe + autresProduits + transfertsChargesExploit
+    - autresCharges - dotationsAmortProv + reprisesAmortProv
 
   // 7. Resultat financier
   const produitsFinanciers = p(['77'])
+  const reprisesProvFinancieres = p(['797'])
+  const transfertsChargesFinancieres = p(['787'])
   const chargesFinancieres = c(['67','697'])
-  const resultatFinancier = produitsFinanciers - chargesFinancieres
+  const resultatFinancier = produitsFinanciers + reprisesProvFinancieres
+    + transfertsChargesFinancieres - chargesFinancieres
 
   // 8. Resultat des activites ordinaires
   const resultatActivitesOrdinaires = resultatExploitation + resultatFinancier
@@ -60,20 +67,21 @@ function computeSIG(bal: BalanceEntry[]) {
   const resultatHAO = produitsHAO - chargesHAO
 
   // 10. Resultat net
+  const participationTravailleurs = c(['87'])
   const impot = c(['89'])
-  const resultatNet = resultatActivitesOrdinaires + resultatHAO - impot
+  const resultatNet = resultatActivitesOrdinaires + resultatHAO - participationTravailleurs - impot
 
   return {
     ventesMarchandises, achatsMarchandises, margeBrute,
-    productionVendue, productionStockee, productionImmobilisee,
+    productionVendue, produitsAccessoires, productionStockee, productionImmobilisee,
     achatsMatieres, autresAchats, transports, servicesExterieurs,
     valeurAjoutee,
     subventionsExploitation, impotsEtTaxes, chargesPersonnel, ebe,
-    autresProduits, autresCharges, dotationsAmortProv, reprisesAmortProv, resultatExploitation,
-    produitsFinanciers, chargesFinancieres, resultatFinancier,
+    autresProduits, transfertsChargesExploit, autresCharges, dotationsAmortProv, reprisesAmortProv, resultatExploitation,
+    produitsFinanciers, reprisesProvFinancieres, transfertsChargesFinancieres, chargesFinancieres, resultatFinancier,
     resultatActivitesOrdinaires,
     produitsHAO, chargesHAO, resultatHAO,
-    impot, resultatNet,
+    participationTravailleurs, impot, resultatNet,
   }
 }
 
@@ -101,6 +109,7 @@ const Note37: React.FC<PageProps> = ({ balance, balanceN1, ...props }) => {
     // Production
     { label: 'ACTIVITE DE PRODUCTION', montant_n: null, montant_n1: null, isSectionHeader: true },
     { label: 'Production vendue (+)', montant_n: v(n.productionVendue), montant_n1: hasN1 ? v(n1.productionVendue) : null, indent: 1 },
+    { label: 'Produits accessoires (+)', montant_n: v(n.produitsAccessoires), montant_n1: hasN1 ? v(n1.produitsAccessoires) : null, indent: 1 },
     { label: 'Production stockee (+/-)', montant_n: v(n.productionStockee), montant_n1: hasN1 ? v(n1.productionStockee) : null, indent: 1 },
     { label: 'Production immobilisee (+)', montant_n: v(n.productionImmobilisee), montant_n1: hasN1 ? v(n1.productionImmobilisee) : null, indent: 1 },
 
@@ -122,6 +131,7 @@ const Note37: React.FC<PageProps> = ({ balance, balanceN1, ...props }) => {
 
     // Resultat d'exploitation
     { label: 'Autres produits (+)', montant_n: v(n.autresProduits), montant_n1: hasN1 ? v(n1.autresProduits) : null, indent: 1 },
+    { label: 'Transferts de charges d\'exploitation (+)', montant_n: v(n.transfertsChargesExploit), montant_n1: hasN1 ? v(n1.transfertsChargesExploit) : null, indent: 1 },
     { label: 'Autres charges (-)', montant_n: v(-n.autresCharges), montant_n1: hasN1 ? v(-n1.autresCharges) : null, indent: 1 },
     { label: 'Dotations amortissements et provisions (-)', montant_n: v(-n.dotationsAmortProv), montant_n1: hasN1 ? v(-n1.dotationsAmortProv) : null, indent: 1 },
     { label: 'Reprises amortissements et provisions (+)', montant_n: v(n.reprisesAmortProv), montant_n1: hasN1 ? v(n1.reprisesAmortProv) : null, indent: 1 },
@@ -130,6 +140,8 @@ const Note37: React.FC<PageProps> = ({ balance, balanceN1, ...props }) => {
     // Resultat financier
     { label: 'OPERATIONS FINANCIERES', montant_n: null, montant_n1: null, isSectionHeader: true },
     { label: 'Produits financiers (+)', montant_n: v(n.produitsFinanciers), montant_n1: hasN1 ? v(n1.produitsFinanciers) : null, indent: 1 },
+    { label: 'Reprises de provisions financieres (+)', montant_n: v(n.reprisesProvFinancieres), montant_n1: hasN1 ? v(n1.reprisesProvFinancieres) : null, indent: 1 },
+    { label: 'Transferts de charges financieres (+)', montant_n: v(n.transfertsChargesFinancieres), montant_n1: hasN1 ? v(n1.transfertsChargesFinancieres) : null, indent: 1 },
     { label: 'Charges financieres (-)', montant_n: v(-n.chargesFinancieres), montant_n1: hasN1 ? v(-n1.chargesFinancieres) : null, indent: 1 },
     { label: 'RESULTAT FINANCIER', montant_n: v(n.resultatFinancier), montant_n1: hasN1 ? v(n1.resultatFinancier) : null, isTotal: true },
 
@@ -143,6 +155,7 @@ const Note37: React.FC<PageProps> = ({ balance, balanceN1, ...props }) => {
     { label: 'RESULTAT HAO', montant_n: v(n.resultatHAO), montant_n1: hasN1 ? v(n1.resultatHAO) : null, isTotal: true },
 
     // Resultat net
+    { label: 'Participation des travailleurs (-)', montant_n: v(-n.participationTravailleurs), montant_n1: hasN1 ? v(-n1.participationTravailleurs) : null, indent: 1 },
     { label: 'Impot sur le resultat (-)', montant_n: v(-n.impot), montant_n1: hasN1 ? v(-n1.impot) : null, indent: 1 },
     { label: 'RESULTAT NET', montant_n: v(n.resultatNet), montant_n1: hasN1 ? v(n1.resultatNet) : null, isTotal: true },
   ]

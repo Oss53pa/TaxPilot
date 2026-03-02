@@ -1,5 +1,5 @@
 /**
- * Sidebar de navigation pour TaxPilot
+ * Sidebar de navigation pour Liass'Pilot
  */
 
 import React from 'react'
@@ -310,7 +310,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onNavigate }) => {
       {/* Header du Sidebar */}
       <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
         <Typography variant="h6" sx={{ fontWeight: 700, color: 'primary.main' }}>
-          TaxPilot
+          Liass'Pilot
         </Typography>
         <Typography variant="caption" color="text.secondary">
           Solution Fiscale OHADA
@@ -344,7 +344,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onNavigate }) => {
           © 2025 Atlas Studio. Tous droits réservés.
         </Typography>
         <Typography variant="caption" color="text.secondary" display="block">
-          TaxPilot est une marque d'Atlas Studio.
+          Liass'Pilot est une marque d'Atlas Studio.
         </Typography>
       </Box>
     </Box>

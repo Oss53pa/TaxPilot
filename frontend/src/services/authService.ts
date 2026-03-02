@@ -1,5 +1,5 @@
 /**
- * Service d'authentification pour TaxPilot
+ * Service d'authentification pour Liass'Pilot
  * CONNEXION RÉELLE AU BACKEND DJANGO
  */
 

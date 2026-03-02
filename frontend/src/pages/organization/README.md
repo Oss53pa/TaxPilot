@@ -2,7 +2,7 @@
 
 ## 🎯 Vue d'ensemble
 
-Ce module gère toutes les fonctionnalités liées aux **organisations multi-tenant SaaS** dans TaxPilot :
+Ce module gère toutes les fonctionnalités liées aux **organisations multi-tenant SaaS** dans Liass'Pilot :
 - Gestion des membres
 - Gestion des abonnements (subscriptions)
 - Système d'invitations

@@ -72,7 +72,7 @@ const NotificationSettings: React.FC = () => {
       type: 'email',
       condition: 'Erreur dans la génération de liasse',
       enabled: true,
-      recipients: ['admin@taxpilot.com']
+      recipients: ['admin@liasspilot.com']
     },
     {
       id: '2', 

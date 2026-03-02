@@ -1,5 +1,5 @@
 /**
- * Configuration de test pour TaxPilot
+ * Configuration de test pour Liass'Pilot
  */
 
 import '@testing-library/jest-dom'

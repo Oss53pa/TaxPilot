@@ -1,9 +1,9 @@
 {
-  "name": "taxpilot-frontend",
+  "name": "liasspilot-frontend",
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "Frontend React TypeScript pour TaxPilot - Application de Génération et Édition de Liasse Fiscale SYSCOHADA/IFRS",
+  "description": "Frontend React TypeScript pour Liass'Pilot - Application de Génération et Édition de Liasse Fiscale SYSCOHADA/IFRS",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

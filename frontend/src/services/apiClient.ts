@@ -309,9 +309,9 @@ class ApiClient {
         const user: User = {
           id: 1,
           username: credentials.username,
-          email: 'admin@taxpilot.com',
+          email: 'admin@liasspilot.com',
           first_name: 'Admin',
-          last_name: 'TaxPilot',
+          last_name: 'LiassPilot',
           is_staff: true,
           is_superuser: true
         }

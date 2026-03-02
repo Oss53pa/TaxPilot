@@ -48,7 +48,7 @@ const mockUsers: UtilisateurEntreprise[] = [
     user: {
       id: '1',
       username: 'jean.dupont',
-      email: 'jean.dupont@demo-taxpilot.com',
+      email: 'jean.dupont@demo-liasspilot.com',
       first_name: 'Jean',
       last_name: 'Dupont',
       is_active: true,
@@ -79,7 +79,7 @@ const mockUsers: UtilisateurEntreprise[] = [
     user: {
       id: '2',
       username: 'marie.martin',
-      email: 'marie.martin@demo-taxpilot.com',
+      email: 'marie.martin@demo-liasspilot.com',
       first_name: 'Marie',
       last_name: 'Martin',
       is_active: true,

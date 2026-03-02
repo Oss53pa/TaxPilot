@@ -1,5 +1,5 @@
 /**
- * Centre de notifications pour TaxPilot
+ * Centre de notifications pour Liass'Pilot
  */
 
 import React from 'react'

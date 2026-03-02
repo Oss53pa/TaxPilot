@@ -37,7 +37,7 @@ export function downloadBalanceTemplate(): string {
 
   XLSX.utils.book_append_sheet(wb, ws, 'Balance')
 
-  const filename = 'Modele_Balance_TaxPilot.xlsx'
+  const filename = 'Modele_Balance_LiassPilot.xlsx'
   const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' })
   saveAs(new Blob([wbout], { type: 'application/octet-stream' }), filename)
 

@@ -260,7 +260,7 @@ const SecuritySettings: React.FC = () => {
                   </ListItemIcon>
                   <ListItemText 
                     primary="Nouvelle connexion détectée"
-                    secondary="admin@taxpilot.com - IP: 192.168.1.100"
+                    secondary="admin@liasspilot.com - IP: 192.168.1.100"
                   />
                   <Chip label="Normal" color="info" size="small" />
                 </ListItem>

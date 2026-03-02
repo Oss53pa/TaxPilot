@@ -353,13 +353,13 @@ console.log(`Balance: ${balanceData.length} lignes`)
 ### Contacts
 
 **Questions techniques** :
-- 📧 Email : dev@taxpilot.com
+- 📧 Email : dev@liasspilot.com
 - 💬 Slack : #migration-liasse
-- 📚 Wiki : https://wiki.taxpilot.com/migration
+- 📚 Wiki : https://wiki.liasspilot.com/migration
 
 **Bugs/Incidents** :
-- 🐛 GitHub Issues : https://github.com/taxpilot/issues
-- 🔴 Urgent : support@taxpilot.com
+- 🐛 GitHub Issues : https://github.com/liasspilot/issues
+- 🔴 Urgent : support@liasspilot.com
 
 ### Office Hours
 

@@ -1,5 +1,5 @@
 /**
- * TaxPilot - Landing Page
+ * Liass'Pilot - Landing Page
  * Style minimaliste avec palette Grayscale monochrome
  */
 
@@ -25,6 +25,7 @@ import { useAuthStore } from '@/store/authStore'
 import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
 import { useEntrepriseData } from '@/hooks/useEntrepriseData'
 import { useBalanceData } from '@/hooks/useBalanceData'
+import { getWorkflowState } from '@/services/workflowStateService'
 import OnboardingTour from '@/components/onboarding/OnboardingTour'
 
 const ModernDashboard: React.FC = () => {
@@ -34,11 +35,15 @@ const ModernDashboard: React.FC = () => {
   const ent = useEntrepriseData()
   const bal = useBalanceData()
 
+  const ws = getWorkflowState()
+  const stepsTotal = 4
+  const stepsDone = [ws.configurationDone, ws.balanceImported, ws.controleDone, ws.generationDone].filter(Boolean).length
+
   const stats = {
-    declarations: 0,
+    declarations: ws.generationDone ? 1 : 0,
     comptes: bal.entries.length,
-    conformite: 0,
-    avancement: 0,
+    conformite: ws.controleDone ? ws.controleScore : 0,
+    avancement: Math.round((stepsDone / stepsTotal) * 100),
   }
 
   useEffect(() => {
@@ -190,7 +195,7 @@ const ModernDashboard: React.FC = () => {
             mb: 0,
           }}
         >
-          TaxPilot
+          Liass'Pilot
         </Typography>
 
         <Typography
@@ -288,7 +293,7 @@ const ModernDashboard: React.FC = () => {
           variant="caption"
           sx={{ color: P.primary300, mt: 1, fontSize: '0.7rem' }}
         >
-          Powered by TaxPilot
+          Powered by Liass'Pilot
         </Typography>
       </Box>
     </Box>

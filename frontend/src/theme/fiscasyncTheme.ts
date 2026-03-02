@@ -1,5 +1,5 @@
 /**
- * Thème TaxPilot - Palette Grayscale professionnelle monochrome
+ * Thème Liass'Pilot - Palette Grayscale professionnelle monochrome
  */
 
 import { createTheme } from '@mui/material/styles'

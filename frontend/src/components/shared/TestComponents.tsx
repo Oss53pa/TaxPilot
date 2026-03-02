@@ -153,7 +153,7 @@ const TestComponents: React.FC = () => {
         <DialogTitle>
           <Box sx={{ display: 'flex', justifyContent: 'between', alignItems: 'center' }}>
             <Typography variant="h6">
-              🎯 Test Modal TaxPilot
+              🎯 Test Modal Liass'Pilot
             </Typography>
             <IconButton onClick={handleCloseModal}>
               <Close />
@@ -162,7 +162,7 @@ const TestComponents: React.FC = () => {
         </DialogTitle>
         <DialogContent>
           <Typography variant="body1" sx={{ mb: 2 }}>
-            Cette modal teste l'affichage des composants Material-UI dans TaxPilot.
+            Cette modal teste l'affichage des composants Material-UI dans Liass'Pilot.
           </Typography>
           <Card sx={{ p: 2, bgcolor: 'primary.light', color: 'primary.contrastText' }}>
             <Typography variant="h6">✅ Fonctionnalités testées :</Typography>
