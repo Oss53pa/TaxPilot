@@ -66,10 +66,13 @@ function formatM(n: number): string {
 export function calculerPassageFiscal(entries: BalanceEntry[]): TableauPassageResult {
   const taux = getTauxFiscaux()
 
-  // Résultat comptable = Produits (classe 7) - Charges (classe 6)
+  // Résultat comptable = Produits (classe 7) - Charges (classe 6) + HAO net (classe 8)
   const produits = soldeCredit(entries, ['7'])
   const charges = soldeDebit(entries, ['6'])
-  const resultat_comptable = arrondiFCFA(produits - charges)
+  const produitsHAO = soldeCredit(entries, ['82', '84', '86', '88'])
+  const chargesHAO = soldeDebit(entries, ['81', '83', '85', '87'])
+  const impotBenefice = soldeDebit(entries, ['89'])
+  const resultat_comptable = arrondiFCFA(produits - charges + produitsHAO - chargesHAO - impotBenefice)
 
   // Chiffre d'affaires = comptes 70x
   const chiffre_affaires = soldeCredit(entries, ['70'])

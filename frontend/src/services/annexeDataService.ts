@@ -204,8 +204,8 @@ function generateNote14(entries: BalanceEntry[]): NoteData {
   const reservesStatutaires = sumCredit(entries, ['112'])
   const reservesFacultatives = sumCredit(entries, ['118'])
   const reservesReglementees = sumCredit(entries, ['113', '114', '115', '116', '117'])
-  const reportNouveau = sumCredit(entries, ['12'])
-  const resultatNet = sumCredit(entries, ['13'])
+  const reportNouveau = sumCredit(entries, ['12']) - sumDebit(entries, ['12'])
+  const resultatNet = sumCredit(entries, ['13']) - sumDebit(entries, ['13'])
   const total = primesEmission + primesApport + reserveLegale + reservesStatutaires + reservesFacultatives + reservesReglementees + reportNouveau + resultatNet
   return {
     titre: 'Primes et reserves',
@@ -452,8 +452,8 @@ function generateNote29(entries: BalanceEntry[]): NoteData {
 // ═══ Note 31: Repartition du resultat (12x, 13x) ═══
 // Colonnes: ['Elements', 'Montant']
 function generateNote31(entries: BalanceEntry[]): NoteData {
-  const resultatNet = sumCredit(entries, ['13'])
-  const reportAN = sumCredit(entries, ['12'])
+  const resultatNet = sumCredit(entries, ['13']) - sumDebit(entries, ['13'])
+  const reportAN = sumCredit(entries, ['12']) - sumDebit(entries, ['12'])
   const totalAffecter = resultatNet + reportAN
   const reserveLegale = Math.round(resultatNet * 0.05)
   return {
@@ -485,7 +485,8 @@ function generateNote37(entries: BalanceEntry[]): NoteData {
   const deductions = sumCredit(entries, ['771']) // revenus non imposables
   const resultatFiscal = resultatComptable + reintegrations - deductions
   const is25 = Math.round(Math.max(0, resultatFiscal) * 0.25)
-  const imf = Math.round(produits * 0.01) // IMF 1% du CA
+  const ca = sumCredit(entries, ['70'])
+  const imf = Math.round(ca * 0.01) // IMF 1% du CA (base = comptes 70x uniquement)
   const impotDu = Math.max(is25, imf)
   return {
     titre: 'Determination impots sur le resultat',
