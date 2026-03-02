@@ -4,6 +4,7 @@ import LiasseHeader from '../LiasseHeader'
 import LiasseTable from '../LiasseTable'
 import type { PageProps } from '../../types'
 import type { Column, Row } from '../LiasseTable'
+import { useLiasseManualData } from '../../hooks/useLiasseManualData'
 
 const COMMENT_PREFIX = 'fiscasync_liasse_note_comment_'
 
@@ -64,29 +65,49 @@ const NOTE_LIST = [
 const Commentaire: React.FC<PageProps> = ({ entreprise }) => {
   const columns: Column[] = [
     { key: 'note', label: 'Note', width: '35%', align: 'left' },
-    { key: 'commentaire', label: 'Commentaire', width: '65%', align: 'left' },
+    { key: 'commentaire', label: 'Commentaire', width: '65%', align: 'left', editable: true, type: 'text' },
   ]
 
-  const rows: Row[] = useMemo(() => {
+  // Build base rows reading existing comments from NoteTemplate's localStorage
+  const baseRows: Row[] = useMemo(() => {
     return NOTE_LIST.map((n, i) => {
-      let comment = ''
+      let comment: string | null = null
       try {
-        comment = localStorage.getItem(COMMENT_PREFIX + n.key) || ''
+        comment = localStorage.getItem(COMMENT_PREFIX + n.key) || null
       } catch { /* ignore */ }
       return {
         id: `c-${i}`,
         cells: {
           note: n.label,
-          commentaire: comment || '—',
+          commentaire: comment,
         },
       }
     })
   }, [])
 
+  const { mergedRows, setCell } = useLiasseManualData('commentaire', baseRows)
+
+  // When a comment is edited here, also save to the NoteTemplate localStorage key
+  const handleCellChange = (rowId: string, colKey: string, value: string | number | null) => {
+    setCell(rowId, colKey, value)
+    if (colKey === 'commentaire') {
+      const idx = parseInt(rowId.replace('c-', ''))
+      if (!isNaN(idx) && NOTE_LIST[idx]) {
+        try {
+          if (value != null && String(value).trim()) {
+            localStorage.setItem(COMMENT_PREFIX + NOTE_LIST[idx].key, String(value))
+          } else {
+            localStorage.removeItem(COMMENT_PREFIX + NOTE_LIST[idx].key)
+          }
+        } catch { /* full */ }
+      }
+    }
+  }
+
   return (
     <Box>
       <LiasseHeader entreprise={entreprise} noteLabel="COMMENTAIRES" pageNumber="82" />
-      <LiasseTable columns={columns} rows={rows} title="Table des commentaires par note" compact />
+      <LiasseTable columns={columns} rows={mergedRows} title="Table des commentaires par note" compact onCellChange={handleCellChange} />
     </Box>
   )
 }

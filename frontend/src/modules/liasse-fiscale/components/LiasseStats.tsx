@@ -88,8 +88,8 @@ function buildPageAnalysis(
     const structureIndicators: PredictionCard['indicators'] = []
 
     if (pageId === 'bilan' || pageId === 'actif') {
-      const immosPct = agg.immoBrutes > 0 && (agg.immoBrutes + agg.actifCirculant) > 0
-        ? (agg.immoBrutes / (agg.immoBrutes + agg.actifCirculant)) * 100 : 0
+      const totalActif = agg.immoNettes + agg.actifCirculant + Math.max(0, agg.tresorerie)
+      const immosPct = totalActif > 0 ? (agg.immoNettes / totalActif) * 100 : 0
       const tauxAmort = agg.immoBrutes > 0 ? (agg.amortissements / agg.immoBrutes) * 100 : 0
       structureIndicators.push(
         { label: 'Immobilisations brutes', value: `${fmt(agg.immoBrutes)} FCFA`, status: 'bon' },
@@ -174,8 +174,8 @@ function buildPageAnalysis(
         { label: 'Tresorerie nette', value: `${fmt(agg.tresorerie)} FCFA`, status: agg.tresorerie >= 0 ? 'bon' : 'critique' },
         {
           label: 'Fonds de roulement',
-          value: `${fmt(agg.capitauxPropres - agg.immoNettes)} FCFA`,
-          status: (agg.capitauxPropres - agg.immoNettes) >= 0 ? 'bon' : 'critique',
+          value: `${fmt(agg.capitauxPropres + agg.provisions + agg.dettesTotal - agg.immoNettes)} FCFA`,
+          status: (agg.capitauxPropres + agg.provisions + agg.dettesTotal - agg.immoNettes) >= 0 ? 'bon' : 'critique',
         },
         {
           label: 'BFR',
@@ -191,7 +191,7 @@ function buildPageAnalysis(
         },
       ],
       narrative: agg.tresorerie >= 0
-        ? `Tresorerie positive de **${fmt(agg.tresorerie)} FCFA**. ${(agg.capitauxPropres - agg.immoNettes) >= 0 ? 'Fonds de roulement positif, structure financiere equilibree.' : 'Attention : FR negatif malgre tresorerie positive.'}`
+        ? `Tresorerie positive de **${fmt(agg.tresorerie)} FCFA**. ${(agg.capitauxPropres + agg.provisions + agg.dettesTotal - agg.immoNettes) >= 0 ? 'Fonds de roulement positif, structure financiere equilibree.' : 'Attention : FR negatif malgre tresorerie positive.'}`
         : `**Tresorerie negative** de ${fmt(agg.tresorerie)} FCFA. Risque de tension sur le cash.`,
       recommendations: [
         ...(agg.tresorerie < 0 ? ['Negocier des delais fournisseurs ou une ligne de credit'] : []),
@@ -326,7 +326,7 @@ function buildNoteAnalysis(pageId: string, balN: Balance[], _balN1: Balance[], a
 
   // Note 8: Tresorerie
   if (pageId === 'note-08' || pageId === 'note-8a' || pageId === 'note-8b' || pageId === 'note-8c') {
-    const fr = agg.capitauxPropres - agg.immoNettes
+    const fr = agg.capitauxPropres + agg.provisions + agg.dettesTotal - agg.immoNettes
     const bfr = agg.actifCirculant - agg.passifCirculant
     const card: PredictionCard = {
       type: 'prediction',
@@ -344,7 +344,7 @@ function buildNoteAnalysis(pageId: string, balN: Balance[], _balN1: Balance[], a
 
   // Notes 9-13: Capitaux propres
   if (['note-09', 'note-10', 'note-11', 'note-12', 'note-13'].includes(pageId)) {
-    const rentaCP = agg.capitauxPropres !== 0 ? (agg.resultat / Math.abs(agg.capitauxPropres)) * 100 : 0
+    const rentaCP = agg.capitauxPropres !== 0 ? (agg.resultat / agg.capitauxPropres) * 100 : 0
     const card: PredictionCard = {
       type: 'prediction',
       title: 'Analyse des Capitaux Propres',
@@ -360,7 +360,7 @@ function buildNoteAnalysis(pageId: string, balN: Balance[], _balN1: Balance[], a
         : `**Capitaux propres negatifs** — l'entreprise est en situation de desequilibre. Obligation legale de reconstituer les capitaux sous 2 ans.`,
       recommendations: [
         ...(agg.capitauxPropres < 0 ? ['Reconstituer les capitaux propres (augmentation de capital ou absorption des pertes)'] : []),
-        ...(agg.capitauxPropres > 0 && agg.capitauxPropres < Math.abs(agg.capitalSocial) / 2 ? ['Capitaux propres < 50% du capital — seuil d\'alerte OHADA'] : []),
+        ...(agg.capitauxPropres > 0 && agg.capitauxPropres < agg.capitalSocial / 2 ? ['Capitaux propres < 50% du capital — seuil d\'alerte OHADA'] : []),
       ],
     }
     return { title: 'Capitaux Propres', cards: [card] }
@@ -368,7 +368,7 @@ function buildNoteAnalysis(pageId: string, balN: Balance[], _balN1: Balance[], a
 
   // Notes 14-16: Dettes
   if (/^note-1[456]/.test(pageId)) {
-    const endettement = agg.capitauxPropres !== 0 ? agg.dettesTotal / Math.abs(agg.capitauxPropres) : 0
+    const endettement = agg.capitauxPropres !== 0 ? agg.dettesTotal / agg.capitauxPropres : 0
     const card: PredictionCard = {
       type: 'prediction',
       title: 'Analyse de l\'Endettement',
@@ -430,7 +430,7 @@ function buildNoteAnalysis(pageId: string, balN: Balance[], _balN1: Balance[], a
       title: 'Analyse des Charges de Personnel',
       indicators: [
         { label: 'Charges de personnel', value: `${fmt(agg.chargesPersonnel)} FCFA`, status: 'bon' },
-        { label: 'Poids / CA', value: agg.ca > 0 ? `${((agg.chargesPersonnel / agg.ca) * 100).toFixed(1)}%` : 'N/A', status: agg.ca > 0 && (agg.chargesPersonnel / agg.ca) * 100 > 50 ? 'critique' : (agg.chargesPersonnel / agg.ca) * 100 > 35 ? 'acceptable' : 'bon' },
+        { label: 'Poids / CA', value: agg.ca > 0 ? `${((agg.chargesPersonnel / agg.ca) * 100).toFixed(1)}%` : 'N/A', status: agg.ca > 0 ? ((agg.chargesPersonnel / agg.ca) * 100 > 50 ? 'critique' : (agg.chargesPersonnel / agg.ca) * 100 > 35 ? 'acceptable' : 'bon') : 'acceptable' },
         { label: 'CA', value: `${fmt(agg.ca)} FCFA`, status: agg.ca > 0 ? 'bon' : 'critique' },
         { label: 'Resultat net', value: `${fmt(agg.resultat)} FCFA`, status: agg.resultat > 0 ? 'bon' : 'critique' },
       ],
@@ -491,7 +491,7 @@ function buildNoteAnalysis(pageId: string, balN: Balance[], _balN1: Balance[], a
 
   // Note 1: Dettes garanties & Engagements
   if (pageId === 'note-01') {
-    const endettement = agg.capitauxPropres !== 0 ? agg.dettesTotal / Math.abs(agg.capitauxPropres) : 0
+    const endettement = agg.capitauxPropres !== 0 ? agg.dettesTotal / agg.capitauxPropres : 0
     const couverture = agg.dettesTotal > 0 ? (agg.immoBrutes / agg.dettesTotal) : 0
     const card: PredictionCard = {
       type: 'prediction',
@@ -610,7 +610,7 @@ function buildNoteAnalysis(pageId: string, balN: Balance[], _balN1: Balance[], a
 
   // Note 31: Repartition du resultat
   if (pageId === 'note-31') {
-    const rentaCP = agg.capitauxPropres !== 0 ? (agg.resultat / Math.abs(agg.capitauxPropres)) * 100 : 0
+    const rentaCP = agg.capitauxPropres !== 0 ? (agg.resultat / agg.capitauxPropres) * 100 : 0
     const card: PredictionCard = {
       type: 'prediction',
       title: 'Repartition & Resultat',

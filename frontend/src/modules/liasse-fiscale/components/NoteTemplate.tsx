@@ -15,6 +15,7 @@ interface NoteTemplateProps extends PageProps {
   rows?: Row[]
   commentSection?: boolean
   children?: React.ReactNode
+  onCellChange?: (rowId: string, colKey: string, value: string | number | null) => void
 }
 
 const COMMENT_PREFIX = 'fiscasync_liasse_note_comment_'
@@ -29,6 +30,7 @@ const NoteTemplate: React.FC<NoteTemplateProps> = ({
   commentSection = true,
   children,
   onNoteClick,
+  onCellChange,
 }) => {
   const theme = useTheme()
   const storageKey = COMMENT_PREFIX + noteLabel.replace(/\s+/g, '_').toLowerCase()
@@ -55,7 +57,7 @@ const NoteTemplate: React.FC<NoteTemplateProps> = ({
       </Typography>
 
       {columns && rows && (
-        <LiasseTable columns={columns} rows={rows} compact onNoteClick={onNoteClick} />
+        <LiasseTable columns={columns} rows={rows} compact onNoteClick={onNoteClick} onCellChange={onCellChange} />
       )}
 
       {children}

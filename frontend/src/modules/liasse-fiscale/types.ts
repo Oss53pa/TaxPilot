@@ -15,7 +15,7 @@ export interface PageProps {
   balance: BalanceEntry[]
   balanceN1?: BalanceEntry[]
   regime?: RegimeImposition
-  onCellChange?: (ref: string, value: string | number) => void
+  onCellChange?: (rowId: string, colKey: string, value: string | number | null) => void
   onNoteClick?: (noteNumber: string) => void
 }
 

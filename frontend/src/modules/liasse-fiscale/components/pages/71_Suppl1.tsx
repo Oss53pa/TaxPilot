@@ -3,13 +3,14 @@ import NoteTemplate from '../NoteTemplate'
 import LiasseTable from '../LiasseTable'
 import type { PageProps } from '../../types'
 import type { Column, Row } from '../LiasseTable'
+import { useLiasseManualData } from '../../hooks/useLiasseManualData'
 
 const Suppl1: React.FC<PageProps> = (props) => {
   // Section 1 : Complement Note Annexe — Montants UEMOA / Hors UEMOA
   const cols1: Column[] = [
     { key: 'designation', label: 'Elements', width: '50%', align: 'left' },
-    { key: 'uemoa', label: 'UEMOA', width: '25%', align: 'right' },
-    { key: 'hors_uemoa', label: 'Hors UEMOA', width: '25%', align: 'right' },
+    { key: 'uemoa', label: 'UEMOA', width: '25%', align: 'right', editable: true, type: 'number' },
+    { key: 'hors_uemoa', label: 'Hors UEMOA', width: '25%', align: 'right', editable: true, type: 'number' },
   ]
 
   const section1Labels = [
@@ -36,7 +37,7 @@ const Suppl1: React.FC<PageProps> = (props) => {
     'TOTAL GENERAL PRODUITS',
   ]
 
-  const rows1: Row[] = section1Labels.map((label, i) => ({
+  const baseRows1: Row[] = section1Labels.map((label, i) => ({
     id: `s1-${i}`,
     cells: { designation: label, uemoa: null, hors_uemoa: null },
     isTotal: label.startsWith('TOTAL'),
@@ -45,22 +46,32 @@ const Suppl1: React.FC<PageProps> = (props) => {
 
   // Section 2 : Complement Note 32 — Production vendue
   const cols2: Column[] = [
-    { key: 'designation', label: 'Produits', width: '40%', align: 'left' },
-    { key: 'quantite', label: 'Quantite', width: '20%', align: 'right' },
-    { key: 'montant_n', label: 'Exercice N', width: '20%', align: 'right' },
-    { key: 'montant_n1', label: 'Exercice N-1', width: '20%', align: 'right' },
+    { key: 'designation', label: 'Produits', width: '40%', align: 'left', editable: true, type: 'text' },
+    { key: 'quantite', label: 'Quantite', width: '20%', align: 'right', editable: true, type: 'number' },
+    { key: 'montant_n', label: 'Exercice N', width: '20%', align: 'right', editable: true, type: 'number' },
+    { key: 'montant_n1', label: 'Exercice N-1', width: '20%', align: 'right', editable: true, type: 'number' },
   ]
 
-  const rows2: Row[] = Array.from({ length: 15 }, (_, i) => ({
+  const baseRows2: Row[] = Array.from({ length: 15 }, (_, i) => ({
     id: `s2-${i}`,
     cells: { designation: null, quantite: null, montant_n: null, montant_n1: null },
   }))
-  rows2.push({
-    id: 's2-total',
-    cells: { designation: 'TOTAL', quantite: null, montant_n: null, montant_n1: null },
-    isTotal: true,
-    bold: true,
-  })
+
+  const { mergedRows, setCell } = useLiasseManualData('suppl1', [...baseRows1, ...baseRows2])
+
+  const merged1 = mergedRows.filter(r => r.id.startsWith('s1-'))
+  const merged2 = mergedRows.filter(r => r.id.startsWith('s2-'))
+
+  // Total for section 2
+  let totN = 0, totN1 = 0
+  for (const r of merged2) {
+    if (typeof r.cells.montant_n === 'number') totN += r.cells.montant_n
+    if (typeof r.cells.montant_n1 === 'number') totN1 += r.cells.montant_n1
+  }
+  const rows2WithTotal: Row[] = [
+    ...merged2,
+    { id: 's2-total', cells: { designation: 'TOTAL', quantite: null, montant_n: totN || null, montant_n1: totN1 || null }, isTotal: true, bold: true },
+  ]
 
   return (
     <NoteTemplate
@@ -70,8 +81,8 @@ const Suppl1: React.FC<PageProps> = (props) => {
       pageNumber="69"
       commentSection={false}
     >
-      <LiasseTable columns={cols1} rows={rows1} title="Complement Note Annexe — Repartition UEMOA / Hors UEMOA" compact />
-      <LiasseTable columns={cols2} rows={rows2} title="Complement Note 32 — Production vendue par produit" compact />
+      <LiasseTable columns={cols1} rows={merged1} title="Complement Note Annexe — Repartition UEMOA / Hors UEMOA" compact onCellChange={setCell} />
+      <LiasseTable columns={cols2} rows={rows2WithTotal} title="Complement Note 32 — Production vendue par produit" compact onCellChange={setCell} />
     </NoteTemplate>
   )
 }
