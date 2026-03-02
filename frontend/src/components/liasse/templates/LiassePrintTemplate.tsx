@@ -376,7 +376,7 @@ const LiassePrintTemplate: React.FC<LiassePrintTemplateProps> = ({ regime, entre
       <PrintModeProvider value={unfoldTabs}>
         <Box>
           {/* Cover page */}
-          <Box className="liasse-page" sx={{ pageBreakAfter: 'always', textAlign: 'center', pt: '80mm', fontFamily: '"Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important', '& *': { fontFamily: 'inherit !important' } }}>
+          <Box className="liasse-page" sx={{ pageBreakAfter: 'always', textAlign: 'center', pt: '80mm', fontFamily: 'Verdana, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important', '& *': { fontFamily: 'inherit !important' } }}>
             <Typography sx={{ fontSize: 24, fontWeight: 700, mb: 2 }}>LIASSE FISCALE SYSCOHADA</Typography>
             <Typography sx={{ fontSize: 18, fontWeight: 600, mb: 1 }}>{entreprise.raison_sociale}</Typography>
             {entreprise.sigle && <Typography sx={{ fontSize: 14, mb: 0.5, color: 'text.secondary' }}>{entreprise.sigle}</Typography>}
@@ -404,7 +404,7 @@ const LiassePrintTemplate: React.FC<LiassePrintTemplateProps> = ({ regime, entre
   }
 
   return (
-    <Box sx={{ display: 'flex', height: '100%', minHeight: 600, border: `1px solid ${P.primary200}`, borderRadius: 1, overflow: 'hidden', fontFamily: '"Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', '& *': { fontFamily: 'inherit !important' } }}>
+    <Box sx={{ display: 'flex', height: '100%', minHeight: 600, border: `1px solid ${P.primary200}`, borderRadius: 1, overflow: 'hidden', fontFamily: 'Verdana, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', '& *': { fontFamily: 'inherit !important' } }}>
       {/* Sidebar */}
       <Sidebar
         regime={configRegime}

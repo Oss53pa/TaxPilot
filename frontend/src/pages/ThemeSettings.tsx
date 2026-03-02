@@ -133,7 +133,7 @@ const LOCAL_PREDEFINED_THEMES: PredefinedTheme[] = [
 ]
 
 const AVAILABLE_FONTS = [
-  'Exo 2', 'Inter', 'Roboto', 'Poppins', 'Montserrat', 'Open Sans',
+  'Exo 2', 'Inter', 'Roboto', 'Poppins', 'Montserrat', 'Verdana',
   'Lato', 'Source Sans Pro', 'Nunito', 'Raleway',
 ]
 

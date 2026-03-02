@@ -2,7 +2,7 @@ import React from 'react'
 import { Box, Paper, useTheme } from '@mui/material'
 import { alpha } from '@mui/material/styles'
 
-const LIASSE_FONT = '"Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+const LIASSE_FONT = 'Verdana, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
 
 interface LiassePageProps {
   children: React.ReactNode
@@ -81,7 +81,7 @@ const LiassePage: React.FC<LiassePageProps> = ({ children, orientation = 'portra
         '& tr[style*="background-color: rgb(245"]': {
           backgroundColor: `${alpha(theme.palette.info.main, 0.03)} !important`,
         },
-        // Override any leftover monospace — force Open Sans everywhere
+        // Override any leftover monospace — force Verdana everywhere
         '& *': {
           fontFamily: 'inherit !important',
         },
@@ -92,11 +92,11 @@ const LiassePage: React.FC<LiassePageProps> = ({ children, orientation = 'portra
           border: 'none !important',
           borderRadius: '0 !important',
           margin: '0 !important',
-          padding: '5mm 0 !important',
+          padding: '0 !important',
           width: '100% !important',
           minHeight: 'auto !important',
-          pageBreakAfter: 'always',
           overflow: 'visible !important',
+          bgcolor: 'transparent !important',
         },
       }}
     >

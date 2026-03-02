@@ -115,7 +115,7 @@ const PageRenderer: React.FC<PageRendererProps> = ({ page, showHeader = true, sh
   return (
     <LiasseRegimeContext.Provider value={data.regime}>
       <Box className="liasse-page" sx={{
-        fontFamily: '"Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important',
+        fontFamily: 'Verdana, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important',
         '& *': { fontFamily: 'inherit !important' },
       }}>
         {showHeader && <DgiHeader page={page} />}

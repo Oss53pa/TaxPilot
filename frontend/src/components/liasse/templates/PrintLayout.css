@@ -15,20 +15,21 @@
  * Interligne corps : 1.5× à 1.7× | Titres : 1.1× à 1.3×
  * ══════════════════════════════════════════════════════════════════════════ */
 
+/* ── @page rules MUST be top-level (NOT inside @media print) ── */
+@page portrait-page {
+  size: A4 portrait;
+  margin: 15mm 10mm 15mm 10mm;
+}
+
+@page landscape-page {
+  size: A4 landscape;
+  margin: 10mm 15mm 10mm 15mm;
+}
+
 @media print {
-  @page {
-    size: A4 portrait;
-    margin: 15mm 10mm 15mm 10mm;
-  }
-
-  @page landscape-page {
-    size: A4 landscape;
-    margin: 10mm 15mm 10mm 15mm;
-  }
-
   body {
     font-size: 12pt;          /* Corps = 12pt référence */
-    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-family: Verdana, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     color: #000;
     line-height: 1.5;
     overflow: visible !important;
@@ -54,36 +55,22 @@
     page-break-before: always;
   }
 
-  /* ── Each printed page ── */
+  /* ── Each printed page = exactly one A4 sheet ── */
   .liasse-print-page {
-    page-break-after: always;
-    page-break-inside: avoid;
+    break-after: page;
+    break-inside: avoid;
+    overflow: hidden;
+    width: 100% !important;
   }
   .liasse-print-page:last-child {
-    page-break-after: auto;
+    break-after: auto;
   }
-
-  /* Chaque page de la liasse */
-  .liasse-page {
-    width: 100%;
-    min-height: auto;
-    page-break-after: always;
-    font-size: 12pt;
-    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  /* Named pages: explicit portrait AND landscape for reliable orientation switching */
+  .liasse-print-page[data-orientation="portrait"] {
+    page: portrait-page;
   }
-
-  .liasse-page *,
-  .liasse-page .MuiTypography-root,
-  .liasse-page .MuiTableCell-root {
-    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
-  }
-
-  .liasse-page.landscape {
+  .liasse-print-page[data-orientation="landscape"] {
     page: landscape-page;
-  }
-
-  .liasse-page:last-child {
-    page-break-after: auto;
   }
 
   /* ── Prevent table truncation ── */
@@ -136,7 +123,7 @@
 
   .montant {
     text-align: right;
-    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-family: Verdana, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   }
 
   .ref-cell {
@@ -202,12 +189,11 @@
  * adaptée à la lecture écran (50-70 cm).
  * ══════════════════════════════════════════════════════════════════════════ */
 @media screen {
-  /* Render print container offscreen so lazy components mount, but user doesn't see it */
+  /* Render print container offscreen — width matches A4 printable area for accurate measurement */
   .liasse-print-container {
     position: fixed;
     left: -200vw;
     top: 0;
-    width: 210mm;
     opacity: 0;
     pointer-events: none;
   }
@@ -222,7 +208,7 @@
     width: 210mm;                      /* Largeur A4 portrait */
     font-size: 14px;                   /* Secondaire comme base de page */
     line-height: 1.5;
-    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+    font-family: Verdana, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
     overflow: hidden;
   }
 
@@ -233,7 +219,7 @@
   .liasse-page .MuiChip-label,
   .liasse-page .MuiAlert-message,
   .liasse-page .MuiInputBase-input {
-    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+    font-family: Verdana, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
   }
 
   .liasse-page.landscape {

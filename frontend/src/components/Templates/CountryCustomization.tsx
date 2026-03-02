@@ -69,7 +69,7 @@ const REGIME_OPTIONS: { key: Regime; label: string }[] = [
   { key: 'micro', label: 'Micro-Entreprise' },
 ]
 
-const FONT_OPTIONS = ['Exo 2', 'Roboto', 'Inter', 'Open Sans', 'Lato', 'Noto Sans', 'Arial', 'Times New Roman']
+const FONT_OPTIONS = ['Exo 2', 'Roboto', 'Inter', 'Verdana', 'Lato', 'Noto Sans', 'Arial', 'Times New Roman']
 
 interface Props {
   onSaveProfile?: (profile: ExportProfile) => void
