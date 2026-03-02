@@ -18,12 +18,12 @@
 @media print {
   @page {
     size: A4 portrait;
-    margin: 20mm 15mm 20mm 15mm;
+    margin: 15mm 10mm 15mm 10mm;
   }
 
   @page landscape-page {
     size: A4 landscape;
-    margin: 15mm 20mm 15mm 20mm;
+    margin: 10mm 15mm 10mm 15mm;
   }
 
   body {
@@ -31,6 +31,17 @@
     font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     color: #000;
     line-height: 1.5;
+    overflow: visible !important;
+  }
+
+  /* ── Hide EVERYTHING except the print container (portaled to body) ── */
+  body > *:not(.liasse-print-container) {
+    display: none !important;
+  }
+  .liasse-print-container {
+    display: block !important;
+    position: static !important;
+    visibility: visible !important;
   }
 
   .no-print,
@@ -43,10 +54,19 @@
     page-break-before: always;
   }
 
+  /* ── Each printed page ── */
+  .liasse-print-page {
+    page-break-after: always;
+    page-break-inside: avoid;
+  }
+  .liasse-print-page:last-child {
+    page-break-after: auto;
+  }
+
   /* Chaque page de la liasse */
   .liasse-page {
     width: 100%;
-    min-height: 247mm; /* A4 minus margins */
+    min-height: auto;
     page-break-after: always;
     font-size: 12pt;
     font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
@@ -60,26 +80,27 @@
 
   .liasse-page.landscape {
     page: landscape-page;
-    min-height: 170mm; /* A4 landscape minus margins */
   }
 
   .liasse-page:last-child {
     page-break-after: auto;
   }
 
-  /* En-tête DGI sur chaque page */
-  .dgi-header {
-    text-align: center;
-    font-size: 9pt;           /* Caption */
-    border-bottom: 1px solid #000;
-    padding-bottom: 4mm;
-    margin-bottom: 4mm;
-  }
-
-  /* Tableaux */
+  /* ── Prevent table truncation ── */
   table {
     border-collapse: collapse;
     width: 100%;
+    page-break-inside: auto;
+  }
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+  thead {
+    display: table-header-group;
+  }
+  tfoot {
+    display: table-footer-group;
   }
 
   td, th {
@@ -94,6 +115,23 @@
     font-size: 10.5pt;        /* Secondaire */
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
+  }
+
+  /* ── Suppress MUI Paper artefacts ── */
+  .MuiPaper-root {
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    background-color: transparent !important;
+  }
+
+  /* En-tête DGI sur chaque page */
+  .dgi-header {
+    text-align: center;
+    font-size: 9pt;           /* Caption */
+    border-bottom: 1px solid #000;
+    padding-bottom: 4mm;
+    margin-bottom: 4mm;
   }
 
   .montant {
@@ -140,9 +178,16 @@
     color: #666;
   }
 
-  /* Hide MUI Tabs in print — all tab content is unfolded via PrintModeContext */
+  /* Hide MUI Tabs in print */
   .MuiTabs-root { display: none !important; }
   .MuiTab-root { display: none !important; }
+
+  /* Hide editable field underlines/borders in print */
+  .MuiInput-underline::before,
+  .MuiInput-underline::after,
+  .MuiOutlinedInput-notchedOutline {
+    display: none !important;
+  }
 
   /* Force background colors to print */
   * {
@@ -157,6 +202,16 @@
  * adaptée à la lecture écran (50-70 cm).
  * ══════════════════════════════════════════════════════════════════════════ */
 @media screen {
+  /* Render print container offscreen so lazy components mount, but user doesn't see it */
+  .liasse-print-container {
+    position: fixed;
+    left: -200vw;
+    top: 0;
+    width: 210mm;
+    opacity: 0;
+    pointer-events: none;
+  }
+
   .liasse-page {
     background: #fff;
     padding: 20mm 15mm;                /* Marges A4 classiques */

@@ -134,37 +134,45 @@ export class RatiosService {
       // CLASSE 1 - CAPITAUX
       capitaux_propres: 0,
       capital_social: 0,
+      primes: 0,
       reserves: 0,
+      report_nouveau: 0,
       resultat_exercice: 0,
-      
-      // CLASSE 2 - IMMOBILISATIONS  
+      subventions_invest: 0,
+      provisions_risques: 0,
+      dettes_financieres: 0,
+
+      // CLASSE 2 - IMMOBILISATIONS
       immobilisations_brutes: 0,
       amortissements: 0,
       immobilisations_nettes: 0,
-      
+
       // CLASSE 3 - STOCKS
       stocks: 0,
       provisions_stocks: 0,
       stocks_nets: 0,
-      
+
       // CLASSE 4 - TIERS
       clients_bruts: 0,
       provisions_clients: 0,
       clients_nets: 0,
       fournisseurs: 0,
+      dettes_fiscales_sociales: 0,
+      autres_dettes_ct: 0,
+      passif_circulant: 0,
       tva_collectee: 0,
       tva_deductible: 0,
-      
+
       // CLASSE 5 - TRÉSORERIE
       banques: 0,
       caisse: 0,
       tresorerie: 0,
-      
+
       // CLASSE 6 - CHARGES
       achats_marchandises: 0,
       charges_personnel: 0,
       charges_financieres: 0,
-      
+
       // CLASSE 7 - PRODUITS
       chiffre_affaires: 0,
       produits_financiers: 0
@@ -173,59 +181,69 @@ export class RatiosService {
     balance.forEach(ligne => {
       const compte = ligne.numero_compte;
       const solde = ligne.debit - ligne.credit;
-      
-      // CLASSE 1 - CAPITAUX PROPRES
-      if (compte.startsWith('101') || compte.startsWith('102')) {
-        agregats.capital_social += -solde; // Créditeur
-      } else if (compte.startsWith('111') || compte.startsWith('112')) {
-        agregats.reserves += -solde;
-      } else if (compte.startsWith('131')) {
-        agregats.resultat_exercice += -solde;
+
+      // CLASSE 1 - CAPITAUX PROPRES & PASSIF
+      if (compte.startsWith('10') && !compte.startsWith('105')) {
+        agregats.capital_social += -solde; // Créditeur (101-104)
+      } else if (compte.startsWith('105')) {
+        agregats.primes += -solde; // Primes d'émission/apport
+      } else if (compte.startsWith('11')) {
+        agregats.reserves += -solde; // Toutes réserves (111-118)
+      } else if (compte.startsWith('12')) {
+        agregats.report_nouveau += -solde; // Report à nouveau
+      } else if (compte.startsWith('13')) {
+        agregats.resultat_exercice += -solde; // Résultat de l'exercice
+      } else if (compte.startsWith('14')) {
+        agregats.subventions_invest += -solde; // Subventions d'investissement
+      } else if (compte.startsWith('15')) {
+        agregats.provisions_risques += -solde; // Provisions pour risques
+      } else if (compte.startsWith('16') || compte.startsWith('17')) {
+        agregats.dettes_financieres += -solde; // Dettes financières LT
       }
-      
+
       // CLASSE 2 - IMMOBILISATIONS
       if (compte.match(/^2[0-7]/)) {
         agregats.immobilisations_brutes += solde;
       } else if (compte.startsWith('28')) {
         agregats.amortissements += -solde; // Créditeur
       }
-      
+
       // CLASSE 3 - STOCKS
       if (compte.match(/^3[1-8]/)) {
         agregats.stocks += solde;
       } else if (compte.startsWith('39')) {
         agregats.provisions_stocks += -solde;
       }
-      
+
       // CLASSE 4 - TIERS
-      if (compte.startsWith('411')) {
+      if (compte.startsWith('411') || compte.startsWith('412') || compte.startsWith('413') || compte.startsWith('416')) {
         agregats.clients_bruts += solde;
       } else if (compte.startsWith('491')) {
         agregats.provisions_clients += -solde;
-      } else if (compte.startsWith('401')) {
-        agregats.fournisseurs += -solde;
-      } else if (compte.startsWith('4431')) {
-        agregats.tva_collectee += -solde;
-      } else if (compte.startsWith('4452')) {
-        agregats.tva_deductible += solde;
+      } else if (compte.startsWith('40')) {
+        agregats.fournisseurs += -solde; // Tous comptes fournisseurs (40x)
+      } else if (compte.startsWith('42') || compte.startsWith('43')) {
+        agregats.dettes_fiscales_sociales += -solde; // Personnel + organismes sociaux
+      } else if (compte.startsWith('44')) {
+        agregats.dettes_fiscales_sociales += -solde; // État et collectivités
       }
-      
+
       // CLASSE 5 - TRÉSORERIE
       if (compte.startsWith('52')) {
         agregats.banques += solde;
       } else if (compte.startsWith('571')) {
         agregats.caisse += solde;
       }
-      
+
       // CLASSE 6 - CHARGES
       if (compte.startsWith('601')) {
         agregats.achats_marchandises += solde;
-      } else if (compte.startsWith('64')) {
-        agregats.charges_personnel += solde;
+      } else if (compte.startsWith('66')) {
+        agregats.charges_personnel += solde; // 66x = charges de personnel SYSCOHADA
       } else if (compte.startsWith('67')) {
         agregats.charges_financieres += solde;
       }
-      
+
       // CLASSE 7 - PRODUITS
       if (compte.startsWith('70')) {
         agregats.chiffre_affaires += -solde;
@@ -235,10 +253,12 @@ export class RatiosService {
     });
 
     // Calculs dérivés
-    agregats.capitaux_propres = agregats.capital_social + agregats.reserves + agregats.resultat_exercice;
+    agregats.capitaux_propres = agregats.capital_social + agregats.primes + agregats.reserves
+      + agregats.report_nouveau + agregats.resultat_exercice + agregats.subventions_invest;
     agregats.immobilisations_nettes = agregats.immobilisations_brutes - agregats.amortissements;
     agregats.stocks_nets = agregats.stocks - agregats.provisions_stocks;
     agregats.clients_nets = agregats.clients_bruts - agregats.provisions_clients;
+    agregats.passif_circulant = agregats.fournisseurs + agregats.dettes_fiscales_sociales + agregats.autres_dettes_ct;
     agregats.tresorerie = agregats.banques + agregats.caisse;
 
     return agregats;
@@ -252,7 +272,7 @@ export class RatiosService {
 
     // 1. RATIO DE LIQUIDITÉ GÉNÉRALE
     const actif_circulant = agregats.stocks_nets + agregats.clients_nets + agregats.tresorerie;
-    const passif_circulant = agregats.fournisseurs; // Simplifié
+    const passif_circulant = agregats.passif_circulant;
     const liquidite_generale = passif_circulant > 0 ? actif_circulant / passif_circulant : 0;
 
     ratios.push({
@@ -273,22 +293,23 @@ export class RatiosService {
     });
 
     // 2. RATIO D'ENDETTEMENT
-    const ratio_endettement = agregats.capitaux_propres > 0 ? 
-      agregats.fournisseurs / agregats.capitaux_propres : 0;
+    const dettes_totales = agregats.dettes_financieres + agregats.passif_circulant;
+    const ratio_endettement = agregats.capitaux_propres > 0 ?
+      dettes_totales / agregats.capitaux_propres : 0;
 
     ratios.push({
       nom: "Ratio d'Endettement",
       valeur: ratio_endettement.toFixed(2),
       interpretation: this.interpreterEndettement(ratio_endettement),
       formule: 'Dettes Totales / Capitaux Propres',
-      status: ratio_endettement <= 0.3 ? 'excellent' : 
-              ratio_endettement <= 0.5 ? 'bon' : 
+      status: ratio_endettement <= 0.3 ? 'excellent' :
+              ratio_endettement <= 0.5 ? 'bon' :
               ratio_endettement <= 0.8 ? 'acceptable' : 'critique',
-      couleur: ratio_endettement <= 0.3 ? 'success' : 
-               ratio_endettement <= 0.5 ? 'primary' : 
+      couleur: ratio_endettement <= 0.3 ? 'success' :
+               ratio_endettement <= 0.5 ? 'primary' :
                ratio_endettement <= 0.8 ? 'warning' : 'error',
       details: {
-        numerateur: agregats.fournisseurs,
+        numerateur: dettes_totales,
         denominateur: agregats.capitaux_propres
       }
     });
@@ -379,16 +400,17 @@ export class RatiosService {
       source: 'Comptes 52*/571 (Balance)'
     });
 
-    // 4. FONDS DE ROULEMENT
-    const fonds_roulement = agregats.capitaux_propres - agregats.immobilisations_nettes;
-    
+    // 4. FONDS DE ROULEMENT (Ressources stables - Emplois stables)
+    const fonds_roulement = agregats.capitaux_propres + agregats.provisions_risques
+      + agregats.dettes_financieres - agregats.immobilisations_nettes;
+
     kpis.push({
       titre: 'Fonds de Roulement',
       valeur: this.formaterMontant(fonds_roulement),
-      evolution: 5.8,
+      evolution: 0,
       tendance: fonds_roulement > 0 ? 'up' : 'down',
       couleur: fonds_roulement > 0 ? 'success' : 'error',
-      source: 'Calculé SYSCOHADA (CP - Immo)'
+      source: 'Calculé SYSCOHADA (CP + Provisions + Dettes LT - Immo)'
     });
 
     return kpis;
@@ -398,18 +420,19 @@ export class RatiosService {
    * Calcule la situation financière détaillée
    */
   private calculerSituationFinanciere(agregats: any) {
-    const total_actif = agregats.immobilisations_nettes + agregats.stocks_nets + 
+    const total_actif = agregats.immobilisations_nettes + agregats.stocks_nets +
                        agregats.clients_nets + agregats.tresorerie;
-    
-    const ratio_solvabilite = total_actif > 0 ? 
+    const dettes_totales = agregats.dettes_financieres + agregats.passif_circulant;
+
+    const ratio_solvabilite = total_actif > 0 ?
       (agregats.capitaux_propres / total_actif) * 100 : 0;
 
     return {
       total_actif: this.formaterMontant(total_actif),
       capitaux_propres: this.formaterMontant(agregats.capitaux_propres),
-      dettes_totales: this.formaterMontant(agregats.fournisseurs), // Simplifié
+      dettes_totales: this.formaterMontant(dettes_totales),
       ratio_solvabilite: Math.round(ratio_solvabilite),
-      status_financier: ratio_solvabilite >= 50 ? 'saine' : 
+      status_financier: ratio_solvabilite >= 50 ? 'saine' :
                        ratio_solvabilite >= 30 ? 'acceptable' : 'critique'
     };
   }

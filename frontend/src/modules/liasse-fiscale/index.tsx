@@ -1,4 +1,5 @@
 import React, { Suspense, useState, useEffect, useCallback, useMemo } from 'react'
+import { createPortal } from 'react-dom'
 import {
   Box, CircularProgress, Typography, Button, Chip, Paper, IconButton, Alert,
 } from '@mui/material'
@@ -26,9 +27,12 @@ import LiasseNav from './components/LiasseNav'
 import LiassePage from './components/LiassePage'
 import LiasseStats from './components/LiasseStats'
 import { LiasseRegimeContext } from './components/LiasseHeader'
-import { PAGES } from './config'
+import { PAGES, preloadPages } from './config'
 import { NOTE_TO_PAGE_ID, toConfigRegime } from './types'
 import { exporterLiasse } from './services/liasse-export-excel'
+import PrintDialog from './components/PrintDialog'
+import type { PrintMode } from './components/PrintDialog'
+import '@/components/liasse/templates/PrintLayout.css'
 
 const SIDEBAR_TRANSITION = 'width 0.3s cubic-bezier(0.4,0,0.2,1), min-width 0.3s cubic-bezier(0.4,0,0.2,1), opacity 0.3s cubic-bezier(0.4,0,0.2,1)'
 const COLLAPSED_WIDTH = 40
@@ -41,10 +45,30 @@ const LiasseFiscaleModule: React.FC = () => {
   const [leftOpen, setLeftOpen] = useState(true)
   const [rightOpen, setRightOpen] = useState(true)
   const [workflowState, setWorkflowState] = useState<WorkflowState | null>(null)
+  const [printDialogOpen, setPrintDialogOpen] = useState(false)
+  const [printMode, setPrintMode] = useState<'off' | 'current' | 'all'>('off')
 
   useEffect(() => {
     setWorkflowState(getWorkflowState())
   }, [])
+
+  // When printMode is set: wait for lazy components to render, then call window.print()
+  useEffect(() => {
+    if (printMode === 'off') return
+    // Components are already preloaded (see handlePrint), give React one frame to render
+    const timer = setTimeout(() => {
+      window.print()
+    }, 500)
+    const onAfterPrint = () => {
+      setPrintMode('off')
+      document.body.classList.remove('liasse-printing')
+    }
+    window.addEventListener('afterprint', onAfterPrint)
+    return () => {
+      clearTimeout(timer)
+      window.removeEventListener('afterprint', onAfterPrint)
+    }
+  }, [printMode])
 
   // Reload data on window focus or exercise change
   useEffect(() => {
@@ -82,6 +106,15 @@ const LiasseFiscaleModule: React.FC = () => {
 
   const PageComponent = currentPage.component
 
+  const handlePrint = useCallback(async (mode: PrintMode) => {
+    // Preload all lazy page components BEFORE setting printMode
+    const pagesToPrint = mode === 'all' ? filteredPages : (currentPage ? [currentPage] : [])
+    await preloadPages(pagesToPrint)
+    // Add body class to hide entire app shell (Layout, Proph3t, etc.)
+    document.body.classList.add('liasse-printing')
+    setPrintMode(mode)
+  }, [filteredPages, currentPage])
+
   const handleNoteClick = useCallback((noteNumber: string) => {
     const pageId = NOTE_TO_PAGE_ID[noteNumber.toUpperCase()] || NOTE_TO_PAGE_ID[noteNumber]
     if (pageId) {
@@ -104,9 +137,44 @@ const LiasseFiscaleModule: React.FC = () => {
     })
   }, [balance, balanceN1, entreprise])
 
+  // Pages to render for print mode 'all'
+  const printPages = useMemo(() => {
+    if (printMode === 'all') return filteredPages
+    if (printMode === 'current' && currentPage) return [currentPage]
+    return []
+  }, [printMode, filteredPages, currentPage])
+
   return (
     <LiasseRegimeContext.Provider value={regime}>
-    <Box sx={{ display: 'flex', gap: 0, height: '100%', overflow: 'hidden', '@media print': { height: 'auto', overflow: 'visible' } }}>
+    {/* Print container — portaled to body, hidden on screen, sole visible element in @media print */}
+    {printMode !== 'off' && createPortal(
+      <div className="liasse-print-container">
+        {printPages.map(page => {
+          const Comp = page.component
+          return (
+            <div key={page.id} className="liasse-print-page">
+              <Suspense fallback={null}>
+                <LiassePage orientation={page.orientation} zoom={100}>
+                  <Comp entreprise={entreprise} balance={balance} balanceN1={balanceN1} regime={regime} onNoteClick={handleNoteClick} />
+                </LiassePage>
+              </Suspense>
+            </div>
+          )
+        })}
+      </div>,
+      document.body
+    )}
+
+    {/* PrintDialog */}
+    <PrintDialog
+      open={printDialogOpen}
+      onClose={() => setPrintDialogOpen(false)}
+      onPrint={handlePrint}
+      currentPageName={currentPage?.ongletExcel || ''}
+      totalPages={filteredPages.length}
+    />
+
+    <Box sx={{ display: 'flex', gap: 0, height: '100%', overflow: 'hidden' }}>
       {/* ── Left sidebar ── */}
       <Box sx={{
         width: leftOpen ? 280 : COLLAPSED_WIDTH,
@@ -227,8 +295,8 @@ const LiasseFiscaleModule: React.FC = () => {
 
             <Button size="small" variant="outlined" startIcon={<ControleIcon sx={{ fontSize: 16 }} />} onClick={() => navigate('/validation-liasse')} sx={{ minWidth: 0, fontSize: '0.75rem', fontWeight: 600 }}>Contrôle</Button>
             <Button size="small" startIcon={<ExcelIcon sx={{ fontSize: 16 }} />} onClick={handleExportExcel} sx={{ minWidth: 0, fontSize: '0.75rem', color: '#16a34a', fontWeight: 600 }}>Excel</Button>
-            <Button size="small" startIcon={<DownloadIcon sx={{ fontSize: 16 }} />} onClick={() => window.print()} sx={{ minWidth: 0, fontSize: '0.75rem' }}>PDF</Button>
-            <Button size="small" startIcon={<PrintIcon sx={{ fontSize: 16 }} />} onClick={() => window.print()} sx={{ minWidth: 0, fontSize: '0.75rem' }}>Imprimer</Button>
+            <Button size="small" startIcon={<DownloadIcon sx={{ fontSize: 16 }} />} onClick={() => setPrintDialogOpen(true)} sx={{ minWidth: 0, fontSize: '0.75rem' }}>PDF</Button>
+            <Button size="small" startIcon={<PrintIcon sx={{ fontSize: 16 }} />} onClick={() => setPrintDialogOpen(true)} sx={{ minWidth: 0, fontSize: '0.75rem' }}>Imprimer</Button>
             <Button size="small" startIcon={<SendIcon sx={{ fontSize: 16 }} />} onClick={() => navigate('/teledeclaration')} sx={{ minWidth: 0, fontSize: '0.75rem' }}>Envoyer</Button>
           </Box>
         </Paper>

@@ -92,9 +92,12 @@ export function calculerAgregats(balance: Balance[]): Agregats {
       dettesTotal += Math.abs(solde)
     }
 
-    // P&L: Produits (cl.7 = solde crediteur) / Charges (cl.6 = solde debiteur)
+    // P&L: Produits (cl.7 + HAO produits) / Charges (cl.6 + HAO charges + IS)
     if (c.startsWith('7')) totalProduits += Math.max(0, -solde)
     if (c.startsWith('6')) totalCharges += Math.max(0, solde)
+    // Class 8: HAO produits (82,84,86,88) and HAO charges + IS (81,83,85,87,89)
+    if (/^8[2468]/.test(c)) totalProduits += Math.max(0, -solde)
+    if (/^8[13579]/.test(c)) totalCharges += Math.max(0, solde)
 
     // CA (70-75) — solde crediteur
     if (/^7[0-5]/.test(c)) ca += Math.max(0, -solde)
@@ -367,7 +370,10 @@ function evalInverse(val: number, thresholds: [number, number, number]): Status 
 /** Agrégats supplémentaires pour ratios avancés (non dans Agregats de base) */
 function calculerAgregatsEtendus(balance: Balance[]) {
   let achats = 0, chargesExternes = 0, impotsTaxes = 0
-  let dotationsAmort = 0, totalCharges = 0, totalProduits = 0
+  let dotationsAmort = 0, dotationsProv = 0, dotationsHAO = 0
+  let reprisesAmort = 0, reprisesProv = 0, reprisesHAO = 0
+  let vncCessions = 0, prodCessions = 0
+  let totalCharges = 0, totalProduits = 0
   let produitsFinanciers = 0, produitsExploitation = 0
   let chargesExploitation = 0
 
@@ -380,8 +386,17 @@ function calculerAgregatsEtendus(balance: Balance[]) {
     if (c.startsWith('61') || c.startsWith('62') || c.startsWith('63')) chargesExternes += Math.max(0, s)
     // Impôts et taxes (64)
     if (c.startsWith('64')) impotsTaxes += Math.max(0, s)
-    // Dotations amortissements (68)
+    // Dotations amortissements (68), provisions (69), HAO (85)
     if (c.startsWith('68')) dotationsAmort += Math.max(0, s)
+    if (c.startsWith('69')) dotationsProv += Math.max(0, s)
+    if (c.startsWith('85')) dotationsHAO += Math.max(0, s)
+    // Reprises amort (78), provisions (79), HAO (86)
+    if (c.startsWith('78')) reprisesAmort += Math.max(0, -s)
+    if (c.startsWith('79')) reprisesProv += Math.max(0, -s)
+    if (c.startsWith('86')) reprisesHAO += Math.max(0, -s)
+    // VNC cessions (81), Produits cessions (82)
+    if (c.startsWith('81')) vncCessions += Math.max(0, s)
+    if (c.startsWith('82')) prodCessions += Math.max(0, -s)
     // Total charges classe 6
     if (c.startsWith('6')) {
       totalCharges += Math.max(0, s)
@@ -395,7 +410,11 @@ function calculerAgregatsEtendus(balance: Balance[]) {
     }
   }
 
-  return { achats, chargesExternes, impotsTaxes, dotationsAmort, totalCharges, totalProduits, produitsFinanciers, produitsExploitation, chargesExploitation }
+  // CAFG = Résultat + Dotations (68+69+85) - Reprises (78+79+86) + VNC(81) - ProdCessions(82)
+  const dotationsTotal = dotationsAmort + dotationsProv + dotationsHAO
+  const reprisesTotal = reprisesAmort + reprisesProv + reprisesHAO
+
+  return { achats, chargesExternes, impotsTaxes, dotationsAmort, dotationsTotal, reprisesTotal, vncCessions, prodCessions, totalCharges, totalProduits, produitsFinanciers, produitsExploitation, chargesExploitation }
 }
 
 export function handlePredictionRatios(balance: Balance[]): Proph3tResponse {
@@ -436,8 +455,8 @@ export function handlePredictionRatios(balance: Balance[]): Proph3tResponse {
   const cycleExploitation = rotationClients + rotationStocks - rotationFournisseurs
   const intensiteCapitalistique = agg.ca > 0 ? (agg.immoNettes / agg.ca) * 100 : 0
 
-  // ── CAF (Capacité d'Autofinancement) ──
-  const caf = agg.resultat + ext.dotationsAmort
+  // ── CAFG (Capacité d'Autofinancement Globale) ──
+  const caf = agg.resultat + ext.dotationsTotal - ext.reprisesTotal + ext.vncCessions - ext.prodCessions
   const capaciteRemboursement = caf > 0 ? agg.dettesTotal / caf : 99
 
   // ── Card 1 : Synthèse (8 ratios clés) ──
@@ -485,7 +504,7 @@ export function handlePredictionRatios(balance: Balance[]): Proph3tResponse {
     { label: 'Marge nette (Resultat/CA)', value: `${margeNette.toFixed(1)}%` },
     { label: 'ROE — Rentabilite financiere (Res/CP)', value: `${roe.toFixed(1)}%` },
     { label: 'ROA — Rentabilite economique (Res/Actif)', value: `${roa.toFixed(1)}%` },
-    { label: 'CAF (Resultat + Dotations amort)', value: `${fmt(caf)} FCFA` },
+    { label: 'CAFG (Resultat + Dot - Repr + VNC - ProdCess)', value: `${fmt(caf)} FCFA` },
 
     { label: '── ACTIVITE & ROTATION ──', value: '' },
     { label: 'Rotation clients (Clients/CA x 360)', value: `${Math.round(rotationClients)} jours` },
@@ -497,7 +516,7 @@ export function handlePredictionRatios(balance: Balance[]): Proph3tResponse {
     { label: '── RATIOS COMPLEMENTAIRES ──', value: '' },
     { label: 'Couverture emplois stables (CP/Immo nettes)', value: couvertureImmo.toFixed(2) },
     { label: 'Capacite remboursement (Dettes/CAF)', value: `${capaciteRemboursement.toFixed(1)} ans` },
-    { label: 'Taux marge EBE (EBE/CA)', value: `${(ext.produitsExploitation > 0 ? ((ext.produitsExploitation - ext.chargesExploitation + ext.dotationsAmort) / agg.ca) * 100 : 0).toFixed(1)}%` },
+    { label: 'Taux valeur ajoutee (VA/CA approx.)', value: `${(agg.ca > 0 ? ((agg.ca - ext.achats - ext.chargesExternes) / agg.ca) * 100 : 0).toFixed(1)}%` },
   ]
 
   const detailCard: FiscalInfoCard = {
@@ -1093,9 +1112,10 @@ export function handlePredictionGeneral(balanceN: Balance[], _balanceN1?: Balanc
   const entries = toBalanceEntries(balanceN)
   const ventesM = sigProduits(entries, ['701'])
   const achatsM = sigCharges(entries, ['601'])
-  const mc = ventesM - achatsM
+  const varStocksM = sigCharges(entries, ['6031'])
+  const mc = ventesM - achatsM - varStocksM
   const prodVendue = sigProduits(entries, ['702', '703', '704', '705', '706', '707'])
-  const production = prodVendue + sigProduits(entries, ['73', '72'])
+  const production = prodVendue + sigNet(entries, ['73']) + sigProduits(entries, ['72'])
   const va = mc + production - sigCharges(entries, ['602', '604', '605', '608', '61', '62', '63', '6032', '6033'])
   const ebe = va + sigProduits(entries, ['71']) - sigCharges(entries, ['64']) - sigCharges(entries, ['66'])
   if (ebe > 0) { score += 3; forces.push(`EBE positif (${fmt(ebe)} FCFA)`) }
@@ -1175,6 +1195,17 @@ function sigCharges(entries: BalanceEntry[], prefixes: string[]): number {
   return total
 }
 
+/** Net solde (credit - debit) for accounts that can swing either way (e.g. 73 = variation stocks) */
+function sigNet(entries: BalanceEntry[], prefixes: string[]): number {
+  let total = 0
+  for (const e of entries) {
+    for (const p of prefixes) {
+      if (e.compte.startsWith(p)) { total += e.solde_credit - e.solde_debit; break }
+    }
+  }
+  return total
+}
+
 // ── PREDICTION_SIG ──────────────────────────────────────────────────
 
 export function handlePredictionSIG(balance: Balance[]): Proph3tResponse {
@@ -1190,7 +1221,7 @@ export function handlePredictionSIG(balance: Balance[]): Proph3tResponse {
 
   // Production de l'Exercice = Prod vendue (702-707) + Prod stockée (73) + Prod immobilisée (72)
   const prodVendue = sigProduits(entries, ['702', '703', '704', '705', '706', '707'])
-  const prodStockee = sigProduits(entries, ['73'])
+  const prodStockee = sigNet(entries, ['73']) // net: credit=stockage, debit=destockage
   const prodImmobilisee = sigProduits(entries, ['72'])
   const production = prodVendue + prodStockee + prodImmobilisee
 
@@ -1232,9 +1263,9 @@ export function handlePredictionSIG(balance: Balance[]): Proph3tResponse {
   const participation = sigCharges(entries, ['89'])
   const resultatNet = rao + resultatHAO - impotBenef - participation
 
-  // CAFG = Résultat net + Dotations amort (68) - Reprises amort (78) + VNC cessions (81) - Prod cessions (82)
-  const dotationsAll = sigCharges(entries, ['68'])
-  const reprisesAll = sigProduits(entries, ['78'])
+  // CAFG = Résultat net + Dotations (68+69+85) - Reprises (78+79+86) + VNC cessions (81) - Prod cessions (82)
+  const dotationsAll = sigCharges(entries, ['68', '69', '85'])
+  const reprisesAll = sigProduits(entries, ['78', '79', '86'])
   const vncCessions = sigCharges(entries, ['81'])
   const prodCessions = sigProduits(entries, ['82'])
   const cafg = resultatNet + dotationsAll - reprisesAll + vncCessions - prodCessions

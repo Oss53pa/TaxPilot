@@ -20,6 +20,10 @@ const LiassePage: React.FC<LiassePageProps> = ({ children, orientation = 'portra
       // Compensate height when zoomed out to avoid empty space
       height: scale < 1 ? `calc(${scale} * 100%)` : 'auto',
       overflow: 'visible',
+      '@media print': {
+        height: 'auto !important',
+        overflow: 'visible !important',
+      },
     }}>
     <Paper
       elevation={0}
@@ -84,12 +88,15 @@ const LiassePage: React.FC<LiassePageProps> = ({ children, orientation = 'portra
 
         '@media print': {
           transform: 'none !important',
-          boxShadow: 'none',
-          border: 'none',
-          borderRadius: 0,
-          m: 0,
-          p: '10mm',
+          boxShadow: 'none !important',
+          border: 'none !important',
+          borderRadius: '0 !important',
+          margin: '0 !important',
+          padding: '5mm 0 !important',
+          width: '100% !important',
+          minHeight: 'auto !important',
           pageBreakAfter: 'always',
+          overflow: 'visible !important',
         },
       }}
     >
