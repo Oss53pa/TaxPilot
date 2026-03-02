@@ -204,10 +204,22 @@ const ModernDashboard: React.FC = () => {
             color: 'text.disabled',
             fontSize: '1.1rem',
             letterSpacing: 1,
+            mb: 1,
+          }}
+        >
+          La liasse fiscale SYSCOHADA, pilotée de bout en bout.
+        </Typography>
+
+        <Typography
+          variant="body2"
+          sx={{
+            color: 'text.disabled',
+            fontSize: '0.95rem',
+            letterSpacing: 0.3,
             mb: 4,
           }}
         >
-          Gestion Fiscale SYSCOHADA
+          Votre balance entre. Votre liasse sort. Conforme.
         </Typography>
 
         {/* Stats Row */}
@@ -293,7 +305,7 @@ const ModernDashboard: React.FC = () => {
           variant="caption"
           sx={{ color: P.primary300, mt: 1, fontSize: '0.7rem' }}
         >
-          Powered by Liass'Pilot
+          Powered by Atlas Studio
         </Typography>
       </Box>
     </Box>
