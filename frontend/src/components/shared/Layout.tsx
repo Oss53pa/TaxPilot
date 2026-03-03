@@ -50,6 +50,8 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
 import NotificationCenter from '../notifications/NotificationCenter'
 import ExerciceSelector from '../exercice/ExerciceSelector'
+import UsageAssistant from '../assistant/UsageAssistant'
+import { HelpOutline as HelpOutlineIcon } from '@mui/icons-material'
 
 const DRAWER_WIDTH = 270
 const DRAWER_WIDTH_COLLAPSED = 68
@@ -69,6 +71,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [collapsed, setCollapsed] = useState(false)
   const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null)
+  const [helpOpen, setHelpOpen] = useState(false)
 
   const drawerWidth = collapsed ? DRAWER_WIDTH_COLLAPSED : DRAWER_WIDTH
 
@@ -297,6 +300,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
           <NotificationCenter />
 
+          <Tooltip title="Guide d'utilisation">
+            <IconButton onClick={() => setHelpOpen(true)} color="inherit">
+              <HelpOutlineIcon />
+            </IconButton>
+          </Tooltip>
+
           <IconButton
             size="large"
             aria-label="account of current user"
@@ -402,6 +411,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           {children}
         </Box>
       </Box>
+
+      <UsageAssistant open={helpOpen} onClose={() => setHelpOpen(false)} />
     </Box>
   )
 }
