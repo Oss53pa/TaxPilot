@@ -47,8 +47,6 @@ import { useEntrepriseData } from '@/hooks/useEntrepriseData'
 import { useBalanceData } from '@/hooks/useBalanceData'
 import { getWorkflowState } from '@/services/workflowStateService'
 import type { WorkflowState } from '@/services/workflowStateService'
-import { getBankFeedStats } from '@/services/bankFeedStorageService'
-import { getInvoiceStats, getAllInvoices } from '@/services/einvoiceStorageService'
 import { getFilingStats, getAllReceipts } from '@/services/dgiFilingStorageService'
 
 // ─── Palette tokens (derived from central theme) ─────────────────────
@@ -323,20 +321,6 @@ const AppDashboard: React.FC = () => {
       }
     } catch { /* ignore */ }
 
-    // E-invoicing activity
-    try {
-      const invoices = getAllInvoices()
-      if (invoices.length > 0) {
-        const latest = invoices[0]
-        const invStats = getInvoiceStats()
-        acts.push({
-          action: 'Facturation',
-          detail: `${invoices.length} facture(s) — CA: ${invStats.totalVentesHT.toLocaleString('fr-FR')} XOF`,
-          time: latest.createdAt ? timeAgo(latest.createdAt) : '',
-          icon: <Receipt sx={{ fontSize: 16 }} />,
-        })
-      }
-    } catch { /* ignore */ }
 
     // DGI filing activity
     try {
@@ -830,8 +814,6 @@ const AppDashboard: React.FC = () => {
             {[
               { label: 'Import Balance', icon: <CloudUpload />, path: '/import-balance' },
               { label: 'Controle Balance', icon: <Security />, path: '/validation-liasse' },
-              { label: 'Rapprochement', icon: <SwapHoriz />, path: '/bank-feed' },
-              { label: 'Factures', icon: <Receipt />, path: '/invoicing' },
               { label: 'Generation Auto', icon: <Description />, path: '/generation' },
               { label: 'Liasse Fiscale', icon: <Assignment />, path: '/liasse-fiscale' },
               { label: 'Templates Export', icon: <CheckCircle />, path: '/templates' },

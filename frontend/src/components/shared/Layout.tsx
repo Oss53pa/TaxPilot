@@ -43,8 +43,6 @@ import {
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon,
   Archive as ArchiveIcon,
-  SwapHoriz as ReconcileIcon,
-  Receipt as InvoiceIcon,
 } from '@mui/icons-material'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
@@ -103,10 +101,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     { text: 'Import Balance', icon: <CloudUpload />, path: '/import-balance', divider: 'Import & Contrôle' },
     { text: 'Journal des Imports', icon: <HistoryIcon />, path: '/import-history' },
     { text: 'Consultation Balance', icon: <AccountBalance />, path: '/balance' },
-    { text: 'Rapprochement Bancaire', icon: <ReconcileIcon />, path: '/bank-feed' },
     { text: 'Audit & Corrections', icon: <Security />, path: '/audit' },
-
-    { text: 'Factures', icon: <InvoiceIcon />, path: '/invoicing', divider: 'Facturation' },
 
     { text: 'Liasse Fiscale', icon: <Assignment />, path: '/liasse-fiscale', divider: 'Production Liasse' },
     { text: 'Controle de Liasse', icon: <Security />, path: '/validation-liasse' },

@@ -82,7 +82,6 @@ const CATEGORIES: { key: string; label: string; icon: React.ReactNode }[] = [
   { key: 'demarrage', label: 'Demarrage rapide', icon: <RocketIcon fontSize="small" /> },
   { key: 'configuration', label: 'Configuration', icon: <SettingsIcon fontSize="small" /> },
   { key: 'import', label: 'Import & Balance', icon: <ImportIcon fontSize="small" /> },
-  { key: 'facturation', label: 'Facturation', icon: <InvoiceIcon fontSize="small" /> },
   { key: 'audit', label: 'Audit & Controle', icon: <AuditIcon fontSize="small" /> },
   { key: 'liasse', label: 'Production Liasse', icon: <LiasseIcon fontSize="small" /> },
   { key: 'finalisation', label: 'Finalisation', icon: <SendIcon fontSize="small" /> },
@@ -235,47 +234,6 @@ const GUIDES: Guide[] = [
     path: '/balance',
     category: 'import',
   },
-  {
-    id: 'bank-feed',
-    title: 'Rapprochement bancaire',
-    icon: <ReconcileIcon />,
-    description: 'Rapprochez automatiquement les ecritures comptables avec les releves bancaires.',
-    steps: [
-      'Accedez a Rapprochement Bancaire',
-      'Importez votre releve bancaire (CSV/OFX)',
-      'Lancez le rapprochement automatique',
-      'Verifiez les ecritures rapprochees',
-      'Traitez manuellement les ecritures non rapprochees',
-    ],
-    tips: [
-      'L\'algorithme de rapprochement utilise montant + date + libelle',
-      'Vous pouvez forcer un rapprochement manuel en cas de besoin',
-    ],
-    path: '/bank-feed',
-    category: 'import',
-  },
-
-  // --- Facturation ---
-  {
-    id: 'invoicing',
-    title: 'Facturation electronique',
-    icon: <InvoiceIcon />,
-    description: 'Creez et gerez vos factures electroniques aux formats UBL, CII et PEPPOL.',
-    steps: [
-      'Accedez a Factures',
-      'Creez une nouvelle facture ou importez un lot',
-      'Renseignez les informations client et lignes de facturation',
-      'Choisissez le format d\'export (UBL/CII/PEPPOL)',
-      'Validez et envoyez ou telechargez la facture',
-    ],
-    tips: [
-      'Les formats UBL et CII sont conformes aux normes europeennes',
-      'PEPPOL permet l\'envoi direct via le reseau d\'echange',
-    ],
-    path: '/invoicing',
-    category: 'facturation',
-  },
-
   // --- Audit & Controle ---
   {
     id: 'audit',
