@@ -27,6 +27,8 @@ import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
 import { useEntrepriseData } from '@/hooks/useEntrepriseData'
 import { useBalanceData } from '@/hooks/useBalanceData'
 import { getWorkflowState } from '@/services/workflowStateService'
+import { getAllExercices } from '@/services/exerciceStorageService'
+import { getAllBalances } from '@/services/balanceStorageService'
 import NotificationCenter from '@/components/notifications/NotificationCenter'
 import OnboardingTour from '@/components/onboarding/OnboardingTour'
 
@@ -58,6 +60,9 @@ const ModernDashboard: React.FC = () => {
     const charges = bal.d(['60', '61', '62', '63', '64', '65', '66', '67', '68', '69'])
     return { ca, resultat: produits - charges, hasBal: true }
   }, [bal])
+
+  const nbExercices = getAllExercices().length
+  const nbBalances = getAllBalances().length
 
   const stats = {
     declarations: ws.generationDone ? 1 : 0,
@@ -290,16 +295,18 @@ const ModernDashboard: React.FC = () => {
           }}
         >
           {[
-            { value: String(stats.comptes), label: 'Comptes', sub: stats.comptes > 0 ? 'importés' : '\u2014' },
+            { value: String(nbExercices), label: 'Exercices', sub: nbExercices > 0 ? 'enregistré(s)' : '\u2014' },
+            { value: String(nbBalances), label: 'Balances', sub: nbBalances > 0 ? 'importée(s)' : '\u2014' },
+            { value: String(stats.comptes), label: 'Comptes', sub: stats.comptes > 0 ? 'dans la balance' : '\u2014' },
             { value: String(stats.declarations), label: 'Liasses', sub: stats.declarations > 0 ? 'générée(s)' : 'en attente' },
             { value: `${stats.conformite}%`, label: 'Conformité', sub: ws.controleDone ? (ws.controleResult === 'passed' ? 'validé' : ws.controleBloquants > 0 ? `${ws.controleBloquants} bloquant(s)` : 'avertissements') : 'non contrôlé' },
             { value: `${stats.avancement}%`, label: 'Avancement', progress: stats.avancement },
-          ].map((stat, i) => (
+          ].map((stat, i, arr) => (
             <Box key={stat.label} sx={{
               textAlign: 'center',
-              px: { xs: 2, sm: 4, md: 5 },
-              borderRight: i < 3 ? { xs: 'none', sm: `1px solid ${P.primary200}` } : 'none',
-              minWidth: 100,
+              px: { xs: 2, sm: 3, md: 4 },
+              borderRight: i < arr.length - 1 ? { xs: 'none', sm: `1px solid ${P.primary200}` } : 'none',
+              minWidth: 90,
             }}>
               <Typography sx={{
                 fontSize: { xs: '1.8rem', md: '2.2rem' }, fontWeight: 300, color: 'text.primary', lineHeight: 1.2,

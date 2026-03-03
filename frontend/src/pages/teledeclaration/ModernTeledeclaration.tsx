@@ -1,6 +1,7 @@
 /**
  * Module Télédéclaration Professionnel - Transmission électronique SYSCOHADA
  * Interface moderne pour dépôt et suivi des déclarations fiscales
+ * Intégré avec dgiFilingStorageService pour la gestion des déclarations
  */
 
 import React, { useState, useEffect } from 'react'
@@ -64,7 +65,24 @@ import {
   CloudDone as CloudDoneIcon,
   Sync as SyncIcon,
   VerifiedUser as CertificateIcon,
+  Add as AddIcon,
+  Delete as DeleteIcon,
+  Description as XmlIcon,
 } from '@mui/icons-material'
+import {
+  type DGIDeclaration,
+  type DeclarationType,
+  createDeclaration,
+  updateDeclaration,
+  getAllDeclarations,
+  deleteDeclaration,
+  validateDeclaration as validateDGIDeclaration,
+  submitDeclaration,
+  generateDSF,
+  getAllReceipts,
+  getFilingStats,
+} from '@/services/dgiFilingStorageService'
+import { generateXmlForDeclaration, downloadXml } from '@/services/dgiXmlGeneratorService'
 
 interface Declaration {
   id: string
@@ -77,6 +95,7 @@ interface Declaration {
   amount?: number
   reference?: string
   attachments: string[]
+  dgiDeclarationId?: string // link to DGI filing service
 }
 
 interface TransmissionStep {
@@ -104,11 +123,14 @@ const ModernTeledeclaration: React.FC = () => {
   const [selectedDeclaration, setSelectedDeclaration] = useState<string>('')
   const [transmissionDialog, setTransmissionDialog] = useState(false)
   const [certificateDialog, setCertificateDialog] = useState(false)
+  const [newDeclDialog, setNewDeclDialog] = useState(false)
+  const [newDeclType, setNewDeclType] = useState<DeclarationType>('DSF')
   const [declarations, setDeclarations] = useState<Declaration[]>([])
+  const [dgiDeclarations, setDgiDeclarations] = useState<DGIDeclaration[]>([])
   const [transmitting, setTransmitting] = useState(false)
+  const [filingStats, setFilingStats] = useState(getFilingStats())
 
-  useEffect(() => {
-    // Build declarations dynamically from workflow state
+  const loadDeclarations = () => {
     try {
       const raw = localStorage.getItem('fiscasync_workflow_state')
       const ws = raw ? JSON.parse(raw) : {}
@@ -125,6 +147,8 @@ const ModernTeledeclaration: React.FC = () => {
       } catch { /* ignore */ }
 
       const decls: Declaration[] = []
+
+      // Workflow-based liasse declaration
       if (ws.generationDone) {
         const status = ws.teledeclarationStatus === 'submitted' ? 'submitted'
           : ws.teledeclarationStatus === 'accepted' ? 'accepted'
@@ -152,10 +176,108 @@ const ModernTeledeclaration: React.FC = () => {
           attachments: [],
         })
       }
+
+      // DGI filing service declarations
+      const dgiDecls = getAllDeclarations()
+      setDgiDeclarations(dgiDecls)
+      for (const dgi of dgiDecls) {
+        const statusMap: Record<string, Declaration['status']> = {
+          brouillon: 'draft',
+          validee: 'ready',
+          soumise: 'submitted',
+          acceptee: 'accepted',
+          rejetee: 'rejected',
+        }
+        const typeLabels: Record<string, string> = {
+          DSF: 'Declaration Statistique et Fiscale',
+          DAS: 'Declaration Annuelle Salaires',
+          TVA: 'Declaration TVA',
+          IS: 'Declaration IS',
+          LIASSE: 'Liasse SYSCOHADA (DGI)',
+        }
+        decls.push({
+          id: `dgi-${dgi.id}`,
+          type: typeLabels[dgi.type] || dgi.type,
+          period: dgi.exercice,
+          company: dgi.entreprise,
+          status: statusMap[dgi.status] || 'draft',
+          dueDate: `31/03/${dgi.exercice}`,
+          submittedDate: dgi.submittedAt ? new Date(dgi.submittedAt).toLocaleDateString('fr-FR') : undefined,
+          amount: dgi.montantDu,
+          reference: dgi.receiptId,
+          attachments: dgi.xmlContent ? ['declaration.xml'] : [],
+          dgiDeclarationId: dgi.id,
+        })
+      }
+
       setDeclarations(decls)
+      setFilingStats(getFilingStats())
     } catch { /* ignore */ }
     setLoading(false)
-  }, [])
+  }
+
+  useEffect(() => { loadDeclarations() }, [])
+
+  // ── Create new DGI declaration ──
+  const handleCreateDeclaration = () => {
+    let companyName = 'Mon entreprise'
+    let nif = ''
+    try {
+      const entRaw = localStorage.getItem('fiscasync_entreprise_settings')
+      if (entRaw) {
+        const ent = JSON.parse(entRaw)
+        companyName = ent?.raison_sociale || companyName
+        nif = ent?.numero_contribuable || ent?.ifu || ''
+      }
+    } catch { /* ignore */ }
+
+    const decl = createDeclaration({
+      type: newDeclType,
+      exercice: new Date().getFullYear().toString(),
+      entreprise: companyName,
+      nif,
+    })
+
+    // Auto-populate DSF data if available
+    if (newDeclType === 'DSF' || newDeclType === 'LIASSE') {
+      const dsfData = generateDSF(decl.exercice)
+      if (dsfData) {
+        updateDeclaration(decl.id, { dsfData, montantDu: dsfData.isDu })
+      }
+    }
+
+    setNewDeclDialog(false)
+    loadDeclarations()
+  }
+
+  // ── Delete DGI declaration ──
+  const handleDeleteDGIDeclaration = (dgiId: string) => {
+    deleteDeclaration(dgiId)
+    loadDeclarations()
+  }
+
+  // ── Validate + Submit DGI declaration ──
+  const handleSubmitDGIDeclaration = async (dgiId: string) => {
+    const validation = validateDGIDeclaration(dgiId)
+    if (!validation.valid) {
+      alert(`Validation echouee:\n${validation.errors.join('\n')}`)
+      return
+    }
+    const receipt = await submitDeclaration(dgiId)
+    if (receipt) {
+      loadDeclarations()
+    }
+  }
+
+  // ── Download XML ──
+  const handleDownloadXml = (dgiId: string) => {
+    const dgi = dgiDeclarations.find(d => d.id === dgiId)
+    if (!dgi) return
+    const xml = generateXmlForDeclaration(dgi)
+    if (xml) {
+      downloadXml(xml, `${dgi.type}_${dgi.exercice}_${dgi.entreprise}.xml`)
+    }
+  }
 
   const governmentServices: GovernmentService[] = [
     { id: 'dgi', name: 'Direction Generale des Impots', code: 'DGI-CI', status: 'online', lastCheck: new Date().toLocaleTimeString(), responseTime: 0.4 },
@@ -262,12 +384,29 @@ const ModernTeledeclaration: React.FC = () => {
     setTransmissionDialog(true)
   }
 
+  /** Get declarations eligible for transmission (ready or validated DGI) */
+  const getTransmittableDeclarations = (): Declaration[] => {
+    return declarations.filter(d => {
+      if (d.dgiDeclarationId) {
+        // DGI declarations: brouillon or validated
+        return d.status === 'draft' || d.status === 'ready'
+      }
+      // Workflow declarations: ready
+      return d.status === 'ready'
+    })
+  }
+
   const handleStartTransmission = async () => {
+    if (!selectedDeclaration) return
     setTransmitting(true)
     setTransmissionDialog(false)
 
+    // Reset steps
+    const resetSteps: TransmissionStep[] = transmissionSteps.map(s => ({ ...s, status: 'pending' as const, timestamp: undefined }))
+    setTransmissionSteps(resetSteps)
+
     const stepDelays = [800, 1200, 1500, 1000, 600]
-    const updatedSteps = [...transmissionSteps]
+    const updatedSteps: TransmissionStep[] = [...resetSteps]
 
     for (let i = 0; i < updatedSteps.length; i++) {
       updatedSteps[i] = { ...updatedSteps[i], status: 'running' }
@@ -281,23 +420,33 @@ const ModernTeledeclaration: React.FC = () => {
       setTransmissionSteps([...updatedSteps])
     }
 
-    // Update workflow state
-    const { updateWorkflowState } = await import('@/services/workflowStateService')
-    const ref = `TD-${Date.now().toString(36).toUpperCase()}`
-    updateWorkflowState({
-      teledeclarationStatus: 'submitted',
-      teledeclarationDate: new Date().toISOString(),
-      teledeclarationReference: ref,
-    })
+    const decl = declarations.find(d => d.id === selectedDeclaration)
 
-    // Update declaration status
-    setDeclarations(prev => prev.map(d =>
-      d.id === selectedDeclaration
-        ? { ...d, status: 'submitted' as const, submittedDate: new Date().toLocaleDateString('fr-FR'), reference: ref }
-        : d
-    ))
+    if (decl?.dgiDeclarationId) {
+      // Route through DGI filing service
+      const receipt = await submitDeclaration(decl.dgiDeclarationId)
+      if (receipt) {
+        // Also update workflow state for consistency
+        const { updateWorkflowState } = await import('@/services/workflowStateService')
+        updateWorkflowState({
+          teledeclarationStatus: 'submitted',
+          teledeclarationDate: new Date().toISOString(),
+          teledeclarationReference: receipt.referenceDepot,
+        })
+      }
+    } else {
+      // Legacy workflow-only transmission
+      const { updateWorkflowState } = await import('@/services/workflowStateService')
+      const ref = `TD-${Date.now().toString(36).toUpperCase()}`
+      updateWorkflowState({
+        teledeclarationStatus: 'submitted',
+        teledeclarationDate: new Date().toISOString(),
+        teledeclarationReference: ref,
+      })
+    }
 
     setTransmitting(false)
+    loadDeclarations()
   }
 
   const TabPanel: React.FC<{ children: React.ReactNode; value: number; index: number }> = ({
@@ -325,6 +474,13 @@ const ModernTeledeclaration: React.FC = () => {
           </Box>
           
           <Stack direction="row" spacing={2}>
+            <Button
+              variant="outlined"
+              startIcon={<AddIcon />}
+              onClick={() => setNewDeclDialog(true)}
+            >
+              Nouvelle Declaration
+            </Button>
             <Button
               variant="outlined"
               startIcon={<CertificateIcon />}
@@ -355,10 +511,10 @@ const ModernTeledeclaration: React.FC = () => {
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <Box>
                     <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, color: theme.palette.success.main }}>
-                      {declarations.filter(d => d.status === 'submitted' || d.status === 'accepted').length}
+                      {declarations.filter(d => d.status === 'submitted' || d.status === 'accepted').length + filingStats.soumises}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      Déclarations transmises
+                      Declarations transmises
                     </Typography>
                   </Box>
                   <Avatar
@@ -413,10 +569,10 @@ const ModernTeledeclaration: React.FC = () => {
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <Box>
                     <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, color: theme.palette.primary.main }}>
-                      {declarations.length > 0 ? Math.round((declarations.filter(d => d.status === 'accepted').length / declarations.length) * 100) : 0}%
+                      {filingStats.totalReceipts}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      Taux d'acceptation
+                      Recepissss de depot
                     </Typography>
                   </Box>
                   <Avatar
@@ -442,10 +598,10 @@ const ModernTeledeclaration: React.FC = () => {
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <Box>
                     <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, color: theme.palette.info.main }}>
-                      {declarations.reduce((s, d) => s + (d.amount || 0), 0).toLocaleString('fr-FR')}
+                      {(declarations.reduce((s, d) => s + (d.amount || 0), 0) + filingStats.totalMontantDu).toLocaleString('fr-FR')}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      Total transmis (FCFA)
+                      Total montant du (FCFA)
                     </Typography>
                   </Box>
                   <Avatar
@@ -566,9 +722,23 @@ const ModernTeledeclaration: React.FC = () => {
                                   <ViewIcon fontSize="small" />
                                 </IconButton>
                               </Tooltip>
-                              {declaration.status === 'ready' && (
+                              {declaration.dgiDeclarationId && declaration.status === 'draft' && (
+                                <Tooltip title="Valider et soumettre">
+                                  <IconButton size="small" color="primary" onClick={() => handleSubmitDGIDeclaration(declaration.dgiDeclarationId!)}>
+                                    <SendIcon fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                              )}
+                              {declaration.dgiDeclarationId && (
+                                <Tooltip title="Telecharger XML">
+                                  <IconButton size="small" onClick={() => handleDownloadXml(declaration.dgiDeclarationId!)}>
+                                    <XmlIcon fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                              )}
+                              {declaration.status === 'ready' && !declaration.dgiDeclarationId && (
                                 <Tooltip title="Transmettre">
-                                  <IconButton size="small" color="primary">
+                                  <IconButton size="small" color="primary" onClick={() => { setSelectedDeclaration(declaration.id); handleTransmit() }}>
                                     <SendIcon fontSize="small" />
                                   </IconButton>
                                 </Tooltip>
@@ -577,6 +747,13 @@ const ModernTeledeclaration: React.FC = () => {
                                 <Tooltip title="Télécharger accusé">
                                   <IconButton size="small">
                                     <DownloadIcon fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                              )}
+                              {declaration.dgiDeclarationId && declaration.status === 'draft' && (
+                                <Tooltip title="Supprimer">
+                                  <IconButton size="small" onClick={() => handleDeleteDGIDeclaration(declaration.dgiDeclarationId!)}>
+                                    <DeleteIcon fontSize="small" />
                                   </IconButton>
                                 </Tooltip>
                               )}
@@ -591,22 +768,110 @@ const ModernTeledeclaration: React.FC = () => {
             </TabPanel>
 
             <TabPanel value={activeTab} index={1}>
-              <CardContent>
-                <Typography variant="body1" color="text.secondary" align="center" sx={{ py: 4 }}>
-                  {declarations.filter(d => d.status === 'ready' || d.status === 'draft').length === 0 
-                    ? 'Aucune déclaration en attente'
-                    : `${declarations.filter(d => d.status === 'ready' || d.status === 'draft').length} déclaration(s) en attente`
-                  }
-                </Typography>
-              </CardContent>
+              {(() => {
+                const pending = declarations.filter(d => d.status === 'ready' || d.status === 'draft')
+                if (pending.length === 0) return (
+                  <CardContent>
+                    <Typography variant="body1" color="text.secondary" align="center" sx={{ py: 4 }}>
+                      Aucune declaration en attente
+                    </Typography>
+                  </CardContent>
+                )
+                return (
+                  <TableContainer>
+                    <Table>
+                      <TableHead>
+                        <TableRow sx={{ backgroundColor: alpha(theme.palette.primary.main, 0.02) }}>
+                          <TableCell sx={{ fontWeight: 600 }}>Type</TableCell>
+                          <TableCell sx={{ fontWeight: 600 }}>Periode</TableCell>
+                          <TableCell sx={{ fontWeight: 600 }}>Statut</TableCell>
+                          <TableCell sx={{ fontWeight: 600 }}>Echeance</TableCell>
+                          <TableCell sx={{ fontWeight: 600 }}>Actions</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {pending.map(d => (
+                          <TableRow key={d.id} hover>
+                            <TableCell><Typography variant="body2" sx={{ fontWeight: 600 }}>{d.type}</Typography></TableCell>
+                            <TableCell><Typography variant="body2">{d.period}</Typography></TableCell>
+                            <TableCell>
+                              <Chip label={getStatusLabel(d.status)} size="small"
+                                sx={{ backgroundColor: alpha(getStatusColor(d.status), 0.1), color: getStatusColor(d.status), fontWeight: 600 }}
+                                icon={getStatusIcon(d.status)} />
+                            </TableCell>
+                            <TableCell><Typography variant="body2">{d.dueDate}</Typography></TableCell>
+                            <TableCell>
+                              <Stack direction="row" spacing={1}>
+                                {d.dgiDeclarationId && (
+                                  <Tooltip title="Valider et soumettre">
+                                    <IconButton size="small" color="primary" onClick={() => handleSubmitDGIDeclaration(d.dgiDeclarationId!)}>
+                                      <SendIcon fontSize="small" />
+                                    </IconButton>
+                                  </Tooltip>
+                                )}
+                                {d.status === 'ready' && (
+                                  <Tooltip title="Transmettre">
+                                    <IconButton size="small" color="primary" onClick={() => { setSelectedDeclaration(d.id); handleTransmit() }}>
+                                      <SendIcon fontSize="small" />
+                                    </IconButton>
+                                  </Tooltip>
+                                )}
+                              </Stack>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                )
+              })()}
             </TabPanel>
 
             <TabPanel value={activeTab} index={2}>
-              <CardContent>
-                <Typography variant="body1" color="text.secondary" align="center" sx={{ py: 4 }}>
-                  {declarations.filter(d => d.status === 'submitted' || d.status === 'accepted').length} déclaration(s) transmise(s)
-                </Typography>
-              </CardContent>
+              {(() => {
+                const transmitted = declarations.filter(d => d.status === 'submitted' || d.status === 'accepted')
+                if (transmitted.length === 0) return (
+                  <CardContent>
+                    <Typography variant="body1" color="text.secondary" align="center" sx={{ py: 4 }}>
+                      Aucune declaration transmise
+                    </Typography>
+                  </CardContent>
+                )
+                return (
+                  <TableContainer>
+                    <Table>
+                      <TableHead>
+                        <TableRow sx={{ backgroundColor: alpha(theme.palette.primary.main, 0.02) }}>
+                          <TableCell sx={{ fontWeight: 600 }}>Type</TableCell>
+                          <TableCell sx={{ fontWeight: 600 }}>Periode</TableCell>
+                          <TableCell sx={{ fontWeight: 600 }}>Entreprise</TableCell>
+                          <TableCell sx={{ fontWeight: 600 }}>Statut</TableCell>
+                          <TableCell sx={{ fontWeight: 600 }}>Date transmission</TableCell>
+                          <TableCell sx={{ fontWeight: 600 }}>Reference</TableCell>
+                          <TableCell sx={{ fontWeight: 600 }}>Montant</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {transmitted.map(d => (
+                          <TableRow key={d.id} hover>
+                            <TableCell><Typography variant="body2" sx={{ fontWeight: 600 }}>{d.type}</Typography></TableCell>
+                            <TableCell><Typography variant="body2">{d.period}</Typography></TableCell>
+                            <TableCell><Typography variant="body2">{d.company}</Typography></TableCell>
+                            <TableCell>
+                              <Chip label={getStatusLabel(d.status)} size="small"
+                                sx={{ backgroundColor: alpha(getStatusColor(d.status), 0.1), color: getStatusColor(d.status), fontWeight: 600 }}
+                                icon={getStatusIcon(d.status)} />
+                            </TableCell>
+                            <TableCell><Typography variant="body2">{d.submittedDate || '-'}</Typography></TableCell>
+                            <TableCell><Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>{d.reference || '-'}</Typography></TableCell>
+                            <TableCell><Typography variant="body2" sx={{ fontWeight: 600 }}>{d.amount ? d.amount.toLocaleString('fr-FR') : '-'}</Typography></TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                )
+              })()}
             </TabPanel>
           </Card>
         </Grid>
@@ -767,14 +1032,14 @@ const ModernTeledeclaration: React.FC = () => {
                   label="Déclaration à transmettre"
                   onChange={(e) => setSelectedDeclaration(e.target.value)}
                 >
-                  {declarations.filter(d => d.status === 'ready').map((declaration) => (
+                  {getTransmittableDeclarations().map((declaration) => (
                     <MenuItem key={declaration.id} value={declaration.id}>
                       <Box>
                         <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
                           {declaration.type} - {declaration.period}
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
-                          {declaration.company}
+                          {declaration.company} {declaration.dgiDeclarationId ? '(DGI)' : ''}
                         </Typography>
                       </Box>
                     </MenuItem>
@@ -839,6 +1104,72 @@ const ModernTeledeclaration: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Dialog nouvelle declaration DGI */}
+      <Dialog open={newDeclDialog} onClose={() => setNewDeclDialog(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Nouvelle Declaration DGI</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} sx={{ mt: 1 }}>
+            <Alert severity="info">
+              <AlertTitle>Creation d'une declaration</AlertTitle>
+              Les donnees seront auto-peuplees depuis la balance importee et le passage fiscal si disponible.
+            </Alert>
+            <FormControl fullWidth>
+              <InputLabel>Type de declaration</InputLabel>
+              <Select value={newDeclType} label="Type de declaration" onChange={e => setNewDeclType(e.target.value as DeclarationType)}>
+                <MenuItem value="DSF">DSF — Declaration Statistique et Fiscale</MenuItem>
+                <MenuItem value="DAS">DAS — Declaration Annuelle des Salaires</MenuItem>
+                <MenuItem value="TVA">TVA — Declaration de TVA</MenuItem>
+                <MenuItem value="IS">IS — Impot sur les Societes</MenuItem>
+                <MenuItem value="LIASSE">LIASSE — Liasse Fiscale SYSCOHADA</MenuItem>
+              </Select>
+            </FormControl>
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setNewDeclDialog(false)}>Annuler</Button>
+          <Button variant="contained" startIcon={<AddIcon />} onClick={handleCreateDeclaration}>
+            Creer
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Receipts section */}
+      {filingStats.totalReceipts > 0 && (
+        <Card elevation={0} sx={{ border: `1px solid ${alpha(theme.palette.divider, 0.08)}`, mt: 3 }}>
+          <CardContent sx={{ p: 3 }}>
+            <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+              Recepissses de depot ({filingStats.totalReceipts})
+            </Typography>
+            <TableContainer>
+              <Table size="small">
+                <TableHead>
+                  <TableRow sx={{ backgroundColor: alpha(theme.palette.primary.main, 0.02) }}>
+                    <TableCell sx={{ fontWeight: 600 }}>Reference</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Type</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Date</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Entreprise</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Montant</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Hash SHA-256</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {getAllReceipts().map(r => (
+                    <TableRow key={r.id} hover>
+                      <TableCell><Typography variant="body2" sx={{ fontWeight: 600 }}>{r.referenceDepot}</Typography></TableCell>
+                      <TableCell><Chip label={r.declarationType} size="small" color="primary" variant="outlined" /></TableCell>
+                      <TableCell><Typography variant="body2">{new Date(r.dateDepot).toLocaleDateString('fr-FR')}</Typography></TableCell>
+                      <TableCell><Typography variant="body2">{r.entreprise}</Typography></TableCell>
+                      <TableCell><Typography variant="body2" sx={{ fontWeight: 600 }}>{r.montant.toLocaleString('fr-FR')}</Typography></TableCell>
+                      <TableCell><Typography variant="caption" sx={{ fontFamily: 'monospace' }}>{r.hashSHA256.substring(0, 16)}...</Typography></TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </CardContent>
+        </Card>
+      )}
     </Box>
   )
 }

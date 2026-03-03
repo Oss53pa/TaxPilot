@@ -38,6 +38,8 @@ import {
   BarChart,
   Refresh,
   Settings,
+  SwapHoriz,
+  Receipt,
 } from '@mui/icons-material'
 import { useNavigate } from 'react-router-dom'
 import { fiscasyncPalette } from '@/theme/fiscasyncTheme'
@@ -45,6 +47,9 @@ import { useEntrepriseData } from '@/hooks/useEntrepriseData'
 import { useBalanceData } from '@/hooks/useBalanceData'
 import { getWorkflowState } from '@/services/workflowStateService'
 import type { WorkflowState } from '@/services/workflowStateService'
+import { getBankFeedStats } from '@/services/bankFeedStorageService'
+import { getInvoiceStats, getAllInvoices } from '@/services/einvoiceStorageService'
+import { getFilingStats, getAllReceipts } from '@/services/dgiFilingStorageService'
 
 // ─── Palette tokens (derived from central theme) ─────────────────────
 const C = {
@@ -304,6 +309,48 @@ const AppDashboard: React.FC = () => {
         })
       }
     }
+
+    // Bank feed activity
+    try {
+      const bfStats = getBankFeedStats()
+      if (bfStats.totalTransactions > 0) {
+        acts.push({
+          action: 'Rapprochement bancaire',
+          detail: `${bfStats.reconciledCount}/${bfStats.totalTransactions} transactions rapprochées — ${bfStats.totalAccounts} compte(s)`,
+          time: '',
+          icon: <SwapHoriz sx={{ fontSize: 16 }} />,
+        })
+      }
+    } catch { /* ignore */ }
+
+    // E-invoicing activity
+    try {
+      const invoices = getAllInvoices()
+      if (invoices.length > 0) {
+        const latest = invoices[0]
+        const invStats = getInvoiceStats()
+        acts.push({
+          action: 'Facturation',
+          detail: `${invoices.length} facture(s) — CA: ${invStats.totalVentesHT.toLocaleString('fr-FR')} XOF`,
+          time: latest.createdAt ? timeAgo(latest.createdAt) : '',
+          icon: <Receipt sx={{ fontSize: 16 }} />,
+        })
+      }
+    } catch { /* ignore */ }
+
+    // DGI filing activity
+    try {
+      const filingStats = getFilingStats()
+      const receipts = getAllReceipts()
+      if (filingStats.totalDeclarations > 0) {
+        acts.push({
+          action: 'Déclarations DGI',
+          detail: `${filingStats.soumises} soumise(s), ${filingStats.enAttente} en attente — ${receipts.length} récépissé(s)`,
+          time: receipts.length > 0 ? timeAgo(receipts[0].createdAt) : '',
+          icon: <Analytics sx={{ fontSize: 16 }} />,
+        })
+      }
+    } catch { /* ignore */ }
 
     return acts
   }, [ws, ent.nom])
@@ -783,6 +830,8 @@ const AppDashboard: React.FC = () => {
             {[
               { label: 'Import Balance', icon: <CloudUpload />, path: '/import-balance' },
               { label: 'Controle Balance', icon: <Security />, path: '/validation-liasse' },
+              { label: 'Rapprochement', icon: <SwapHoriz />, path: '/bank-feed' },
+              { label: 'Factures', icon: <Receipt />, path: '/invoicing' },
               { label: 'Generation Auto', icon: <Description />, path: '/generation' },
               { label: 'Liasse Fiscale', icon: <Assignment />, path: '/liasse-fiscale' },
               { label: 'Templates Export', icon: <CheckCircle />, path: '/templates' },

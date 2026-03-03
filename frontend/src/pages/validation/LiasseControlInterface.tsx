@@ -18,6 +18,7 @@ import {
   IconButton,
   Divider,
   Tooltip,
+  Drawer,
 } from '@mui/material'
 import {
   CheckCircle as ValidIcon,
@@ -33,6 +34,9 @@ import {
   AccountBalance as FiscalIcon,
   History as HistoryIcon,
   Archive as ArchiveIcon,
+  Close as CloseIcon,
+  NavigateBefore as PrevIcon,
+  NavigateNext as NextIcon,
 } from '@mui/icons-material'
 
 import { auditOrchestrator, reportGenerator } from '@/services/audit'
@@ -143,27 +147,28 @@ const ScoreGauge: React.FC<{ score: number; size?: number }> = ({ score, size = 
 }
 
 // --- Control Card Component ---
-const ControlCard: React.FC<{ result: ResultatControle }> = ({ result: r }) => {
-  const [expanded, setExpanded] = useState(false)
+const ControlCard: React.FC<{ result: ResultatControle; selected?: boolean; onSelect?: (r: ResultatControle) => void }> = ({ result: r, selected, onSelect }) => {
   const cfg = SEVERITE_CONFIG[r.severite]
   const isOk = r.statut === 'OK'
   const isNA = r.statut === 'NON_APPLICABLE'
+  const clickable = !isOk && !isNA && !!onSelect
 
   return (
     <Paper
       elevation={0}
       sx={{
         border: '1px solid',
-        borderColor: isOk ? '#e5e5e5' : `${cfg.color}30`,
+        borderColor: selected ? cfg.color : isOk ? '#e5e5e5' : `${cfg.color}30`,
         borderLeft: `4px solid ${cfg.color}`,
         mb: 1,
-        bgcolor: expanded && !isOk ? cfg.bg : 'white',
+        bgcolor: selected ? cfg.bg : 'white',
         transition: 'all 0.2s',
+        '&:hover': clickable ? { bgcolor: cfg.bg, borderColor: `${cfg.color}60` } : {},
       }}
     >
       <Box
-        sx={{ display: 'flex', alignItems: 'center', px: 2, py: 1, cursor: isOk ? 'default' : 'pointer', gap: 1.5 }}
-        onClick={() => !isOk && !isNA && setExpanded(!expanded)}
+        sx={{ display: 'flex', alignItems: 'center', px: 2, py: 1, cursor: clickable ? 'pointer' : 'default', gap: 1.5 }}
+        onClick={() => clickable && onSelect(r)}
       >
         {/* Status icon */}
         {isOk ? (
@@ -201,116 +206,280 @@ const ControlCard: React.FC<{ result: ResultatControle }> = ({ result: r }) => {
           sx={{ bgcolor: `${cfg.color}15`, color: cfg.color, fontWeight: 600, fontSize: '0.6rem', height: 20, minWidth: 60 }}
         />
 
-        {/* Expand button */}
-        {!isOk && !isNA && (
-          <IconButton size="small" sx={{ p: 0.25 }}>
-            {expanded ? <ExpandLessIcon sx={{ fontSize: 16 }} /> : <ExpandMoreIcon sx={{ fontSize: 16 }} />}
-          </IconButton>
+        {/* Arrow indicator for clickable */}
+        {clickable && (
+          <ArrowForwardIcon sx={{ fontSize: 14, color: '#a3a3a3' }} />
         )}
       </Box>
+    </Paper>
+  )
+}
 
-      {/* Expanded details */}
-      <Collapse in={expanded}>
-        <Box sx={{ px: 2, pb: 2, pt: 0.5 }}>
-          <Divider sx={{ mb: 1.5 }} />
+// --- Anomaly Detail Sidebar ---
+const SIDEBAR_WIDTH = 420
 
-          {/* PROPH3T structured fields */}
-          <Grid container spacing={1.5}>
-            {r.details?.attendu && (
-              <Grid item xs={12} sm={6}>
-                <Typography variant="caption" sx={{ color: '#16a34a', fontWeight: 700, textTransform: 'uppercase', fontSize: '0.6rem' }}>
-                  Attendu
-                </Typography>
-                <Typography variant="body2" sx={{ fontSize: '0.78rem' }}>{r.details.attendu}</Typography>
+const AnomalyDetailSidebar: React.FC<{
+  anomaly: ResultatControle | null
+  onClose: () => void
+  onNavigate?: (direction: 'prev' | 'next') => void
+  currentIndex?: number
+  totalCount?: number
+}> = ({ anomaly, onClose, onNavigate, currentIndex, totalCount }) => {
+  if (!anomaly) return null
+  const r = anomaly
+  const cfg = SEVERITE_CONFIG[r.severite]
+
+  return (
+    <Drawer
+      anchor="right"
+      open={!!anomaly}
+      onClose={onClose}
+      variant="persistent"
+      slotProps={{ backdrop: { invisible: true } }}
+      sx={{
+        '& .MuiDrawer-paper': {
+          width: SIDEBAR_WIDTH,
+          boxSizing: 'border-box',
+          bgcolor: '#ffffff',
+          borderLeft: `3px solid ${cfg.color}`,
+          boxShadow: '-4px 0 20px rgba(0,0,0,0.08)',
+        },
+      }}
+    >
+      <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+        {/* Header */}
+        <Box sx={{ p: 2, bgcolor: cfg.bg, borderBottom: '1px solid #e5e5e5' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              {r.severite === 'BLOQUANT' || r.severite === 'MAJEUR' ? (
+                <ErrorIcon sx={{ color: cfg.color, fontSize: 20 }} />
+              ) : (
+                <WarningIcon sx={{ color: cfg.color, fontSize: 20 }} />
+              )}
+              <Chip
+                label={cfg.label}
+                size="small"
+                sx={{ bgcolor: `${cfg.color}20`, color: cfg.color, fontWeight: 700, fontSize: '0.7rem' }}
+              />
+              <Chip label={`Niveau ${r.niveau}`} size="small" variant="outlined" sx={{ fontSize: '0.65rem', height: 22 }} />
+            </Box>
+            <IconButton size="small" onClick={onClose} sx={{ ml: 1 }}>
+              <CloseIcon sx={{ fontSize: 18 }} />
+            </IconButton>
+          </Box>
+          <Typography variant="caption" fontWeight={700} fontFamily="monospace" sx={{ color: '#525252', display: 'block', mb: 0.5 }}>
+            {r.ref}
+          </Typography>
+          <Typography variant="subtitle1" fontWeight={700} sx={{ color: '#171717', lineHeight: 1.3 }}>
+            {r.nom}
+          </Typography>
+        </Box>
+
+        {/* Navigation between anomalies */}
+        {onNavigate && totalCount && totalCount > 1 && (
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2, py: 0.75, bgcolor: '#fafafa', borderBottom: '1px solid #f0f0f0' }}>
+            <IconButton size="small" onClick={() => onNavigate('prev')} disabled={currentIndex === 0}>
+              <PrevIcon sx={{ fontSize: 18 }} />
+            </IconButton>
+            <Typography variant="caption" color="text.secondary" fontWeight={600}>
+              {(currentIndex ?? 0) + 1} / {totalCount} anomalies
+            </Typography>
+            <IconButton size="small" onClick={() => onNavigate('next')} disabled={currentIndex === (totalCount - 1)}>
+              <NextIcon sx={{ fontSize: 18 }} />
+            </IconButton>
+          </Box>
+        )}
+
+        {/* Scrollable content */}
+        <Box sx={{ flex: 1, overflow: 'auto', p: 2.5 }}>
+          {/* Message */}
+          {r.message && (
+            <Box sx={{ mb: 2.5 }}>
+              <Typography variant="caption" sx={{ fontWeight: 700, color: '#737373', textTransform: 'uppercase', fontSize: '0.6rem', letterSpacing: 0.5 }}>
+                Diagnostic
+              </Typography>
+              <Typography variant="body2" sx={{ mt: 0.5, color: '#171717', lineHeight: 1.6 }}>
+                {r.message}
+              </Typography>
+            </Box>
+          )}
+
+          {/* Attendu / Constate */}
+          {(r.details?.attendu || r.details?.constate) && (
+            <Box sx={{ mb: 2.5 }}>
+              <Grid container spacing={1.5}>
+                {r.details?.attendu && (
+                  <Grid item xs={12}>
+                    <Paper elevation={0} sx={{ p: 1.5, bgcolor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 1.5 }}>
+                      <Typography variant="caption" sx={{ color: '#16a34a', fontWeight: 700, textTransform: 'uppercase', fontSize: '0.6rem' }}>
+                        Attendu
+                      </Typography>
+                      <Typography variant="body2" sx={{ mt: 0.25, fontSize: '0.82rem' }}>{r.details.attendu}</Typography>
+                    </Paper>
+                  </Grid>
+                )}
+                {r.details?.constate && (
+                  <Grid item xs={12}>
+                    <Paper elevation={0} sx={{ p: 1.5, bgcolor: '#fef2f2', border: '1px solid #fecaca', borderRadius: 1.5 }}>
+                      <Typography variant="caption" sx={{ color: '#dc2626', fontWeight: 700, textTransform: 'uppercase', fontSize: '0.6rem' }}>
+                        Constate
+                      </Typography>
+                      <Typography variant="body2" sx={{ mt: 0.25, fontSize: '0.82rem' }}>{r.details.constate}</Typography>
+                    </Paper>
+                  </Grid>
+                )}
               </Grid>
-            )}
-            {r.details?.constate && (
-              <Grid item xs={12} sm={6}>
-                <Typography variant="caption" sx={{ color: '#dc2626', fontWeight: 700, textTransform: 'uppercase', fontSize: '0.6rem' }}>
-                  Constate
-                </Typography>
-                <Typography variant="body2" sx={{ fontSize: '0.78rem' }}>{r.details.constate}</Typography>
-              </Grid>
-            )}
-          </Grid>
+            </Box>
+          )}
+
+          {/* Ecart */}
+          {r.details?.ecart !== undefined && r.details.ecart !== 0 && (
+            <Box sx={{ mb: 2.5, p: 1.5, bgcolor: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 1.5 }}>
+              <Typography variant="caption" sx={{ fontWeight: 700, color: '#ea580c', textTransform: 'uppercase', fontSize: '0.6rem' }}>
+                Ecart
+              </Typography>
+              <Typography variant="h6" fontWeight={800} sx={{ color: '#ea580c' }}>
+                {r.details.ecart.toLocaleString('fr-FR')} FCFA
+              </Typography>
+            </Box>
+          )}
 
           {/* Description */}
           {r.details?.description && (
-            <Typography variant="body2" sx={{ mt: 1.5, color: '#525252', fontSize: '0.78rem', lineHeight: 1.6 }}>
-              {r.details.description}
-            </Typography>
+            <Box sx={{ mb: 2.5 }}>
+              <Typography variant="caption" sx={{ fontWeight: 700, color: '#737373', textTransform: 'uppercase', fontSize: '0.6rem', letterSpacing: 0.5 }}>
+                Description
+              </Typography>
+              <Typography variant="body2" sx={{ mt: 0.5, color: '#525252', fontSize: '0.82rem', lineHeight: 1.7 }}>
+                {r.details.description}
+              </Typography>
+            </Box>
           )}
 
-          {/* Accounts concerned */}
-          {r.details?.comptes && r.details.comptes.length > 0 && (
-            <Box sx={{ mt: 1.5 }}>
-              <Typography variant="caption" sx={{ fontWeight: 700, color: '#525252', fontSize: '0.6rem' }}>
-                COMPTES CONCERNES
+          {/* Montants */}
+          {r.details?.montants && Object.keys(r.details.montants).length > 0 && (
+            <Box sx={{ mb: 2.5 }}>
+              <Typography variant="caption" sx={{ fontWeight: 700, color: '#737373', textTransform: 'uppercase', fontSize: '0.6rem', letterSpacing: 0.5 }}>
+                Montants
               </Typography>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 0.5 }}>
-                {r.details.comptes.slice(0, 8).map((c, i) => (
-                  <Chip key={i} label={c} size="small" variant="outlined" sx={{ fontSize: '0.65rem', height: 20, fontFamily: 'monospace' }} />
+              <Box sx={{ mt: 0.5 }}>
+                {Object.entries(r.details.montants).map(([key, val]) => (
+                  <Box key={key} sx={{ display: 'flex', justifyContent: 'space-between', py: 0.5, borderBottom: '1px solid #f5f5f5' }}>
+                    <Typography variant="body2" sx={{ fontSize: '0.8rem', color: '#525252' }}>{key}</Typography>
+                    <Typography variant="body2" fontWeight={600} fontFamily="monospace" sx={{ fontSize: '0.8rem' }}>
+                      {val.toLocaleString('fr-FR')}
+                    </Typography>
+                  </Box>
                 ))}
-                {r.details.comptes.length > 8 && (
-                  <Chip label={`+${r.details.comptes.length - 8}`} size="small" sx={{ fontSize: '0.65rem', height: 20 }} />
-                )}
               </Box>
             </Box>
           )}
 
+          {/* Accounts concerned */}
+          {r.details?.comptes && r.details.comptes.length > 0 && (
+            <Box sx={{ mb: 2.5 }}>
+              <Typography variant="caption" sx={{ fontWeight: 700, color: '#737373', textTransform: 'uppercase', fontSize: '0.6rem', letterSpacing: 0.5 }}>
+                Comptes concernes ({r.details.comptes.length})
+              </Typography>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 0.75 }}>
+                {r.details.comptes.map((c, i) => (
+                  <Chip key={i} label={c} size="small" variant="outlined" sx={{ fontSize: '0.7rem', height: 24, fontFamily: 'monospace' }} />
+                ))}
+              </Box>
+            </Box>
+          )}
+
+          <Divider sx={{ my: 2 }} />
+
           {/* Suggestion */}
           {r.suggestion && (
-            <Box sx={{ mt: 1.5, display: 'flex', gap: 1, alignItems: 'flex-start' }}>
-              <SuggestionIcon sx={{ fontSize: 16, color: '#3b82f6', mt: 0.25 }} />
-              <Typography variant="body2" sx={{ color: '#1d4ed8', fontSize: '0.78rem' }}>
-                {r.suggestion}
-              </Typography>
+            <Box sx={{ mb: 2.5, p: 1.5, bgcolor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 1.5 }}>
+              <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
+                <SuggestionIcon sx={{ fontSize: 18, color: '#3b82f6', mt: 0.25, flexShrink: 0 }} />
+                <Box>
+                  <Typography variant="caption" sx={{ fontWeight: 700, color: '#3b82f6', textTransform: 'uppercase', fontSize: '0.6rem' }}>
+                    Suggestion de correction
+                  </Typography>
+                  <Typography variant="body2" sx={{ mt: 0.25, color: '#1d4ed8', fontSize: '0.82rem', lineHeight: 1.6 }}>
+                    {r.suggestion}
+                  </Typography>
+                </Box>
+              </Box>
             </Box>
           )}
 
           {/* Legal reference */}
           {r.referenceReglementaire && (
-            <Box sx={{ mt: 1, display: 'flex', gap: 1, alignItems: 'center' }}>
-              <LegalIcon sx={{ fontSize: 14, color: '#737373' }} />
-              <Typography variant="caption" sx={{ color: '#737373', fontStyle: 'italic' }}>
-                {r.referenceReglementaire}
-              </Typography>
+            <Box sx={{ mb: 2.5, display: 'flex', gap: 1, alignItems: 'flex-start' }}>
+              <LegalIcon sx={{ fontSize: 16, color: '#737373', mt: 0.25, flexShrink: 0 }} />
+              <Box>
+                <Typography variant="caption" sx={{ fontWeight: 700, color: '#737373', textTransform: 'uppercase', fontSize: '0.6rem' }}>
+                  Reference reglementaire
+                </Typography>
+                <Typography variant="body2" sx={{ mt: 0.25, color: '#525252', fontStyle: 'italic', fontSize: '0.82rem' }}>
+                  {r.referenceReglementaire}
+                </Typography>
+              </Box>
             </Box>
           )}
 
           {/* Fiscal impact */}
           {r.details?.impactFiscal && (
-            <Box sx={{ mt: 1, display: 'flex', gap: 1, alignItems: 'flex-start' }}>
-              <FiscalIcon sx={{ fontSize: 14, color: '#ea580c', mt: 0.25 }} />
-              <Typography variant="caption" sx={{ color: '#ea580c', fontWeight: 500 }}>
-                {r.details.impactFiscal}
-              </Typography>
+            <Box sx={{ mb: 2.5, p: 1.5, bgcolor: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 1.5 }}>
+              <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
+                <FiscalIcon sx={{ fontSize: 18, color: '#ea580c', mt: 0.25, flexShrink: 0 }} />
+                <Box>
+                  <Typography variant="caption" sx={{ fontWeight: 700, color: '#ea580c', textTransform: 'uppercase', fontSize: '0.6rem' }}>
+                    Impact fiscal
+                  </Typography>
+                  <Typography variant="body2" sx={{ mt: 0.25, color: '#ea580c', fontWeight: 500, fontSize: '0.82rem' }}>
+                    {r.details.impactFiscal}
+                  </Typography>
+                </Box>
+              </Box>
             </Box>
           )}
 
           {/* Corrective entries */}
           {r.ecrituresCorrectives && r.ecrituresCorrectives.length > 0 && (
-            <Box sx={{ mt: 1.5, p: 1, bgcolor: '#f5f5f5', borderRadius: 1 }}>
-              <Typography variant="caption" sx={{ fontWeight: 700, color: '#525252', fontSize: '0.6rem' }}>
-                ECRITURES CORRECTIVES PROPOSEES
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="caption" sx={{ fontWeight: 700, color: '#737373', textTransform: 'uppercase', fontSize: '0.6rem', letterSpacing: 0.5 }}>
+                Ecritures correctives proposees
               </Typography>
               {r.ecrituresCorrectives.map((ec, i) => (
-                <Box key={i} sx={{ mt: 0.5 }}>
-                  <Typography variant="caption" fontFamily="monospace" sx={{ fontSize: '0.7rem' }}>
+                <Paper key={i} elevation={0} sx={{ mt: 1, p: 1.5, bgcolor: '#f5f5f5', borderRadius: 1.5 }}>
+                  <Typography variant="caption" fontWeight={700} fontFamily="monospace" sx={{ fontSize: '0.72rem', color: '#525252' }}>
                     Journal {ec.journal} — {ec.date}
                   </Typography>
                   {ec.lignes.map((l, j) => (
-                    <Typography key={j} variant="caption" fontFamily="monospace" sx={{ display: 'block', fontSize: '0.7rem', pl: 1 }}>
-                      {l.sens === 'D' ? 'D' : '  C'} {l.compte} — {l.libelle}: {l.montant.toLocaleString('fr-FR')}
-                    </Typography>
+                    <Box key={j} sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5, pl: 1 }}>
+                      <Chip
+                        label={l.sens === 'D' ? 'D' : 'C'}
+                        size="small"
+                        sx={{
+                          fontSize: '0.6rem', height: 18, minWidth: 24, fontWeight: 700, fontFamily: 'monospace',
+                          bgcolor: l.sens === 'D' ? '#dbeafe' : '#fce7f3',
+                          color: l.sens === 'D' ? '#1d4ed8' : '#be185d',
+                        }}
+                      />
+                      <Typography variant="caption" fontFamily="monospace" sx={{ fontSize: '0.72rem', fontWeight: 600 }}>
+                        {l.compte}
+                      </Typography>
+                      <Typography variant="caption" sx={{ fontSize: '0.72rem', flex: 1 }} noWrap>
+                        {l.libelle}
+                      </Typography>
+                      <Typography variant="caption" fontFamily="monospace" fontWeight={700} sx={{ fontSize: '0.72rem' }}>
+                        {l.montant.toLocaleString('fr-FR')}
+                      </Typography>
+                    </Box>
                   ))}
-                </Box>
+                </Paper>
               ))}
             </Box>
           )}
         </Box>
-      </Collapse>
-    </Paper>
+      </Box>
+    </Drawer>
   )
 }
 
@@ -328,6 +497,7 @@ const LiasseControlInterface: React.FC = () => {
   const [showHistory, setShowHistory] = useState(false)
   const [deploying, setDeploying] = useState(false)
   const [balanceMeta, setBalanceMeta] = useState<{ version?: number; exercice?: string; fileName?: string }>({})
+  const [selectedAnomaly, setSelectedAnomaly] = useState<ResultatControle | null>(null)
 
   // Load last session on mount — only if a balance is currently imported
   useEffect(() => {
@@ -388,6 +558,7 @@ const LiasseControlInterface: React.FC = () => {
     setProgress(0)
     setProgressLabel('Initialisation...')
     setSession(null)
+    setSelectedAnomaly(null)
 
     try {
       const result = await auditOrchestrator.startPhase1Audit(
@@ -469,6 +640,28 @@ const LiasseControlInterface: React.FC = () => {
       .sort((a, b) => order[a.severite] - order[b.severite])
   }, [session])
 
+  // Anomalies only (for sidebar navigation)
+  const anomaliesOnly = useMemo(() => {
+    return filteredResults.filter(r => r.statut === 'ANOMALIE')
+  }, [filteredResults])
+
+  const selectedAnomalyIndex = useMemo(() => {
+    if (!selectedAnomaly) return -1
+    return anomaliesOnly.findIndex(r => r.ref === selectedAnomaly.ref)
+  }, [selectedAnomaly, anomaliesOnly])
+
+  const handleSelectAnomaly = useCallback((r: ResultatControle) => {
+    setSelectedAnomaly(r)
+  }, [])
+
+  const handleNavigateAnomaly = useCallback((direction: 'prev' | 'next') => {
+    if (selectedAnomalyIndex === -1) return
+    const newIndex = direction === 'prev' ? selectedAnomalyIndex - 1 : selectedAnomalyIndex + 1
+    if (newIndex >= 0 && newIndex < anomaliesOnly.length) {
+      setSelectedAnomaly(anomaliesOnly[newIndex])
+    }
+  }, [selectedAnomalyIndex, anomaliesOnly])
+
   const handleExportCSV = useCallback(() => {
     if (!session) return
     reportGenerator.downloadReport('csv', session, session.resultats)
@@ -482,7 +675,7 @@ const LiasseControlInterface: React.FC = () => {
   const getScoreColor = (score: number) => score >= 90 ? '#16a34a' : score >= 70 ? '#d97706' : '#dc2626'
 
   return (
-    <Box sx={{ maxWidth: 1100, mx: 'auto' }}>
+    <Box sx={{ maxWidth: selectedAnomaly ? 'none' : 1100, mx: 'auto', mr: selectedAnomaly ? `${SIDEBAR_WIDTH}px` : 'auto', transition: 'margin 0.3s ease' }}>
       <Typography variant="h5" gutterBottom fontWeight={700}>
         Rapport d'Audit de Liasse Fiscale
       </Typography>
@@ -629,7 +822,18 @@ const LiasseControlInterface: React.FC = () => {
               {actionPlan.slice(0, 10).map((r, i) => {
                 const cfg = SEVERITE_CONFIG[r.severite]
                 return (
-                  <Box key={r.ref} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 0.75, borderBottom: i < 9 ? '1px solid #f5f5f5' : 'none' }}>
+                  <Box
+                    key={r.ref}
+                    onClick={() => handleSelectAnomaly(r)}
+                    sx={{
+                      display: 'flex', alignItems: 'center', gap: 1.5, py: 0.75,
+                      borderBottom: i < 9 ? '1px solid #f5f5f5' : 'none',
+                      cursor: 'pointer', borderRadius: 1, px: 0.5,
+                      bgcolor: selectedAnomaly?.ref === r.ref ? cfg.bg : 'transparent',
+                      '&:hover': { bgcolor: cfg.bg },
+                      transition: 'background-color 0.15s',
+                    }}
+                  >
                     <Typography variant="caption" sx={{ color: '#a3a3a3', minWidth: 16, fontWeight: 600 }}>
                       {i + 1}.
                     </Typography>
@@ -640,6 +844,7 @@ const LiasseControlInterface: React.FC = () => {
                     <Typography variant="body2" sx={{ flexGrow: 1, fontSize: '0.8rem' }} noWrap>
                       {r.nom}: {r.message}
                     </Typography>
+                    <ArrowForwardIcon sx={{ fontSize: 14, color: '#a3a3a3', flexShrink: 0 }} />
                   </Box>
                 )
               })}
@@ -693,7 +898,12 @@ const LiasseControlInterface: React.FC = () => {
           {/* Control Cards */}
           <Box>
             {filteredResults.map(r => (
-              <ControlCard key={r.ref} result={r} />
+              <ControlCard
+                key={r.ref}
+                result={r}
+                selected={selectedAnomaly?.ref === r.ref}
+                onSelect={handleSelectAnomaly}
+              />
             ))}
           </Box>
 
@@ -795,6 +1005,14 @@ const LiasseControlInterface: React.FC = () => {
           )}
         </>
       )}
+      {/* Anomaly Detail Sidebar */}
+      <AnomalyDetailSidebar
+        anomaly={selectedAnomaly}
+        onClose={() => setSelectedAnomaly(null)}
+        onNavigate={handleNavigateAnomaly}
+        currentIndex={selectedAnomalyIndex}
+        totalCount={anomaliesOnly.length}
+      />
     </Box>
   )
 }

@@ -33,6 +33,8 @@ const ModernGeneration = React.lazy(() => import('@/pages/generation/ModernGener
 const ModernAudit = React.lazy(() => import('@/pages/audit/ModernAudit'))
 const ControlPointsManager = React.lazy(() => import('@/pages/audit/ControlPointsManager'))
 const LiasseControlInterface = React.lazy(() => import('@/pages/validation/LiasseControlInterface'))
+const BankFeedPage = React.lazy(() => import('@/pages/bankfeed/BankFeedPage'))
+const EInvoicingPage = React.lazy(() => import('@/pages/invoicing/EInvoicingPage'))
 const ModernTeledeclaration = React.lazy(() => import('@/pages/teledeclaration/ModernTeledeclaration'))
 const ModernCompliance = React.lazy(() => import('@/pages/compliance/ModernCompliance'))
 const ModernFiscalCalendar = React.lazy(() => import('@/pages/calendar/ModernFiscalCalendar'))
@@ -116,6 +118,8 @@ function App() {
           <Route path="/audit" element={<S><ModernAudit /></S>} />
           <Route path="/control-points" element={<S><ControlPointsManager /></S>} />
           <Route path="/validation-liasse" element={<S><LiasseControlInterface /></S>} />
+          <Route path="/bank-feed" element={<S><BankFeedPage /></S>} />
+          <Route path="/invoicing" element={<S><EInvoicingPage /></S>} />
           <Route path="/teledeclaration" element={<S><ModernTeledeclaration /></S>} />
           <Route path="/compliance" element={<S><ModernCompliance /></S>} />
           <Route path="/calendar" element={<S><ModernFiscalCalendar /></S>} />
