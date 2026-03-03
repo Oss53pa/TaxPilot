@@ -190,6 +190,14 @@ const Bilan: React.FC<PageProps> = ({ entreprise, balance, balanceN1, onNoteClic
     bold: r.bold || r.isTotal,
   }))
 
+  // Equalize row counts for perfect vertical alignment
+  while (passifRows.length < actifRows.length) {
+    passifRows.push({ id: `p-spacer-${passifRows.length}`, cells: { ref: '', label: '', note: '', montant: null, montant_n1: null } })
+  }
+  while (actifRows.length < passifRows.length) {
+    actifRows.push({ id: `a-spacer-${actifRows.length}`, cells: { ref: '', label: '', note: '', brut: null, amort: null, net: null, net_n1: null } })
+  }
+
   return (
     <Box sx={{ fontFamily: '"Courier New", Courier, monospace' }}>
       <LiasseHeader entreprise={entreprise} noteLabel="" pageNumber="7" />
@@ -199,7 +207,7 @@ const Bilan: React.FC<PageProps> = ({ entreprise, balance, balanceN1, onNoteClic
       </Typography>
 
       {/* Actif (gauche) + Passif (droite) côte à côte */}
-      <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
+      <Box sx={{ display: 'flex', gap: 1, alignItems: 'stretch' }}>
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <LiasseTable columns={actifColumns} rows={actifRows} title="ACTIF" compact onNoteClick={onNoteClick} />
         </Box>
