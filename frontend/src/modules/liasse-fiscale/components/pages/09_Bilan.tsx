@@ -190,12 +190,24 @@ const Bilan: React.FC<PageProps> = ({ entreprise, balance, balanceN1, onNoteClic
     bold: r.bold || r.isTotal,
   }))
 
-  // Equalize row counts for perfect vertical alignment
+  // Align totals: insert spacer rows so matching totals sit on the same line
+  // ACTIF totals: AZ(15) BK(22) BT(26) BZ(28)
+  // PASSIF totals: DF(15) DP(22) DT(25) DZ(27)
+  // → insert 1 spacer in passif after DP (index 22) to push DT from 25→26, DZ from 27→28
+  const emptyCellsP = { ref: '', label: '', note: '', montant: null, montant_n1: null }
+  const emptyCellsA = { ref: '', label: '', note: '', brut: null, amort: null, net: null, net_n1: null }
+
+  const dpIndex = passifRows.findIndex(r => r.cells.ref === 'DP')
+  if (dpIndex !== -1) {
+    passifRows.splice(dpIndex + 1, 0, { id: 'p-spacer-dp', cells: emptyCellsP })
+  }
+
+  // Pad remaining difference at the end
   while (passifRows.length < actifRows.length) {
-    passifRows.push({ id: `p-spacer-${passifRows.length}`, cells: { ref: '', label: '', note: '', montant: null, montant_n1: null } })
+    passifRows.push({ id: `p-spacer-${passifRows.length}`, cells: emptyCellsP })
   }
   while (actifRows.length < passifRows.length) {
-    actifRows.push({ id: `a-spacer-${actifRows.length}`, cells: { ref: '', label: '', note: '', brut: null, amort: null, net: null, net_n1: null } })
+    actifRows.push({ id: `a-spacer-${actifRows.length}`, cells: emptyCellsA })
   }
 
   return (
