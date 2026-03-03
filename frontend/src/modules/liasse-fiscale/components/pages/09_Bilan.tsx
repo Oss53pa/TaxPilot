@@ -190,25 +190,39 @@ const Bilan: React.FC<PageProps> = ({ entreprise, balance, balanceN1, onNoteClic
     bold: r.bold || r.isTotal,
   }))
 
-  // Align totals: insert spacer rows so matching totals sit on the same line
-  // ACTIF totals: AZ(15) BK(22) BT(26) BZ(28)
-  // PASSIF totals: DF(15) DP(22) DT(25) DZ(27)
-  // → insert 1 spacer in passif after DP (index 22) to push DT from 25→26, DZ from 27→28
+  // ── Align totals horizontally (as per official SYSCOHADA bilan layout) ──
+  // Target alignment:
+  //   AZ (Total Actif Immobilise)  ↔ CP (Total Capitaux Propres)
+  //   BK (Total Actif Circulant)   ↔ DP (Total Passif Circulant)
+  //   BT (Total Tresorerie-Actif)  ↔ DT (Total Tresorerie-Passif)
+  //   BZ (Total General)           ↔ DZ (Total General)
   const emptyCellsP = { ref: '', label: '', note: '', montant: null, montant_n1: null }
   const emptyCellsA = { ref: '', label: '', note: '', brut: null, amort: null, net: null, net_n1: null }
+  const spacerP = (id: string) => ({ id, cells: emptyCellsP })
+  const spacerA = (id: string) => ({ id, cells: emptyCellsA })
 
-  const dpIndex = passifRows.findIndex(r => r.cells.ref === 'DP')
-  if (dpIndex !== -1) {
-    passifRows.splice(dpIndex + 1, 0, { id: 'p-spacer-dp', cells: emptyCellsP })
+  // Helper: insert N spacers after row with given ref
+  const insertAfter = (rows: Row[], ref: string, count: number, prefix: string, emptyFn: (id: string) => Row) => {
+    const idx = rows.findIndex(r => r.cells.ref === ref)
+    if (idx !== -1) {
+      const spacers = Array.from({ length: count }, (_, i) => emptyFn(`${prefix}-${ref}-${i}`))
+      rows.splice(idx + 1, 0, ...spacers)
+    }
   }
 
-  // Pad remaining difference at the end
-  while (passifRows.length < actifRows.length) {
-    passifRows.push({ id: `p-spacer-${passifRows.length}`, cells: emptyCellsP })
-  }
-  while (actifRows.length < passifRows.length) {
-    actifRows.push({ id: `a-spacer-${actifRows.length}`, cells: emptyCellsA })
-  }
+  // Section 1: ACTIF has 15 detail rows before AZ (row 16), PASSIF has 10 before CP
+  // → 5 spacers in PASSIF after CM (before CP)
+  insertAfter(passifRows, 'CM', 5, 'p-spacer', spacerP)
+
+  // Section 2: ACTIF has 6 detail rows (BA-BJ) before BK, PASSIF has 11 (DA-DN) before DP
+  // → 5 spacers in ACTIF after BJ (before BK)
+  insertAfter(actifRows, 'BJ', 5, 'a-spacer', spacerA)
+
+  // Section 3: ACTIF has 3 detail rows (BQ-BS) before BT, PASSIF has 2 (DQ-DR) before DT
+  // → 1 spacer in PASSIF after DR (before DT)
+  insertAfter(passifRows, 'DR', 1, 'p-spacer', spacerP)
+
+  // Section 4: BU/BZ ↔ DV/DZ — already equal (2 rows each)
 
   return (
     <Box sx={{ fontFamily: '"Courier New", Courier, monospace' }}>
