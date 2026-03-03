@@ -309,18 +309,18 @@ export default function Proph3tChatPanel({ open, onClose }: Props) {
             >
               Proph3t
             </Typography>
-            <Typography variant="caption" sx={{ color: 'text.disabled' }}>
+            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)' }}>
               Assistant SYSCOHADA & Fiscal CI
               {balanceLoaded && ' — Balance connectee'}
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', gap: 0.5 }}>
             <Tooltip title="Nouvelle conversation">
-              <IconButton onClick={handleNewConversation} size="small" sx={{ color: 'text.disabled', '&:hover': { color: P.white } }}>
+              <IconButton onClick={handleNewConversation} size="small" sx={{ color: 'rgba(255,255,255,0.6)', '&:hover': { color: P.white } }}>
                 <AddCommentOutlinedIcon fontSize="small" />
               </IconButton>
             </Tooltip>
-            <IconButton onClick={onClose} size="small" sx={{ color: 'text.disabled', '&:hover': { color: P.white } }}>
+            <IconButton onClick={onClose} size="small" sx={{ color: 'rgba(255,255,255,0.6)', '&:hover': { color: P.white } }}>
               <CloseIcon fontSize="small" />
             </IconButton>
           </Box>
