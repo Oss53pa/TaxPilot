@@ -1,10 +1,8 @@
 import React from 'react'
 import { Box, Typography } from '@mui/material'
 import LiasseHeader from '../LiasseHeader'
-import LiasseTable from '../LiasseTable'
 import type { PageProps, BalanceEntry } from '../../types'
 import { getActifBrut, getAmortProv, getBalanceSolde, fmt } from '../../services/liasse-calculs'
-import type { Column, Row } from '../LiasseTable'
 
 interface ActifRowDef {
   ref: string; label: string; comptes: string[]; amort: string[]
@@ -142,61 +140,48 @@ const Bilan: React.FC<PageProps> = ({ entreprise, balance, balanceN1, onNoteClic
   const passifData = computePassif(balance)
   const passifN1 = balanceN1 && balanceN1.length > 0 ? computePassif(balanceN1) : null
 
-  const actifColumns: Column[] = [
-    { key: 'ref', label: 'REF', width: 24, align: 'center' },
-    { key: 'label', label: 'ACTIF', width: '30%', align: 'left' },
-    { key: 'note', label: 'NOTE', width: 24, align: 'center' },
-    { key: 'brut', label: 'BRUT', align: 'right', subLabel: 'N' },
-    { key: 'amort', label: 'AMORT.', align: 'right', subLabel: 'N' },
-    { key: 'net', label: 'NET', align: 'right', subLabel: 'N' },
-    { key: 'net_n1', label: 'NET', align: 'right', subLabel: 'N-1' },
-  ]
+  // Build merged rows: pad shorter side with empties so BZ and DZ are on the same line
+  const maxRows = Math.max(actifData.length, passifData.length)
+  const emptyA = { ref: '', label: '', note: '', brut: 0, amort: 0, net: 0, isTotal: false, indent: undefined, bold: false }
+  const emptyP = { ref: '', label: '', note: '', montant: 0, isTotal: false, indent: undefined, bold: false }
 
-  const actifRows: Row[] = actifData.map((r, i) => ({
-    id: `a-${i}`,
-    cells: {
-      ref: r.ref,
-      label: r.label,
-      note: r.note,
-      brut: v(r.brut),
-      amort: v(r.amort),
-      net: v(r.net),
-      net_n1: actifN1 ? v(actifN1[i].net) : null,
-    },
-    isTotal: r.isTotal,
-    indent: r.indent,
-    bold: r.bold || r.isTotal,
-  }))
+  // Pad passif at the end (before last row = DZ) to match actif length
+  const passifPadded = [...passifData]
+  while (passifPadded.length < actifData.length) {
+    passifPadded.splice(passifPadded.length - 1, 0, { ...emptyP })
+  }
+  const actifPadded = [...actifData]
+  while (actifPadded.length < passifPadded.length) {
+    actifPadded.splice(actifPadded.length - 1, 0, { ...emptyA })
+  }
 
-  const passifColumns: Column[] = [
-    { key: 'ref', label: 'REF', width: 24, align: 'center' },
-    { key: 'label', label: 'PASSIF', width: '45%', align: 'left' },
-    { key: 'note', label: 'NOTE', width: 24, align: 'center' },
-    { key: 'montant', label: 'NET', align: 'right', subLabel: 'N' },
-    { key: 'montant_n1', label: 'NET', align: 'right', subLabel: 'N-1' },
-  ]
+  const totalRows = actifPadded.length
 
-  const passifRows: Row[] = passifData.map((r, i) => ({
-    id: `p-${i}`,
-    cells: {
-      ref: r.ref,
-      label: r.label,
-      note: r.note,
-      montant: v(r.montant),
-      montant_n1: passifN1 ? v(passifN1[i].montant) : null,
-    },
-    isTotal: r.isTotal,
-    indent: r.indent,
-    bold: r.bold || r.isTotal,
-  }))
+  const cellSx = (isTotal: boolean, bold: boolean, align: 'left' | 'right' | 'center' = 'left') => ({
+    fontSize: isTotal ? 9 : 8,
+    fontWeight: isTotal ? 700 : bold ? 600 : 400,
+    color: isTotal ? '#fff' : undefined,
+    bgcolor: isTotal ? '#1a1a1a' : undefined,
+    py: 0.15,
+    px: 0.5,
+    height: 22,
+    whiteSpace: 'nowrap' as const,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    borderBottom: '1px solid #e0e0e0',
+    textAlign: align,
+    fontFamily: 'inherit',
+  })
 
-  // Align TOTAL GENERAL: passif has 1 fewer row, add spacer before DZ
-  const emptyCellsP = { ref: '', label: '', note: '', montant: null, montant_n1: null }
-  const dzIndex = passifRows.findIndex(r => r.cells.ref === 'DZ')
-  if (dzIndex !== -1 && passifRows.length < actifRows.length) {
-    const diff = actifRows.length - passifRows.length
-    const spacers = Array.from({ length: diff }, (_, i) => ({ id: `p-spacer-${i}`, cells: emptyCellsP }))
-    passifRows.splice(dzIndex, 0, ...spacers)
+  const noteSx = (isTotal: boolean) => ({
+    ...cellSx(isTotal, false, 'center'),
+    cursor: 'pointer',
+    '&:hover': { color: '#1976d2' },
+  })
+
+  const numFmt = (n: number | undefined) => {
+    if (!n || n === 0) return ''
+    return n.toLocaleString('fr-FR', { maximumFractionDigits: 0 })
   }
 
   return (
@@ -207,13 +192,94 @@ const Bilan: React.FC<PageProps> = ({ entreprise, balance, balanceN1, onNoteClic
         BILAN AU {new Date(entreprise.exercice_clos || Date.now()).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' }).toUpperCase()}
       </Typography>
 
-      {/* Actif (gauche) + Passif (droite) côte à côte */}
-      <Box sx={{ display: 'flex', gap: 1, alignItems: 'stretch' }}>
-        <Box sx={{ flex: 1, minWidth: 0 }}>
-          <LiasseTable columns={actifColumns} rows={actifRows} title="ACTIF" compact onNoteClick={onNoteClick} />
+      {/* Single unified table: ACTIF left | separator | PASSIF right */}
+      <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed', fontFamily: 'inherit' }}>
+        {/* Column widths */}
+        <colgroup>
+          {/* ACTIF: ref, label, note, brut, amort, net, net_n1 */}
+          <col style={{ width: '2.5%' }} />
+          <col style={{ width: '18%' }} />
+          <col style={{ width: '3%' }} />
+          <col style={{ width: '9%' }} />
+          <col style={{ width: '9%' }} />
+          <col style={{ width: '9%' }} />
+          <col style={{ width: '9%' }} />
+          {/* Separator */}
+          <col style={{ width: '0.5%' }} />
+          {/* PASSIF: ref, label, note, net, net_n1 */}
+          <col style={{ width: '2.5%' }} />
+          <col style={{ width: '22%' }} />
+          <col style={{ width: '3%' }} />
+          <col style={{ width: '9%' }} />
+          <col style={{ width: '9%' }} />
+        </colgroup>
+
+        {/* Header */}
+        <Box component="thead">
+          <Box component="tr" sx={{ bgcolor: 'grey.100' }}>
+            {/* ACTIF headers */}
+            <Box component="th" sx={{ fontSize: 8, fontWeight: 600, py: 0.25, px: 0.5, textAlign: 'center' }}>REF</Box>
+            <Box component="th" sx={{ fontSize: 8, fontWeight: 600, py: 0.25, px: 0.5, textAlign: 'left' }}>ACTIF</Box>
+            <Box component="th" sx={{ fontSize: 8, fontWeight: 600, py: 0.25, px: 0.5, textAlign: 'center' }}>NOTE</Box>
+            <Box component="th" sx={{ fontSize: 8, fontWeight: 600, py: 0.25, px: 0.5, textAlign: 'right' }}>
+              BRUT<Box component="span" sx={{ display: 'block', fontSize: 7, fontWeight: 400, color: 'text.secondary' }}>N</Box>
+            </Box>
+            <Box component="th" sx={{ fontSize: 8, fontWeight: 600, py: 0.25, px: 0.5, textAlign: 'right' }}>
+              AMORT.<Box component="span" sx={{ display: 'block', fontSize: 7, fontWeight: 400, color: 'text.secondary' }}>N</Box>
+            </Box>
+            <Box component="th" sx={{ fontSize: 8, fontWeight: 600, py: 0.25, px: 0.5, textAlign: 'right' }}>
+              NET<Box component="span" sx={{ display: 'block', fontSize: 7, fontWeight: 400, color: 'text.secondary' }}>N</Box>
+            </Box>
+            <Box component="th" sx={{ fontSize: 8, fontWeight: 600, py: 0.25, px: 0.5, textAlign: 'right' }}>
+              NET<Box component="span" sx={{ display: 'block', fontSize: 7, fontWeight: 400, color: 'text.secondary' }}>N-1</Box>
+            </Box>
+            {/* Separator */}
+            <Box component="th" sx={{ bgcolor: '#d0d0d0', px: 0 }} />
+            {/* PASSIF headers */}
+            <Box component="th" sx={{ fontSize: 8, fontWeight: 600, py: 0.25, px: 0.5, textAlign: 'center' }}>REF</Box>
+            <Box component="th" sx={{ fontSize: 8, fontWeight: 600, py: 0.25, px: 0.5, textAlign: 'left' }}>PASSIF</Box>
+            <Box component="th" sx={{ fontSize: 8, fontWeight: 600, py: 0.25, px: 0.5, textAlign: 'center' }}>NOTE</Box>
+            <Box component="th" sx={{ fontSize: 8, fontWeight: 600, py: 0.25, px: 0.5, textAlign: 'right' }}>
+              NET<Box component="span" sx={{ display: 'block', fontSize: 7, fontWeight: 400, color: 'text.secondary' }}>N</Box>
+            </Box>
+            <Box component="th" sx={{ fontSize: 8, fontWeight: 600, py: 0.25, px: 0.5, textAlign: 'right' }}>
+              NET<Box component="span" sx={{ display: 'block', fontSize: 7, fontWeight: 400, color: 'text.secondary' }}>N-1</Box>
+            </Box>
+          </Box>
         </Box>
-        <Box sx={{ flex: 1, minWidth: 0 }}>
-          <LiasseTable columns={passifColumns} rows={passifRows} title="PASSIF" compact onNoteClick={onNoteClick} />
+
+        {/* Body */}
+        <Box component="tbody">
+          {Array.from({ length: totalRows }, (_, i) => {
+            const a = actifPadded[i]
+            const p = passifPadded[i]
+            const aTotal = a.isTotal
+            const pTotal = p.isTotal
+            const aBold = a.bold || aTotal
+            const pBold = p.bold || pTotal
+            const aIndent = a.indent ? a.indent * 12 + 4 : 0
+
+            return (
+              <Box component="tr" key={i}>
+                {/* ACTIF cells */}
+                <Box component="td" sx={cellSx(aTotal, aBold, 'center')}>{a.ref}</Box>
+                <Box component="td" sx={{ ...cellSx(aTotal, aBold), pl: aIndent ? `${aIndent}px` : 0.5 }}>{a.label}</Box>
+                <Box component="td" sx={noteSx(aTotal)} onClick={() => a.note && onNoteClick?.(a.note)}>{a.note}</Box>
+                <Box component="td" sx={cellSx(aTotal, aBold, 'right')}>{numFmt(a.brut)}</Box>
+                <Box component="td" sx={cellSx(aTotal, aBold, 'right')}>{numFmt(a.amort)}</Box>
+                <Box component="td" sx={cellSx(aTotal, aBold, 'right')}>{numFmt(a.net)}</Box>
+                <Box component="td" sx={cellSx(aTotal, aBold, 'right')}>{actifN1 ? numFmt(actifN1[i]?.net) : ''}</Box>
+                {/* Separator */}
+                <Box component="td" sx={{ bgcolor: '#d0d0d0', px: 0, borderBottom: '1px solid #d0d0d0' }} />
+                {/* PASSIF cells */}
+                <Box component="td" sx={cellSx(pTotal, pBold, 'center')}>{p.ref}</Box>
+                <Box component="td" sx={{ ...cellSx(pTotal, pBold), pl: p.indent ? `${p.indent * 12 + 4}px` : 0.5 }}>{p.label}</Box>
+                <Box component="td" sx={noteSx(pTotal)} onClick={() => p.note && onNoteClick?.(p.note)}>{p.note}</Box>
+                <Box component="td" sx={cellSx(pTotal, pBold, 'right')}>{numFmt(p.montant)}</Box>
+                <Box component="td" sx={cellSx(pTotal, pBold, 'right')}>{passifN1 ? numFmt(passifN1[i]?.montant) : ''}</Box>
+              </Box>
+            )
+          })}
         </Box>
       </Box>
 
