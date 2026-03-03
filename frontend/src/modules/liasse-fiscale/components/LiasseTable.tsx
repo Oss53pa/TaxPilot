@@ -134,7 +134,7 @@ const EditableCell: React.FC<{
   )
 }
 
-const LiasseTable: React.FC<LiasseTableProps> = ({ columns, rows, title, compact: _compact, onNoteClick, onCellChange }) => {
+const LiasseTable: React.FC<LiasseTableProps> = ({ columns, rows, title, compact, onNoteClick, onCellChange }) => {
   const theme = useTheme()
 
   // Show all rows including empty ones (same height as populated rows)
@@ -147,8 +147,8 @@ const LiasseTable: React.FC<LiasseTableProps> = ({ columns, rows, title, compact
           {title}
         </Typography>
       )}
-      <TableContainer>
-        <Table size="small" sx={{ minWidth: 600 }}>
+      <TableContainer sx={compact ? { overflow: 'hidden' } : undefined}>
+        <Table size="small" sx={{ minWidth: compact ? 0 : 600, tableLayout: compact ? 'fixed' : 'auto', width: '100%' }}>
           <TableHead>
             <TableRow sx={{ bgcolor: 'grey.100' }}>
               {columns.map(col => (
@@ -157,15 +157,16 @@ const LiasseTable: React.FC<LiasseTableProps> = ({ columns, rows, title, compact
                   align={col.align || 'center'}
                   sx={{
                     fontWeight: 600,
-                    fontSize: 10,
+                    fontSize: compact ? 8 : 10,
                     width: col.width,
                     whiteSpace: 'nowrap',
-                    py: 0.5,
+                    py: compact ? 0.25 : 0.5,
+                    px: compact ? 0.5 : 1,
                   }}
                 >
                   {col.label}
                   {col.subLabel && (
-                    <Typography variant="caption" display="block" color="text.secondary" sx={{ fontSize: 9, fontWeight: 400 }}>
+                    <Typography variant="caption" display="block" color="text.secondary" sx={{ fontSize: compact ? 7 : 9, fontWeight: 400 }}>
                       {col.subLabel}
                     </Typography>
                   )}
@@ -235,19 +236,24 @@ const LiasseTable: React.FC<LiasseTableProps> = ({ columns, rows, title, compact
                           align={col.align || (isNumeric ? 'right' : 'left')}
                           sx={{
                             fontWeight: isTotal || isSubtotal ? 700 : fontWeight,
-                            fontSize: isTotal ? 12 : isSubtotal ? 11.5 : 11,
+                            fontSize: compact
+                              ? (isTotal ? 9 : 8)
+                              : (isTotal ? 12 : isSubtotal ? 11.5 : 11),
                             color: isTotal || isSubtotal ? '#fff' : undefined,
                             bgcolor: isTotal
                               ? '#1a1a1a'
                               : isSubtotal
                                 ? '#4a4a4a'
                                 : undefined,
-                            py: isEditable ? 0.25 : 0.5,
-                            height: 28,
-                            pl: row.indent && col.key === columns[0].key
-                              ? `${(row.indent * 24) + 16}px`
+                            py: compact ? 0.15 : isEditable ? 0.25 : 0.5,
+                            px: compact ? 0.5 : 1,
+                            height: compact ? 22 : 28,
+                            pl: row.indent && col.key === columns[1]?.key
+                              ? `${(row.indent * (compact ? 12 : 24)) + (compact ? 8 : 16)}px`
                               : undefined,
                             borderColor: isTotal || isSubtotal ? '#444' : undefined,
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
                           }}
                         >
                           {isEditable ? (

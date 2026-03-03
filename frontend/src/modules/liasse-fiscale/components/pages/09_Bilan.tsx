@@ -143,13 +143,13 @@ const Bilan: React.FC<PageProps> = ({ entreprise, balance, balanceN1, onNoteClic
   const passifN1 = balanceN1 && balanceN1.length > 0 ? computePassif(balanceN1) : null
 
   const actifColumns: Column[] = [
-    { key: 'ref', label: 'REF', width: 28, align: 'center' },
-    { key: 'label', label: 'ACTIF', width: '35%', align: 'left' },
-    { key: 'note', label: 'NOTE', width: 30, align: 'center' },
-    { key: 'brut', label: 'BRUT', align: 'right', subLabel: 'Exercice N' },
-    { key: 'amort', label: 'AMORT/DEPREC.', align: 'right', subLabel: 'Exercice N' },
-    { key: 'net', label: 'NET', align: 'right', subLabel: 'Exercice N' },
-    { key: 'net_n1', label: 'NET', align: 'right', subLabel: 'Exercice N-1' },
+    { key: 'ref', label: 'REF', width: 24, align: 'center' },
+    { key: 'label', label: 'ACTIF', width: '30%', align: 'left' },
+    { key: 'note', label: 'NOTE', width: 24, align: 'center' },
+    { key: 'brut', label: 'BRUT', align: 'right', subLabel: 'N' },
+    { key: 'amort', label: 'AMORT.', align: 'right', subLabel: 'N' },
+    { key: 'net', label: 'NET', align: 'right', subLabel: 'N' },
+    { key: 'net_n1', label: 'NET', align: 'right', subLabel: 'N-1' },
   ]
 
   const actifRows: Row[] = actifData.map((r, i) => ({
@@ -169,11 +169,11 @@ const Bilan: React.FC<PageProps> = ({ entreprise, balance, balanceN1, onNoteClic
   }))
 
   const passifColumns: Column[] = [
-    { key: 'ref', label: 'REF', width: 28, align: 'center' },
-    { key: 'label', label: 'PASSIF', width: '50%', align: 'left' },
-    { key: 'note', label: 'NOTE', width: 30, align: 'center' },
-    { key: 'montant', label: 'NET', align: 'right', subLabel: 'Exercice N' },
-    { key: 'montant_n1', label: 'NET', align: 'right', subLabel: 'Exercice N-1' },
+    { key: 'ref', label: 'REF', width: 24, align: 'center' },
+    { key: 'label', label: 'PASSIF', width: '45%', align: 'left' },
+    { key: 'note', label: 'NOTE', width: 24, align: 'center' },
+    { key: 'montant', label: 'NET', align: 'right', subLabel: 'N' },
+    { key: 'montant_n1', label: 'NET', align: 'right', subLabel: 'N-1' },
   ]
 
   const passifRows: Row[] = passifData.map((r, i) => ({
