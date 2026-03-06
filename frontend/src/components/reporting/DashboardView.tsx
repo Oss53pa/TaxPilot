@@ -1,7 +1,7 @@
 import { logger } from '@/utils/logger'
 /**
  * Composant pour afficher le tableau de bord de reporting
- * Utilise les nouvelles APIs backend
+ * Utilise les données locales
  */
 
 import { useState, useEffect } from 'react'

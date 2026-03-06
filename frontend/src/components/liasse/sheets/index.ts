@@ -1,6 +1,6 @@
 import { logger } from '@/utils/logger'
 /**
- * Export centralisé de toutes les feuilles SYSCOHADA avec connexion backend automatique
+ * Export centralisé de toutes les feuilles SYSCOHADA avec connexion automatique
  */
 
 import { withBackendData } from './withBackendData'
@@ -127,9 +127,9 @@ import RecevabiliteBase from './Recevabilite'
 import FicheRenseignementsBase from './FicheRenseignements'
 
 // Application automatique du HOC withBackendData à toutes les feuilles
-// Cela connecte automatiquement chaque feuille au backend
+// Cela connecte automatiquement chaque feuille
 
-// Export des feuilles connectées au backend
+// Export des feuilles connectées
 export const BilanActif = withBackendData(BilanActifBase)
 export const BilanActifSYSCOHADA = withBackendData(BilanActifSYSCOHADABase)
 export const BilanPassifSYSCOHADA = withBackendData(BilanPassifSYSCOHADABase)
@@ -306,4 +306,4 @@ export default {
 // Export de la configuration
 export { SHEET_BACKEND_CONFIG } from './connectAllSheets'
 
-logger.debug('✅ Toutes les feuilles SYSCOHADA sont maintenant connectées au backend automatiquement!')
+logger.debug('✅ Toutes les feuilles SYSCOHADA sont maintenant connectées automatiquement!')

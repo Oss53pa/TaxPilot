@@ -1,7 +1,7 @@
 import { logger } from '@/utils/logger'
 /**
  * Dialog d'export avancé de balance avec options
- * Connecté au backend via balanceService.exportBalanceAdvanced()
+ * Connecté via balanceService.exportBalanceAdvanced()
  */
 
 import React, { useState } from 'react'

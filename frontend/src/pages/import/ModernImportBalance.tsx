@@ -221,7 +221,7 @@ const ModernImportBalance: React.FC = () => {
   // Timer pour EX-IMPORT-009
   const [, setImportStartTime] = useState<Date | null>(null)
 
-  // Récupérer le plan comptable SYSCOHADA depuis le backend
+  // Récupérer le plan comptable SYSCOHADA 
   useBackendData({
     service: 'accountingService',
     method: 'getPlansComptables',
@@ -237,11 +237,11 @@ const ModernImportBalance: React.FC = () => {
     ]
   })
 
-  // Récupérer l'historique de mapping depuis le backend
+  // Récupérer l'historique de mapping 
   const [mappingHistory, setMappingHistory] = useState<any[]>([])
 
   useEffect(() => {
-    // Charger l'historique de mapping depuis le backend
+    // Charger l'historique de mapping 
     const loadMappingHistory = async () => {
       try {
         logger.debug('📤 Loading mapping history from backend...')
@@ -580,7 +580,7 @@ const ModernImportBalance: React.FC = () => {
     try {
       logger.debug('📤 Importing balance via API...')
 
-      // Récupérer les balances depuis le backend
+      // Récupérer les balances 
       const balancesResponse = await balanceService.getBalances({
         page_size: 1000,
         ordering: '-date_creation'

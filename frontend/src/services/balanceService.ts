@@ -1,6 +1,6 @@
 /**
  * Service pour la gestion des balances comptables
- * CONNEXION RÉELLE AU BACKEND DJANGO
+ * Service stub (frontend-only)
  */
 
 import { apiClient } from './apiClient'
@@ -82,7 +82,7 @@ export interface ImportBalance {
 class BalanceService {
   private baseUrl = '/api/v1/balance'
 
-  // Gestion des balances - CONNEXION RÉELLE AU BACKEND
+  // Gestion des balances - Stub service
   async getBalances(params?: {
     entreprise?: string
     exercice?: string
@@ -92,31 +92,31 @@ class BalanceService {
     page_size?: number
     ordering?: string
   }) {
-    logger.debug('Fetching balances from backend...', params)
+    logger.debug('Fetching balances ...', params)
     return apiClient.get(`${this.baseUrl}/balances/`, params)
   }
 
   async getBalance(id: string): Promise<Balance> {
-    logger.debug(`Fetching balance ${id} from backend...`)
+    logger.debug(`Fetching balance ${id} ...`)
     return apiClient.get(`${this.baseUrl}/balances/${id}/`)
   }
 
   async createBalance(data: Partial<Balance>): Promise<Balance> {
-    logger.debug('Creating balance in backend...', data)
+    logger.debug('Creating balance ...', data)
     return apiClient.post(`${this.baseUrl}/balances/`, data)
   }
 
   async updateBalance(id: string, data: Partial<Balance>): Promise<Balance> {
-    logger.debug(`Updating balance ${id} in backend...`, data)
+    logger.debug(`Updating balance ${id} ...`, data)
     return apiClient.patch(`${this.baseUrl}/balances/${id}/`, data)
   }
 
   async deleteBalance(id: string): Promise<void> {
-    logger.debug(`Deleting balance ${id} from backend...`)
+    logger.debug(`Deleting balance ${id} ...`)
     return apiClient.delete(`${this.baseUrl}/balances/${id}/`)
   }
 
-  // Lignes de balance - CONNEXION RÉELLE AU BACKEND
+  // Lignes de balance - Stub service
   async getLignesBalance(balanceId: string, params?: {
     compte?: string
     page?: number
@@ -157,12 +157,12 @@ class BalanceService {
       formData.append('options', JSON.stringify(params.options))
     }
 
-    logger.debug('Importing balance file to backend...', { entrepriseId, exerciceId, file: file.name })
+    logger.debug('Importing balance file ...', { entrepriseId, exerciceId, file: file.name })
     return apiClient.post(`${this.baseUrl}/imports/`, formData)
   }
 
   async getImportStatus(importId: string): Promise<ImportBalance> {
-    logger.debug(`Getting import status ${importId} from backend...`)
+    logger.debug(`Getting import status ${importId} ...`)
     return apiClient.get(`${this.baseUrl}/imports/${importId}/`)
   }
 
@@ -172,13 +172,13 @@ class BalanceService {
     statut?: string
     page?: number
   }) {
-    logger.debug('Getting import history from backend...', params)
+    logger.debug('Getting import history ...', params)
     return apiClient.get(`${this.baseUrl}/imports/`, params)
   }
 
-  // Validation et contrôles - CONNEXION RÉELLE AU BACKEND
+  // Validation et contrôles - Stub service
   async validateBalance(balanceId: string) {
-    logger.debug(`Validating balance ${balanceId} on backend...`)
+    logger.debug(`Validating balance ${balanceId} ...`)
     return apiClient.post(`${this.baseUrl}/balances/${balanceId}/valider/`)
   }
 
@@ -194,11 +194,11 @@ class BalanceService {
     page?: number
     page_size?: number
   }) {
-    logger.debug('Fetching validation history from backend...', params)
+    logger.debug('Fetching validation history ...', params)
     return apiClient.get(`${this.baseUrl}/validations/`, params)
   }
 
-  // Export - CONNEXION RÉELLE AU BACKEND
+  // Export - Stub service
   async exportBalance(balanceId: string, format: 'XLSX' | 'CSV' | 'PDF') {
     logger.debug(`Exporting balance ${balanceId} as ${format}...`)
     return apiClient.get(`${this.baseUrl}/export-balance/`, {
@@ -243,7 +243,7 @@ class BalanceService {
     return response.data
   }
 
-  // Mapping intelligent (IA) - CONNEXION RÉELLE AU BACKEND
+  // Mapping intelligent (IA) - Stub service
   async intelligentMapping(balanceId: string) {
     logger.debug(`Starting intelligent mapping for balance ${balanceId}...`)
     return apiClient.post(`${this.baseUrl}/mapping-intelligent/`, {
@@ -251,7 +251,7 @@ class BalanceService {
     })
   }
 
-  // Comparaison - CONNEXION RÉELLE AU BACKEND
+  // Comparaison - Stub service
   async compareBalances(balance1Id: string, balance2Id: string) {
     logger.debug(`Comparing balances ${balance1Id} and ${balance2Id}...`)
     return apiClient.get(`${this.baseUrl}/balances/compare/`, {
@@ -260,7 +260,7 @@ class BalanceService {
     })
   }
 
-  // Statistiques - CONNEXION RÉELLE AU BACKEND
+  // Statistiques - Stub service
   async getBalanceStats(balanceId: string) {
     logger.debug(`Getting stats for balance ${balanceId}...`)
     return apiClient.get(`${this.baseUrl}/balances/${balanceId}/stats/`)

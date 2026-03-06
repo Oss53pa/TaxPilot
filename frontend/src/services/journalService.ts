@@ -1,7 +1,7 @@
 import { logger } from '@/utils/logger'
 /**
  * Service pour la gestion des journaux comptables
- * CONNEXION RÉELLE AU BACKEND DJANGO
+ * Service stub (frontend-only)
  */
 
 import { apiClient } from './apiClient'
@@ -46,7 +46,7 @@ class JournalService {
   private baseUrl = '/api/v1/accounting/journaux'
 
   async list(filters?: JournalFilters): Promise<{ count: number; results: Journal[] }> {
-    logger.debug('Fetching journaux from backend...', filters)
+    logger.debug('Fetching journaux ...', filters)
     return apiClient.get(this.baseUrl, filters)
   }
 

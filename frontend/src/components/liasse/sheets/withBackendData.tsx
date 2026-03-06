@@ -1,6 +1,6 @@
 import { logger } from '@/utils/logger'
 /**
- * HOC pour connecter automatiquement les feuilles SYSCOHADA au backend
+ * HOC pour connecter automatiquement les feuilles SYSCOHADA
  */
 
 import React, { useEffect, useState } from 'react'
@@ -86,7 +86,7 @@ export function withBackendData<P extends object>(
             return
           }
 
-          // Sinon charger depuis le backend
+          // Sinon charger 
           const [entreprises, balances, comptes] = await Promise.all([
             entrepriseService.getEntreprises({ page_size: 10 }),
             balanceService.getBalances({ page_size: 10 }),

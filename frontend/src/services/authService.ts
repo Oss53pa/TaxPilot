@@ -1,6 +1,6 @@
 /**
  * Service d'authentification pour Liass'Pilot
- * CONNEXION RÉELLE AU BACKEND DJANGO
+ * Service stub (frontend-only)
  */
 
 import { apiClient, type AuthResponse, type User, type LoginCredentials, type SignupData, type SignupResponse } from './apiClient'
@@ -10,10 +10,10 @@ import { logger } from '@/utils/logger'
 export type { User, LoginCredentials, AuthResponse, SignupData, SignupResponse }
 
 class AuthService {
-  // Authentification - CONNEXION RÉELLE AU BACKEND
+  // Authentification - Stub service
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
     try {
-      logger.debug('Logging in to backend...', credentials.username)
+      logger.debug('Logging in ...', credentials.username)
       const response = await apiClient.login(credentials)
       logger.debug('Login successful:', response.success)
       return response
@@ -61,7 +61,7 @@ class AuthService {
     }
   }
 
-  // État de l'authentification - CONNEXION RÉELLE AU BACKEND
+  // État de l'authentification - Stub service
   isAuthenticated(): boolean {
     return apiClient.isAuthenticated()
   }
@@ -127,7 +127,7 @@ class AuthService {
     return user.username.substring(0, 2).toUpperCase()
   }
 
-  // Utilitaires - CONNEXION RÉELLE AU BACKEND
+  // Utilitaires - Stub service
   async checkHealth(): Promise<boolean> {
     try {
       logger.debug('Checking backend health...')
@@ -143,15 +143,15 @@ class AuthService {
   // Nouvelles méthodes pour l'API backend
   async getCurrentUserFromAPI(): Promise<User | null> {
     try {
-      logger.debug('Fetching current user from backend...')
+      logger.debug('Fetching current user ...')
       const response = await apiClient.get<{ success: boolean; data: User }>('/api/v1/core/auth/me/')
       if (response.success) {
-        logger.debug('User fetched from backend:', response.data.username)
+        logger.debug('User fetched :', response.data.username)
         return response.data
       }
       return null
     } catch (error) {
-      logger.error('Failed to fetch user from backend:', error)
+      logger.error('Failed to fetch user :', error)
       return null
     }
   }

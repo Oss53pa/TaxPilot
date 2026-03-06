@@ -1,7 +1,7 @@
 import { logger } from '@/utils/logger'
 /**
  * Composant de gestion des transitions de statut d'une liasse
- * Connecté au backend via generationService.getTransitions() et transition()
+ * Connecté via generationService.getTransitions() et transition()
  */
 
 import React, { useState, useEffect } from 'react'

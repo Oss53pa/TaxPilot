@@ -1,7 +1,7 @@
 import { logger } from '@/utils/logger'
 /**
  * Service pour la gestion comptable et plan de comptes
- * CONNEXION RÉELLE AU BACKEND DJANGO
+ * Service stub (frontend-only)
  */
 
 import { apiClient } from './apiClient'
@@ -135,34 +135,34 @@ export interface GrandLivre {
 class AccountingService {
   private baseUrl = '/api/v1/accounting'
 
-  // Plan comptable - CONNEXION RÉELLE AU BACKEND
+  // Plan comptable - Stub service
   async getPlansComptables(params?: {
     norme?: string
     pays?: string
     is_officiel?: boolean
     page?: number
   }) {
-    logger.debug('Fetching plans comptables from backend...', params)
+    logger.debug('Fetching plans comptables ...', params)
     return apiClient.get(`${this.baseUrl}/plans/`, params)
   }
 
   async getPlanComptable(id: string): Promise<PlanComptable> {
-    logger.debug(`Fetching plan comptable ${id} from backend...`)
+    logger.debug(`Fetching plan comptable ${id} ...`)
     return apiClient.get(`${this.baseUrl}/plans/${id}/`)
   }
 
   async createPlanComptable(plan: Partial<PlanComptable>): Promise<PlanComptable> {
-    logger.debug('Creating plan comptable in backend...', plan)
+    logger.debug('Creating plan comptable ...', plan)
     return apiClient.post(`${this.baseUrl}/plans/`, plan)
   }
 
   async updatePlanComptable(id: string, plan: Partial<PlanComptable>): Promise<PlanComptable> {
-    logger.debug(`Updating plan comptable ${id} in backend...`)
+    logger.debug(`Updating plan comptable ${id} ...`)
     return apiClient.patch(`${this.baseUrl}/plans/${id}/`, plan)
   }
 
   async deletePlanComptable(id: string): Promise<void> {
-    logger.debug(`Deleting plan comptable ${id} from backend...`)
+    logger.debug(`Deleting plan comptable ${id} ...`)
     return apiClient.delete(`${this.baseUrl}/plans/${id}/`)
   }
 
@@ -171,7 +171,7 @@ class AccountingService {
     return apiClient.post(`${this.baseUrl}/plans/${id}/duplicate/`, { nom: newName })
   }
 
-  // Comptes comptables - CONNEXION RÉELLE AU BACKEND
+  // Comptes comptables - Stub service
   async getComptes(params?: {
     plan_comptable?: string
     classe?: number
@@ -182,27 +182,27 @@ class AccountingService {
     page?: number
     page_size?: number
   }) {
-    logger.debug('Fetching comptes from backend...', params)
+    logger.debug('Fetching comptes ...', params)
     return apiClient.get(`${this.baseUrl}/comptes/`, params)
   }
 
   async getCompte(id: string): Promise<CompteComplet> {
-    logger.debug(`Fetching compte ${id} from backend...`)
+    logger.debug(`Fetching compte ${id} ...`)
     return apiClient.get(`${this.baseUrl}/comptes/${id}/`)
   }
 
   async createCompte(compte: Partial<CompteComplet>): Promise<CompteComplet> {
-    logger.debug('Creating compte in backend...', compte)
+    logger.debug('Creating compte ...', compte)
     return apiClient.post(`${this.baseUrl}/comptes/`, compte)
   }
 
   async updateCompte(id: string, compte: Partial<CompteComplet>): Promise<CompteComplet> {
-    logger.debug(`Updating compte ${id} in backend...`)
+    logger.debug(`Updating compte ${id} ...`)
     return apiClient.patch(`${this.baseUrl}/comptes/${id}/`, compte)
   }
 
   async deleteCompte(id: string): Promise<void> {
-    logger.debug(`Deleting compte ${id} from backend...`)
+    logger.debug(`Deleting compte ${id} ...`)
     return apiClient.delete(`${this.baseUrl}/comptes/${id}/`)
   }
 
@@ -216,7 +216,7 @@ class AccountingService {
     return apiClient.get(`${this.baseUrl}/comptes/search/`, { q: query, plan_comptable: plan_id })
   }
 
-  // Écritures comptables - CONNEXION RÉELLE AU BACKEND
+  // Écritures comptables - Stub service
   async getEcritures(params?: {
     journal?: string
     exercice?: string
@@ -226,37 +226,37 @@ class AccountingService {
     compte?: string
     page?: number
   }) {
-    logger.debug('Fetching écritures from backend...', params)
+    logger.debug('Fetching écritures ...', params)
     return apiClient.get(`${this.baseUrl}/ecritures/`, params)
   }
 
   async getEcriture(id: string): Promise<EcritureComptable> {
-    logger.debug(`Fetching écriture ${id} from backend...`)
+    logger.debug(`Fetching écriture ${id} ...`)
     return apiClient.get(`${this.baseUrl}/ecritures/${id}/`)
   }
 
   async createEcriture(ecriture: Partial<EcritureComptable>): Promise<EcritureComptable> {
-    logger.debug('Creating écriture in backend...', ecriture)
+    logger.debug('Creating écriture ...', ecriture)
     return apiClient.post(`${this.baseUrl}/ecritures/`, ecriture)
   }
 
   async updateEcriture(id: string, ecriture: Partial<EcritureComptable>): Promise<EcritureComptable> {
-    logger.debug(`Updating écriture ${id} in backend...`)
+    logger.debug(`Updating écriture ${id} ...`)
     return apiClient.patch(`${this.baseUrl}/ecritures/${id}/`, ecriture)
   }
 
   async deleteEcriture(id: string): Promise<void> {
-    logger.debug(`Deleting écriture ${id} from backend...`)
+    logger.debug(`Deleting écriture ${id} ...`)
     return apiClient.delete(`${this.baseUrl}/ecritures/${id}/`)
   }
 
   async validateEcriture(id: string): Promise<EcritureComptable> {
-    logger.debug(`Validating écriture ${id} on backend...`)
+    logger.debug(`Validating écriture ${id} ...`)
     return apiClient.post(`${this.baseUrl}/ecritures/${id}/validate/`)
   }
 
   async unvalidateEcriture(id: string): Promise<EcritureComptable> {
-    logger.debug(`Unvalidating écriture ${id} on backend...`)
+    logger.debug(`Unvalidating écriture ${id} ...`)
     return apiClient.post(`${this.baseUrl}/ecritures/${id}/unvalidate/`)
   }
 
@@ -265,37 +265,37 @@ class AccountingService {
     return apiClient.post(`${this.baseUrl}/ecritures/${id}/duplicate/`)
   }
 
-  // Journaux - CONNEXION RÉELLE AU BACKEND
+  // Journaux - Stub service
   async getJournaux(params?: {
     type_journal?: string
     is_actif?: boolean
     page?: number
   }) {
-    logger.debug('Fetching journaux from backend...', params)
+    logger.debug('Fetching journaux ...', params)
     return apiClient.get(`${this.baseUrl}/journaux/`, params)
   }
 
   async getJournal(id: string): Promise<Journal> {
-    logger.debug(`Fetching journal ${id} from backend...`)
+    logger.debug(`Fetching journal ${id} ...`)
     return apiClient.get(`${this.baseUrl}/journaux/${id}/`)
   }
 
   async createJournal(journal: Partial<Journal>): Promise<Journal> {
-    logger.debug('Creating journal in backend...', journal)
+    logger.debug('Creating journal ...', journal)
     return apiClient.post(`${this.baseUrl}/journaux/`, journal)
   }
 
   async updateJournal(id: string, journal: Partial<Journal>): Promise<Journal> {
-    logger.debug(`Updating journal ${id} in backend...`)
+    logger.debug(`Updating journal ${id} ...`)
     return apiClient.patch(`${this.baseUrl}/journaux/${id}/`, journal)
   }
 
   async deleteJournal(id: string): Promise<void> {
-    logger.debug(`Deleting journal ${id} from backend...`)
+    logger.debug(`Deleting journal ${id} ...`)
     return apiClient.delete(`${this.baseUrl}/journaux/${id}/`)
   }
 
-  // États comptables - CONNEXION RÉELLE AU BACKEND
+  // États comptables - Stub service
   async getBalance(params: {
     exercice: string
     date_arret?: string
@@ -303,7 +303,7 @@ class AccountingService {
     comptes_fin?: string
     niveau_detail?: number
   }): Promise<Balance> {
-    logger.debug('Getting balance from backend...', params)
+    logger.debug('Getting balance ...', params)
     return apiClient.get(`${this.baseUrl}/balance/`, params)
   }
 
@@ -332,17 +332,17 @@ class AccountingService {
     type_tiers: 'CLIENT' | 'FOURNISSEUR'
     date_arret?: string
   }) {
-    logger.debug('Getting balance auxiliaire from backend...', params)
+    logger.debug('Getting balance auxiliaire ...', params)
     return apiClient.get(`${this.baseUrl}/balance-auxiliaire/`, params)
   }
 
-  // Import/Export - CONNEXION RÉELLE AU BACKEND
+  // Import/Export - Stub service
   async importEcritures(file: File, options?: {
     journal_id: string
     format: 'CSV' | 'EXCEL' | 'FEC'
     mapping?: any
   }) {
-    logger.debug('Importing écritures to backend...', options)
+    logger.debug('Importing écritures ...', options)
     return apiClient.upload(`${this.baseUrl}/import/ecritures/`, file, options)
   }
 
@@ -350,7 +350,7 @@ class AccountingService {
     format: 'CSV' | 'EXCEL'
     replace_existing: boolean
   }) {
-    logger.debug('Importing plan comptable to backend...', options)
+    logger.debug('Importing plan comptable ...', options)
     return apiClient.upload(`${this.baseUrl}/import/plan/`, file, options)
   }
 
@@ -359,7 +359,7 @@ class AccountingService {
     format: 'EXCEL' | 'CSV' | 'PDF'
     date_arret?: string
   }): Promise<Blob> {
-    logger.debug('Exporting balance from backend...', params)
+    logger.debug('Exporting balance ...', params)
     const response = await apiClient.client.get(`${this.baseUrl}/export/balance/`, {
       params,
       responseType: 'blob'
@@ -373,7 +373,7 @@ class AccountingService {
     periode_fin: string
     format: 'EXCEL' | 'CSV' | 'PDF'
   }): Promise<Blob> {
-    logger.debug('Exporting grand livre from backend...', params)
+    logger.debug('Exporting grand livre ...', params)
     const response = await apiClient.client.get(`${this.baseUrl}/export/grand-livre/`, {
       params,
       responseType: 'blob'
@@ -390,7 +390,7 @@ class AccountingService {
     return response.data
   }
 
-  // Validation et contrôles - CONNEXION RÉELLE AU BACKEND
+  // Validation et contrôles - Stub service
   async validateBalance(exercice: string) {
     logger.debug(`Validating balance for exercice ${exercice}...`)
     return apiClient.post(`${this.baseUrl}/validate/balance/`, { exercice })
@@ -406,11 +406,11 @@ class AccountingService {
     type_anomalie?: string
     severite?: string
   }) {
-    logger.debug('Getting anomalies comptables from backend...', params)
+    logger.debug('Getting anomalies comptables ...', params)
     return apiClient.get(`${this.baseUrl}/anomalies/`, params)
   }
 
-  // Clôture d'exercice - CONNEXION RÉELLE AU BACKEND
+  // Clôture d'exercice - Stub service
   async startCloture(exercice: string, options?: {
     generer_reports: boolean
     valider_toutes_ecritures: boolean
@@ -429,7 +429,7 @@ class AccountingService {
     return apiClient.post(`${this.baseUrl}/cloture/cancel/`, { exercice })
   }
 
-  // Validation et Mapping - CONNEXION RÉELLE AU BACKEND
+  // Validation et Mapping - Stub service
   async validatePlanComptable(entrepriseId: string) {
     logger.debug(`Validating plan comptable for entreprise ${entrepriseId}...`)
     return apiClient.post(`${this.baseUrl}/validation_plan_comptable/`, { entreprise_id: entrepriseId })

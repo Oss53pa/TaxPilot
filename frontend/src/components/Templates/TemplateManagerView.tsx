@@ -1,7 +1,7 @@
 import { logger } from '@/utils/logger'
 /**
  * Composant pour gérer les templates et modèles
- * Consomme les APIs du moteur de templates backend
+ * Consomme les données locales
  */
 
 import { useState, useEffect } from 'react'

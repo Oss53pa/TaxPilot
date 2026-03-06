@@ -1,7 +1,7 @@
 import { logger } from '@/utils/logger'
 /**
  * Service pour l'audit et le contrôle des liasses fiscales
- * CONNEXION RÉELLE AU BACKEND DJANGO
+ * Service stub (frontend-only)
  */
 
 import { apiClient } from './apiClient'
@@ -86,9 +86,9 @@ export interface ControlRule {
 class AuditService {
   private baseUrl = '/api/v1/audit'
 
-  // Sessions d'audit - CONNEXION RÉELLE AU BACKEND
+  // Sessions d'audit - Stub service
   async startAudit(request: AuditRequest): Promise<AuditSession> {
-    logger.debug('Starting audit session in backend...', request)
+    logger.debug('Starting audit session ...', request)
     return apiClient.post(`${this.baseUrl}/sessions/`, request)
   }
 
@@ -100,26 +100,26 @@ class AuditService {
     page?: number
     page_size?: number
   }) {
-    logger.debug('Fetching audit sessions from backend...', params)
+    logger.debug('Fetching audit sessions ...', params)
     return apiClient.get(`${this.baseUrl}/sessions/`, params)
   }
 
   async getAuditSession(id: string): Promise<AuditSession> {
-    logger.debug(`Fetching audit session ${id} from backend...`)
+    logger.debug(`Fetching audit session ${id} ...`)
     return apiClient.get(`${this.baseUrl}/sessions/${id}/`)
   }
 
   async getAuditStatus(id: string): Promise<AuditSession> {
-    logger.debug(`Getting audit status ${id} from backend...`)
+    logger.debug(`Getting audit status ${id} ...`)
     return apiClient.get(`${this.baseUrl}/sessions/${id}/status/`)
   }
 
   async cancelAudit(id: string): Promise<void> {
-    logger.debug(`Cancelling audit ${id} on backend...`)
+    logger.debug(`Cancelling audit ${id} ...`)
     return apiClient.post(`${this.baseUrl}/sessions/${id}/cancel/`)
   }
 
-  // Anomalies et résultats - CONNEXION RÉELLE AU BACKEND
+  // Anomalies et résultats - Stub service
   async getAuditAnomalies(sessionId: string, params?: {
     type?: string
     categorie?: string
@@ -133,7 +133,7 @@ class AuditService {
   }
 
   async getAnomalie(id: string): Promise<AuditAnomalie> {
-    logger.debug(`Fetching anomalie ${id} from backend...`)
+    logger.debug(`Fetching anomalie ${id} ...`)
     return apiClient.get(`${this.baseUrl}/anomalies/${id}/`)
   }
 
@@ -154,40 +154,40 @@ class AuditService {
     return apiClient.post(`${this.baseUrl}/anomalies/${id}/resolve/`, resolution)
   }
 
-  // Règles de contrôle - CONNEXION RÉELLE AU BACKEND
+  // Règles de contrôle - Stub service
   async getControlRules(params?: {
     categorie?: string
     type_controle?: string
     applicable_type?: string
     page?: number
   }) {
-    logger.debug('Fetching control rules from backend...', params)
+    logger.debug('Fetching control rules ...', params)
     return apiClient.get(`${this.baseUrl}/rules/`, params)
   }
 
   async getControlRule(id: string): Promise<ControlRule> {
-    logger.debug(`Fetching control rule ${id} from backend...`)
+    logger.debug(`Fetching control rule ${id} ...`)
     return apiClient.get(`${this.baseUrl}/rules/${id}/`)
   }
 
   async createControlRule(rule: Partial<ControlRule>): Promise<ControlRule> {
-    logger.debug('Creating control rule in backend...', rule)
+    logger.debug('Creating control rule ...', rule)
     return apiClient.post(`${this.baseUrl}/rules/`, rule)
   }
 
   async updateControlRule(id: string, rule: Partial<ControlRule>): Promise<ControlRule> {
-    logger.debug(`Updating control rule ${id} in backend...`)
+    logger.debug(`Updating control rule ${id} ...`)
     return apiClient.patch(`${this.baseUrl}/rules/${id}/`, rule)
   }
 
   async deleteControlRule(id: string): Promise<void> {
-    logger.debug(`Deleting control rule ${id} from backend...`)
+    logger.debug(`Deleting control rule ${id} ...`)
     return apiClient.delete(`${this.baseUrl}/rules/${id}/`)
   }
 
-  // Tests et validations - CONNEXION RÉELLE AU BACKEND
+  // Tests et validations - Stub service
   async testControlRule(ruleId: string, testData: any) {
-    logger.debug(`Testing control rule ${ruleId} on backend...`)
+    logger.debug(`Testing control rule ${ruleId} ...`)
     return apiClient.post(`${this.baseUrl}/rules/${ruleId}/test/`, testData)
   }
 
@@ -199,7 +199,7 @@ class AuditService {
     })
   }
 
-  // Rapports d'audit - CONNEXION RÉELLE AU BACKEND
+  // Rapports d'audit - Stub service
   async generateAuditReport(sessionId: string, options?: {
     format: 'PDF' | 'EXCEL' | 'XML'
     inclure_annexes: boolean
@@ -218,13 +218,13 @@ class AuditService {
     return response.data
   }
 
-  // Statistiques et métriques - CONNEXION RÉELLE AU BACKEND
+  // Statistiques et métriques - Stub service
   async getAuditStats(params?: {
     entreprise?: string
     period?: string
     type_audit?: string
   }) {
-    logger.debug('Getting audit stats from backend...', params)
+    logger.debug('Getting audit stats ...', params)
     return apiClient.get(`${this.baseUrl}/stats/`, params)
   }
 
@@ -233,11 +233,11 @@ class AuditService {
     period_start?: string
     period_end?: string
   }) {
-    logger.debug('Getting audit trends from backend...', params)
+    logger.debug('Getting audit trends ...', params)
     return apiClient.get(`${this.baseUrl}/trends/`, params)
   }
 
-  // IA et recommandations - CONNEXION RÉELLE AU BACKEND
+  // IA et recommandations - Stub service
   async getAIRecommendations(sessionId: string) {
     logger.debug(`Getting AI recommendations for audit ${sessionId}...`)
     return apiClient.get(`${this.baseUrl}/sessions/${sessionId}/ai-recommendations/`)
@@ -248,11 +248,11 @@ class AuditService {
     focus_areas?: string[]
     analysis_level: 'BASIC' | 'ADVANCED' | 'EXPERT'
   }) {
-    logger.debug('Starting AI analysis on backend...', data)
+    logger.debug('Starting AI analysis ...', data)
     return apiClient.post(`${this.baseUrl}/ai-analyze/`, data)
   }
 
-  // Historique et comparaisons - CONNEXION RÉELLE AU BACKEND
+  // Historique et comparaisons - Stub service
   async getAuditHistory(entrepriseId: string, exerciceId?: string) {
     logger.debug(`Getting audit history for entreprise ${entrepriseId}...`)
     return apiClient.get(`${this.baseUrl}/history/`, {

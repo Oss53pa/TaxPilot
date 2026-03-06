@@ -1,7 +1,7 @@
 import { logger } from '@/utils/logger'
 /**
  * Service pour la gestion des plans comptables de référence
- * CONNEXION RÉELLE AU BACKEND DJANGO
+ * Service stub (frontend-only)
  */
 
 import { apiClient } from './apiClient'
@@ -120,7 +120,7 @@ class PlanComptableService {
     count: number
     results: PlanComptableReference[]
   }> {
-    logger.debug('Fetching plans comptables from backend...', filters)
+    logger.debug('Fetching plans comptables ...', filters)
     return apiClient.get(`${this.baseUrl}/plans-reference`, filters)
   }
 
@@ -187,7 +187,7 @@ class PlanComptableService {
     count: number
     results: CompteReference[]
   }> {
-    logger.debug('Fetching comptes de référence from backend...', filters)
+    logger.debug('Fetching comptes de référence ...', filters)
     return apiClient.get(`${this.baseUrl}/comptes-reference`, filters)
   }
 

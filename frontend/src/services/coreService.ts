@@ -1,6 +1,6 @@
 /**
  * Service pour les fonctionnalités core (paramètres système, pays, devises, etc.)
- * CONNEXION RÉELLE AU BACKEND DJANGO
+ * Service stub (frontend-only)
  */
 
 import { apiClient } from './apiClient'

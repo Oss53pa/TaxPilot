@@ -1,0 +1,73 @@
+/* SOLUTION RADICALE - SIDEBARS TRÈS CLAIRES ET LISIBLES */
+
+/* Fond gris TRÈS CLAIR pour les sidebars */
+.MuiDrawer-paper {
+  background-color: #b0b0b0 !important;
+}
+
+/* TOUT LE TEXTE EN BLANC ÉCLATANT */
+.MuiDrawer-paper,
+.MuiDrawer-paper *,
+.MuiDrawer-paper .MuiTypography-root,
+.MuiDrawer-paper .MuiListItemText-primary,
+.MuiDrawer-paper .MuiListItemText-secondary,
+.MuiDrawer-paper .MuiTypography-body2,
+.MuiDrawer-paper .MuiTypography-caption,
+.MuiDrawer-paper .MuiTypography-overline,
+.MuiDrawer-paper .MuiTypography-h6,
+.MuiDrawer-paper .MuiTypography-h5,
+.MuiDrawer-paper .MuiTypography-h4,
+.MuiDrawer-paper .MuiTypography-subtitle1,
+.MuiDrawer-paper .MuiTypography-subtitle2,
+.MuiDrawer-paper span,
+.MuiDrawer-paper div,
+.MuiDrawer-paper p {
+  color: #ffffff !important;
+  font-weight: 500 !important;
+}
+
+/* ICÔNES BLANCHES */
+.MuiDrawer-paper .MuiSvgIcon-root,
+.MuiDrawer-paper svg {
+  color: #ffffff !important;
+  fill: #ffffff !important;
+}
+
+/* DIVIDERS TRÈS VISIBLES */
+.MuiDrawer-paper .MuiDivider-root {
+  background-color: #aaaaaa !important;
+  margin: 12px 0 !important;
+  height: 2px !important;
+}
+
+/* HOVER ET SÉLECTION */
+.MuiDrawer-paper .MuiListItemButton-root:hover {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+.MuiDrawer-paper .MuiListItemButton-root.Mui-selected {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* FORCE BLANC SUR TOUT */
+.MuiDrawer-paper [color="text.secondary"],
+.MuiDrawer-paper [color="textSecondary"] {
+  color: #ffffff !important;
+}
+
+/* CHIPS ET BOUTONS */
+.MuiDrawer-paper .MuiChip-root {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.MuiDrawer-paper .MuiButton-root {
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* AMÉLIORATION OMBRE */
+.MuiDrawer-paper {
+  box-shadow: 4px 0 20px rgba(0,0,0,0.2) !important;
+}

@@ -1,7 +1,7 @@
 import { logger } from '@/utils/logger'
 /**
  * Service pour la gestion des exercices comptables
- * CONNEXION RÉELLE AU BACKEND DJANGO
+ * Service stub (frontend-only)
  */
 
 import { apiClient } from './apiClient'
@@ -55,7 +55,7 @@ class ExerciceService {
     previous: string | null
     results: ExerciceComptable[]
   }> {
-    logger.debug('Fetching exercices from backend...', filters)
+    logger.debug('Fetching exercices ...', filters)
     return apiClient.get(this.baseUrl, filters)
   }
 
@@ -63,7 +63,7 @@ class ExerciceService {
    * Récupérer tous les exercices (sans pagination)
    */
   async getAll(filters?: Omit<ExerciceFilters, 'page' | 'page_size'>): Promise<ExerciceComptable[]> {
-    logger.debug('Fetching all exercices from backend...', filters)
+    logger.debug('Fetching all exercices ...', filters)
     const data = await apiClient.get<Record<string, any>>(this.baseUrl, { ...filters, page_size: 1000 })
     return data.results || []
   }
@@ -72,7 +72,7 @@ class ExerciceService {
    * Récupérer un exercice comptable par ID
    */
   async getById(id: number): Promise<ExerciceComptable> {
-    logger.debug(`Fetching exercice ${id} from backend...`)
+    logger.debug(`Fetching exercice ${id} ...`)
     return apiClient.get(`${this.baseUrl}/${id}/`)
   }
 
@@ -80,7 +80,7 @@ class ExerciceService {
    * Créer un nouvel exercice comptable
    */
   async create(data: CreateExerciceComptable): Promise<ExerciceComptable> {
-    logger.debug('Creating exercice in backend...', data)
+    logger.debug('Creating exercice ...', data)
     return apiClient.post(this.baseUrl, data)
   }
 
@@ -88,7 +88,7 @@ class ExerciceService {
    * Mettre à jour un exercice comptable
    */
   async update(id: number, data: Partial<CreateExerciceComptable>): Promise<ExerciceComptable> {
-    logger.debug(`Updating exercice ${id} in backend...`, data)
+    logger.debug(`Updating exercice ${id} ...`, data)
     return apiClient.patch(`${this.baseUrl}/${id}/`, data)
   }
 
@@ -96,7 +96,7 @@ class ExerciceService {
    * Supprimer un exercice comptable
    */
   async delete(id: number): Promise<void> {
-    logger.debug(`Deleting exercice ${id} from backend...`)
+    logger.debug(`Deleting exercice ${id} ...`)
     return apiClient.delete(`${this.baseUrl}/${id}/`)
   }
 
@@ -104,7 +104,7 @@ class ExerciceService {
    * Récupérer les exercices actuels
    */
   async getCurrent(entrepriseId?: number): Promise<ExerciceComptable[]> {
-    logger.debug('Fetching current exercices from backend...', { entrepriseId })
+    logger.debug('Fetching current exercices ...', { entrepriseId })
     const params = entrepriseId ? { entreprise: entrepriseId } : undefined
     return apiClient.get(`${this.baseUrl}/current/`, params)
   }
@@ -122,7 +122,7 @@ class ExerciceService {
    * Clôturer un exercice comptable
    */
   async cloturer(id: number): Promise<ExerciceComptable> {
-    logger.debug(`Closing exercice ${id} in backend...`)
+    logger.debug(`Closing exercice ${id} ...`)
     return apiClient.post(`${this.baseUrl}/${id}/cloturer/`)
   }
 
@@ -130,7 +130,7 @@ class ExerciceService {
    * Rouvrir un exercice comptable clôturé
    */
   async rouvrir(id: number): Promise<ExerciceComptable> {
-    logger.debug(`Reopening exercice ${id} in backend...`)
+    logger.debug(`Reopening exercice ${id} ...`)
     return apiClient.post(`${this.baseUrl}/${id}/rouvrir/`)
   }
 

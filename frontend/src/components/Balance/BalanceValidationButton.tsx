@@ -1,7 +1,7 @@
 import { logger } from '@/utils/logger'
 /**
  * Bouton de validation de balance avec dialog de confirmation
- * Connecté au backend via balanceService.validateBalance()
+ * Connecté via balanceService.validateBalance()
  */
 
 import React, { useState } from 'react'

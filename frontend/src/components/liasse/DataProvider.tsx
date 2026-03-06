@@ -1,6 +1,6 @@
 /**
  * Provider de données pour toutes les feuilles SYSCOHADA
- * Remplace automatiquement les données mockées par les données backend
+ * Remplace automatiquement les données mockées par les données
  */
 
 import React, { createContext, useContext, useState, ReactNode } from 'react'
@@ -86,10 +86,10 @@ export function withLiasseData<P extends object>(
   )
 }
 
-// Fonction utilitaire pour convertir les données mockées en données backend
+// Fonction utilitaire pour convertir les données mockées en données
 export const convertMockToBackendData = (mockData: any[], liasseData: LiasseData) => {
   if (!liasseData.comptes || liasseData.comptes.length === 0) {
-    return mockData // Garder les données mockées si pas de données backend
+    return mockData // Garder les données mockées si pas de données
   }
 
   // Mapper les données mockées vers les vrais comptes

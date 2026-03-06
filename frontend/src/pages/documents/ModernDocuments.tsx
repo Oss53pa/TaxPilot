@@ -127,7 +127,7 @@ const ModernDocuments: React.FC = () => {
     }
   });
 
-  // Charger les données depuis le backend
+  // Charger les données 
   useEffect(() => {
     loadBackendData();
   }, []);

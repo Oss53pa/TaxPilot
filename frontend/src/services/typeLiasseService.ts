@@ -1,7 +1,7 @@
 import { logger } from '@/utils/logger'
 /**
  * Service pour la gestion des types de liasses fiscales
- * CONNEXION RÉELLE AU BACKEND DJANGO
+ * Service stub (frontend-only)
  */
 
 import { apiClient } from './apiClient'
@@ -62,7 +62,7 @@ class TypeLiasseService {
     previous: string | null
     results: TypeLiasse[]
   }> {
-    logger.debug('Fetching types de liasse from backend...', filters)
+    logger.debug('Fetching types de liasse ...', filters)
     return apiClient.get(this.baseUrl, filters)
   }
 

@@ -1,7 +1,7 @@
 import { logger } from '@/utils/logger'
 /**
  * Dialog de validation complète d'une liasse fiscale
- * Connecté au backend via generationService.validateComplete()
+ * Connecté via generationService.validateComplete()
  */
 
 import React, { useState } from 'react'

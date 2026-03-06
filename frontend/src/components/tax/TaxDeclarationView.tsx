@@ -1,7 +1,7 @@
 import { logger } from '@/utils/logger'
 /**
  * Composant pour gérer les déclarations fiscales
- * Consomme les APIs backend pour la gestion fiscale
+ * Consomme les données locales
  */
 
 import { useState, useEffect } from 'react'

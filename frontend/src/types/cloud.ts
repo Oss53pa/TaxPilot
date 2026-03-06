@@ -1,6 +1,5 @@
 /**
- * Cloud Types — Liass'Pilot Multi-Tenant
- * Maps to Supabase tables defined in 001_multi_tenant_schema.sql
+ * Types Multi-Tenant — Liass'Pilot
  */
 
 // ============================================================
@@ -145,11 +144,3 @@ export interface Invitation {
   created_at: string
 }
 
-// ============================================================
-// Supabase mode flag
-// ============================================================
-export function isSupabaseEnabled(): boolean {
-  const url = import.meta.env.VITE_SUPABASE_URL
-  const key = import.meta.env.VITE_SUPABASE_ANON_KEY
-  return !!(url && key && !url.includes('YOUR_PROJECT'))
-}

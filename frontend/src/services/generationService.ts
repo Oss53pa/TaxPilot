@@ -1,7 +1,7 @@
 import { logger } from '@/utils/logger'
 /**
  * Service pour la génération de liasses fiscales
- * CONNEXION RÉELLE AU BACKEND DJANGO
+ * Service stub (frontend-only)
  */
 
 import { apiClient } from './apiClient'
@@ -68,9 +68,9 @@ export interface ExportOptions {
 class GenerationService {
   private baseUrl = '/api/v1/generation'
 
-  // Génération de liasses - CONNEXION RÉELLE AU BACKEND
+  // Génération de liasses - Stub service
   async generateLiasse(request: GenerationRequest): Promise<LiasseGeneration> {
-    logger.debug('Starting liasse generation in backend...', request)
+    logger.debug('Starting liasse generation ...', request)
     return apiClient.post(`${this.baseUrl}/liasses/`, request)
   }
 
@@ -82,26 +82,26 @@ class GenerationService {
     page?: number
     page_size?: number
   }) {
-    logger.debug('Fetching liasse generations from backend...', params)
+    logger.debug('Fetching liasse generations ...', params)
     return apiClient.get(`${this.baseUrl}/liasses/`, params)
   }
 
   async getLiasseGeneration(id: string): Promise<LiasseGeneration> {
-    logger.debug(`Fetching liasse generation ${id} from backend...`)
+    logger.debug(`Fetching liasse generation ${id} ...`)
     return apiClient.get(`${this.baseUrl}/liasses/${id}/`)
   }
 
   async getGenerationStatus(id: string): Promise<LiasseGeneration> {
-    logger.debug(`Getting generation status ${id} from backend...`)
+    logger.debug(`Getting generation status ${id} ...`)
     return apiClient.get(`${this.baseUrl}/liasses/${id}/status/`)
   }
 
   async cancelGeneration(id: string): Promise<void> {
-    logger.debug(`Cancelling generation ${id} on backend...`)
+    logger.debug(`Cancelling generation ${id} ...`)
     return apiClient.post(`${this.baseUrl}/liasses/${id}/cancel/`)
   }
 
-  // Export et téléchargement - CONNEXION RÉELLE AU BACKEND
+  // Export et téléchargement - Stub service
   async exportLiasse(id: string, options: ExportOptions) {
     logger.debug(`Exporting liasse ${id} as ${options.format}...`)
     return apiClient.get(`${this.baseUrl}/liasses/${id}/export/`, options)
@@ -116,20 +116,20 @@ class GenerationService {
     return response.data
   }
 
-  // Templates et modèles - CONNEXION RÉELLE AU BACKEND
+  // Templates et modèles - Stub service
   async getAvailableTemplates(type_liasse?: string) {
-    logger.debug('Fetching available templates from backend...', type_liasse)
+    logger.debug('Fetching available templates ...', type_liasse)
     return apiClient.get(`${this.baseUrl}/templates/`, { type_liasse })
   }
 
   async getTemplate(id: string) {
-    logger.debug(`Fetching template ${id} from backend...`)
+    logger.debug(`Fetching template ${id} ...`)
     return apiClient.get(`${this.baseUrl}/templates/${id}/`)
   }
 
-  // Validation et contrôles - CONNEXION RÉELLE AU BACKEND
+  // Validation et contrôles - Stub service
   async validateLiasse(id: string) {
-    logger.debug(`Validating liasse ${id} on backend...`)
+    logger.debug(`Validating liasse ${id} ...`)
     return apiClient.post(`${this.baseUrl}/liasses/${id}/validate/`)
   }
 
@@ -138,16 +138,16 @@ class GenerationService {
     return apiClient.get(`${this.baseUrl}/liasses/${id}/validation-errors/`)
   }
 
-  // Statistiques - CONNEXION RÉELLE AU BACKEND
+  // Statistiques - Stub service
   async getGenerationStats(params?: {
     entreprise?: string
     period?: string
   }) {
-    logger.debug('Getting generation stats from backend...', params)
+    logger.debug('Getting generation stats ...', params)
     return apiClient.get(`${this.baseUrl}/stats/`, params)
   }
 
-  // Historique et versions - CONNEXION RÉELLE AU BACKEND
+  // Historique et versions - Stub service
   async getLiasseHistory(entreprise_id: string, exercice_id: string) {
     logger.debug(`Getting liasse history for entreprise ${entreprise_id}, exercice ${exercice_id}...`)
     return apiClient.get(`${this.baseUrl}/history/`, {
@@ -164,24 +164,24 @@ class GenerationService {
     })
   }
 
-  // Preview et aperçu - CONNEXION RÉELLE AU BACKEND
+  // Preview et aperçu - Stub service
   async previewLiasse(request: GenerationRequest) {
-    logger.debug('Generating liasse preview on backend...', request)
+    logger.debug('Generating liasse preview ...', request)
     return apiClient.post(`${this.baseUrl}/preview/`, request)
   }
 
-  // Batch operations - CONNEXION RÉELLE AU BACKEND
+  // Batch operations - Stub service
   async batchGenerate(requests: GenerationRequest[]) {
-    logger.debug('Starting batch generation on backend...', requests.length, 'liasses')
+    logger.debug('Starting batch generation ...', requests.length, 'liasses')
     return apiClient.post(`${this.baseUrl}/batch/`, { requests })
   }
 
   async getBatchStatus(batch_id: string) {
-    logger.debug(`Getting batch status ${batch_id} from backend...`)
+    logger.debug(`Getting batch status ${batch_id} ...`)
     return apiClient.get(`${this.baseUrl}/batch/${batch_id}/`)
   }
 
-  // Validation approfondie - CONNEXION RÉELLE AU BACKEND
+  // Validation approfondie - Stub service
   async checkPrerequisites(liasseId: string) {
     logger.debug(`Checking prerequisites for liasse ${liasseId}...`)
     return apiClient.get(`${this.baseUrl}/liasses/${liasseId}/check-prerequisites/`)
@@ -197,7 +197,7 @@ class GenerationService {
     return apiClient.get(`${this.baseUrl}/liasses/${liasseId}/validation-report/`)
   }
 
-  // Workflow statuts - CONNEXION RÉELLE AU BACKEND
+  // Workflow statuts - Stub service
   async getTransitions(liasseId: string) {
     logger.debug(`Getting available transitions for liasse ${liasseId}...`)
     return apiClient.get(`${this.baseUrl}/liasses/${liasseId}/get_transitions/`)
@@ -238,7 +238,7 @@ class GenerationService {
     return apiClient.post(`${this.baseUrl}/liasses/${liasseId}/declarer_liasse/`)
   }
 
-  // Export batch avancé - CONNEXION RÉELLE AU BACKEND
+  // Export batch avancé - Stub service
   async exportBatch(liasseIds: string[], format: 'PDF' | 'EXCEL') {
     logger.debug(`Starting batch export for ${liasseIds.length} liasses...`)
     return apiClient.post(`${this.baseUrl}/liasses/export_batch/`, {

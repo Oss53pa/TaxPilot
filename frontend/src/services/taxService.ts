@@ -1,7 +1,7 @@
 import { logger } from '@/utils/logger'
 /**
  * Service pour la gestion fiscale et calculs d'impôts
- * CONNEXION RÉELLE AU BACKEND DJANGO
+ * Service stub (frontend-only)
  */
 
 import { apiClient } from './apiClient'
@@ -142,38 +142,38 @@ export interface SimulationFiscale {
 class TaxService {
   private baseUrl = '/api/v1/tax/'
 
-  // Impôts et taxes - CONNEXION RÉELLE AU BACKEND
+  // Impôts et taxes - Stub service
   async getImpots(params?: {
     pays?: string
     type_impot?: string
     is_actif?: boolean
     page?: number
   }) {
-    logger.debug('Fetching impôts from backend...', params)
+    logger.debug('Fetching impôts ...', params)
     return apiClient.get(`${this.baseUrl}/impots/`, params)
   }
 
   async getImpot(id: string): Promise<Impot> {
-    logger.debug(`Fetching impôt ${id} from backend...`)
+    logger.debug(`Fetching impôt ${id} ...`)
     return apiClient.get(`${this.baseUrl}/impots/${id}/`)
   }
 
   async createImpot(impot: Partial<Impot>): Promise<Impot> {
-    logger.debug('Creating impôt in backend...', impot)
+    logger.debug('Creating impôt ...', impot)
     return apiClient.post(`${this.baseUrl}/impots/`, impot)
   }
 
   async updateImpot(id: string, impot: Partial<Impot>): Promise<Impot> {
-    logger.debug(`Updating impôt ${id} in backend...`)
+    logger.debug(`Updating impôt ${id} ...`)
     return apiClient.patch(`${this.baseUrl}/impots/${id}/`, impot)
   }
 
   async deleteImpot(id: string): Promise<void> {
-    logger.debug(`Deleting impôt ${id} from backend...`)
+    logger.debug(`Deleting impôt ${id} ...`)
     return apiClient.delete(`${this.baseUrl}/impots/${id}/`)
   }
 
-  // Calculs fiscaux - CONNEXION RÉELLE AU BACKEND
+  // Calculs fiscaux - Stub service
   async calculateIS(data: {
     entreprise_id: string
     exercice_id: string
@@ -182,7 +182,7 @@ class TaxService {
     deductions?: number
     abattements?: string[]
   }): Promise<CalculFiscal> {
-    logger.debug('Calculating IS on backend...', data)
+    logger.debug('Calculating IS ...', data)
     return apiClient.post(`${this.baseUrl}/calcul/is/`, data)
   }
 
@@ -193,7 +193,7 @@ class TaxService {
     tva_collectee: number
     tva_deductible: number
   }): Promise<CalculFiscal> {
-    logger.debug('Calculating TVA on backend...', data)
+    logger.debug('Calculating TVA ...', data)
     return apiClient.post(`${this.baseUrl}/calcul/tva/`, data)
   }
 
@@ -203,7 +203,7 @@ class TaxService {
     chiffre_affaires: number
     valeur_locative?: number
   }): Promise<CalculFiscal> {
-    logger.debug('Calculating Patente on backend...', data)
+    logger.debug('Calculating Patente ...', data)
     return apiClient.post(`${this.baseUrl}/calcul/patente/`, data)
   }
 
@@ -216,11 +216,11 @@ class TaxService {
       investissements?: number
     }>
   }) {
-    logger.debug('Running fiscal simulation on backend...', data)
+    logger.debug('Running fiscal simulation ...', data)
     return apiClient.post(`${this.baseUrl}/simulation/`, data)
   }
 
-  // Déclarations fiscales - CONNEXION RÉELLE AU BACKEND
+  // Déclarations fiscales - Stub service
   async getDeclarations(params?: {
     entreprise?: string
     exercice?: string
@@ -231,27 +231,27 @@ class TaxService {
     page?: number
     page_size?: number
   }) {
-    logger.debug('Fetching déclarations from backend...', params)
+    logger.debug('Fetching déclarations ...', params)
     return apiClient.get(`${this.baseUrl}/declarations/`, params)
   }
 
   async getDeclaration(id: string): Promise<DeclarationFiscale> {
-    logger.debug(`Fetching déclaration ${id} from backend...`)
+    logger.debug(`Fetching déclaration ${id} ...`)
     return apiClient.get(`${this.baseUrl}/declarations/${id}/`)
   }
 
   async createDeclaration(declaration: Partial<DeclarationFiscale>): Promise<DeclarationFiscale> {
-    logger.debug('Creating déclaration in backend...', declaration)
+    logger.debug('Creating déclaration ...', declaration)
     return apiClient.post(`${this.baseUrl}/declarations/`, declaration)
   }
 
   async updateDeclaration(id: string, declaration: Partial<DeclarationFiscale>): Promise<DeclarationFiscale> {
-    logger.debug(`Updating déclaration ${id} in backend...`)
+    logger.debug(`Updating déclaration ${id} ...`)
     return apiClient.patch(`${this.baseUrl}/declarations/${id}/`, declaration)
   }
 
   async validateDeclaration(id: string): Promise<DeclarationFiscale> {
-    logger.debug(`Validating déclaration ${id} on backend...`)
+    logger.debug(`Validating déclaration ${id} ...`)
     return apiClient.post(`${this.baseUrl}/declarations/${id}/validate/`)
   }
 
@@ -268,18 +268,18 @@ class TaxService {
     return response.data
   }
 
-  // Régimes fiscaux - CONNEXION RÉELLE AU BACKEND
+  // Régimes fiscaux - Stub service
   async getRegimesFiscaux(params?: {
     pays?: string
     ca_entreprise?: number
     secteur?: string
   }) {
-    logger.debug('Fetching régimes fiscaux from backend...', params)
+    logger.debug('Fetching régimes fiscaux ...', params)
     return apiClient.get(`${this.baseUrl}/regimes/`, params)
   }
 
   async getRegimeFiscal(id: string): Promise<RegimeFiscal> {
-    logger.debug(`Fetching régime fiscal ${id} from backend...`)
+    logger.debug(`Fetching régime fiscal ${id} ...`)
     return apiClient.get(`${this.baseUrl}/regimes/${id}/`)
   }
 
@@ -289,7 +289,7 @@ class TaxService {
     secteur_activite: string
     pays: string
   }) {
-    logger.debug('Getting optimal régime fiscal from backend...', data)
+    logger.debug('Getting optimal régime fiscal ...', data)
     return apiClient.post(`${this.baseUrl}/regimes/optimal/`, data)
   }
 
@@ -297,14 +297,14 @@ class TaxService {
     ca_previsionnel: number
     charges_prevues: number
   }) {
-    logger.debug('Comparing régimes fiscaux on backend...', data)
+    logger.debug('Comparing régimes fiscaux ...', data)
     return apiClient.post(`${this.baseUrl}/regimes/compare/`, {
       regime_ids,
       ...data
     })
   }
 
-  // Obligations fiscales - CONNEXION RÉELLE AU BACKEND
+  // Obligations fiscales - Stub service
   async getObligations(params?: {
     entreprise?: string
     type_obligation?: string
@@ -314,17 +314,17 @@ class TaxService {
     page?: number
     page_size?: number
   }) {
-    logger.debug('Fetching obligations fiscales from backend...', params)
+    logger.debug('Fetching obligations fiscales ...', params)
     return apiClient.get(`${this.baseUrl}/obligations/`, params)
   }
 
   async getObligation(id: string): Promise<ObligationFiscale> {
-    logger.debug(`Fetching obligation ${id} from backend...`)
+    logger.debug(`Fetching obligation ${id} ...`)
     return apiClient.get(`${this.baseUrl}/obligations/${id}/`)
   }
 
   async createObligation(obligation: Partial<ObligationFiscale>): Promise<ObligationFiscale> {
-    logger.debug('Creating obligation in backend...', obligation)
+    logger.debug('Creating obligation ...', obligation)
     return apiClient.post(`${this.baseUrl}/obligations/`, obligation)
   }
 
@@ -338,7 +338,7 @@ class TaxService {
     annee: number
     mois?: number
   }) {
-    logger.debug('Getting obligations calendar from backend...', params)
+    logger.debug('Getting obligations calendar ...', params)
     return apiClient.get(`${this.baseUrl}/obligations/calendar/`, params)
   }
 
@@ -350,18 +350,18 @@ class TaxService {
     })
   }
 
-  // Abattements et déductions - CONNEXION RÉELLE AU BACKEND
+  // Abattements et déductions - Stub service
   async getAbattements(params?: {
     type_impot?: string
     pays?: string
     is_obligatoire?: boolean
   }) {
-    logger.debug('Fetching abattements from backend...', params)
+    logger.debug('Fetching abattements ...', params)
     return apiClient.get(`${this.baseUrl}/abattements/`, params)
   }
 
   async getAbattement(id: string): Promise<AbattementFiscal> {
-    logger.debug(`Fetching abattement ${id} from backend...`)
+    logger.debug(`Fetching abattement ${id} ...`)
     return apiClient.get(`${this.baseUrl}/abattements/${id}/`)
   }
 
@@ -377,11 +377,11 @@ class TaxService {
     type_impot: string
     montant_base: number
   }) {
-    logger.debug('Getting eligible abattements from backend...', data)
+    logger.debug('Getting eligible abattements ...', data)
     return apiClient.post(`${this.baseUrl}/abattements/eligibles/`, data)
   }
 
-  // Analyses et optimisation - CONNEXION RÉELLE AU BACKEND
+  // Analyses et optimisation - Stub service
   async analyzeFiscalPosition(entreprise_id: string, exercice_id: string) {
     logger.debug(`Analyzing fiscal position for entreprise ${entreprise_id}...`)
     return apiClient.post(`${this.baseUrl}/analyse/position/`, {
@@ -407,7 +407,7 @@ class TaxService {
     })
   }
 
-  // Import/Export et intégrations - CONNEXION RÉELLE AU BACKEND
+  // Import/Export et intégrations - Stub service
   async importDeclarationData(file: File, type_declaration: string) {
     logger.debug(`Importing ${type_declaration} declaration data...`)
     return apiClient.upload(`${this.baseUrl}/import/declaration/`, file, { type_declaration })
@@ -436,13 +436,13 @@ class TaxService {
     return apiClient.post(`${this.baseUrl}/authorities/sync/`, { pays })
   }
 
-  // Statistiques fiscales - CONNEXION RÉELLE AU BACKEND
+  // Statistiques fiscales - Stub service
   async getFiscalStats(params: {
     entreprise: string
     periode_debut: string
     periode_fin: string
   }) {
-    logger.debug('Getting fiscal stats from backend...', params)
+    logger.debug('Getting fiscal stats ...', params)
     return apiClient.get(`${this.baseUrl}/stats/`, params)
   }
 
@@ -452,7 +452,7 @@ class TaxService {
     periode_debut: string
     periode_fin: string
   }) {
-    logger.debug('Getting fiscal trends from backend...', params)
+    logger.debug('Getting fiscal trends ...', params)
     return apiClient.get(`${this.baseUrl}/trends/`, params)
   }
 
@@ -461,7 +461,7 @@ class TaxService {
     pays: string
     taille_entreprise: 'TPE' | 'PME' | 'ETI' | 'GE'
   }) {
-    logger.debug('Getting benchmark fiscal data from backend...', data)
+    logger.debug('Getting benchmark fiscal data ...', data)
     return apiClient.get(`${this.baseUrl}/benchmark/`, data)
   }
 }

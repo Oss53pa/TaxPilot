@@ -142,7 +142,7 @@ const ModernConsolidation: React.FC = () => {
   const [eliminationDialogOpen, setEliminationDialogOpen] = useState(false)
   const [expanded, setExpanded] = useState<string[]>(['root'])
 
-  // Récupérer les données du backend
+  // Récupérer les données
   const { data: entreprisesBackend, loading: loadingEntreprises } = useBackendData({
     service: 'entrepriseService',
     method: 'getEntreprises',
@@ -177,10 +177,10 @@ const ModernConsolidation: React.FC = () => {
     }
   }, [loadingEntreprises, loadingBalances, loadingComptes])
 
-  // Fusionner les données backend avec le format attendu
+  // Fusionner les données avec le format attendu
   const entities: Entity[] = React.useMemo(() => {
     if (entreprisesBackend && entreprisesBackend.length > 0) {
-      logger.debug('📤 Using backend entreprises for consolidation:', entreprisesBackend)
+      logger.debug('📤 Using cached entreprises for consolidation:', entreprisesBackend)
       return entreprisesBackend.map((ent: any, index: number) => ({
         id: ent.id || String(index + 1),
         name: ent.raison_sociale || ent.name || 'Entité ' + (index + 1),
@@ -197,7 +197,7 @@ const ModernConsolidation: React.FC = () => {
       }))
     }
 
-    // Données par défaut si pas de backend
+    // Données par défaut si pas de données
     return [
       {
         id: '1',
@@ -298,7 +298,7 @@ const ModernConsolidation: React.FC = () => {
   // Générer les opérations intra-groupe basées sur les écritures comptables
   const intraGroupOperations: IntraGroupOperation[] = React.useMemo(() => {
     if (journauxBackend && journauxBackend.length > 0 && entities.length > 1) {
-      logger.debug('📤 Generating intra-group operations from backend journaux')
+      logger.debug('📤 Generating intra-group operations from cached journaux')
       // Générer des opérations basées sur les écritures
       return [
         {
@@ -388,7 +388,7 @@ const ModernConsolidation: React.FC = () => {
   // EX-CONSO-004 : Ajustements de consolidation basés sur les comptes
   const consolidationAdjustments: ConsolidationAdjustment[] = React.useMemo(() => {
     if (comptesBackend && comptesBackend.length > 0 && entities.length > 1) {
-      logger.debug('📤 Generating consolidation adjustments from backend comptes')
+      logger.debug('📤 Generating consolidation adjustments from cached comptes')
       const adjustments: ConsolidationAdjustment[] = []
 
       // Rechercher l'écart d'acquisition (compte 207)

@@ -1,6 +1,6 @@
 /**
  * Service pour la gestion des organisations (Multi-tenant SaaS)
- * CONNEXION RÉELLE AU BACKEND DJANGO
+ * Service stub (frontend-only)
  */
 
 import { apiClient } from './apiClient'
@@ -225,7 +225,7 @@ class OrganizationService {
     previous: string | null
     results: Organization[]
   }> {
-    logger.debug('Fetching organizations from backend...', filters)
+    logger.debug('Fetching organizations ...', filters)
     return apiClient.get(this.baseUrl, filters)
   }
 
@@ -233,7 +233,7 @@ class OrganizationService {
    * Récupérer toutes les organisations (sans pagination)
    */
   async getAll(): Promise<Organization[]> {
-    logger.debug('Fetching all organizations from backend...')
+    logger.debug('Fetching all organizations ...')
     const data = await apiClient.get<Record<string, any>>(this.baseUrl, { page_size: 100 })
     return data.results || []
   }
@@ -242,7 +242,7 @@ class OrganizationService {
    * Récupérer une organisation par slug
    */
   async getBySlug(slug: string): Promise<Organization> {
-    logger.debug(`Fetching organization ${slug} from backend...`)
+    logger.debug(`Fetching organization ${slug} ...`)
     return apiClient.get(`${this.baseUrl}/${slug}/`)
   }
 
@@ -250,7 +250,7 @@ class OrganizationService {
    * Créer une nouvelle organisation
    */
   async create(data: CreateOrganization): Promise<Organization> {
-    logger.debug('Creating organization in backend...', data)
+    logger.debug('Creating organization ...', data)
     return apiClient.post(this.baseUrl, data)
   }
 
@@ -258,7 +258,7 @@ class OrganizationService {
    * Mettre à jour une organisation
    */
   async update(slug: string, data: Partial<CreateOrganization>): Promise<Organization> {
-    logger.debug(`Updating organization ${slug} in backend...`, data)
+    logger.debug(`Updating organization ${slug} ...`, data)
     return apiClient.patch(`${this.baseUrl}/${slug}/`, data)
   }
 
@@ -266,7 +266,7 @@ class OrganizationService {
    * Supprimer une organisation
    */
   async delete(slug: string): Promise<void> {
-    logger.debug(`Deleting organization ${slug} from backend...`)
+    logger.debug(`Deleting organization ${slug} ...`)
     return apiClient.delete(`${this.baseUrl}/${slug}/`)
   }
 
@@ -452,7 +452,7 @@ class OrganizationService {
    * Récupérer la liste des membres d'une organisation
    */
   async getMembers(organizationSlug?: string): Promise<OrganizationMember[]> {
-    logger.debug('Fetching organization members from backend...', organizationSlug)
+    logger.debug('Fetching organization members ...', organizationSlug)
     const params = organizationSlug ? { organization: organizationSlug } : undefined
     const data = await apiClient.get<Record<string, any>>('/api/v1/members/', params)
     return data.results || []
@@ -462,7 +462,7 @@ class OrganizationService {
    * Récupérer un membre spécifique
    */
   async getMember(id: string): Promise<OrganizationMember> {
-    logger.debug(`Fetching member ${id} from backend...`)
+    logger.debug(`Fetching member ${id} ...`)
     return apiClient.get(`/api/v1/members/${id}/`)
   }
 
@@ -528,7 +528,7 @@ class OrganizationService {
    * Récupérer la liste des subscriptions
    */
   async getSubscriptions(organizationSlug?: string): Promise<Subscription[]> {
-    logger.debug('Fetching subscriptions from backend...', organizationSlug)
+    logger.debug('Fetching subscriptions ...', organizationSlug)
     const params = organizationSlug ? { organization: organizationSlug } : undefined
     const data = await apiClient.get<Record<string, any>>('/api/v1/subscriptions/', params)
     return data.results || []
@@ -538,7 +538,7 @@ class OrganizationService {
    * Récupérer une subscription spécifique
    */
   async getSubscription(id: string): Promise<Subscription> {
-    logger.debug(`Fetching subscription ${id} from backend...`)
+    logger.debug(`Fetching subscription ${id} ...`)
     return apiClient.get(`/api/v1/subscriptions/${id}/`)
   }
 
@@ -604,7 +604,7 @@ class OrganizationService {
    * Récupérer la liste des invitations
    */
   async getInvitations(organizationSlug?: string): Promise<Invitation[]> {
-    logger.debug('Fetching invitations from backend...', organizationSlug)
+    logger.debug('Fetching invitations ...', organizationSlug)
     const params = organizationSlug ? { organization: organizationSlug } : undefined
     const data = await apiClient.get<Record<string, any>>('/api/v1/invitations/', params)
     return data.results || []
@@ -614,7 +614,7 @@ class OrganizationService {
    * Récupérer une invitation spécifique
    */
   async getInvitation(id: string): Promise<Invitation> {
-    logger.debug(`Fetching invitation ${id} from backend...`)
+    logger.debug(`Fetching invitation ${id} ...`)
     return apiClient.get(`/api/v1/invitations/${id}/`)
   }
 

@@ -1,7 +1,7 @@
 import { logger } from '@/utils/logger'
 /**
  * Service pour la gestion des écritures comptables
- * CONNEXION RÉELLE AU BACKEND DJANGO
+ * Service stub (frontend-only)
  */
 
 import { apiClient } from './apiClient'
@@ -70,7 +70,7 @@ class EcritureService {
   private baseUrl = '/api/v1/accounting/ecritures'
 
   async list(filters?: EcritureFilters): Promise<{ count: number; results: EcritureComptable[] }> {
-    logger.debug('Fetching écritures from backend...', filters)
+    logger.debug('Fetching écritures ...', filters)
     return apiClient.get(this.baseUrl, filters)
   }
 

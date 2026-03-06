@@ -185,7 +185,7 @@ const EntrepriseSettings: React.FC = () => {
   const [commissaires, setCommissaires] = useState<CommissaireEntry[]>([emptyCommissaire()])
   const [participations, setParticipations] = useState<ParticipationEntry[]>([emptyParticipation()])
 
-  // Récupérer les données de l'entreprise depuis le backend
+  // Récupérer les données de l'entreprise 
   const { data: entreprises, loading: loadingEntreprises } = useBackendData({
     service: 'entrepriseService',
     method: 'getEntreprises',
@@ -250,7 +250,7 @@ const EntrepriseSettings: React.FC = () => {
     } as any,
   })
 
-  // Charger les données : priorité backend, fallback localStorage
+  // Charger les données : priorité service, fallback localStorage
   useEffect(() => {
     const entreprise = (entreprises && entreprises.length > 0)
       ? entreprises[0]

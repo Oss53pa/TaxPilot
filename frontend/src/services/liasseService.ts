@@ -1,7 +1,7 @@
 /**
  * Service d'intégration Backend pour la Liasse Fiscale
  *
- * Connecte le service liasseDataService.ts aux API Django
+ * Service stub (frontend-only)
  * Endpoints: /api/generation/liasses/
  */
 

@@ -1,7 +1,7 @@
 import { logger } from '@/utils/logger'
 /**
  * Dialog d'export batch de plusieurs liasses
- * Connecté au backend via generationService.exportBatch()
+ * Connecté via generationService.exportBatch()
  */
 
 import React, { useState } from 'react'

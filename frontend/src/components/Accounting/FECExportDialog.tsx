@@ -91,7 +91,7 @@ const FECExportDialog: React.FC<FECExportDialogProps> = ({
     setSuccess(false)
 
     try {
-      // Export FEC depuis le backend
+      // Export FEC 
       const blob = await accountingService.exportFEC(selectedExercice)
 
       // Téléchargement automatique

@@ -1,5 +1,5 @@
 /**
- * Script pour connecter automatiquement toutes les feuilles SYSCOHADA au backend
+ * Script pour connecter automatiquement toutes les feuilles SYSCOHADA
  * Ce script modifie automatiquement les imports et exports de tous les fichiers de feuilles
  */
 
@@ -44,7 +44,7 @@ export const SYSCOHADA_SHEETS = [
   'TableauxSupplementaires'
 ]
 
-// Fonction pour obtenir les données backend pour une feuille spécifique
+// Fonction pour obtenir les données pour une feuille spécifique
 export const getSheetBackendData = (sheetName: string, backendData: any) => {
   if (!backendData || !backendData.comptes) {
     return null
@@ -83,7 +83,7 @@ export const getSheetBackendData = (sheetName: string, backendData: any) => {
   }
 }
 
-// Fonction pour enrichir les données mockées avec les données backend
+// Fonction pour enrichir les données mockées avec les données
 export const enrichSheetData = (mockData: any[], backendComptes: any[]) => {
   if (!backendComptes || backendComptes.length === 0) {
     return mockData
@@ -95,7 +95,7 @@ export const enrichSheetData = (mockData: any[], backendComptes: any[]) => {
       return row
     }
 
-    // Chercher le compte correspondant dans le backend
+    // Chercher le compte correspondant dans le service
     const matchingAccount = backendComptes.find((compte: any) => {
       // Essayer de matcher par référence ou numéro de compte
       return compte.numero === row.ref ||
@@ -129,7 +129,7 @@ export const SHEET_BACKEND_CONFIG = {
   maxRetries: 3
 }
 
-// HOC pour connecter une feuille au backend
+// HOC pour connecter une feuille
 export const connectSheet = (Component: React.ComponentType<any>) => {
   return withBackendData(Component)
 }

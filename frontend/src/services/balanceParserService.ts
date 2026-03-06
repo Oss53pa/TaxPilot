@@ -105,6 +105,12 @@ const PATTERNS = {
 /** Patterns that identify a column as N-1 (prior year) */
 const N1_MARKER = /n[\s\-._]*1|pr[eé]c[eé]dent|ant[eé]rieur|previous/i
 
+/** Extract a 4-digit year from a header string (e.g. "Solde Débit 2023" → 2023) */
+function extractYear(header: string): number | null {
+  const m = header.match(/\b(20\d{2})\b/)
+  return m ? parseInt(m[1], 10) : null
+}
+
 export function detectStructure(sheet: ParsedSheet): DetectionResult {
   const { headers, rows } = sheet
 
@@ -115,10 +121,17 @@ export function detectStructure(sheet: ParsedSheet): DetectionResult {
   const mapping: Partial<ColumnMapping> = {}
   let matchCount = 0
 
+  // Detect years in headers to identify N vs N-1 by year
+  const headerYears = headers.map(h => extractYear(h.trim()))
+  const distinctYears = [...new Set(headerYears.filter((y): y is number => y !== null))].sort((a, b) => a - b)
+  const maxYear = distinctYears.length >= 2 ? distinctYears[distinctYears.length - 1] : null
+
   // Classify each header column
-  const colClassification: { type: string; isN1: boolean }[] = headers.map(h => {
+  const colClassification: { type: string; isN1: boolean }[] = headers.map((h, idx) => {
     const trimmed = h.trim()
-    const isN1 = N1_MARKER.test(trimmed)
+    // N-1 detection: explicit marker OR lower year when 2+ years are present
+    const isN1 = N1_MARKER.test(trimmed) ||
+      (maxYear !== null && headerYears[idx] !== null && headerYears[idx]! < maxYear)
     if (PATTERNS.soldeDebit.test(trimmed))  return { type: 'soldeDebit', isN1 }
     if (PATTERNS.soldeCredit.test(trimmed)) return { type: 'soldeCredit', isN1 }
     if (PATTERNS.compte.test(trimmed))      return { type: 'compte', isN1: false }
@@ -139,7 +152,7 @@ export function detectStructure(sheet: ParsedSheet): DetectionResult {
     else if (col.type === 'credit' && mapping.credit === undefined) { mapping.credit = i; matchCount++ }
   })
 
-  // Assign N-1 columns
+  // Assign N-1 columns (explicitly marked with N-1 marker)
   colClassification.forEach((col, i) => {
     if (!col.isN1 || col.type === 'unknown') return
     if (col.type === 'soldeDebit' && mapping.soldeDebitN1 === undefined) { mapping.soldeDebitN1 = i }
@@ -147,6 +160,36 @@ export function detectStructure(sheet: ParsedSheet): DetectionResult {
     else if (col.type === 'debit' && mapping.debitN1 === undefined) { mapping.debitN1 = i }
     else if (col.type === 'credit' && mapping.creditN1 === undefined) { mapping.creditN1 = i }
   })
+
+  // Handle duplicate columns without N-1 markers:
+  // If there are 2+ debit/credit or soldeDebit/soldeCredit columns without N-1 markers,
+  // the second pair is treated as N-1 data.
+  const hasExplicitN1 = mapping.debitN1 !== undefined || mapping.creditN1 !== undefined ||
+                         mapping.soldeDebitN1 !== undefined || mapping.soldeCreditN1 !== undefined
+  if (!hasExplicitN1) {
+    // Collect duplicate non-N1 amount columns
+    const dupes: { type: string; indices: number[] }[] = []
+    const seen = new Map<string, number[]>()
+    colClassification.forEach((col, i) => {
+      if (col.isN1 || col.type === 'unknown' || col.type === 'compte' || col.type === 'libelle') return
+      const list = seen.get(col.type) || []
+      list.push(i)
+      seen.set(col.type, list)
+    })
+    seen.forEach((indices, type) => { if (indices.length >= 2) dupes.push({ type, indices }) })
+
+    if (dupes.length > 0) {
+      // When duplicates exist: first column = N, second column = N-1
+      dupes.forEach(({ type, indices }) => {
+        const nIdx = indices[0]
+        const n1Idx = indices[1]
+        if (type === 'soldeDebit')  { mapping.soldeDebit = nIdx; mapping.soldeDebitN1 = n1Idx }
+        if (type === 'soldeCredit') { mapping.soldeCredit = nIdx; mapping.soldeCreditN1 = n1Idx }
+        if (type === 'debit')       { mapping.debit = nIdx; mapping.debitN1 = n1Idx }
+        if (type === 'credit')      { mapping.credit = nIdx; mapping.creditN1 = n1Idx }
+      })
+    }
+  }
 
   // Minimal: at least compte + (debit/credit or soldeDebit/soldeCredit)
   const hasCompte = mapping.compte !== undefined

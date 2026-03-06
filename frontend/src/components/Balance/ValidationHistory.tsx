@@ -1,7 +1,7 @@
 import { logger } from '@/utils/logger'
 /**
  * Historique des validations de balance
- * Connecté au backend via balanceService.getValidationHistory()
+ * Connecté via balanceService.getValidationHistory()
  */
 
 import React, { useState, useEffect } from 'react'

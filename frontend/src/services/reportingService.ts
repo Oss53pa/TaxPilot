@@ -1,7 +1,7 @@
 import { logger } from '@/utils/logger'
 /**
  * Service pour la génération de rapports et statistiques
- * CONNEXION RÉELLE AU BACKEND DJANGO
+ * Service stub (frontend-only)
  */
 
 import { apiClient } from './apiClient'
@@ -123,9 +123,9 @@ export interface ReportRequest {
 class ReportingService {
   private baseUrl = '/api/v1/reporting'
 
-  // Génération de rapports - CONNEXION RÉELLE AU BACKEND
+  // Génération de rapports - Stub service
   async generateReport(request: ReportRequest): Promise<Report> {
-    logger.debug('Starting report generation in backend...', request)
+    logger.debug('Starting report generation ...', request)
     return apiClient.post(`${this.baseUrl}/reports/`, request)
   }
 
@@ -139,60 +139,60 @@ class ReportingService {
     page?: number
     page_size?: number
   }) {
-    logger.debug('Fetching reports from backend...', params)
+    logger.debug('Fetching reports ...', params)
     return apiClient.get(`${this.baseUrl}/reports/`, params)
   }
 
   async getReport(id: string): Promise<Report> {
-    logger.debug(`Fetching report ${id} from backend...`)
+    logger.debug(`Fetching report ${id} ...`)
     return apiClient.get(`${this.baseUrl}/reports/${id}/`)
   }
 
   async getReportStatus(id: string): Promise<Report> {
-    logger.debug(`Getting report status ${id} from backend...`)
+    logger.debug(`Getting report status ${id} ...`)
     return apiClient.get(`${this.baseUrl}/reports/${id}/status/`)
   }
 
   async cancelReport(id: string): Promise<void> {
-    logger.debug(`Cancelling report ${id} on backend...`)
+    logger.debug(`Cancelling report ${id} ...`)
     return apiClient.post(`${this.baseUrl}/reports/${id}/cancel/`)
   }
 
   async downloadReport(id: string): Promise<Blob> {
-    logger.debug(`Downloading report ${id} from backend...`)
+    logger.debug(`Downloading report ${id} ...`)
     const response = await apiClient.client.get(`${this.baseUrl}/reports/${id}/download/`, {
       responseType: 'blob'
     })
     return response.data
   }
 
-  // Templates de rapports - CONNEXION RÉELLE AU BACKEND
+  // Templates de rapports - Stub service
   async getReportTemplates(params?: {
     type_rapport?: string
     is_public?: boolean
     page?: number
   }) {
-    logger.debug('Fetching report templates from backend...', params)
+    logger.debug('Fetching report templates ...', params)
     return apiClient.get(`${this.baseUrl}/templates/`, params)
   }
 
   async getReportTemplate(id: string): Promise<ReportTemplate> {
-    logger.debug(`Fetching report template ${id} from backend...`)
+    logger.debug(`Fetching report template ${id} ...`)
     return apiClient.get(`${this.baseUrl}/templates/${id}/`)
   }
 
   async createReportTemplate(template: Partial<ReportTemplate>): Promise<ReportTemplate> {
-    logger.debug('Creating report template in backend...', template)
+    logger.debug('Creating report template ...', template)
     return apiClient.post(`${this.baseUrl}/templates/`, template)
   }
 
   async updateReportTemplate(id: string, template: Partial<ReportTemplate>): Promise<ReportTemplate> {
-    logger.debug(`Updating report template ${id} in backend...`)
+    logger.debug(`Updating report template ${id} ...`)
     return apiClient.patch(`${this.baseUrl}/templates/${id}/`, template)
   }
 
   async deleteReportTemplate(id: string): Promise<void> {
-    logger.debug(`Deleting report template ${id} from backend...`)
+    logger.debug(`Deleting report template ${id} ...`)
     return apiClient.delete(`${this.baseUrl}/templates/${id}/`)
   }
 
@@ -201,12 +201,12 @@ class ReportingService {
     return apiClient.post(`${this.baseUrl}/templates/${id}/duplicate/`, { nom: newName })
   }
 
-  // Dashboard et statistiques - CONNEXION RÉELLE AU BACKEND
+  // Dashboard et statistiques - Stub service
   async getDashboardStats(params?: {
     periode?: string
     entreprise?: string
   }): Promise<DashboardStats> {
-    logger.debug('Getting dashboard stats from backend...', params)
+    logger.debug('Getting dashboard stats ...', params)
     return apiClient.get(`${this.baseUrl}/reports/stats/`, params)
   }
 
@@ -215,7 +215,7 @@ class ReportingService {
     periode_fin?: string
     granularite?: 'HOUR' | 'DAY' | 'WEEK' | 'MONTH'
   }): Promise<AnalyticsData> {
-    logger.debug('Getting analytics data from backend...', params)
+    logger.debug('Getting analytics data ...', params)
     return apiClient.get(`${this.baseUrl}/analytics/`, params)
   }
 
@@ -223,11 +223,11 @@ class ReportingService {
     module?: string
     periode?: string
   }) {
-    logger.debug('Getting performance metrics from backend...', params)
+    logger.debug('Getting performance metrics ...', params)
     return apiClient.get(`${this.baseUrl}/performance/`, params)
   }
 
-  // Rapports prédéfinis - CONNEXION RÉELLE AU BACKEND
+  // Rapports prédéfinis - Stub service
   async getFinancialReport(entreprise_id: string, exercice_id: string, options?: {
     inclure_comparaison: boolean
     format: 'PDF' | 'EXCEL'
@@ -273,7 +273,7 @@ class ReportingService {
     })
   }
 
-  // Export et partage - CONNEXION RÉELLE AU BACKEND
+  // Export et partage - Stub service
   async shareReport(id: string, options: {
     emails: string[]
     message?: string
@@ -297,7 +297,7 @@ class ReportingService {
   }
 
   async getScheduledReports() {
-    logger.debug('Fetching scheduled reports from backend...')
+    logger.debug('Fetching scheduled reports ...')
     return apiClient.get(`${this.baseUrl}/schedule/`)
   }
 
@@ -311,13 +311,13 @@ class ReportingService {
     return apiClient.delete(`${this.baseUrl}/schedule/${id}/`)
   }
 
-  // Historique et comparaisons - CONNEXION RÉELLE AU BACKEND
+  // Historique et comparaisons - Stub service
   async getReportHistory(params?: {
     entreprise?: string
     type_rapport?: string
     limit?: number
   }) {
-    logger.debug('Getting report history from backend...', params)
+    logger.debug('Getting report history ...', params)
     return apiClient.get(`${this.baseUrl}/history/`, params)
   }
 
@@ -329,9 +329,9 @@ class ReportingService {
     })
   }
 
-  // Validation et qualité - CONNEXION RÉELLE AU BACKEND
+  // Validation et qualité - Stub service
   async validateReportData(data: any) {
-    logger.debug('Validating report data on backend...')
+    logger.debug('Validating report data ...')
     return apiClient.post(`${this.baseUrl}/validate/`, data)
   }
 
@@ -343,9 +343,9 @@ class ReportingService {
     })
   }
 
-  // KPI Management - CONNEXION RÉELLE AU BACKEND
+  // KPI Management - Stub service
   async getKPIs(params?: { entreprise?: string; page?: number; page_size?: number }) {
-    logger.debug('Getting KPIs from backend...', params)
+    logger.debug('Getting KPIs ...', params)
     return apiClient.get(`${this.baseUrl}/kpis/`, params)
   }
 
@@ -355,22 +355,22 @@ class ReportingService {
   }
 
   async getKPIAlertes(params?: { entreprise?: string; active_only?: boolean }) {
-    logger.debug('Getting KPI alerts from backend...', params)
+    logger.debug('Getting KPI alerts ...', params)
     return apiClient.get(`${this.baseUrl}/kpi-alerts/`, params)
   }
 
   async createKPI(kpi: any) {
-    logger.debug('Creating KPI in backend...', kpi)
+    logger.debug('Creating KPI ...', kpi)
     return apiClient.post(`${this.baseUrl}/kpis/`, kpi)
   }
 
   async updateKPI(id: string, kpi: any) {
-    logger.debug(`Updating KPI ${id} in backend...`)
+    logger.debug(`Updating KPI ${id} ...`)
     return apiClient.patch(`${this.baseUrl}/kpis/${id}/`, kpi)
   }
 
   async deleteKPI(id: string) {
-    logger.debug(`Deleting KPI ${id} from backend...`)
+    logger.debug(`Deleting KPI ${id} ...`)
     return apiClient.delete(`${this.baseUrl}/kpis/${id}/`)
   }
 

@@ -111,7 +111,7 @@ const Couverture: React.FC<CouvertureProps> = ({ data = {}, entreprise }) => {
   const currentYear = new Date().getFullYear()
   const selectedRegime = useRegimeImposition()
 
-  // Si props.entreprise existe (venant du backend), mapper vers les champs d'affichage
+  // Si props.entreprise existe (venant), mapper vers les champs d'affichage
   // Sinon, utiliser data (ancien format) puis les valeurs hardcodées en dernier recours
   const ent = entreprise
   const hasEntreprise = !!ent

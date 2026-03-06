@@ -10,6 +10,5 @@ export const STORAGE_KEYS = {
   DB_PREFIX: 'fiscasync_db_',
   AUDIT_PREFIX: 'fiscasync_audit_',
   BALANCE_PREFIX: 'fiscasync_balance_',
-  SUPABASE_AUTH: 'fiscasync_supabase_auth',
   TAUX_FISCAUX: 'fiscasync_taux_fiscaux',
 } as const

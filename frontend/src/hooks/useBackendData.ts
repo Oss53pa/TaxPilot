@@ -1,14 +1,14 @@
 import { logger } from '@/utils/logger'
 /**
- * Hook personnalisé pour charger les données du backend
+ * Hook personnalisé pour charger les données
  * Remplace automatiquement les données mockées par les vraies données
  */
 
 import { useState, useEffect } from 'react'
 import * as services from '@/services'
 
-// Backend désactivé → on renvoie directement defaultData sans appel réseau
-const BACKEND_ENABLED = import.meta.env.VITE_BACKEND_ENABLED === 'true'
+// Frontend-only : pas d'appels réseau
+const BACKEND_ENABLED = false
 
 interface UseBackendDataOptions {
   service: keyof typeof services

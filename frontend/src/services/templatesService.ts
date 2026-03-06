@@ -1,7 +1,7 @@
 import { logger } from '@/utils/logger'
 /**
  * Service pour la gestion des templates et modèles
- * CONNEXION RÉELLE AU BACKEND DJANGO
+ * Service stub (frontend-only)
  */
 
 import { apiClient } from './apiClient'
@@ -105,7 +105,7 @@ export interface GenerationRequest {
 class TemplatesService {
   private baseUrl = '/api/v1/templates'
 
-  // Templates - CONNEXION RÉELLE AU BACKEND
+  // Templates - Stub service
   async getTemplates(params?: {
     type_template?: string
     categorie?: string
@@ -119,27 +119,27 @@ class TemplatesService {
     page?: number
     page_size?: number
   }) {
-    logger.debug('Fetching templates from backend...', params)
+    logger.debug('Fetching templates ...', params)
     return apiClient.get(`${this.baseUrl}/`, params)
   }
 
   async getTemplate(id: string): Promise<Template> {
-    logger.debug(`Fetching template ${id} from backend...`)
+    logger.debug(`Fetching template ${id} ...`)
     return apiClient.get(`${this.baseUrl}/${id}/`)
   }
 
   async createTemplate(template: Partial<Template>): Promise<Template> {
-    logger.debug('Creating template in backend...', template)
+    logger.debug('Creating template ...', template)
     return apiClient.post(`${this.baseUrl}/`, template)
   }
 
   async updateTemplate(id: string, template: Partial<Template>): Promise<Template> {
-    logger.debug(`Updating template ${id} in backend...`)
+    logger.debug(`Updating template ${id} ...`)
     return apiClient.patch(`${this.baseUrl}/${id}/`, template)
   }
 
   async deleteTemplate(id: string): Promise<void> {
-    logger.debug(`Deleting template ${id} from backend...`)
+    logger.debug(`Deleting template ${id} ...`)
     return apiClient.delete(`${this.baseUrl}/${id}/`)
   }
 
@@ -158,7 +158,7 @@ class TemplatesService {
     return apiClient.post(`${this.baseUrl}/${id}/unpublish/`)
   }
 
-  // Upload et fichiers - CONNEXION RÉELLE AU BACKEND
+  // Upload et fichiers - Stub service
   async uploadTemplate(file: File, metadata: {
     nom: string
     description: string
@@ -166,7 +166,7 @@ class TemplatesService {
     categorie: string
     norme_applicable?: string
   }): Promise<Template> {
-    logger.debug('Uploading template file to backend...', metadata)
+    logger.debug('Uploading template file ...', metadata)
     return apiClient.upload(`${this.baseUrl}/upload/`, file, metadata)
   }
 
@@ -176,14 +176,14 @@ class TemplatesService {
   }
 
   async downloadTemplate(id: string): Promise<Blob> {
-    logger.debug(`Downloading template ${id} from backend...`)
+    logger.debug(`Downloading template ${id} ...`)
     const response = await apiClient.client.get(`${this.baseUrl}/${id}/download/`, {
       responseType: 'blob'
     })
     return response.data
   }
 
-  // Variables et sections - CONNEXION RÉELLE AU BACKEND
+  // Variables et sections - Stub service
   async getTemplateVariables(templateId: string) {
     logger.debug(`Fetching variables for template ${templateId}...`)
     return apiClient.get(`${this.baseUrl}/${templateId}/variables/`)
@@ -229,9 +229,9 @@ class TemplatesService {
     return apiClient.post(`${this.baseUrl}/${templateId}/sections/reorder/`, { sections: sectionOrders })
   }
 
-  // Génération d'instances - CONNEXION RÉELLE AU BACKEND
+  // Génération d'instances - Stub service
   async generateInstance(request: GenerationRequest): Promise<TemplateInstance> {
-    logger.debug('Starting template instance generation in backend...', request)
+    logger.debug('Starting template instance generation ...', request)
     return apiClient.post(`${this.baseUrl}/generate/`, request)
   }
 
@@ -243,34 +243,34 @@ class TemplatesService {
     date_fin?: string
     page?: number
   }) {
-    logger.debug('Fetching template instances from backend...', params)
+    logger.debug('Fetching template instances ...', params)
     return apiClient.get(`${this.baseUrl}/instances/`, params)
   }
 
   async getTemplateInstance(id: string): Promise<TemplateInstance> {
-    logger.debug(`Fetching template instance ${id} from backend...`)
+    logger.debug(`Fetching template instance ${id} ...`)
     return apiClient.get(`${this.baseUrl}/instances/${id}/`)
   }
 
   async getInstanceStatus(id: string): Promise<TemplateInstance> {
-    logger.debug(`Getting instance status ${id} from backend...`)
+    logger.debug(`Getting instance status ${id} ...`)
     return apiClient.get(`${this.baseUrl}/instances/${id}/status/`)
   }
 
   async cancelInstance(id: string): Promise<void> {
-    logger.debug(`Cancelling instance ${id} on backend...`)
+    logger.debug(`Cancelling instance ${id} ...`)
     return apiClient.post(`${this.baseUrl}/instances/${id}/cancel/`)
   }
 
   async downloadInstance(id: string): Promise<Blob> {
-    logger.debug(`Downloading instance ${id} from backend...`)
+    logger.debug(`Downloading instance ${id} ...`)
     const response = await apiClient.client.get(`${this.baseUrl}/instances/${id}/download/`, {
       responseType: 'blob'
     })
     return response.data
   }
 
-  // Preview et validation - CONNEXION RÉELLE AU BACKEND
+  // Preview et validation - Stub service
   async previewTemplate(templateId: string, parametres: Record<string, any>, sampleData?: any) {
     logger.debug(`Generating template preview for ${templateId}...`)
     return apiClient.post(`${this.baseUrl}/${templateId}/preview/`, {
@@ -280,7 +280,7 @@ class TemplatesService {
   }
 
   async validateTemplate(templateId: string, testData?: any) {
-    logger.debug(`Validating template ${templateId} on backend...`)
+    logger.debug(`Validating template ${templateId} ...`)
     return apiClient.post(`${this.baseUrl}/${templateId}/validate/`, { test_data: testData })
   }
 
@@ -289,9 +289,9 @@ class TemplatesService {
     return apiClient.post(`${this.baseUrl}/${templateId}/test/`, testData)
   }
 
-  // Catégories et tags - CONNEXION RÉELLE AU BACKEND
+  // Catégories et tags - Stub service
   async getCategories() {
-    logger.debug('Fetching template categories from backend...')
+    logger.debug('Fetching template categories ...')
     return apiClient.get(`${this.baseUrl}/categories/`)
   }
 
@@ -301,7 +301,7 @@ class TemplatesService {
   }
 
   async getTags() {
-    logger.debug('Fetching template tags from backend...')
+    logger.debug('Fetching template tags ...')
     return apiClient.get(`${this.baseUrl}/tags/`)
   }
 
@@ -310,14 +310,14 @@ class TemplatesService {
     return apiClient.get(`${this.baseUrl}/by-tag/`, { tag })
   }
 
-  // Librairies de templates - CONNEXION RÉELLE AU BACKEND
+  // Librairies de templates - Stub service
   async getTemplateLibraries() {
-    logger.debug('Fetching template libraries from backend...')
+    logger.debug('Fetching template libraries ...')
     return apiClient.get(`${this.baseUrl}/libraries/`)
   }
 
   async getTemplateLibrary(id: string): Promise<TemplateLibrary> {
-    logger.debug(`Fetching template library ${id} from backend...`)
+    logger.debug(`Fetching template library ${id} ...`)
     return apiClient.get(`${this.baseUrl}/libraries/${id}/`)
   }
 
@@ -331,7 +331,7 @@ class TemplatesService {
     return apiClient.post(`${this.baseUrl}/libraries/${libraryId}/install/`, { template_id: templateId })
   }
 
-  // Statistiques et analytics - CONNEXION RÉELLE AU BACKEND
+  // Statistiques et analytics - Stub service
   async getTemplateStats(templateId: string) {
     logger.debug(`Getting stats for template ${templateId}...`)
     return apiClient.get(`${this.baseUrl}/${templateId}/stats/`)
@@ -343,7 +343,7 @@ class TemplatesService {
     template?: string
     utilisateur?: string
   }) {
-    logger.debug('Getting template usage analytics from backend...', params)
+    logger.debug('Getting template usage analytics ...', params)
     return apiClient.get(`${this.baseUrl}/analytics/usage/`, params)
   }
 
@@ -352,7 +352,7 @@ class TemplatesService {
     return apiClient.get(`${this.baseUrl}/popular/`, { limit })
   }
 
-  // Notation et commentaires - CONNEXION RÉELLE AU BACKEND
+  // Notation et commentaires - Stub service
   async rateTemplate(templateId: string, rating: number, commentaire?: string) {
     logger.debug(`Rating template ${templateId}: ${rating}/5...`)
     return apiClient.post(`${this.baseUrl}/${templateId}/rate/`, { rating, commentaire })
@@ -368,7 +368,7 @@ class TemplatesService {
     return apiClient.post(`${this.baseUrl}/${templateId}/report/`, { motif, description })
   }
 
-  // Import/Export - CONNEXION RÉELLE AU BACKEND
+  // Import/Export - Stub service
   async exportTemplate(templateId: string, includeData: boolean = false): Promise<Blob> {
     logger.debug(`Exporting template ${templateId}...`)
     const response = await apiClient.client.get(`${this.baseUrl}/${templateId}/export/`, {
@@ -382,7 +382,7 @@ class TemplatesService {
     override_existing: boolean
     preserve_ids: boolean
   }): Promise<Template> {
-    logger.debug('Importing template to backend...', options)
+    logger.debug('Importing template ...', options)
     return apiClient.upload(`${this.baseUrl}/import/`, file, options)
   }
 
@@ -390,7 +390,7 @@ class TemplatesService {
     library_name?: string
     override_existing: boolean
   }) {
-    logger.debug('Batch importing templates to backend...', options)
+    logger.debug('Batch importing templates ...', options)
     return apiClient.upload(`${this.baseUrl}/batch-import/`, file, options)
   }
 }
