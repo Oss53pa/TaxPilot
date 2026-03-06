@@ -53,22 +53,19 @@ import {
   Close as CloseIcon,
 } from '@mui/icons-material'
 import { StatCard } from '@/components/shared/StatCard'
-import type { BalanceEntry } from '@/services/liasseDataService'
-import { getLatestBalance, getLatestBalanceN1 } from '@/services/balanceStorageService'
+import { getLatestBalance } from '@/services/balanceStorageService'
 
 interface DisplayEntry {
   id: string
   compte: string
   intitule: string
   classe: string
-  debit: number
-  credit: number
-  soldeDebiteur: number
-  soldeCrediteur: number
-  debitN1: number
-  creditN1: number
-  soldeDebiteurN1: number
-  soldeCrediteurN1: number
+  soldeDebitN1: number
+  soldeCreditN1: number
+  mouvementDebit: number
+  mouvementCredit: number
+  soldeDebit: number
+  soldeCredit: number
 }
 
 const ModernBalance: React.FC = () => {
@@ -85,13 +82,17 @@ const ModernBalance: React.FC = () => {
 
   useEffect(() => {
     loadBalanceData()
-  }, [])
 
-  // Reload on exercise switch
-  useEffect(() => {
+    // Reload on exercise switch, balance import, or page focus
     const handler = () => loadBalanceData()
     window.addEventListener('fiscasync:exercice-changed', handler)
-    return () => window.removeEventListener('fiscasync:exercice-changed', handler)
+    window.addEventListener('fiscasync:balance-imported', handler)
+    window.addEventListener('focus', handler)
+    return () => {
+      window.removeEventListener('fiscasync:exercice-changed', handler)
+      window.removeEventListener('fiscasync:balance-imported', handler)
+      window.removeEventListener('focus', handler)
+    }
   }, [])
 
   const loadBalanceData = () => {
@@ -99,7 +100,6 @@ const ModernBalance: React.FC = () => {
       setLoading(true)
 
       const stored = getLatestBalance()
-      const storedN1 = getLatestBalanceN1()
 
       if (!stored?.entries?.length) {
         setEntries([])
@@ -107,28 +107,18 @@ const ModernBalance: React.FC = () => {
         return
       }
 
-      const n1Map = new Map<string, BalanceEntry>()
-      if (storedN1?.entries) {
-        storedN1.entries.forEach(e => n1Map.set(e.compte, e))
-      }
-
-      const data: DisplayEntry[] = stored.entries.map((entry, idx) => {
-        const n1 = n1Map.get(entry.compte)
-        return {
-          id: String(idx + 1),
-          compte: entry.compte,
-          intitule: entry.intitule,
-          classe: entry.compte.charAt(0),
-          debit: entry.debit || 0,
-          credit: entry.credit || 0,
-          soldeDebiteur: entry.solde_debit || 0,
-          soldeCrediteur: entry.solde_credit || 0,
-          debitN1: n1?.debit || 0,
-          creditN1: n1?.credit || 0,
-          soldeDebiteurN1: n1?.solde_debit || 0,
-          soldeCrediteurN1: n1?.solde_credit || 0,
-        }
-      })
+      const data: DisplayEntry[] = stored.entries.map((entry, idx) => ({
+        id: String(idx + 1),
+        compte: entry.compte,
+        intitule: entry.intitule,
+        classe: entry.compte.charAt(0),
+        soldeDebitN1: entry.solde_debit_n1 ?? 0,
+        soldeCreditN1: entry.solde_credit_n1 ?? 0,
+        mouvementDebit: entry.debit || 0,
+        mouvementCredit: entry.credit || 0,
+        soldeDebit: entry.solde_debit || 0,
+        soldeCredit: entry.solde_credit || 0,
+      }))
 
       setEntries(data)
       setFilteredData(data)
@@ -141,12 +131,10 @@ const ModernBalance: React.FC = () => {
   }
 
   const stats = useMemo(() => {
-    const totalDebit = entries.reduce((s, e) => s + e.debit, 0)
-    const totalCredit = entries.reduce((s, e) => s + e.credit, 0)
-    const totalSD = entries.reduce((s, e) => s + e.soldeDebiteur, 0)
-    const totalSC = entries.reduce((s, e) => s + e.soldeCrediteur, 0)
+    const totalSD = entries.reduce((s, e) => s + e.soldeDebit, 0)
+    const totalSC = entries.reduce((s, e) => s + e.soldeCredit, 0)
     const ecart = Math.abs(totalSD - totalSC)
-    return { totalDebit, totalCredit, totalSD, totalSC, ecart, balanced: ecart < 1 }
+    return { totalSD, totalSC, ecart, balanced: ecart < 1 }
   }, [entries])
 
   useEffect(() => {
@@ -170,14 +158,12 @@ const ModernBalance: React.FC = () => {
   }
 
   const totals = useMemo(() => ({
-    debit: filteredData.reduce((s, e) => s + e.debit, 0),
-    credit: filteredData.reduce((s, e) => s + e.credit, 0),
-    soldeDebiteur: filteredData.reduce((s, e) => s + e.soldeDebiteur, 0),
-    soldeCrediteur: filteredData.reduce((s, e) => s + e.soldeCrediteur, 0),
-    debitN1: filteredData.reduce((s, e) => s + e.debitN1, 0),
-    creditN1: filteredData.reduce((s, e) => s + e.creditN1, 0),
-    soldeDebiteurN1: filteredData.reduce((s, e) => s + e.soldeDebiteurN1, 0),
-    soldeCrediteurN1: filteredData.reduce((s, e) => s + e.soldeCrediteurN1, 0),
+    soldeDebitN1: filteredData.reduce((s, e) => s + e.soldeDebitN1, 0),
+    soldeCreditN1: filteredData.reduce((s, e) => s + e.soldeCreditN1, 0),
+    mouvementDebit: filteredData.reduce((s, e) => s + e.mouvementDebit, 0),
+    mouvementCredit: filteredData.reduce((s, e) => s + e.mouvementCredit, 0),
+    soldeDebit: filteredData.reduce((s, e) => s + e.soldeDebit, 0),
+    soldeCredit: filteredData.reduce((s, e) => s + e.soldeCredit, 0),
   }), [filteredData])
 
   const hdr = { fontWeight: 700, fontSize: '0.75rem', whiteSpace: 'nowrap' as const }
@@ -224,16 +210,16 @@ const ModernBalance: React.FC = () => {
         </Grid>
         <Grid item xs={12} sm={6} lg={3}>
           <StatCard
-            title="Total Débit"
-            value={fmt(stats.totalDebit)}
+            title="Solde Débit N"
+            value={fmt(stats.totalSD)}
             color={theme.palette.info.main}
             icon={<TrendingUpIcon />}
           />
         </Grid>
         <Grid item xs={12} sm={6} lg={3}>
           <StatCard
-            title="Total Crédit"
-            value={fmt(stats.totalCredit)}
+            title="Solde Crédit N"
+            value={fmt(stats.totalSC)}
             color={theme.palette.warning.main}
             icon={<TrendingDownIcon />}
           />
@@ -317,41 +303,46 @@ const ModernBalance: React.FC = () => {
               <TableHead>
                 {/* Ligne groupement */}
                 <TableRow>
-                  <TableCell rowSpan={2} sx={{ ...hdr, minWidth: 90 }}>N° Compte</TableCell>
-                  <TableCell rowSpan={2} sx={{ ...hdr, minWidth: 200 }}>Intitulé</TableCell>
-                  <TableCell colSpan={4} align="center" sx={{
-                    ...hdr,
-                    backgroundColor: alpha(theme.palette.primary.main, 0.08),
-                    borderBottom: `2px solid ${theme.palette.primary.main}`,
-                  }}>
-                    Exercice N
-                  </TableCell>
-                  <TableCell colSpan={4} align="center" sx={{
+                  <TableCell rowSpan={2} sx={{ ...hdr, minWidth: 90 }}>Compte</TableCell>
+                  <TableCell rowSpan={2} sx={{ ...hdr, minWidth: 200 }}>Description</TableCell>
+                  <TableCell colSpan={2} align="center" sx={{
                     ...hdr,
                     backgroundColor: alpha(theme.palette.grey[500], 0.08),
                     borderBottom: `2px solid ${theme.palette.grey[500]}`,
                   }}>
                     Exercice N-1
                   </TableCell>
+                  <TableCell colSpan={2} align="center" sx={{
+                    ...hdr,
+                    backgroundColor: alpha(theme.palette.info.main, 0.08),
+                    borderBottom: `2px solid ${theme.palette.info.main}`,
+                  }}>
+                    Mouvements N
+                  </TableCell>
+                  <TableCell colSpan={2} align="center" sx={{
+                    ...hdr,
+                    backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                    borderBottom: `2px solid ${theme.palette.primary.main}`,
+                  }}>
+                    Soldes N
+                  </TableCell>
                   <TableCell rowSpan={2} sx={{ width: 50 }} />
                 </TableRow>
                 {/* Sous-colonnes */}
                 <TableRow>
-                  <TableCell align="right" sx={{ ...hdr, backgroundColor: nBg }}>Débit</TableCell>
-                  <TableCell align="right" sx={{ ...hdr, backgroundColor: nBg }}>Crédit</TableCell>
-                  <TableCell align="right" sx={{ ...hdr, backgroundColor: nBg }}>Solde Débiteur</TableCell>
-                  <TableCell align="right" sx={{ ...hdr, backgroundColor: nBg }}>Solde Créditeur</TableCell>
-                  <TableCell align="right" sx={{ ...hdr, backgroundColor: n1Bg }}>Débit</TableCell>
-                  <TableCell align="right" sx={{ ...hdr, backgroundColor: n1Bg }}>Crédit</TableCell>
-                  <TableCell align="right" sx={{ ...hdr, backgroundColor: n1Bg }}>Solde Débiteur</TableCell>
-                  <TableCell align="right" sx={{ ...hdr, backgroundColor: n1Bg }}>Solde Créditeur</TableCell>
+                  <TableCell align="right" sx={{ ...hdr, backgroundColor: n1Bg }}>Solde Débit</TableCell>
+                  <TableCell align="right" sx={{ ...hdr, backgroundColor: n1Bg }}>Solde Crédit</TableCell>
+                  <TableCell align="right" sx={{ ...hdr, backgroundColor: alpha(theme.palette.info.main, 0.04) }}>Mvt Débit</TableCell>
+                  <TableCell align="right" sx={{ ...hdr, backgroundColor: alpha(theme.palette.info.main, 0.04) }}>Mvt Crédit</TableCell>
+                  <TableCell align="right" sx={{ ...hdr, backgroundColor: nBg }}>Solde Débit</TableCell>
+                  <TableCell align="right" sx={{ ...hdr, backgroundColor: nBg }}>Solde Crédit</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {loading ? (
-                  Array.from({ length: 10 }).map((_, i) => (
+                  Array.from({ length: 8 }).map((_, i) => (
                     <TableRow key={i}>
-                      {Array.from({ length: 11 }).map((_, j) => (
+                      {Array.from({ length: 9 }).map((_, j) => (
                         <TableCell key={j}><Skeleton variant="text" height={20} /></TableCell>
                       ))}
                     </TableRow>
@@ -371,39 +362,34 @@ const ModernBalance: React.FC = () => {
                             {entry.intitule}
                           </Typography>
                         </TableCell>
-                        {/* N */}
-                        <TableCell align="right" sx={{ ...mono, backgroundColor: alpha(theme.palette.primary.main, 0.02) }}>
-                          {fmt(entry.debit)}
+                        {/* N-1 Soldes */}
+                        <TableCell align="right" sx={{ ...mono, color: theme.palette.text.secondary, backgroundColor: alpha(theme.palette.grey[500], 0.02) }}>
+                          {fmt(entry.soldeDebitN1)}
                         </TableCell>
-                        <TableCell align="right" sx={{ ...mono, backgroundColor: alpha(theme.palette.primary.main, 0.02) }}>
-                          {fmt(entry.credit)}
+                        <TableCell align="right" sx={{ ...mono, color: theme.palette.text.secondary, backgroundColor: alpha(theme.palette.grey[500], 0.02) }}>
+                          {fmt(entry.soldeCreditN1)}
+                        </TableCell>
+                        {/* Mouvements N */}
+                        <TableCell align="right" sx={{ ...mono, backgroundColor: alpha(theme.palette.info.main, 0.02) }}>
+                          {fmt(entry.mouvementDebit)}
+                        </TableCell>
+                        <TableCell align="right" sx={{ ...mono, backgroundColor: alpha(theme.palette.info.main, 0.02) }}>
+                          {fmt(entry.mouvementCredit)}
+                        </TableCell>
+                        {/* Soldes N */}
+                        <TableCell align="right" sx={{
+                          ...mono, fontWeight: 600,
+                          color: entry.soldeDebit > 0 ? theme.palette.success.main : undefined,
+                          backgroundColor: alpha(theme.palette.primary.main, 0.02),
+                        }}>
+                          {fmt(entry.soldeDebit)}
                         </TableCell>
                         <TableCell align="right" sx={{
                           ...mono, fontWeight: 600,
-                          color: entry.soldeDebiteur > 0 ? theme.palette.success.main : undefined,
+                          color: entry.soldeCredit > 0 ? theme.palette.error.main : undefined,
                           backgroundColor: alpha(theme.palette.primary.main, 0.02),
                         }}>
-                          {fmt(entry.soldeDebiteur)}
-                        </TableCell>
-                        <TableCell align="right" sx={{
-                          ...mono, fontWeight: 600,
-                          color: entry.soldeCrediteur > 0 ? theme.palette.error.main : undefined,
-                          backgroundColor: alpha(theme.palette.primary.main, 0.02),
-                        }}>
-                          {fmt(entry.soldeCrediteur)}
-                        </TableCell>
-                        {/* N-1 */}
-                        <TableCell align="right" sx={{ ...mono, color: theme.palette.text.secondary, backgroundColor: alpha(theme.palette.grey[500], 0.02) }}>
-                          {fmt(entry.debitN1)}
-                        </TableCell>
-                        <TableCell align="right" sx={{ ...mono, color: theme.palette.text.secondary, backgroundColor: alpha(theme.palette.grey[500], 0.02) }}>
-                          {fmt(entry.creditN1)}
-                        </TableCell>
-                        <TableCell align="right" sx={{ ...mono, color: theme.palette.text.secondary, backgroundColor: alpha(theme.palette.grey[500], 0.02) }}>
-                          {fmt(entry.soldeDebiteurN1)}
-                        </TableCell>
-                        <TableCell align="right" sx={{ ...mono, color: theme.palette.text.secondary, backgroundColor: alpha(theme.palette.grey[500], 0.02) }}>
-                          {fmt(entry.soldeCrediteurN1)}
+                          {fmt(entry.soldeCredit)}
                         </TableCell>
                         <TableCell align="center">
                           <Tooltip title="Détails">
@@ -421,14 +407,12 @@ const ModernBalance: React.FC = () => {
                     <TableCell colSpan={2}>
                       <Typography variant="body2" sx={{ fontWeight: 700 }}>TOTAUX</Typography>
                     </TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 700, ...mono }}>{fmt(totals.debit)}</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 700, ...mono }}>{fmt(totals.credit)}</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 700, ...mono }}>{fmt(totals.soldeDebiteur)}</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 700, ...mono }}>{fmt(totals.soldeCrediteur)}</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 700, ...mono, color: 'text.secondary' }}>{fmt(totals.debitN1)}</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 700, ...mono, color: 'text.secondary' }}>{fmt(totals.creditN1)}</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 700, ...mono, color: 'text.secondary' }}>{fmt(totals.soldeDebiteurN1)}</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 700, ...mono, color: 'text.secondary' }}>{fmt(totals.soldeCrediteurN1)}</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 700, ...mono, color: 'text.secondary' }}>{fmt(totals.soldeDebitN1)}</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 700, ...mono, color: 'text.secondary' }}>{fmt(totals.soldeCreditN1)}</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 700, ...mono }}>{fmt(totals.mouvementDebit)}</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 700, ...mono }}>{fmt(totals.mouvementCredit)}</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 700, ...mono }}>{fmt(totals.soldeDebit)}</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 700, ...mono }}>{fmt(totals.soldeCredit)}</TableCell>
                     <TableCell />
                   </TableRow>
                 )}
@@ -468,43 +452,39 @@ const ModernBalance: React.FC = () => {
                 <Typography variant="body1">{selectedEntry.intitule}</Typography>
               </Box>
               <Divider />
-              <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>Exercice N</Typography>
+              <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>Soldes N-1</Typography>
               <Grid container spacing={2}>
-                <Grid item xs={3}>
-                  <Typography variant="subtitle2" color="text.secondary">Débit</Typography>
-                  <Typography variant="h6">{fmt(selectedEntry.debit)}</Typography>
+                <Grid item xs={6}>
+                  <Typography variant="subtitle2" color="text.secondary">Solde Débit N-1</Typography>
+                  <Typography variant="h6" color="text.secondary">{fmt(selectedEntry.soldeDebitN1)}</Typography>
                 </Grid>
-                <Grid item xs={3}>
-                  <Typography variant="subtitle2" color="text.secondary">Crédit</Typography>
-                  <Typography variant="h6">{fmt(selectedEntry.credit)}</Typography>
-                </Grid>
-                <Grid item xs={3}>
-                  <Typography variant="subtitle2" color="text.secondary">Solde Débiteur</Typography>
-                  <Typography variant="h6" color="success.main">{fmt(selectedEntry.soldeDebiteur)}</Typography>
-                </Grid>
-                <Grid item xs={3}>
-                  <Typography variant="subtitle2" color="text.secondary">Solde Créditeur</Typography>
-                  <Typography variant="h6" color="error.main">{fmt(selectedEntry.soldeCrediteur)}</Typography>
+                <Grid item xs={6}>
+                  <Typography variant="subtitle2" color="text.secondary">Solde Crédit N-1</Typography>
+                  <Typography variant="h6" color="text.secondary">{fmt(selectedEntry.soldeCreditN1)}</Typography>
                 </Grid>
               </Grid>
               <Divider />
-              <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>Exercice N-1</Typography>
+              <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>Mouvements N</Typography>
               <Grid container spacing={2}>
-                <Grid item xs={3}>
-                  <Typography variant="subtitle2" color="text.secondary">Débit</Typography>
-                  <Typography variant="h6" color="text.secondary">{fmt(selectedEntry.debitN1)}</Typography>
+                <Grid item xs={6}>
+                  <Typography variant="subtitle2" color="text.secondary">Mouvement Débit</Typography>
+                  <Typography variant="h6">{fmt(selectedEntry.mouvementDebit)}</Typography>
                 </Grid>
-                <Grid item xs={3}>
-                  <Typography variant="subtitle2" color="text.secondary">Crédit</Typography>
-                  <Typography variant="h6" color="text.secondary">{fmt(selectedEntry.creditN1)}</Typography>
+                <Grid item xs={6}>
+                  <Typography variant="subtitle2" color="text.secondary">Mouvement Crédit</Typography>
+                  <Typography variant="h6">{fmt(selectedEntry.mouvementCredit)}</Typography>
                 </Grid>
-                <Grid item xs={3}>
-                  <Typography variant="subtitle2" color="text.secondary">Solde Débiteur</Typography>
-                  <Typography variant="h6" color="text.secondary">{fmt(selectedEntry.soldeDebiteurN1)}</Typography>
+              </Grid>
+              <Divider />
+              <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>Soldes N</Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={6}>
+                  <Typography variant="subtitle2" color="text.secondary">Solde Débit</Typography>
+                  <Typography variant="h6" color="success.main">{fmt(selectedEntry.soldeDebit)}</Typography>
                 </Grid>
-                <Grid item xs={3}>
-                  <Typography variant="subtitle2" color="text.secondary">Solde Créditeur</Typography>
-                  <Typography variant="h6" color="text.secondary">{fmt(selectedEntry.soldeCrediteurN1)}</Typography>
+                <Grid item xs={6}>
+                  <Typography variant="subtitle2" color="text.secondary">Solde Crédit</Typography>
+                  <Typography variant="h6" color="error.main">{fmt(selectedEntry.soldeCredit)}</Typography>
                 </Grid>
               </Grid>
             </Stack>

@@ -9,7 +9,7 @@ import { balanceService } from '@/services'
 import { useBackendData } from '@/hooks/useBackendData'
 import { importBalanceFile } from '@/services/balanceParserService'
 import type { ImportPipelineResult } from '@/services/balanceParserService'
-import { saveImportedBalance, saveImportedBalanceN1, saveImportRecord, hasExistingBalance, getBalancesForExercice } from '@/services/balanceStorageService'
+import { saveImportedBalance, saveImportRecord, hasExistingBalance, getBalancesForExercice } from '@/services/balanceStorageService'
 import { getOrCreateExercice, markExerciceHasBalance } from '@/services/exerciceStorageService'
 import { runComparison, type ComparisonReport } from '@/services/comparisonService'
 import ComparisonResultModal from '@/components/comparison/ComparisonResultModal'
@@ -103,6 +103,9 @@ interface BalanceAccount {
   creditMovements?: number
   debitClosing?: number
   creditClosing?: number
+  // N-1 unified fields
+  soldeDebitN1?: number
+  soldeCreditN1?: number
   // Champs détectés automatiquement
   detectedType?: 'asset' | 'liability' | 'income' | 'expense' | 'equity'
   mappedAccount?: string // Compte SYSCOHADA mappé
@@ -204,9 +207,6 @@ const ModernImportBalance: React.FC = () => {
   const [exerciceConfigured, setExerciceConfigured] = useState(false)
   const [reimportInfo, setReimportInfo] = useState<{ exists: boolean; version: number }>({ exists: false, version: 0 })
 
-  // Parsed N-1 entries from the same file
-  const [parsedEntriesN1, setParsedEntriesN1] = useState<import('@/services/liasseDataService').BalanceEntry[]>([])
-
   // État erreurs/warnings visibles
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [warningMessages, setWarningMessages] = useState<string[]>([])
@@ -241,26 +241,13 @@ const ModernImportBalance: React.FC = () => {
   const [mappingHistory, setMappingHistory] = useState<any[]>([])
 
   useEffect(() => {
-    // Charger l'historique de mapping 
-    const loadMappingHistory = async () => {
-      try {
-        logger.debug('📤 Loading mapping history from backend...')
-        const history = await (balanceService as any).getMappingHistory()
-        if (history?.results) {
-          setMappingHistory(history.results)
-        }
-      } catch (error) {
-        logger.error('❌ Error loading mapping history:', error)
-        // Utiliser un historique par défaut
-        setMappingHistory([
-          { source: '10100000', target: '101', frequency: 15 },
-          { source: 'CAPITAL SOCIAL', target: '101', frequency: 12 },
-          { source: '40100000', target: '401', frequency: 20 },
-          { source: 'FOURNISSEURS', target: '401', frequency: 18 },
-        ])
-      }
-    }
-    loadMappingHistory()
+    // Default mapping history (backend service not available)
+    setMappingHistory([
+      { source: '10100000', target: '101', frequency: 15 },
+      { source: 'CAPITAL SOCIAL', target: '101', frequency: 12 },
+      { source: '40100000', target: '401', frequency: 20 },
+      { source: 'FOURNISSEURS', target: '401', frequency: 18 },
+    ])
   }, [])
 
   // Configuration du dropzone
@@ -326,6 +313,8 @@ const ModernImportBalance: React.FC = () => {
         creditMovements: entry.credit,
         debitClosing: entry.solde_debit,
         creditClosing: entry.solde_credit,
+        soldeDebitN1: entry.solde_debit_n1 ?? 0,
+        soldeCreditN1: entry.solde_credit_n1 ?? 0,
         detectedType: detectAccountType(entry.compte),
         mappedAccount: entry.compte.substring(0, 3),
         mappingConfidence: 80,
@@ -333,16 +322,25 @@ const ModernImportBalance: React.FC = () => {
       }))
 
       setImportedData(accounts)
-      setParsedEntriesN1(result.entriesN1)
+      console.log('[Import Parse] Detection mapping:', JSON.stringify(result.detection.mapping))
       if (result.warnings.length > 0) setWarningMessages(result.warnings)
       if (result.errors.length > 0) setErrorMessage(result.errors.join(' | '))
 
       validateBalance(accounts)
       generateMappingSuggestions(accounts)
 
-      // Build N-1 comparison from parsed entries
-      if (result.entriesN1.length > 0) {
-        compareWithN1(accounts, result.entriesN1)
+      // Build N-1 comparison from unified entries
+      const hasN1Data = accounts.some(a => (a.soldeDebitN1 || 0) !== 0 || (a.soldeCreditN1 || 0) !== 0)
+      console.log('[Import Parse] N entries:', result.entries.length, '| hasN1:', hasN1Data)
+      if (hasN1Data) {
+        const n1Entries = accounts.map(a => ({
+          compte: a.accountNumber,
+          intitule: a.accountName,
+          debit: 0, credit: 0,
+          solde_debit: a.soldeDebitN1 || 0,
+          solde_credit: a.soldeCreditN1 || 0,
+        }))
+        compareWithN1(accounts, n1Entries)
       }
 
       const endTime = performance.now()
@@ -488,7 +486,7 @@ const ModernImportBalance: React.FC = () => {
     return null
   }
 
-  // EX-IMPORT-008: Comparaison N vs N-1 using parsedEntriesN1
+  // EX-IMPORT-008: Comparaison N vs N-1
   const compareWithN1 = (
     currentData: BalanceAccount[],
     n1Entries: import('@/services/liasseDataService').BalanceEntry[]
@@ -1135,8 +1133,6 @@ const ModernImportBalance: React.FC = () => {
                           <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem', backgroundColor: alpha(theme.palette.primary.main, 0.04) }}>Crédit</TableCell>
                           <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem', backgroundColor: alpha(theme.palette.primary.main, 0.04) }}>Solde Débiteur</TableCell>
                           <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem', backgroundColor: alpha(theme.palette.primary.main, 0.04) }}>Solde Créditeur</TableCell>
-                          <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem', backgroundColor: alpha(theme.palette.grey[500], 0.04) }}>Débit N-1</TableCell>
-                          <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem', backgroundColor: alpha(theme.palette.grey[500], 0.04) }}>Crédit N-1</TableCell>
                           <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem', backgroundColor: alpha(theme.palette.grey[500], 0.04) }}>SD N-1</TableCell>
                           <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem', backgroundColor: alpha(theme.palette.grey[500], 0.04) }}>SC N-1</TableCell>
                           <TableCell sx={{ fontWeight: 600, fontSize: '0.75rem' }}>Statut</TableCell>
@@ -1146,7 +1142,6 @@ const ModernImportBalance: React.FC = () => {
                         {importedData
                           .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                           .map((account) => {
-                            const n1 = parsedEntriesN1.find(e => e.compte === account.accountNumber)
                             return (
                             <TableRow key={account.accountNumber} hover>
                               <TableCell>
@@ -1172,16 +1167,10 @@ const ModernImportBalance: React.FC = () => {
                                 {(account.creditClosing || 0) > 0 ? (account.creditClosing || 0).toLocaleString('fr-FR') : '-'}
                               </TableCell>
                               <TableCell align="right" sx={{ fontFamily: 'monospace', color: 'text.secondary' }}>
-                                {(n1?.debit || 0) > 0 ? (n1?.debit || 0).toLocaleString('fr-FR') : '-'}
+                                {(account.soldeDebitN1 || 0) > 0 ? (account.soldeDebitN1 || 0).toLocaleString('fr-FR') : '-'}
                               </TableCell>
                               <TableCell align="right" sx={{ fontFamily: 'monospace', color: 'text.secondary' }}>
-                                {(n1?.credit || 0) > 0 ? (n1?.credit || 0).toLocaleString('fr-FR') : '-'}
-                              </TableCell>
-                              <TableCell align="right" sx={{ fontFamily: 'monospace', color: 'text.secondary' }}>
-                                {(n1?.solde_debit || 0) > 0 ? (n1?.solde_debit || 0).toLocaleString('fr-FR') : '-'}
-                              </TableCell>
-                              <TableCell align="right" sx={{ fontFamily: 'monospace', color: 'text.secondary' }}>
-                                {(n1?.solde_credit || 0) > 0 ? (n1?.solde_credit || 0).toLocaleString('fr-FR') : '-'}
+                                {(account.soldeCreditN1 || 0) > 0 ? (account.soldeCreditN1 || 0).toLocaleString('fr-FR') : '-'}
                               </TableCell>
                               <TableCell>
                                 {account.status === 'valid' && <CheckIcon color="success" fontSize="small" />}
@@ -1567,7 +1556,7 @@ const ModernImportBalance: React.FC = () => {
                           fullWidth
                           onClick={async () => {
                             try {
-                              // Convert to BalanceEntry[] for liasseDataService
+                              // Convert to unified BalanceEntry[] (N + N-1 in each entry)
                               const entries = importedData.map(acc => ({
                                 compte: acc.accountNumber,
                                 intitule: acc.accountName,
@@ -1575,25 +1564,22 @@ const ModernImportBalance: React.FC = () => {
                                 credit: acc.creditMovements || 0,
                                 solde_debit: acc.debitClosing || 0,
                                 solde_credit: acc.creditClosing || 0,
+                                solde_debit_n1: acc.soldeDebitN1 || 0,
+                                solde_credit_n1: acc.soldeCreditN1 || 0,
                               }))
 
-                              // Save N balance
+                              // Save unified balance (N + N-1 together)
                               const savedBalance = saveImportedBalance(
                                 entries,
                                 importReport?.fileName || 'Import balance',
                                 exerciceConfigured ? String(exerciceConfig.year) : undefined,
                                 exerciceConfigured ? exerciceConfig : undefined,
                               )
+                              // loadBalance auto-builds N-1 cache from unified entries
                               liasseDataService.loadBalance(entries)
 
-                              // Save N-1 if detected in the same file
-                              if (parsedEntriesN1.length > 0) {
-                                saveImportedBalanceN1(
-                                  parsedEntriesN1,
-                                  importReport?.fileName || 'Import balance',
-                                )
-                                liasseDataService.loadBalanceN1(parsedEntriesN1)
-                              }
+                              const hasN1 = entries.some(e => (e.solde_debit_n1 || 0) !== 0 || (e.solde_credit_n1 || 0) !== 0)
+                              console.log('[Import] Saved', entries.length, 'unified entries, hasN1:', hasN1)
 
                               // Save import record
                               saveImportRecord(
@@ -1636,7 +1622,7 @@ const ModernImportBalance: React.FC = () => {
                               // Run N vs N-1 comparison if N-1 exists
                               const anneeN1 = String(parseInt(yearStr) - 1)
                               const balancesN1 = getBalancesForExercice(anneeN1)
-                              if (balancesN1.length > 0 || parsedEntriesN1.length > 0) {
+                              if (balancesN1.length > 0 || hasN1) {
                                 try {
                                   const report = runComparison(yearStr)
                                   if (report) {
@@ -1659,7 +1645,7 @@ const ModernImportBalance: React.FC = () => {
                             }
                           }}
                         >
-                          Valider l'import{parsedEntriesN1.length > 0 ? ' (N + N-1)' : ''}
+                          Valider l'import{importedData.some(a => (a.soldeDebitN1 || 0) !== 0 || (a.soldeCreditN1 || 0) !== 0) ? ' (N + N-1)' : ''}
                         </Button>
                         <Button
                           variant="outlined"

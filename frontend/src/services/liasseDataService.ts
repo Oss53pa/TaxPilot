@@ -10,10 +10,18 @@ import type { TypeLiasse } from '../types'
 export interface BalanceEntry {
   compte: string
   intitule: string
+  /** Mouvement débit N */
   debit: number
+  /** Mouvement crédit N */
   credit: number
+  /** Solde débit N */
   solde_debit: number
+  /** Solde crédit N */
   solde_credit: number
+  /** Solde débit N-1 (unified — no separate N-1 array needed) */
+  solde_debit_n1?: number
+  /** Solde crédit N-1 (unified — no separate N-1 array needed) */
+  solde_credit_n1?: number
 }
 
 export interface LiasseData {
@@ -197,15 +205,32 @@ export class LiasseDataService {
   }
 
   /**
-   * Charge la balance validée (exercice N)
+   * Charge la balance validée (exercice N).
+   * Si les entrées contiennent solde_debit_n1 / solde_credit_n1, le cache N-1 est
+   * automatiquement construit (pas besoin d'appeler loadBalanceN1 séparément).
    */
   loadBalance(balance: BalanceEntry[]) {
     this.balance = balance
     this.buildMappingCache()
+
+    // Auto-build N-1 cache from unified entries if N-1 fields are present
+    const hasUnifiedN1 = balance.some(e => (e.solde_debit_n1 ?? 0) !== 0 || (e.solde_credit_n1 ?? 0) !== 0)
+    if (hasUnifiedN1) {
+      this.balanceN1 = balance.map(e => ({
+        compte: e.compte,
+        intitule: e.intitule,
+        debit: 0,
+        credit: 0,
+        solde_debit: e.solde_debit_n1 ?? 0,
+        solde_credit: e.solde_credit_n1 ?? 0,
+      }))
+      this.buildMappingCacheN1()
+    }
   }
 
   /**
-   * Charge la balance de l'exercice précédent (N-1)
+   * Charge la balance de l'exercice précédent (N-1) — rétrocompatibilité.
+   * Prefer unified entries with solde_debit_n1/solde_credit_n1 in loadBalance().
    */
   loadBalanceN1(balance: BalanceEntry[]) {
     this.balanceN1 = balance

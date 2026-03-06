@@ -5,18 +5,12 @@
 
 import React, { createContext, useContext, useState, ReactNode } from 'react'
 import { liasseDataService } from '../../services/liasseDataService'
-import { getLatestBalance, getLatestBalanceN1 } from '../../services/balanceStorageService'
+import { getLatestBalance } from '../../services/balanceStorageService'
 
-// Charger la balance importée si disponible
+// Charger la balance importée (N + N-1 unified in each entry)
 const storedBalance = getLatestBalance()
 const initialBalance = storedBalance?.entries?.length ? storedBalance.entries : []
 liasseDataService.loadBalance(initialBalance)
-
-// Charger la balance N-1 si disponible
-const storedN1 = getLatestBalanceN1()
-if (storedN1?.entries?.length) {
-  liasseDataService.loadBalanceN1(storedN1.entries)
-}
 
 interface LiasseData {
   entreprise: any

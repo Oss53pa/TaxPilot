@@ -1,10 +1,16 @@
 /**
- * Service de parsing Excel/CSV 100% client-side
- * Utilise la librairie xlsx (SheetJS) pour lire les fichiers
+ * Service de parsing Excel/CSV — balance SYSCOHADA 8 colonnes
+ * Structure cible :
+ *   Compte | Description | Solde Débit N-1 | Solde Crédit N-1
+ *   | Mouvement Débit N | Mouvement Crédit N | Solde Débit N | Solde Crédit N
+ *
+ * Rétrocompatible avec l'ancien format 10 colonnes (Débit/Crédit + Solde Débit/Crédit + N-1).
  */
 
 import * as XLSX from 'xlsx'
 import type { BalanceEntry } from './liasseDataService'
+
+// ────────── Public types ──────────
 
 export interface ParsedSheet {
   name: string
@@ -20,7 +26,6 @@ export interface ColumnMapping {
   credit: number
   soldeDebit?: number
   soldeCredit?: number
-  // N-1 columns (optional — present when the file includes prior year data)
   debitN1?: number
   creditN1?: number
   soldeDebitN1?: number
@@ -37,12 +42,22 @@ export interface DetectionResult {
 
 export interface ParseResult {
   entries: BalanceEntry[]
+  /** @deprecated — N-1 is now inside each BalanceEntry. Kept empty for compat. */
   entriesN1: BalanceEntry[]
   errors: string[]
   warnings: string[]
   totalRows: number
   validRows: number
   skippedRows: number
+}
+
+export interface ImportPipelineResult {
+  entries: BalanceEntry[]
+  entriesN1: BalanceEntry[]
+  detection: DetectionResult
+  parseResult: ParseResult
+  errors: string[]
+  warnings: string[]
 }
 
 // ────────── File reading ──────────
@@ -81,7 +96,7 @@ export function parseExcelFile(buffer: ArrayBuffer): ParsedSheet[] {
 export function parseCsvFile(text: string, separator?: string): ParsedSheet {
   const workbook = XLSX.read(text, {
     type: 'string',
-    FS: separator,
+    FS: separator || undefined,
   })
   const name = workbook.SheetNames[0]
   const sheet = workbook.Sheets[name]
@@ -93,23 +108,32 @@ export function parseCsvFile(text: string, separator?: string): ParsedSheet {
 
 // ────────── Column detection ──────────
 
-const PATTERNS = {
-  compte:      /n[°o]?\s*compte|numero.*compte|code.*compte|num[eé]ro|n[°o]\s*cpte|compte/i,
-  libelle:     /libell[eé]|intitul[eé]|d[eé]signation|nom.*compte/i,
-  debit:       /d[eé]bit(?!\s*e)/i,
-  credit:      /cr[eé]dit/i,
-  soldeDebit:  /solde.*d[eé]bit|d[eé]bit.*solde|sd/i,
-  soldeCredit: /solde.*cr[eé]dit|cr[eé]dit.*solde|sc/i,
+/** Normalise: lowercase, remove accents/extra spaces */
+function norm(s: string): string {
+  return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\s+/g, ' ').trim()
 }
 
-/** Patterns that identify a column as N-1 (prior year) */
-const N1_MARKER = /n[\s\-._]*1|pr[eé]c[eé]dent|ant[eé]rieur|previous/i
+/** Patterns for column type detection */
+const PATTERNS = {
+  compte:      /n[°o]?\s*compte|numero.*compte|code.*compte|numero|n[°o]\s*cpte|^compte$/,
+  libelle:     /libelle|intitule|designation|description|nom.*compte/,
+  debit:       /debit(?!\s*e)/,
+  credit:      /credit/,
+  soldeDebit:  /solde.*debit|debit.*solde|^sd$/,
+  soldeCredit: /solde.*credit|credit.*solde|^sc$/,
+}
 
-/** Extract a 4-digit year from a header string (e.g. "Solde Débit 2023" → 2023) */
+/** N-1 markers */
+const N1_MARKER = /n[\s\-._]*1|precedent|anterieur|previous/
+
+/** Extract a 4-digit year from a header string */
 function extractYear(header: string): number | null {
   const m = header.match(/\b(20\d{2})\b/)
   return m ? parseInt(m[1], 10) : null
 }
+
+/** Mouvement marker — distinguishes "Mouvement Débit" from "Solde Débit" */
+const MVT_MARKER = /mouvement|mvt|flux/
 
 export function detectStructure(sheet: ParsedSheet): DetectionResult {
   const { headers, rows } = sheet
@@ -121,54 +145,53 @@ export function detectStructure(sheet: ParsedSheet): DetectionResult {
   const mapping: Partial<ColumnMapping> = {}
   let matchCount = 0
 
-  // Detect years in headers to identify N vs N-1 by year
+  // Detect years in headers for N vs N-1 disambiguation
   const headerYears = headers.map(h => extractYear(h.trim()))
   const distinctYears = [...new Set(headerYears.filter((y): y is number => y !== null))].sort((a, b) => a - b)
   const maxYear = distinctYears.length >= 2 ? distinctYears[distinctYears.length - 1] : null
 
   // Classify each header column
-  const colClassification: { type: string; isN1: boolean }[] = headers.map((h, idx) => {
-    const trimmed = h.trim()
-    // N-1 detection: explicit marker OR lower year when 2+ years are present
-    const isN1 = N1_MARKER.test(trimmed) ||
+  const colClassification: { type: string; isN1: boolean; isMvt: boolean }[] = headers.map((h, idx) => {
+    const n = norm(h)
+    const isN1 = N1_MARKER.test(n) ||
       (maxYear !== null && headerYears[idx] !== null && headerYears[idx]! < maxYear)
-    if (PATTERNS.soldeDebit.test(trimmed))  return { type: 'soldeDebit', isN1 }
-    if (PATTERNS.soldeCredit.test(trimmed)) return { type: 'soldeCredit', isN1 }
-    if (PATTERNS.compte.test(trimmed))      return { type: 'compte', isN1: false }
-    if (PATTERNS.libelle.test(trimmed))     return { type: 'libelle', isN1: false }
-    if (PATTERNS.debit.test(trimmed))       return { type: 'debit', isN1 }
-    if (PATTERNS.credit.test(trimmed))      return { type: 'credit', isN1 }
-    return { type: 'unknown', isN1 }
+    const isMvt = MVT_MARKER.test(n)
+
+    // Order matters: soldeDebit before debit to avoid false matches
+    if (!isMvt && PATTERNS.soldeDebit.test(n))  return { type: 'soldeDebit', isN1, isMvt }
+    if (!isMvt && PATTERNS.soldeCredit.test(n)) return { type: 'soldeCredit', isN1, isMvt }
+    if (PATTERNS.compte.test(n))                return { type: 'compte', isN1: false, isMvt: false }
+    if (PATTERNS.libelle.test(n))               return { type: 'libelle', isN1: false, isMvt: false }
+    if (PATTERNS.debit.test(n))                 return { type: 'debit', isN1, isMvt }
+    if (PATTERNS.credit.test(n))                return { type: 'credit', isN1, isMvt }
+    return { type: 'unknown', isN1, isMvt }
   })
 
   // Assign N columns (non N-1)
   colClassification.forEach((col, i) => {
     if (col.isN1 || col.type === 'unknown') return
-    if (col.type === 'soldeDebit' && mapping.soldeDebit === undefined) { mapping.soldeDebit = i; matchCount++ }
+    if (col.type === 'soldeDebit' && mapping.soldeDebit === undefined)   { mapping.soldeDebit = i; matchCount++ }
     else if (col.type === 'soldeCredit' && mapping.soldeCredit === undefined) { mapping.soldeCredit = i; matchCount++ }
-    else if (col.type === 'compte' && mapping.compte === undefined) { mapping.compte = i; matchCount++ }
-    else if (col.type === 'libelle' && mapping.libelle === undefined) { mapping.libelle = i; matchCount++ }
-    else if (col.type === 'debit' && mapping.debit === undefined) { mapping.debit = i; matchCount++ }
-    else if (col.type === 'credit' && mapping.credit === undefined) { mapping.credit = i; matchCount++ }
+    else if (col.type === 'compte' && mapping.compte === undefined)     { mapping.compte = i; matchCount++ }
+    else if (col.type === 'libelle' && mapping.libelle === undefined)   { mapping.libelle = i; matchCount++ }
+    else if (col.type === 'debit' && mapping.debit === undefined)       { mapping.debit = i; matchCount++ }
+    else if (col.type === 'credit' && mapping.credit === undefined)     { mapping.credit = i; matchCount++ }
   })
 
-  // Assign N-1 columns (explicitly marked with N-1 marker)
+  // Assign N-1 columns (explicitly marked)
   colClassification.forEach((col, i) => {
     if (!col.isN1 || col.type === 'unknown') return
-    if (col.type === 'soldeDebit' && mapping.soldeDebitN1 === undefined) { mapping.soldeDebitN1 = i }
+    if (col.type === 'soldeDebit' && mapping.soldeDebitN1 === undefined)   { mapping.soldeDebitN1 = i }
     else if (col.type === 'soldeCredit' && mapping.soldeCreditN1 === undefined) { mapping.soldeCreditN1 = i }
-    else if (col.type === 'debit' && mapping.debitN1 === undefined) { mapping.debitN1 = i }
-    else if (col.type === 'credit' && mapping.creditN1 === undefined) { mapping.creditN1 = i }
+    else if (col.type === 'debit' && mapping.debitN1 === undefined)       { mapping.debitN1 = i }
+    else if (col.type === 'credit' && mapping.creditN1 === undefined)     { mapping.creditN1 = i }
   })
 
   // Handle duplicate columns without N-1 markers:
-  // If there are 2+ debit/credit or soldeDebit/soldeCredit columns without N-1 markers,
-  // the second pair is treated as N-1 data.
+  // If there are 2+ debit/credit or soldeDebit/soldeCredit columns, second pair = N-1
   const hasExplicitN1 = mapping.debitN1 !== undefined || mapping.creditN1 !== undefined ||
                          mapping.soldeDebitN1 !== undefined || mapping.soldeCreditN1 !== undefined
   if (!hasExplicitN1) {
-    // Collect duplicate non-N1 amount columns
-    const dupes: { type: string; indices: number[] }[] = []
     const seen = new Map<string, number[]>()
     colClassification.forEach((col, i) => {
       if (col.isN1 || col.type === 'unknown' || col.type === 'compte' || col.type === 'libelle') return
@@ -176,22 +199,17 @@ export function detectStructure(sheet: ParsedSheet): DetectionResult {
       list.push(i)
       seen.set(col.type, list)
     })
-    seen.forEach((indices, type) => { if (indices.length >= 2) dupes.push({ type, indices }) })
-
-    if (dupes.length > 0) {
-      // When duplicates exist: first column = N, second column = N-1
-      dupes.forEach(({ type, indices }) => {
-        const nIdx = indices[0]
-        const n1Idx = indices[1]
-        if (type === 'soldeDebit')  { mapping.soldeDebit = nIdx; mapping.soldeDebitN1 = n1Idx }
-        if (type === 'soldeCredit') { mapping.soldeCredit = nIdx; mapping.soldeCreditN1 = n1Idx }
-        if (type === 'debit')       { mapping.debit = nIdx; mapping.debitN1 = n1Idx }
-        if (type === 'credit')      { mapping.credit = nIdx; mapping.creditN1 = n1Idx }
-      })
-    }
+    seen.forEach((indices, type) => {
+      if (indices.length < 2) return
+      const [nIdx, n1Idx] = indices
+      if (type === 'soldeDebit')  { mapping.soldeDebit = nIdx; mapping.soldeDebitN1 = n1Idx }
+      if (type === 'soldeCredit') { mapping.soldeCredit = nIdx; mapping.soldeCreditN1 = n1Idx }
+      if (type === 'debit')       { mapping.debit = nIdx; mapping.debitN1 = n1Idx }
+      if (type === 'credit')      { mapping.credit = nIdx; mapping.creditN1 = n1Idx }
+    })
   }
 
-  // Minimal: at least compte + (debit/credit or soldeDebit/soldeCredit)
+  // Minimal requirement: at least compte + amount columns
   const hasCompte = mapping.compte !== undefined
   const hasAmounts = (mapping.debit !== undefined && mapping.credit !== undefined) ||
                      (mapping.soldeDebit !== undefined && mapping.soldeCredit !== undefined)
@@ -209,9 +227,9 @@ export function detectStructure(sheet: ParsedSheet): DetectionResult {
   // Fill defaults
   if (mapping.debit === undefined) mapping.debit = mapping.soldeDebit!
   if (mapping.credit === undefined) mapping.credit = mapping.soldeCredit!
-  if (mapping.libelle === undefined) mapping.libelle = -1 // no libelle column
+  if (mapping.libelle === undefined) mapping.libelle = -1
 
-  // Fill N-1 defaults
+  // Fill N-1 defaults from solde columns
   if (mapping.debitN1 === undefined && mapping.soldeDebitN1 !== undefined) mapping.debitN1 = mapping.soldeDebitN1
   if (mapping.creditN1 === undefined && mapping.soldeCreditN1 !== undefined) mapping.creditN1 = mapping.soldeCreditN1
 
@@ -233,8 +251,6 @@ function parseFrenchNumber(value: any): number {
   if (value == null || value === '') return 0
 
   let str = String(value).trim()
-  // Remove thousand separators (spaces, non-breaking spaces, dots used as thousands)
-  str = str.replace(/[\s\u00A0]/g, '')
 
   // Handle parentheses for negative numbers: (1234) => -1234
   const isNeg = /^\(.*\)$/.test(str)
@@ -255,18 +271,18 @@ function parseFrenchNumber(value: any): number {
 
 export function parseBalanceData(sheet: ParsedSheet, mapping: ColumnMapping): ParseResult {
   const entries: BalanceEntry[] = []
-  const entriesN1: BalanceEntry[] = []
   const errors: string[] = []
   const warnings: string[] = []
   let skippedRows = 0
 
-  const hasN1 = mapping.debitN1 !== undefined && mapping.creditN1 !== undefined
+  const hasN1 = (mapping.soldeDebitN1 !== undefined && mapping.soldeCreditN1 !== undefined) ||
+                (mapping.debitN1 !== undefined && mapping.creditN1 !== undefined)
 
   const { rows } = sheet
 
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i]
-    const lineNum = i + 2 // +1 for header, +1 for 1-indexed
+    const lineNum = i + 2
 
     const compteRaw = row[mapping.compte]
     if (compteRaw == null || String(compteRaw).trim() === '') {
@@ -275,7 +291,6 @@ export function parseBalanceData(sheet: ParsedSheet, mapping: ColumnMapping): Pa
     }
 
     const compte = String(compteRaw).trim().replace(/\s/g, '')
-    // Skip rows where "compte" is clearly not an account number
     if (!/^\d/.test(compte)) {
       skippedRows++
       continue
@@ -285,40 +300,39 @@ export function parseBalanceData(sheet: ParsedSheet, mapping: ColumnMapping): Pa
     const debit = parseFrenchNumber(row[mapping.debit])
     const credit = parseFrenchNumber(row[mapping.credit])
 
+    // Solde N
     let solde_debit: number
     let solde_credit: number
-
     if (mapping.soldeDebit !== undefined && mapping.soldeCredit !== undefined &&
         mapping.soldeDebit !== mapping.debit && mapping.soldeCredit !== mapping.credit) {
       solde_debit = parseFrenchNumber(row[mapping.soldeDebit])
       solde_credit = parseFrenchNumber(row[mapping.soldeCredit])
     } else {
-      // Compute solde from debit/credit
       const solde = debit - credit
       solde_debit = solde > 0 ? solde : 0
       solde_credit = solde < 0 ? Math.abs(solde) : 0
     }
 
-    if (debit === 0 && credit === 0 && solde_debit === 0 && solde_credit === 0) {
-      // Still check N-1 before skipping
-      if (hasN1) {
-        const debitN1 = parseFrenchNumber(row[mapping.debitN1!])
-        const creditN1 = parseFrenchNumber(row[mapping.creditN1!])
-        if (debitN1 !== 0 || creditN1 !== 0) {
-          // Account only exists in N-1
-          let sd_n1: number, sc_n1: number
-          if (mapping.soldeDebitN1 !== undefined && mapping.soldeCreditN1 !== undefined &&
-              mapping.soldeDebitN1 !== mapping.debitN1 && mapping.soldeCreditN1 !== mapping.creditN1) {
-            sd_n1 = parseFrenchNumber(row[mapping.soldeDebitN1])
-            sc_n1 = parseFrenchNumber(row[mapping.soldeCreditN1])
-          } else {
-            const soldeN1 = debitN1 - creditN1
-            sd_n1 = soldeN1 > 0 ? soldeN1 : 0
-            sc_n1 = soldeN1 < 0 ? Math.abs(soldeN1) : 0
-          }
-          entriesN1.push({ compte, intitule, debit: debitN1, credit: creditN1, solde_debit: sd_n1, solde_credit: sc_n1 })
-        }
+    // Solde N-1 (unified into the same entry)
+    let solde_debit_n1 = 0
+    let solde_credit_n1 = 0
+    if (hasN1) {
+      if (mapping.soldeDebitN1 !== undefined && mapping.soldeCreditN1 !== undefined &&
+          mapping.soldeDebitN1 !== mapping.debitN1 && mapping.soldeCreditN1 !== mapping.creditN1) {
+        solde_debit_n1 = parseFrenchNumber(row[mapping.soldeDebitN1])
+        solde_credit_n1 = parseFrenchNumber(row[mapping.soldeCreditN1])
+      } else if (mapping.debitN1 !== undefined && mapping.creditN1 !== undefined) {
+        const dN1 = parseFrenchNumber(row[mapping.debitN1])
+        const cN1 = parseFrenchNumber(row[mapping.creditN1])
+        const soldeN1 = dN1 - cN1
+        solde_debit_n1 = soldeN1 > 0 ? soldeN1 : 0
+        solde_credit_n1 = soldeN1 < 0 ? Math.abs(soldeN1) : 0
       }
+    }
+
+    // Skip completely empty rows
+    if (debit === 0 && credit === 0 && solde_debit === 0 && solde_credit === 0 &&
+        solde_debit_n1 === 0 && solde_credit_n1 === 0) {
       skippedRows++
       continue
     }
@@ -327,28 +341,16 @@ export function parseBalanceData(sheet: ParsedSheet, mapping: ColumnMapping): Pa
       warnings.push(`Ligne ${lineNum} : montant négatif détecté pour le compte ${compte}`)
     }
 
-    entries.push({ compte, intitule, debit, credit, solde_debit, solde_credit })
-
-    // Parse N-1 columns if present
-    if (hasN1) {
-      const debitN1 = parseFrenchNumber(row[mapping.debitN1!])
-      const creditN1 = parseFrenchNumber(row[mapping.creditN1!])
-
-      let sd_n1: number, sc_n1: number
-      if (mapping.soldeDebitN1 !== undefined && mapping.soldeCreditN1 !== undefined &&
-          mapping.soldeDebitN1 !== mapping.debitN1 && mapping.soldeCreditN1 !== mapping.creditN1) {
-        sd_n1 = parseFrenchNumber(row[mapping.soldeDebitN1])
-        sc_n1 = parseFrenchNumber(row[mapping.soldeCreditN1])
-      } else {
-        const soldeN1 = debitN1 - creditN1
-        sd_n1 = soldeN1 > 0 ? soldeN1 : 0
-        sc_n1 = soldeN1 < 0 ? Math.abs(soldeN1) : 0
-      }
-
-      if (debitN1 !== 0 || creditN1 !== 0 || sd_n1 !== 0 || sc_n1 !== 0) {
-        entriesN1.push({ compte, intitule, debit: debitN1, credit: creditN1, solde_debit: sd_n1, solde_credit: sc_n1 })
-      }
-    }
+    entries.push({
+      compte,
+      intitule,
+      debit,
+      credit,
+      solde_debit,
+      solde_credit,
+      solde_debit_n1,
+      solde_credit_n1,
+    })
   }
 
   if (entries.length === 0 && rows.length > 0) {
@@ -359,13 +361,14 @@ export function parseBalanceData(sheet: ParsedSheet, mapping: ColumnMapping): Pa
     warnings.push(`${skippedRows} lignes ignorées (vides ou non numériques)`)
   }
 
-  if (hasN1 && entriesN1.length > 0) {
-    warnings.push(`${entriesN1.length} comptes N-1 détectés et importés`)
+  const n1Count = entries.filter(e => (e.solde_debit_n1 ?? 0) !== 0 || (e.solde_credit_n1 ?? 0) !== 0).length
+  if (n1Count > 0) {
+    warnings.push(`${n1Count} comptes avec données N-1 détectés`)
   }
 
   return {
     entries,
-    entriesN1,
+    entriesN1: [], // deprecated — N-1 is now inside entries
     errors,
     warnings,
     totalRows: rows.length,
@@ -375,15 +378,6 @@ export function parseBalanceData(sheet: ParsedSheet, mapping: ColumnMapping): Pa
 }
 
 // ────────── Full pipeline ──────────
-
-export interface ImportPipelineResult {
-  entries: BalanceEntry[]
-  entriesN1: BalanceEntry[]
-  detection: DetectionResult
-  parseResult: ParseResult
-  errors: string[]
-  warnings: string[]
-}
 
 export async function importBalanceFile(
   file: File,
@@ -419,7 +413,6 @@ export async function importBalanceFile(
     throw new Error('Le fichier est vide ou ne contient aucune donnée lisible.')
   }
 
-  // Use first sheet
   const sheet = sheets[0]
 
   // Detect columns
@@ -427,7 +420,7 @@ export async function importBalanceFile(
   if (!detection.mapping) {
     throw new Error(
       'Impossible de détecter les colonnes de comptes. ' +
-      'Vérifiez que le fichier contient les colonnes : Compte, Libellé, Débit, Crédit'
+      'Vérifiez que le fichier contient les colonnes : Compte, Description, Solde Débit, Solde Crédit'
     )
   }
 
@@ -450,7 +443,7 @@ export async function importBalanceFile(
 
   return {
     entries: parseResult.entries,
-    entriesN1: parseResult.entriesN1,
+    entriesN1: [], // deprecated
     detection,
     parseResult,
     errors,

@@ -49,7 +49,25 @@ function getItem<T>(key: string): T | null {
 }
 
 function setItem<T>(key: string, value: T): void {
-  localStorage.setItem(PREFIX + key, JSON.stringify(value))
+  try {
+    localStorage.setItem(PREFIX + key, JSON.stringify(value))
+  } catch (e) {
+    console.error(`[BalanceStorage] Failed to save key "${PREFIX + key}":`, e)
+    // On quota exceeded, try to free space by trimming the list
+    if (e instanceof DOMException && e.name === 'QuotaExceededError') {
+      try {
+        const list = getItem<any[]>('list') || []
+        if (list.length > 2) {
+          list.length = 2
+          localStorage.setItem(PREFIX + 'list', JSON.stringify(list))
+          // Retry
+          localStorage.setItem(PREFIX + key, JSON.stringify(value))
+          return
+        }
+      } catch { /* give up */ }
+    }
+    throw e
+  }
 }
 
 // ────────── Balance CRUD ──────────
@@ -178,6 +196,10 @@ export function saveImportedBalanceN1(
   }
 
   setItem('latest_n1', balance)
+
+  // Notify listeners that balance data changed
+  window.dispatchEvent(new CustomEvent('fiscasync:balance-imported'))
+
   return balance
 }
 
