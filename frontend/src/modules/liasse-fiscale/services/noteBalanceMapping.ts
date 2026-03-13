@@ -364,7 +364,7 @@ export const NOTE23_LINES: NoteLineDef[] = [
 
 export const NOTE24_LINES: NoteLineDef[] = [
   { label: 'Valeurs comptables des cessions HAO', prefixes: ['81'], side: 'debit' },
-  { label: 'Charges HAO', prefixes: ['83', '85'], side: 'debit' },
+  { label: 'Charges HAO', prefixes: ['83'], side: 'debit' },
   { label: 'Dotations HAO aux amortissements', prefixes: ['851', '852'], side: 'debit' },
   { label: 'Dotations HAO aux provisions', prefixes: ['853', '854'], side: 'debit' },
   { label: 'TOTAL', prefixes: [], isTotal: true, totalOf: [0, 1, 2, 3] },
@@ -372,7 +372,7 @@ export const NOTE24_LINES: NoteLineDef[] = [
 
 export const NOTE25_LINES: NoteLineDef[] = [
   { label: 'Produits des cessions d\'immobilisations', prefixes: ['82'], side: 'credit_abs' },
-  { label: 'Produits HAO', prefixes: ['84', '86', '88'], side: 'credit_abs' },
+  { label: 'Produits HAO', prefixes: ['84', '88'], side: 'credit_abs' },
   { label: 'Reprises HAO', prefixes: ['861', '862', '863', '864'], side: 'credit_abs' },
   { label: 'TOTAL', prefixes: [], isTotal: true, totalOf: [0, 1, 2] },
 ]

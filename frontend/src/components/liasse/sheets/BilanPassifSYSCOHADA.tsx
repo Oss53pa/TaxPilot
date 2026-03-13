@@ -57,7 +57,7 @@ const PASSIF_STRUCTURE = [
   { type: 'line', ref: 'CO', label: 'Primes liées aux titres participatifs', indent: 2 },
   { type: 'line', ref: 'CR', label: 'Avances conditionnées', indent: 2 },
   
-  { type: 'total', ref: 'CS', label: 'TOTAL AUTRES CAPITAUX PROPRES', formula: 'CM+CN+CO+CR' },
+  { type: 'total', ref: 'CS', label: 'TOTAL AUTRES CAPITAUX PROPRES', formula: 'CN+CO+CR' },
   
   { type: 'total', ref: 'CZ', label: 'TOTAL CAPITAUX PROPRES ET RESSOURCES ASSIMILÉES', formula: 'CL+CS' },
   

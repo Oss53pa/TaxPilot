@@ -135,29 +135,31 @@ const TableauFluxTresorerieSYSCOHADA: FC<TFTProps> = ({ onNoteClick }) => {
 
     const newData: TFTData = {
       // Section A — Opérationnel
-      FA: { montant: tft.FA || 0, montantN1: 0 },
-      FB: { montant: tft.FB || 0, montantN1: 0 },
-      FC: { montant: tft.FC || 0, montantN1: 0 },
-      FD: { montant: tft.FD || 0, montantN1: 0 },
+      FA: { montant: tft.FA || 0, montantN1: tft.FA_N1 || 0 },
+      FB: { montant: tft.FB || 0, montantN1: tft.FB_N1 || 0 },
+      FC: { montant: tft.FC || 0, montantN1: tft.FC_N1 || 0 },
+      FD: { montant: tft.FD || 0, montantN1: tft.FD_N1 || 0 },
       // FE calculé
-      FF: { montant: tft.FF || 0, montantN1: 0 },
+      FF: { montant: tft.FF || 0, montantN1: tft.FF_N1 || 0 },
       // FG calculé
 
       // Section B — Investissement
-      FH: { montant: tft.FH || 0, montantN1: 0 },
-      FI: { montant: tft.FI || 0, montantN1: 0 },
-      FJ: { montant: tft.FJ || 0, montantN1: 0 },
+      FH: { montant: tft.FH || 0, montantN1: tft.FH_N1 || 0 },
+      FI: { montant: tft.FI || 0, montantN1: tft.FI_N1 || 0 },
+      FJ: { montant: tft.FJ || 0, montantN1: tft.FJ_N1 || 0 },
       // FK calculé
 
       // Section C — Financement
-      FL: { montant: tft.FL || 0, montantN1: 0 },
-      FM: { montant: tft.FM || 0, montantN1: 0 },
-      FN: { montant: tft.FN || 0, montantN1: 0 },
-      FO: { montant: tft.FO || 0, montantN1: 0 },
+      FL: { montant: tft.FL || 0, montantN1: tft.FL_N1 || 0 },
+      FM: { montant: tft.FM || 0, montantN1: tft.FM_N1 || 0 },
+      FN: { montant: tft.FN || 0, montantN1: tft.FN_N1 || 0 },
+      FO: { montant: tft.FO || 0, montantN1: tft.FO_N1 || 0 },
       // FP calculé
 
       // Synthèse (FR = début exercice, FS = fin exercice)
-      FR: { montant: tft.FR || 0, montantN1: 0 },
+      FR: { montant: tft.FR || 0, montantN1: tft.FR_N1 || 0 },
+      // FS depuis la balance (trésorerie réelle) pour le contrôle FT
+      FS_BAL: { montant: tft.FS || 0, montantN1: tft.FS_N1 || 0 },
     }
 
     setHasN1Data(tft.hasN1 || false)
@@ -204,16 +206,19 @@ const TableauFluxTresorerieSYSCOHADA: FC<TFTProps> = ({ onNoteClick }) => {
       montantN1: totals.FG.montantN1 + totals.FK.montantN1 + totals.FP.montantN1,
     }
 
-    // FS = FR + FQ (Trésorerie fin)
+    // FS = FR + FQ (Trésorerie fin — calculée)
     totals.FS = {
       montant: get('FR') + totals.FQ.montant,
       montantN1: getN1('FR') + totals.FQ.montantN1,
     }
 
-    // FT = contrôle : FS - FR - FQ (doit être 0)
+    // FT = contrôle : FS(balance) - FR - FQ (doit être 0)
+    // On utilise FS du service (trésorerie réelle) si disponible, sinon FS calculé
+    const fsBalance = get('FS_BAL')
+    const fsBalN1 = getN1('FS_BAL')
     totals.FT = {
-      montant: totals.FS.montant - get('FR') - totals.FQ.montant,
-      montantN1: totals.FS.montantN1 - getN1('FR') - totals.FQ.montantN1,
+      montant: (fsBalance || totals.FS.montant) - get('FR') - totals.FQ.montant,
+      montantN1: (fsBalN1 || totals.FS.montantN1) - getN1('FR') - totals.FQ.montantN1,
     }
 
     return totals

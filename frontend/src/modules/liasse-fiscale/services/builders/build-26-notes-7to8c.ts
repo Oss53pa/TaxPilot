@@ -8,7 +8,7 @@
  *   - Sheet 30: NOTE 8C  (9 cols)  - Provisions pour engagements de retraite
  */
 
-import { SheetData, Row, emptyRow, rowAt, m, headerRows, exerciceYear, exerciceYearN1, variationPct } from './helpers'
+import { SheetData, Row, emptyRow, rowAt, m, headerRows, exerciceYear, exerciceYearN1, variationPct, getActifBrut, getAmortProv, getPassif } from './helpers'
 import type { EntrepriseData, ExerciceData, BalanceEntry } from './helpers'
 
 /** Push a data row with label merged A:D and values at specific columns */
@@ -35,8 +35,8 @@ function pushDataRow10(
 // ────────────────────────────────────────────────────────────────────────────
 
 function buildNote7(
-  _bal: BalanceEntry[],
-  _balN1: BalanceEntry[],
+  bal: BalanceEntry[],
+  balN1: BalanceEntry[],
   ent: EntrepriseData,
   ex: ExerciceData,
 ): SheetData {
@@ -79,31 +79,34 @@ function buildNote7(
   rows.push(rH)
   merges.push(m(7, 0, 7, 3)) // A8:D8
 
-  // ── Data rows (L9-L16) — all values default to 0 ──
-  const clientLines = [
-    'Clients (hors réserves de propriété et Groupe)',
-    'Clients effets à recevoir',
-    'Clients avec réserves de propriété',
-    'Clients et effets à recevoir Groupe',
-    'Créances sur cession d\'immobilisations',
-    'Clients effets escomptés et non échus',
-    'Créances litigieuses ou douteuses',
-    'Clients produits à recevoir',
+  // ── Data rows (L9-L16) — values from balance ──
+  // SYSCOHADA accounts: 411 Clients, 412 Effets à recevoir, 413 Réserves propriété,
+  // 414 Clients Groupe, 485 Créances cessions immo, 415 Effets escomptés,
+  // 416 Créances douteuses, 4181 Produits à recevoir
+  const clientLines: [string, string[]][] = [
+    ['Clients (hors réserves de propriété et Groupe)', ['4111', '4112', '4113', '4114', '4117', '4118']],
+    ['Clients effets à recevoir', ['412']],
+    ['Clients avec réserves de propriété', ['413']],
+    ['Clients et effets à recevoir Groupe', ['414']],
+    ['Créances sur cession d\'immobilisations', ['485']],
+    ['Clients effets escomptés et non échus', ['415']],
+    ['Créances litigieuses ou douteuses', ['416']],
+    ['Clients produits à recevoir', ['4181']],
   ]
 
   const valuesN: number[] = []
   const valuesN1: number[] = []
 
-  for (const label of clientLines) {
-    const vN = 0
-    const vN1 = 0
+  for (const [label, prefixes] of clientLines) {
+    const vN = getActifBrut(bal, prefixes)
+    const vN1 = getActifBrut(balN1, prefixes)
     valuesN.push(vN)
     valuesN1.push(vN1)
     const pct = variationPct(vN, vN1)
     pushDataRow10(rows, merges, label, [
-      [4, vN],
-      [5, vN1],
-      [6, pct],
+      [4, vN || 0],
+      [5, vN1 || 0],
+      [6, pct || 0],
       [7, 0],
       [8, 0],
       [9, 0],
@@ -114,21 +117,21 @@ function buildNote7(
   const totalBrutN = valuesN.reduce((a, b) => a + b, 0)
   const totalBrutN1 = valuesN1.reduce((a, b) => a + b, 0)
   pushDataRow10(rows, merges, 'TOTAL BRUT CLIENTS', [
-    [4, totalBrutN],
-    [5, totalBrutN1],
-    [6, variationPct(totalBrutN, totalBrutN1)],
+    [4, totalBrutN || 0],
+    [5, totalBrutN1 || 0],
+    [6, variationPct(totalBrutN, totalBrutN1) || 0],
     [7, 0],
     [8, 0],
     [9, 0],
   ])
 
-  // ── Row 17 (L18): Dépréciations des comptes clients ──
-  const depN = 0
-  const depN1 = 0
+  // ── Row 17 (L18): Dépréciations des comptes clients (491) ──
+  const depN = getAmortProv(bal, ['491'])
+  const depN1 = getAmortProv(balN1, ['491'])
   pushDataRow10(rows, merges, 'Dépréciations des comptes clients', [
-    [4, depN],
-    [5, depN1],
-    [6, variationPct(depN, depN1)],
+    [4, depN || 0],
+    [5, depN1 || 0],
+    [6, variationPct(depN, depN1) || 0],
     [7, 0],
     [8, 0],
     [9, 0],
@@ -138,32 +141,40 @@ function buildNote7(
   const totalNetN = totalBrutN - depN
   const totalNetN1 = totalBrutN1 - depN1
   pushDataRow10(rows, merges, 'TOTAL NET', [
-    [4, totalNetN],
-    [5, totalNetN1],
-    [6, variationPct(totalNetN, totalNetN1)],
+    [4, totalNetN || 0],
+    [5, totalNetN1 || 0],
+    [6, variationPct(totalNetN, totalNetN1) || 0],
     [7, 0],
     [8, 0],
     [9, 0],
   ])
 
-  // ── Row 19 (L20): Clients, avances reçues hors groupe ──
+  // ── Row 19 (L20): Clients, avances reçues hors groupe (4191) ──
+  const avRecN = getPassif(bal, ['4191'])
+  const avRecN1 = getPassif(balN1, ['4191'])
   pushDataRow10(rows, merges, 'Clients, avances reçues hors groupe', [
-    [4, 0], [5, 0], [6, 0], [7, 0], [8, 0], [9, 0],
+    [4, avRecN || 0], [5, avRecN1 || 0], [6, variationPct(avRecN, avRecN1) || 0], [7, 0], [8, 0], [9, 0],
   ])
 
-  // ── Row 20 (L21): Clients, avances reçues groupe ──
+  // ── Row 20 (L21): Clients, avances reçues groupe (4194) ──
+  const avGrpN = getPassif(bal, ['4194'])
+  const avGrpN1 = getPassif(balN1, ['4194'])
   pushDataRow10(rows, merges, 'Clients, avances reçues groupe', [
-    [4, 0], [5, 0], [6, 0], [7, 0], [8, 0], [9, 0],
+    [4, avGrpN || 0], [5, avGrpN1 || 0], [6, variationPct(avGrpN, avGrpN1) || 0], [7, 0], [8, 0], [9, 0],
   ])
 
-  // ── Row 21 (L22): Autres clients créditeurs ──
+  // ── Row 21 (L22): Autres clients créditeurs (4198) ──
+  const autCliN = getPassif(bal, ['4198'])
+  const autCliN1 = getPassif(balN1, ['4198'])
   pushDataRow10(rows, merges, 'Autres clients créditeurs', [
-    [4, 0], [5, 0], [6, 0], [7, 0], [8, 0], [9, 0],
+    [4, autCliN || 0], [5, autCliN1 || 0], [6, variationPct(autCliN, autCliN1) || 0], [7, 0], [8, 0], [9, 0],
   ])
 
   // ── Row 22 (L23): TOTAL CLIENTS CREDITEURS ──
+  const totalCredN = avRecN + avGrpN + autCliN
+  const totalCredN1 = avRecN1 + avGrpN1 + autCliN1
   pushDataRow10(rows, merges, 'TOTAL CLIENTS CREDITEURS', [
-    [4, 0], [5, 0], [6, 0], [7, 0], [8, 0], [9, 0],
+    [4, totalCredN || 0], [5, totalCredN1 || 0], [6, variationPct(totalCredN, totalCredN1) || 0], [7, 0], [8, 0], [9, 0],
   ])
 
   // ── Commentaire ──
@@ -185,8 +196,8 @@ function buildNote7(
 // ────────────────────────────────────────────────────────────────────────────
 
 function buildNote8(
-  _bal: BalanceEntry[],
-  _balN1: BalanceEntry[],
+  bal: BalanceEntry[],
+  balN1: BalanceEntry[],
   ent: EntrepriseData,
   ex: ExerciceData,
 ): SheetData {
@@ -229,33 +240,36 @@ function buildNote8(
   rows.push(rH)
   merges.push(m(7, 0, 7, 3)) // A8:D8
 
-  // ── Data rows (L9-L18) — all values default to 0 ──
-  const creanceLines = [
-    'Personnel',
-    'Organismes sociaux',
-    'Etat et Collectivités publiques',
-    'Organismes internationaux',
-    'Apporteurs, associés et groupe',
-    'Compte transitoire ajustement spécial lié à la révision du\nSYSCOHADA (Voir Note',
-    'Autres débiteurs divers',
-    'Comptes permanents non bloqués des établissements et des succursales',
-    'Comptes de liaison charges et produits',
-    'Comptes de liaison des sociétés en participation',
+  // ── Data rows (L9-L18) — values from balance ──
+  // SYSCOHADA: 42x Personnel, 43x Org sociaux, 44x Etat, 45x Org internationaux,
+  // 46x Apporteurs/associés/groupe, 47x Comptes transitoires, 471-472 Débiteurs divers,
+  // 181/182 Comptes liaison
+  const creanceLines: [string, string[]][] = [
+    ['Personnel', ['421', '422', '423', '424', '425', '426', '427', '428']],
+    ['Organismes sociaux', ['431', '432', '433']],
+    ['Etat et Collectivités publiques', ['441', '442', '443', '444', '445', '446', '447', '448', '449']],
+    ['Organismes internationaux', ['451', '452']],
+    ['Apporteurs, associés et groupe', ['461', '462', '463', '464', '465', '466', '467']],
+    ['Compte transitoire ajustement spécial lié à la révision du\nSYSCOHADA (Voir Note', ['475']],
+    ['Autres débiteurs divers', ['471', '472']],
+    ['Comptes permanents non bloqués des établissements et des succursales', ['181', '182']],
+    ['Comptes de liaison charges et produits', ['186', '187']],
+    ['Comptes de liaison des sociétés en participation', ['188']],
   ]
 
   const valuesN: number[] = []
   const valuesN1: number[] = []
 
-  for (const label of creanceLines) {
-    const vN = 0
-    const vN1 = 0
+  for (const [label, prefixes] of creanceLines) {
+    const vN = getActifBrut(bal, prefixes)
+    const vN1 = getActifBrut(balN1, prefixes)
     valuesN.push(vN)
     valuesN1.push(vN1)
     const pct = variationPct(vN, vN1)
     pushDataRow10(rows, merges, label, [
-      [4, vN],
-      [5, vN1],
-      [6, pct],
+      [4, vN || 0],
+      [5, vN1 || 0],
+      [6, pct || 0],
       [7, 0],
       [8, 0],
       [9, 0],
@@ -266,21 +280,21 @@ function buildNote8(
   const totalBrutN = valuesN.reduce((a, b) => a + b, 0)
   const totalBrutN1 = valuesN1.reduce((a, b) => a + b, 0)
   pushDataRow10(rows, merges, 'TOTAL BRUT AUTRES CREANCES', [
-    [4, totalBrutN],
-    [5, totalBrutN1],
-    [6, variationPct(totalBrutN, totalBrutN1)],
+    [4, totalBrutN || 0],
+    [5, totalBrutN1 || 0],
+    [6, variationPct(totalBrutN, totalBrutN1) || 0],
     [7, 0],
     [8, 0],
     [9, 0],
   ])
 
-  // ── Dépréciations des autres créances ──
-  const depN = 0
-  const depN1 = 0
+  // ── Dépréciations des autres créances (492, 493, 494, 495, 496, 497, 498) ──
+  const depN = getAmortProv(bal, ['492', '493', '494', '495', '496', '497', '498'])
+  const depN1 = getAmortProv(balN1, ['492', '493', '494', '495', '496', '497', '498'])
   pushDataRow10(rows, merges, 'Dépréciations des autres créances', [
-    [4, depN],
-    [5, depN1],
-    [6, variationPct(depN, depN1)],
+    [4, depN || 0],
+    [5, depN1 || 0],
+    [6, variationPct(depN, depN1) || 0],
     [7, 0],
     [8, 0],
     [9, 0],
@@ -290,9 +304,9 @@ function buildNote8(
   const totalNetN = totalBrutN - depN
   const totalNetN1 = totalBrutN1 - depN1
   pushDataRow10(rows, merges, 'TOTAL NET', [
-    [4, totalNetN],
-    [5, totalNetN1],
-    [6, variationPct(totalNetN, totalNetN1)],
+    [4, totalNetN || 0],
+    [5, totalNetN1 || 0],
+    [6, variationPct(totalNetN, totalNetN1) || 0],
     [7, 0],
     [8, 0],
     [9, 0],

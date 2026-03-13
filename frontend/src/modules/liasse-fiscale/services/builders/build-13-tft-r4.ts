@@ -107,17 +107,17 @@ function buildTFT(
   const ZA_n1 = 0 // would need balN-2 which we don't have
 
   // FA: Capacité d'Autofinancement Globale (CAFG)
-  // CAFG = Résultat Net + Dotations(681,691,697) - Reprises(791,797,798,799) + VCN cessions(81) - Prix cession(82)
+  // CAFG = Résultat Net + Dotations(681,687,691,697) - Reprises(787,791,797,798,799) + VCN cessions(81) - Prix cession(82)
   const resultatNet_n = -getBalanceSolde(bal, ['13'])
-  const dotations_n = getCharges(bal, ['681', '691', '697'])
-  const reprises_n = getProduits(bal, ['791', '797', '798', '799'])
+  const dotations_n = getCharges(bal, ['681', '687', '691', '697'])
+  const reprises_n = getProduits(bal, ['791', '797', '798', '799', '787'])
   const vcnCessions_n = getCharges(bal, ['81'])
   const prixCessions_n = getProduits(bal, ['82'])
   const FA_n = resultatNet_n + dotations_n - reprises_n + vcnCessions_n - prixCessions_n
 
   const resultatNet_n1 = -getBalanceSolde(balN1, ['13'])
-  const dotations_n1 = getCharges(balN1, ['681', '691', '697'])
-  const reprises_n1 = getProduits(balN1, ['791', '797', '798', '799'])
+  const dotations_n1 = getCharges(balN1, ['681', '687', '691', '697'])
+  const reprises_n1 = getProduits(balN1, ['791', '797', '798', '799', '787'])
   const vcnCessions_n1 = getCharges(balN1, ['81'])
   const prixCessions_n1 = getProduits(balN1, ['82'])
   const FA_n1 = resultatNet_n1 + dotations_n1 - reprises_n1 + vcnCessions_n1 - prixCessions_n1

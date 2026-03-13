@@ -95,7 +95,10 @@ function compChargesPageHeader(
 // Helper: Generate detail rows for COMP-CHARGES
 // ════════════════════════════════════════════════════════════════════════════
 
-/** Add a detail row: account in col A, label in col B, computed values from balance */
+/** Add a detail row: account in col A, label in col B, computed values from balance.
+ *  Uses getBalanceSolde (signed) to correctly handle contra-expense accounts
+ *  (RRR: 6019,6029,6049,6059,6089,619) and stock variation accounts (6031-6033)
+ *  which carry credit balances that getCharges would ignore. */
 function addDetailRow(
   rows: Row[],
   account: string,
@@ -105,8 +108,8 @@ function addDetailRow(
   accum: { n: number; n1: number },
 ): void {
   const C = 10
-  const valN = getCharges(bal, [account])
-  const valN1 = getCharges(balN1, [account])
+  const valN = getBalanceSolde(bal, [account])
+  const valN1 = getBalanceSolde(balN1, [account])
   accum.n += valN
   accum.n1 += valN1
   const variation = valN - valN1

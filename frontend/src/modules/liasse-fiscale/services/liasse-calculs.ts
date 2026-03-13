@@ -59,7 +59,7 @@ export const getActifBrut = (balance: BalanceEntry[], prefixes: readonly string[
   return total
 }
 
-/** Amort/provisions = soldes crediteurs (abs) */
+/** Amort/provisions = soldes crediteurs uniquement (abs) */
 export const getAmortProv = (balance: BalanceEntry[], prefixes: readonly string[]): number => {
   let total = 0
   for (const entry of balance) {
@@ -67,7 +67,8 @@ export const getAmortProv = (balance: BalanceEntry[], prefixes: readonly string[
     for (const prefix of prefixes) {
       if (compte === prefix || compte.startsWith(prefix)) {
         const solde = entry.solde_debit - entry.solde_credit
-        total += Math.abs(solde)
+        // Seuls les soldes créditeurs (négatifs) comptent comme amort/provisions
+        if (solde < 0) total += Math.abs(solde)
         break
       }
     }

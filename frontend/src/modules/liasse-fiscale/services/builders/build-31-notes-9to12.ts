@@ -7,7 +7,7 @@
  *   - Sheet 34: NOTE 12 (9 cols)  - Ecarts de conversion et transferts de charges
  */
 
-import { SheetData, Row, emptyRow, rowAt, m, headerRows, exerciceYear, exerciceYearN1, variationPct } from './helpers'
+import { SheetData, Row, emptyRow, rowAt, m, headerRows, exerciceYear, exerciceYearN1, variationPct, getActifBrut, getAmortProv } from './helpers'
 import type { EntrepriseData, ExerciceData, BalanceEntry } from './helpers'
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -42,8 +42,8 @@ function pushDataRow(
 // ────────────────────────────────────────────────────────────────────────────
 
 function buildNote9(
-  _bal: BalanceEntry[],
-  _balN1: BalanceEntry[],
+  bal: BalanceEntry[],
+  balN1: BalanceEntry[],
   ent: EntrepriseData,
   ex: ExerciceData,
 ): SheetData {
@@ -90,26 +90,28 @@ function buildNote9(
   merges.push(m(7, 4, 7, 5)) // E8:F8
   merges.push(m(7, 6, 7, 7)) // G8:H8
 
-  // ── Data rows (L9-L15): detail lines ──
-  const labels = [
-    'Titres de trésor et bons de caisse à court terme',
-    'Actions',
-    'Obligations',
-    'Bons de souscription',
-    'Titres négociables hors régions',
-    'Intérêts courus',
-    'Autres valeurs assimilées',
+  // ── Data rows (L9-L15): detail lines from balance ──
+  // SYSCOHADA: 501 Bons du Trésor, 502 Actions, 503 Obligations, 504 Bons souscription,
+  // 505 Titres hors région, 506 Intérêts courus, 508 Autres
+  const lines: [string, string[]][] = [
+    ['Titres de trésor et bons de caisse à court terme', ['501']],
+    ['Actions', ['502']],
+    ['Obligations', ['503']],
+    ['Bons de souscription', ['504']],
+    ['Titres négociables hors régions', ['505']],
+    ['Intérêts courus', ['506']],
+    ['Autres valeurs assimilées', ['508']],
   ]
 
   const detailValsN: number[] = []
   const detailValsN1: number[] = []
 
-  for (const label of labels) {
-    const valN = 0
-    const valN1Inner = 0
+  for (const [label, prefixes] of lines) {
+    const valN = getActifBrut(bal, prefixes)
+    const valN1Inner = getActifBrut(balN1, prefixes)
     detailValsN.push(valN)
     detailValsN1.push(valN1Inner)
-    pushDataRow(rows, merges, C, label, valN, valN1Inner, variationPct(valN, valN1Inner))
+    pushDataRow(rows, merges, C, label, valN || 0, valN1Inner || 0, variationPct(valN, valN1Inner))
   }
 
   // ── L16: TOTAL BRUT TITRES ──
@@ -117,9 +119,9 @@ function buildNote9(
   const totalBrutN1 = detailValsN1.reduce((a, b) => a + b, 0)
   pushDataRow(rows, merges, C, 'TOTAL BRUT TITRES', totalBrutN, totalBrutN1, variationPct(totalBrutN, totalBrutN1))
 
-  // ── L17: Dépréciations des titres ──
-  const depN = 0
-  const depN1 = 0
+  // ── L17: Dépréciations des titres (590) ──
+  const depN = getAmortProv(bal, ['590'])
+  const depN1 = getAmortProv(balN1, ['590'])
   pushDataRow(rows, merges, C, 'Dépréciations des titres', depN, depN1, variationPct(depN, depN1))
 
   // ── L18: TOTAL NET ──
@@ -130,7 +132,7 @@ function buildNote9(
   // ── Commentaires ──
   rows.push(emptyRow(C))
   const cm = emptyRow(C)
-  cm[0] = 'Commentaire : Faire un commentaire.'
+  cm[0] = 'Commentaire :'
   rows.push(cm)
   merges.push(m(rows.length - 1, 0, rows.length - 1, 8))
 
@@ -146,8 +148,8 @@ function buildNote9(
 // ────────────────────────────────────────────────────────────────────────────
 
 function buildNote10(
-  _bal: BalanceEntry[],
-  _balN1: BalanceEntry[],
+  bal: BalanceEntry[],
+  balN1: BalanceEntry[],
   ent: EntrepriseData,
   ex: ExerciceData,
 ): SheetData {
@@ -194,25 +196,28 @@ function buildNote10(
   merges.push(m(7, 4, 7, 5)) // E8:F8
   merges.push(m(7, 6, 7, 7)) // G8:H8
 
-  // ── Data rows (L9-L14): detail lines ──
-  const labels = [
-    'Effets à encaisser',
-    'Effets à l\'encaissement',
-    'Chèques à encaisser',
-    'Chèques à l\'encaissement',
-    'Cartes de crédit à encaisser',
-    'Autres valeurs à encaisser',
+  // ── Data rows (L9-L14): detail lines from balance ──
+  // SYSCOHADA: 511 Effets à encaisser, 512 Effets à l'encaissement,
+  // 513 Chèques à encaisser, 514 Chèques à l'encaissement,
+  // 515 Cartes crédit, 518 Autres
+  const lines: [string, string[]][] = [
+    ['Effets à encaisser', ['511']],
+    ['Effets à l\'encaissement', ['512']],
+    ['Chèques à encaisser', ['513']],
+    ['Chèques à l\'encaissement', ['514']],
+    ['Cartes de crédit à encaisser', ['515']],
+    ['Autres valeurs à encaisser', ['516', '518']],
   ]
 
   const detailValsN: number[] = []
   const detailValsN1: number[] = []
 
-  for (const label of labels) {
-    const valN = 0
-    const valN1Inner = 0
+  for (const [label, prefixes] of lines) {
+    const valN = getActifBrut(bal, prefixes)
+    const valN1Inner = getActifBrut(balN1, prefixes)
     detailValsN.push(valN)
     detailValsN1.push(valN1Inner)
-    pushDataRow(rows, merges, C, label, valN, valN1Inner, variationPct(valN, valN1Inner))
+    pushDataRow(rows, merges, C, label, valN || 0, valN1Inner || 0, variationPct(valN, valN1Inner))
   }
 
   // ── L15: TOTAL BRUT VALEURS A ENCAISSER ──
@@ -220,9 +225,9 @@ function buildNote10(
   const totalBrutN1 = detailValsN1.reduce((a, b) => a + b, 0)
   pushDataRow(rows, merges, C, 'TOTAL BRUT VALEURS A ENCAISSER', totalBrutN, totalBrutN1, variationPct(totalBrutN, totalBrutN1))
 
-  // ── L16: Dépréciations des valeurs à encaisser ──
-  const depN = 0
-  const depN1 = 0
+  // ── L16: Dépréciations des valeurs à encaisser (591) ──
+  const depN = getAmortProv(bal, ['591'])
+  const depN1 = getAmortProv(balN1, ['591'])
   pushDataRow(rows, merges, C, 'Dépréciations des valeurs à encaisser', depN, depN1, variationPct(depN, depN1))
 
   // ── L17: TOTAL NET ──
@@ -233,7 +238,7 @@ function buildNote10(
   // ── Commentaires ──
   rows.push(emptyRow(C))
   const cm = emptyRow(C)
-  cm[0] = 'Commentaire : Faire un commentaire.'
+  cm[0] = 'Commentaire :'
   rows.push(cm)
   merges.push(m(rows.length - 1, 0, rows.length - 1, 8))
 
@@ -249,8 +254,8 @@ function buildNote10(
 // ────────────────────────────────────────────────────────────────────────────
 
 function buildNote11(
-  _bal: BalanceEntry[],
-  _balN1: BalanceEntry[],
+  bal: BalanceEntry[],
+  balN1: BalanceEntry[],
   ent: EntrepriseData,
   ex: ExerciceData,
 ): SheetData {
@@ -293,31 +298,35 @@ function buildNote11(
   merges.push(m(7, 4, 7, 5)) // E8:F8
   merges.push(m(7, 6, 7, 7)) // G8:H8
 
-  // ── Data rows (L9-L20): detail lines ──
-  const labels = [
-    'Banques locales',
-    'Banques autres états région',
-    'Banques, dépôt à terme',
-    'Autres Banques',
-    'Banques intérêts courus',
-    'Chèques postaux',
-    'Autres établissement financiers',
-    'Etablissement financiers intérêts courus',
-    'Instruments de trésorerie',
-    'Instruments de monnaie électronique',
-    'Caisse',
-    'Régies d\'avances et virements accréditifs',
+  // ── Data rows (L9-L20): detail lines from balance ──
+  // SYSCOHADA: 521 Banques locales, 522 Banques autres états, 523 Dépôts à terme,
+  // 524 Autres banques, 525 Intérêts courus, 531 Chèques postaux,
+  // 532 Trésors, 54x Autres établ. fin., 541 Intérêts courus,
+  // 55x Instruments trésorerie, 571 Caisse, 581-585 Régies/virements
+  const lines: [string, string[]][] = [
+    ['Banques locales', ['5211']],
+    ['Banques autres états région', ['5212']],
+    ['Banques, dépôt à terme', ['523']],
+    ['Autres Banques', ['5213', '5214', '5215', '5216', '5217', '5218']],
+    ['Banques intérêts courus', ['525']],
+    ['Chèques postaux', ['531']],
+    ['Autres établissement financiers', ['532', '533', '534', '537', '538']],
+    ['Etablissement financiers intérêts courus', ['535']],
+    ['Instruments de trésorerie', ['551', '552', '553', '554', '555', '558']],
+    ['Instruments de monnaie électronique', ['556', '557']],
+    ['Caisse', ['571', '572', '573', '574', '575', '576', '577', '578']],
+    ['Régies d\'avances et virements accréditifs', ['581', '582', '585', '586', '588']],
   ]
 
   const detailValsN: number[] = []
   const detailValsN1: number[] = []
 
-  for (const label of labels) {
-    const valN = 0
-    const valN1Inner = 0
+  for (const [label, prefixes] of lines) {
+    const valN = getActifBrut(bal, prefixes)
+    const valN1Inner = getActifBrut(balN1, prefixes)
     detailValsN.push(valN)
     detailValsN1.push(valN1Inner)
-    pushDataRow(rows, merges, C, label, valN, valN1Inner, variationPct(valN, valN1Inner))
+    pushDataRow(rows, merges, C, label, valN || 0, valN1Inner || 0, variationPct(valN, valN1Inner))
   }
 
   // ── L21: TOTAL BRUT DISPONIBILITES ──
@@ -325,9 +334,9 @@ function buildNote11(
   const totalBrutN1 = detailValsN1.reduce((a, b) => a + b, 0)
   pushDataRow(rows, merges, C, 'TOTAL BRUT DISPONIBILITES', totalBrutN, totalBrutN1, variationPct(totalBrutN, totalBrutN1))
 
-  // ── L22: Dépréciations ──
-  const depN = 0
-  const depN1 = 0
+  // ── L22: Dépréciations (592, 593, 594, 595) ──
+  const depN = getAmortProv(bal, ['592', '593', '594', '595'])
+  const depN1 = getAmortProv(balN1, ['592', '593', '594', '595'])
   pushDataRow(rows, merges, C, 'Dépréciations', depN, depN1, variationPct(depN, depN1))
 
   // ── L23: TOTAL NET ──
@@ -338,7 +347,7 @@ function buildNote11(
   // ── Commentaires ──
   rows.push(emptyRow(C))
   const cm = emptyRow(C)
-  cm[0] = 'Commentaire : Faire un commentaire.'
+  cm[0] = 'Commentaire :'
   rows.push(cm)
   merges.push(m(rows.length - 1, 0, rows.length - 1, 8))
 

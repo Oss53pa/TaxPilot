@@ -144,7 +144,7 @@ export const SYSCOHADA_MAPPING = {
     RC: { comptes: ['602'] },
     RD: { comptes: ['6032'] },
     RE: { comptes: ['604', '605', '608'] },
-    RF: { comptes: ['6033'] },
+    RF: { comptes: ['6033', '6038'] },
     RG: { comptes: ['61'] },
     RH: { comptes: ['62', '63'] },
     RI: { comptes: ['64'] },
@@ -153,36 +153,33 @@ export const SYSCOHADA_MAPPING = {
     RL: { comptes: ['681'] },
     RM: { comptes: ['691'] },
 
-    // Activité financière
-    RN: { comptes: ['671', '672', '673', '674', '675'] },
-    RO: { comptes: ['676'] },
-    RP: { comptes: ['679', '697'] },
+    // Activité financière (67 = frais financiers, 697 = dotations provisions financières)
+    RN: { comptes: ['67'] },
 
     // HAO
     RQ: { comptes: ['81'] },
     RR: { comptes: ['83', '85'] },
 
-    // Impôt
+    // Participation et Impôt
     RS: { comptes: ['89'] }
   },
 
   // ──────────────── PRODUITS ────────────────
   produits: {
     TA: { comptes: ['701'] },
-    TB: { comptes: ['702', '703', '704', '705'] },
-    TC: { comptes: ['706'] },
+    TB: { comptes: ['702', '703'] },
+    TC: { comptes: ['704', '705', '706'] },
     TD: { comptes: ['73'] },
     TE: { comptes: ['72'] },
-    TF: { comptes: ['707'] },
+    TF: { comptes: ['707', '708'] },
     TG: { comptes: ['71'] },
     TH: { comptes: ['75'] },
     TI: { comptes: ['791', '798', '799'] },
 
     // Activité financière
-    TJ: { comptes: ['771', '772', '773', '774', '775'] },
-    TK: { comptes: ['776'] },
-    TL: { comptes: ['787', '797'] },
-    TM: { comptes: ['781', '782'] },
+    TJ: { comptes: ['77'] },
+    TK: { comptes: ['797'] },
+    TL: { comptes: ['787'] },
 
     // HAO
     TN: { comptes: ['82'] },
@@ -301,8 +298,9 @@ export class LiasseDataService {
     amortComptes.forEach(prefix => {
       this.mappingCache.forEach((value, key) => {
         if (key === prefix || key.startsWith(prefix)) {
-          // Amort: solde normalement créditeur, donc valeur < 0 dans le cache
-          total += Math.abs(value)
+          // Amort: solde normalement créditeur (value < 0), on prend |value|
+          // Un solde débiteur sur un compte d'amort est anormal → ignoré
+          if (value < 0) total += Math.abs(value)
         }
       })
     })
@@ -424,7 +422,7 @@ export class LiasseDataService {
     let total = 0
     amortComptes.forEach(prefix => {
       this.mappingCacheN1.forEach((value, key) => {
-        if (key === prefix || key.startsWith(prefix)) total += Math.abs(value)
+        if ((key === prefix || key.startsWith(prefix)) && value < 0) total += Math.abs(value)
       })
     })
     return total
@@ -722,7 +720,7 @@ export class LiasseDataService {
         valeurA: resultatCdR,
         labelA: 'Resultat CdR (XI)',
         valeurB: resultatBilan,
-        labelB: 'Resultat Bilan (CJ)',
+        labelB: 'Resultat Bilan (CH)',
         ecart: Math.abs(resultatCdR - resultatBilan),
         ok: Math.abs(resultatCdR - resultatBilan) <= 1,
       },

@@ -39,7 +39,6 @@ import {
   Refresh,
   Settings,
   SwapHoriz,
-  Receipt,
 } from '@mui/icons-material'
 import { useNavigate } from 'react-router-dom'
 import { fiscasyncPalette } from '@/theme/fiscasyncTheme'
@@ -48,6 +47,7 @@ import { useBalanceData } from '@/hooks/useBalanceData'
 import { getWorkflowState } from '@/services/workflowStateService'
 import type { WorkflowState } from '@/services/workflowStateService'
 import { getFilingStats, getAllReceipts } from '@/services/dgiFilingStorageService'
+import { getBankFeedStats } from '@/services/bankFeedStorageService'
 
 // ─── Palette tokens (derived from central theme) ─────────────────────
 const C = {

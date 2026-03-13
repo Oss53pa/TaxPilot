@@ -20,7 +20,7 @@ import {
   Alert,
   useTheme,
 } from '@mui/material'
-import { Inventory, Warning, CheckCircle } from '@mui/icons-material'
+import { Inventory, Warning } from '@mui/icons-material'
 import { useBalanceData } from '@/hooks/useBalanceData'
 import CommentairesSection from '../shared/CommentairesSection'
 import TableActions from '../shared/TableActions'
@@ -30,10 +30,23 @@ const Note5SYSCOHADA: React.FC = () => {
   const bal = useBalanceData()
 
   // Stocks calculés depuis la balance importée
+  // Stock initial = solde débiteur N-1, Stock final = solde débiteur N
+  // Variation = Stock final - Stock initial (>0 = entrées nettes, <0 = sorties nettes)
   const stockRow = (nature: string, stockPrefixes: string[], provPrefixes: string[], methode: string) => {
     const brut = bal.d(stockPrefixes)
+    const brutN1 = bal.dN1(stockPrefixes)
     const prov = bal.c(provPrefixes)
-    return { nature, stockInitial: 0, entrees: 0, sorties: 0, stockFinalBrut: brut, provisions: prov, stockFinalNet: brut - prov, methodeEvaluation: methode }
+    const variation = brut - brutN1
+    return {
+      nature,
+      stockInitial: brutN1,
+      entrees: variation > 0 ? variation : 0,
+      sorties: variation < 0 ? Math.abs(variation) : 0,
+      stockFinalBrut: brut,
+      provisions: prov,
+      stockFinalNet: brut - prov,
+      methodeEvaluation: methode,
+    }
   }
 
   const donneesStocks = [
@@ -81,8 +94,7 @@ const Note5SYSCOHADA: React.FC = () => {
       {/* Alerte méthode d'évaluation */}
       <Alert severity="info" sx={{ mb: 3 }} icon={<Inventory />}>
         <Typography variant="body2">
-          Les stocks sont évalués selon la méthode du <strong>Coût Moyen Pondéré (CMP)</strong>. 
-          L'inventaire physique a été effectué au 31 décembre 2024 sous contrôle des commissaires aux comptes.
+          Les stocks sont evalues selon la methode du <strong>Cout Moyen Pondere (CMP)</strong>.
         </Typography>
       </Alert>
 
@@ -189,42 +201,24 @@ const Note5SYSCOHADA: React.FC = () => {
                   </Box>
                 )
               })}
-              <Box sx={{ mt: 2, p: 2, backgroundColor: 'success.light', borderRadius: 1 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                  <CheckCircle color="success" fontSize="small" sx={{ mr: 1 }} />
-                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                    Contrôle qualité
+              {total.stockFinalBrut > 0 && total.stockInitial > 0 && (
+                <Box sx={{ mt: 2, p: 2, backgroundColor: 'info.light', borderRadius: 1 }}>
+                  <Typography variant="caption">
+                    Variation globale : {formatMontant(total.stockFinalBrut - total.stockInitial)} FCFA
+                    ({total.stockInitial > 0 ? (((total.stockFinalBrut - total.stockInitial) / total.stockInitial) * 100).toFixed(1) : '0'}%)
                   </Typography>
                 </Box>
-                <Typography variant="caption">
-                  Inventaire physique réalisé au 31/12/2024 avec écart inférieur à 1%
-                </Typography>
-              </Box>
+              )}
             </CardContent>
           </Card>
         </Grid>
       </Grid>
 
       {/* Section Commentaires et Observations */}
-      <CommentairesSection 
+      <CommentairesSection
         titre="Commentaires et Observations - Note 5"
-        noteId="note5" 
-        commentairesInitiaux={[
-          {
-            id: '1',
-            auteur: 'Expert-comptable',
-            date: new Date().toLocaleDateString('fr-FR'),
-            contenu: 'L\'inventaire physique des stocks a été réalisé au 31 décembre 2024.\n\nObservations :\n- Écart d\'inventaire inférieur à 1% sur tous les postes\n- Rotation des stocks satisfaisante (4,2 fois/an en moyenne)\n- Provision pour dépréciation de 2 500 000 FCFA sur stocks obsolètes\n- Méthode FIFO appliquée de manière cohérente',
-            type: 'observation'
-          },
-          {
-            id: '2',
-            auteur: 'Contrôleur',
-            date: new Date().toLocaleDateString('fr-FR'),
-            contenu: 'Point d\'attention sur la gestion des stocks à faible rotation (matières premières).\n\nRecommandation : optimiser les commandes pour réduire les coûts de stockage.',
-            type: 'correction'
-          }
-        ]}
+        noteId="note5"
+        commentairesInitiaux={[]}
       />
     </Box>
   )

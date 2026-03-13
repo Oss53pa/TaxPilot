@@ -69,13 +69,13 @@ const PASSIF_LINES_CIRC: PassifLine[] = [
   { ref: 'DI', label: 'Clients, avances reçues', note: 7, prefixes: ['419'] },
   { ref: 'DJ', label: 'Fournisseurs d\'exploitation', note: 17, prefixes: ['40'] },
   { ref: 'DK', label: 'Dettes fiscales et sociales', note: 18, prefixes: ['42','43','44'] },
-  { ref: 'DM', label: 'Autres dettes', note: 19, prefixes: ['45','46','47','48'] },
+  { ref: 'DM', label: 'Autres dettes', note: 19, prefixes: ['45','46','47','483','487'] },
   { ref: 'DN', label: 'Provisions pour risques à court terme', note: 19, prefixes: ['499','599'] },
 ]
 
 const PASSIF_LINES_TRESO: PassifLine[] = [
   { ref: 'DQ', label: 'Banques, crédits d\'escompte', note: 20, prefixes: ['564','565'] },
-  { ref: 'DR', label: 'Banques, établissements financiers et crédits de trésorerie', note: 20, prefixes: ['56'] },
+  { ref: 'DR', label: 'Banques, établissements financiers et crédits de trésorerie', note: 20, prefixes: ['560','561','562','563','566','567','568','569'] },
 ]
 
 // ────────────────────────────────────────────────────────────────────────────

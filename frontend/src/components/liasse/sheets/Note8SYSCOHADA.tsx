@@ -2,7 +2,7 @@
  * Note 8 - Stocks
  */
 
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import {
   Box,
   Paper,
@@ -116,78 +116,28 @@ const Note8SYSCOHADA: React.FC = () => {
   const [comment, setComment] = useState('')
   const [hasChanges, setHasChanges] = useState(false)
 
-  useEffect(() => {
-    loadInitialData()
-  }, [])
-
-  const loadInitialData = () => {
-    const initialData: Stock[] = [
-      {
-        id: '1',
-        categorie: 'matieres_premieres',
-        designation: 'Farine de blé',
-        quantite: 5000,
-        unite: 'kg',
-        coutUnitaire: 450,
-        valeurComptable: 2250000,
-        valeurMarche: 2100000,
-        provision: 150000,
-        methodeEvaluation: 'Coût moyen pondéré',
-        dateInventaire: '2024-12-31',
-        observations: ''
-      },
-      {
-        id: '2',
-        categorie: 'marchandises',
-        designation: 'Produits électroniques',
-        quantite: 150,
-        unite: 'pièces',
-        coutUnitaire: 85000,
-        valeurComptable: 12750000,
-        valeurMarche: 13200000,
-        provision: 0,
-        methodeEvaluation: 'FIFO (Premier entré, premier sorti)',
-        dateInventaire: '2024-12-31',
-        observations: ''
-      },
-      {
-        id: '3',
-        categorie: 'produits_finis',
-        designation: 'Pain de mie',
-        quantite: 2000,
-        unite: 'unités',
-        coutUnitaire: 650,
-        valeurComptable: 1300000,
-        valeurMarche: 1400000,
-        provision: 0,
-        methodeEvaluation: 'Coût moyen pondéré',
-        dateInventaire: '2024-12-31',
-        observations: ''
-      }
-    ]
-    
-    setStocks(initialData)
-  }
+  // Note 8 is a manual data entry sheet for stock detail by article.
+  // Users add stock lines manually — no demo data pre-loaded.
 
   const handleStockChange = (id: string, field: keyof Stock, value: any) => {
     setStocks(prev => prev.map(stock => {
       if (stock.id === id) {
         const updated = { ...stock, [field]: value }
-        
+
         // Recalculer la valeur comptable
         if (field === 'quantite' || field === 'coutUnitaire') {
           updated.valeurComptable = updated.quantite * updated.coutUnitaire
         }
-        
-        // Recalculer la provision si nécessaire
-        if (field === 'valeurComptable' || field === 'valeurMarche') {
-          if (updated.valeurMarche < updated.valeurComptable) {
+
+        // Recalculer la provision apres tout changement affectant valeurComptable ou valeurMarche
+        if (field === 'quantite' || field === 'coutUnitaire' || field === 'valeurComptable' || field === 'valeurMarche') {
+          if (updated.valeurMarche > 0 && updated.valeurMarche < updated.valeurComptable) {
             updated.provision = updated.valeurComptable - updated.valeurMarche
           } else {
             updated.provision = 0
           }
         }
-        
+
         return updated
       }
       return stock

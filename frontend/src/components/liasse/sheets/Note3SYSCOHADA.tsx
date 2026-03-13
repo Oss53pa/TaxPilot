@@ -57,7 +57,7 @@ const Note3ASYSCOHADA: React.FC = () => {
   const donneesImmobilisations = [
     immoRow('Terrains (22)', ['22'], ['282'], '0%', 'Illimitee'),
     immoRow('Batiments (23)', ['23'], ['283'], '4%', '25 ans'),
-    immoRow('Installations techniques (24)', ['24'], ['284'], '10%', '10 ans'),
+    immoRow('Installations techniques (24)', ['241', '242', '243', '246', '247', '248', '249'], ['2841', '2842', '2843', '2846', '2847', '2848', '2849'], '10%', '10 ans'),
     immoRow('Materiel de transport (245)', ['245'], ['2845'], '25%', '4 ans'),
     immoRow('Mobilier et informatique (244)', ['244'], ['2844'], '20%', '5 ans'),
     immoRow('Agencements et installations (218)', ['218'], ['2818'], '10%', '10 ans'),

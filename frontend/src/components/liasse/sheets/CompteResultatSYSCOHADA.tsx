@@ -47,7 +47,7 @@ const COMPTE_RESULTAT_STRUCTURE = [
   { type: 'line', ref: 'TD', label: 'Production stockée (ou déstockage)', note: '6', indent: 1 },
   { type: 'line', ref: 'TE', label: 'Production immobilisée', note: '21', indent: 1 },
   { type: 'line', ref: 'TF', label: 'Produits accessoires', note: '21', indent: 1 },
-  { type: 'subtotal', ref: 'XB', label: 'CHIFFRE D\'AFFAIRES (TA + TB + TC + TD + TF)', formula: 'TA+TB+TC+TD+TF' },
+  { type: 'subtotal', ref: 'XB', label: 'CHIFFRE D\'AFFAIRES (TA + TB + TC + TF)', formula: 'TA+TB+TC+TF' },
 
   { type: 'line', ref: 'TG', label: 'Subventions d\'exploitation', note: '26', indent: 1 },
   { type: 'line', ref: 'TH', label: 'Autres produits', note: '27', indent: 1 },
@@ -60,7 +60,7 @@ const COMPTE_RESULTAT_STRUCTURE = [
   { type: 'line', ref: 'RI', label: '(-) Impôts et taxes', note: '26', indent: 1, negative: true },
   { type: 'line', ref: 'RJ', label: '(-) Autres charges', note: '27', indent: 1, negative: true },
 
-  { type: 'subtotal', ref: 'XC', label: 'VALEUR AJOUTÉE', formula: 'XB+RC+RD+RE+RF+RG+RH+RI+RJ+TG+TH' },
+  { type: 'subtotal', ref: 'XC', label: 'VALEUR AJOUTÉE', formula: 'XB+RA+RB+TD+TE+TG+TH+TI+RC+RD+RE+RF+RG+RH+RI+RJ' },
 
   { type: 'line', ref: 'RK', label: '(-) Charges de personnel', note: '28', indent: 1, negative: true },
 
@@ -174,16 +174,16 @@ const CompteResultatSYSCOHADA: React.FC<CompteResultatProps> = ({ onNoteClick })
     // Marge commerciale
     totals.XA = calculate('TA+RA+RB')
     
-    // Chiffre d'affaires
+    // Chiffre d'affaires (ventes uniquement, sans production stockée/immobilisée)
     totals.XB = {
-      montant: (data.TA?.montant || 0) + (data.TB?.montant || 0) + (data.TC?.montant || 0) + (data.TD?.montant || 0) + (data.TF?.montant || 0),
-      montantN1: (data.TA?.montantN1 || 0) + (data.TB?.montantN1 || 0) + (data.TC?.montantN1 || 0) + (data.TD?.montantN1 || 0) + (data.TF?.montantN1 || 0)
+      montant: (data.TA?.montant || 0) + (data.TB?.montant || 0) + (data.TC?.montant || 0) + (data.TF?.montant || 0),
+      montantN1: (data.TA?.montantN1 || 0) + (data.TB?.montantN1 || 0) + (data.TC?.montantN1 || 0) + (data.TF?.montantN1 || 0)
     }
     
-    // Valeur ajoutée
+    // Valeur ajoutée (XB + marge commerciale + production + consommations)
     totals.XC = {
-      montant: totals.XB.montant + (data.TG?.montant || 0) + (data.TH?.montant || 0) + (data.RC?.montant || 0) + (data.RD?.montant || 0) + (data.RE?.montant || 0) + (data.RF?.montant || 0) + (data.RG?.montant || 0) + (data.RH?.montant || 0) + (data.RI?.montant || 0) + (data.RJ?.montant || 0),
-      montantN1: totals.XB.montantN1 + (data.TG?.montantN1 || 0) + (data.TH?.montantN1 || 0) + (data.RC?.montantN1 || 0) + (data.RD?.montantN1 || 0) + (data.RE?.montantN1 || 0) + (data.RF?.montantN1 || 0) + (data.RG?.montantN1 || 0) + (data.RH?.montantN1 || 0) + (data.RI?.montantN1 || 0) + (data.RJ?.montantN1 || 0)
+      montant: totals.XB.montant + (data.RA?.montant || 0) + (data.RB?.montant || 0) + (data.TD?.montant || 0) + (data.TE?.montant || 0) + (data.TG?.montant || 0) + (data.TH?.montant || 0) + (data.TI?.montant || 0) + (data.RC?.montant || 0) + (data.RD?.montant || 0) + (data.RE?.montant || 0) + (data.RF?.montant || 0) + (data.RG?.montant || 0) + (data.RH?.montant || 0) + (data.RI?.montant || 0) + (data.RJ?.montant || 0),
+      montantN1: totals.XB.montantN1 + (data.RA?.montantN1 || 0) + (data.RB?.montantN1 || 0) + (data.TD?.montantN1 || 0) + (data.TE?.montantN1 || 0) + (data.TG?.montantN1 || 0) + (data.TH?.montantN1 || 0) + (data.TI?.montantN1 || 0) + (data.RC?.montantN1 || 0) + (data.RD?.montantN1 || 0) + (data.RE?.montantN1 || 0) + (data.RF?.montantN1 || 0) + (data.RG?.montantN1 || 0) + (data.RH?.montantN1 || 0) + (data.RI?.montantN1 || 0) + (data.RJ?.montantN1 || 0)
     }
     
     // EBE

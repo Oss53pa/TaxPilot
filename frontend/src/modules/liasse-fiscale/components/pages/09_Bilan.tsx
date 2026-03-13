@@ -1,5 +1,5 @@
 import React from 'react'
-import { Box, Typography } from '@mui/material'
+import { Box, Typography, Chip } from '@mui/material'
 import LiasseHeader from '../LiasseHeader'
 import type { PageProps, BalanceEntry } from '../../types'
 import { getActifBrut, getAmortProv, getBalanceSolde, fmt } from '../../services/liasse-calculs'
@@ -132,8 +132,6 @@ function computePassif(bal: BalanceEntry[]) {
   }))
 }
 
-const v = (n: number) => n || null
-
 const Bilan: React.FC<PageProps> = ({ entreprise, balance, balanceN1, onNoteClick }) => {
   const actifData = computeActif(balance)
   const actifN1 = balanceN1 && balanceN1.length > 0 ? computeActif(balanceN1) : null
@@ -141,7 +139,6 @@ const Bilan: React.FC<PageProps> = ({ entreprise, balance, balanceN1, onNoteClic
   const passifN1 = balanceN1 && balanceN1.length > 0 ? computePassif(balanceN1) : null
 
   // Build merged rows: pad shorter side with empties so BZ and DZ are on the same line
-  const maxRows = Math.max(actifData.length, passifData.length)
   const emptyA = { ref: '', label: '', note: '', brut: 0, amort: 0, net: 0, isTotal: false, indent: undefined, bold: false }
   const emptyP = { ref: '', label: '', note: '', montant: 0, isTotal: false, indent: undefined, bold: false }
 
@@ -173,11 +170,19 @@ const Bilan: React.FC<PageProps> = ({ entreprise, balance, balanceN1, onNoteClic
     fontFamily: 'inherit',
   })
 
-  const noteSx = (isTotal: boolean) => ({
+  const noteCellSx = (isTotal: boolean) => ({
     ...cellSx(isTotal, false, 'center'),
-    cursor: 'pointer',
-    '&:hover': { color: '#1976d2' },
   })
+
+  const noteChipSx = {
+    height: 18,
+    minWidth: 18,
+    fontSize: 8,
+    fontWeight: 600,
+    cursor: 'pointer',
+    '& .MuiChip-label': { px: 0.5, py: 0 },
+    '&:hover': { bgcolor: 'primary.main', color: 'white', borderColor: 'primary.main' },
+  }
 
   const numFmt = (n: number | undefined) => {
     if (!n || n === 0) return ''
@@ -264,7 +269,9 @@ const Bilan: React.FC<PageProps> = ({ entreprise, balance, balanceN1, onNoteClic
                 {/* ACTIF cells */}
                 <Box component="td" sx={cellSx(aTotal, aBold, 'center')}>{a.ref}</Box>
                 <Box component="td" sx={{ ...cellSx(aTotal, aBold), pl: aIndent ? `${aIndent}px` : 0.5 }}>{a.label}</Box>
-                <Box component="td" sx={noteSx(aTotal)} onClick={() => a.note && onNoteClick?.(a.note)}>{a.note}</Box>
+                <Box component="td" sx={noteCellSx(aTotal)}>
+                  {a.note && <Chip label={a.note} size="small" variant="outlined" clickable color="primary" onClick={() => onNoteClick?.(a.note)} sx={noteChipSx} />}
+                </Box>
                 <Box component="td" sx={cellSx(aTotal, aBold, 'right')}>{numFmt(a.brut)}</Box>
                 <Box component="td" sx={cellSx(aTotal, aBold, 'right')}>{numFmt(a.amort)}</Box>
                 <Box component="td" sx={cellSx(aTotal, aBold, 'right')}>{numFmt(a.net)}</Box>
@@ -274,7 +281,9 @@ const Bilan: React.FC<PageProps> = ({ entreprise, balance, balanceN1, onNoteClic
                 {/* PASSIF cells */}
                 <Box component="td" sx={cellSx(pTotal, pBold, 'center')}>{p.ref}</Box>
                 <Box component="td" sx={{ ...cellSx(pTotal, pBold), pl: p.indent ? `${p.indent * 12 + 4}px` : 0.5 }}>{p.label}</Box>
-                <Box component="td" sx={noteSx(pTotal)} onClick={() => p.note && onNoteClick?.(p.note)}>{p.note}</Box>
+                <Box component="td" sx={noteCellSx(pTotal)}>
+                  {p.note && <Chip label={p.note} size="small" variant="outlined" clickable color="primary" onClick={() => onNoteClick?.(p.note)} sx={noteChipSx} />}
+                </Box>
                 <Box component="td" sx={cellSx(pTotal, pBold, 'right')}>{numFmt(p.montant)}</Box>
                 <Box component="td" sx={cellSx(pTotal, pBold, 'right')}>{passifN1 ? numFmt(passifN1[i]?.montant) : ''}</Box>
               </Box>

@@ -6,7 +6,7 @@
 
 import { useMemo, useState, useEffect } from 'react'
 import type { BalanceEntry } from '@/services/liasseDataService'
-import { getLatestBalance } from '@/services/balanceStorageService'
+import { getLatestBalance, getLatestBalanceN1 } from '@/services/balanceStorageService'
 
 function soldeD(e: BalanceEntry): number {
   // Use solde_debit/solde_credit when available (non-zero), otherwise fall back to movements
@@ -42,6 +42,10 @@ export interface BalanceData {
   d: (prefixes: string[]) => number   // solde débiteur
   c: (prefixes: string[]) => number   // solde créditeur
   accounts: (prefixes: string[]) => BalanceEntry[]
+  // N-1 helpers (prior year balance)
+  hasN1: boolean
+  dN1: (prefixes: string[]) => number   // solde débiteur N-1
+  cN1: (prefixes: string[]) => number   // solde créditeur N-1
 }
 
 export function useBalanceData(): BalanceData {
@@ -61,12 +65,17 @@ export function useBalanceData(): BalanceData {
     const stored = getLatestBalance()
     const entries = stored?.entries?.length ? stored.entries : []
     const usingImported = !!(stored?.entries?.length)
+    const storedN1 = getLatestBalanceN1()
+    const entriesN1 = storedN1?.entries?.length ? storedN1.entries : []
     return {
       entries,
       usingImported,
       d: (prefixes: string[]) => sumDebit(entries, prefixes),
       c: (prefixes: string[]) => sumCredit(entries, prefixes),
       accounts: (prefixes: string[]) => getAccounts(entries, prefixes),
+      hasN1: entriesN1.length > 0,
+      dN1: (prefixes: string[]) => sumDebit(entriesN1, prefixes),
+      cN1: (prefixes: string[]) => sumCredit(entriesN1, prefixes),
     }
   }, [version])
 }

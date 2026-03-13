@@ -97,16 +97,15 @@ const Note11SYSCOHADA: React.FC = () => {
   const [tabValue, setTabValue] = useState(0)
   const [actionnaires, setActionnaires] = useState<Actionnaire[]>([])
   const [mouvements, setMouvements] = useState<MouvementCapital[]>([])
-  const [capitalInfo, _setCapitalInfo] = useState(() => {
+  const [capitalInfo, setCapitalInfo] = useState(() => {
     // Capital social calculé depuis la balance importée
     const cs = bal.c(['101'])
     const cna = bal.d(['109'])
     const pe = bal.c(['104', '105'])
-    const vn = 10000
     return {
       capitalSocial: cs,
-      nombreActionsTotal: cs > 0 ? Math.round(cs / vn) : 0,
-      valeurNominale: vn,
+      nombreActionsTotal: 0, // A saisir par l'utilisateur
+      valeurNominale: 0,     // Calculé = capitalSocial / nombreActions
       capitalLibere: cs - cna,
       capitalNonAppele: cna,
       primeEmission: pe,
@@ -683,10 +682,24 @@ const Note11SYSCOHADA: React.FC = () => {
           <Grid item xs={12} sm={6} md={3}>
             <Card sx={{ textAlign: 'center', backgroundColor: alpha(theme.palette.info.main, 0.1) }}>
               <CardContent sx={{ py: 2 }}>
-                <Typography variant="h6" color="info.main" sx={{ fontWeight: 600 }}>
-                  {formatNumber(capitalInfo.nombreActionsTotal)}
-                </Typography>
-                <Typography variant="body2">Actions</Typography>
+                <TextField
+                  size="small"
+                  type="number"
+                  value={capitalInfo.nombreActionsTotal || ''}
+                  onChange={(e) => {
+                    const nb = parseInt(e.target.value) || 0
+                    setCapitalInfo(prev => ({
+                      ...prev,
+                      nombreActionsTotal: nb,
+                      valeurNominale: nb > 0 ? Math.round(prev.capitalSocial / nb) : 0,
+                    }))
+                    setHasChanges(true)
+                  }}
+                  placeholder="Nb actions"
+                  sx={{ width: 120, mb: 0.5 }}
+                  inputProps={{ style: { textAlign: 'center', fontWeight: 600 } }}
+                />
+                <Typography variant="body2">Actions (a saisir)</Typography>
               </CardContent>
             </Card>
           </Grid>
@@ -694,9 +707,9 @@ const Note11SYSCOHADA: React.FC = () => {
             <Card sx={{ textAlign: 'center', backgroundColor: alpha(theme.palette.success.main, 0.1) }}>
               <CardContent sx={{ py: 2 }}>
                 <Typography variant="h6" color="success.main" sx={{ fontWeight: 600 }}>
-                  {formatCurrency(capitalInfo.valeurNominale)}
+                  {capitalInfo.valeurNominale > 0 ? formatCurrency(capitalInfo.valeurNominale) : '-'}
                 </Typography>
-                <Typography variant="body2">Valeur nominale</Typography>
+                <Typography variant="body2">Valeur nominale (calculee)</Typography>
               </CardContent>
             </Card>
           </Grid>

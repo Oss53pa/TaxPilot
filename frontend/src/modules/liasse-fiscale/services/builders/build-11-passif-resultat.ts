@@ -37,13 +37,13 @@ const PASSIF_LINES_CIRC: PassifLine[] = [
   { ref: 'DI', label: 'Clients, avances reçues', note: 7, prefixes: ['419'] },
   { ref: 'DJ', label: 'Fournisseurs d\'exploitation', note: 17, prefixes: ['40'] },
   { ref: 'DK', label: 'Dettes fiscales et sociales', note: 18, prefixes: ['42','43','44'] },
-  { ref: 'DM', label: 'Autres dettes', note: 19, prefixes: ['45','46','47','48'] },
+  { ref: 'DM', label: 'Autres dettes', note: 19, prefixes: ['45','46','47','483','487'] },
   { ref: 'DN', label: 'Provisions pour risques et charges à court terme', note: 19, prefixes: ['499','599'] },
 ]
 
 const PASSIF_LINES_TRESO: PassifLine[] = [
   { ref: 'DQ', label: 'Banques, crédits d\'escompte', note: 20, prefixes: ['564','565'] },
-  { ref: 'DR', label: 'Banques, établissements financiers et crédits de trésorerie', note: 20, prefixes: ['56'] },
+  { ref: 'DR', label: 'Banques, établissements financiers et crédits de trésorerie', note: 20, prefixes: ['560','561','562','563','566','567','568','569'] },
 ]
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -392,8 +392,8 @@ function buildResultat(
   addLabelMerge(rows.length - 1)
 
   // ── TI: Transferts de charges d'exploitation ──
-  const TI_n = getProduits(bal, ['781','791'])
-  const TI_n1 = getProduits(balN1, ['781','791'])
+  const TI_n = getProduits(bal, ['781'])
+  const TI_n1 = getProduits(balN1, ['781'])
   rows.push(makeDataRow('TI', 'Transferts de charges d\'exploitation', null, '+', 12, TI_n, TI_n1))
   addLabelMerge(rows.length - 1)
 
@@ -542,8 +542,8 @@ function buildResultat(
   addLabelMerge(rows.length - 1)
 
   // ── RP: Autres charges HAO ──
-  const RP_n = -getCharges(bal, ['83','85','87'])
-  const RP_n1 = -getCharges(balN1, ['83','85','87'])
+  const RP_n = -getCharges(bal, ['83','85'])
+  const RP_n1 = -getCharges(balN1, ['83','85'])
   rows.push(makeDataRow('RP', 'Autres charges HAO', null, '-', 30, RP_n, RP_n1))
   addLabelMerge(rows.length - 1)
 
