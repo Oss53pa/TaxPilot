@@ -37,65 +37,11 @@ const SupplementAvantagesFiscaux: React.FC = () => {
   const bal = useBalanceData()
   const resultatAvantImpot = bal.c(['7']) - bal.d(['6'])
 
+  // Avantages fiscaux are user-entered — start empty, no demo data
   const avantagesFiscaux = {
-    creditImpot: [
-      {
-        nature: 'Crédit d\'impôt recherche et développement',
-        baseCalcul: 1800000,
-        tauxApplication: 30,
-        montantCredit: 540000,
-        utilisePrecedent: 0,
-        utiliseExercice: 540000,
-        reporterSuivant: 0,
-        validiteJusqu: '2026-12-31'
-      },
-      {
-        nature: 'Crédit d\'impôt investissement zones franches',
-        baseCalcul: 600000,
-        tauxApplication: 30,
-        montantCredit: 180000,
-        utilisePrecedent: 0,
-        utiliseExercice: 180000,
-        reporterSuivant: 0,
-        validiteJusqu: '2025-12-31'
-      }
-    ],
-    exonerations: [
-      {
-        nature: 'Exonération IS - Première tranche (0-50M)',
-        baseExoneree: 50000000,
-        tauxNormal: 25,
-        economieRealisee: 12500000,
-        dureeRestante: '3 ans',
-        conditionsRespectees: true
-      },
-      {
-        nature: 'Exonération TVA équipements industriels',
-        baseExoneree: 2500000,
-        tauxNormal: 18,
-        economieRealisee: 450000,
-        dureeRestante: 'Permanent',
-        conditionsRespectees: true
-      }
-    ],
-    reductions: [
-      {
-        nature: 'Réduction pour investissements productifs',
-        baseCalcul: 5600000,
-        tauxReduction: 40,
-        montantReduction: 2240000,
-        imputeIS: 2240000,
-        reportable: false
-      },
-      {
-        nature: 'Réduction emplois nouveaux',
-        baseCalcul: 8500000,
-        tauxReduction: 25,
-        montantReduction: 2125000,
-        imputeIS: 2125000,
-        reportable: true
-      }
-    ]
+    creditImpot: [] as { nature: string; baseCalcul: number; tauxApplication: number; montantCredit: number; utilisePrecedent: number; utiliseExercice: number; reporterSuivant: number; validiteJusqu: string }[],
+    exonerations: [] as { nature: string; baseExoneree: number; tauxNormal: number; economieRealisee: number; dureeRestante: string; conditionsRespectees: boolean }[],
+    reductions: [] as { nature: string; baseCalcul: number; tauxReduction: number; montantReduction: number; imputeIS: number; reportable: boolean }[],
   }
 
   const totalCredits = avantagesFiscaux.creditImpot.reduce((sum, credit) => sum + credit.montantCredit, 0)

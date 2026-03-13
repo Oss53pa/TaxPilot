@@ -24,6 +24,9 @@ interface NoteData {
 }
 
 const fmt = (n: number) => n === 0 ? '' : Math.round(n).toLocaleString('fr-FR')
+const fmtVar = (n: number, n1: number) => n1 === 0 ? '' : fmt(n - n1)
+const fmtVarPct = (n: number, n1: number) => n1 === 0 ? '' : `${(((n - n1) / n1) * 100).toFixed(1)}%`
+
 function sumDebit(entries: BalanceEntry[], prefixes: string[]): number {
   return entries
     .filter(e => prefixes.some(p => e.compte.startsWith(p)))
@@ -36,396 +39,365 @@ function sumCredit(entries: BalanceEntry[], prefixes: string[]): number {
     .reduce((s, e) => s + Math.max(0, (e.solde_credit || e.credit || 0) - (e.solde_debit || e.debit || 0)), 0)
 }
 
+function sumDebitN1(entries: BalanceEntry[], prefixes: string[]): number {
+  return entries
+    .filter(e => prefixes.some(p => e.compte.startsWith(p)))
+    .reduce((s, e) => s + Math.max(0, (e.solde_debit_n1 ?? 0) - (e.solde_credit_n1 ?? 0)), 0)
+}
+
+function sumCreditN1(entries: BalanceEntry[], prefixes: string[]): number {
+  return entries
+    .filter(e => prefixes.some(p => e.compte.startsWith(p)))
+    .reduce((s, e) => s + Math.max(0, (e.solde_credit_n1 ?? 0) - (e.solde_debit_n1 ?? 0)), 0)
+}
+
+// Helper: build a 5-col debit row [label, N, N-1, var, var%]
+function dRow(e: BalanceEntry[], label: string, pfx: string[]): string[] {
+  const n = sumDebit(e, pfx), n1 = sumDebitN1(e, pfx)
+  return [label, fmt(n), fmt(n1), fmtVar(n, n1), fmtVarPct(n, n1)]
+}
+// Helper: build a 5-col credit row
+function cRow(e: BalanceEntry[], label: string, pfx: string[]): string[] {
+  const n = sumCredit(e, pfx), n1 = sumCreditN1(e, pfx)
+  return [label, fmt(n), fmt(n1), fmtVar(n, n1), fmtVarPct(n, n1)]
+}
+// Helper: 6-col debit row with echeance (all CT by default)
+function dRow6(e: BalanceEntry[], label: string, pfx: string[]): string[] {
+  const n = sumDebit(e, pfx), n1 = sumDebitN1(e, pfx)
+  return [label, fmt(n), fmt(n1), fmtVar(n, n1), fmt(n), '']
+}
+// Helper: 6-col credit row with echeance (all CT by default)
+function cRow6(e: BalanceEntry[], label: string, pfx: string[]): string[] {
+  const n = sumCredit(e, pfx), n1 = sumCreditN1(e, pfx)
+  return [label, fmt(n), fmt(n1), fmtVar(n, n1), fmt(n), '']
+}
+
 // ═══ Note 4: Immobilisations financieres (26x, 27x) ═══
 // Colonnes: ['Nature', 'Montant N', 'Montant N-1', 'Variation', 'Variation %']
 function generateNote4(entries: BalanceEntry[]): NoteData {
-  const titresPartic = sumDebit(entries, ['26'])
-  const autresTitres = sumDebit(entries, ['271', '272', '273', '274'])
-  const prets = sumDebit(entries, ['276', '277'])
-  const depots = sumDebit(entries, ['275'])
-  const creancesRattachees = sumDebit(entries, ['266', '267'])
-  const pretsPersonnel = sumDebit(entries, ['278'])
-  const interetsCourus = sumDebit(entries, ['279'])
-  const total = titresPartic + autresTitres + prets + depots + creancesRattachees + pretsPersonnel + interetsCourus
+  const items = [
+    dRow(entries, 'Titres de participation', ['26']),
+    dRow(entries, 'Autres titres immobilises', ['271', '272', '273', '274']),
+    dRow(entries, 'Prets et creances non commerciales', ['276', '277']),
+    dRow(entries, 'Depots et cautionnements verses', ['275']),
+    dRow(entries, 'Creances rattachees a des participations', ['266', '267']),
+    dRow(entries, 'Prets au personnel', ['278']),
+    dRow(entries, 'Interets courus sur prets', ['279']),
+  ]
+  const total = sumDebit(entries, ['26', '27']), totalN1 = sumDebitN1(entries, ['26', '27'])
+  items.push(['TOTAL', fmt(total), fmt(totalN1), fmtVar(total, totalN1), fmtVarPct(total, totalN1)])
   return {
     titre: 'Immobilisations financieres',
     tableau: {
       titre: 'Detail des immobilisations financieres',
       colonnes: ['Nature', 'Montant N', 'Montant N-1', 'Variation', 'Variation %'],
-      lignes: [
-        ['Titres de participation', fmt(titresPartic), '', '', ''],
-        ['Autres titres immobilises', fmt(autresTitres), '', '', ''],
-        ['Prets et creances non commerciales', fmt(prets), '', '', ''],
-        ['Depots et cautionnements verses', fmt(depots), '', '', ''],
-        ['Creances rattachees a des participations', fmt(creancesRattachees), '', '', ''],
-        ['Prets au personnel', fmt(pretsPersonnel), '', '', ''],
-        ['Interets courus sur prets', fmt(interetsCourus), '', '', ''],
-        ['TOTAL', fmt(total), '', '', ''],
-      ]
+      lignes: items
     }
   }
 }
 
 // ═══ Note 7: Clients (41x) ═══
-// Colonnes: ['Nature', 'Montant N', 'Montant N-1', 'Variation', 'Variation %']
 function generateNote7(entries: BalanceEntry[]): NoteData {
-  const ventesBiens = sumDebit(entries, ['411'])
-  const prestations = sumDebit(entries, ['412'])
-  const effets = sumDebit(entries, ['413'])
-  const douteux = sumDebit(entries, ['416'])
-  const provisions = sumCredit(entries, ['491'])
-  const totalBrut = ventesBiens + prestations + effets + douteux
-  const totalNet = totalBrut - provisions
+  const prov = sumCredit(entries, ['491']), provN1 = sumCreditN1(entries, ['491'])
+  const totalBrut = sumDebit(entries, ['411', '412', '413', '416']), totalBrutN1 = sumDebitN1(entries, ['411', '412', '413', '416'])
+  const totalNet = totalBrut - prov, totalNetN1 = totalBrutN1 - provN1
   return {
     titre: 'Clients',
     tableau: {
       titre: 'Creances clients et comptes rattaches',
       colonnes: ['Nature', 'Montant N', 'Montant N-1', 'Variation', 'Variation %'],
       lignes: [
-        ['Clients — ventes de biens', fmt(ventesBiens), '', '', ''],
-        ['Clients — prestations de services', fmt(prestations), '', '', ''],
-        ['Clients — effets a recevoir', fmt(effets), '', '', ''],
-        ['Clients douteux ou litigieux', fmt(douteux), '', '', ''],
-        ['Provisions pour depreciation des clients', fmt(-provisions), '', '', ''],
-        ['TOTAL NET', fmt(totalNet), '', '', ''],
+        dRow(entries, 'Clients — ventes de biens', ['411']),
+        dRow(entries, 'Clients — prestations de services', ['412']),
+        dRow(entries, 'Clients — effets a recevoir', ['413']),
+        dRow(entries, 'Clients douteux ou litigieux', ['416']),
+        ['Provisions pour depreciation des clients', fmt(-prov), fmt(-provN1), fmtVar(-prov, -provN1), ''],
+        ['TOTAL NET', fmt(totalNet), fmt(totalNetN1), fmtVar(totalNet, totalNetN1), fmtVarPct(totalNet, totalNetN1)],
       ]
     }
   }
 }
 
 // ═══ Note 8: Autres creances (42x-47x) ═══
-// Colonnes: ['Nature', 'Montant N', 'Montant N-1', 'Variation', 'Echeance < 1 an', 'Echeance > 1 an']
 function generateNote8(entries: BalanceEntry[]): NoteData {
-  const fournisseursAvances = sumDebit(entries, ['409'])
-  const personnel = sumDebit(entries, ['42'])
-  const orgSociaux = sumDebit(entries, ['43'])
-  const etat = sumDebit(entries, ['44'])
-  const debiteursDivers = sumDebit(entries, ['47'])
-  const chargesConstatees = sumDebit(entries, ['476'])
-  const total = fournisseursAvances + personnel + orgSociaux + etat + debiteursDivers + chargesConstatees
+  const total = sumDebit(entries, ['409', '42', '43', '44', '47', '476'])
+  const totalN1 = sumDebitN1(entries, ['409', '42', '43', '44', '47', '476'])
   return {
     titre: 'Autres creances',
     tableau: {
       titre: 'Detail des autres creances',
       colonnes: ['Nature', 'Montant N', 'Montant N-1', 'Variation', 'Echeance < 1 an', 'Echeance > 1 an'],
       lignes: [
-        ['Fournisseurs, avances versees', fmt(fournisseursAvances), '', '', fmt(fournisseursAvances), ''],
-        ['Personnel', fmt(personnel), '', '', fmt(personnel), ''],
-        ['Organismes sociaux', fmt(orgSociaux), '', '', fmt(orgSociaux), ''],
-        ['Etat et collectivites', fmt(etat), '', '', fmt(etat), ''],
-        ['Debiteurs divers', fmt(debiteursDivers), '', '', fmt(debiteursDivers), ''],
-        ['Charges constatees d\'avance', fmt(chargesConstatees), '', '', fmt(chargesConstatees), ''],
-        ['TOTAL', fmt(total), '', '', fmt(total), ''],
+        dRow6(entries, 'Fournisseurs, avances versees', ['409']),
+        dRow6(entries, 'Personnel', ['42']),
+        dRow6(entries, 'Organismes sociaux', ['43']),
+        dRow6(entries, 'Etat et collectivites', ['44']),
+        dRow6(entries, 'Debiteurs divers', ['47']),
+        dRow6(entries, 'Charges constatees d\'avance', ['476']),
+        ['TOTAL', fmt(total), fmt(totalN1), fmtVar(total, totalN1), fmt(total), ''],
       ]
     }
   }
 }
 
 // ═══ Note 9: Titres de placement (50x) ═══
-// Colonnes: ['Nature', 'Montant N', 'Montant N-1', 'Variation', 'Variation %']
 function generateNote9(entries: BalanceEntry[]): NoteData {
-  const actionsCotees = sumDebit(entries, ['501'])
-  const actionsNonCotees = sumDebit(entries, ['502'])
-  const obligations = sumDebit(entries, ['503', '504', '505', '506'])
-  const depots = sumDebit(entries, ['507', '508'])
-  const provisions = sumCredit(entries, ['590'])
-  const totalBrut = actionsCotees + actionsNonCotees + obligations + depots
+  const prov = sumCredit(entries, ['590']), provN1 = sumCreditN1(entries, ['590'])
+  const totalBrut = sumDebit(entries, ['501', '502', '503', '504', '505', '506', '507', '508'])
+  const totalBrutN1 = sumDebitN1(entries, ['501', '502', '503', '504', '505', '506', '507', '508'])
+  const net = totalBrut - prov, netN1 = totalBrutN1 - provN1
   return {
     titre: 'Titres de placement',
     tableau: {
       titre: 'Titres de placement et valeurs mobilieres',
       colonnes: ['Nature', 'Montant N', 'Montant N-1', 'Variation', 'Variation %'],
       lignes: [
-        ['Actions cotees', fmt(actionsCotees), '', '', ''],
-        ['Actions non cotees', fmt(actionsNonCotees), '', '', ''],
-        ['Obligations et bons', fmt(obligations), '', '', ''],
-        ['Depots a terme', fmt(depots), '', '', ''],
-        ['Provisions pour depreciation des titres', fmt(-provisions), '', '', ''],
-        ['TOTAL NET', fmt(totalBrut - provisions), '', '', ''],
+        dRow(entries, 'Actions cotees', ['501']),
+        dRow(entries, 'Actions non cotees', ['502']),
+        dRow(entries, 'Obligations et bons', ['503', '504', '505', '506']),
+        dRow(entries, 'Depots a terme', ['507', '508']),
+        ['Provisions pour depreciation des titres', fmt(-prov), fmt(-provN1), fmtVar(-prov, -provN1), ''],
+        ['TOTAL NET', fmt(net), fmt(netN1), fmtVar(net, netN1), fmtVarPct(net, netN1)],
       ]
     }
   }
 }
 
 // ═══ Note 11: Disponibilites (51x-58x) ═══
-// Colonnes: ['Nature', 'Montant N', 'Montant N-1', 'Variation', 'Variation %']
 function generateNote11(entries: BalanceEntry[]): NoteData {
-  const banquesNationales = sumDebit(entries, ['521'])
-  const banquesDevises = sumDebit(entries, ['522', '523', '524', '525', '526', '527'])
-  const caisse = sumDebit(entries, ['57'])
-  const regies = sumDebit(entries, ['54'])
-  const virements = sumDebit(entries, ['58'])
-  const total = banquesNationales + banquesDevises + caisse + regies + virements
+  const total = sumDebit(entries, ['521', '522', '523', '524', '525', '526', '527', '57', '54', '58'])
+  const totalN1 = sumDebitN1(entries, ['521', '522', '523', '524', '525', '526', '527', '57', '54', '58'])
   return {
     titre: 'Disponibilites',
     tableau: {
       titre: 'Detail des disponibilites',
       colonnes: ['Nature', 'Montant N', 'Montant N-1', 'Variation', 'Variation %'],
       lignes: [
-        ['Banques en monnaie nationale', fmt(banquesNationales), '', '', ''],
-        ['Banques en devises', fmt(banquesDevises), '', '', ''],
-        ['Caisse', fmt(caisse), '', '', ''],
-        ['Regies d\'avances', fmt(regies), '', '', ''],
-        ['Virements de fonds', fmt(virements), '', '', ''],
-        ['TOTAL', fmt(total), '', '', ''],
+        dRow(entries, 'Banques en monnaie nationale', ['521']),
+        dRow(entries, 'Banques en devises', ['522', '523', '524', '525', '526', '527']),
+        dRow(entries, 'Caisse', ['57']),
+        dRow(entries, 'Regies d\'avances', ['54']),
+        dRow(entries, 'Virements de fonds', ['58']),
+        ['TOTAL', fmt(total), fmt(totalN1), fmtVar(total, totalN1), fmtVarPct(total, totalN1)],
       ]
     }
   }
 }
 
 // ═══ Note 13: Capital (10x) ═══
-// Colonnes: ['Elements', 'Montant N', 'Montant N-1', 'Variation']
 function generateNote13(entries: BalanceEntry[]): NoteData {
-  const capitalSocial = sumCredit(entries, ['101'])
-  const capitalNonAppele = sumDebit(entries, ['109'])
-  const capitalAppeleNonVerse = sumDebit(entries, ['1011'])
-  const total = capitalSocial - capitalNonAppele - capitalAppeleNonVerse
+  const cs = sumCredit(entries, ['101']), csN1 = sumCreditN1(entries, ['101'])
+  const cna = sumDebit(entries, ['109']), cnaN1 = sumDebitN1(entries, ['109'])
+  const canv = sumDebit(entries, ['1011']), canvN1 = sumDebitN1(entries, ['1011'])
+  const total = cs - cna - canv, totalN1 = csN1 - cnaN1 - canvN1
   return {
     titre: 'Capital',
     tableau: {
       titre: 'Capital social et actionnaires',
       colonnes: ['Elements', 'Montant N', 'Montant N-1', 'Variation'],
       lignes: [
-        ['Capital social', fmt(capitalSocial), '', ''],
-        ['Actionnaires, capital souscrit non appele', fmt(capitalNonAppele), '', ''],
-        ['Actionnaires, capital souscrit appele non verse', fmt(capitalAppeleNonVerse), '', ''],
-        ['TOTAL', fmt(total), '', ''],
+        ['Capital social', fmt(cs), fmt(csN1), fmtVar(cs, csN1)],
+        ['Actionnaires, capital souscrit non appele', fmt(cna), fmt(cnaN1), fmtVar(cna, cnaN1)],
+        ['Actionnaires, capital souscrit appele non verse', fmt(canv), fmt(canvN1), fmtVar(canv, canvN1)],
+        ['TOTAL', fmt(total), fmt(totalN1), fmtVar(total, totalN1)],
       ]
     }
   }
 }
 
 // ═══ Note 14: Primes et reserves (105x, 11x, 12x, 13x) ═══
-// Colonnes: ['Nature', 'Montant N', 'Montant N-1', 'Variation', 'Variation %']
 function generateNote14(entries: BalanceEntry[]): NoteData {
-  const primesEmission = sumCredit(entries, ['1051'])
-  const primesApport = sumCredit(entries, ['1052', '1053', '1054'])
-  const reserveLegale = sumCredit(entries, ['111'])
-  const reservesStatutaires = sumCredit(entries, ['112'])
-  const reservesFacultatives = sumCredit(entries, ['118'])
-  const reservesReglementees = sumCredit(entries, ['113', '114', '115', '116', '117'])
-  const reportNouveau = sumCredit(entries, ['12']) - sumDebit(entries, ['12'])
-  const resultatNet = sumCredit(entries, ['13']) - sumDebit(entries, ['13'])
-  const total = primesEmission + primesApport + reserveLegale + reservesStatutaires + reservesFacultatives + reservesReglementees + reportNouveau + resultatNet
+  const rn = sumCredit(entries, ['12']) - sumDebit(entries, ['12'])
+  const rnN1 = sumCreditN1(entries, ['12']) - sumDebitN1(entries, ['12'])
+  const res = sumCredit(entries, ['13']) - sumDebit(entries, ['13'])
+  const resN1 = sumCreditN1(entries, ['13']) - sumDebitN1(entries, ['13'])
   return {
     titre: 'Primes et reserves',
     tableau: {
       titre: 'Detail des primes et reserves',
       colonnes: ['Nature', 'Montant N', 'Montant N-1', 'Variation', 'Variation %'],
       lignes: [
-        ['Primes d\'emission', fmt(primesEmission), '', '', ''],
-        ['Primes d\'apport', fmt(primesApport), '', '', ''],
-        ['Reserve legale', fmt(reserveLegale), '', '', ''],
-        ['Reserves statutaires', fmt(reservesStatutaires), '', '', ''],
-        ['Reserves facultatives', fmt(reservesFacultatives), '', '', ''],
-        ['Reserves reglementees', fmt(reservesReglementees), '', '', ''],
-        ['Report a nouveau', fmt(reportNouveau), '', '', ''],
-        ['Resultat net de l\'exercice', fmt(resultatNet), '', '', ''],
-        ['TOTAL', fmt(total), '', '', ''],
+        cRow(entries, 'Primes d\'emission', ['1051']),
+        cRow(entries, 'Primes d\'apport', ['1052', '1053', '1054']),
+        cRow(entries, 'Reserve legale', ['111']),
+        cRow(entries, 'Reserves statutaires', ['112']),
+        cRow(entries, 'Reserves facultatives', ['118']),
+        cRow(entries, 'Reserves reglementees', ['113', '114', '115', '116', '117']),
+        ['Report a nouveau', fmt(rn), fmt(rnN1), fmtVar(rn, rnN1), fmtVarPct(rn, rnN1)],
+        ['Resultat net de l\'exercice', fmt(res), fmt(resN1), fmtVar(res, resN1), fmtVarPct(res, resN1)],
+        (() => {
+          const t = sumCredit(entries, ['1051', '1052', '1053', '1054', '111', '112', '118', '113', '114', '115', '116', '117']) + rn + res
+          const tN1 = sumCreditN1(entries, ['1051', '1052', '1053', '1054', '111', '112', '118', '113', '114', '115', '116', '117']) + rnN1 + resN1
+          return ['TOTAL', fmt(t), fmt(tN1), fmtVar(t, tN1), fmtVarPct(t, tN1)]
+        })(),
       ]
     }
   }
 }
 
 // ═══ Note 17: Fournisseurs d'exploitation (40x) ═══
-// Colonnes: ['Nature', 'Montant N', 'Montant N-1', 'Variation', 'Echeance < 1 an', 'Echeance > 1 an']
 function generateNote17(entries: BalanceEntry[]): NoteData {
-  const fournisseurs = sumCredit(entries, ['401'])
-  const effets = sumCredit(entries, ['402'])
-  const facturesNP = sumCredit(entries, ['408'])
-  const fournisseursInvest = sumCredit(entries, ['404'])
-  const retenuesGarantie = sumCredit(entries, ['4017'])
-  const total = fournisseurs + effets + facturesNP + fournisseursInvest + retenuesGarantie
+  const total = sumCredit(entries, ['401', '402', '408', '404', '4017'])
+  const totalN1 = sumCreditN1(entries, ['401', '402', '408', '404', '4017'])
   return {
     titre: 'Fournisseurs d\'exploitation',
     tableau: {
       titre: 'Detail des dettes fournisseurs',
       colonnes: ['Nature', 'Montant N', 'Montant N-1', 'Variation', 'Echeance < 1 an', 'Echeance > 1 an'],
       lignes: [
-        ['Fournisseurs, dettes en compte', fmt(fournisseurs), '', '', fmt(fournisseurs), ''],
-        ['Fournisseurs, effets a payer', fmt(effets), '', '', fmt(effets), ''],
-        ['Fournisseurs, factures non parvenues', fmt(facturesNP), '', '', fmt(facturesNP), ''],
-        ['Fournisseurs d\'investissements', fmt(fournisseursInvest), '', '', fmt(fournisseursInvest), ''],
-        ['Fournisseurs, retenues de garantie', fmt(retenuesGarantie), '', '', fmt(retenuesGarantie), ''],
-        ['TOTAL', fmt(total), '', '', fmt(total), ''],
+        cRow6(entries, 'Fournisseurs, dettes en compte', ['401']),
+        cRow6(entries, 'Fournisseurs, effets a payer', ['402']),
+        cRow6(entries, 'Fournisseurs, factures non parvenues', ['408']),
+        cRow6(entries, 'Fournisseurs d\'investissements', ['404']),
+        cRow6(entries, 'Fournisseurs, retenues de garantie', ['4017']),
+        ['TOTAL', fmt(total), fmt(totalN1), fmtVar(total, totalN1), fmt(total), ''],
       ]
     }
   }
 }
 
 // ═══ Note 18: Dettes fiscales et sociales (43x, 44x) ═══
-// Colonnes: ['Nature', 'Montant N', 'Montant N-1', 'Variation', 'Variation %']
 function generateNote18(entries: BalanceEntry[]): NoteData {
-  const personnelRemun = sumCredit(entries, ['422'])
-  const orgSociaux = sumCredit(entries, ['43'])
-  const etatIS = sumCredit(entries, ['441'])
-  const etatTVA = sumCredit(entries, ['443', '4441'])
-  const etatAutres = sumCredit(entries, ['442', '445', '446', '447', '448', '449'])
-  const autresFiscales = sumCredit(entries, ['4491', '4492', '4499'])
-  const total = personnelRemun + orgSociaux + etatIS + etatTVA + etatAutres + autresFiscales
+  const total = sumCredit(entries, ['422', '43', '441', '443', '4441', '442', '445', '446', '447', '448', '449', '4491', '4492', '4499'])
+  const totalN1 = sumCreditN1(entries, ['422', '43', '441', '443', '4441', '442', '445', '446', '447', '448', '449', '4491', '4492', '4499'])
   return {
     titre: 'Dettes fiscales et sociales',
     tableau: {
       titre: 'Dettes fiscales et sociales',
       colonnes: ['Nature', 'Montant N', 'Montant N-1', 'Variation', 'Variation %'],
       lignes: [
-        ['Personnel — remunerations dues', fmt(personnelRemun), '', '', ''],
-        ['Organismes sociaux', fmt(orgSociaux), '', '', ''],
-        ['Etat — impots sur les benefices', fmt(etatIS), '', '', ''],
-        ['Etat — TVA due', fmt(etatTVA), '', '', ''],
-        ['Etat — autres impots et taxes', fmt(etatAutres), '', '', ''],
-        ['Autres dettes fiscales', fmt(autresFiscales), '', '', ''],
-        ['TOTAL', fmt(total), '', '', ''],
+        cRow(entries, 'Personnel — remunerations dues', ['422']),
+        cRow(entries, 'Organismes sociaux', ['43']),
+        cRow(entries, 'Etat — impots sur les benefices', ['441']),
+        cRow(entries, 'Etat — TVA due', ['443', '4441']),
+        cRow(entries, 'Etat — autres impots et taxes', ['442', '445', '446', '447', '448', '449']),
+        cRow(entries, 'Autres dettes fiscales', ['4491', '4492', '4499']),
+        ['TOTAL', fmt(total), fmt(totalN1), fmtVar(total, totalN1), fmtVarPct(total, totalN1)],
       ]
     }
   }
 }
 
 // ═══ Note 19: Autres dettes et provisions pour risques (19x, 47x) ═══
-// Colonnes: ['Nature', 'Montant N', 'Montant N-1', 'Variation', 'Echeance < 1 an', 'Echeance > 1 an']
 function generateNote19(entries: BalanceEntry[]): NoteData {
-  const dettesFiscales = sumCredit(entries, ['441', '442', '443', '444', '445'])
-  const dettesSociales = sumCredit(entries, ['43'])
-  const produitsConstates = sumCredit(entries, ['477'])
-  const crediteursDivers = sumCredit(entries, ['47'])
-  const provisionsRisques = sumCredit(entries, ['151', '152', '153', '155', '156', '157', '158'])
-  const provisionsCharges = sumCredit(entries, ['19'])
-  const total = dettesFiscales + dettesSociales + produitsConstates + crediteursDivers + provisionsRisques + provisionsCharges
+  const provR = sumCredit(entries, ['151', '152', '153', '155', '156', '157', '158'])
+  const provRN1 = sumCreditN1(entries, ['151', '152', '153', '155', '156', '157', '158'])
+  const provC = sumCredit(entries, ['19']), provCN1 = sumCreditN1(entries, ['19'])
+  const total = sumCredit(entries, ['441', '442', '443', '444', '445', '43', '477', '47']) + provR + provC
+  const totalN1 = sumCreditN1(entries, ['441', '442', '443', '444', '445', '43', '477', '47']) + provRN1 + provCN1
   return {
     titre: 'Autres dettes et provisions pour risques et charges',
     tableau: {
       titre: 'Detail des autres dettes et provisions pour risques',
       colonnes: ['Nature', 'Montant N', 'Montant N-1', 'Variation', 'Echeance < 1 an', 'Echeance > 1 an'],
       lignes: [
-        ['Dettes fiscales courantes', fmt(dettesFiscales), '', '', fmt(dettesFiscales), ''],
-        ['Dettes sociales courantes', fmt(dettesSociales), '', '', fmt(dettesSociales), ''],
-        ['Produits constates d\'avance', fmt(produitsConstates), '', '', fmt(produitsConstates), ''],
-        ['Crediteurs divers', fmt(crediteursDivers), '', '', fmt(crediteursDivers), ''],
-        ['Provisions pour risques', fmt(provisionsRisques), '', '', '', fmt(provisionsRisques)],
-        ['Provisions pour charges', fmt(provisionsCharges), '', '', '', fmt(provisionsCharges)],
-        ['TOTAL', fmt(total), '', '', '', ''],
+        cRow6(entries, 'Dettes fiscales courantes', ['441', '442', '443', '444', '445']),
+        cRow6(entries, 'Dettes sociales courantes', ['43']),
+        cRow6(entries, 'Produits constates d\'avance', ['477']),
+        cRow6(entries, 'Crediteurs divers', ['47']),
+        ['Provisions pour risques', fmt(provR), fmt(provRN1), fmtVar(provR, provRN1), '', fmt(provR)],
+        ['Provisions pour charges', fmt(provC), fmt(provCN1), fmtVar(provC, provCN1), '', fmt(provC)],
+        ['TOTAL', fmt(total), fmt(totalN1), fmtVar(total, totalN1), '', ''],
       ]
     }
   }
 }
 
 // ═══ Note 20: Banques, credit d'escompte et de tresorerie (52x credit, 56x) ═══
-// Colonnes: ['Nature', 'Montant N', 'Montant N-1', 'Variation', 'Variation %']
 function generateNote20(entries: BalanceEntry[]): NoteData {
-  const banquesCredit = sumCredit(entries, ['52'])
-  const creditsEscompte = sumCredit(entries, ['56'])
-  const creditsTresorerie = sumCredit(entries, ['55'])
-  const decouvertsB = sumCredit(entries, ['521'])
-  const total = banquesCredit + creditsEscompte + creditsTresorerie
+  const total = sumCredit(entries, ['52', '56', '55'])
+  const totalN1 = sumCreditN1(entries, ['52', '56', '55'])
   return {
     titre: 'Banques, credit d\'escompte et de tresorerie',
     tableau: {
       titre: 'Tresorerie passive',
       colonnes: ['Nature', 'Montant N', 'Montant N-1', 'Variation', 'Variation %'],
       lignes: [
-        ['Banques — soldes crediteurs', fmt(banquesCredit), '', '', ''],
-        ['Credits d\'escompte', fmt(creditsEscompte), '', '', ''],
-        ['Credits de tresorerie', fmt(creditsTresorerie), '', '', ''],
-        ['Decouverts bancaires', fmt(decouvertsB), '', '', ''],
-        ['TOTAL', fmt(total), '', '', ''],
+        cRow(entries, 'Banques — soldes crediteurs', ['52']),
+        cRow(entries, 'Credits d\'escompte', ['56']),
+        cRow(entries, 'Credits de tresorerie', ['55']),
+        cRow(entries, 'Decouverts bancaires', ['521']),
+        ['TOTAL', fmt(total), fmt(totalN1), fmtVar(total, totalN1), fmtVarPct(total, totalN1)],
       ]
     }
   }
 }
 
 // ═══ Note 21: Chiffre d'affaires et autres produits (70x-75x) ═══
-// Colonnes: ['Nature', 'Montant N', 'Montant N-1', 'Variation', 'Variation %']
 function generateNote21(entries: BalanceEntry[]): NoteData {
-  const ventesMarch = sumCredit(entries, ['701'])
-  const ventesProdFab = sumCredit(entries, ['702', '703'])
-  const travauxServices = sumCredit(entries, ['704', '705', '706'])
-  const produitsAccess = sumCredit(entries, ['707'])
-  const subventionsExploit = sumCredit(entries, ['71'])
-  const autresProduits = sumCredit(entries, ['75'])
-  const total = ventesMarch + ventesProdFab + travauxServices + produitsAccess + subventionsExploit + autresProduits
+  const total = sumCredit(entries, ['701', '702', '703', '704', '705', '706', '707', '71', '75'])
+  const totalN1 = sumCreditN1(entries, ['701', '702', '703', '704', '705', '706', '707', '71', '75'])
   return {
     titre: 'Chiffre d\'affaires et autres produits',
     tableau: {
       titre: 'Chiffre d\'affaires et autres produits',
       colonnes: ['Nature', 'Montant N', 'Montant N-1', 'Variation', 'Variation %'],
       lignes: [
-        ['Ventes de marchandises', fmt(ventesMarch), '', '', ''],
-        ['Ventes de produits fabriques', fmt(ventesProdFab), '', '', ''],
-        ['Travaux et services vendus', fmt(travauxServices), '', '', ''],
-        ['Produits accessoires', fmt(produitsAccess), '', '', ''],
-        ['Subventions d\'exploitation', fmt(subventionsExploit), '', '', ''],
-        ['Autres produits', fmt(autresProduits), '', '', ''],
-        ['TOTAL', fmt(total), '', '', ''],
+        cRow(entries, 'Ventes de marchandises', ['701']),
+        cRow(entries, 'Ventes de produits fabriques', ['702', '703']),
+        cRow(entries, 'Travaux et services vendus', ['704', '705', '706']),
+        cRow(entries, 'Produits accessoires', ['707']),
+        cRow(entries, 'Subventions d\'exploitation', ['71']),
+        cRow(entries, 'Autres produits', ['75']),
+        ['TOTAL', fmt(total), fmt(totalN1), fmtVar(total, totalN1), fmtVarPct(total, totalN1)],
       ]
     }
   }
 }
 
 // ═══ Note 22: Achats (60x, 61x) ═══
-// Colonnes: ['Nature', 'Montant N', 'Montant N-1', 'Variation', 'Variation %']
 function generateNote22(entries: BalanceEntry[]): NoteData {
-  const achatsMarch = sumDebit(entries, ['601'])
-  const achatsMatieres = sumDebit(entries, ['602'])
-  const achatsFournitures = sumDebit(entries, ['604', '605', '606'])
-  const achatsEmballages = sumDebit(entries, ['608'])
-  const variationStocks = sumDebit(entries, ['603'])
-  const total = achatsMarch + achatsMatieres + achatsFournitures + achatsEmballages + variationStocks
+  const total = sumDebit(entries, ['601', '602', '604', '605', '606', '608', '603'])
+  const totalN1 = sumDebitN1(entries, ['601', '602', '604', '605', '606', '608', '603'])
   return {
     titre: 'Achats',
     tableau: {
       titre: 'Achats de l\'exercice',
       colonnes: ['Nature', 'Montant N', 'Montant N-1', 'Variation', 'Variation %'],
       lignes: [
-        ['Achats de marchandises', fmt(achatsMarch), '', '', ''],
-        ['Achats de matieres premieres', fmt(achatsMatieres), '', '', ''],
-        ['Achats de fournitures liees', fmt(achatsFournitures), '', '', ''],
-        ['Achats d\'emballages', fmt(achatsEmballages), '', '', ''],
-        ['Variation de stocks', fmt(variationStocks), '', '', ''],
-        ['TOTAL', fmt(total), '', '', ''],
+        dRow(entries, 'Achats de marchandises', ['601']),
+        dRow(entries, 'Achats de matieres premieres', ['602']),
+        dRow(entries, 'Achats de fournitures liees', ['604', '605', '606']),
+        dRow(entries, 'Achats d\'emballages', ['608']),
+        dRow(entries, 'Variation de stocks', ['603']),
+        ['TOTAL', fmt(total), fmt(totalN1), fmtVar(total, totalN1), fmtVarPct(total, totalN1)],
       ]
     }
   }
 }
 
 // ═══ Note 28: Dotations et charges pour provisions (68x, 69x, 79x) ═══
-// Colonnes: ['Nature', 'Montant N', 'Montant N-1', 'Variation', 'Variation %']
 function generateNote28(entries: BalanceEntry[]): NoteData {
-  const dotAmortExploit = sumDebit(entries, ['681'])
-  const dotProvExploit = sumDebit(entries, ['691'])
-  const dotDepreciations = sumDebit(entries, ['6817', '6818', '697'])
-  const reprisesProvisions = sumCredit(entries, ['791', '797'])
-  const reprisesDepreciations = sumCredit(entries, ['7817', '7818'])
-  const totalNet = dotAmortExploit + dotProvExploit + dotDepreciations - reprisesProvisions - reprisesDepreciations
+  const d1 = sumDebit(entries, ['681']), d1N1 = sumDebitN1(entries, ['681'])
+  const d2 = sumDebit(entries, ['691']), d2N1 = sumDebitN1(entries, ['691'])
+  const d3 = sumDebit(entries, ['6817', '6818', '697']), d3N1 = sumDebitN1(entries, ['6817', '6818', '697'])
+  const r1 = sumCredit(entries, ['791', '797']), r1N1 = sumCreditN1(entries, ['791', '797'])
+  const r2 = sumCredit(entries, ['7817', '7818']), r2N1 = sumCreditN1(entries, ['7817', '7818'])
+  const net = d1 + d2 + d3 - r1 - r2, netN1 = d1N1 + d2N1 + d3N1 - r1N1 - r2N1
   return {
     titre: 'Dotations et charges pour provisions et depreciations',
     tableau: {
       titre: 'Dotations aux amortissements, depreciations et provisions',
       colonnes: ['Nature', 'Montant N', 'Montant N-1', 'Variation', 'Variation %'],
       lignes: [
-        ['Dotations aux amortissements d\'exploitation', fmt(dotAmortExploit), '', '', ''],
-        ['Dotations aux provisions d\'exploitation', fmt(dotProvExploit), '', '', ''],
-        ['Dotations aux depreciations', fmt(dotDepreciations), '', '', ''],
-        ['Reprises de provisions', fmt(reprisesProvisions), '', '', ''],
-        ['Reprises de depreciations', fmt(reprisesDepreciations), '', '', ''],
-        ['TOTAL NET', fmt(totalNet), '', '', ''],
+        dRow(entries, 'Dotations aux amortissements d\'exploitation', ['681']),
+        dRow(entries, 'Dotations aux provisions d\'exploitation', ['691']),
+        dRow(entries, 'Dotations aux depreciations', ['6817', '6818', '697']),
+        cRow(entries, 'Reprises de provisions', ['791', '797']),
+        cRow(entries, 'Reprises de depreciations', ['7817', '7818']),
+        ['TOTAL NET', fmt(net), fmt(netN1), fmtVar(net, netN1), fmtVarPct(net, netN1)],
       ]
     }
   }
 }
 
 // ═══ Note 29: Charges et revenus financiers (67x, 77x, 79x) ═══
-// Colonnes: ['Nature', 'Montant N', 'Montant N-1', 'Variation', 'Variation %']
 function generateNote29(entries: BalanceEntry[]): NoteData {
-  const revenusTitres = sumCredit(entries, ['771', '772'])
-  const interetsProduits = sumCredit(entries, ['773', '774', '775', '776'])
-  const gainsChange = sumCredit(entries, ['776'])
-  const reprisesFinancieres = sumCredit(entries, ['797'])
-  const totalProduits = revenusTitres + interetsProduits + gainsChange + reprisesFinancieres
-  const interetsCharges = sumDebit(entries, ['671', '672'])
-  const pertesChange = sumDebit(entries, ['676'])
-  const dotationsFinancieres = sumDebit(entries, ['697'])
-  const totalCharges = interetsCharges + pertesChange + dotationsFinancieres
-  const resultatFinancier = totalProduits - totalCharges
+  const totalProd = sumCredit(entries, ['771', '772', '773', '774', '775', '776', '797'])
+  const totalProdN1 = sumCreditN1(entries, ['771', '772', '773', '774', '775', '776', '797'])
+  const totalCh = sumDebit(entries, ['671', '672', '676', '697'])
+  const totalChN1 = sumDebitN1(entries, ['671', '672', '676', '697'])
+  const rf = totalProd - totalCh, rfN1 = totalProdN1 - totalChN1
   return {
     titre: 'Charges et revenus financiers',
     tableau: {
@@ -433,17 +405,17 @@ function generateNote29(entries: BalanceEntry[]): NoteData {
       colonnes: ['Nature', 'Montant N', 'Montant N-1', 'Variation', 'Variation %'],
       lignes: [
         ['PRODUITS FINANCIERS:', '', '', '', ''],
-        ['Revenus des titres de participation', fmt(revenusTitres), '', '', ''],
-        ['Interets et produits assimiles', fmt(interetsProduits), '', '', ''],
-        ['Gains de change', fmt(gainsChange), '', '', ''],
-        ['Reprises de provisions financieres', fmt(reprisesFinancieres), '', '', ''],
-        ['Total produits financiers', fmt(totalProduits), '', '', ''],
+        cRow(entries, 'Revenus des titres de participation', ['771', '772']),
+        cRow(entries, 'Interets et produits assimiles', ['773', '774', '775', '776']),
+        cRow(entries, 'Gains de change', ['776']),
+        cRow(entries, 'Reprises de provisions financieres', ['797']),
+        ['Total produits financiers', fmt(totalProd), fmt(totalProdN1), fmtVar(totalProd, totalProdN1), fmtVarPct(totalProd, totalProdN1)],
         ['CHARGES FINANCIERES:', '', '', '', ''],
-        ['Interets et charges assimilees', fmt(interetsCharges), '', '', ''],
-        ['Pertes de change', fmt(pertesChange), '', '', ''],
-        ['Dotations provisions financieres', fmt(dotationsFinancieres), '', '', ''],
-        ['Total charges financieres', fmt(totalCharges), '', '', ''],
-        ['RESULTAT FINANCIER', fmt(resultatFinancier), '', '', ''],
+        dRow(entries, 'Interets et charges assimilees', ['671', '672']),
+        dRow(entries, 'Pertes de change', ['676']),
+        dRow(entries, 'Dotations provisions financieres', ['697']),
+        ['Total charges financieres', fmt(totalCh), fmt(totalChN1), fmtVar(totalCh, totalChN1), fmtVarPct(totalCh, totalChN1)],
+        ['RESULTAT FINANCIER', fmt(rf), fmt(rfN1), fmtVar(rf, rfN1), fmtVarPct(rf, rfN1)],
       ]
     }
   }

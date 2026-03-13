@@ -272,11 +272,12 @@ const LiasseTable: React.FC<LiasseTableProps> = ({ columns, rows, title, compact
                                 onClick={() => onNoteClick(String(val))}
                                 color="primary"
                                 sx={{
-                                  height: 18,
-                                  minWidth: 18,
-                                  fontSize: compact ? 8 : 10,
+                                  height: 16,
+                                  minWidth: 16,
+                                  fontSize: compact ? 7 : 9,
                                   fontWeight: 600,
-                                  '& .MuiChip-label': { px: 0.5, py: 0 },
+                                  borderRadius: '8px',
+                                  '& .MuiChip-label': { px: '3px', py: 0, lineHeight: 1 },
                                   '&:hover': { bgcolor: 'primary.main', color: 'white', borderColor: 'primary.main' },
                                 }}
                               />

@@ -281,7 +281,7 @@ const SupplementTVA: FC = () => {
                       {formatMontant(totalTVACollectee)}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      Sur un chiffre d'affaires HT de {formatMontant(160000000)}
+                      Sur un chiffre d'affaires HT de {formatMontant(operationsTVA.collectee.reduce((sum, op) => sum + op.baseHT, 0))}
                     </Typography>
                   </CardContent>
                 </Card>
@@ -296,7 +296,7 @@ const SupplementTVA: FC = () => {
                       {formatMontant(totalTVADeductible)}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      Sur des achats HT de {formatMontant(125400000)}
+                      Sur des achats HT de {formatMontant(operationsTVA.deductible.reduce((sum, op) => sum + op.baseHT, 0))}
                     </Typography>
                   </CardContent>
                 </Card>

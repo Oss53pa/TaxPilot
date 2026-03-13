@@ -130,55 +130,8 @@ const FicheR4SYSCOHADA: React.FC = () => {
   }, [])
 
   const loadInitialData = () => {
-    const initialProvisions: Provision[] = [
-      {
-        id: '1',
-        categorie: 'risques',
-        nature: 'Litiges en cours',
-        designation: 'Litige commercial avec fournisseur ABC',
-        montantDebut: 15000000,
-        dotations: 5000000,
-        reprises: 2000000,
-        montantFin: 18000000,
-        dateConstitution: '2023-06-15',
-        echeance: '2025-12-31',
-        justification: 'Procédure judiciaire en cours, risque probable de condamnation',
-        probabiliteRealisation: 75,
-        observations: 'Audience prévue Q2 2025'
-      },
-      {
-        id: '2',
-        categorie: 'charges',
-        nature: 'Grosses réparations',
-        designation: 'Réfection toiture bâtiment principal',
-        montantDebut: 25000000,
-        dotations: 10000000,
-        reprises: 0,
-        montantFin: 35000000,
-        dateConstitution: '2022-01-01',
-        echeance: '2025-06-30',
-        justification: 'Travaux planifiés selon plan de maintenance',
-        probabiliteRealisation: 100,
-        observations: 'Devis reçus, travaux confirmés'
-      },
-      {
-        id: '3',
-        categorie: 'depreciation',
-        nature: 'Dépréciation créances',
-        designation: 'Créances clients douteux',
-        montantDebut: 8000000,
-        dotations: 3500000,
-        reprises: 1500000,
-        montantFin: 10000000,
-        dateConstitution: '2024-01-01',
-        echeance: '',
-        justification: 'Clients en difficulté financière, retards de paiement > 180 jours',
-        probabiliteRealisation: 90,
-        observations: 'Procédures de recouvrement en cours'
-      }
-    ]
-    
-    setProvisions(initialProvisions)
+    // Provisions are user-entered — start empty, no demo data
+    setProvisions([])
   }
 
   const handleProvisionChange = (id: string, field: keyof Provision, value: any) => {

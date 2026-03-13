@@ -32,11 +32,12 @@ const Note2SYSCOHADA: React.FC = () => {
   // Comptes SYSCOHADA : brut = solde débiteur classe 21x, amort = solde créditeur classe 281x
   const immoRow = (rubrique: string, brutPrefixes: string[], amortPrefixes: string[], taux: string, duree: string) => {
     const brut = bal.d(brutPrefixes)
+    const brutN1 = bal.dN1(brutPrefixes)
     const amort = bal.c(amortPrefixes)
     return {
       rubrique,
-      valeurBruteDebut: brut, // Brut N (ouverture = clôture car pas de journal)
-      acquisitions: 0, // Nécessite données de journal (non disponibles depuis la balance)
+      valeurBruteDebut: bal.hasN1 ? brutN1 : brut, // N-1 opening if available, else N closing
+      acquisitions: 0,
       cessions: 0,
       virements: 0,
       valeurBruteFin: brut,

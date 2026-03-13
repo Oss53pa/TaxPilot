@@ -64,64 +64,98 @@ const ComplementCharges: React.FC = () => {
   const autresPerso = bal.d(['665', '668'])
   const totalPersonnel = salaires + chargesCNPS + autresChargesSoc + formation + autresPerso
 
+  // N-1 values from prior year balance
+  const achatsMarchN1 = bal.dN1(['601'])
+  const varStockMarchN1 = bal.dN1(['6031']) - bal.cN1(['6031'])
+  const achatsMPN1 = bal.dN1(['602'])
+  const varStockMPN1 = bal.dN1(['6032']) - bal.cN1(['6032'])
+  const autresAchatsN1 = bal.dN1(['604', '605', '608'])
+  const totalAchatsN1 = achatsMarchN1 + varStockMarchN1 + achatsMPN1 + varStockMPN1 + autresAchatsN1
+
+  const sousTraitN1 = bal.dN1(['621', '622'])
+  const locationsN1 = bal.dN1(['613', '614'])
+  const entretienN1 = bal.dN1(['615', '616'])
+  const assurancesN1 = bal.dN1(['617'])
+  const docFormationN1 = bal.dN1(['618'])
+  const totalServExtN1 = sousTraitN1 + locationsN1 + entretienN1 + assurancesN1 + docFormationN1
+
+  const remunIntermN1 = bal.dN1(['632'])
+  const publiciteN1 = bal.dN1(['627'])
+  const transportsN1 = bal.dN1(['624'])
+  const deplacementsN1 = bal.dN1(['625', '626'])
+  const servicesBancN1 = bal.dN1(['631'])
+  const totalAutresServN1 = remunIntermN1 + publiciteN1 + transportsN1 + deplacementsN1 + servicesBancN1
+
+  const impotRemunN1 = bal.dN1(['641'])
+  const autresImpotsN1 = bal.dN1(['645', '646', '647', '648'])
+  const droitsEnregN1 = bal.dN1(['642', '643'])
+  const totalImpotsN1 = impotRemunN1 + autresImpotsN1 + droitsEnregN1
+
+  const salairesN1 = bal.dN1(['661'])
+  const chargesCNPSN1 = bal.dN1(['664'])
+  const autresChargesSocN1 = bal.dN1(['662', '663'])
+  const formationN1 = bal.dN1(['658'])
+  const autresPersoN1 = bal.dN1(['665', '668'])
+  const totalPersonnelN1 = salairesN1 + chargesCNPSN1 + autresChargesSocN1 + formationN1 + autresPersoN1
+
   const donneesCharges = [
     {
       categorie: 'ACHATS',
       sousCategories: [
-        { nature: 'Achats de marchandises (601)', montantN: achatsMarch, montantN1: 0, pourcentageCA: pct(achatsMarch) },
-        { nature: 'Variation de stock marchandises (6031)', montantN: varStockMarch, montantN1: 0, pourcentageCA: pct(varStockMarch) },
-        { nature: 'Achats de matieres premieres (602)', montantN: achatsMP, montantN1: 0, pourcentageCA: pct(achatsMP) },
-        { nature: 'Variation de stock matieres (6032)', montantN: varStockMP, montantN1: 0, pourcentageCA: pct(varStockMP) },
-        { nature: 'Autres achats et charges (604-608)', montantN: autresAchats, montantN1: 0, pourcentageCA: pct(autresAchats) },
+        { nature: 'Achats de marchandises (601)', montantN: achatsMarch, montantN1: achatsMarchN1, pourcentageCA: pct(achatsMarch) },
+        { nature: 'Variation de stock marchandises (6031)', montantN: varStockMarch, montantN1: varStockMarchN1, pourcentageCA: pct(varStockMarch) },
+        { nature: 'Achats de matieres premieres (602)', montantN: achatsMP, montantN1: achatsMPN1, pourcentageCA: pct(achatsMP) },
+        { nature: 'Variation de stock matieres (6032)', montantN: varStockMP, montantN1: varStockMPN1, pourcentageCA: pct(varStockMP) },
+        { nature: 'Autres achats et charges (604-608)', montantN: autresAchats, montantN1: autresAchatsN1, pourcentageCA: pct(autresAchats) },
       ],
       totalN: totalAchats,
-      totalN1: 0
+      totalN1: totalAchatsN1
     },
     {
       categorie: 'SERVICES EXTERIEURS',
       sousCategories: [
-        { nature: 'Sous-traitance (621-622)', montantN: sousTrait, montantN1: 0, pourcentageCA: pct(sousTrait) },
-        { nature: 'Locations et charges locatives (613-614)', montantN: locations, montantN1: 0, pourcentageCA: pct(locations) },
-        { nature: 'Entretien et reparations (615-616)', montantN: entretien, montantN1: 0, pourcentageCA: pct(entretien) },
-        { nature: 'Assurances (617)', montantN: assurances, montantN1: 0, pourcentageCA: pct(assurances) },
-        { nature: 'Documentation et formation (618)', montantN: docFormation, montantN1: 0, pourcentageCA: pct(docFormation) },
+        { nature: 'Sous-traitance (621-622)', montantN: sousTrait, montantN1: sousTraitN1, pourcentageCA: pct(sousTrait) },
+        { nature: 'Locations et charges locatives (613-614)', montantN: locations, montantN1: locationsN1, pourcentageCA: pct(locations) },
+        { nature: 'Entretien et reparations (615-616)', montantN: entretien, montantN1: entretienN1, pourcentageCA: pct(entretien) },
+        { nature: 'Assurances (617)', montantN: assurances, montantN1: assurancesN1, pourcentageCA: pct(assurances) },
+        { nature: 'Documentation et formation (618)', montantN: docFormation, montantN1: docFormationN1, pourcentageCA: pct(docFormation) },
       ],
       totalN: totalServExt,
-      totalN1: 0
+      totalN1: totalServExtN1
     },
     {
       categorie: 'AUTRES SERVICES EXTERIEURS',
       sousCategories: [
-        { nature: 'Remunerations d\'intermediaires (631-632)', montantN: remunInterm, montantN1: 0, pourcentageCA: pct(remunInterm) },
-        { nature: 'Publicite et relations publiques (627)', montantN: publicite, montantN1: 0, pourcentageCA: pct(publicite) },
-        { nature: 'Transports (624)', montantN: transports, montantN1: 0, pourcentageCA: pct(transports) },
-        { nature: 'Deplacements et missions (625-626)', montantN: deplacements, montantN1: 0, pourcentageCA: pct(deplacements) },
-        { nature: 'Services bancaires (631)', montantN: servicesBanc, montantN1: 0, pourcentageCA: pct(servicesBanc) },
+        { nature: 'Remunerations d\'intermediaires (631-632)', montantN: remunInterm, montantN1: remunIntermN1, pourcentageCA: pct(remunInterm) },
+        { nature: 'Publicite et relations publiques (627)', montantN: publicite, montantN1: publiciteN1, pourcentageCA: pct(publicite) },
+        { nature: 'Transports (624)', montantN: transports, montantN1: transportsN1, pourcentageCA: pct(transports) },
+        { nature: 'Deplacements et missions (625-626)', montantN: deplacements, montantN1: deplacementsN1, pourcentageCA: pct(deplacements) },
+        { nature: 'Services bancaires (631)', montantN: servicesBanc, montantN1: servicesBancN1, pourcentageCA: pct(servicesBanc) },
       ],
       totalN: totalAutresServ,
-      totalN1: 0
+      totalN1: totalAutresServN1
     },
     {
       categorie: 'IMPOTS ET TAXES',
       sousCategories: [
-        { nature: 'Impots sur remunerations (641)', montantN: impotRemun, montantN1: 0, pourcentageCA: pct(impotRemun) },
-        { nature: 'Autres impots et taxes (645-648)', montantN: autresImpots, montantN1: 0, pourcentageCA: pct(autresImpots) },
-        { nature: 'Droits d\'enregistrement (642-643)', montantN: droitsEnreg, montantN1: 0, pourcentageCA: pct(droitsEnreg) },
+        { nature: 'Impots sur remunerations (641)', montantN: impotRemun, montantN1: impotRemunN1, pourcentageCA: pct(impotRemun) },
+        { nature: 'Autres impots et taxes (645-648)', montantN: autresImpots, montantN1: autresImpotsN1, pourcentageCA: pct(autresImpots) },
+        { nature: 'Droits d\'enregistrement (642-643)', montantN: droitsEnreg, montantN1: droitsEnregN1, pourcentageCA: pct(droitsEnreg) },
       ],
       totalN: totalImpots,
-      totalN1: 0
+      totalN1: totalImpotsN1
     },
     {
       categorie: 'CHARGES DE PERSONNEL',
       sousCategories: [
-        { nature: 'Salaires et appointements (661)', montantN: salaires, montantN1: 0, pourcentageCA: pct(salaires) },
-        { nature: 'Charges sociales CNPS (664)', montantN: chargesCNPS, montantN1: 0, pourcentageCA: pct(chargesCNPS) },
-        { nature: 'Autres charges sociales (662-663)', montantN: autresChargesSoc, montantN1: 0, pourcentageCA: pct(autresChargesSoc) },
-        { nature: 'Formation du personnel (658)', montantN: formation, montantN1: 0, pourcentageCA: pct(formation) },
-        { nature: 'Autres charges de personnel (665-668)', montantN: autresPerso, montantN1: 0, pourcentageCA: pct(autresPerso) },
+        { nature: 'Salaires et appointements (661)', montantN: salaires, montantN1: salairesN1, pourcentageCA: pct(salaires) },
+        { nature: 'Charges sociales CNPS (664)', montantN: chargesCNPS, montantN1: chargesCNPSN1, pourcentageCA: pct(chargesCNPS) },
+        { nature: 'Autres charges sociales (662-663)', montantN: autresChargesSoc, montantN1: autresChargesSocN1, pourcentageCA: pct(autresChargesSoc) },
+        { nature: 'Formation du personnel (658)', montantN: formation, montantN1: formationN1, pourcentageCA: pct(formation) },
+        { nature: 'Autres charges de personnel (665-668)', montantN: autresPerso, montantN1: autresPersoN1, pourcentageCA: pct(autresPerso) },
       ],
       totalN: totalPersonnel,
-      totalN1: 0
+      totalN1: totalPersonnelN1
     }
   ]
 
@@ -264,26 +298,21 @@ const ComplementCharges: React.FC = () => {
               </Typography>
               <Box sx={{ mb: 2 }}>
                 <Typography variant="body2" sx={{ fontWeight: 600, color: 'success.main' }}>
-                  Augmentations notables :
+                  Variations par catégorie :
                 </Typography>
-                <Typography variant="body2">• Transports : +14,3% (optimisation logistique)</Typography>
-                <Typography variant="body2">• Déplacements : +50,0% (expansion commerciale)</Typography>
-                <Typography variant="body2">• Charges de personnel : +7,3% (recrutements)</Typography>
-              </Box>
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="body2" sx={{ fontWeight: 600, color: 'warning.main' }}>
-                  Maîtrise des coûts :
-                </Typography>
-                <Typography variant="body2">• Achats marchandises : +6,0% (vs CA +6,8%)</Typography>
-                <Typography variant="body2">• Services extérieurs : +7,2% contrôlé</Typography>
+                {donneesCharges.map((cat, i) => (
+                  <Typography key={i} variant="body2">
+                    • {cat.categorie} : {cat.totalN1 > 0 ? `${calculerVariation(cat.totalN, cat.totalN1) >= 0 ? '+' : ''}${calculerVariation(cat.totalN, cat.totalN1).toFixed(1)}%` : 'N-1 non disponible'}
+                  </Typography>
+                ))}
               </Box>
               <Box>
                 <Typography variant="body2" sx={{ fontWeight: 600, color: 'info.main' }}>
                   Ratio clé :
                 </Typography>
                 <Typography variant="body2">
-                  Charges d'exploitation / CA : {((totalGeneral / chiffreAffaires) * 100).toFixed(1)}%
-                  (vs {((totalGeneralN1 / 197400000) * 100).toFixed(1)}% en N-1)
+                  Charges d'exploitation / CA : {chiffreAffaires > 0 ? `${((totalGeneral / chiffreAffaires) * 100).toFixed(1)}%` : '-'}
+                  {totalGeneralN1 > 0 && chiffreAffaires > 0 ? ` (vs ${((totalGeneralN1 / bal.cN1(['70'])) * 100).toFixed(1)}% en N-1)` : ''}
                 </Typography>
               </Box>
             </CardContent>

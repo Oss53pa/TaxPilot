@@ -48,7 +48,7 @@ function buildNote13(
   // ── Row 7 (L8): Valeur nominale ──
   const r7 = emptyRow(C)
   r7[8] = 'Valeur nominale des actions ou parts :'
-  r7[11] = 10000
+  r7[11] = ''  // Valeur nominale — renseignée par l'utilisateur
   rows.push(r7)
   merges.push(m(7, 8, 7, 10)) // I8:K8
 

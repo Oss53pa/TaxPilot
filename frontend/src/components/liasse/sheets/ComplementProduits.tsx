@@ -45,36 +45,52 @@ const ComplementProduits: React.FC = () => {
   const reprisesProvisions = bal.c(['791', '797', '799'])
   const totalSubventions = subventions + autresProduits + reprisesProvisions
 
+  // N-1 values from prior year balance
+  const ventesMarchN1 = bal.cN1(['701'])
+  const venteProdFinisN1 = bal.cN1(['702', '703'])
+  const venteProdSemiFinisN1 = bal.cN1(['704'])
+  const venteDechetsN1 = bal.cN1(['705', '706', '707'])
+  const totalVentesN1 = ventesMarchN1 + venteProdFinisN1 + venteProdSemiFinisN1 + venteDechetsN1
+
+  const varStockPFN1 = bal.cN1(['73'])
+  const prodImmoN1 = bal.cN1(['72'])
+  const totalProdStockeeN1 = varStockPFN1 + prodImmoN1
+
+  const subventionsN1 = bal.cN1(['71'])
+  const autresProduitsN1 = bal.cN1(['75'])
+  const reprisesProvisionsN1 = bal.cN1(['791', '797', '799'])
+  const totalSubventionsN1 = subventionsN1 + autresProduitsN1 + reprisesProvisionsN1
+
   const donneesProduits = [
     {
       categorie: 'VENTES',
       sousCategories: [
-        { nature: 'Ventes de marchandises (701)', montantN: ventesMarch, montantN1: 0, pourcentageCA: pct(ventesMarch) },
-        { nature: 'Ventes de produits finis (702-703)', montantN: venteProdFinis, montantN1: 0, pourcentageCA: pct(venteProdFinis) },
-        { nature: 'Ventes de produits semi-finis (704)', montantN: venteProdSemiFinis, montantN1: 0, pourcentageCA: pct(venteProdSemiFinis) },
-        { nature: 'Autres ventes (705-707)', montantN: venteDechets, montantN1: 0, pourcentageCA: pct(venteDechets) },
+        { nature: 'Ventes de marchandises (701)', montantN: ventesMarch, montantN1: ventesMarchN1, pourcentageCA: pct(ventesMarch) },
+        { nature: 'Ventes de produits finis (702-703)', montantN: venteProdFinis, montantN1: venteProdFinisN1, pourcentageCA: pct(venteProdFinis) },
+        { nature: 'Ventes de produits semi-finis (704)', montantN: venteProdSemiFinis, montantN1: venteProdSemiFinisN1, pourcentageCA: pct(venteProdSemiFinis) },
+        { nature: 'Autres ventes (705-707)', montantN: venteDechets, montantN1: venteDechetsN1, pourcentageCA: pct(venteDechets) },
       ],
       totalN: totalVentes,
-      totalN1: 0
+      totalN1: totalVentesN1
     },
     {
       categorie: 'PRODUCTION STOCKEE ET IMMOBILISEE',
       sousCategories: [
-        { nature: 'Variation stock produits (73)', montantN: varStockPF, montantN1: 0, pourcentageCA: pct(varStockPF) },
-        { nature: 'Production immobilisee (72)', montantN: prodImmo, montantN1: 0, pourcentageCA: pct(prodImmo) },
+        { nature: 'Variation stock produits (73)', montantN: varStockPF, montantN1: varStockPFN1, pourcentageCA: pct(varStockPF) },
+        { nature: 'Production immobilisee (72)', montantN: prodImmo, montantN1: prodImmoN1, pourcentageCA: pct(prodImmo) },
       ],
       totalN: totalProdStockee,
-      totalN1: 0
+      totalN1: totalProdStockeeN1
     },
     {
       categorie: 'SUBVENTIONS ET AUTRES PRODUITS',
       sousCategories: [
-        { nature: 'Subventions d\'exploitation (71)', montantN: subventions, montantN1: 0, pourcentageCA: pct(subventions) },
-        { nature: 'Autres produits d\'exploitation (75)', montantN: autresProduits, montantN1: 0, pourcentageCA: pct(autresProduits) },
-        { nature: 'Reprises de provisions (791-799)', montantN: reprisesProvisions, montantN1: 0, pourcentageCA: pct(reprisesProvisions) },
+        { nature: 'Subventions d\'exploitation (71)', montantN: subventions, montantN1: subventionsN1, pourcentageCA: pct(subventions) },
+        { nature: 'Autres produits d\'exploitation (75)', montantN: autresProduits, montantN1: autresProduitsN1, pourcentageCA: pct(autresProduits) },
+        { nature: 'Reprises de provisions (791-799)', montantN: reprisesProvisions, montantN1: reprisesProvisionsN1, pourcentageCA: pct(reprisesProvisions) },
       ],
       totalN: totalSubventions,
-      totalN1: 0
+      totalN1: totalSubventionsN1
     }
   ]
 
@@ -221,31 +237,24 @@ const ComplementProduits: React.FC = () => {
                   Croissance du chiffre d'affaires :
                 </Typography>
                 <Typography variant="body2">
-                  • Progression globale : +{calculerVariation(totalGeneral, totalGeneralN1).toFixed(1)}%
+                  • Progression globale : {totalGeneralN1 > 0 ? `+${calculerVariation(totalGeneral, totalGeneralN1).toFixed(1)}%` : 'N-1 non disponible'}
                 </Typography>
                 <Typography variant="body2">
-                  • Ventes marchandises : +{calculerVariation(125000000, 117000000).toFixed(1)}%
+                  • Ventes marchandises : {bal.cN1(['701']) > 0 ? `+${calculerVariation(ventesMarch, bal.cN1(['701'])).toFixed(1)}%` : 'N-1 non disponible'}
                 </Typography>
                 <Typography variant="body2">
-                  • Ventes produits finis : +{calculerVariation(68000000, 63500000).toFixed(1)}%
+                  • Ventes produits finis : {bal.cN1(['702', '703']) > 0 ? `+${calculerVariation(venteProdFinis, bal.cN1(['702', '703'])).toFixed(1)}%` : 'N-1 non disponible'}
                 </Typography>
-              </Box>
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="body2" sx={{ fontWeight: 600, color: 'warning.main' }}>
-                  Points d'attention :
-                </Typography>
-                <Typography variant="body2">• Production stockée en forte hausse</Typography>
-                <Typography variant="body2">• Absence de subventions d'exploitation</Typography>
               </Box>
               <Box>
                 <Typography variant="body2" sx={{ fontWeight: 600, color: 'info.main' }}>
                   Indicateurs clés :
                 </Typography>
                 <Typography variant="body2">
-                  CA moyen : {formatMontant(Math.round((totalGeneral + totalGeneralN1) / 2))}
+                  CA moyen : {totalGeneralN1 > 0 ? formatMontant(Math.round((totalGeneral + totalGeneralN1) / 2)) : formatMontant(totalGeneral)}
                 </Typography>
                 <Typography variant="body2">
-                  Croissance mensuelle : +{(calculerVariation(totalGeneral, totalGeneralN1) / 12).toFixed(2)}%
+                  Croissance mensuelle : {totalGeneralN1 > 0 ? `+${(calculerVariation(totalGeneral, totalGeneralN1) / 12).toFixed(2)}%` : '-'}
                 </Typography>
               </Box>
             </CardContent>

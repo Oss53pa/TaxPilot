@@ -256,21 +256,21 @@ const TablesCalculImpots: FC = () => {
         ecart: 0
       },
       {
-        code: 'TAX_002', 
+        code: 'TAX_002',
         libelle: 'Contribution des patentes',
-        base_imposable: 500000, // Base fixe
+        base_imposable: bal.d(['631']),
         taux: 0,
-        montant_calcule: 500000,
-        montant_declare: 500000,
+        montant_calcule: bal.d(['631']),
+        montant_declare: bal.d(['631']),
         ecart: 0
       },
       {
         code: 'TAX_003',
         libelle: 'Taxe foncière',
-        base_imposable: 200000,
+        base_imposable: bal.d(['635']),
         taux: 0,
-        montant_calcule: 200000,
-        montant_declare: 200000,
+        montant_calcule: bal.d(['635']),
+        montant_declare: bal.d(['635']),
         ecart: 0
       }
     ]

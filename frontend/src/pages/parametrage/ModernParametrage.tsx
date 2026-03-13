@@ -88,6 +88,7 @@ import {
   Add as AddIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
+  DeleteForever as DeleteForeverIcon,
   ExpandMore as ExpandMoreIcon,
   Speed as SpeedIcon,
   Assessment as AssessmentIcon,
@@ -218,6 +219,24 @@ const ModernParametrage: React.FC = () => {
   const [validationErrors, setValidationErrors] = useState<ValidationResult[]>([])
   const [importDialogOpen, setImportDialogOpen] = useState(false)
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false)
+  const [resetDialogOpen, setResetDialogOpen] = useState(false)
+  const [resetConfirmText, setResetConfirmText] = useState('')
+
+  const handleResetData = useCallback(() => {
+    const keysToRemove: string[] = []
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i)
+      if (key && (key.startsWith('fiscasync_db_') || key.startsWith('fiscasync_audit_'))) {
+        keysToRemove.push(key)
+      }
+    }
+    keysToRemove.forEach(k => localStorage.removeItem(k))
+    // Also remove the purge flag so seed data can be re-created
+    localStorage.removeItem('fiscasync_seed_purged_v2')
+    setResetDialogOpen(false)
+    setResetConfirmText('')
+    window.location.reload()
+  }, [])
   const [showPassword, setShowPassword] = useState(false)
 
   // Paramètres de thème
@@ -1987,11 +2006,70 @@ const ModernParametrage: React.FC = () => {
                     </TableContainer>
                   </AccordionDetails>
                 </Accordion>
+
+                {/* Réinitialisation des données */}
+                <Paper variant="outlined" sx={{ p: 3, mt: 3, borderColor: 'error.light' }}>
+                  <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 1 }}>
+                    <DeleteForeverIcon color="error" />
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'error.main' }}>
+                      Réinitialiser les données
+                    </Typography>
+                  </Stack>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    Supprime toutes les données (écritures, balances, entreprises, factures, etc.) et recharge les données de démonstration. Cette action est irréversible.
+                  </Typography>
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    startIcon={<DeleteForeverIcon />}
+                    onClick={() => setResetDialogOpen(true)}
+                  >
+                    Réinitialiser toutes les données
+                  </Button>
+                </Paper>
               </CardContent>
             </TabPanel>
           </Card>
         </Grid>
       </Grid>
+
+      {/* Dialog Confirmation Reset */}
+      <Dialog open={resetDialogOpen} onClose={() => { setResetDialogOpen(false); setResetConfirmText('') }}>
+        <DialogTitle sx={{ color: 'error.main', fontWeight: 700 }}>
+          Confirmer la réinitialisation
+        </DialogTitle>
+        <DialogContent>
+          <Alert severity="error" sx={{ mb: 2 }}>
+            <AlertTitle>Action irréversible</AlertTitle>
+            Toutes les données seront supprimées et remplacées par les données de démonstration.
+          </Alert>
+          <Typography variant="body2" sx={{ mb: 2 }}>
+            Tapez <strong>REINITIALISER</strong> pour confirmer :
+          </Typography>
+          <TextField
+            fullWidth
+            size="small"
+            value={resetConfirmText}
+            onChange={(e) => setResetConfirmText(e.target.value)}
+            placeholder="REINITIALISER"
+            autoFocus
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => { setResetDialogOpen(false); setResetConfirmText('') }}>
+            Annuler
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            disabled={resetConfirmText !== 'REINITIALISER'}
+            onClick={handleResetData}
+            startIcon={<DeleteForeverIcon />}
+          >
+            Réinitialiser
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Dialog Import */}
       <Dialog open={importDialogOpen} onClose={() => setImportDialogOpen(false)}>

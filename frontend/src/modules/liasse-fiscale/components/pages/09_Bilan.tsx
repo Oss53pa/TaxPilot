@@ -175,12 +175,13 @@ const Bilan: React.FC<PageProps> = ({ entreprise, balance, balanceN1, onNoteClic
   })
 
   const noteChipSx = {
-    height: 18,
-    minWidth: 18,
-    fontSize: 8,
+    height: 16,
+    minWidth: 16,
+    fontSize: 7,
     fontWeight: 600,
+    borderRadius: '8px',
     cursor: 'pointer',
-    '& .MuiChip-label': { px: 0.5, py: 0 },
+    '& .MuiChip-label': { px: '3px', py: 0, lineHeight: 1 },
     '&:hover': { bgcolor: 'primary.main', color: 'white', borderColor: 'primary.main' },
   }
 

@@ -597,10 +597,13 @@ export class LiasseDataService {
       const brut = this.calculateActifBrut(mapping.comptes)
       const amortProv = this.calculateAmortProv(mapping.amortComptes || [])
       const net = brut - amortProv
+      const netN1 = this.hasN1
+        ? this.calculateActifBrutN1(mapping.comptes) - this.calculateAmortProvN1(mapping.amortComptes || [])
+        : 0
       rows.push({
         ref,
         libelle: SMT_LIBELLES.actif[ref as keyof typeof SMT_LIBELLES.actif],
-        brut, amortProv, net, net_n1: 0,
+        brut, amortProv, net, net_n1: netN1,
       })
     })
     return rows
@@ -610,10 +613,11 @@ export class LiasseDataService {
     const rows: any[] = []
     Object.entries(SMT_MAPPING.passif).forEach(([ref, mapping]) => {
       const montant = this.calculatePassif(mapping.comptes)
+      const montantN1 = this.hasN1 ? this.calculatePassifN1(mapping.comptes) : 0
       rows.push({
         ref,
         libelle: SMT_LIBELLES.passif[ref as keyof typeof SMT_LIBELLES.passif],
-        montant, montant_n1: 0,
+        montant, montant_n1: montantN1,
       })
     })
     return rows
@@ -630,10 +634,13 @@ export class LiasseDataService {
       const montant = chargeVariationRefs.includes(ref)
         ? this.calculateVariation(mapping.comptes)
         : this.calculateCharges(mapping.comptes)
+      const montantN1 = this.hasN1
+        ? (chargeVariationRefs.includes(ref) ? this.sumSoldesN1(mapping.comptes) : this.calculateChargesN1(mapping.comptes))
+        : 0
       charges.push({
         ref,
         libelle: SMT_LIBELLES.charges[ref as keyof typeof SMT_LIBELLES.charges],
-        montant, montant_n1: 0,
+        montant, montant_n1: montantN1,
       })
     })
 
@@ -650,10 +657,15 @@ export class LiasseDataService {
       } else {
         montant = this.calculateProduits(mapping.comptes)
       }
+      const montantN1Prod = this.hasN1
+        ? (ref === 'PR_3'
+          ? this.calculateProduitsN1(['72']) + (-this.sumSoldesN1(['73']))
+          : this.calculateProduitsN1(mapping.comptes))
+        : 0
       produits.push({
         ref,
         libelle: SMT_LIBELLES.produits[ref as keyof typeof SMT_LIBELLES.produits],
-        montant, montant_n1: 0,
+        montant, montant_n1: montantN1Prod,
       })
     })
 
@@ -1286,7 +1298,10 @@ export class LiasseDataService {
       const credit = this.sumCredit(prefixes)
       const montant = key === 'capital_non_appele' ? debit : credit
       if (montant === 0 && debit === 0) return
-      lines.push({ id: key, designation: label, montantN: montant, montantN1: 0 })
+      const montantN1 = this.hasN1
+        ? (key === 'capital_non_appele' ? this.calculateActifBrutN1(prefixes) : this.calculatePassifN1(prefixes))
+        : 0
+      lines.push({ id: key, designation: label, montantN: montant, montantN1 })
     })
     return lines
   }
@@ -1307,7 +1322,8 @@ export class LiasseDataService {
     Object.entries(DETTES_MAP).forEach(([key, { label, categorie, prefixes }]) => {
       const montant = this.sumCredit(prefixes)
       if (montant === 0) return
-      lines.push({ id: key, categorie, designation: label, montantN: montant, montantN1: 0, echeanceCT: 0, echeanceLT: montant })
+      const montantN1 = this.hasN1 ? this.calculatePassifN1(prefixes) : 0
+      lines.push({ id: key, categorie, designation: label, montantN: montant, montantN1, echeanceCT: 0, echeanceLT: montant })
     })
     return lines
   }
@@ -1330,7 +1346,8 @@ export class LiasseDataService {
       // Revenue accounts have credit balance
       const montant = this.sumCredit(prefixes)
       if (montant === 0) return
-      lines.push({ id: key, categorie, designation: label, montantN: montant, montantN1: 0 })
+      const montantN1 = this.hasN1 ? this.calculateProduitsN1(prefixes) : 0
+      lines.push({ id: key, categorie, designation: label, montantN: montant, montantN1 })
     })
     return lines
   }
@@ -1349,7 +1366,8 @@ export class LiasseDataService {
     Object.entries(PERSONNEL_MAP).forEach(([key, { label, prefixes }]) => {
       const montant = this.sumDebit(prefixes)
       if (montant === 0) return
-      lines.push({ id: key, designation: label, montantN: montant, montantN1: 0 })
+      const montantN1 = this.hasN1 ? this.calculateChargesN1(prefixes) : 0
+      lines.push({ id: key, designation: label, montantN: montant, montantN1 })
     })
     return lines
   }

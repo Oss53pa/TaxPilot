@@ -39,10 +39,11 @@ const Note3ASYSCOHADA: React.FC = () => {
 
   const immoRow = (rubrique: string, brutPrefixes: string[], amortPrefixes: string[], taux: string, duree: string) => {
     const brut = bal.d(brutPrefixes)
+    const brutN1 = bal.dN1(brutPrefixes)
     const amort = bal.c(amortPrefixes)
     return {
       rubrique,
-      valeurBruteDebut: brut,
+      valeurBruteDebut: bal.hasN1 ? brutN1 : brut,
       acquisitions: 0,
       cessions: 0,
       reevaluations: 0,
