@@ -58,6 +58,7 @@ import { generateCorrectionReport } from '@/services/audit/auditEngine'
 import { getAllSessions, getSnapshotByBalance } from '@/services/audit/auditStorage'
 import { getLatestBalance, getLatestBalanceN1 } from '@/services/balanceStorageService'
 
+import { useSnackbar } from 'notistack'
 import AuditProgressDialog from '@/components/audit/AuditProgressDialog'
 import AuditResultsView from '@/components/audit/AuditResultsView'
 import CorrectionReportView from '@/components/audit/CorrectionReportView'
@@ -71,6 +72,7 @@ const ModernAudit: React.FC = () => {
   const dispatch = useAppDispatch()
   const { currentSession, resultats, correctionReport, isRunning, rapportPartie2 } = useAppSelector((s) => s.audit)
 
+  const { enqueueSnackbar } = useSnackbar()
   const [activeTab, setActiveTab] = useState(0)
   const [deploying, setDeploying] = useState(false)
   const [deployError, setDeployError] = useState<string | null>(null)
@@ -139,6 +141,12 @@ const ModernAudit: React.FC = () => {
 
       dispatch(setSession(session))
       dispatch(stopAudit())
+
+      // P0-4: Toast notification after audit completed with score
+      const auditScore = session.resume?.scoreGlobal ?? 0
+      enqueueSnackbar(`Audit terminé — Score : ${auditScore}/100`, {
+        variant: auditScore >= 80 ? 'success' : auditScore >= 50 ? 'warning' : 'error',
+      })
 
       // Generer rapport de corrections si une session precedente existe
       const allSessions = getAllSessions()

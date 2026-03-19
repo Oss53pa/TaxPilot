@@ -567,6 +567,16 @@ const ModernConsolidation: React.FC = () => {
 
   return (
     <Box sx={{ p: 3, backgroundColor: 'background.default', minHeight: '100vh' }}>
+      {/* P0-3: Badge "Bientôt disponible" — module non fonctionnel */}
+      <Alert
+        severity="info"
+        sx={{ mb: 2 }}
+        icon={false}
+      >
+        <Chip label="Bientôt disponible" color="warning" size="small" sx={{ mr: 1, fontWeight: 600 }} />
+        Cette fonctionnalité sera disponible dans une prochaine version.
+      </Alert>
+
       {/* Header */}
       <Box sx={{ mb: 4 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
@@ -596,6 +606,8 @@ const ModernConsolidation: React.FC = () => {
               variant="contained"
               startIcon={<SyncIcon />}
               sx={{ backgroundColor: theme.palette.primary.main }}
+              disabled
+              title="Bientôt disponible"
             >
               Lancer consolidation
             </Button>
@@ -747,6 +759,8 @@ const ModernConsolidation: React.FC = () => {
                     size="small"
                     startIcon={<AddIcon />}
                     onClick={() => setPerimeterDialogOpen(true)}
+                    disabled
+                    title="Bientôt disponible"
                   >
                     Nouveau périmètre
                   </Button>
@@ -983,6 +997,8 @@ const ModernConsolidation: React.FC = () => {
                   startIcon={<AddIcon />}
                   sx={{ mt: 3 }}
                   fullWidth
+                  disabled
+                  title="Bientôt disponible"
                 >
                   Ajouter un ajustement
                 </Button>

@@ -9,72 +9,71 @@ import type { Column, Row } from '../LiasseTable'
 
 const PASSIF_DETAIL: { ref: string; label: string; comptes: string[]; note?: string; isTotal?: boolean; isSub?: boolean; special?: string }[] = [
   { ref: '', label: 'CAPITAUX PROPRES ET RESSOURCES ASSIMILEES', comptes: [], isSub: true },
-  { ref: 'CA', label: 'Capital', comptes: ['101', '102', '103'], note: '10' },
-  { ref: 'CB', label: 'Actionnaires capital souscrit non appele (-)', comptes: ['109'], note: '10', special: 'debit' },
-  { ref: 'CC', label: 'Primes liees au capital social', comptes: ['104', '105'], note: '11' },
-  { ref: 'CD', label: 'Ecarts de reevaluation', comptes: ['106'], note: '3E' },
-  { ref: 'CE', label: 'Reserves indisponibles', comptes: ['111', '112'], note: '11' },
-  { ref: 'CF', label: 'Reserves libres', comptes: ['113', '118'], note: '11' },
-  { ref: 'CG', label: 'Report a nouveau (+ ou -)', comptes: ['12'], note: '11', special: 'signed' },
-  { ref: 'CH', label: 'Resultat net de l\'exercice (benefice + ou perte -)', comptes: ['13'], special: 'signed' },
-  { ref: 'CI', label: 'Subventions d\'investissement', comptes: ['14'], note: '12' },
-  { ref: 'CJ', label: 'Provisions reglementees', comptes: ['15'], note: '13' },
-  { ref: 'CP', label: 'TOTAL CAPITAUX PROPRES (I)', comptes: [], isTotal: true },
+  { ref: 'CA', label: 'Capital', comptes: ['101', '102', '103'], note: '13' },
+  { ref: 'CB', label: 'Apporteurs capital non appel\u00e9 (-)', comptes: ['109'], note: '13', special: 'debit' },
+  { ref: 'CD', label: 'Primes li\u00e9es au capital social', comptes: ['104', '105'], note: '14' },
+  { ref: 'CE', label: 'Ecarts de r\u00e9\u00e9valuation', comptes: ['106'], note: '3e' },
+  { ref: 'CF', label: 'R\u00e9serves indisponibles', comptes: ['111', '112'], note: '14' },
+  { ref: 'CG', label: 'R\u00e9serves libres', comptes: ['113', '118'], note: '14' },
+  { ref: 'CH', label: 'Report \u00e0 nouveau (+ ou -)', comptes: ['12'], note: '14', special: 'signed' },
+  { ref: 'CJ', label: 'R\u00e9sultat net de l\'exercice (b\u00e9n\u00e9fice + ou perte -)', comptes: ['13'], special: 'signed' },
+  { ref: 'CL', label: 'Subventions d\'investissement', comptes: ['14'], note: '15' },
+  { ref: 'CM', label: 'Provisions r\u00e9glement\u00e9es', comptes: ['15'], note: '15' },
+  { ref: 'CP', label: 'TOTAL CAPITAUX PROPRES ET RESSOURCES ASSIMILEES', comptes: [], isTotal: true },
   { ref: '', label: 'DETTES FINANCIERES ET RESSOURCES ASSIMILEES', comptes: [], isSub: true },
-  { ref: 'DA', label: 'Emprunts obligataires', comptes: ['161'], note: '14' },
-  { ref: 'DB', label: 'Emprunts et dettes de credit-bail', comptes: ['162', '163', '164'], note: '14' },
-  { ref: 'DC', label: 'Dettes financieres diverses', comptes: ['165', '166', '168'], note: '14' },
-  { ref: 'DD', label: 'Dettes de credit-bail immobilier', comptes: ['17'], note: '14' },
-  { ref: 'DE', label: 'Dettes financieres diverses', comptes: ['181', '182', '183', '184', '185', '186'], note: '14' },
-  { ref: 'DF', label: 'Provisions financieres pour risques et charges', comptes: ['19'], note: '14' },
-  { ref: 'DG', label: 'TOTAL DETTES FINANCIERES (II)', comptes: [], isTotal: true },
+  { ref: 'DA', label: 'Emprunts et dettes financi\u00e8res diverses', comptes: ['161', '162', '163', '164', '165', '166', '168'], note: '16' },
+  { ref: 'DB', label: 'Dettes de location-acquisition', comptes: ['17'], note: '16' },
+  { ref: 'DC', label: 'Provisions pour risques et charges', comptes: ['19'], note: '16' },
+  { ref: 'DD', label: 'TOTAL DETTES FINANCIERES ET RESSOURCES ASSIMILEES', comptes: [], isTotal: true },
+  { ref: 'DF', label: 'TOTAL RESSOURCES STABLES', comptes: [], isTotal: true },
   { ref: '', label: 'PASSIF CIRCULANT', comptes: [], isSub: true },
-  { ref: 'DH', label: 'Dettes circulantes HAO et ressources assimilees', comptes: ['481', '482', '483', '484'], note: '15A' },
-  { ref: 'DI', label: 'Clients, avances recues', comptes: ['419'], note: '15A' },
-  { ref: 'DJ', label: 'Fournisseurs d\'exploitation', comptes: ['401', '402', '403', '404', '405', '408'], note: '15B' },
-  { ref: 'DK', label: 'Dettes fiscales et sociales', comptes: ['43', '44'], note: '16A' },
-  { ref: 'DL', label: 'Autres dettes', comptes: ['421', '422', '423', '424', '425', '426', '427', '428'], note: '16B' },
-  { ref: 'DM', label: 'Risques provisionnees', comptes: ['499'], note: '16B' },
-  { ref: 'DN', label: 'TOTAL PASSIF CIRCULANT (III)', comptes: [], isTotal: true },
+  { ref: 'DH', label: 'Dettes circulantes HAO', comptes: ['481', '482', '483', '484'], note: '5' },
+  { ref: 'DI', label: 'Clients, avances re\u00e7ues', comptes: ['419'], note: '7' },
+  { ref: 'DJ', label: 'Fournisseurs d\'exploitation', comptes: ['401', '402', '403', '404', '405', '408'], note: '17' },
+  { ref: 'DK', label: 'Dettes fiscales et sociales', comptes: ['43', '44'], note: '18' },
+  { ref: 'DM', label: 'Autres dettes', comptes: ['421', '422', '423', '424', '425', '426', '427', '428'], note: '19' },
+  { ref: 'DN', label: 'Provisions pour risques et charges \u00e0 court terme', comptes: ['499'], note: '19' },
+  { ref: 'DP', label: 'TOTAL PASSIF CIRCULANT', comptes: [], isTotal: true },
   { ref: '', label: 'TRESORERIE - PASSIF', comptes: [], isSub: true },
-  { ref: 'DQ', label: 'Banques, credits de tresorerie', comptes: ['52', '561', '564'], note: '14' },
-  { ref: 'DR', label: 'Banques, credits d\'escompte', comptes: ['565'], note: '14' },
-  { ref: 'DS', label: 'TOTAL TRESORERIE - PASSIF (IV)', comptes: [], isTotal: true },
-  { ref: 'DT', label: 'Ecart de conversion - Passif (V)', comptes: ['479'], note: '8B' },
-  { ref: 'DZ', label: 'TOTAL GENERAL (I + II + III + IV + V)', comptes: [], isTotal: true },
+  { ref: 'DQ', label: 'Banques, cr\u00e9dits d\'escompte', comptes: ['565'], note: '20' },
+  { ref: 'DR', label: 'Banques, \u00e9tablissements financiers et cr\u00e9dits de tr\u00e9sorerie', comptes: ['52', '561', '564'], note: '20' },
+  { ref: 'DT', label: 'TOTAL TRESORERIE-PASSIF', comptes: [], isTotal: true },
+  { ref: 'DV', label: 'Ecart de conversion-Passif', comptes: ['479'], note: '12' },
+  { ref: 'DZ', label: 'TOTAL GENERAL', comptes: [], isTotal: true },
 ]
 
 function computePassif(bal: BalanceEntry[]) {
-  let totalCP = 0, totalDF = 0, totalPC = 0, totalTP = 0, ecartConv = 0
-  let section = 'cp'
+  const values: Record<string, number> = {}
 
-  return PASSIF_DETAIL.map(r => {
-    if (r.isSub) {
-      if (r.label.includes('CAPITAUX')) section = 'cp'
-      else if (r.label.includes('DETTES FIN')) section = 'df'
-      else if (r.label.includes('PASSIF CIRC')) section = 'pc'
-      else if (r.label.includes('TRESORERIE')) section = 'tp'
-      return { ref: r.ref, montant: 0, isSub: true, isTotal: false, label: r.label, note: '' }
-    }
-    if (r.isTotal) {
-      if (r.ref === 'CP') return { ref: r.ref, montant: totalCP, isSub: false, isTotal: true, label: r.label, note: '' }
-      if (r.ref === 'DG') return { ref: r.ref, montant: totalDF, isSub: false, isTotal: true, label: r.label, note: '' }
-      if (r.ref === 'DN') return { ref: r.ref, montant: totalPC, isSub: false, isTotal: true, label: r.label, note: '' }
-      if (r.ref === 'DS') return { ref: r.ref, montant: totalTP, isSub: false, isTotal: true, label: r.label, note: '' }
-      if (r.ref === 'DZ') return { ref: r.ref, montant: totalCP + totalDF + totalPC + totalTP + ecartConv, isSub: false, isTotal: true, label: r.label, note: '' }
-      return { ref: r.ref, montant: 0, isSub: false, isTotal: true, label: r.label, note: '' }
-    }
+  // Compute individual line values
+  for (const r of PASSIF_DETAIL) {
+    if (r.isSub || r.isTotal) continue
     let montant: number
     if (r.special === 'debit') montant = Math.abs(getBalanceSolde(bal, r.comptes))
     else if (r.special === 'signed') montant = -getBalanceSolde(bal, r.comptes)
     else montant = getPassif(bal, r.comptes)
+    values[r.ref] = montant
+  }
 
-    if (r.ref === 'DT') { ecartConv = montant }
-    else if (section === 'cp') totalCP += (r.ref === 'CB' ? -montant : montant)
-    else if (section === 'df') totalDF += montant
-    else if (section === 'pc') totalPC += montant
-    else if (section === 'tp') totalTP += montant
-    return { ref: r.ref, montant, isSub: false, isTotal: false, label: r.label, note: r.note || '' }
+  // Compute totals
+  values['CP'] = (values['CA'] || 0) - (values['CB'] || 0) + (values['CD'] || 0) + (values['CE'] || 0)
+    + (values['CF'] || 0) + (values['CG'] || 0) + (values['CH'] || 0) + (values['CJ'] || 0)
+    + (values['CL'] || 0) + (values['CM'] || 0)
+  values['DD'] = (values['DA'] || 0) + (values['DB'] || 0) + (values['DC'] || 0)
+  values['DF'] = (values['CP'] || 0) + (values['DD'] || 0)
+  values['DP'] = (values['DH'] || 0) + (values['DI'] || 0) + (values['DJ'] || 0)
+    + (values['DK'] || 0) + (values['DM'] || 0) + (values['DN'] || 0)
+  values['DT'] = (values['DQ'] || 0) + (values['DR'] || 0)
+  values['DZ'] = (values['DF'] || 0) + (values['DP'] || 0) + (values['DT'] || 0) + (values['DV'] || 0)
+
+  return PASSIF_DETAIL.map(r => {
+    if (r.isSub) {
+      return { ref: r.ref, montant: 0, isSub: true, isTotal: false, label: r.label, note: '' }
+    }
+    if (r.isTotal) {
+      return { ref: r.ref, montant: values[r.ref] || 0, isSub: false, isTotal: true, label: r.label, note: '' }
+    }
+    return { ref: r.ref, montant: values[r.ref] || 0, isSub: false, isTotal: false, label: r.label, note: r.note || '' }
   })
 }
 
@@ -86,8 +85,8 @@ const Passif: React.FC<PageProps> = ({ entreprise, balance, balanceN1, onNoteCli
     { key: 'ref', label: 'REF', width: 52, align: 'center' },
     { key: 'label', label: 'PASSIF', width: '45%' },
     { key: 'note', label: 'Note', width: 44, align: 'center' },
-    { key: 'montant', label: 'MONTANT', width: 130, align: 'right', subLabel: 'Exercice N' },
-    { key: 'montant_n1', label: 'MONTANT', width: 130, align: 'right', subLabel: 'Exercice N-1' },
+    { key: 'montant', label: 'NET', width: 130, align: 'right', subLabel: 'Exercice N' },
+    { key: 'montant_n1', label: 'NET', width: 130, align: 'right', subLabel: 'Exercice N-1' },
   ]
 
   const rows: Row[] = data.map((r, i) => ({

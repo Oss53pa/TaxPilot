@@ -49,7 +49,18 @@ const OrganizationMembersPage = React.lazy(() => import('@/pages/organization/Or
 const SubscriptionPage = React.lazy(() => import('@/pages/organization/SubscriptionPage'))
 const InvitationsPage = React.lazy(() => import('@/pages/organization/InvitationsPage'))
 
+// P1: Onboarding & dossiers
+const ModeSelection = React.lazy(() => import('@/pages/onboarding/ModeSelection'))
+const OnboardingWizard = React.lazy(() => import('@/pages/onboarding/OnboardingWizard'))
+const DossiersPage = React.lazy(() => import('@/pages/dossiers/DossiersPage'))
+
+// P2-3: Auth pages
+const LoginPage = React.lazy(() => import('@/pages/auth/LoginPage'))
+const RegisterPage = React.lazy(() => import('@/pages/auth/RegisterPage'))
+const ForgotPasswordPage = React.lazy(() => import('@/pages/auth/ForgotPasswordPage'))
+
 import { useAuthStore } from './store/authStore'
+import { useModeStore } from './store/modeStore'
 
 /** Wrapper: page avec sidebar */
 const WithSidebar: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -81,6 +92,7 @@ function purgeSeedData() {
 
 function App() {
   const { checkAuth } = useAuthStore()
+  const { userMode, onboardingCompleted } = useModeStore()
 
   React.useEffect(() => {
     checkAuth()
@@ -91,8 +103,21 @@ function App() {
     <ErrorBoundary>
       <Suspense fallback={<PageLoader />}>
         <Routes>
-          {/* Landing page - SANS sidebar */}
-          <Route path="/" element={<ModernDashboard />} />
+          {/* P2-3: Auth routes */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+
+          {/* P1-1: First launch → mode selection if no mode chosen yet */}
+          <Route path="/mode-selection" element={<ModeSelection />} />
+          <Route path="/onboarding" element={<OnboardingWizard />} />
+
+          {/* Landing page — redirect to mode selection if first launch */}
+          <Route path="/" element={
+            !userMode ? <Navigate to="/mode-selection" replace /> :
+            !onboardingCompleted ? <Navigate to="/onboarding" replace /> :
+            <ModernDashboard />
+          } />
 
           {/* Toutes les pages app - AVEC sidebar */}
           <Route path="/dashboard" element={<S><AppDashboard /></S>} />
@@ -124,6 +149,9 @@ function App() {
           <Route path="/reporting" element={<S><ModernReporting /></S>} />
           <Route path="/archives" element={<S><ArchivesPage /></S>} />
           <Route path="/veille" element={<S><ModernVeilleReglementaire /></S>} />
+
+          {/* P1-4: Dossiers clients (mode Cabinet) */}
+          <Route path="/dossiers" element={<S><DossiersPage /></S>} />
 
           <Route path="/collaboration" element={<S><ModernCollaboration /></S>} />
           <Route path="/integrations" element={<S><ModernIntegrations /></S>} />

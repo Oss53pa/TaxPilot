@@ -77,6 +77,7 @@ import {
   ArrowForward as ArrowIcon,
 } from '@mui/icons-material'
 import { useDropzone } from 'react-dropzone'
+import { useSnackbar } from 'notistack'
 
 // EX-IMPORT-001: Support multi-formats et API
 type ImportFormat = 'excel' | 'csv' | 'xml' | 'json' | 'api'
@@ -175,6 +176,7 @@ interface ImportReport {
 const ModernImportBalance: React.FC = () => {
   const theme = useTheme()
   const navigate = useNavigate()
+  const { enqueueSnackbar } = useSnackbar()
   const [loading, setLoading] = useState(false)
   const [importStep, setImportStep] = useState(0)
   const [importedData, setImportedData] = useState<BalanceAccount[]>([])
@@ -1581,6 +1583,9 @@ const ModernImportBalance: React.FC = () => {
                               const hasN1 = entries.some(e => (e.solde_debit_n1 || 0) !== 0 || (e.solde_credit_n1 || 0) !== 0)
                               console.log('[Import] Saved', entries.length, 'unified entries, hasN1:', hasN1)
 
+                              // P0-1: Toast notification after successful import
+                              enqueueSnackbar(`Balance importée avec succès (${entries.length} comptes chargés)`, { variant: 'success' })
+
                               // Save import record
                               saveImportRecord(
                                 importReport?.fileName || 'Import balance',
@@ -1641,7 +1646,13 @@ const ModernImportBalance: React.FC = () => {
                               }
                             } catch (error: any) {
                               logger.error('Erreur validation import:', error)
-                              setErrorMessage(error?.message || 'Erreur lors de la sauvegarde.')
+                              // P0-5: User-friendly message for storage quota errors
+                              const isQuota = error instanceof DOMException && error.name === 'QuotaExceededError'
+                              const msg = isQuota
+                                ? 'Espace de stockage insuffisant. Supprimez d\'anciens imports ou videz le cache navigateur.'
+                                : (error?.message || 'Erreur lors de la sauvegarde.')
+                              setErrorMessage(msg)
+                              enqueueSnackbar(msg, { variant: 'error' })
                             }
                           }}
                         >

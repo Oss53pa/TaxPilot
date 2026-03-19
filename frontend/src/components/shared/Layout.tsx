@@ -43,6 +43,7 @@ import {
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon,
   Archive as ArchiveIcon,
+  Folder as FolderIcon,
 } from '@mui/icons-material'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
@@ -91,8 +92,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     navigate('/login')
   }
 
+  // P1-4: Read user mode to conditionally show dossiers link
+  const userMode = (() => { try { const s = localStorage.getItem('fiscasync-mode'); return s ? JSON.parse(s)?.state?.userMode : null } catch { return null } })()
+
   const menuItems = [
     { text: 'Tableau de bord', icon: <DashboardIcon />, path: '/dashboard' },
+    // P1-4: Dossiers link visible only in cabinet mode
+    ...(userMode === 'cabinet' ? [{ text: 'Dossiers Clients', icon: <FolderIcon />, path: '/dossiers' }] : []),
 
     { text: 'Configuration', icon: <Settings />, path: '/parametrage', divider: 'Configuration' },
     { text: 'Plans Comptables', icon: <AccountBalance />, path: '/plans-comptables' },

@@ -1,7 +1,8 @@
 import React, { Suspense, useState, useEffect, useCallback, useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import {
-  Box, CircularProgress, Typography, Button, Chip, Paper, IconButton, Alert,
+  Box, CircularProgress, Typography, Button, Chip, Paper, IconButton, Alert, Menu, MenuItem, ListItemIcon, ListItemText,
+  Dialog, LinearProgress,
 } from '@mui/material'
 import {
   ArrowBack as ArrowBackIcon,
@@ -13,6 +14,7 @@ import {
   ChevronRight,
   ChevronLeft,
   TableChart as ExcelIcon,
+  Description as ModeleIcon,
   FactCheck as ControleIcon,
   CheckCircle as CheckCircleIcon,
   Warning as WarningIcon,
@@ -29,10 +31,12 @@ import LiasseStats from './components/LiasseStats'
 import { LiasseRegimeContext } from './components/LiasseHeader'
 import { PAGES, loadPageComponents } from './config'
 import { NOTE_TO_PAGE_ID, toConfigRegime } from './types'
-import { exporterLiasse } from './services/liasse-export-excel'
+import { exporterLiasseWithProgress } from '@/services/excelExportAsync'
+import { exportModeB } from './services/liasse-export-modele'
 import PrintDialog from './components/PrintDialog'
 import type { PrintMode } from './components/PrintDialog'
 import type { PageProps } from './types'
+import { useSnackbar } from 'notistack'
 import '@/components/liasse/templates/PrintLayout.css'
 
 const SIDEBAR_TRANSITION = 'width 0.3s cubic-bezier(0.4,0,0.2,1), min-width 0.3s cubic-bezier(0.4,0,0.2,1), opacity 0.3s cubic-bezier(0.4,0,0.2,1)'
@@ -41,6 +45,7 @@ const COLLAPSED_WIDTH = 40
 const LiasseFiscaleModule: React.FC = () => {
   const navigate = useNavigate()
   const { entreprise, balance, balanceN1, regime, setRegime, refresh } = useLiasseFiscaleData()
+  const { enqueueSnackbar } = useSnackbar()
   const [currentPageId, setCurrentPageId] = useState(PAGES[0].id)
   const [zoom, setZoom] = useState(100)
   const [leftOpen, setLeftOpen] = useState(true)
@@ -49,6 +54,8 @@ const LiasseFiscaleModule: React.FC = () => {
   const [printDialogOpen, setPrintDialogOpen] = useState(false)
   const [printMode, setPrintMode] = useState<'off' | 'current' | 'all'>('off')
   const [printComponents, setPrintComponents] = useState<Map<string, React.ComponentType<PageProps>>>(new Map())
+  const [excelMenuAnchor, setExcelMenuAnchor] = useState<null | HTMLElement>(null)
+  const [exportProgress, setExportProgress] = useState<{ current: number; total: number; sheet: string } | null>(null)
 
   useEffect(() => {
     setWorkflowState(getWorkflowState())
@@ -172,15 +179,43 @@ const LiasseFiscaleModule: React.FC = () => {
   const handleZoomOut = useCallback(() => setZoom(z => Math.max(z - 10, 50)), [])
   const handleZoomReset = useCallback(() => setZoom(100), [])
 
-  const handleExportExcel = useCallback(() => {
+  const handleExportExcel = useCallback(async () => {
+    setExcelMenuAnchor(null)
     const dateFin = entreprise.exercice_clos || '31/12/2024'
     const annee = parseInt(dateFin.slice(-4)) || 2024
-    exporterLiasse(balance, balanceN1, entreprise, {
-      annee,
-      dateDebut: `01/01/${annee}`,
-      dateFin,
-      dureeMois: entreprise.duree_mois || 12,
-    })
+    try {
+      await exporterLiasseWithProgress(
+        balance,
+        balanceN1,
+        entreprise,
+        {
+          annee,
+          dateDebut: `01/01/${annee}`,
+          dateFin,
+          dureeMois: entreprise.duree_mois || 12,
+        },
+        (current, total, sheet) => setExportProgress({ current, total, sheet })
+      )
+      // P0-2: Toast notification after Excel export (Mode A)
+      enqueueSnackbar('Liasse exportée avec succès', { variant: 'success' })
+    } catch (err) {
+      console.error('[Export Excel] Erreur:', err)
+      enqueueSnackbar('Erreur lors de l\'export Excel.', { variant: 'error' })
+    } finally {
+      setExportProgress(null)
+    }
+  }, [balance, balanceN1, entreprise])
+
+  const handleExportModele = useCallback(async () => {
+    setExcelMenuAnchor(null)
+    try {
+      await exportModeB(balance, balanceN1, entreprise)
+      // P0-3: Toast notification after DGI export (Mode B)
+      enqueueSnackbar('Liasse DGI exportée avec succès', { variant: 'success' })
+    } catch (err) {
+      console.error('[Mode B] Erreur export:', err)
+      enqueueSnackbar('Erreur lors de l\'export modèle DGI.', { variant: 'error' })
+    }
   }, [balance, balanceN1, entreprise])
 
   // Pages to render for print mode 'all'
@@ -226,6 +261,15 @@ const LiasseFiscaleModule: React.FC = () => {
       currentPageName={currentPage?.ongletExcel || ''}
       totalPages={filteredPages.length}
     />
+
+    {/* Export progress dialog */}
+    <Dialog open={!!exportProgress} PaperProps={{ sx: { p: 3, minWidth: 320 } }}>
+      <Typography sx={{ fontWeight: 600, mb: 1 }}>Génération en cours...</Typography>
+      <Typography sx={{ fontSize: 13, color: '#737373', mb: 1.5 }}>
+        {exportProgress?.sheet} ({exportProgress?.current}/{exportProgress?.total})
+      </Typography>
+      <LinearProgress variant="determinate" value={(exportProgress?.current || 0) / (exportProgress?.total || 84) * 100} />
+    </Dialog>
 
     <Box sx={{ display: 'flex', gap: 0, height: '100%', overflow: 'hidden' }}>
       {/* ── Left sidebar ── */}
@@ -347,7 +391,17 @@ const LiasseFiscaleModule: React.FC = () => {
             <Box sx={{ borderLeft: '1px solid #e0e0e0', height: 24, mx: 0.5 }} />
 
             <Button size="small" variant="outlined" startIcon={<ControleIcon sx={{ fontSize: 16 }} />} onClick={() => navigate('/validation-liasse')} sx={{ minWidth: 0, fontSize: '0.75rem', fontWeight: 600 }}>Contrôle</Button>
-            <Button size="small" startIcon={<ExcelIcon sx={{ fontSize: 16 }} />} onClick={handleExportExcel} sx={{ minWidth: 0, fontSize: '0.75rem', color: '#16a34a', fontWeight: 600 }}>Excel</Button>
+            <Button size="small" startIcon={<ExcelIcon sx={{ fontSize: 16 }} />} onClick={e => setExcelMenuAnchor(e.currentTarget)} sx={{ minWidth: 0, fontSize: '0.75rem', color: '#16a34a', fontWeight: 600 }}>Excel</Button>
+            <Menu anchorEl={excelMenuAnchor} open={Boolean(excelMenuAnchor)} onClose={() => setExcelMenuAnchor(null)}>
+              <MenuItem onClick={handleExportExcel}>
+                <ListItemIcon><ExcelIcon sx={{ fontSize: 18, color: '#16a34a' }} /></ListItemIcon>
+                <ListItemText primary="Export libre" secondary="Fichier généré par l'app" />
+              </MenuItem>
+              <MenuItem onClick={handleExportModele}>
+                <ListItemIcon><ModeleIcon sx={{ fontSize: 18, color: '#2563eb' }} /></ListItemIcon>
+                <ListItemText primary="Modèle DGI officiel" secondary="Injection dans le template 84 onglets" />
+              </MenuItem>
+            </Menu>
             <Button size="small" startIcon={<DownloadIcon sx={{ fontSize: 16 }} />} onClick={() => setPrintDialogOpen(true)} sx={{ minWidth: 0, fontSize: '0.75rem' }}>PDF</Button>
             <Button size="small" startIcon={<PrintIcon sx={{ fontSize: 16 }} />} onClick={() => setPrintDialogOpen(true)} sx={{ minWidth: 0, fontSize: '0.75rem' }}>Imprimer</Button>
             <Button size="small" startIcon={<SendIcon sx={{ fontSize: 16 }} />} onClick={() => navigate('/teledeclaration')} sx={{ minWidth: 0, fontSize: '0.75rem' }}>Envoyer</Button>

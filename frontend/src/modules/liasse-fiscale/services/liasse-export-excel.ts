@@ -3,7 +3,8 @@ import type { BalanceEntry, EntrepriseData } from '../types'
 import { BUILDERS } from './builders'
 
 // ── 84 onglets dans l'ordre exact du fichier Excel de reference ──
-const ONGLETS = [
+export { BUILDERS }
+export const ONGLETS = [
   'COUVERTURE',
   'GARDE',
   'RECEVABILITE',
