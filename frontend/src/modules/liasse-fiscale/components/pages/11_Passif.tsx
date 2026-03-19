@@ -83,11 +83,11 @@ const Passif: React.FC<PageProps> = ({ entreprise, balance, balanceN1, onNoteCli
   const dataN1 = balanceN1 && balanceN1.length > 0 ? computePassif(balanceN1) : null
 
   const columns: Column[] = [
-    { key: 'ref', label: 'REF', width: 28, align: 'center' },
-    { key: 'label', label: 'PASSIF', width: '50%' },
-    { key: 'note', label: 'Note', width: 30, align: 'center' },
-    { key: 'montant', label: 'MONTANT', align: 'right', subLabel: 'Exercice N' },
-    { key: 'montant_n1', label: 'MONTANT', align: 'right', subLabel: 'Exercice N-1' },
+    { key: 'ref', label: 'REF', width: 52, align: 'center' },
+    { key: 'label', label: 'PASSIF', width: '45%' },
+    { key: 'note', label: 'Note', width: 44, align: 'center' },
+    { key: 'montant', label: 'MONTANT', width: 130, align: 'right', subLabel: 'Exercice N' },
+    { key: 'montant_n1', label: 'MONTANT', width: 130, align: 'right', subLabel: 'Exercice N-1' },
   ]
 
   const rows: Row[] = data.map((r, i) => ({

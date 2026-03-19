@@ -163,8 +163,6 @@ const Bilan: React.FC<PageProps> = ({ entreprise, balance, balanceN1, onNoteClic
     px: 0.5,
     height: 22,
     whiteSpace: 'nowrap' as const,
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
     borderBottom: '1px solid #e0e0e0',
     textAlign: align,
     fontFamily: 'inherit',
@@ -199,25 +197,25 @@ const Bilan: React.FC<PageProps> = ({ entreprise, balance, balanceN1, onNoteClic
       </Typography>
 
       {/* Single unified table: ACTIF left | separator | PASSIF right */}
-      <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed', fontFamily: 'inherit' }}>
+      <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'auto', fontFamily: 'inherit', minWidth: 1100 }}>
         {/* Column widths */}
         <colgroup>
           {/* ACTIF: ref, label, note, brut, amort, net, net_n1 */}
-          <col style={{ width: '2.5%' }} />
-          <col style={{ width: '18%' }} />
-          <col style={{ width: '3%' }} />
-          <col style={{ width: '9%' }} />
-          <col style={{ width: '9%' }} />
-          <col style={{ width: '9%' }} />
-          <col style={{ width: '9%' }} />
+          <col style={{ minWidth: 30 }} />
+          <col style={{ width: '18%', minWidth: 140 }} />
+          <col style={{ minWidth: 30 }} />
+          <col style={{ minWidth: 90 }} />
+          <col style={{ minWidth: 90 }} />
+          <col style={{ minWidth: 90 }} />
+          <col style={{ minWidth: 90 }} />
           {/* Separator */}
-          <col style={{ width: '0.5%' }} />
+          <col style={{ width: 4 }} />
           {/* PASSIF: ref, label, note, net, net_n1 */}
-          <col style={{ width: '2.5%' }} />
-          <col style={{ width: '22%' }} />
-          <col style={{ width: '3%' }} />
-          <col style={{ width: '9%' }} />
-          <col style={{ width: '9%' }} />
+          <col style={{ minWidth: 30 }} />
+          <col style={{ width: '20%', minWidth: 160 }} />
+          <col style={{ minWidth: 30 }} />
+          <col style={{ minWidth: 90 }} />
+          <col style={{ minWidth: 90 }} />
         </colgroup>
 
         {/* Header */}

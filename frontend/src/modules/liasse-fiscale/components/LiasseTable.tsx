@@ -147,8 +147,8 @@ const LiasseTable: React.FC<LiasseTableProps> = ({ columns, rows, title, compact
           {title}
         </Typography>
       )}
-      <TableContainer sx={compact ? { overflow: 'hidden' } : undefined}>
-        <Table size="small" sx={{ minWidth: compact ? 0 : 600, tableLayout: compact ? 'fixed' : 'auto', width: '100%' }}>
+      <TableContainer sx={{ overflowX: 'auto' }}>
+        <Table size="small" sx={{ minWidth: compact ? 600 : 600, tableLayout: 'auto', width: '100%' }}>
           <TableHead>
             <TableRow sx={{ bgcolor: 'grey.100' }}>
               {columns.map(col => (
@@ -252,8 +252,8 @@ const LiasseTable: React.FC<LiasseTableProps> = ({ columns, rows, title, compact
                               ? `${(row.indent * (compact ? 12 : 24)) + (compact ? 8 : 16)}px`
                               : undefined,
                             borderColor: isTotal || isSubtotal ? '#444' : undefined,
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                            minWidth: col.align === 'right' ? 110 : undefined,
                           }}
                         >
                           {isEditable ? (

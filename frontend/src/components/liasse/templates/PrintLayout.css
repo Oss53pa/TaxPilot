@@ -66,6 +66,9 @@
     break-after: auto;
   }
   /* ── Prevent table truncation ── */
+  .MuiTableContainer-root {
+    overflow: visible !important;
+  }
   table {
     border-collapse: collapse;
     width: 100%;
@@ -209,7 +212,8 @@
     font-size: 14px;                   /* Secondaire comme base de page */
     line-height: 1.5;
     font-family: Verdana, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
-    overflow: hidden;
+    overflow-x: auto;
+    overflow-y: visible;
   }
 
   .liasse-page *,
@@ -298,8 +302,12 @@
     font-size: 13px !important;
   }
 
-  .liasse-page th,
+  /* ── En-tête collant lors du scroll vertical ── */
+  .liasse-page thead th,
   .liasse-page .MuiTableCell-head {
+    position: sticky;
+    top: 0;
+    z-index: 2;
     font-size: 12px !important;        /* Caption = 9pt / 12px */
     font-weight: 600 !important;
     padding: 5px 8px !important;

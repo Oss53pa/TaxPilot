@@ -85,13 +85,13 @@ const Actif: React.FC<PageProps> = ({ entreprise, balance, balanceN1, onNoteClic
   const dataN1 = balanceN1 && balanceN1.length > 0 ? computeActif(balanceN1) : null
 
   const columns: Column[] = [
-    { key: 'ref', label: 'REF', width: 28, align: 'center' },
-    { key: 'label', label: 'ACTIF', width: '40%' },
-    { key: 'note', label: 'Note', width: 30, align: 'center' },
-    { key: 'brut', label: 'BRUT', align: 'right', subLabel: 'Exercice au 31/12/N' },
-    { key: 'amort', label: 'AMORT et DEPREC.', align: 'right' },
-    { key: 'net', label: 'NET', align: 'right' },
-    { key: 'net_n1', label: 'NET', align: 'right', subLabel: 'Exercice au 31/12/N-1' },
+    { key: 'ref', label: 'REF', width: 52, align: 'center' },
+    { key: 'label', label: 'ACTIF', width: '35%' },
+    { key: 'note', label: 'Note', width: 44, align: 'center' },
+    { key: 'brut', label: 'BRUT', width: 120, align: 'right', subLabel: 'Exercice au 31/12/N' },
+    { key: 'amort', label: 'AMORT et DEPREC.', width: 120, align: 'right' },
+    { key: 'net', label: 'NET', width: 120, align: 'right' },
+    { key: 'net_n1', label: 'NET', width: 120, align: 'right', subLabel: 'Exercice au 31/12/N-1' },
   ]
 
   const rows: Row[] = data.map((r, i) => ({
