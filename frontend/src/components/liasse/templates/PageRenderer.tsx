@@ -73,12 +73,21 @@ const LoadingFallback: React.FC = () => (
 
 // ── Component cache to avoid re-creating lazy components on every render ──
 
+const pageModules = import.meta.glob<{ default: React.ComponentType<any> }>(
+  '../../../modules/liasse-fiscale/components/pages/*.tsx',
+)
+
 const componentCache = new Map<string, React.LazyExoticComponent<React.ComponentType<any>>>()
 
 function getLazyComponent(componentFile: string): React.LazyExoticComponent<React.ComponentType<any>> {
   let cached = componentCache.get(componentFile)
   if (!cached) {
-    cached = React.lazy(() => import(`../../../modules/liasse-fiscale/components/pages/${componentFile}`))
+    const key = `../../../modules/liasse-fiscale/components/pages/${componentFile}.tsx`
+    const loader = pageModules[key]
+    if (!loader) {
+      throw new Error(`Module not found: ${componentFile}`)
+    }
+    cached = React.lazy(loader)
     componentCache.set(componentFile, cached)
   }
   return cached

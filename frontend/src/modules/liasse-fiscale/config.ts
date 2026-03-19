@@ -3,7 +3,20 @@ import { LIASSE_PAGES } from '@/config/liasse-pages-config'
 import type { LiassePage } from '@/config/liasse-pages-config'
 import type { PageDef, PageProps, SectionKey } from './types'
 
-const lp = (name: string) => React.lazy(() => import(`./components/pages/${name}`))
+// Use import.meta.glob for Vite-compatible dynamic imports in production
+const pageModules = import.meta.glob<{ default: React.ComponentType<any> }>(
+  './components/pages/*.tsx',
+)
+
+const lp = (name: string) => {
+  const key = `./components/pages/${name}.tsx`
+  const loader = pageModules[key]
+  if (!loader) {
+    // Return a placeholder component if module not found
+    return React.lazy(() => Promise.resolve({ default: (() => null) as React.ComponentType<any> }))
+  }
+  return React.lazy(loader)
+}
 
 // Map master config sections to module sections
 const SECTION_MAP: Record<string, SectionKey> = {
@@ -51,8 +64,12 @@ export async function loadPageComponents(pages: PageDef[]): Promise<Map<string, 
   const pageIds = new Set(pages.map(p => p.id))
   const toLoad = LIASSE_PAGES.filter(p => pageIds.has(p.moduleId))
   await Promise.all(toLoad.map(async (p) => {
-    const mod = await import(`./components/pages/${p.componentFile}`)
-    result.set(p.moduleId, mod.default)
+    const key = `./components/pages/${p.componentFile}.tsx`
+    const loader = pageModules[key]
+    if (loader) {
+      const mod = await loader()
+      result.set(p.moduleId, mod.default)
+    }
   }))
   return result
 }
