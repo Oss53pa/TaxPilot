@@ -5,6 +5,8 @@
 
 import { calculerPassageFiscal } from './passageFiscalService'
 
+import { scopeKey } from './dossierScopeService'
+
 const PREFIX = 'fiscasync_dgifiling_'
 
 // ────────── Interfaces ──────────
@@ -98,7 +100,7 @@ export interface FilingSettings {
 
 function getItem<T>(key: string): T | null {
   try {
-    const raw = localStorage.getItem(PREFIX + key)
+    const raw = localStorage.getItem(scopeKey(PREFIX + key))
     return raw ? JSON.parse(raw) : null
   } catch {
     return null
@@ -106,7 +108,7 @@ function getItem<T>(key: string): T | null {
 }
 
 function setItem<T>(key: string, value: T): void {
-  localStorage.setItem(PREFIX + key, JSON.stringify(value))
+  localStorage.setItem(scopeKey(PREFIX + key), JSON.stringify(value))
 }
 
 function generateId(): string {

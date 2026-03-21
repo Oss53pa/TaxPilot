@@ -4,12 +4,13 @@
  */
 
 import type { Entreprise } from './entrepriseService'
+import { scopeKey } from './dossierScopeService'
 
-const STORAGE_KEY = 'fiscasync_entreprise_settings'
+const BASE_KEY = 'fiscasync_entreprise_settings'
 
 export function saveEntreprise(data: Partial<Entreprise>): void {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
+    localStorage.setItem(scopeKey(BASE_KEY), JSON.stringify(data))
     // Notify other components (e.g. liasse fiscale) that enterprise data changed
     window.dispatchEvent(new Event('fiscasync:entreprise-saved'))
   } catch {
@@ -19,7 +20,7 @@ export function saveEntreprise(data: Partial<Entreprise>): void {
 
 export function getEntreprise(): Partial<Entreprise> | null {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
+    const raw = localStorage.getItem(scopeKey(BASE_KEY))
     return raw ? JSON.parse(raw) : null
   } catch {
     return null
@@ -27,5 +28,5 @@ export function getEntreprise(): Partial<Entreprise> | null {
 }
 
 export function clearEntreprise(): void {
-  localStorage.removeItem(STORAGE_KEY)
+  localStorage.removeItem(scopeKey(BASE_KEY))
 }

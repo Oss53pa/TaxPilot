@@ -7,6 +7,7 @@ import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import type { ExerciceRecord } from '../services/exerciceStorageService'
 import { getAllExercices, getOrCreateExercice } from '../services/exerciceStorageService'
+import { scopeKey } from '../services/dossierScopeService'
 
 interface ExerciceState {
   activeExercice: ExerciceRecord | null
@@ -26,7 +27,7 @@ interface ExerciceState {
 function switchBalancePointers(annee: string): void {
   const PREFIX = 'fiscasync_balance_'
   try {
-    const raw = localStorage.getItem(PREFIX + 'list')
+    const raw = localStorage.getItem(scopeKey(PREFIX + 'list'))
     if (!raw) return
     const list = JSON.parse(raw) as Array<{ exercice: string; version?: number }>
 
@@ -36,7 +37,7 @@ function switchBalancePointers(annee: string): void {
       .sort((a, b) => (b.version || 1) - (a.version || 1))
 
     if (balancesN.length > 0) {
-      localStorage.setItem(PREFIX + 'latest', JSON.stringify(balancesN[0]))
+      localStorage.setItem(scopeKey(PREFIX + 'latest'), JSON.stringify(balancesN[0]))
     }
 
     // Balance N-1 = la plus recente pour l'annee precedente
@@ -46,9 +47,9 @@ function switchBalancePointers(annee: string): void {
       .sort((a, b) => (b.version || 1) - (a.version || 1))
 
     if (balancesN1.length > 0) {
-      localStorage.setItem(PREFIX + 'latest_n1', JSON.stringify(balancesN1[0]))
+      localStorage.setItem(scopeKey(PREFIX + 'latest_n1'), JSON.stringify(balancesN1[0]))
     } else {
-      localStorage.removeItem(PREFIX + 'latest_n1')
+      localStorage.removeItem(scopeKey(PREFIX + 'latest_n1'))
     }
   } catch {
     // ignore

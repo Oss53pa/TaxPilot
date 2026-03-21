@@ -3,7 +3,9 @@
  * Chaque exercice est identifie par son annee et peut contenir balance, audit, archive
  */
 
-const STORAGE_KEY = 'fiscasync_exercices'
+import { scopeKey } from './dossierScopeService'
+
+const BASE_STORAGE_KEY = 'fiscasync_exercices'
 
 export type StatutExercice = 'en_cours' | 'cloture' | 'valide' | 'depose'
 
@@ -24,7 +26,7 @@ export interface ExerciceRecord {
 
 function readAll(): ExerciceRecord[] {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
+    const raw = localStorage.getItem(scopeKey(BASE_STORAGE_KEY))
     return raw ? JSON.parse(raw) : []
   } catch {
     return []
@@ -32,7 +34,7 @@ function readAll(): ExerciceRecord[] {
 }
 
 function writeAll(records: ExerciceRecord[]): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(records))
+  localStorage.setItem(scopeKey(BASE_STORAGE_KEY), JSON.stringify(records))
 }
 
 export function getAllExercices(): ExerciceRecord[] {

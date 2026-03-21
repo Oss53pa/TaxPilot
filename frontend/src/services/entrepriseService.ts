@@ -82,6 +82,18 @@ export interface Entreprise {
   commissaires_comptes?: any[]
   // R3 - Participations (JSON)
   participations_filiales?: any[]
+
+  // ─── Branding / Page de garde ────────────────────────────────────
+  code_pays_iso?: string              // 'CI' | 'CM' | 'SN' | 'GA' | 'BJ' | 'TG' | 'ML' | 'BF'
+  branding_logo_url?: string          // URL du logo entreprise
+  branding_logo_width?: number        // largeur en px (défaut 120)
+  branding_logo_height?: number       // hauteur en px (défaut 60)
+  branding_image_fond_url?: string    // URL image de fond optionnelle
+  branding_image_fond_opacite?: number // 0-100 (défaut 10)
+  branding_surcharge_theme?: Record<string, any>  // Partial<PaysTheme> pour surcharger les couleurs pays
+  branding_pied_page_texte?: string   // texte personnalisé en pied de page
+  branding_pied_page_logo?: boolean   // afficher "Généré par Liass'Pilot"
+
   created_at: string
   updated_at: string
 }

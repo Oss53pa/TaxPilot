@@ -152,7 +152,7 @@ export default function OnboardingWizard() {
 
   const handleFinish = () => {
     completeOnboarding()
-    navigate('/dashboard')
+    navigate('/')
   }
 
   const isLastStep = stepIndex === steps.length - 1

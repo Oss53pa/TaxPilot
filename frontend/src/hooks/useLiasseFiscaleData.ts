@@ -9,6 +9,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react'
 import type { EntrepriseData, BalanceEntry, RegimeImposition } from '@/modules/liasse-fiscale/types'
+import { scopeKey } from '@/services/dossierScopeService'
 
 // ── EMPTY_ENTREPRISE ──
 
@@ -43,7 +44,7 @@ export const loadEntreprise = (): EntrepriseData => {
   ]
   for (const key of keys) {
     try {
-      const raw = localStorage.getItem(key)
+      const raw = localStorage.getItem(scopeKey(key))
       if (!raw) continue
       const parsed = JSON.parse(raw)
       const e = Array.isArray(parsed) ? parsed[0] : parsed
@@ -126,7 +127,7 @@ export const parseEntries = (entries: unknown[]): BalanceEntry[] =>
 
 export const loadBalanceN1 = (): BalanceEntry[] => {
   try {
-    const raw = localStorage.getItem('fiscasync_balance_latest_n1')
+    const raw = localStorage.getItem(scopeKey('fiscasync_balance_latest_n1'))
     if (raw) {
       const stored = JSON.parse(raw)
       if (Array.isArray(stored?.entries) && stored.entries.length > 0) {
@@ -137,7 +138,7 @@ export const loadBalanceN1 = (): BalanceEntry[] => {
   } catch { /* try next */ }
 
   try {
-    const raw = localStorage.getItem('fiscasync_balance_latest')
+    const raw = localStorage.getItem(scopeKey('fiscasync_balance_latest'))
     if (raw) {
       const stored = JSON.parse(raw)
       if (Array.isArray(stored?.entriesN1) && stored.entriesN1.length > 0) {
@@ -148,7 +149,7 @@ export const loadBalanceN1 = (): BalanceEntry[] => {
   } catch { /* try next */ }
 
   try {
-    const raw = localStorage.getItem('fiscasync_balance_list')
+    const raw = localStorage.getItem(scopeKey('fiscasync_balance_list'))
     if (raw) {
       const list = JSON.parse(raw)
       if (Array.isArray(list) && list.length > 1) {
@@ -167,7 +168,7 @@ export const loadBalanceN1 = (): BalanceEntry[] => {
 
 export const loadBalance = (): BalanceEntry[] => {
   try {
-    const raw = localStorage.getItem('fiscasync_balance_latest')
+    const raw = localStorage.getItem(scopeKey('fiscasync_balance_latest'))
     if (raw) {
       const stored = JSON.parse(raw)
       if (Array.isArray(stored?.entries) && stored.entries.length > 0) {
@@ -178,7 +179,7 @@ export const loadBalance = (): BalanceEntry[] => {
   } catch { /* try next */ }
 
   try {
-    const raw = localStorage.getItem('fiscasync_balance_list')
+    const raw = localStorage.getItem(scopeKey('fiscasync_balance_list'))
     if (raw) {
       const list = JSON.parse(raw)
       if (Array.isArray(list) && list.length > 0) {

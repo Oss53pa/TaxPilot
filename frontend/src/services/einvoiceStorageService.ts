@@ -3,6 +3,8 @@
  * Pattern identique a balanceStorageService.ts
  */
 
+import { scopeKey } from './dossierScopeService'
+
 const PREFIX = 'fiscasync_einvoice_'
 
 // ────────── Interfaces ──────────
@@ -93,7 +95,7 @@ export interface InvoiceSettings {
 
 function getItem<T>(key: string): T | null {
   try {
-    const raw = localStorage.getItem(PREFIX + key)
+    const raw = localStorage.getItem(scopeKey(PREFIX + key))
     return raw ? JSON.parse(raw) : null
   } catch {
     return null
@@ -101,7 +103,7 @@ function getItem<T>(key: string): T | null {
 }
 
 function setItem<T>(key: string, value: T): void {
-  localStorage.setItem(PREFIX + key, JSON.stringify(value))
+  localStorage.setItem(scopeKey(PREFIX + key), JSON.stringify(value))
 }
 
 function generateId(): string {

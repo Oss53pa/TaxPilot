@@ -1,8 +1,9 @@
 /**
  * Hook utilitaire pour accéder aux paramètres entreprise depuis localStorage
+ * Réactif au changement de dossier en mode cabinet
  */
 
-import { useMemo } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { getEntreprise } from '@/services/entrepriseStorageService'
 import type { Entreprise } from '@/services/entrepriseService'
 
@@ -40,6 +41,18 @@ export interface EntrepriseData {
 }
 
 export function useEntrepriseData(): EntrepriseData {
+  const [version, setVersion] = useState(0)
+
+  useEffect(() => {
+    const handler = () => setVersion(v => v + 1)
+    window.addEventListener('fiscasync:dossier-changed', handler)
+    window.addEventListener('fiscasync:entreprise-saved', handler)
+    return () => {
+      window.removeEventListener('fiscasync:dossier-changed', handler)
+      window.removeEventListener('fiscasync:entreprise-saved', handler)
+    }
+  }, [])
+
   return useMemo(() => {
     const ent = getEntreprise()
     return {
@@ -74,5 +87,5 @@ export function useEntrepriseData(): EntrepriseData {
       hasDeclaration302: ent?.has_declaration_302 || false,
       dateCreationEntreprise: ent?.date_creation_entreprise || '',
     }
-  }, [])
+  }, [version])
 }

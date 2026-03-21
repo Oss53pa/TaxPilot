@@ -23,6 +23,7 @@ import {
   Public,
   Backup,
   MenuBook,
+  Description,
 } from '@mui/icons-material'
 import EntrepriseSettings from '@/components/Parametrage/EntrepriseSettings'
 import UserManagement from '@/components/Parametrage/UserManagement'
@@ -34,6 +35,7 @@ import ThemeSettings from '@/pages/ThemeSettings'
 import RegionalSettings from '@/components/Parametrage/RegionalSettings'
 import BackupRestoreSettings from '@/components/Parametrage/BackupRestoreSettings'
 import DocumentationJuridique from '@/components/Parametrage/DocumentationJuridique'
+import BrandingPage from '@/pages/parametres/BrandingPage'
 import { TabPanel } from '@/components/shared/TabPanel'
 
 const Parametrage: React.FC = () => {
@@ -50,9 +52,10 @@ const Parametrage: React.FC = () => {
     if (path.includes('/securite')) return 4
     if (path.includes('/notifications')) return 5
     if (path.includes('/theme')) return 6
-    if (path.includes('/regional')) return 7
-    if (path.includes('/sauvegarde')) return 8
-    if (path.includes('/documentation-juridique')) return 9
+    if (path.includes('/page-de-garde')) return 7
+    if (path.includes('/regional')) return 8
+    if (path.includes('/sauvegarde')) return 9
+    if (path.includes('/documentation-juridique')) return 10
     return 0
   }
 
@@ -69,6 +72,7 @@ const Parametrage: React.FC = () => {
       '/parametrage/securite',
       '/parametrage/notifications',
       '/parametrage/theme',
+      '/parametrage/page-de-garde',
       '/parametrage/regional',
       '/parametrage/sauvegarde',
       '/parametrage/documentation-juridique',
@@ -160,25 +164,32 @@ const Parametrage: React.FC = () => {
               aria-controls="parametrage-tabpanel-6"
             />
             <Tab
-              label="Régional"
-              icon={<Public />}
+              label="Page de garde"
+              icon={<Description />}
               iconPosition="start"
               id="parametrage-tab-7"
               aria-controls="parametrage-tabpanel-7"
             />
             <Tab
-              label="Sauvegarde"
-              icon={<Backup />}
+              label="Régional"
+              icon={<Public />}
               iconPosition="start"
               id="parametrage-tab-8"
               aria-controls="parametrage-tabpanel-8"
             />
             <Tab
-              label="Documentation Juridique"
-              icon={<MenuBook />}
+              label="Sauvegarde"
+              icon={<Backup />}
               iconPosition="start"
               id="parametrage-tab-9"
               aria-controls="parametrage-tabpanel-9"
+            />
+            <Tab
+              label="Documentation Juridique"
+              icon={<MenuBook />}
+              iconPosition="start"
+              id="parametrage-tab-10"
+              aria-controls="parametrage-tabpanel-10"
             />
           </Tabs>
         </Box>
@@ -213,14 +224,18 @@ const Parametrage: React.FC = () => {
         </TabPanel>
 
         <TabPanel value={activeTab} index={7}>
-          <RegionalSettings />
+          <BrandingPage />
         </TabPanel>
 
         <TabPanel value={activeTab} index={8}>
-          <BackupRestoreSettings />
+          <RegionalSettings />
         </TabPanel>
 
         <TabPanel value={activeTab} index={9}>
+          <BackupRestoreSettings />
+        </TabPanel>
+
+        <TabPanel value={activeTab} index={10}>
           <DocumentationJuridique />
         </TabPanel>
       </Paper>

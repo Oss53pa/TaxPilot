@@ -7,6 +7,8 @@ import type { SessionAudit, RapportPartie2 } from '@/types/audit.types'
 import type { StoredBalance } from './balanceStorageService'
 import { computeHash } from './audit/auditStorage'
 
+import { scopeKey } from './dossierScopeService'
+
 const PREFIX = 'fiscasync_archive_'
 
 export interface LiasseArchiveRecord {
@@ -44,7 +46,7 @@ export interface LiasseArchiveRecord {
 
 function getArchives(): LiasseArchiveRecord[] {
   try {
-    const data = localStorage.getItem(PREFIX + 'records')
+    const data = localStorage.getItem(scopeKey(PREFIX + 'records'))
     return data ? JSON.parse(data) : []
   } catch {
     return []
@@ -52,7 +54,7 @@ function getArchives(): LiasseArchiveRecord[] {
 }
 
 function saveArchives(archives: LiasseArchiveRecord[]): void {
-  localStorage.setItem(PREFIX + 'records', JSON.stringify(archives))
+  localStorage.setItem(scopeKey(PREFIX + 'records'), JSON.stringify(archives))
 }
 
 /**

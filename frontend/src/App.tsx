@@ -3,13 +3,12 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { CircularProgress, Box } from '@mui/material'
 import ModernLayout from './components/shared/Layout'
 import ErrorBoundary from './components/ui/ErrorBoundary'
+import DossierGuard from './components/guards/DossierGuard'
 
 import './styles/liasse-fixes.css'
 import './styles/wcag-conformity.css'
 import './styles/liasse-text-fix.css'
 
-// LiasseDataProvider no longer used - all liasse routes redirect to /liasse-fiscale
-import { Proph3tFloatingBall } from './components/prophet'
 
 const PageLoader = () => (
   <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
@@ -26,7 +25,6 @@ const ImportHistoryPage = React.lazy(() => import('@/pages/import/ImportHistoryP
 const ModernBalance = React.lazy(() => import('@/pages/balance/ModernBalance'))
 const PlanSYSCOHADARevise = React.lazy(() => import('@/pages/plans/PlanSYSCOHADARevise'))
 const OperationsSpecifiques = React.lazy(() => import('@/pages/plans/OperationsSpecifiques'))
-// const LiasseFiscaleOfficial = React.lazy(() => import('@/pages/liasse/LiasseFiscaleOfficial'))
 const LiasseFiscale = React.lazy(() => import('@/pages/liasse/LiasseFiscale'))
 const ModernDocuments = React.lazy(() => import('@/pages/documents/ModernDocuments'))
 const ModernGeneration = React.lazy(() => import('@/pages/generation/ModernGeneration'))
@@ -69,9 +67,16 @@ const WithSidebar: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   </ModernLayout>
 )
 
-/** Shortcut */
+/** Shortcut: sidebar only (no dossier guard) */
 const S: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <WithSidebar>{children}</WithSidebar>
+)
+
+/** Shortcut: sidebar + dossier guard (cabinet mode requires active dossier) */
+const DS: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <WithSidebar>
+    <DossierGuard>{children}</DossierGuard>
+  </WithSidebar>
 )
 
 // Purge seed/mock data from FiscaSync-Lite on first run
@@ -119,44 +124,12 @@ function App() {
             <ModernDashboard />
           } />
 
-          {/* Toutes les pages app - AVEC sidebar */}
-          <Route path="/dashboard" element={<S><AppDashboard /></S>} />
-          <Route path="/parametrage/*" element={<S><Parametrage /></S>} />
-          <Route path="/import-balance" element={<S><ModernImportBalance /></S>} />
-          <Route path="/import-history" element={<S><ImportHistoryPage /></S>} />
-          <Route path="/balance" element={<S><ModernBalance /></S>} />
-          <Route path="/plans-comptables" element={<S><PlanSYSCOHADARevise /></S>} />
-          <Route path="/plan-syscohada" element={<S><PlanSYSCOHADARevise /></S>} />
-          <Route path="/operations-syscohada" element={<S><OperationsSpecifiques /></S>} />
-
-          <Route path="/liasse" element={<Navigate to="/liasse-fiscale" replace />} />
-          <Route path="/production-liasse" element={<Navigate to="/liasse-fiscale" replace />} />
-          <Route path="/liasse-complete" element={<Navigate to="/liasse-fiscale" replace />} />
-          <Route path="/direct-liasse" element={<Navigate to="/liasse-fiscale" replace />} />
-          <Route path="/liasse-fiscale" element={<S><LiasseFiscale /></S>} />
-          <Route path="/documents" element={<S><ModernDocuments /></S>} />
-          <Route path="/generation" element={<S><ModernGeneration /></S>} />
-
-          <Route path="/audit" element={<S><ModernAudit /></S>} />
-          <Route path="/control-points" element={<S><ControlPointsManager /></S>} />
-          <Route path="/validation-liasse" element={<S><LiasseControlInterface /></S>} />
-          <Route path="/teledeclaration" element={<S><ModernTeledeclaration /></S>} />
-          <Route path="/compliance" element={<S><ModernCompliance /></S>} />
-          <Route path="/calendar" element={<S><ModernFiscalCalendar /></S>} />
-
-          <Route path="/templates" element={<S><ModernTemplates /></S>} />
-          <Route path="/consolidation" element={<S><ModernConsolidation /></S>} />
-          <Route path="/reporting" element={<S><ModernReporting /></S>} />
-          <Route path="/archives" element={<S><ArchivesPage /></S>} />
+          {/* Pages accessibles sans dossier actif (cabinet: liste dossiers, paramètres) */}
+          <Route path="/dossiers" element={<DossiersPage />} />
           <Route path="/veille" element={<S><ModernVeilleReglementaire /></S>} />
-
-          {/* P1-4: Dossiers clients (mode Cabinet) */}
-          <Route path="/dossiers" element={<S><DossiersPage /></S>} />
-
           <Route path="/collaboration" element={<S><ModernCollaboration /></S>} />
           <Route path="/integrations" element={<S><ModernIntegrations /></S>} />
           <Route path="/security" element={<S><ModernSecurity /></S>} />
-
           <Route path="/organization/:slug/members" element={<S><OrganizationWrapper>{(slug) => <OrganizationMembersPage organizationSlug={slug} />}</OrganizationWrapper></S>} />
           <Route path="/organization/:slug/subscription" element={<S><OrganizationWrapper>{(slug) => <SubscriptionPage organizationSlug={slug} />}</OrganizationWrapper></S>} />
           <Route path="/organization/:slug/invitations" element={<S><OrganizationWrapper>{(slug) => <InvitationsPage organizationSlug={slug} />}</OrganizationWrapper></S>} />
@@ -164,12 +137,41 @@ function App() {
           <Route path="/settings/subscription" element={<S><OrganizationWrapper>{(slug) => <SubscriptionPage organizationSlug={slug} />}</OrganizationWrapper></S>} />
           <Route path="/settings/invitations" element={<S><OrganizationWrapper>{(slug) => <InvitationsPage organizationSlug={slug} />}</OrganizationWrapper></S>} />
 
+          {/* Pages métier — nécessitent un dossier actif en mode cabinet */}
+          <Route path="/dashboard" element={<DS><AppDashboard /></DS>} />
+          <Route path="/parametrage/*" element={<DS><Parametrage /></DS>} />
+          <Route path="/import-balance" element={<DS><ModernImportBalance /></DS>} />
+          <Route path="/import-history" element={<DS><ImportHistoryPage /></DS>} />
+          <Route path="/balance" element={<DS><ModernBalance /></DS>} />
+          <Route path="/plans-comptables" element={<DS><PlanSYSCOHADARevise /></DS>} />
+          <Route path="/plan-syscohada" element={<DS><PlanSYSCOHADARevise /></DS>} />
+          <Route path="/operations-syscohada" element={<DS><OperationsSpecifiques /></DS>} />
+
+          <Route path="/liasse" element={<Navigate to="/liasse-fiscale" replace />} />
+          <Route path="/production-liasse" element={<Navigate to="/liasse-fiscale" replace />} />
+          <Route path="/liasse-complete" element={<Navigate to="/liasse-fiscale" replace />} />
+          <Route path="/direct-liasse" element={<Navigate to="/liasse-fiscale" replace />} />
+          <Route path="/liasse-fiscale" element={<DS><LiasseFiscale /></DS>} />
+          <Route path="/documents" element={<DS><ModernDocuments /></DS>} />
+          <Route path="/generation" element={<DS><ModernGeneration /></DS>} />
+
+          <Route path="/audit" element={<DS><ModernAudit /></DS>} />
+          <Route path="/control-points" element={<DS><ControlPointsManager /></DS>} />
+          <Route path="/validation-liasse" element={<DS><LiasseControlInterface /></DS>} />
+          <Route path="/teledeclaration" element={<DS><ModernTeledeclaration /></DS>} />
+          <Route path="/compliance" element={<DS><ModernCompliance /></DS>} />
+          <Route path="/calendar" element={<DS><ModernFiscalCalendar /></DS>} />
+
+          <Route path="/templates" element={<DS><ModernTemplates /></DS>} />
+          <Route path="/consolidation" element={<DS><ModernConsolidation /></DS>} />
+          <Route path="/reporting" element={<DS><ModernReporting /></DS>} />
+          <Route path="/archives" element={<DS><ArchivesPage /></DS>} />
+
           {/* Debug routes removed for production */}
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>
-      <Proph3tFloatingBall />
     </ErrorBoundary>
   )
 }

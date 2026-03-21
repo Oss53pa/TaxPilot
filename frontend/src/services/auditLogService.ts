@@ -13,7 +13,9 @@ export interface AuditEntry {
   createdAt?: string
 }
 
-const LOCAL_KEY = 'fiscasync_audit_log'
+import { scopeKey } from './dossierScopeService'
+
+const BASE_LOCAL_KEY = 'fiscasync_audit_log'
 const MAX_LOCAL_ENTRIES = 500
 
 /**
@@ -36,12 +38,12 @@ export async function logAuditAction(entry: Omit<AuditEntry, 'id' | 'createdAt'>
 
   // Fallback localStorage
   try {
-    const raw = localStorage.getItem(LOCAL_KEY)
+    const raw = localStorage.getItem(scopeKey(BASE_LOCAL_KEY))
     const entries: AuditEntry[] = raw ? JSON.parse(raw) : []
     entries.unshift({ ...entry, id: Date.now().toString(36), createdAt: timestamp })
     // Keep only last MAX entries
     if (entries.length > MAX_LOCAL_ENTRIES) entries.length = MAX_LOCAL_ENTRIES
-    localStorage.setItem(LOCAL_KEY, JSON.stringify(entries))
+    localStorage.setItem(scopeKey(BASE_LOCAL_KEY), JSON.stringify(entries))
   } catch {
     console.error('[Audit] Erreur localStorage')
   }
@@ -76,7 +78,7 @@ export async function fetchAuditLog(dossierId?: string, limit = 100): Promise<Au
 
   // Fallback localStorage
   try {
-    const raw = localStorage.getItem(LOCAL_KEY)
+    const raw = localStorage.getItem(scopeKey(BASE_LOCAL_KEY))
     const entries: AuditEntry[] = raw ? JSON.parse(raw) : []
     const filtered = dossierId ? entries.filter(e => e.dossierId === dossierId) : entries
     return filtered.slice(0, limit)

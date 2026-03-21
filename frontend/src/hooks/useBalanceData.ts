@@ -55,9 +55,11 @@ export function useBalanceData(): BalanceData {
     const handler = () => setVersion(v => v + 1)
     window.addEventListener('fiscasync:exercice-changed', handler)
     window.addEventListener('fiscasync:balance-imported', handler)
+    window.addEventListener('fiscasync:dossier-changed', handler)
     return () => {
       window.removeEventListener('fiscasync:exercice-changed', handler)
       window.removeEventListener('fiscasync:balance-imported', handler)
+      window.removeEventListener('fiscasync:dossier-changed', handler)
     }
   }, [])
 

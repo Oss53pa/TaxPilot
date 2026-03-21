@@ -1,6 +1,7 @@
 /**
  * Layout principal de l'application Liass'Pilot
  * Palette Grayscale monochrome
+ * Sidebar adaptée au mode Entreprise / Cabinet
  */
 
 import React, { useState } from 'react'
@@ -24,7 +25,8 @@ import {
   useTheme,
   useMediaQuery,
   Divider,
-  Tooltip
+  Tooltip,
+  Chip,
 } from '@mui/material'
 import {
   Menu as MenuIcon,
@@ -44,12 +46,18 @@ import {
   ChevronRight as ChevronRightIcon,
   Archive as ArchiveIcon,
   Folder as FolderIcon,
+  Add as AddIcon,
+  Business as BusinessIcon,
+  ArrowBack as ArrowBackIcon,
 } from '@mui/icons-material'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
+import { useModeStore } from '../../store/modeStore'
+import { useDossierStore } from '../../store/dossierStore'
 import NotificationCenter from '../notifications/NotificationCenter'
 import ExerciceSelector from '../exercice/ExerciceSelector'
 import UsageAssistant from '../assistant/UsageAssistant'
+import { Proph3tFloatingBall } from '../prophet'
 import { HelpOutline as HelpOutlineIcon } from '@mui/icons-material'
 
 const DRAWER_WIDTH = 270
@@ -66,6 +74,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation()
 
   const { user, logout } = useAuthStore()
+  const { userMode } = useModeStore()
+  const { activeDossierId, getActiveDossier, deactivateDossier } = useDossierStore()
+
+  const isCabinet = userMode === 'cabinet'
+  const activeDossier = isCabinet ? getActiveDossier() : null
 
   const [mobileOpen, setMobileOpen] = useState(false)
   const [collapsed, setCollapsed] = useState(false)
@@ -92,13 +105,29 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     navigate('/login')
   }
 
-  // P1-4: Read user mode to conditionally show dossiers link
-  const userMode = (() => { try { const s = localStorage.getItem('fiscasync-mode'); return s ? JSON.parse(s)?.state?.userMode : null } catch { return null } })()
+  const handleBackToDossiers = () => {
+    deactivateDossier()
+    navigate('/dossiers')
+  }
 
-  const menuItems = [
+  // ── Menu items ──
+  // Cabinet mode without active dossier: show cabinet-level menu
+  // Cabinet mode with active dossier: show dossier-level menu (same as entreprise)
+  // Entreprise mode: show standard menu
+
+  const cabinetGlobalItems = [
+    { text: 'Dossiers Clients', icon: <FolderIcon />, path: '/dossiers', divider: 'Portefeuille' },
+    { text: 'Veille Réglementaire', icon: <Analytics />, path: '/veille' },
+    { text: 'Collaboration', icon: <BusinessIcon />, path: '/collaboration' },
+
+    { text: 'Membres & Rôles', icon: <Settings />, path: '/settings/members', divider: 'Administration' },
+    { text: 'Abonnement', icon: <AccountBalance />, path: '/settings/subscription' },
+    { text: 'Invitations', icon: <BusinessIcon />, path: '/settings/invitations' },
+    { text: 'Sécurité', icon: <Security />, path: '/security' },
+  ]
+
+  const dossierItems = [
     { text: 'Tableau de bord', icon: <DashboardIcon />, path: '/dashboard' },
-    // P1-4: Dossiers link visible only in cabinet mode
-    ...(userMode === 'cabinet' ? [{ text: 'Dossiers Clients', icon: <FolderIcon />, path: '/dossiers' }] : []),
 
     { text: 'Configuration', icon: <Settings />, path: '/parametrage', divider: 'Configuration' },
     { text: 'Plans Comptables', icon: <AccountBalance />, path: '/plans-comptables' },
@@ -118,6 +147,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     { text: 'Reporting', icon: <Analytics />, path: '/reporting' },
     { text: 'Archives', icon: <ArchiveIcon />, path: '/archives' },
   ]
+
+  const onDossiersPage = location.pathname === '/dossiers'
+  const menuItems = (isCabinet && (!activeDossierId || onDossiersPage)) ? cabinetGlobalItems : dossierItems
 
   const renderDrawerContent = (isCollapsed: boolean) => (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
@@ -165,7 +197,76 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         )}
       </Toolbar>
 
-      <ExerciceSelector collapsed={isCollapsed} />
+      {/* ── Dossier context (cabinet mode with active dossier, hidden on /dossiers) ── */}
+      {isCabinet && activeDossier && !onDossiersPage && !isCollapsed && (
+        <Box sx={{ px: 2, py: 1.5, bgcolor: P.primary800, mx: 1, borderRadius: 2, mb: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5 }}>
+            <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, color: P.white, lineHeight: 1.2 }} noWrap>
+              {activeDossier.nomClient}
+            </Typography>
+            <Chip
+              label={activeDossier.statut === 'en_cours' ? 'En cours' : activeDossier.statut === 'validee' ? 'Validée' : 'Exportée'}
+              size="small"
+              sx={{
+                height: 18, fontSize: '0.6rem', fontWeight: 700, ml: 0.5,
+                bgcolor: activeDossier.statut === 'en_cours' ? P.warning : P.success,
+                color: '#fff',
+              }}
+            />
+          </Box>
+          <Typography sx={{ fontSize: '0.65rem', color: P.primary400, mb: 1 }}>
+            Exercice {activeDossier.exerciceN} — {activeDossier.regime === 'normal' ? 'Syst. Normal' : activeDossier.regime === 'simplifie' ? 'SMT' : 'Forfait'}
+          </Typography>
+          <Box
+            onClick={handleBackToDossiers}
+            sx={{
+              display: 'flex', alignItems: 'center', gap: 0.5,
+              cursor: 'pointer', color: P.primary400,
+              '&:hover': { color: P.white },
+              transition: 'color 0.15s',
+            }}
+          >
+            <ArrowBackIcon sx={{ fontSize: 14 }} />
+            <Typography sx={{ fontSize: '0.65rem', fontWeight: 600 }}>
+              Retour aux dossiers
+            </Typography>
+          </Box>
+        </Box>
+      )}
+      {isCabinet && activeDossier && !onDossiersPage && isCollapsed && (
+        <Tooltip title={`${activeDossier.nomClient} — Retour aux dossiers`} placement="right">
+          <IconButton
+            onClick={handleBackToDossiers}
+            size="small"
+            sx={{ mx: 'auto', my: 0.5, color: P.primary400, '&:hover': { color: P.white, bgcolor: P.primary800 } }}
+          >
+            <ArrowBackIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      )}
+
+      {/* ── Cabinet global: new client button ── */}
+      {isCabinet && (!activeDossierId || onDossiersPage) && !isCollapsed && (
+        <Box sx={{ px: 1.5, mb: 1 }}>
+          <Box
+            onClick={() => navigate('/dossiers')}
+            sx={{
+              display: 'flex', alignItems: 'center', gap: 1,
+              px: 2, py: 1, borderRadius: 2,
+              bgcolor: P.primary800, cursor: 'pointer',
+              '&:hover': { bgcolor: P.primary700 },
+              transition: 'background-color 0.15s',
+            }}
+          >
+            <AddIcon sx={{ fontSize: 18, color: P.white }} />
+            <Typography sx={{ fontSize: '0.8rem', fontWeight: 600, color: P.white }}>
+              Nouveau dossier
+            </Typography>
+          </Box>
+        </Box>
+      )}
+
+      {!onDossiersPage && <ExerciceSelector collapsed={isCollapsed} />}
 
       <List sx={{ px: isCollapsed ? 0.25 : 0.5, overflowY: 'auto', flexGrow: 1 }}>
         {menuItems.map((item, index) => (
@@ -263,6 +364,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     </Box>
   )
 
+  // AppBar title
+  const appBarTitle = isCabinet && activeDossier && !onDossiersPage
+    ? `Liass'Pilot — ${activeDossier.nomClient}`
+    : "Liass'Pilot"
+
   return (
     <Box sx={{ display: 'flex', height: '100vh' }}>
       {/* App Bar */}
@@ -296,7 +402,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             component="div"
             sx={{ flexGrow: 1, fontWeight: 600, color: 'text.primary' }}
           >
-            Liass'Pilot
+            {appBarTitle}
           </Typography>
 
           <NotificationCenter />
@@ -414,6 +520,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </Box>
 
       <UsageAssistant open={helpOpen} onClose={() => setHelpOpen(false)} />
+      <Proph3tFloatingBall />
     </Box>
   )
 }

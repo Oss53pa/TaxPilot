@@ -5,6 +5,7 @@
  */
 
 import { useExerciceStore } from '../store/exerciceStore'
+import { scopeKey } from './dossierScopeService'
 
 export interface WorkflowState {
   configurationDone: boolean
@@ -54,8 +55,8 @@ function getActiveAnnee(): string | null {
 
 function storageKey(exercice?: string): string {
   const annee = exercice || getActiveAnnee()
-  if (annee) return `${STORAGE_KEY_PREFIX}_${annee}`
-  return LEGACY_KEY
+  const base = annee ? `${STORAGE_KEY_PREFIX}_${annee}` : LEGACY_KEY
+  return scopeKey(base)
 }
 
 /** Migration one-shot: copie l'ancienne cle globale vers la cle de l'exercice courant */

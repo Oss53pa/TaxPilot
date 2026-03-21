@@ -5,6 +5,7 @@
  */
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { cleanupDossierData, scopeKey } from '@/services/dossierScopeService'
 
 export interface Dossier {
   id: string
@@ -35,11 +36,35 @@ interface DossierState {
   updateDossier: (id: string, updates: Partial<Dossier>) => void
   deleteDossier: (id: string) => void
   setActiveDossier: (id: string | null) => void
+  deactivateDossier: () => void
   duplicateDossier: (id: string, newExerciceN: number) => string
 }
 
 function generateId(): string {
   return Date.now().toString(36) + Math.random().toString(36).substring(2, 8)
+}
+
+/**
+ * Initialise les paramètres entreprise du dossier dans le storage scopé
+ * (seulement si pas déjà renseigné, pour ne pas écraser les saisies utilisateur)
+ */
+function initDossierContext(dossier: Dossier): void {
+  const entKey = scopeKey('fiscasync_entreprise_settings')
+  if (!localStorage.getItem(entKey)) {
+    const regimeLabels: Record<string, string> = {
+      normal: 'Système Normal',
+      simplifie: 'Système Minimal de Trésorerie',
+      forfaitaire: 'Régime Forfaitaire',
+    }
+    localStorage.setItem(entKey, JSON.stringify({
+      raison_sociale: dossier.nomClient,
+      rccm: dossier.rccm,
+      numero_contribuable: dossier.ncc,
+      regime_imposition: regimeLabels[dossier.regime] || dossier.regime,
+      exercice_debut: `${dossier.exerciceN}-01-01`,
+      exercice_fin: `${dossier.exerciceN}-12-31`,
+    }))
+  }
 }
 
 export const useDossierStore = create<DossierState>()(
@@ -78,19 +103,35 @@ export const useDossierStore = create<DossierState>()(
       },
 
       deleteDossier: (id) => {
-        // Clean up localStorage balance data for this dossier
-        const dossier = get().dossiers.find(d => d.id === id)
-        if (dossier) {
-          localStorage.removeItem(dossier.balanceKey)
-          localStorage.removeItem(dossier.balanceN1Key)
-        }
+        // Clean up ALL localStorage data scoped to this dossier
+        cleanupDossierData(id)
         set(state => ({
           dossiers: state.dossiers.filter(d => d.id !== id),
           activeDossierId: state.activeDossierId === id ? null : state.activeDossierId,
         }))
       },
 
-      setActiveDossier: (id) => set({ activeDossierId: id }),
+      setActiveDossier: (id) => {
+        set({ activeDossierId: id })
+        // Init enterprise context for the dossier
+        if (id) {
+          const dossier = get().dossiers.find(d => d.id === id)
+          if (dossier) {
+            initDossierContext(dossier)
+          }
+        }
+        // Notify all hooks/components
+        window.dispatchEvent(new CustomEvent('fiscasync:dossier-changed', {
+          detail: { dossierId: id },
+        }))
+      },
+
+      deactivateDossier: () => {
+        set({ activeDossierId: null })
+        window.dispatchEvent(new CustomEvent('fiscasync:dossier-changed', {
+          detail: { dossierId: null },
+        }))
+      },
 
       duplicateDossier: (id, newExerciceN) => {
         const source = get().dossiers.find(d => d.id === id)

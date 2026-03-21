@@ -6,6 +6,8 @@
 import type { BalanceEntry } from './liasseDataService'
 import type { StatutBalance, ExerciceConfig } from '@/types/audit.types'
 
+import { scopeKey } from './dossierScopeService'
+
 const PREFIX = 'fiscasync_balance_'
 const MAX_BALANCES = 10
 
@@ -41,7 +43,7 @@ export interface ImportRecord {
 
 function getItem<T>(key: string): T | null {
   try {
-    const raw = localStorage.getItem(PREFIX + key)
+    const raw = localStorage.getItem(scopeKey(PREFIX + key))
     return raw ? JSON.parse(raw) : null
   } catch {
     return null
@@ -50,16 +52,16 @@ function getItem<T>(key: string): T | null {
 
 function setItem<T>(key: string, value: T): void {
   try {
-    localStorage.setItem(PREFIX + key, JSON.stringify(value))
+    localStorage.setItem(scopeKey(PREFIX + key), JSON.stringify(value))
   } catch (e) {
-    console.error(`[BalanceStorage] Failed to save key "${PREFIX + key}":`, e)
+    console.error(`[BalanceStorage] Failed to save key "${scopeKey(PREFIX + key)}":`, e)
     // On quota exceeded, try to free space by trimming the list
     if (e instanceof DOMException && e.name === 'QuotaExceededError') {
       try {
         const list = getItem<any[]>('list') || []
         if (list.length > 2) {
           list.length = 2
-          localStorage.setItem(PREFIX + 'list', JSON.stringify(list))
+          localStorage.setItem(scopeKey(PREFIX + 'list'), JSON.stringify(list))
           // Retry
           localStorage.setItem(PREFIX + key, JSON.stringify(value))
           return
