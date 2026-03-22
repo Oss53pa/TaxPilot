@@ -39,14 +39,14 @@ import { useDossierStore, type Dossier } from '@/store/dossierStore'
 
 const REGIME_LABELS: Record<Dossier['regime'], string> = {
   normal: 'Normal',
-  simplifie: 'Simplifi\u00e9',
+  simplifie: 'Simplifié',
   forfaitaire: 'Forfaitaire',
 }
 
 const STATUT_CONFIG: Record<Dossier['statut'], { label: string; color: 'info' | 'success' | 'secondary'; icon: React.ReactElement }> = {
   en_cours: { label: 'En cours', color: 'info', icon: <HourglassEmpty fontSize="small" /> },
-  validee: { label: 'Valid\u00e9e', color: 'success', icon: <CheckCircle fontSize="small" /> },
-  exportee: { label: 'Export\u00e9e', color: 'secondary', icon: <CloudDone fontSize="small" /> },
+  validee: { label: 'Validée', color: 'success', icon: <CheckCircle fontSize="small" /> },
+  exportee: { label: 'Exportée', color: 'secondary', icon: <CloudDone fontSize="small" /> },
 }
 
 const INITIAL_FORM = {
@@ -140,7 +140,7 @@ export default function DossiersPage() {
       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', gap: 3 }}>
         <FolderOpen sx={{ fontSize: 80, color: '#9e9e9e' }} />
         <Typography variant="h6" sx={{ color: '#616161' }}>
-          Aucun dossier. Cr\u00e9ez votre premier dossier client.
+          Aucun dossier. Créez votre premier dossier client.
         </Typography>
         <Button
           variant="contained"
@@ -200,7 +200,7 @@ export default function DossiersPage() {
             size="small"
           />
           <TextField
-            label="R\u00e9gime"
+            label="Régime"
             select
             value={form.regime}
             onChange={e => setForm(f => ({ ...f, regime: e.target.value as Dossier['regime'] }))}
@@ -208,7 +208,7 @@ export default function DossiersPage() {
             size="small"
           >
             <MenuItem value="normal">Normal</MenuItem>
-            <MenuItem value="simplifie">Simplifi\u00e9</MenuItem>
+            <MenuItem value="simplifie">Simplifié</MenuItem>
             <MenuItem value="forfaitaire">Forfaitaire</MenuItem>
           </TextField>
         </DialogContent>
@@ -222,7 +222,7 @@ export default function DossiersPage() {
             disabled={!form.nomClient.trim()}
             sx={{ bgcolor: '#212121', '&:hover': { bgcolor: '#424242' } }}
           >
-            Cr\u00e9er
+            Créer
           </Button>
         </DialogActions>
       </Dialog>
@@ -257,9 +257,9 @@ export default function DossiersPage() {
               <TableCell sx={{ fontWeight: 600, color: '#424242' }}>Nom client</TableCell>
               <TableCell sx={{ fontWeight: 600, color: '#424242' }}>RCCM</TableCell>
               <TableCell sx={{ fontWeight: 600, color: '#424242' }}>Exercice</TableCell>
-              <TableCell sx={{ fontWeight: 600, color: '#424242' }}>R\u00e9gime</TableCell>
+              <TableCell sx={{ fontWeight: 600, color: '#424242' }}>Régime</TableCell>
               <TableCell sx={{ fontWeight: 600, color: '#424242' }}>Statut</TableCell>
-              <TableCell sx={{ fontWeight: 600, color: '#424242' }}>Derni\u00e8re modification</TableCell>
+              <TableCell sx={{ fontWeight: 600, color: '#424242' }}>Dernière modification</TableCell>
               <TableCell sx={{ fontWeight: 600, color: '#424242' }} align="right">Actions</TableCell>
             </TableRow>
           </TableHead>
@@ -383,7 +383,7 @@ export default function DossiersPage() {
         <DialogTitle sx={{ fontWeight: 600 }}>Confirmer la suppression</DialogTitle>
         <DialogContent>
           <Typography variant="body2" sx={{ color: '#616161' }}>
-            Cette action est irr\u00e9versible. Le dossier et toutes ses donn\u00e9es de balance seront supprim\u00e9s.
+            Cette action est irréversible. Le dossier et toutes ses données de balance seront supprimés.
           </Typography>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>

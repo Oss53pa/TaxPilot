@@ -26,7 +26,20 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Badge
+  Badge,
+  TextField,
+  MenuItem,
+  Select,
+  InputLabel,
+  FormControl,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Checkbox,
+  Collapse,
+  Tooltip
 } from '@mui/material';
 import {
   Timeline,
@@ -45,358 +58,74 @@ import {
   CheckCircle,
   Visibility,
   AssignmentTurnedIn,
-  NotificationImportant
+  NotificationImportant,
+  Search,
+  Bookmark,
+  BookmarkBorder,
+  ExpandMore,
+  ExpandLess,
+  Add,
+  Delete,
+  DoneAll,
+  NotificationsOff,
+  FilterList
 } from '@mui/icons-material';
 import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme';
-
-// EX-VEILLE-001 à 010: Module Veille Réglementaire Complet
-// Surveillance automatique des changements réglementaires avec alertes intelligentes
-
-interface Regulation {
-  id: string;
-  title: string;
-  type: 'law' | 'decree' | 'circular' | 'instruction' | 'convention' | 'standard';
-  category: 'fiscal' | 'social' | 'commercial' | 'accounting' | 'customs' | 'environmental';
-  jurisdiction: string;
-  country: string;
-  authority: string;
-  referenceNumber: string;
-  publicationDate: Date;
-  effectiveDate: Date;
-  expiryDate?: Date;
-  status: 'draft' | 'published' | 'active' | 'amended' | 'repealed';
-  priority: 'low' | 'medium' | 'high' | 'critical';
-  summary: string;
-  fullText?: string;
-  impacts: Impact[];
-  amendments: Amendment[];
-  relatedRegulations: string[];
-  tags: string[];
-  isBookmarked: boolean;
-  readStatus: 'unread' | 'read' | 'analyzed';
-  complianceStatus: 'compliant' | 'non-compliant' | 'in-progress' | 'not-applicable';
-  attachments: Attachment[];
-  notifications: RegulationNotification[];
-}
-
-interface Impact {
-  id: string;
-  area: string;
-  description: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
-  deadline?: Date;
-  actionRequired: string;
-  responsibleDepartment: string;
-  status: 'pending' | 'in-progress' | 'completed';
-  estimatedCost?: number;
-}
-
-interface Amendment {
-  id: string;
-  date: Date;
-  description: string;
-  articles: string[];
-  reason: string;
-  author: string;
-}
-
-interface Attachment {
-  id: string;
-  name: string;
-  type: string;
-  size: number;
-  url: string;
-  uploadDate: Date;
-}
-
-interface RegulationNotification {
-  id: string;
-  type: 'new' | 'update' | 'deadline' | 'alert';
-  message: string;
-  date: Date;
-  isRead: boolean;
-  priority: 'low' | 'medium' | 'high' | 'urgent';
-}
-
-interface ComplianceTask {
-  id: string;
-  regulationId: string;
-  title: string;
-  description: string;
-  dueDate: Date;
-  assignedTo: string[];
-  status: 'pending' | 'in-progress' | 'completed' | 'overdue';
-  priority: 'low' | 'medium' | 'high' | 'critical';
-  progress: number;
-  checkpoints: Checkpoint[];
-  documents: string[];
-  createdAt: Date;
-  completedAt?: Date;
-}
-
-interface Checkpoint {
-  id: string;
-  description: string;
-  isCompleted: boolean;
-  completedBy?: string;
-  completedAt?: Date;
-  comments?: string;
-}
-
-interface RegulatoryAlert {
-  id: string;
-  title: string;
-  message: string;
-  type: 'info' | 'warning' | 'critical';
-  source: string;
-  date: Date;
-  jurisdictions: string[];
-  categories: string[];
-  isActive: boolean;
-  expiresAt?: Date;
-  actions: string[];
-}
+import * as veilleService from '@/services/veilleStorageService';
+import type {
+  VeilleRegulation,
+  ComplianceTask,
+  RegulatoryAlert,
+} from '@/services/veilleStorageService';
 
 const ModernVeilleReglementaire: React.FC = () => {
   const [activeTab, setActiveTab] = useState(0);
-  const [regulations, setRegulations] = useState<Regulation[]>([]);
+  const [regulations, setRegulations] = useState<VeilleRegulation[]>([]);
   const [complianceTasks, setComplianceTasks] = useState<ComplianceTask[]>([]);
   const [alerts, setAlerts] = useState<RegulatoryAlert[]>([]);
   const [isAutoRefresh, setIsAutoRefresh] = useState(true);
-  
-  // EX-VEILLE-001: Surveillance automatique temps réel
   const refreshInterval = useRef<NodeJS.Timeout | null>(null);
   const [lastCheck, setLastCheck] = useState(new Date());
 
-  // Initialisation
+  // Filters
+  const [regCategoryFilter, setRegCategoryFilter] = useState('');
+  const [regJurisdictionFilter, setRegJurisdictionFilter] = useState('');
+  const [regPriorityFilter, setRegPriorityFilter] = useState('');
+  const [regSearchTerm, setRegSearchTerm] = useState('');
+  const [expandedRegId, setExpandedRegId] = useState<string | null>(null);
+
+  // Task dialog
+  const [taskDialogOpen, setTaskDialogOpen] = useState(false);
+  const [newTask, setNewTask] = useState({ title: '', description: '', regulationId: '', dueDate: '', priority: 'medium' as const });
+
+  // Alert filters
+  const [showDismissed, setShowDismissed] = useState(false);
+
+  const loadData = () => {
+    setRegulations(veilleService.getAllRegulations());
+    setComplianceTasks(veilleService.getAllTasks());
+    setAlerts(veilleService.getAllAlerts());
+  };
+
   useEffect(() => {
-    initializeRegulations();
-    initializeComplianceTasks();
-    initializeAlerts();
-    
+    veilleService.seedVeilleData();
+    loadData();
+
+    const handleUpdate = () => loadData();
+    window.addEventListener('fiscasync:veille-updated', handleUpdate);
+
     if (isAutoRefresh) {
-      startAutoRefresh();
+      refreshInterval.current = setInterval(() => {
+        setLastCheck(new Date());
+        logger.debug('Vérification des mises à jour réglementaires...');
+      }, 3600000);
     }
-    
+
     return () => {
-      if (refreshInterval.current) {
-        clearInterval(refreshInterval.current);
-      }
+      window.removeEventListener('fiscasync:veille-updated', handleUpdate);
+      if (refreshInterval.current) clearInterval(refreshInterval.current);
     };
   }, [isAutoRefresh]);
-
-  const initializeRegulations = () => {
-    const mockRegulations: Regulation[] = [
-      {
-        id: 'reg-1',
-        title: 'Nouvelle Directive TVA UEMOA 2025',
-        type: 'decree',
-        category: 'fiscal',
-        jurisdiction: 'UEMOA',
-        country: 'Régional',
-        authority: 'Commission UEMOA',
-        referenceNumber: 'DIR/2024/TVA/001',
-        publicationDate: new Date('2024-11-15'),
-        effectiveDate: new Date('2025-01-01'),
-        status: 'published',
-        priority: 'high',
-        summary: 'Harmonisation des taux de TVA dans l\'espace UEMOA avec nouvelles exonérations sectorielles',
-        impacts: [
-          {
-            id: 'impact-1',
-            area: 'Comptabilité',
-            description: 'Mise à jour des taux de TVA dans le système',
-            severity: 'high',
-            deadline: new Date('2024-12-31'),
-            actionRequired: 'Paramétrer les nouveaux taux dans le système',
-            responsibleDepartment: 'Finance',
-            status: 'in-progress',
-            estimatedCost: 50000
-          }
-        ],
-        amendments: [],
-        relatedRegulations: [],
-        tags: ['TVA', 'UEMOA', 'Fiscal', '2025'],
-        isBookmarked: true,
-        readStatus: 'analyzed',
-        complianceStatus: 'in-progress',
-        attachments: [],
-        notifications: []
-      },
-      {
-        id: 'reg-2',
-        title: 'Réforme du Code du Travail OHADA',
-        type: 'law',
-        category: 'social',
-        jurisdiction: 'OHADA',
-        country: 'Régional',
-        authority: 'Secrétariat Permanent OHADA',
-        referenceNumber: 'AU/2024/SOC/003',
-        publicationDate: new Date('2024-10-20'),
-        effectiveDate: new Date('2025-07-01'),
-        status: 'active',
-        priority: 'medium',
-        summary: 'Nouvelles dispositions sur le télétravail et la protection sociale',
-        impacts: [],
-        amendments: [],
-        relatedRegulations: [],
-        tags: ['Social', 'OHADA', 'Travail'],
-        isBookmarked: false,
-        readStatus: 'read',
-        complianceStatus: 'compliant',
-        attachments: [],
-        notifications: []
-      },
-      {
-        id: 'reg-3',
-        title: 'Instruction Fiscale sur la Déclaration Électronique',
-        type: 'instruction',
-        category: 'fiscal',
-        jurisdiction: 'National',
-        country: 'Côte d\'Ivoire',
-        authority: 'Direction Générale des Impôts',
-        referenceNumber: 'INSTR/2024/DGI/E-FILING',
-        publicationDate: new Date('2024-11-01'),
-        effectiveDate: new Date('2024-12-01'),
-        status: 'active',
-        priority: 'critical',
-        summary: 'Obligation de télédéclaration pour toutes les entreprises au chiffre d\'affaires > 200M FCFA',
-        impacts: [
-          {
-            id: 'impact-2',
-            area: 'Déclarations',
-            description: 'Migration vers la télédéclaration obligatoire',
-            severity: 'critical',
-            deadline: new Date('2024-12-01'),
-            actionRequired: 'Activer le module de télédéclaration',
-            responsibleDepartment: 'Fiscal',
-            status: 'pending',
-            estimatedCost: 0
-          }
-        ],
-        amendments: [],
-        relatedRegulations: [],
-        tags: ['Télédéclaration', 'Digital', 'Obligatoire'],
-        isBookmarked: true,
-        readStatus: 'analyzed',
-        complianceStatus: 'non-compliant',
-        attachments: [],
-        notifications: []
-      }
-    ];
-
-    setRegulations(mockRegulations);
-  };
-
-  const initializeComplianceTasks = () => {
-    const mockTasks: ComplianceTask[] = [
-      {
-        id: 'task-1',
-        regulationId: 'reg-1',
-        title: 'Mise à jour des taux de TVA UEMOA',
-        description: 'Paramétrer les nouveaux taux de TVA conformément à la directive UEMOA 2025',
-        dueDate: new Date('2024-12-31'),
-        assignedTo: ['Responsable Fiscal', 'Administrateur Système'],
-        status: 'in-progress',
-        priority: 'high',
-        progress: 35,
-        checkpoints: [
-          {
-            id: 'check-1',
-            description: 'Analyser la directive',
-            isCompleted: true,
-            completedBy: 'Jean Dupont',
-            completedAt: new Date('2024-11-20')
-          },
-          {
-            id: 'check-2',
-            description: 'Identifier les changements de taux',
-            isCompleted: true,
-            completedBy: 'Marie Martin',
-            completedAt: new Date('2024-11-22')
-          },
-          {
-            id: 'check-3',
-            description: 'Paramétrer dans le système',
-            isCompleted: false
-          },
-          {
-            id: 'check-4',
-            description: 'Tester les calculs',
-            isCompleted: false
-          },
-          {
-            id: 'check-5',
-            description: 'Former les utilisateurs',
-            isCompleted: false
-          }
-        ],
-        documents: [],
-        createdAt: new Date('2024-11-16')
-      },
-      {
-        id: 'task-2',
-        regulationId: 'reg-3',
-        title: 'Activation Télédéclaration Obligatoire',
-        description: 'Configurer et activer le module de télédéclaration pour se conformer à l\'instruction DGI',
-        dueDate: new Date('2024-12-01'),
-        assignedTo: ['Chef de Projet IT', 'Responsable Fiscal'],
-        status: 'pending',
-        priority: 'critical',
-        progress: 0,
-        checkpoints: [],
-        documents: [],
-        createdAt: new Date('2024-11-02')
-      }
-    ];
-
-    setComplianceTasks(mockTasks);
-  };
-
-  const initializeAlerts = () => {
-    const mockAlerts: RegulatoryAlert[] = [
-      {
-        id: 'alert-1',
-        title: 'URGENT: Télédéclaration Obligatoire dans 5 jours',
-        message: 'La télédéclaration devient obligatoire le 1er décembre 2024 pour les entreprises > 200M FCFA',
-        type: 'critical',
-        source: 'Direction Générale des Impôts',
-        date: new Date(),
-        jurisdictions: ['Côte d\'Ivoire'],
-        categories: ['fiscal'],
-        isActive: true,
-        expiresAt: new Date('2024-12-01'),
-        actions: ['Activer module télédéclaration', 'Former les équipes']
-      },
-      {
-        id: 'alert-2',
-        title: 'Nouveaux Taux TVA UEMOA',
-        message: 'Les nouveaux taux de TVA entrent en vigueur le 1er janvier 2025',
-        type: 'warning',
-        source: 'Commission UEMOA',
-        date: new Date('2024-11-20'),
-        jurisdictions: ['UEMOA'],
-        categories: ['fiscal'],
-        isActive: true,
-        actions: ['Mettre à jour les taux', 'Informer les clients']
-      }
-    ];
-
-    setAlerts(mockAlerts);
-  };
-
-  // EX-VEILLE-002: Actualisation automatique toutes les heures
-  const startAutoRefresh = () => {
-    refreshInterval.current = setInterval(() => {
-      checkForUpdates();
-    }, 3600000); // 1 heure
-  };
-
-  const checkForUpdates = () => {
-    setLastCheck(new Date());
-    // Simulation de vérification de nouvelles réglementations
-    logger.debug('Vérification des mises à jour réglementaires...');
-  };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -417,22 +146,94 @@ const ModernVeilleReglementaire: React.FC = () => {
     }
   };
 
+  const getComplianceColor = (status: string) => {
+    switch (status) {
+      case 'compliant': return 'success';
+      case 'non-compliant': return 'error';
+      case 'in-progress': return 'warning';
+      default: return 'default';
+    }
+  };
+
+  const getComplianceLabel = (status: string) => {
+    switch (status) {
+      case 'compliant': return 'Conforme';
+      case 'non-compliant': return 'Non conforme';
+      case 'in-progress': return 'En cours';
+      case 'not-applicable': return 'N/A';
+      default: return status;
+    }
+  };
+
+  const getTypeLabel = (type: string) => {
+    switch (type) {
+      case 'law': return 'Loi';
+      case 'decree': return 'Décret';
+      case 'circular': return 'Circulaire';
+      case 'instruction': return 'Instruction';
+      case 'convention': return 'Convention';
+      case 'standard': return 'Norme';
+      default: return type;
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'pending': return 'En attente';
+      case 'in-progress': return 'En cours';
+      case 'completed': return 'Terminé';
+      case 'overdue': return 'En retard';
+      default: return status;
+    }
+  };
+
+  const toggleBookmark = (id: string) => {
+    const reg = regulations.find(r => r.id === id);
+    if (reg) veilleService.updateRegulation(id, { isBookmarked: !reg.isBookmarked });
+  };
+
+  const toggleCheckpoint = (taskId: string, checkpointId: string) => {
+    const task = complianceTasks.find(t => t.id === taskId);
+    if (!task) return;
+    const checkpoints = task.checkpoints.map(c =>
+      c.id === checkpointId ? { ...c, isCompleted: !c.isCompleted, completedAt: !c.isCompleted ? new Date().toISOString() : undefined } : c
+    );
+    const completed = checkpoints.filter(c => c.isCompleted).length;
+    const progress = checkpoints.length > 0 ? Math.round((completed / checkpoints.length) * 100) : 0;
+    const status = progress === 100 ? 'completed' : task.status;
+    veilleService.updateTask(taskId, { checkpoints, progress, status, completedAt: progress === 100 ? new Date().toISOString() : undefined });
+  };
+
+  const handleCreateTask = () => {
+    if (!newTask.title || !newTask.dueDate) return;
+    veilleService.createTask({
+      title: newTask.title,
+      description: newTask.description,
+      regulationId: newTask.regulationId,
+      dueDate: newTask.dueDate,
+      assignedTo: [],
+      status: 'pending',
+      priority: newTask.priority,
+      progress: 0,
+      checkpoints: [],
+    });
+    setNewTask({ title: '', description: '', regulationId: '', dueDate: '', priority: 'medium' });
+    setTaskDialogOpen(false);
+  };
+
+  // ────────── Dashboard Tab ──────────
+
   const renderDashboardTab = () => (
     <Box>
-      {/* Métriques de conformité */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
         <Grid item xs={12} sm={6} md={3}>
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                 <Gavel color="primary" sx={{ mr: 1 }} />
-                <Typography variant="h6">
-                  {regulations.length}
-                </Typography>
+                <Typography variant="h6">{regulations.length}</Typography>
               </Box>
-              <Typography color="textSecondary">
-                Réglementations Surveillées
-              </Typography>
+              <Typography color="textSecondary">Réglementations Surveillées</Typography>
             </CardContent>
           </Card>
         </Grid>
@@ -441,13 +242,9 @@ const ModernVeilleReglementaire: React.FC = () => {
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                 <CheckCircle color="success" sx={{ mr: 1 }} />
-                <Typography variant="h6">
-                  {regulations.filter(r => r.complianceStatus === 'compliant').length}
-                </Typography>
+                <Typography variant="h6">{regulations.filter(r => r.complianceStatus === 'compliant').length}</Typography>
               </Box>
-              <Typography color="textSecondary">
-                Conformes
-              </Typography>
+              <Typography color="textSecondary">Conformes</Typography>
             </CardContent>
           </Card>
         </Grid>
@@ -456,13 +253,9 @@ const ModernVeilleReglementaire: React.FC = () => {
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                 <Warning color="warning" sx={{ mr: 1 }} />
-                <Typography variant="h6">
-                  {complianceTasks.filter(t => t.status === 'pending' || t.status === 'in-progress').length}
-                </Typography>
+                <Typography variant="h6">{complianceTasks.filter(t => t.status === 'pending' || t.status === 'in-progress').length}</Typography>
               </Box>
-              <Typography color="textSecondary">
-                Actions en Cours
-              </Typography>
+              <Typography color="textSecondary">Actions en Cours</Typography>
             </CardContent>
           </Card>
         </Grid>
@@ -471,24 +264,17 @@ const ModernVeilleReglementaire: React.FC = () => {
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                 <NotificationImportant color="error" sx={{ mr: 1 }} />
-                <Typography variant="h6">
-                  {alerts.filter(a => a.type === 'critical').length}
-                </Typography>
+                <Typography variant="h6">{alerts.filter(a => a.type === 'critical' && a.isActive).length}</Typography>
               </Box>
-              <Typography color="textSecondary">
-                Alertes Critiques
-              </Typography>
+              <Typography color="textSecondary">Alertes Critiques</Typography>
             </CardContent>
           </Card>
         </Grid>
       </Grid>
 
-      {/* Alertes actives */}
       {alerts.filter(a => a.isActive).length > 0 && (
         <Paper sx={{ p: 3, mb: 3 }}>
-          <Typography variant="h6" gutterBottom>
-            Alertes Réglementaires
-          </Typography>
+          <Typography variant="h6" gutterBottom>Alertes Réglementaires</Typography>
           <List>
             {alerts.filter(a => a.isActive).map((alert) => (
               <ListItem key={alert.id}>
@@ -501,20 +287,16 @@ const ModernVeilleReglementaire: React.FC = () => {
                   primary={alert.title}
                   secondary={
                     <Box>
-                      <Typography variant="body2" color="text.secondary">
-                        {alert.message}
-                      </Typography>
+                      <Typography variant="body2" color="text.secondary">{alert.message}</Typography>
                       <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
-                        {alert.jurisdictions.map(j => (
-                          <Chip key={j} label={j} size="small" />
-                        ))}
+                        {alert.jurisdictions.map(j => (<Chip key={j} label={j} size="small" />))}
                       </Box>
                     </Box>
                   }
                 />
                 <ListItemSecondaryAction>
                   <Typography variant="caption" color="text.secondary">
-                    {alert.date.toLocaleDateString()}
+                    {new Date(alert.date).toLocaleDateString()}
                   </Typography>
                 </ListItemSecondaryAction>
               </ListItem>
@@ -523,21 +305,13 @@ const ModernVeilleReglementaire: React.FC = () => {
         </Paper>
       )}
 
-      {/* Timeline des changements récents */}
       <Paper sx={{ p: 3, mb: 3 }}>
-        <Typography variant="h6" gutterBottom>
-          Changements Réglementaires Récents
-        </Typography>
+        <Typography variant="h6" gutterBottom>Changements Réglementaires Récents</Typography>
         <Timeline position="alternate">
           {regulations.slice(0, 5).map((regulation, index) => (
             <TimelineItem key={regulation.id}>
-              <TimelineOppositeContent
-                sx={{ m: 'auto 0' }}
-                align={index % 2 === 0 ? 'right' : 'left'}
-                variant="body2"
-                color="text.secondary"
-              >
-                {regulation.publicationDate.toLocaleDateString()}
+              <TimelineOppositeContent sx={{ m: 'auto 0' }} align={index % 2 === 0 ? 'right' : 'left'} variant="body2" color="text.secondary">
+                {new Date(regulation.publicationDate).toLocaleDateString()}
               </TimelineOppositeContent>
               <TimelineSeparator>
                 <TimelineConnector />
@@ -547,23 +321,11 @@ const ModernVeilleReglementaire: React.FC = () => {
                 <TimelineConnector />
               </TimelineSeparator>
               <TimelineContent sx={{ py: '12px', px: 2 }}>
-                <Typography variant="h6" component="span">
-                  {regulation.title}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {regulation.summary}
-                </Typography>
+                <Typography variant="h6" component="span">{regulation.title}</Typography>
+                <Typography variant="body2" color="text.secondary">{regulation.summary}</Typography>
                 <Box sx={{ mt: 1 }}>
-                  <Chip
-                    label={regulation.jurisdiction}
-                    size="small"
-                    sx={{ mr: 1 }}
-                  />
-                  <Chip
-                    label={regulation.category}
-                    size="small"
-                    variant="outlined"
-                  />
+                  <Chip label={regulation.jurisdiction} size="small" sx={{ mr: 1 }} />
+                  <Chip label={regulation.category} size="small" variant="outlined" />
                 </Box>
               </TimelineContent>
             </TimelineItem>
@@ -571,11 +333,8 @@ const ModernVeilleReglementaire: React.FC = () => {
         </Timeline>
       </Paper>
 
-      {/* Tâches de conformité */}
       <Paper sx={{ p: 3 }}>
-        <Typography variant="h6" gutterBottom>
-          Tâches de Mise en Conformité
-        </Typography>
+        <Typography variant="h6" gutterBottom>Tâches de Mise en Conformité</Typography>
         <TableContainer>
           <Table>
             <TableHead>
@@ -592,56 +351,25 @@ const ModernVeilleReglementaire: React.FC = () => {
               {complianceTasks.map((task) => (
                 <TableRow key={task.id}>
                   <TableCell>
-                    <Typography variant="body2" fontWeight="medium">
-                      {task.title}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {task.description}
-                    </Typography>
+                    <Typography variant="body2" fontWeight="medium">{task.title}</Typography>
+                    <Typography variant="caption" color="text.secondary">{task.description}</Typography>
                   </TableCell>
                   <TableCell>
-                    <Box
-                      sx={{
-                        width: 8,
-                        height: 8,
-                        borderRadius: '50%',
-                        backgroundColor: getPriorityColor(task.priority),
-                        display: 'inline-block',
-                        mr: 1
-                      }}
-                    />
+                    <Box sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: getPriorityColor(task.priority), display: 'inline-block', mr: 1 }} />
                     {task.priority}
                   </TableCell>
-                  <TableCell>
-                    {task.dueDate.toLocaleDateString()}
-                  </TableCell>
+                  <TableCell>{new Date(task.dueDate).toLocaleDateString()}</TableCell>
                   <TableCell>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <LinearProgress
-                        variant="determinate"
-                        value={task.progress}
-                        sx={{ width: 100, height: 6, borderRadius: 3 }}
-                      />
-                      <Typography variant="caption">
-                        {task.progress}%
-                      </Typography>
+                      <LinearProgress variant="determinate" value={task.progress} sx={{ width: 100, height: 6, borderRadius: 3 }} />
+                      <Typography variant="caption">{task.progress}%</Typography>
                     </Box>
                   </TableCell>
                   <TableCell>
-                    <Chip
-                      label={task.status}
-                      size="small"
-                      color={
-                        task.status === 'completed' ? 'success' :
-                        task.status === 'in-progress' ? 'warning' :
-                        task.status === 'overdue' ? 'error' : 'default'
-                      }
-                    />
+                    <Chip label={getStatusLabel(task.status)} size="small" color={task.status === 'completed' ? 'success' : task.status === 'in-progress' ? 'warning' : task.status === 'overdue' ? 'error' : 'default'} />
                   </TableCell>
                   <TableCell>
-                    <IconButton size="small">
-                      <Visibility />
-                    </IconButton>
+                    <IconButton size="small"><Visibility /></IconButton>
                   </TableCell>
                 </TableRow>
               ))}
@@ -652,19 +380,432 @@ const ModernVeilleReglementaire: React.FC = () => {
     </Box>
   );
 
+  // ────────── Réglementations Tab ──────────
+
+  const renderReglementationsTab = () => {
+    let filtered = [...regulations];
+    if (regCategoryFilter) filtered = filtered.filter(r => r.category === regCategoryFilter);
+    if (regJurisdictionFilter) filtered = filtered.filter(r => r.jurisdiction === regJurisdictionFilter);
+    if (regPriorityFilter) filtered = filtered.filter(r => r.priority === regPriorityFilter);
+    if (regSearchTerm) {
+      const term = regSearchTerm.toLowerCase();
+      filtered = filtered.filter(r => r.title.toLowerCase().includes(term) || r.summary.toLowerCase().includes(term) || r.referenceNumber.toLowerCase().includes(term));
+    }
+
+    return (
+      <Box>
+        {/* Filtres */}
+        <Paper sx={{ p: 2, mb: 3 }}>
+          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
+            <TextField size="small" placeholder="Rechercher..." value={regSearchTerm} onChange={e => setRegSearchTerm(e.target.value)}
+              InputProps={{ startAdornment: <Search sx={{ mr: 1, color: 'text.secondary' }} /> }} sx={{ minWidth: 250 }} />
+            <FormControl size="small" sx={{ minWidth: 140 }}>
+              <InputLabel>Catégorie</InputLabel>
+              <Select value={regCategoryFilter} label="Catégorie" onChange={e => setRegCategoryFilter(e.target.value)}>
+                <MenuItem value="">Toutes</MenuItem>
+                <MenuItem value="fiscal">Fiscal</MenuItem>
+                <MenuItem value="social">Social</MenuItem>
+                <MenuItem value="commercial">Commercial</MenuItem>
+                <MenuItem value="accounting">Comptable</MenuItem>
+                <MenuItem value="customs">Douanier</MenuItem>
+                <MenuItem value="environmental">Environnemental</MenuItem>
+              </Select>
+            </FormControl>
+            <FormControl size="small" sx={{ minWidth: 140 }}>
+              <InputLabel>Juridiction</InputLabel>
+              <Select value={regJurisdictionFilter} label="Juridiction" onChange={e => setRegJurisdictionFilter(e.target.value)}>
+                <MenuItem value="">Toutes</MenuItem>
+                <MenuItem value="UEMOA">UEMOA</MenuItem>
+                <MenuItem value="OHADA">OHADA</MenuItem>
+                <MenuItem value="National">National</MenuItem>
+              </Select>
+            </FormControl>
+            <FormControl size="small" sx={{ minWidth: 120 }}>
+              <InputLabel>Priorité</InputLabel>
+              <Select value={regPriorityFilter} label="Priorité" onChange={e => setRegPriorityFilter(e.target.value)}>
+                <MenuItem value="">Toutes</MenuItem>
+                <MenuItem value="critical">Critique</MenuItem>
+                <MenuItem value="high">Haute</MenuItem>
+                <MenuItem value="medium">Moyenne</MenuItem>
+                <MenuItem value="low">Basse</MenuItem>
+              </Select>
+            </FormControl>
+            <Chip icon={<FilterList />} label={`${filtered.length} résultat(s)`} variant="outlined" />
+          </Box>
+        </Paper>
+
+        {/* Table des réglementations */}
+        <Paper>
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell width={30}></TableCell>
+                  <TableCell>Titre</TableCell>
+                  <TableCell>Type</TableCell>
+                  <TableCell>Juridiction</TableCell>
+                  <TableCell>Priorité</TableCell>
+                  <TableCell>Date Effective</TableCell>
+                  <TableCell>Conformité</TableCell>
+                  <TableCell>Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {filtered.map(reg => (
+                  <React.Fragment key={reg.id}>
+                    <TableRow hover sx={{ cursor: 'pointer' }} onClick={() => setExpandedRegId(expandedRegId === reg.id ? null : reg.id)}>
+                      <TableCell>
+                        <IconButton size="small">
+                          {expandedRegId === reg.id ? <ExpandLess /> : <ExpandMore />}
+                        </IconButton>
+                      </TableCell>
+                      <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          {reg.readStatus === 'unread' && <Badge color="primary" variant="dot"><Box /></Badge>}
+                          <Box>
+                            <Typography variant="body2" fontWeight="medium">{reg.title}</Typography>
+                            <Typography variant="caption" color="text.secondary">{reg.referenceNumber}</Typography>
+                          </Box>
+                        </Box>
+                      </TableCell>
+                      <TableCell><Chip label={getTypeLabel(reg.type)} size="small" variant="outlined" /></TableCell>
+                      <TableCell><Chip label={reg.jurisdiction} size="small" /></TableCell>
+                      <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          <Box sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: getPriorityColor(reg.priority) }} />
+                          <Typography variant="body2">{reg.priority}</Typography>
+                        </Box>
+                      </TableCell>
+                      <TableCell>{new Date(reg.effectiveDate).toLocaleDateString()}</TableCell>
+                      <TableCell>
+                        <Chip label={getComplianceLabel(reg.complianceStatus)} size="small" color={getComplianceColor(reg.complianceStatus) as any} />
+                      </TableCell>
+                      <TableCell onClick={e => e.stopPropagation()}>
+                        <IconButton size="small" onClick={() => toggleBookmark(reg.id)}>
+                          {reg.isBookmarked ? <Bookmark color="warning" /> : <BookmarkBorder />}
+                        </IconButton>
+                        <IconButton size="small" onClick={() => {
+                          if (reg.readStatus === 'unread') veilleService.updateRegulation(reg.id, { readStatus: 'read' });
+                        }}>
+                          <Visibility fontSize="small" />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell colSpan={8} sx={{ py: 0, borderBottom: expandedRegId === reg.id ? undefined : 'none' }}>
+                        <Collapse in={expandedRegId === reg.id} timeout="auto" unmountOnExit>
+                          <Box sx={{ p: 2 }}>
+                            <Typography variant="subtitle2" gutterBottom>Résumé</Typography>
+                            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{reg.summary}</Typography>
+
+                            <Typography variant="subtitle2" gutterBottom>Informations</Typography>
+                            <Grid container spacing={2} sx={{ mb: 2 }}>
+                              <Grid item xs={6} sm={3}><Typography variant="caption" color="text.secondary">Autorité</Typography><Typography variant="body2">{reg.authority}</Typography></Grid>
+                              <Grid item xs={6} sm={3}><Typography variant="caption" color="text.secondary">Pays</Typography><Typography variant="body2">{reg.country}</Typography></Grid>
+                              <Grid item xs={6} sm={3}><Typography variant="caption" color="text.secondary">Publication</Typography><Typography variant="body2">{new Date(reg.publicationDate).toLocaleDateString()}</Typography></Grid>
+                              <Grid item xs={6} sm={3}><Typography variant="caption" color="text.secondary">Statut</Typography><Typography variant="body2">{reg.status}</Typography></Grid>
+                            </Grid>
+
+                            {reg.impacts.length > 0 && (
+                              <>
+                                <Typography variant="subtitle2" gutterBottom>Impacts ({reg.impacts.length})</Typography>
+                                {reg.impacts.map(impact => (
+                                  <Paper key={impact.id} variant="outlined" sx={{ p: 1.5, mb: 1 }}>
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                      <Box>
+                                        <Typography variant="body2" fontWeight="medium">{impact.area}</Typography>
+                                        <Typography variant="caption" color="text.secondary">{impact.description}</Typography>
+                                      </Box>
+                                      <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                                        <Chip label={impact.severity} size="small" sx={{ backgroundColor: getPriorityColor(impact.severity), color: 'white' }} />
+                                        <Chip label={getStatusLabel(impact.status)} size="small" variant="outlined" />
+                                      </Box>
+                                    </Box>
+                                    {impact.deadline && <Typography variant="caption" color="error">Échéance: {new Date(impact.deadline).toLocaleDateString()}</Typography>}
+                                  </Paper>
+                                ))}
+                              </>
+                            )}
+
+                            <Box sx={{ display: 'flex', gap: 1, mt: 2, flexWrap: 'wrap' }}>
+                              {reg.tags.map(tag => <Chip key={tag} label={tag} size="small" variant="outlined" />)}
+                            </Box>
+                          </Box>
+                        </Collapse>
+                      </TableCell>
+                    </TableRow>
+                  </React.Fragment>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Paper>
+      </Box>
+    );
+  };
+
+  // ────────── Conformité Tab ──────────
+
+  const renderConformiteTab = () => {
+    const tasksByStatus = {
+      pending: complianceTasks.filter(t => t.status === 'pending'),
+      'in-progress': complianceTasks.filter(t => t.status === 'in-progress'),
+      completed: complianceTasks.filter(t => t.status === 'completed'),
+      overdue: complianceTasks.filter(t => t.status === 'overdue'),
+    };
+
+    const totalTasks = complianceTasks.length;
+    const completedTasks = tasksByStatus.completed.length;
+    const overallProgress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
+    const renderTaskCard = (task: ComplianceTask) => {
+      const reg = regulations.find(r => r.id === task.regulationId);
+      return (
+        <Paper key={task.id} variant="outlined" sx={{ p: 2, mb: 1.5 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+            <Typography variant="body2" fontWeight="medium">{task.title}</Typography>
+            <Box sx={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: getPriorityColor(task.priority), flexShrink: 0, mt: 0.5 }} />
+          </Box>
+          {reg && <Chip label={reg.title} size="small" variant="outlined" sx={{ mb: 1, maxWidth: '100%' }} />}
+          <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 1 }}>
+            Échéance: {new Date(task.dueDate).toLocaleDateString()}
+          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+            <LinearProgress variant="determinate" value={task.progress} sx={{ flex: 1, height: 6, borderRadius: 3 }} />
+            <Typography variant="caption">{task.progress}%</Typography>
+          </Box>
+          {task.checkpoints.length > 0 && (
+            <Box sx={{ mt: 1 }}>
+              {task.checkpoints.map(cp => (
+                <Box key={cp.id} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  <Checkbox size="small" checked={cp.isCompleted} onChange={() => toggleCheckpoint(task.id, cp.id)} />
+                  <Typography variant="caption" sx={{ textDecoration: cp.isCompleted ? 'line-through' : 'none', color: cp.isCompleted ? 'text.disabled' : 'text.primary' }}>
+                    {cp.description}
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
+          )}
+          {task.assignedTo.length > 0 && (
+            <Box sx={{ display: 'flex', gap: 0.5, mt: 1, flexWrap: 'wrap' }}>
+              {task.assignedTo.map(a => <Chip key={a} label={a} size="small" variant="outlined" />)}
+            </Box>
+          )}
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1, gap: 0.5 }}>
+            {task.status !== 'completed' && task.status !== 'overdue' && (
+              <Tooltip title="Marquer en cours">
+                <IconButton size="small" onClick={() => veilleService.updateTask(task.id, { status: 'in-progress' })}>
+                  <AssignmentTurnedIn fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            )}
+            <Tooltip title="Supprimer">
+              <IconButton size="small" onClick={() => veilleService.deleteTask(task.id)}>
+                <Delete fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          </Box>
+        </Paper>
+      );
+    };
+
+    return (
+      <Box>
+        {/* Stats */}
+        <Grid container spacing={3} sx={{ mb: 3 }}>
+          <Grid item xs={6} sm={3}>
+            <Card><CardContent sx={{ textAlign: 'center' }}>
+              <Typography variant="h4">{totalTasks}</Typography>
+              <Typography variant="caption" color="text.secondary">Total</Typography>
+            </CardContent></Card>
+          </Grid>
+          <Grid item xs={6} sm={3}>
+            <Card><CardContent sx={{ textAlign: 'center' }}>
+              <Typography variant="h4" color="success.main">{completedTasks}</Typography>
+              <Typography variant="caption" color="text.secondary">Terminées</Typography>
+            </CardContent></Card>
+          </Grid>
+          <Grid item xs={6} sm={3}>
+            <Card><CardContent sx={{ textAlign: 'center' }}>
+              <Typography variant="h4" color="warning.main">{tasksByStatus['in-progress'].length}</Typography>
+              <Typography variant="caption" color="text.secondary">En cours</Typography>
+            </CardContent></Card>
+          </Grid>
+          <Grid item xs={6} sm={3}>
+            <Card><CardContent sx={{ textAlign: 'center' }}>
+              <Typography variant="h4">{overallProgress}%</Typography>
+              <LinearProgress variant="determinate" value={overallProgress} sx={{ mt: 1, height: 6, borderRadius: 3 }} />
+            </CardContent></Card>
+          </Grid>
+        </Grid>
+
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+          <Button variant="contained" startIcon={<Add />} onClick={() => setTaskDialogOpen(true)}>
+            Nouvelle Tâche
+          </Button>
+        </Box>
+
+        {/* Kanban */}
+        <Grid container spacing={2}>
+          {([
+            { key: 'pending', label: 'En attente', color: P.primary400 },
+            { key: 'in-progress', label: 'En cours', color: '#f59e0b' },
+            { key: 'completed', label: 'Terminé', color: '#22c55e' },
+            { key: 'overdue', label: 'En retard', color: '#ef4444' },
+          ] as const).map(col => (
+            <Grid item xs={12} sm={6} md={3} key={col.key}>
+              <Paper sx={{ p: 2, minHeight: 200, borderTop: `3px solid ${col.color}` }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                  <Typography variant="subtitle2">{col.label}</Typography>
+                  <Chip label={tasksByStatus[col.key].length} size="small" />
+                </Box>
+                {tasksByStatus[col.key].map(renderTaskCard)}
+              </Paper>
+            </Grid>
+          ))}
+        </Grid>
+
+        {/* Dialog nouvelle tâche */}
+        <Dialog open={taskDialogOpen} onClose={() => setTaskDialogOpen(false)} maxWidth="sm" fullWidth>
+          <DialogTitle>Nouvelle Tâche de Conformité</DialogTitle>
+          <DialogContent>
+            <TextField label="Titre" fullWidth margin="normal" value={newTask.title} onChange={e => setNewTask({ ...newTask, title: e.target.value })} />
+            <TextField label="Description" fullWidth margin="normal" multiline rows={2} value={newTask.description} onChange={e => setNewTask({ ...newTask, description: e.target.value })} />
+            <FormControl fullWidth margin="normal">
+              <InputLabel>Réglementation liée</InputLabel>
+              <Select value={newTask.regulationId} label="Réglementation liée" onChange={e => setNewTask({ ...newTask, regulationId: e.target.value })}>
+                <MenuItem value="">Aucune</MenuItem>
+                {regulations.map(r => <MenuItem key={r.id} value={r.id}>{r.title}</MenuItem>)}
+              </Select>
+            </FormControl>
+            <TextField label="Échéance" type="date" fullWidth margin="normal" InputLabelProps={{ shrink: true }} value={newTask.dueDate} onChange={e => setNewTask({ ...newTask, dueDate: e.target.value })} />
+            <FormControl fullWidth margin="normal">
+              <InputLabel>Priorité</InputLabel>
+              <Select value={newTask.priority} label="Priorité" onChange={e => setNewTask({ ...newTask, priority: e.target.value as any })}>
+                <MenuItem value="low">Basse</MenuItem>
+                <MenuItem value="medium">Moyenne</MenuItem>
+                <MenuItem value="high">Haute</MenuItem>
+                <MenuItem value="critical">Critique</MenuItem>
+              </Select>
+            </FormControl>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setTaskDialogOpen(false)}>Annuler</Button>
+            <Button variant="contained" onClick={handleCreateTask}>Créer</Button>
+          </DialogActions>
+        </Dialog>
+      </Box>
+    );
+  };
+
+  // ────────── Alertes Tab ──────────
+
+  const renderAlertesTab = () => {
+    const activeAlerts = alerts.filter(a => a.isActive && !a.isDismissed);
+    const dismissedAlerts = alerts.filter(a => a.isDismissed);
+
+    return (
+      <Box>
+        {/* Alertes actives */}
+        <Paper sx={{ p: 3, mb: 3 }}>
+          <Typography variant="h6" gutterBottom>
+            Alertes Actives ({activeAlerts.length})
+          </Typography>
+          {activeAlerts.length === 0 ? (
+            <Alert severity="success">Aucune alerte active</Alert>
+          ) : (
+            <List>
+              {activeAlerts.map(alert => (
+                <ListItem key={alert.id} sx={{
+                  mb: 1, borderRadius: 1,
+                  borderLeft: `4px solid ${alert.type === 'critical' ? '#dc2626' : alert.type === 'warning' ? '#f59e0b' : '#3b82f6'}`,
+                  backgroundColor: alert.type === 'critical' ? '#fef2f2' : alert.type === 'warning' ? '#fffbeb' : '#eff6ff',
+                }}>
+                  <ListItemIcon>
+                    <NotificationImportant sx={{ color: alert.type === 'critical' ? '#dc2626' : alert.type === 'warning' ? '#f59e0b' : '#3b82f6' }} />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={<Typography variant="body1" fontWeight="medium">{alert.title}</Typography>}
+                    secondary={
+                      <Box>
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>{alert.message}</Typography>
+                        <Typography variant="caption" color="text.secondary">Source: {alert.source}</Typography>
+                        <Box sx={{ display: 'flex', gap: 1, mt: 1, flexWrap: 'wrap' }}>
+                          {alert.jurisdictions.map(j => <Chip key={j} label={j} size="small" />)}
+                          {alert.categories.map(c => <Chip key={c} label={c} size="small" variant="outlined" />)}
+                        </Box>
+                        {alert.expiresAt && (
+                          <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 1 }}>
+                            Expire le: {new Date(alert.expiresAt).toLocaleDateString()}
+                          </Typography>
+                        )}
+                        {alert.actions.length > 0 && (
+                          <Box sx={{ mt: 1 }}>
+                            <Typography variant="caption" fontWeight="medium">Actions requises:</Typography>
+                            {alert.actions.map((action, i) => (
+                              <Typography key={i} variant="caption" display="block" sx={{ pl: 1 }}>• {action}</Typography>
+                            ))}
+                          </Box>
+                        )}
+                      </Box>
+                    }
+                  />
+                  <ListItemSecondaryAction>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                      <Tooltip title="Marquer comme lu">
+                        <IconButton size="small" onClick={() => veilleService.dismissAlert(alert.id)}>
+                          <DoneAll fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Ignorer">
+                        <IconButton size="small" onClick={() => veilleService.dismissAlert(alert.id)}>
+                          <NotificationsOff fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
+                  </ListItemSecondaryAction>
+                </ListItem>
+              ))}
+            </List>
+          )}
+        </Paper>
+
+        {/* Historique des alertes */}
+        <Paper sx={{ p: 3 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+            <Typography variant="h6">Historique des Alertes ({dismissedAlerts.length})</Typography>
+            <FormControlLabel
+              control={<Switch checked={showDismissed} onChange={e => setShowDismissed(e.target.checked)} size="small" />}
+              label="Afficher"
+            />
+          </Box>
+          {showDismissed && (
+            <List>
+              {dismissedAlerts.map(alert => (
+                <ListItem key={alert.id} sx={{ opacity: 0.6 }}>
+                  <ListItemIcon>
+                    <NotificationsOff color="disabled" />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={alert.title}
+                    secondary={`${alert.source} • ${new Date(alert.date).toLocaleDateString()}`}
+                  />
+                  <ListItemSecondaryAction>
+                    <Chip label={alert.type} size="small" color={getAlertColor(alert.type) as any} />
+                  </ListItemSecondaryAction>
+                </ListItem>
+              ))}
+            </List>
+          )}
+        </Paper>
+      </Box>
+    );
+  };
+
+  // ────────── Render principal ──────────
+
   return (
     <Box sx={{ p: 3 }}>
-      {/* P0-3: Badge "Bientôt disponible" — module non fonctionnel */}
-      <Alert
-        severity="info"
-        sx={{ mb: 2 }}
-        icon={false}
-      >
-        <Chip label="Bientôt disponible" color="warning" size="small" sx={{ mr: 1, fontWeight: 600 }} />
-        Cette fonctionnalité sera disponible dans une prochaine version.
-      </Alert>
-
-      {/* En-tête */}
       <Box sx={{ mb: 4 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Box>
@@ -677,12 +818,7 @@ const ModernVeilleReglementaire: React.FC = () => {
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <FormControlLabel
-              control={
-                <Switch
-                  checked={isAutoRefresh}
-                  onChange={(e) => setIsAutoRefresh(e.target.checked)}
-                />
-              }
+              control={<Switch checked={isAutoRefresh} onChange={(e) => setIsAutoRefresh(e.target.checked)} />}
               label="Actualisation auto"
             />
             <Typography variant="caption" color="text.secondary">
@@ -690,43 +826,21 @@ const ModernVeilleReglementaire: React.FC = () => {
             </Typography>
           </Box>
         </Box>
-        
-        {/* Alerte de performance */}
-        <Alert severity="info" sx={{ mt: 2 }}>
-          <strong>EX-VEILLE-001 :</strong> Surveillance automatique multi-juridictions • 
-          Alertes intelligentes avec analyse d'impact • 
-          Gestion intégrée de la conformité
-        </Alert>
       </Box>
 
-      {/* Onglets */}
       <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
         <Tabs value={activeTab} onChange={(_, newValue) => setActiveTab(newValue)}>
-          <Tab 
-            label="Dashboard" 
-            icon={<Gavel />} 
-            iconPosition="start"
-          />
-          <Tab 
-            label="Réglementations" 
-            icon={<Policy />} 
-            iconPosition="start"
-          />
-          <Tab 
-            label="Conformité" 
-            icon={<AssignmentTurnedIn />} 
-            iconPosition="start"
-          />
-          <Tab 
-            label="Alertes" 
-            icon={<Notifications />} 
-            iconPosition="start"
-          />
+          <Tab label="Dashboard" icon={<Gavel />} iconPosition="start" />
+          <Tab label="Réglementations" icon={<Policy />} iconPosition="start" />
+          <Tab label="Conformité" icon={<AssignmentTurnedIn />} iconPosition="start" />
+          <Tab label="Alertes" icon={<Notifications />} iconPosition="start" />
         </Tabs>
       </Box>
 
-      {/* Contenu */}
       {activeTab === 0 && renderDashboardTab()}
+      {activeTab === 1 && renderReglementationsTab()}
+      {activeTab === 2 && renderConformiteTab()}
+      {activeTab === 3 && renderAlertesTab()}
     </Box>
   );
 };

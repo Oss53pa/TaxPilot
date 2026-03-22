@@ -74,7 +74,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation()
 
   const { user, logout } = useAuthStore()
-  const { userMode } = useModeStore()
+  const { userMode, nomCabinet } = useModeStore()
   const { activeDossierId, getActiveDossier, deactivateDossier } = useDossierStore()
 
   const isCabinet = userMode === 'cabinet'
@@ -172,7 +172,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         {isCollapsed ? (
           <Tooltip title="Liass'Pilot — Accueil" placement="right">
             <IconButton
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/accueil')}
               size="small"
               sx={{
                 color: P.white,
@@ -184,7 +184,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </Tooltip>
         ) : (
           <IconButton
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/accueil')}
             size="small"
             sx={{
               color: P.primary500,
@@ -199,37 +199,57 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
       {/* ── Dossier context (cabinet mode with active dossier, hidden on /dossiers) ── */}
       {isCabinet && activeDossier && !onDossiersPage && !isCollapsed && (
-        <Box sx={{ px: 2, py: 1.5, bgcolor: P.primary800, mx: 1, borderRadius: 2, mb: 1 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5 }}>
-            <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, color: P.white, lineHeight: 1.2 }} noWrap>
-              {activeDossier.nomClient}
+        <Box sx={{ mx: 1, mb: 1 }}>
+          {/* Nom du cabinet */}
+          <Box sx={{ px: 2, py: 1, bgcolor: P.primary700, borderRadius: '8px 8px 0 0' }}>
+            <Typography sx={{ fontSize: '0.6rem', color: P.primary400, textTransform: 'uppercase', letterSpacing: 1.5, fontWeight: 700 }}>
+              Cabinet
             </Typography>
-            <Chip
-              label={activeDossier.statut === 'en_cours' ? 'En cours' : activeDossier.statut === 'validee' ? 'Validée' : 'Exportée'}
-              size="small"
-              sx={{
-                height: 18, fontSize: '0.6rem', fontWeight: 700, ml: 0.5,
-                bgcolor: activeDossier.statut === 'en_cours' ? P.warning : P.success,
-                color: '#fff',
-              }}
-            />
+            <Typography sx={{ fontSize: '0.85rem', fontWeight: 700, color: P.white, lineHeight: 1.3 }} noWrap>
+              {nomCabinet || 'Mon Cabinet'}
+            </Typography>
           </Box>
-          <Typography sx={{ fontSize: '0.65rem', color: P.primary400, mb: 1 }}>
-            Exercice {activeDossier.exerciceN} — {activeDossier.regime === 'normal' ? 'Syst. Normal' : activeDossier.regime === 'simplifie' ? 'SMT' : 'Forfait'}
-          </Typography>
-          <Box
-            onClick={handleBackToDossiers}
-            sx={{
+          {/* Dossier actif + exercice */}
+          <Box sx={{ px: 2, py: 1.5, bgcolor: P.primary800, borderRadius: '0 0 8px 8px' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5 }}>
+              <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, color: P.white, lineHeight: 1.2 }} noWrap>
+                {activeDossier.nomClient}
+              </Typography>
+              <Chip
+                label={activeDossier.statut === 'en_cours' ? 'En cours' : activeDossier.statut === 'validee' ? 'Validée' : 'Exportée'}
+                size="small"
+                sx={{
+                  height: 18, fontSize: '0.6rem', fontWeight: 700, ml: 0.5,
+                  bgcolor: activeDossier.statut === 'en_cours' ? P.warning : P.success,
+                  color: '#fff',
+                }}
+              />
+            </Box>
+            <Box sx={{
               display: 'flex', alignItems: 'center', gap: 0.5,
-              cursor: 'pointer', color: P.primary400,
-              '&:hover': { color: P.white },
-              transition: 'color 0.15s',
-            }}
-          >
-            <ArrowBackIcon sx={{ fontSize: 14 }} />
-            <Typography sx={{ fontSize: '0.65rem', fontWeight: 600 }}>
-              Retour aux dossiers
-            </Typography>
+              bgcolor: 'rgba(255,255,255,0.08)', borderRadius: 1, px: 1, py: 0.5, mb: 1,
+            }}>
+              <Typography sx={{ fontSize: '0.75rem', fontWeight: 600, color: P.white }}>
+                Exercice {activeDossier.exerciceN}
+              </Typography>
+              <Typography sx={{ fontSize: '0.65rem', color: P.primary400 }}>
+                — {activeDossier.regime === 'normal' ? 'Syst. Normal' : activeDossier.regime === 'simplifie' ? 'SMT' : 'Forfait'}
+              </Typography>
+            </Box>
+            <Box
+              onClick={handleBackToDossiers}
+              sx={{
+                display: 'flex', alignItems: 'center', gap: 0.5,
+                cursor: 'pointer', color: P.primary400,
+                '&:hover': { color: P.white },
+                transition: 'color 0.15s',
+              }}
+            >
+              <ArrowBackIcon sx={{ fontSize: 14 }} />
+              <Typography sx={{ fontSize: '0.65rem', fontWeight: 600 }}>
+                Retour aux dossiers
+              </Typography>
+            </Box>
           </Box>
         </Box>
       )}
@@ -245,9 +265,18 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         </Tooltip>
       )}
 
-      {/* ── Cabinet global: new client button ── */}
+      {/* ── Cabinet global: nom cabinet + bouton nouveau dossier ── */}
       {isCabinet && (!activeDossierId || onDossiersPage) && !isCollapsed && (
         <Box sx={{ px: 1.5, mb: 1 }}>
+          {/* Nom du cabinet */}
+          <Box sx={{ px: 1.5, py: 1, mb: 0.5 }}>
+            <Typography sx={{ fontSize: '0.6rem', color: P.primary500, textTransform: 'uppercase', letterSpacing: 1.5, fontWeight: 700 }}>
+              Cabinet
+            </Typography>
+            <Typography sx={{ fontSize: '0.9rem', fontWeight: 700, color: P.white, lineHeight: 1.3 }} noWrap>
+              {nomCabinet || 'Mon Cabinet'}
+            </Typography>
+          </Box>
           <Box
             onClick={() => navigate('/dossiers')}
             sx={{

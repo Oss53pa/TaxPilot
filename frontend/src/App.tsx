@@ -1,6 +1,6 @@
 import React, { Suspense } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
-import { CircularProgress, Box } from '@mui/material'
+import { CircularProgress, Box, Typography, Paper, Chip } from '@mui/material'
 import ModernLayout from './components/shared/Layout'
 import ErrorBoundary from './components/ui/ErrorBoundary'
 import DossierGuard from './components/guards/DossierGuard'
@@ -59,6 +59,24 @@ const ForgotPasswordPage = React.lazy(() => import('@/pages/auth/ForgotPasswordP
 
 import { useAuthStore } from './store/authStore'
 import { useModeStore } from './store/modeStore'
+import { Construction as ConstructionIcon, People as PeopleIcon, CreditCard, Mail } from '@mui/icons-material'
+
+/** Placeholder pour les modules admin pas encore connectés à Supabase */
+const AdminPlaceholder: React.FC<{ title: string; description: string; icon: string }> = ({ title, description, icon }) => {
+  const icons: Record<string, React.ReactNode> = {
+    people: <PeopleIcon sx={{ fontSize: 48, color: '#9e9e9e' }} />,
+    subscription: <CreditCard sx={{ fontSize: 48, color: '#9e9e9e' }} />,
+    invite: <Mail sx={{ fontSize: 48, color: '#9e9e9e' }} />,
+  }
+  return (
+    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', gap: 2 }}>
+      {icons[icon] || <ConstructionIcon sx={{ fontSize: 48, color: '#9e9e9e' }} />}
+      <Typography variant="h5" sx={{ fontWeight: 600, color: '#424242' }}>{title}</Typography>
+      <Typography variant="body1" sx={{ color: '#757575', textAlign: 'center', maxWidth: 480 }}>{description}</Typography>
+      <Chip label="Disponible avec Supabase" size="small" sx={{ mt: 1, bgcolor: '#f5f5f5', color: '#757575' }} />
+    </Box>
+  )
+}
 
 /** Wrapper: page avec sidebar */
 const WithSidebar: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -81,12 +99,18 @@ const DS: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 
 // Purge seed/mock data from FiscaSync-Lite on first run
 function purgeSeedData() {
-  const PURGED_KEY = 'fiscasync_seed_purged_v2'
+  const PURGED_KEY = 'fiscasync_seed_purged_v3'
   if (localStorage.getItem(PURGED_KEY)) return
   const keysToRemove: string[] = []
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i)
-    if (key && (key.startsWith('fiscasync_db_') || key.startsWith('fiscasync_audit_'))) keysToRemove.push(key)
+    if (key && (
+      key.startsWith('fiscasync_db_') ||
+      key.startsWith('fiscasync_audit_') ||
+      key.startsWith('fiscasync_collab_') ||
+      key.startsWith('fiscasync_security_') ||
+      key.startsWith('fiscasync_veille_')
+    )) keysToRemove.push(key)
   }
   if (keysToRemove.length > 0) {
     keysToRemove.forEach(k => localStorage.removeItem(k))
@@ -117,15 +141,21 @@ function App() {
           <Route path="/mode-selection" element={<ModeSelection />} />
           <Route path="/onboarding" element={<OnboardingWizard />} />
 
-          {/* Landing page — redirect to mode selection if first launch */}
+          {/* Landing page — redirect based on mode */}
           <Route path="/" element={
+            !userMode ? <Navigate to="/mode-selection" replace /> :
+            !onboardingCompleted ? <Navigate to="/onboarding" replace /> :
+            userMode === 'cabinet' ? <Navigate to="/dossiers" replace /> :
+            <Navigate to="/dashboard" replace />
+          } />
+          <Route path="/accueil" element={
             !userMode ? <Navigate to="/mode-selection" replace /> :
             !onboardingCompleted ? <Navigate to="/onboarding" replace /> :
             <ModernDashboard />
           } />
 
           {/* Pages accessibles sans dossier actif (cabinet: liste dossiers, paramètres) */}
-          <Route path="/dossiers" element={<DossiersPage />} />
+          <Route path="/dossiers" element={<S><DossiersPage /></S>} />
           <Route path="/veille" element={<S><ModernVeilleReglementaire /></S>} />
           <Route path="/collaboration" element={<S><ModernCollaboration /></S>} />
           <Route path="/integrations" element={<S><ModernIntegrations /></S>} />
@@ -133,9 +163,9 @@ function App() {
           <Route path="/organization/:slug/members" element={<S><OrganizationWrapper>{(slug) => <OrganizationMembersPage organizationSlug={slug} />}</OrganizationWrapper></S>} />
           <Route path="/organization/:slug/subscription" element={<S><OrganizationWrapper>{(slug) => <SubscriptionPage organizationSlug={slug} />}</OrganizationWrapper></S>} />
           <Route path="/organization/:slug/invitations" element={<S><OrganizationWrapper>{(slug) => <InvitationsPage organizationSlug={slug} />}</OrganizationWrapper></S>} />
-          <Route path="/settings/members" element={<S><OrganizationWrapper>{(slug) => <OrganizationMembersPage organizationSlug={slug} />}</OrganizationWrapper></S>} />
-          <Route path="/settings/subscription" element={<S><OrganizationWrapper>{(slug) => <SubscriptionPage organizationSlug={slug} />}</OrganizationWrapper></S>} />
-          <Route path="/settings/invitations" element={<S><OrganizationWrapper>{(slug) => <InvitationsPage organizationSlug={slug} />}</OrganizationWrapper></S>} />
+          <Route path="/settings/members" element={<S><AdminPlaceholder title="Membres & Rôles" description="Gérez les collaborateurs de votre cabinet, attribuez des rôles (administrateur, collaborateur, observateur) et contrôlez les accès." icon="people" /></S>} />
+          <Route path="/settings/subscription" element={<S><AdminPlaceholder title="Abonnement" description="Consultez votre plan actuel, suivez vos quotas (liasses, stockage) et gérez la facturation." icon="subscription" /></S>} />
+          <Route path="/settings/invitations" element={<S><AdminPlaceholder title="Invitations" description="Envoyez des invitations par email à vos collaborateurs pour rejoindre le cabinet." icon="invite" /></S>} />
 
           {/* Pages métier — nécessitent un dossier actif en mode cabinet */}
           <Route path="/dashboard" element={<DS><AppDashboard /></DS>} />
