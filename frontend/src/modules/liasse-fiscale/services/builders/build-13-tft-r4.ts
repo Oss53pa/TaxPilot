@@ -7,8 +7,8 @@
 
 import { SheetData, Row, emptyRow, rowAt, m, headerRows } from './helpers'
 import type { EntrepriseData, ExerciceData, BalanceEntry } from './helpers'
-import { getBalanceSolde, getCharges, getProduits } from './helpers'
-import { getActifBrut, getPassif } from './helpers'
+import { getBalanceSolde, getCharges, getProduits, getActifBrut, getPassif } from './helpers'
+import { TFT_COMPTES, BILAN_PASSIF } from '@/constants/syscohada-mappings'
 
 // ────────────────────────────────────────────────────────────────────────────
 // Sheet 13 : TFT — 10 columns (A=0 to J=9), ~44 rows
@@ -101,32 +101,41 @@ function buildTFT(
   // ZA: Trésorerie nette au 1er janvier
   // Trésorerie actif N-1 = getActifBrut for cash accounts from balN1
   // Trésorerie passif N-1 = getPassif for account 56 from balN1
-  const tresoActifN1 = getActifBrut(balN1, ['50', '51', '52', '53', '54', '55', '57', '58'])
-  const tresoPassifN1 = getPassif(balN1, ['56'])
+  const tresoActifN1 = getActifBrut(balN1, TFT_COMPTES.TRESORERIE_ACTIF)
+  const tresoPassifN1 = getPassif(balN1, TFT_COMPTES.TRESORERIE_PASSIF)
   const ZA_n = tresoActifN1 - tresoPassifN1
   const ZA_n1 = 0 // would need balN-2 which we don't have
 
   // FA: Capacité d'Autofinancement Globale (CAFG)
-  // CAFG = Résultat Net + Dotations(681,687,691,697) - Reprises(787,791,797,798,799) + VCN cessions(81) - Prix cession(82)
-  const resultatNet_n = -getBalanceSolde(bal, ['13'])
-  const dotations_n = getCharges(bal, ['681', '687', '691', '697'])
-  const reprises_n = getProduits(bal, ['791', '797', '798', '799', '787'])
-  const vcnCessions_n = getCharges(bal, ['81'])
-  const prixCessions_n = getProduits(bal, ['82'])
+  // CAFG = Résultat Net + Dotations - Reprises + VCN cessions - Prix cession
+  // Comptes importés depuis TFT_COMPTES (source unique : syscohada-mappings.ts)
+  const resultatNet_n = -getBalanceSolde(bal, BILAN_PASSIF.CJ.comptes)
+  const dotations_n = getCharges(bal, TFT_COMPTES.DOTATIONS)
+  const reprises_n = getProduits(bal, TFT_COMPTES.REPRISES)
+  const vcnCessions_n = getCharges(bal, TFT_COMPTES.VC_CESSIONS)
+  const prixCessions_n = getProduits(bal, TFT_COMPTES.PROD_CESSIONS)
   const FA_n = resultatNet_n + dotations_n - reprises_n + vcnCessions_n - prixCessions_n
 
-  const resultatNet_n1 = -getBalanceSolde(balN1, ['13'])
-  const dotations_n1 = getCharges(balN1, ['681', '687', '691', '697'])
-  const reprises_n1 = getProduits(balN1, ['791', '797', '798', '799', '787'])
-  const vcnCessions_n1 = getCharges(balN1, ['81'])
-  const prixCessions_n1 = getProduits(balN1, ['82'])
+  const resultatNet_n1 = -getBalanceSolde(balN1, BILAN_PASSIF.CJ.comptes)
+  const dotations_n1 = getCharges(balN1, TFT_COMPTES.DOTATIONS)
+  const reprises_n1 = getProduits(balN1, TFT_COMPTES.REPRISES)
+  const vcnCessions_n1 = getCharges(balN1, TFT_COMPTES.VC_CESSIONS)
+  const prixCessions_n1 = getProduits(balN1, TFT_COMPTES.PROD_CESSIONS)
   const FA_n1 = resultatNet_n1 + dotations_n1 - reprises_n1 + vcnCessions_n1 - prixCessions_n1
 
-  // Manual entry fields (default 0)
-  const FB_n = 0, FB_n1 = 0
-  const FC_n = 0, FC_n1 = 0
-  const FD_n = 0, FD_n1 = 0
-  const FE_n = 0, FE_n1 = 0
+  // FB-FE: Variations BFR (N vs N-1)
+  const hasN1 = balN1.length > 0
+  const baComptes = [...TFT_COMPTES.ACTIF_CIRCULANT_HAO]
+  const bbComptes = [...TFT_COMPTES.STOCKS]
+  const crComptes = [...TFT_COMPTES.CREANCES]
+  const pcComptes = [...TFT_COMPTES.PASSIF_CIRCULANT]
+
+  const FB_n = -(getActifBrut(bal, baComptes) - (hasN1 ? getActifBrut(balN1, baComptes) : 0))
+  const FC_n = -(getActifBrut(bal, bbComptes) - (hasN1 ? getActifBrut(balN1, bbComptes) : 0))
+  const FD_n = -(getActifBrut(bal, crComptes) - (hasN1 ? getActifBrut(balN1, crComptes) : 0))
+  const FE_n = getPassif(bal, pcComptes) - (hasN1 ? getPassif(balN1, pcComptes) : 0)
+  // N-1 variations require balN-2 (not available in builder) → 0
+  const FB_n1 = 0, FC_n1 = 0, FD_n1 = 0, FE_n1 = 0
 
   // Subtotal: variation du BF
   const varBF_n = FB_n + FC_n + FD_n + FE_n
@@ -136,31 +145,42 @@ function buildTFT(
   const ZB_n = FA_n + FB_n + FC_n + FD_n + FE_n
   const ZB_n1 = FA_n1 + FB_n1 + FC_n1 + FD_n1 + FE_n1
 
-  // Investment activities (manual entry, default 0)
-  const FF_n = 0, FF_n1 = 0
-  const FG_n = 0, FG_n1 = 0
-  const FH_n = 0, FH_n1 = 0
-  const FI_n = 0, FI_n1 = 0
-  const FJ_n = 0, FJ_n1 = 0
+  // FF-FH: Décaissements acquisitions immo (variation brut négatif = acquisition)
+  const incComptes = [...TFT_COMPTES.IMMO_INCORPORELLES]
+  const corComptes = [...TFT_COMPTES.IMMO_CORPORELLES]
+  const finComptes = [...TFT_COMPTES.IMMO_FINANCIERES]
+  const FF_n = -(getActifBrut(bal, incComptes) - (hasN1 ? getActifBrut(balN1, incComptes) : 0))
+  const FG_n = -(getActifBrut(bal, corComptes) - (hasN1 ? getActifBrut(balN1, corComptes) : 0))
+  const FH_n = -(getActifBrut(bal, finComptes) - (hasN1 ? getActifBrut(balN1, finComptes) : 0))
+  // FI: Encaissements cessions immob incorporelles et corporelles
+  const FI_n = -getBalanceSolde(bal, [...TFT_COMPTES.PROD_CESSIONS])
+  // FJ: Encaissements cessions financières (non dérivable de la balance → 0)
+  const FJ_n = 0
+  // N-1 investissements require balN-2 → 0
+  const FF_n1 = 0, FG_n1 = 0, FH_n1 = 0, FI_n1 = 0, FJ_n1 = 0
 
   // ZC: Flux de trésorerie provenant des activités d'investissement
   const ZC_n = FF_n + FG_n + FH_n + FI_n + FJ_n
   const ZC_n1 = FF_n1 + FG_n1 + FH_n1 + FI_n1 + FJ_n1
 
-  // Equity financing (manual entry, default 0)
-  const FK_n = 0, FK_n1 = 0
-  const FL_n = 0, FL_n1 = 0
-  const FM_n = 0, FM_n1 = 0
-  const FN_n = 0, FN_n1 = 0
+  // FK-FN: Financement capitaux propres
+  const FK_n = getPassif(bal, [...TFT_COMPTES.CAPITAL]) - (hasN1 ? getPassif(balN1, [...TFT_COMPTES.CAPITAL]) : 0)
+  const FL_n = getPassif(bal, [...TFT_COMPTES.SUBVENTIONS_INVEST]) - (hasN1 ? getPassif(balN1, [...TFT_COMPTES.SUBVENTIONS_INVEST]) : 0)
+  // FM (prélèvements capital), FN (dividendes) : non dérivables de la balance → 0
+  const FM_n = 0, FN_n = 0
+  // N-1 require balN-2 → 0
+  const FK_n1 = 0, FL_n1 = 0, FM_n1 = 0, FN_n1 = 0
 
   // ZD: Flux de trésorerie provenant des capitaux propres
   const ZD_n = FK_n + FL_n + FM_n + FN_n
   const ZD_n1 = FK_n1 + FL_n1 + FM_n1 + FN_n1
 
-  // Foreign capital financing (manual entry, default 0)
-  const FO_n = 0, FO_n1 = 0
-  const FP_n = 0, FP_n1 = 0
-  const FQ_n = 0, FQ_n1 = 0
+  // FO-FQ: Financement capitaux étrangers
+  const FO_n = Math.max(0, getPassif(bal, [...TFT_COMPTES.EMPRUNTS_LT]) - (hasN1 ? getPassif(balN1, [...TFT_COMPTES.EMPRUNTS_LT]) : 0))
+  const FP_n = Math.max(0, getPassif(bal, [...TFT_COMPTES.AUTRES_DETTES_FIN]) - (hasN1 ? getPassif(balN1, [...TFT_COMPTES.AUTRES_DETTES_FIN]) : 0))
+  const FQ_n = Math.min(0, getPassif(bal, [...TFT_COMPTES.TOUS_EMPRUNTS]) - (hasN1 ? getPassif(balN1, [...TFT_COMPTES.TOUS_EMPRUNTS]) : 0))
+  // N-1 require balN-2 → 0
+  const FO_n1 = 0, FP_n1 = 0, FQ_n1 = 0
 
   // ZE: Flux de trésorerie provenant des capitaux étrangers
   const ZE_n = FO_n + FP_n + FQ_n
