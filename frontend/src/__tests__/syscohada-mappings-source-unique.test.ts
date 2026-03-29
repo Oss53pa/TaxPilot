@@ -9,7 +9,6 @@
  */
 import { describe, it, expect } from 'vitest'
 import {
-  BILAN_ACTIF,
   BILAN_PASSIF,
   BILAN_ACTIF_TOTAUX,
   BILAN_PASSIF_TOTAUX,
@@ -17,8 +16,6 @@ import {
   TFT_COMPTES,
 } from '../constants/syscohada-mappings'
 import {
-  getActifBrut,
-  getAmortProv,
   getBalanceSolde,
   getCharges,
   getProduits,

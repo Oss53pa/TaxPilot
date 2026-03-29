@@ -27,7 +27,6 @@ interface InjectionLog {
 function computeAllValues(
   balance: BalanceEntry[],
   balanceN1: BalanceEntry[],
-  entreprise: EntrepriseData,
   balanceN2: BalanceEntry[] = []
 ): Record<string, number | string> {
   const vals: Record<string, number | string> = {}
@@ -533,7 +532,7 @@ export async function exportModeB(
   })
 
   // 3. Compute all values
-  const vals = computeAllValues(balance, balanceN1, entreprise, balanceN2)
+  const vals = computeAllValues(balance, balanceN1, balanceN2)
 
   // 3b. Audit de calcul — vérifier les contrôles avant injection
   const auditVals: Record<string, number> = {}
@@ -619,6 +618,18 @@ export async function exportModeB(
     'NOTE 34': 'layoutA', 'NOTE 35': 'layoutA',
     'NOTE 37': 'layoutA', 'NOTE 38': 'layoutA', 'NOTE 39': 'layoutA',
     'NOTES DGI - INS': 'layoutA', 'FICHE R4': 'layoutA',
+    // Notes with layout B (H4 sigle)
+    'NOTE 8B': 'layoutB', 'NOTE 8C': 'layoutB',
+    // FICHE R2/R3 use layout B
+    'FICHE R2': 'layoutB', 'FICHE R3': 'layoutB',
+    // SUPPL sheets use layout A-like header
+    'SUPPL1': 'layoutA', 'SUPPL2': 'layoutA', 'SUPPL3': 'layoutA',
+    'SUPPL4': 'layoutA', 'SUPPL5': 'layoutA', 'SUPPL6': 'layoutB',
+    'SUPPL7': 'layoutB',
+    // COMP sheets
+    'COMP-TVA': 'layoutA', 'COMP-TVA (2)': 'layoutA',
+    // COMMENTAIRE
+    'COMMENTAIRE': 'layoutB',
   }
   const entData: Record<string, string | number> = {
     denomination: entreprise.denomination || '',
@@ -734,7 +745,64 @@ export async function exportModeB(
     }
   }
 
-  // 3i. Dynamic injection for detailed notes (NOTE 4-9, 11-13, 15A-35)
+  // 3i. Inject FICHE R2 (onglet 7) — company activities and CA
+  const wsR2 = wb.Sheets['FICHE R2']
+  if (wsR2) {
+    const r2Data: [string, string | number][] = [
+      ['I3', entreprise.denomination || ''],
+      ['E4', entreprise.adresse || ''],
+      ['AI4', entreprise.sigle || ''],
+      ['I5', entreprise.ncc || ''],
+      ['W5', entreprise.exercice_clos || ''],
+      ['AI5', entreprise.duree_mois || 12],
+      ['I6', entreprise.ntd || ''],
+      ['Q9', entreprise.forme_juridique || ''],
+      ['Q13', entreprise.code_pays || ''],
+    ]
+    for (const [cell, val] of r2Data) {
+      if (!val && val !== 0) continue
+      const existing = wsR2[cell]
+      if (existing?.f) continue
+      wsR2[cell] = { t: typeof val === 'number' ? 'n' : 's', v: val }
+      headerCount++
+    }
+  }
+
+  // 3i-bis. Inject NOTE 27B (onglet 54) — effectifs from entreprise data
+  const ws27b = wb.Sheets['NOTE 27B']
+  if (ws27b) {
+    const ent27b: [string, string | number][] = [
+      ['D3', entreprise.denomination || ''],
+      ['C4', entreprise.adresse || ''],
+      ['R4', entreprise.sigle || ''],
+      ['D5', entreprise.ncc || ''],
+      ['O5', entreprise.exercice_clos || ''],
+      ['S5', entreprise.duree_mois || 12],
+      ['D6', entreprise.ntd || ''],
+    ]
+    for (const [cell, val] of ent27b) {
+      if (!val && val !== 0) continue
+      const existing = ws27b[cell]
+      if (existing?.f) continue
+      ws27b[cell] = { t: typeof val === 'number' ? 'n' : 's', v: val }
+      headerCount++
+    }
+    // Inject effectifs if available
+    if (entreprise.effectif_permanent) {
+      ws27b['K16'] = { t: 'n', v: entreprise.effectif_permanent, z: '#,##0' }
+      headerCount++
+    }
+    if (entreprise.effectif_temporaire) {
+      ws27b['K26'] = { t: 'n', v: entreprise.effectif_temporaire, z: '#,##0' }
+      headerCount++
+    }
+    if (entreprise.masse_salariale) {
+      ws27b['S16'] = { t: 'n', v: entreprise.masse_salariale, z: '#,##0' }
+      headerCount++
+    }
+  }
+
+  // 3j. Dynamic injection for detailed notes (NOTE 4-9, 11-13, 15A-35)
   // These notes have a pattern: column E or F = Année N, next column = Année N-1
   // Values are balance-derived and mapped by account prefix
   // We inject directly where we find matching account patterns
@@ -909,6 +977,94 @@ export async function exportModeB(
       { row: 10, comptes: ['6813', '6814'], colN: 'F', colN1: 'G', type: 'debit' },
       { row: 14, comptes: ['6816', '6817', '6818', '6819'], colN: 'F', colN1: 'G', type: 'debit' },
       { row: 15, comptes: ['6911', '6912', '6913'], colN: 'F', colN1: 'G', type: 'debit' },
+    ]},
+    // NOTE 15B: Autres fonds propres (onglet 38)
+    { sheet: 'NOTE 15B', rows: [
+      { row: 9, comptes: ['167'], colN: 'G', colN1: 'H', type: 'passif' },   // Titres participatifs
+      { row: 10, comptes: ['168'], colN: 'G', colN1: 'H', type: 'passif' },  // Avances conditionnées
+      { row: 11, comptes: ['1661'], colN: 'G', colN1: 'H', type: 'passif' }, // T.S.D.I.
+      { row: 12, comptes: ['1662'], colN: 'G', colN1: 'H', type: 'passif' }, // O.R.A.
+      { row: 13, comptes: ['1663', '1664', '1665', '1668'], colN: 'G', colN1: 'H', type: 'passif' },
+    ]},
+    // NOTE 29: Charges et revenus financiers (onglet 56)
+    { sheet: 'NOTE 29', rows: [
+      { row: 9, comptes: ['6711'], colN: 'F', colN1: 'G', type: 'debit' },   // Intérêts emprunts
+      { row: 10, comptes: ['6712'], colN: 'F', colN1: 'G', type: 'debit' },  // Intérêts location-acquisition
+      { row: 11, comptes: ['673'], colN: 'F', colN1: 'G', type: 'debit' },   // Escomptes accordés
+      { row: 12, comptes: ['674'], colN: 'F', colN1: 'G', type: 'debit' },   // Autres intérêts
+      { row: 13, comptes: ['675'], colN: 'F', colN1: 'G', type: 'debit' },   // Escomptes effets commerce
+      { row: 14, comptes: ['676'], colN: 'F', colN1: 'G', type: 'debit' },   // Pertes de change financières
+      { row: 15, comptes: ['677'], colN: 'F', colN1: 'G', type: 'debit' },   // Pertes cessions titres
+      { row: 17, comptes: ['679'], colN: 'F', colN1: 'G', type: 'debit' },   // Pertes risques financiers
+      { row: 20, comptes: ['771'], colN: 'F', colN1: 'G', type: 'credit' },  // Intérêts prêts
+      { row: 21, comptes: ['772', '773'], colN: 'F', colN1: 'G', type: 'credit' },  // Revenus participations
+      { row: 22, comptes: ['774'], colN: 'F', colN1: 'G', type: 'credit' },  // Escomptes obtenus
+      { row: 23, comptes: ['775'], colN: 'F', colN1: 'G', type: 'credit' },  // Revenus placement
+      { row: 25, comptes: ['776'], colN: 'F', colN1: 'G', type: 'credit' },  // Gains de change financiers
+      { row: 26, comptes: ['777'], colN: 'F', colN1: 'G', type: 'credit' },  // Gains cessions titres
+      { row: 27, comptes: ['778'], colN: 'F', colN1: 'G', type: 'credit' },  // Gains risques financiers
+    ]},
+    // NOTE 30: Autres charges et produits HAO (onglet 57)
+    { sheet: 'NOTE 30', rows: [
+      { row: 9, comptes: ['831'], colN: 'F', colN1: 'G', type: 'debit' },    // Charges HAO constatées
+      { row: 16, comptes: ['832'], colN: 'F', colN1: 'G', type: 'debit' },   // Charges restructuration
+      { row: 17, comptes: ['834'], colN: 'F', colN1: 'G', type: 'debit' },   // Pertes créances HAO
+      { row: 18, comptes: ['835'], colN: 'F', colN1: 'G', type: 'debit' },   // Dons libéralités accordés
+      { row: 19, comptes: ['836'], colN: 'F', colN1: 'G', type: 'debit' },   // Abandons créances consentis
+      { row: 21, comptes: ['85'], colN: 'F', colN1: 'G', type: 'debit' },    // Dotations HAO
+      { row: 24, comptes: ['841'], colN: 'F', colN1: 'G', type: 'credit' },  // Produits HAO constatés
+      { row: 31, comptes: ['842'], colN: 'F', colN1: 'G', type: 'credit' },  // Produits restructuration
+      { row: 33, comptes: ['845'], colN: 'F', colN1: 'G', type: 'credit' },  // Dons libéralités obtenus
+      { row: 34, comptes: ['846'], colN: 'F', colN1: 'G', type: 'credit' },  // Abandons créances obtenus
+      { row: 37, comptes: ['86'], colN: 'F', colN1: 'G', type: 'credit' },   // Reprises HAO
+      { row: 38, comptes: ['88'], colN: 'F', colN1: 'G', type: 'credit' },   // Subventions d'équilibre
+    ]},
+    // NOTE 31: Répartition résultat 5 derniers exercices (onglet 58) — partial injection
+    { sheet: 'NOTE 31', rows: [
+      { row: 18, comptes: ['701', '702', '703', '704', '705', '706', '707', '708'], colN: 'G', colN1: 'H', type: 'credit' },  // CA HT
+      { row: 21, comptes: ['89'], colN: 'G', colN1: 'H', type: 'debit' },    // Impôt sur le résultat
+    ]},
+    // NOTE 14: Primes et réserves (onglet 36)
+    { sheet: 'NOTE 14', rows: [
+      { row: 9, comptes: ['1051'], colN: 'F', colN1: 'G', type: 'passif' },  // Primes d'émission
+      { row: 10, comptes: ['1052'], colN: 'F', colN1: 'G', type: 'passif' }, // Prime d'apport
+      { row: 11, comptes: ['1053'], colN: 'F', colN1: 'G', type: 'passif' }, // Prime de fusion
+      { row: 12, comptes: ['1054'], colN: 'F', colN1: 'G', type: 'passif' }, // Prime de conversion
+      { row: 13, comptes: ['1058'], colN: 'F', colN1: 'G', type: 'passif' }, // Autres primes
+      { row: 15, comptes: ['1111'], colN: 'F', colN1: 'G', type: 'passif' }, // Réserves légales
+      { row: 16, comptes: ['1112'], colN: 'F', colN1: 'G', type: 'passif' }, // Réserves statutaires
+      { row: 17, comptes: ['1113'], colN: 'F', colN1: 'G', type: 'passif' }, // Réserves plus-values LT
+      { row: 21, comptes: ['1118'], colN: 'F', colN1: 'G', type: 'passif' }, // Réserves libres
+      { row: 22, comptes: ['12'], colN: 'F', colN1: 'G', type: 'signed' },   // Report à nouveau
+    ]},
+    // NOTE 9: Titres de placement (onglet 31)
+    { sheet: 'NOTE 9', rows: [
+      { row: 9, comptes: ['501'], colN: 'E', colN1: 'G', type: 'actif' },    // Titres trésor
+      { row: 10, comptes: ['502'], colN: 'E', colN1: 'G', type: 'actif' },   // Actions
+      { row: 11, comptes: ['503'], colN: 'E', colN1: 'G', type: 'actif' },   // Obligations
+      { row: 12, comptes: ['504'], colN: 'E', colN1: 'G', type: 'actif' },   // Bons de souscription
+      { row: 15, comptes: ['507'], colN: 'E', colN1: 'G', type: 'actif' },   // Autres valeurs
+      { row: 17, comptes: ['590'], colN: 'E', colN1: 'G', type: 'passif' },  // Dépréciations titres
+    ]},
+    // NOTE 10: Valeurs à encaisser (onglet 32)
+    { sheet: 'NOTE 10', rows: [
+      { row: 9, comptes: ['511'], colN: 'E', colN1: 'G', type: 'actif' },    // Effets à encaisser
+      { row: 10, comptes: ['512'], colN: 'E', colN1: 'G', type: 'actif' },   // Effets à l'encaissement
+      { row: 11, comptes: ['513'], colN: 'E', colN1: 'G', type: 'actif' },   // Chèques à encaisser
+      { row: 12, comptes: ['514'], colN: 'E', colN1: 'G', type: 'actif' },   // Chèques à l'encaissement
+      { row: 13, comptes: ['515'], colN: 'E', colN1: 'G', type: 'actif' },   // Cartes crédit
+      { row: 14, comptes: ['518'], colN: 'E', colN1: 'G', type: 'actif' },   // Autres valeurs
+      { row: 16, comptes: ['591'], colN: 'E', colN1: 'G', type: 'passif' },  // Dépréciations
+    ]},
+    // NOTE 11: Disponibilités (onglet 33)
+    { sheet: 'NOTE 11', rows: [
+      { row: 9, comptes: ['521', '522', '523', '524'], colN: 'E', colN1: 'G', type: 'actif' },   // Banques locales
+      { row: 10, comptes: ['525', '526'], colN: 'E', colN1: 'G', type: 'actif' },                 // Banques autres états
+      { row: 14, comptes: ['531'], colN: 'E', colN1: 'G', type: 'actif' },   // Chèques postaux
+      { row: 15, comptes: ['54'], colN: 'E', colN1: 'G', type: 'actif' },    // Autres établissements financiers
+      { row: 17, comptes: ['506'], colN: 'E', colN1: 'G', type: 'actif' },   // Instruments trésorerie
+      { row: 18, comptes: ['508'], colN: 'E', colN1: 'G', type: 'actif' },   // Monnaie électronique
+      { row: 19, comptes: ['57'], colN: 'E', colN1: 'G', type: 'actif' },    // Caisse
     ]},
   ]
 
