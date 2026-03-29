@@ -49,6 +49,8 @@ import {
   Add as AddIcon,
   Business as BusinessIcon,
   ArrowBack as ArrowBackIcon,
+  SupportAgent as SupportIcon,
+  School as SchoolIcon,
 } from '@mui/icons-material'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
@@ -124,6 +126,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     { text: 'Abonnement', icon: <AccountBalance />, path: '/settings/subscription' },
     { text: 'Invitations', icon: <BusinessIcon />, path: '/settings/invitations' },
     { text: 'Sécurité', icon: <Security />, path: '/security' },
+
+    { text: 'Formation', icon: <SchoolIcon />, path: '/formation', divider: 'Aide' },
+    { text: 'Support', icon: <SupportIcon />, path: '/support' },
   ]
 
   const dossierItems = [
@@ -146,6 +151,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     { text: 'Télédéclaration', icon: <Analytics />, path: '/teledeclaration', divider: 'Finalisation' },
     { text: 'Reporting', icon: <Analytics />, path: '/reporting' },
     { text: 'Archives', icon: <ArchiveIcon />, path: '/archives' },
+
+    { text: 'Support', icon: <SupportIcon />, path: '/support', divider: 'Aide' },
   ]
 
   const onDossiersPage = location.pathname === '/dossiers'

@@ -438,6 +438,91 @@ function FI015(ctx: AuditContext): ResultatControle {
   return ok(ref, nom, 'Taux effectif d\'imposition normal')
 }
 
+// FI-016: Cadeaux clients > 0.5% CA
+function FI016(ctx: AuditContext): ResultatControle {
+  const ref = 'FI-016', nom = 'Cadeaux > 0.5% CA'
+  const cadeaux = absSum(find(ctx.balanceN, '6234'))
+  const ca = absSum([...find(ctx.balanceN, '70'), ...find(ctx.balanceN, '71')])
+  if (ca > 0 && cadeaux > ca * 0.005) {
+    return anomalie(ref, nom, 'MINEUR',
+      `Cadeaux (${cadeaux.toLocaleString('fr-FR')}) > 0.5% du CA (${(ca * 0.005).toLocaleString('fr-FR')})`,
+      { montants: { cadeaux, ca, seuil: ca * 0.005 } },
+      'La fraction excedentaire est a reintegrer (CGI Art. 18).',
+      undefined, 'Art. 18 CGI - Cadeaux clients')
+  }
+  return ok(ref, nom, 'Cadeaux clients dans la norme')
+}
+
+// FI-017: Frais de reception > 1% CA
+function FI017(ctx: AuditContext): ResultatControle {
+  const ref = 'FI-017', nom = 'Frais reception > 1% CA'
+  const receptions = absSum(find(ctx.balanceN, '6257'))
+  const ca = absSum([...find(ctx.balanceN, '70'), ...find(ctx.balanceN, '71')])
+  if (ca > 0 && receptions > ca * 0.01) {
+    return anomalie(ref, nom, 'INFO',
+      `Frais reception (${receptions.toLocaleString('fr-FR')}) > 1% du CA — verifier deductibilite`,
+      { montants: { receptions, ca } },
+      'Verifier justificatifs et caractere professionnel des depenses.')
+  }
+  return ok(ref, nom, 'Frais reception dans la norme')
+}
+
+// FI-018: Base IMF = 0.5% CA minimum 3M FCFA (CI)
+function FI018(ctx: AuditContext): ResultatControle {
+  const ref = 'FI-018', nom = 'Base IMF coherente'
+  const ca = absSum([...find(ctx.balanceN, '70'), ...find(ctx.balanceN, '71')])
+  const taux = getTauxFiscaux()
+  if (ca > 0) {
+    const imfCalc = Math.max(ca * taux.IMF.taux, taux.IMF.minimum)
+    const isCompt = absSum(find(ctx.balanceN, '89'))
+    if (isCompt > 0 && isCompt < imfCalc * 0.9) {
+      return anomalie(ref, nom, 'MINEUR',
+        `IS comptabilise (${isCompt.toLocaleString('fr-FR')}) < IMF estime (${imfCalc.toLocaleString('fr-FR')})`,
+        { montants: { isCompt, imfCalc, ca } },
+        'L\'IS ne peut etre inferieur a l\'IMF. Verifier le calcul fiscal.',
+        undefined, 'Art. 33 CGI - Minimum forfaitaire d\'imposition')
+    }
+  }
+  return ok(ref, nom, 'Base IMF coherente')
+}
+
+// FI-019: Deficit reportable < 5 exercices
+function FI019(ctx: AuditContext): ResultatControle {
+  const ref = 'FI-019', nom = 'Deficit reportable < 5 ans'
+  const resultat = find(ctx.balanceN, '13').reduce((s, l) => s + (l.credit - l.debit), 0)
+  const ran = find(ctx.balanceN, '12').reduce((s, l) => s + (l.credit - l.debit), 0)
+  if (resultat < 0 && ran < 0) {
+    return anomalie(ref, nom, 'INFO',
+      `Deficit cumule (RAN=${ran.toLocaleString('fr-FR')}, RN=${resultat.toLocaleString('fr-FR')}). Verifier report < 5 ans.`,
+      { montants: { ran, resultat } },
+      'Les deficits sont reportables sur 5 exercices maximum (CGI Art. 7). Verifier l\'anciennete.',
+      undefined, 'Art. 7 CGI - Report deficitaire')
+  }
+  return ok(ref, nom, 'Pas de deficit cumule')
+}
+
+// FI-020: IS comptabilise = max(IS calcule, IMF)
+function FI020(ctx: AuditContext): ResultatControle {
+  const ref = 'FI-020', nom = 'IS = max(IS calcule, IMF)'
+  const resultat = find(ctx.balanceN, '13').reduce((s, l) => s + (l.credit - l.debit), 0)
+  const isCompt = absSum(find(ctx.balanceN, '89'))
+  const ca = absSum([...find(ctx.balanceN, '70'), ...find(ctx.balanceN, '71')])
+  const taux = getTauxFiscaux()
+  if (resultat > 0 && ca > 0) {
+    const isCalc = resultat * taux.IS.taux_normal
+    const imf = Math.max(ca * taux.IMF.taux, taux.IMF.minimum)
+    const attendu = Math.max(isCalc, imf)
+    const ecart = Math.abs(isCompt - attendu)
+    if (ecart > attendu * 0.15 && ecart > 500000) {
+      return anomalie(ref, nom, 'MINEUR',
+        `IS comptabilise (${isCompt.toLocaleString('fr-FR')}) s'ecarte de max(IS,IMF) = ${attendu.toLocaleString('fr-FR')}`,
+        { montants: { isCompt, isCalc: Math.round(isCalc), imf: Math.round(imf), attendu: Math.round(attendu) } },
+        'Verifier le passage fiscal : reintegrations, deductions, et choix IS vs IMF.')
+    }
+  }
+  return ok(ref, nom, 'IS comptabilise coherent')
+}
+
 // --- Enregistrement ---
 
 export function registerLevel7Controls(): void {
@@ -457,6 +542,11 @@ export function registerLevel7Controls(): void {
     ['FI-013', 'Interets comptes courants', 'Plafond fiscal interets CC associes', 'MINEUR', FI013],
     ['FI-014', 'Loyers vs occupation', 'Coherence loyers et batiments propres', 'INFO', FI014],
     ['FI-015', 'Taux effectif d\'imposition', 'Analyse du taux effectif d\'IS', 'INFO', FI015],
+    ['FI-016', 'Cadeaux > 0.5% CA', 'Plafond cadeaux clients CGI Art. 18', 'MINEUR', FI016],
+    ['FI-017', 'Frais reception > 1% CA', 'Seuil frais reception', 'INFO', FI017],
+    ['FI-018', 'Base IMF coherente', 'IMF = 0.5% CA min 3M FCFA', 'MINEUR', FI018],
+    ['FI-019', 'Deficit reportable < 5 ans', 'Report deficitaire CGI Art. 7', 'INFO', FI019],
+    ['FI-020', 'IS = max(IS calcule, IMF)', 'Coherence IS vs IMF', 'MINEUR', FI020],
   ]
 
   for (const [ref, nom, desc, sev, fn] of defs) {

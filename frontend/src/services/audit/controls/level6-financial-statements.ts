@@ -635,6 +635,79 @@ function EF019(ctx: AuditContext): ResultatControle {
   return ok(ref, nom, 'Pas de charges de personnel')
 }
 
+// EF-020: Charges financieres vs dettes financieres
+function EF020(ctx: AuditContext): ResultatControle {
+  const ref = 'EF-020', nom = 'Charges fin. vs dettes fin.'
+  const chargesFin = sumForPrefixes(ctx.balanceN, ['67'])
+  const dettesFin = sumForPrefixes(ctx.balanceN, ['16', '17'])
+  if (dettesFin === 0 && chargesFin > 100000) {
+    return anomalie(ref, nom, 'MINEUR',
+      `Charges financieres (${chargesFin.toLocaleString('fr-FR')}) sans dettes financieres au bilan`,
+      { montants: { chargesFin, dettesFin } },
+      'Verifier l\'origine des charges financieres: comptes courants, decouverts, ou dettes non bilantees.')
+  }
+  return ok(ref, nom, 'Coherence charges et dettes financieres')
+}
+
+// EF-021: Dotations CR = dotations note 3C (amortissements)
+function EF021(ctx: AuditContext): ResultatControle {
+  const ref = 'EF-021', nom = 'Dotations CR coherentes'
+  const dotCR = sumForPrefixes(ctx.balanceN, ['681', '691'])
+  const amortFin = sumForPrefixes(ctx.balanceN, ['28'])
+  // Simple sanity: si amortissements > 0, les dotations CR doivent aussi etre > 0
+  if (amortFin > 0 && dotCR === 0) {
+    return anomalie(ref, nom, 'MAJEUR',
+      `Amortissements cumules (${amortFin.toLocaleString('fr-FR')}) mais aucune dotation au CR`,
+      { montants: { dotCR, amortFin } },
+      'Verifier que les dotations aux amortissements sont bien passees au compte de resultat.')
+  }
+  return ok(ref, nom, 'Dotations CR coherentes avec amortissements')
+}
+
+// EF-022: FR = Capitaux permanents - Actif immobilise net
+function EF022(ctx: AuditContext): ResultatControle {
+  const ref = 'EF-022', nom = 'Fonds de roulement'
+  const cp = Math.abs(sumSoldeForPrefixes(ctx.balanceN, ['10', '11', '12', '13', '14', '15']))
+  const dettesLT = Math.abs(sumSoldeForPrefixes(ctx.balanceN, ['16', '17']))
+  const immoBrut = sumForPrefixes(ctx.balanceN, ['20', '21', '22', '23', '24', '25', '26', '27'])
+  const amort = sumForPrefixes(ctx.balanceN, ['28', '29'])
+  const actifImmoNet = immoBrut - amort
+  const fr = cp + dettesLT - actifImmoNet
+  if (fr < 0) {
+    return anomalie(ref, nom, 'MINEUR',
+      `Fonds de roulement negatif: ${fr.toLocaleString('fr-FR')} FCFA`,
+      { montants: { cp, dettesLT, actifImmoNet, fr } },
+      'Un FR negatif signifie que les ressources stables ne couvrent pas les emplois stables. Risque de desequilibre financier.')
+  }
+  return ok(ref, nom, `Fonds de roulement positif: ${fr.toLocaleString('fr-FR')}`)
+}
+
+// EF-023: BFR = Actif circulant (hors treso) - Passif circulant (hors treso)
+function EF023(ctx: AuditContext): ResultatControle {
+  const ref = 'EF-023', nom = 'BFR coherent'
+  const actifCirc = sumForPrefixes(ctx.balanceN, ['3', '40', '41', '42', '43', '44', '45', '46', '47', '48'])
+  const passifCirc = sumForPrefixes(ctx.balanceN, ['40', '41', '42', '43', '44', '45', '46', '47', '48'])
+  const bfr = actifCirc - passifCirc
+  if (bfr < 0) {
+    return ok(ref, nom, `BFR negatif (${bfr.toLocaleString('fr-FR')}): l'exploitation degage de la tresorerie`)
+  }
+  return ok(ref, nom, `BFR: ${bfr.toLocaleString('fr-FR')} FCFA`)
+}
+
+// EF-024: Produits HAO sans charges HAO (ou inversement)
+function EF024(ctx: AuditContext): ResultatControle {
+  const ref = 'EF-024', nom = 'Coherence HAO'
+  const chargesHAO = sumForPrefixes(ctx.balanceN, ['81', '83', '85'])
+  const produitsHAO = sumForPrefixes(ctx.balanceN, ['82', '84', '86'])
+  if (chargesHAO > 0 && produitsHAO === 0) {
+    return anomalie(ref, nom, 'INFO',
+      `Charges HAO (${chargesHAO.toLocaleString('fr-FR')}) sans produits HAO correspondants`,
+      { montants: { chargesHAO, produitsHAO } },
+      'Verifier si les operations HAO sont correctement classees et si un produit de cession est attendu.')
+  }
+  return ok(ref, nom, 'Coherence charges/produits HAO')
+}
+
 // --- Enregistrement ---
 
 export function registerLevel6Controls(): void {
@@ -658,6 +731,11 @@ export function registerLevel6Controls(): void {
     ['EF-017', 'Note 3I - Dettes', 'Coherence note 3I', 'BLOQUANT', EF017],
     ['EF-018', 'Note 3J - Provisions', 'Coherence note 3J', 'MAJEUR', EF018],
     ['EF-019', 'Effectifs vs charges personnel', 'Effectifs renseignes si charges 66x', 'MINEUR', EF019],
+    ['EF-020', 'Charges fin. vs dettes fin.', 'Coherence charges et dettes financieres', 'MINEUR', EF020],
+    ['EF-021', 'Dotations CR coherentes', 'Dotations CR vs amortissements cumules', 'MAJEUR', EF021],
+    ['EF-022', 'Fonds de roulement', 'FR = Capitaux permanents - Actif immo net', 'MINEUR', EF022],
+    ['EF-023', 'BFR coherent', 'BFR = Actif circulant - Passif circulant', 'INFO', EF023],
+    ['EF-024', 'Coherence HAO', 'Charges HAO vs produits HAO', 'INFO', EF024],
   ]
 
   for (const [ref, nom, desc, sev, fn] of defs) {

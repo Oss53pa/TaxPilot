@@ -277,6 +277,96 @@ function NN008(ctx: AuditContext): ResultatControle {
   return ok(ref, nom, 'Immobilisations coherentes entre exercices')
 }
 
+// NN-009: Variation CA > 50%
+function NN009(ctx: AuditContext): ResultatControle {
+  const ref = 'NN-009', nom = 'Variation CA > 50%'
+  const skip = needsN1(ref, nom, ctx); if (skip) return skip
+  const caN = absSum([...find(ctx.balanceN, '70'), ...find(ctx.balanceN, '71')])
+  const caN1 = absSum([...find(ctx.balanceN1!, '70'), ...find(ctx.balanceN1!, '71')])
+  if (caN1 > 0 && Math.abs(caN - caN1) / caN1 > 0.5) {
+    return anomalie(ref, nom, 'MINEUR',
+      `CA variation > 50% : N=${caN.toLocaleString('fr-FR')} vs N-1=${caN1.toLocaleString('fr-FR')}`,
+      { montants: { caN, caN1, variation: ((caN - caN1) / caN1 * 100).toFixed(1) + '%' } },
+      'Justifier la variation significative du chiffre d\'affaires.')
+  }
+  return ok(ref, nom, 'CA stable entre exercices')
+}
+
+// NN-010: Charges personnel stables si effectifs inchanges
+function NN010(ctx: AuditContext): ResultatControle {
+  const ref = 'NN-010', nom = 'Charges personnel N/N-1'
+  const skip = needsN1(ref, nom, ctx); if (skip) return skip
+  const cpN = absSum(find(ctx.balanceN, '66'))
+  const cpN1 = absSum(find(ctx.balanceN1!, '66'))
+  if (cpN1 > 0 && Math.abs(cpN - cpN1) / cpN1 > 0.4) {
+    return anomalie(ref, nom, 'MINEUR',
+      `Charges personnel variation > 40% : N=${cpN.toLocaleString('fr-FR')} vs N-1=${cpN1.toLocaleString('fr-FR')}`,
+      { montants: { cpN, cpN1 } },
+      'Verifier coherence avec effectifs (embauches, departs, augmentations).')
+  }
+  return ok(ref, nom, 'Charges personnel coherentes')
+}
+
+// NN-011: Dotations amortissements coherentes
+function NN011(ctx: AuditContext): ResultatControle {
+  const ref = 'NN-011', nom = 'Dotations amort. N/N-1'
+  const skip = needsN1(ref, nom, ctx); if (skip) return skip
+  const dotN = absSum(find(ctx.balanceN, '681'))
+  const dotN1 = absSum(find(ctx.balanceN1!, '681'))
+  if (dotN1 > 0 && dotN < dotN1 * 0.5) {
+    return anomalie(ref, nom, 'MINEUR',
+      `Dotations amortissements en forte baisse : N=${dotN.toLocaleString('fr-FR')} vs N-1=${dotN1.toLocaleString('fr-FR')}`,
+      { montants: { dotN, dotN1 } },
+      'Verifier que toutes les immobilisations sont correctement amorties en N.')
+  }
+  return ok(ref, nom, 'Dotations amortissements coherentes')
+}
+
+// NN-012: Variation stocks coherente avec activite
+function NN012(ctx: AuditContext): ResultatControle {
+  const ref = 'NN-012', nom = 'Variation stocks N/N-1'
+  const skip = needsN1(ref, nom, ctx); if (skip) return skip
+  const stN = absSum(find(ctx.balanceN, '3'))
+  const stN1 = absSum(find(ctx.balanceN1!, '3'))
+  if (stN1 > 0 && Math.abs(stN - stN1) / stN1 > 0.6) {
+    return anomalie(ref, nom, 'MINEUR',
+      `Stocks variation > 60% : N=${stN.toLocaleString('fr-FR')} vs N-1=${stN1.toLocaleString('fr-FR')}`,
+      { montants: { stN, stN1 } },
+      'Justifier la variation importante des stocks.')
+  }
+  return ok(ref, nom, 'Stocks coherents entre exercices')
+}
+
+// NN-013: Dettes fournisseurs variation vs achats
+function NN013(ctx: AuditContext): ResultatControle {
+  const ref = 'NN-013', nom = 'Dettes fournisseurs vs achats N/N-1'
+  const skip = needsN1(ref, nom, ctx); if (skip) return skip
+  const dfN = absSum(find(ctx.balanceN, '40'))
+  const dfN1 = absSum(find(ctx.balanceN1!, '40'))
+  if (dfN1 > 0 && dfN > dfN1 * 2.5) {
+    return anomalie(ref, nom, 'MINEUR',
+      `Dettes fournisseurs × 2.5 vs N-1 : N=${dfN.toLocaleString('fr-FR')} vs N-1=${dfN1.toLocaleString('fr-FR')}`,
+      { montants: { dfN, dfN1 } },
+      'Verifier les echeances fournisseurs et la politique de paiement.')
+  }
+  return ok(ref, nom, 'Dettes fournisseurs coherentes')
+}
+
+// NN-014: Tresorerie variation justifiable
+function NN014(ctx: AuditContext): ResultatControle {
+  const ref = 'NN-014', nom = 'Variation tresorerie N/N-1'
+  const skip = needsN1(ref, nom, ctx); if (skip) return skip
+  const tN = find(ctx.balanceN, '5').reduce((s, l) => s + solde(l), 0)
+  const tN1 = find(ctx.balanceN1!, '5').reduce((s, l) => s + solde(l), 0)
+  if (tN1 !== 0 && Math.abs(tN - tN1) / Math.abs(tN1) > 1) {
+    return anomalie(ref, nom, 'INFO',
+      `Tresorerie variation > 100% : N=${tN.toLocaleString('fr-FR')} vs N-1=${tN1.toLocaleString('fr-FR')}`,
+      { montants: { tN, tN1 } },
+      'Verifier coherence avec le TFT et les flux de tresorerie.')
+  }
+  return ok(ref, nom, 'Tresorerie coherente entre exercices')
+}
+
 // --- Enregistrement ---
 
 export function registerLevel5Controls(): void {
@@ -289,6 +379,12 @@ export function registerLevel5Controls(): void {
     ['NN-006', 'Variation total bilan', 'Detecte variation > 30% du bilan', 'INFO', NN006],
     ['NN-007', 'Comptes gestion disparus', 'Detecte les comptes de gestion absents en N', 'MINEUR', NN007],
     ['NN-008', 'Coherence immobilisations N/N-1', 'Verifie les mouvements d\'immobilisations', 'MINEUR', NN008],
+    ['NN-009', 'Variation CA > 50%', 'Detecte variation anormale du CA', 'MINEUR', NN009],
+    ['NN-010', 'Charges personnel N/N-1', 'Coherence charges personnel inter-exercices', 'MINEUR', NN010],
+    ['NN-011', 'Dotations amort. N/N-1', 'Coherence dotations amortissements', 'MINEUR', NN011],
+    ['NN-012', 'Variation stocks N/N-1', 'Coherence stocks inter-exercices', 'MINEUR', NN012],
+    ['NN-013', 'Dettes fournisseurs vs achats N/N-1', 'Coherence dettes fournisseurs', 'MINEUR', NN013],
+    ['NN-014', 'Variation tresorerie N/N-1', 'Coherence tresorerie inter-exercices', 'INFO', NN014],
   ]
 
   for (const [ref, nom, desc, sev, fn] of defs) {

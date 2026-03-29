@@ -38,6 +38,8 @@ const ModernTemplates = React.lazy(() => import('@/pages/templates/ModernTemplat
 const ModernConsolidation = React.lazy(() => import('@/pages/consolidation/ModernConsolidation'))
 const ModernReporting = React.lazy(() => import('@/pages/reporting/ModernReporting'))
 const ArchivesPage = React.lazy(() => import('@/pages/archives/ArchivesPage'))
+const SupportPage = React.lazy(() => import('@/pages/support/SupportPage'))
+const FormationPage = React.lazy(() => import('@/pages/formation/FormationPage'))
 const ModernVeilleReglementaire = React.lazy(() => import('@/pages/veille/ModernVeilleReglementaire'))
 const ModernCollaboration = React.lazy(() => import('@/pages/collaboration/ModernCollaboration'))
 const ModernIntegrations = React.lazy(() => import('@/pages/integrations/ModernIntegrations'))
@@ -196,6 +198,10 @@ function App() {
           <Route path="/consolidation" element={<DS><ModernConsolidation /></DS>} />
           <Route path="/reporting" element={<DS><ModernReporting /></DS>} />
           <Route path="/archives" element={<DS><ArchivesPage /></DS>} />
+
+          {/* Support & Formation */}
+          <Route path="/support" element={<S><SupportPage /></S>} />
+          <Route path="/formation" element={<S><FormationPage /></S>} />
 
           {/* Debug routes removed for production */}
 
