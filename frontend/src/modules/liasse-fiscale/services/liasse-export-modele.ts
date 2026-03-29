@@ -806,6 +806,110 @@ export async function exportModeB(
       { row: 11, comptes: ['705', '706', '707'], colN: 'F', colN1: 'G', type: 'credit' },
       { row: 12, comptes: ['708'], colN: 'F', colN1: 'G', type: 'credit' },
     ]},
+    // NOTE 12: Charges de personnel (onglet 34)
+    { sheet: 'NOTE 12', rows: [
+      { row: 9, comptes: ['661'], colN: 'F', colN1: 'G', type: 'debit' },   // Rémunérations directes
+      { row: 10, comptes: ['662'], colN: 'F', colN1: 'G', type: 'debit' },  // Primes et gratifications
+      { row: 11, comptes: ['663'], colN: 'F', colN1: 'G', type: 'debit' },  // Congés payés
+      { row: 12, comptes: ['664'], colN: 'F', colN1: 'G', type: 'debit' },  // Indemnités
+      { row: 13, comptes: ['665', '666', '667', '668'], colN: 'F', colN1: 'G', type: 'debit' },
+      { row: 17, comptes: ['6411', '6412', '6413'], colN: 'F', colN1: 'G', type: 'debit' },  // Charges sociales
+      { row: 18, comptes: ['6414', '6415', '6416', '6418'], colN: 'F', colN1: 'G', type: 'debit' },
+    ]},
+    // NOTE 15A: Fournisseurs et comptes rattachés (onglet 37)
+    { sheet: 'NOTE 15A', rows: [
+      { row: 9, comptes: ['401'], colN: 'F', colN1: 'G', type: 'passif' },
+      { row: 10, comptes: ['402'], colN: 'F', colN1: 'G', type: 'passif' },
+      { row: 11, comptes: ['403', '404', '405'], colN: 'F', colN1: 'G', type: 'passif' },
+      { row: 12, comptes: ['408'], colN: 'F', colN1: 'G', type: 'passif' },
+    ]},
+    // NOTE 16A: Dettes fiscales (onglet 39)
+    { sheet: 'NOTE 16A', rows: [
+      { row: 9, comptes: ['441'], colN: 'E', colN1: 'F', type: 'passif' },
+      { row: 10, comptes: ['4421', '4422', '4424'], colN: 'E', colN1: 'F', type: 'passif' },
+      { row: 11, comptes: ['4431', '4432', '4434'], colN: 'E', colN1: 'F', type: 'passif' },
+      { row: 12, comptes: ['4441'], colN: 'E', colN1: 'F', type: 'passif' },
+      { row: 13, comptes: ['445'], colN: 'E', colN1: 'F', type: 'passif' },
+      { row: 14, comptes: ['446', '447'], colN: 'E', colN1: 'F', type: 'passif' },
+      { row: 15, comptes: ['448', '449'], colN: 'E', colN1: 'F', type: 'passif' },
+    ]},
+    // NOTE 17: Personnel (onglet 43)
+    { sheet: 'NOTE 17', rows: [
+      { row: 9, comptes: ['421'], colN: 'F', colN1: 'G', type: 'passif' },
+      { row: 10, comptes: ['422'], colN: 'F', colN1: 'G', type: 'passif' },
+      { row: 11, comptes: ['423', '424', '425'], colN: 'F', colN1: 'G', type: 'passif' },
+      { row: 12, comptes: ['426', '427', '428'], colN: 'F', colN1: 'G', type: 'passif' },
+    ]},
+    // NOTE 18: Organismes sociaux (onglet 44)
+    { sheet: 'NOTE 18', rows: [
+      { row: 9, comptes: ['431'], colN: 'F', colN1: 'G', type: 'passif' },
+      { row: 10, comptes: ['432'], colN: 'F', colN1: 'G', type: 'passif' },
+      { row: 11, comptes: ['433'], colN: 'F', colN1: 'G', type: 'passif' },
+    ]},
+    // NOTE 19: Associés et groupe (onglet 45)
+    { sheet: 'NOTE 19', rows: [
+      { row: 9, comptes: ['461'], colN: 'F', colN1: 'G', type: 'passif' },
+      { row: 10, comptes: ['462', '463'], colN: 'F', colN1: 'G', type: 'passif' },
+      { row: 11, comptes: ['464', '465', '466', '467'], colN: 'F', colN1: 'G', type: 'passif' },
+      { row: 12, comptes: ['471', '472', '473', '474', '475', '476', '477'], colN: 'F', colN1: 'G', type: 'passif' },
+    ]},
+    // NOTE 20: Banques, crédits (onglet 46)
+    { sheet: 'NOTE 20', rows: [
+      { row: 9, comptes: ['5651'], colN: 'F', colN1: 'G', type: 'passif' },   // Escompte campagne
+      { row: 10, comptes: ['5652'], colN: 'F', colN1: 'G', type: 'passif' },  // Escompte ordinaire
+      { row: 12, comptes: ['521', '522', '523', '524', '525', '526', '527', '528'], colN: 'F', colN1: 'G', type: 'actif' },  // Banques locales
+      { row: 16, comptes: ['561', '564'], colN: 'F', colN1: 'G', type: 'passif' },  // Crédit trésorerie
+    ]},
+    // NOTE 21: CA et autres produits (onglet 47) — detail ventilé
+    { sheet: 'NOTE 21', rows: [
+      { row: 9, comptes: ['7011'], colN: 'F', colN1: 'G', type: 'credit' },
+      { row: 21, comptes: ['7051', '7061', '7071'], colN: 'F', colN1: 'G', type: 'credit' },
+      { row: 27, comptes: ['708'], colN: 'F', colN1: 'G', type: 'credit' },
+      { row: 37, comptes: ['72'], colN: 'F', colN1: 'G', type: 'credit' },
+      { row: 38, comptes: ['71'], colN: 'F', colN1: 'G', type: 'credit' },
+      { row: 39, comptes: ['75'], colN: 'F', colN1: 'G', type: 'credit' },
+    ]},
+    // NOTE 22: Achats (onglet 48) — detail par nature
+    { sheet: 'NOTE 22', rows: [
+      { row: 9, comptes: ['6011', '6012', '6013', '6014'], colN: 'F', colN1: 'G', type: 'debit' },
+      { row: 15, comptes: ['6021', '6022', '6023', '6024'], colN: 'F', colN1: 'G', type: 'debit' },
+      { row: 21, comptes: ['604', '605', '608'], colN: 'F', colN1: 'G', type: 'debit' },
+    ]},
+    // NOTE 23: Transports (onglet 49)
+    { sheet: 'NOTE 23', rows: [
+      { row: 9, comptes: ['612', '613', '614'], colN: 'F', colN1: 'G', type: 'debit' },
+      { row: 12, comptes: ['616', '6181', '6182', '6183'], colN: 'F', colN1: 'G', type: 'debit' },
+    ]},
+    // NOTE 24: Services extérieurs (onglet 50)
+    { sheet: 'NOTE 24', rows: [
+      { row: 9, comptes: ['621'], colN: 'F', colN1: 'G', type: 'debit' },
+      { row: 10, comptes: ['622'], colN: 'F', colN1: 'G', type: 'debit' },
+      { row: 11, comptes: ['623', '624'], colN: 'F', colN1: 'G', type: 'debit' },
+      { row: 12, comptes: ['625'], colN: 'F', colN1: 'G', type: 'debit' },
+      { row: 13, comptes: ['626'], colN: 'F', colN1: 'G', type: 'debit' },
+      { row: 14, comptes: ['627', '628'], colN: 'F', colN1: 'G', type: 'debit' },
+    ]},
+    // NOTE 25: Impôts et taxes (onglet 51)
+    { sheet: 'NOTE 25', rows: [
+      { row: 9, comptes: ['641'], colN: 'F', colN1: 'G', type: 'debit' },
+      { row: 10, comptes: ['642', '643'], colN: 'F', colN1: 'G', type: 'debit' },
+      { row: 11, comptes: ['644', '645', '646'], colN: 'F', colN1: 'G', type: 'debit' },
+      { row: 12, comptes: ['647', '648', '649'], colN: 'F', colN1: 'G', type: 'debit' },
+    ]},
+    // NOTE 26: Autres charges (onglet 52)
+    { sheet: 'NOTE 26', rows: [
+      { row: 9, comptes: ['651'], colN: 'F', colN1: 'G', type: 'debit' },
+      { row: 10, comptes: ['652'], colN: 'F', colN1: 'G', type: 'debit' },
+      { row: 11, comptes: ['653', '654'], colN: 'F', colN1: 'G', type: 'debit' },
+      { row: 12, comptes: ['655', '656', '657', '658', '659'], colN: 'F', colN1: 'G', type: 'debit' },
+    ]},
+    // NOTE 27A: Dotations amortissements (onglet 53)
+    { sheet: 'NOTE 27A', rows: [
+      { row: 9, comptes: ['6811', '6812'], colN: 'F', colN1: 'G', type: 'debit' },
+      { row: 10, comptes: ['6813', '6814'], colN: 'F', colN1: 'G', type: 'debit' },
+      { row: 14, comptes: ['6816', '6817', '6818', '6819'], colN: 'F', colN1: 'G', type: 'debit' },
+      { row: 15, comptes: ['6911', '6912', '6913'], colN: 'F', colN1: 'G', type: 'debit' },
+    ]},
   ]
 
   let noteDetailCount = 0
