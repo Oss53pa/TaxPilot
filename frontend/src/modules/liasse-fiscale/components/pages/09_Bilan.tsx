@@ -166,15 +166,13 @@ const Bilan: React.FC<PageProps> = ({ entreprise, balance, balanceN1, onNoteClic
   const anomaliesPassif = detecterAnomaliesPassif(balance, ALL_PASSIF_PREFIXES)
   const anomalies: AnomalieComptable[] = [...anomaliesActif, ...anomaliesPassif]
 
-  // ── ACTIF table ──
+  // ── ACTIF table (Bilan synthétique = NET only, no BRUT/AMORT) ──
   const actifColumns: Column[] = [
-    { key: 'ref', label: 'REF', width: 60, align: 'center' },
-    { key: 'label', label: 'ACTIF', width: '40%' },
-    { key: 'note', label: 'Note', width: 50, align: 'center' },
-    { key: 'brut', label: 'BRUT', width: 140, align: 'right', subLabel: 'Exercice N' },
-    { key: 'amort', label: 'AMORT/DEPREC.', width: 140, align: 'right' },
-    { key: 'net', label: 'NET', width: 140, align: 'right', subLabel: 'Exercice N' },
-    { key: 'net_n1', label: 'NET', width: 140, align: 'right', subLabel: 'Exercice N-1' },
+    { key: 'ref', label: 'REF', width: 40, align: 'center' },
+    { key: 'label', label: 'ACTIF', width: '45%' },
+    { key: 'note', label: 'Note', width: 35, align: 'center' },
+    { key: 'net', label: 'NET', width: 110, align: 'right', subLabel: 'Exercice N' },
+    { key: 'net_n1', label: 'NET', width: 110, align: 'right', subLabel: 'Exercice N-1' },
   ]
 
   const actifRows: Row[] = actifData.map((r, i) => ({
@@ -183,8 +181,6 @@ const Bilan: React.FC<PageProps> = ({ entreprise, balance, balanceN1, onNoteClic
       ref: r.ref,
       label: r.label,
       note: r.isSub || r.isTotal ? '' : (r.note || ''),
-      brut: r.isSub ? '' : (r.brut || null),
-      amort: r.isSub ? '' : (r.amortV || null),
       net: r.isSub ? '' : (r.net || null),
       net_n1: r.isSub ? '' : (r.ref && actifN1Map?.get(r.ref)?.net ? actifN1Map.get(r.ref)!.net : null),
     },
@@ -196,11 +192,11 @@ const Bilan: React.FC<PageProps> = ({ entreprise, balance, balanceN1, onNoteClic
 
   // ── PASSIF table ──
   const passifColumns: Column[] = [
-    { key: 'ref', label: 'REF', width: 60, align: 'center' },
+    { key: 'ref', label: 'REF', width: 40, align: 'center' },
     { key: 'label', label: 'PASSIF', width: '45%' },
-    { key: 'note', label: 'Note', width: 50, align: 'center' },
-    { key: 'montant', label: 'NET', width: 160, align: 'right', subLabel: 'Exercice N' },
-    { key: 'montant_n1', label: 'NET', width: 160, align: 'right', subLabel: 'Exercice N-1' },
+    { key: 'note', label: 'Note', width: 35, align: 'center' },
+    { key: 'montant', label: 'NET', width: 110, align: 'right', subLabel: 'Exercice N' },
+    { key: 'montant_n1', label: 'NET', width: 110, align: 'right', subLabel: 'Exercice N-1' },
   ]
 
   const passifRows: Row[] = passifData.map((r, i) => ({
@@ -228,19 +224,24 @@ const Bilan: React.FC<PageProps> = ({ entreprise, balance, balanceN1, onNoteClic
         BILAN AU {new Date(entreprise.exercice_clos || Date.now()).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' }).toUpperCase()}
       </Typography>
 
-      {/* ACTIF */}
-      <Typography sx={{ fontSize: '10pt', fontWeight: 700, textAlign: 'center', mb: 0.5, fontFamily: 'inherit' }}>
-        ACTIF
-      </Typography>
-      <LiasseTable columns={actifColumns} rows={actifRows} compact onNoteClick={onNoteClick} />
+      {/* ACTIF + PASSIF côte à côte */}
+      <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
+        {/* ACTIF */}
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Typography sx={{ fontSize: '10pt', fontWeight: 700, textAlign: 'center', mb: 0.5, fontFamily: 'inherit' }}>
+            ACTIF
+          </Typography>
+          <LiasseTable columns={actifColumns} rows={actifRows} compact onNoteClick={onNoteClick} />
+        </Box>
 
-      <Box sx={{ my: 2 }} />
-
-      {/* PASSIF */}
-      <Typography sx={{ fontSize: '10pt', fontWeight: 700, textAlign: 'center', mb: 0.5, fontFamily: 'inherit' }}>
-        PASSIF
-      </Typography>
-      <LiasseTable columns={passifColumns} rows={passifRows} compact onNoteClick={onNoteClick} />
+        {/* PASSIF */}
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Typography sx={{ fontSize: '10pt', fontWeight: 700, textAlign: 'center', mb: 0.5, fontFamily: 'inherit' }}>
+            PASSIF
+          </Typography>
+          <LiasseTable columns={passifColumns} rows={passifRows} compact onNoteClick={onNoteClick} />
+        </Box>
+      </Box>
 
       {/* Alertes soldes anormaux */}
       {anomalies.length > 0 && (

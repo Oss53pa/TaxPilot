@@ -461,7 +461,7 @@ const LiasseFiscaleModule: React.FC = () => {
                 <CircularProgress size={32} />
               </Box>
             }>
-              <LiassePage orientation={currentPage.orientation} zoom={currentPage.orientation === 'landscape' ? zoom * (210 / 297) : zoom}>
+              <LiassePage orientation={currentPage.orientation} zoom={zoom}>
                 <PageComponent entreprise={entreprise} balance={balance} balanceN1={balanceN1} regime={regime} onNoteClick={handleNoteClick} />
               </LiassePage>
             </Suspense>

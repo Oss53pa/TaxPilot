@@ -24,6 +24,7 @@ import {
   Backup,
   MenuBook,
   Description,
+  RestartAlt,
 } from '@mui/icons-material'
 import EntrepriseSettings from '@/components/Parametrage/EntrepriseSettings'
 import UserManagement from '@/components/Parametrage/UserManagement'
@@ -35,6 +36,7 @@ import ThemeSettings from '@/pages/ThemeSettings'
 import RegionalSettings from '@/components/Parametrage/RegionalSettings'
 import BackupRestoreSettings from '@/components/Parametrage/BackupRestoreSettings'
 import DocumentationJuridique from '@/components/Parametrage/DocumentationJuridique'
+import ResetSettings from '@/components/Parametrage/ResetSettings'
 import BrandingPage from '@/pages/parametres/BrandingPage'
 import { TabPanel } from '@/components/shared/TabPanel'
 
@@ -56,6 +58,7 @@ const Parametrage: React.FC = () => {
     if (path.includes('/regional')) return 8
     if (path.includes('/sauvegarde')) return 9
     if (path.includes('/documentation-juridique')) return 10
+    if (path.includes('/reinitialisation')) return 11
     return 0
   }
 
@@ -76,6 +79,7 @@ const Parametrage: React.FC = () => {
       '/parametrage/regional',
       '/parametrage/sauvegarde',
       '/parametrage/documentation-juridique',
+      '/parametrage/reinitialisation',
     ]
     
     navigate(tabPaths[newValue])
@@ -191,6 +195,14 @@ const Parametrage: React.FC = () => {
               id="parametrage-tab-10"
               aria-controls="parametrage-tabpanel-10"
             />
+            <Tab
+              label="Réinitialisation"
+              icon={<RestartAlt />}
+              iconPosition="start"
+              id="parametrage-tab-11"
+              aria-controls="parametrage-tabpanel-11"
+              sx={{ color: 'error.main' }}
+            />
           </Tabs>
         </Box>
 
@@ -237,6 +249,10 @@ const Parametrage: React.FC = () => {
 
         <TabPanel value={activeTab} index={10}>
           <DocumentationJuridique />
+        </TabPanel>
+
+        <TabPanel value={activeTab} index={11}>
+          <ResetSettings />
         </TabPanel>
       </Paper>
     </Box>
