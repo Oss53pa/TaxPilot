@@ -374,14 +374,139 @@ function computeAllValues(
     }
   }
 
-  // Enterprise info
-  vals['_denomination.denomination'] = entreprise.denomination || ''
-  vals['_adresse.adresse'] = entreprise.adresse || ''
-  vals['_ncc.ncc'] = entreprise.ncc || ''
-  vals['_exercice.exerciceClos'] = entreprise.exercice_clos || ''
-  vals['_duree.dureeMois'] = entreprise.duree_mois || 12
-  vals['_ntd.ntd'] = entreprise.ntd || ''
-  vals['_sigle.sigle'] = entreprise.sigle || ''
+  // ── Notes annexes — données injectables ──
+
+  // NOTE 1: Dettes garanties (onglet 15)
+  // F11-F14: emprunts obligataires et dettes (détail classe 16)
+  vals['N1_F11.val'] = getPassif(balance, ['1611'])  // Emprunts obligataires convertibles
+  vals['N1_F12.val'] = getPassif(balance, ['1612'])  // Autres emprunts obligataires
+  vals['N1_F13.val'] = getPassif(balance, ['162', '163', '164'])  // Emprunts établissements crédit
+  vals['N1_F14.val'] = getPassif(balance, ['165', '166', '167', '168'])  // Autres dettes financières
+  // F17-F20: dettes location-acquisition (détail classe 17)
+  vals['N1_F17.val'] = getPassif(balance, ['171'])  // Crédit-bail immobilier
+  vals['N1_F18.val'] = getPassif(balance, ['172'])  // Crédit-bail mobilier
+  vals['N1_F19.val'] = getPassif(balance, ['173'])  // Location-vente
+  vals['N1_F20.val'] = getPassif(balance, ['174', '175', '176', '177', '178'])  // Autres location-acquisition
+  // F23-F30: dettes passif circulant
+  vals['N1_F23.val'] = getPassif(balance, ['401', '402', '403', '404', '405', '408'])  // Fournisseurs
+  vals['N1_F24.val'] = getActifBrut(balance, ['411', '412', '413', '414', '415', '416', '418'])  // Clients (avances)
+  vals['N1_F25.val'] = getPassif(balance, ['421', '422', '423'])  // Personnel
+  vals['N1_F26.val'] = getPassif(balance, ['431', '432', '433'])  // Sécurité sociale
+  vals['N1_F27.val'] = getPassif(balance, ['441', '442', '443', '444', '445', '446', '447', '448', '449'])  // Etat
+  vals['N1_F28.val'] = getPassif(balance, ['45'])  // Organismes internationaux
+  vals['N1_F29.val'] = getPassif(balance, ['46'])  // Associés et groupe
+  vals['N1_F30.val'] = getPassif(balance, ['47'])  // Créditeurs divers
+
+  // NOTE 3A: Immobilisations brutes — mouvements (onglet 17)
+  // Col D = montant brut ouverture (= N-1), Col E = acquisitions, Col J = formule
+  const n3a = (comptes: string[]) => ({
+    ouv: balanceN1.length > 0 ? getActifBrut(balanceN1, comptes) : 0,
+    clo: getActifBrut(balance, comptes),
+  })
+  const n3aLine = (comptes: string[], prefix: string) => {
+    const { ouv, clo } = n3a(comptes)
+    vals[`${prefix}_D.val`] = ouv  // Ouverture
+    vals[`${prefix}_E.val`] = Math.max(0, clo - ouv)  // Acquisitions (augmentation)
+    vals[`${prefix}_H.val`] = Math.max(0, ouv - clo)  // Cessions (diminution)
+  }
+  n3aLine(['211', '212'], 'N3A_12')  // Frais développement
+  n3aLine(['213', '214', '215'], 'N3A_13')  // Brevets, licences
+  n3aLine(['216'], 'N3A_14')  // Fonds commercial
+  n3aLine(['217', '218', '219'], 'N3A_15')  // Autres immo incorporelles
+  n3aLine(['22'], 'N3A_17')  // Terrains hors immeuble placement
+  // Row 18: Terrains immeuble placement — usually 0 for most companies
+  vals['N3A_18_D.val'] = 0; vals['N3A_18_E.val'] = 0; vals['N3A_18_H.val'] = 0
+  n3aLine(['231', '232', '233', '234'], 'N3A_19')  // Bâtiments hors immeuble
+  vals['N3A_20_D.val'] = 0; vals['N3A_20_E.val'] = 0; vals['N3A_20_H.val'] = 0  // Bâtiments immeuble placement
+  n3aLine(['235', '237', '238'], 'N3A_21')  // Aménagements
+  n3aLine(['241', '242', '243', '244'], 'N3A_22')  // Matériel, mobilier
+  n3aLine(['245'], 'N3A_23')  // Matériel transport
+  n3aLine(['251', '252'], 'N3A_24')  // Avances et acomptes
+  n3aLine(['26'], 'N3A_28')  // Titres participation
+  n3aLine(['271', '272', '273', '274', '275', '276', '277'], 'N3A_29')  // Autres immo financières
+
+  // NOTE 3C: Amortissements — mouvements (onglet 19)
+  const n3c = (comptes: string[]) => ({
+    ouv: balanceN1.length > 0 ? getAmortProv(balanceN1, comptes) : 0,
+    clo: getAmortProv(balance, comptes),
+  })
+  const n3cLine = (comptes: string[], prefix: string) => {
+    const { ouv, clo } = n3c(comptes)
+    vals[`${prefix}_D.val`] = ouv
+    vals[`${prefix}_E.val`] = Math.max(0, clo - ouv)  // Dotations
+    vals[`${prefix}_H.val`] = Math.max(0, ouv - clo)  // Reprises
+  }
+  n3cLine(['2811', '2812', '2911', '2912'], 'N3C_11')  // Amort frais développement
+  n3cLine(['2813', '2814', '2815', '2913', '2914', '2915'], 'N3C_12')  // Amort brevets
+  n3cLine(['2816', '2916'], 'N3C_13')  // Amort fonds commercial
+  n3cLine(['2817', '2818', '2819', '2917', '2918', '2919'], 'N3C_14')  // Amort autres immo incorp
+  n3cLine(['282', '292'], 'N3C_16')  // Amort terrains
+  n3cLine(['2831', '2832', '2833', '2834', '2931', '2932', '2933', '2934'], 'N3C_17')  // Amort bâtiments
+  n3cLine(['2835', '2837', '2838', '2935', '2937', '2938'], 'N3C_18')  // Amort aménagements
+  n3cLine(['2841', '2842', '2843', '2844', '2941', '2942', '2943', '2944'], 'N3C_19')  // Amort matériel
+  n3cLine(['2845', '2945'], 'N3C_20')  // Amort transport
+
+  // NOTE 10: Emprunts et dettes financières détail (onglet 32)
+  vals['N10_F9.val'] = getPassif(balance, ['1611'])  // Emprunts obligataires
+  vals['N10_G9.val'] = balanceN1.length > 0 ? getPassif(balanceN1, ['1611']) : 0
+  vals['N10_F10.val'] = getPassif(balance, ['1612', '1618'])
+  vals['N10_G10.val'] = balanceN1.length > 0 ? getPassif(balanceN1, ['1612', '1618']) : 0
+  vals['N10_F11.val'] = getPassif(balance, ['162', '163', '164'])
+  vals['N10_G11.val'] = balanceN1.length > 0 ? getPassif(balanceN1, ['162', '163', '164']) : 0
+  vals['N10_F12.val'] = getPassif(balance, ['165', '166', '167', '168'])
+  vals['N10_G12.val'] = balanceN1.length > 0 ? getPassif(balanceN1, ['165', '166', '167', '168']) : 0
+  vals['N10_F14.val'] = getPassif(balance, ['171'])
+  vals['N10_G14.val'] = balanceN1.length > 0 ? getPassif(balanceN1, ['171']) : 0
+  vals['N10_F15.val'] = getPassif(balance, ['172'])
+  vals['N10_G15.val'] = balanceN1.length > 0 ? getPassif(balanceN1, ['172']) : 0
+  vals['N10_F16.val'] = getPassif(balance, ['19'])
+  vals['N10_G16.val'] = balanceN1.length > 0 ? getPassif(balanceN1, ['19']) : 0
+
+  // NOTE 14: Résultat financier détail (onglet 36)
+  vals['N14_F9.val'] = -getBalanceSolde(balance, ['771'])  // Intérêts reçus
+  vals['N14_G9.val'] = balanceN1.length > 0 ? -getBalanceSolde(balanceN1, ['771']) : 0
+  vals['N14_F10.val'] = -getBalanceSolde(balance, ['772', '773'])  // Revenus titres
+  vals['N14_G10.val'] = balanceN1.length > 0 ? -getBalanceSolde(balanceN1, ['772', '773']) : 0
+  vals['N14_F11.val'] = -getBalanceSolde(balance, ['774', '775', '776', '777', '778'])  // Autres revenus financiers
+  vals['N14_G11.val'] = balanceN1.length > 0 ? -getBalanceSolde(balanceN1, ['774', '775', '776', '777', '778']) : 0
+  vals['N14_F15.val'] = getBalanceSolde(balance, ['671'])  // Intérêts des emprunts
+  vals['N14_G15.val'] = balanceN1.length > 0 ? getBalanceSolde(balanceN1, ['671']) : 0
+  vals['N14_F16.val'] = getBalanceSolde(balance, ['672', '673', '674', '675', '676', '677', '678'])  // Autres frais financiers
+  vals['N14_G16.val'] = balanceN1.length > 0 ? getBalanceSolde(balanceN1, ['672', '673', '674', '675', '676', '677', '678']) : 0
+
+  // COMP-CHARGES: Détail des charges par compte (onglet 68)
+  // Each line maps a specific account to columns G(N) and H(N-1)
+  const compChargesAccounts = [
+    '6011','6012','6013','6014','6015','6019',  // Achats marchandises
+    '6031',  // Variation stocks marchandises
+    '6021','6022','6023','6024','6025','6029',  // Achats MP
+    '6032',  // Variation stocks MP
+    '6041','6042','6043','6044','6045','6046','6047','6049',  // Autres achats
+    '6051','6052','6053','6054','6055','6056','6057','6058','6059',  // FNS
+    '6081','6082','6083','6085','6089',  // Emballages
+    '6033',  // Variation autres appro
+    '612','613','614','616','6181','6182','6183','619',  // Transports
+    '621','622','623','624','625','626','627','628','629',  // Services extérieurs
+    '631','632','633','634','635','636','637','638','639',  // Autres services ext
+    '641','642','643','644','645','646','647','648','649',  // Impôts taxes
+    '651','652','653','654','655','656','657','658','659',  // Autres charges
+    '661','662','663','664','665','666','668','669',  // Charges personnel
+    '671','672','673','674','675','676','677','678','679',  // Frais financiers
+    '681','682','683','684','685','686','687','689',  // Dotations
+    '691','692','693','694','695','697',  // Dotations financières
+    '81','82','83','84','85','86','87','88','89',  // HAO + impôts
+  ]
+  let compRow = 11
+  for (const acct of compChargesAccounts) {
+    const soldeN = getBalanceSolde(balance, [acct])
+    const soldeN1 = balanceN1.length > 0 ? getBalanceSolde(balanceN1, [acct]) : 0
+    // Only inject if there's actual data
+    if (soldeN !== 0 || soldeN1 !== 0) {
+      vals[`COMP_G${compRow}.val`] = Math.abs(soldeN)
+      vals[`COMP_H${compRow}.val`] = Math.abs(soldeN1)
+    }
+    compRow++
+  }
 
   return vals
 }
@@ -467,6 +592,120 @@ export async function exportModeB(
     }
     console.warn(`[Audit] ${bloquants.length} contrôle(s) bloquant(s) — export autorisé (bilan équilibré)`)
   }
+
+  // 3d. Inject enterprise headers into ALL note/sheet headers (rows 3-6)
+  // Most sheets share the same header layout — we inject by pattern instead of CELL_MAP
+  const headerLayouts: Record<string, Record<string, string>> = {
+    // Layout A: Notes with columns A-I/J (most notes 3A onwards)
+    layoutA: { denomination: 'C3', adresse: 'B4', sigle: 'I4', ncc: 'C5', exercice: 'G5', duree: 'I5', ntd: 'C6' },
+    // Layout B: Sheets with different sigle position (H4)
+    layoutB: { denomination: 'C3', adresse: 'B4', sigle: 'H4', ncc: 'C5', exercice: 'F5', duree: 'H5', ntd: 'C6' },
+    // Layout C: BILAN/RESULTAT/TFT — already handled via CELL_MAP, skip
+  }
+  // Map each sheet to its layout
+  const sheetHeaderMap: Record<string, string> = {
+    // Notes with layout A (I4 sigle)
+    'NOTE 1': 'layoutA', 'NOTE 3A': 'layoutA', 'NOTE 3C': 'layoutA', 'NOTE 3C BIS': 'layoutA',
+    'NOTE 3D': 'layoutA', 'NOTE 3E': 'layoutA', 'NOTE 4': 'layoutA', 'NOTE 5': 'layoutA',
+    'NOTE 6': 'layoutA', 'NOTE 7': 'layoutA', 'NOTE 8': 'layoutA', 'NOTE 8A': 'layoutA',
+    'NOTE 9': 'layoutA', 'NOTE 10': 'layoutA', 'NOTE 11': 'layoutA', 'NOTE 12': 'layoutA',
+    'NOTE 13': 'layoutA', 'NOTE 14': 'layoutA', 'NOTE 15A': 'layoutA', 'NOTE 15B': 'layoutA',
+    'NOTE 16A': 'layoutA', 'NOTE 16B': 'layoutA', 'NOTE 16B BIS': 'layoutA',
+    'NOTE 16C': 'layoutA', 'NOTE 17': 'layoutA', 'NOTE 18': 'layoutA', 'NOTE 19': 'layoutA',
+    'NOTE 20': 'layoutB', 'NOTE 21': 'layoutB', 'NOTE 22': 'layoutB', 'NOTE 23': 'layoutB',
+    'NOTE 24': 'layoutB', 'NOTE 25': 'layoutB', 'NOTE 26': 'layoutB',
+    'NOTE 27A': 'layoutB', 'NOTE 27B': 'layoutB', 'NOTE 28': 'layoutB', 'NOTE 29': 'layoutB',
+    'NOTE 30': 'layoutB', 'NOTE 31': 'layoutB', 'NOTE 32': 'layoutB', 'NOTE 33': 'layoutB',
+    'NOTE 34': 'layoutA', 'NOTE 35': 'layoutA',
+    'NOTE 37': 'layoutA', 'NOTE 38': 'layoutA', 'NOTE 39': 'layoutA',
+    'NOTES DGI - INS': 'layoutA', 'FICHE R4': 'layoutA',
+  }
+  const entData: Record<string, string | number> = {
+    denomination: entreprise.denomination || '',
+    adresse: entreprise.adresse || '',
+    sigle: entreprise.sigle || '',
+    ncc: entreprise.ncc || '',
+    exercice: entreprise.exercice_clos || '',
+    duree: entreprise.duree_mois || 12,
+    ntd: entreprise.ntd || '',
+  }
+  let headerCount = 0
+  for (const [sheetName, layoutKey] of Object.entries(sheetHeaderMap)) {
+    const ws = wb.Sheets[sheetName]
+    if (!ws) continue
+    const layout = headerLayouts[layoutKey]
+    for (const [field, cell] of Object.entries(layout)) {
+      const existing = ws[cell]
+      if (existing?.f) continue  // Don't overwrite formulas
+      const val = entData[field]
+      if (val === undefined || val === null || val === '') continue
+      ws[cell] = { t: typeof val === 'number' ? 'n' : 's', v: val }
+      // Extend range
+      const cr = XLSX.utils.decode_cell(cell)
+      const rng = XLSX.utils.decode_range(ws['!ref'] || 'A1')
+      if (cr.r > rng.e.r) rng.e.r = cr.r
+      if (cr.c > rng.e.c) rng.e.c = cr.c
+      ws['!ref'] = XLSX.utils.encode_range(rng)
+      headerCount++
+    }
+  }
+
+  // 3e. Inject COUVERTURE sheet (onglet 1)
+  const wsCouv = wb.Sheets['COUVERTURE']
+  if (wsCouv) {
+    const couvData: [string, string | number][] = [
+      ['G13', entreprise.centre_depot || ''],
+      ['G38', entreprise.denomination || ''],
+      ['G41', entreprise.sigle || ''],
+      ['G43', entreprise.adresse || ''],
+      ['H45', entreprise.ncc || ''],
+      ['H46', entreprise.ntd || ''],
+    ]
+    for (const [cell, val] of couvData) {
+      if (!val) continue
+      wsCouv[cell] = { t: typeof val === 'number' ? 'n' : 's', v: val }
+      headerCount++
+    }
+  }
+
+  // 3f. Inject GARDE sheet (onglet 2)
+  const wsGarde = wb.Sheets['GARDE']
+  if (wsGarde) {
+    const gardeData: [string, string | number][] = [
+      ['D9', entreprise.centre_depot || ''],
+      ['D22', entreprise.denomination || ''],
+      ['C26', entreprise.sigle || ''],
+      ['C28', entreprise.adresse || ''],
+      ['D30', entreprise.ncc || ''],
+      ['D31', entreprise.ntd || ''],
+    ]
+    for (const [cell, val] of gardeData) {
+      if (!val) continue
+      wsGarde[cell] = { t: typeof val === 'number' ? 'n' : 's', v: val }
+      headerCount++
+    }
+  }
+
+  // 3g. Inject NOTE36 (TABLE DES CODES) sheet (onglet 4)
+  const wsN36 = wb.Sheets['NOTE36 (TABLE DES CODES)']
+  if (wsN36) {
+    const n36Data: [string, string | number][] = [
+      ['C3', entreprise.denomination || ''],
+      ['B4', entreprise.adresse || ''],
+      ['I4', entreprise.sigle || ''],
+      ['C5', entreprise.ncc || ''],
+      ['G5', entreprise.exercice_clos || ''],
+      ['I5', entreprise.duree_mois || 12],
+      ['C6', entreprise.ntd || ''],
+    ]
+    for (const [cell, val] of n36Data) {
+      if (!val) continue
+      wsN36[cell] = { t: typeof val === 'number' ? 'n' : 's', v: val }
+      headerCount++
+    }
+  }
+
+  console.log(`[Mode B] ${headerCount} en-têtes entreprise injectés`)
 
   // 4. Inject cell by cell
   const log: InjectionLog[] = []
