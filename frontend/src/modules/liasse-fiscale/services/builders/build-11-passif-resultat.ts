@@ -207,8 +207,8 @@ function buildPassif(
   addLabelMerge(rows.length - 1)
 
   // ── Row 37: ECART DE CONVERSION-PASSIF (DV) ──
-  const DV_net = pv(['479'])
-  const DV_netN1 = pvN1(['479'])
+  const DV_net = pv(BILAN_PASSIF.DV.comptes)
+  const DV_netN1 = pvN1(BILAN_PASSIF.DV.comptes)
   rows.push(makeRow('DV', 'Ecart de conversion-Passif', 12, DV_net, DV_netN1))
   addLabelMerge(rows.length - 1)
 
@@ -532,20 +532,20 @@ function buildResultat(
   addLabelMerge(rows.length - 1)
 
   // ── TO: Autres produits HAO ──
-  const TO_n = getProduits(bal, ['84','86','88'])
-  const TO_n1 = getProduits(balN1, ['84','86','88'])
+  const TO_n = getProduits(bal, COMPTE_RESULTAT_MAPPING.TO.comptes)
+  const TO_n1 = getProduits(balN1, COMPTE_RESULTAT_MAPPING.TO.comptes)
   rows.push(makeDataRow('TO', 'Autres produits HAO', null, '+', 30, TO_n, TO_n1))
   addLabelMerge(rows.length - 1)
 
   // ── RO: Valeurs comptables des cessions d'immobilisations ──
-  const RO_n = -getCharges(bal, ['81'])
-  const RO_n1 = -getCharges(balN1, ['81'])
+  const RO_n = -getCharges(bal, COMPTE_RESULTAT_MAPPING.RO.comptes)
+  const RO_n1 = -getCharges(balN1, COMPTE_RESULTAT_MAPPING.RO.comptes)
   rows.push(makeDataRow('RO', 'Valeurs comptables des cessions d\'immobilisations', null, '-', 3, RO_n, RO_n1))
   addLabelMerge(rows.length - 1)
 
   // ── RP: Autres charges HAO ──
-  const RP_n = -getCharges(bal, ['83','85'])
-  const RP_n1 = -getCharges(balN1, ['83','85'])
+  const RP_n = -getCharges(bal, COMPTE_RESULTAT_MAPPING.RP.comptes)
+  const RP_n1 = -getCharges(balN1, COMPTE_RESULTAT_MAPPING.RP.comptes)
   rows.push(makeDataRow('RP', 'Autres charges HAO', null, '-', 30, RP_n, RP_n1))
   addLabelMerge(rows.length - 1)
 
@@ -556,14 +556,14 @@ function buildResultat(
   addLabelMerge(rows.length - 1)
 
   // ── RQ: Participation des travailleurs ──
-  const RQ_n = -getCharges(bal, ['870'])
-  const RQ_n1 = -getCharges(balN1, ['870'])
+  const RQ_n = -getCharges(bal, COMPTE_RESULTAT_MAPPING.RQ.comptes)
+  const RQ_n1 = -getCharges(balN1, COMPTE_RESULTAT_MAPPING.RQ.comptes)
   rows.push(makeDataRow('RQ', 'Participation des travailleurs', null, '-', 30, RQ_n, RQ_n1))
   addLabelMerge(rows.length - 1)
 
   // ── RS: Impôts sur le résultat ──
-  const RS_n = -getCharges(bal, ['89'])
-  const RS_n1 = -getCharges(balN1, ['89'])
+  const RS_n = -getCharges(bal, COMPTE_RESULTAT_MAPPING.RS.comptes)
+  const RS_n1 = -getCharges(balN1, COMPTE_RESULTAT_MAPPING.RS.comptes)
   rows.push(makeDataRow('RS', 'Impôts sur le résultat', null, '-', null, RS_n, RS_n1))
   addLabelMerge(rows.length - 1)
 
