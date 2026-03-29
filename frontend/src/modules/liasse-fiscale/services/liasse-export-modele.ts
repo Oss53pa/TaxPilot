@@ -705,7 +705,155 @@ export async function exportModeB(
     }
   }
 
-  console.log(`[Mode B] ${headerCount} en-têtes entreprise injectés`)
+  // 3h. Inject FICHE R1 (onglet 6) — identification entreprise
+  const wsR1 = wb.Sheets['FICHE R1']
+  if (wsR1) {
+    const r1Data: [string, string | number][] = [
+      ['D5', entreprise.denomination || ''],
+      ['D7', entreprise.sigle || ''],
+      ['D8', entreprise.adresse || ''],
+      ['D10', entreprise.ncc || ''],
+      ['D11', entreprise.ntd || ''],
+      ['L5', entreprise.exercice_clos || ''],
+      ['D13', entreprise.forme_juridique || ''],
+      ['D15', entreprise.branche_activite || ''],
+      ['L9', entreprise.code_pays || ''],
+      ['D17', entreprise.capital_social || 0],
+      ['D19', entreprise.nom_dirigeant || ''],
+      ['D21', entreprise.fonction_dirigeant || ''],
+      ['D27', entreprise.effectif_permanent || 0],
+      ['D28', entreprise.effectif_temporaire || 0],
+      ['D29', entreprise.masse_salariale || 0],
+    ]
+    for (const [cell, val] of r1Data) {
+      if (!val && val !== 0) continue
+      const existing = wsR1[cell]
+      if (existing?.f) continue
+      wsR1[cell] = { t: typeof val === 'number' ? 'n' : 's', v: val }
+      headerCount++
+    }
+  }
+
+  // 3i. Dynamic injection for detailed notes (NOTE 4-9, 11-13, 15A-35)
+  // These notes have a pattern: column E or F = Année N, next column = Année N-1
+  // Values are balance-derived and mapped by account prefix
+  // We inject directly where we find matching account patterns
+  const noteDetailMappings: { sheet: string; rows: { row: number; comptes: string[]; colN: string; colN1: string; type: 'actif' | 'passif' | 'credit' | 'debit' | 'signed' }[] }[] = [
+    // NOTE 4: Immobilisations financières (onglet 23)
+    { sheet: 'NOTE 4', rows: [
+      { row: 9, comptes: ['261'], colN: 'E', colN1: 'F', type: 'actif' },
+      { row: 10, comptes: ['262', '263', '264', '265', '266'], colN: 'E', colN1: 'F', type: 'actif' },
+      { row: 11, comptes: ['271', '272'], colN: 'E', colN1: 'F', type: 'actif' },
+      { row: 12, comptes: ['273', '274'], colN: 'E', colN1: 'F', type: 'actif' },
+      { row: 13, comptes: ['275', '276'], colN: 'E', colN1: 'F', type: 'actif' },
+      { row: 14, comptes: ['277'], colN: 'E', colN1: 'F', type: 'actif' },
+    ]},
+    // NOTE 5: Actif circulant HAO (onglet 24)
+    { sheet: 'NOTE 5', rows: [
+      { row: 9, comptes: ['485'], colN: 'F', colN1: 'G', type: 'actif' },
+      { row: 10, comptes: ['486'], colN: 'F', colN1: 'G', type: 'actif' },
+      { row: 11, comptes: ['487'], colN: 'F', colN1: 'G', type: 'actif' },
+      { row: 12, comptes: ['488'], colN: 'F', colN1: 'G', type: 'actif' },
+    ]},
+    // NOTE 6: Stocks (onglet 25)
+    { sheet: 'NOTE 6', rows: [
+      { row: 9, comptes: ['31'], colN: 'F', colN1: 'G', type: 'actif' },
+      { row: 10, comptes: ['32'], colN: 'F', colN1: 'G', type: 'actif' },
+      { row: 11, comptes: ['33'], colN: 'F', colN1: 'G', type: 'actif' },
+      { row: 12, comptes: ['34'], colN: 'F', colN1: 'G', type: 'actif' },
+      { row: 13, comptes: ['35'], colN: 'F', colN1: 'G', type: 'actif' },
+      { row: 14, comptes: ['36'], colN: 'F', colN1: 'G', type: 'actif' },
+      { row: 15, comptes: ['37'], colN: 'F', colN1: 'G', type: 'actif' },
+      { row: 16, comptes: ['38'], colN: 'F', colN1: 'G', type: 'actif' },
+    ]},
+    // NOTE 7: Clients (onglet 26)
+    { sheet: 'NOTE 7', rows: [
+      { row: 9, comptes: ['411', '412', '413', '414', '415', '416'], colN: 'E', colN1: 'F', type: 'actif' },
+      { row: 10, comptes: ['415'], colN: 'E', colN1: 'F', type: 'actif' },
+      { row: 15, comptes: ['416'], colN: 'E', colN1: 'F', type: 'actif' },
+      { row: 16, comptes: ['418'], colN: 'E', colN1: 'F', type: 'actif' },
+      { row: 18, comptes: ['491'], colN: 'E', colN1: 'F', type: 'passif' },
+    ]},
+    // NOTE 8: Autres créances (onglet 27)
+    { sheet: 'NOTE 8', rows: [
+      { row: 9, comptes: ['421', '422', '423'], colN: 'E', colN1: 'F', type: 'actif' },
+      { row: 10, comptes: ['431', '432', '433'], colN: 'E', colN1: 'F', type: 'actif' },
+      { row: 11, comptes: ['441', '442', '443', '444', '445', '446', '447', '448', '449'], colN: 'E', colN1: 'F', type: 'actif' },
+      { row: 12, comptes: ['45'], colN: 'E', colN1: 'F', type: 'actif' },
+      { row: 13, comptes: ['46'], colN: 'E', colN1: 'F', type: 'actif' },
+      { row: 15, comptes: ['47'], colN: 'E', colN1: 'F', type: 'actif' },
+    ]},
+    // NOTE 9: Subventions et provisions réglementées (onglet 31)
+    { sheet: 'NOTE 9', rows: [
+      { row: 9, comptes: ['14'], colN: 'F', colN1: 'G', type: 'passif' },
+      { row: 14, comptes: ['151'], colN: 'F', colN1: 'G', type: 'passif' },
+      { row: 15, comptes: ['152'], colN: 'F', colN1: 'G', type: 'passif' },
+      { row: 16, comptes: ['153', '154', '155', '156', '157', '158'], colN: 'F', colN1: 'G', type: 'passif' },
+    ]},
+    // NOTE 11: Dettes passif circulant (onglet 33)
+    { sheet: 'NOTE 11', rows: [
+      { row: 9, comptes: ['401', '402', '403', '404', '405', '408'], colN: 'F', colN1: 'G', type: 'passif' },
+      { row: 13, comptes: ['421', '422', '423', '424', '425', '426', '427', '428'], colN: 'F', colN1: 'G', type: 'passif' },
+      { row: 14, comptes: ['431', '432', '433'], colN: 'F', colN1: 'G', type: 'passif' },
+      { row: 15, comptes: ['441', '442', '443', '444', '445', '446', '447', '448', '449'], colN: 'F', colN1: 'G', type: 'passif' },
+      { row: 17, comptes: ['46'], colN: 'F', colN1: 'G', type: 'passif' },
+      { row: 18, comptes: ['47'], colN: 'F', colN1: 'G', type: 'passif' },
+    ]},
+    // NOTE 13: Production et CA (onglet 35) — uses credit side
+    { sheet: 'NOTE 13', rows: [
+      { row: 9, comptes: ['701'], colN: 'F', colN1: 'G', type: 'credit' },
+      { row: 10, comptes: ['702', '703', '704'], colN: 'F', colN1: 'G', type: 'credit' },
+      { row: 11, comptes: ['705', '706', '707'], colN: 'F', colN1: 'G', type: 'credit' },
+      { row: 12, comptes: ['708'], colN: 'F', colN1: 'G', type: 'credit' },
+    ]},
+  ]
+
+  let noteDetailCount = 0
+  for (const noteMap of noteDetailMappings) {
+    const ws = wb.Sheets[noteMap.sheet]
+    if (!ws) continue
+    for (const row of noteMap.rows) {
+      const cellN = `${row.colN}${row.row}`
+      const cellN1 = `${row.colN1}${row.row}`
+      // Skip if formula exists
+      if (ws[cellN]?.f || ws[cellN1]?.f) continue
+      let valN: number, valN1: number
+      switch (row.type) {
+        case 'actif':
+          valN = getActifBrut(balance, row.comptes)
+          valN1 = balanceN1.length > 0 ? getActifBrut(balanceN1, row.comptes) : 0
+          break
+        case 'passif':
+          valN = getPassif(balance, row.comptes)
+          valN1 = balanceN1.length > 0 ? getPassif(balanceN1, row.comptes) : 0
+          break
+        case 'credit':
+          valN = -getBalanceSolde(balance, row.comptes)
+          valN1 = balanceN1.length > 0 ? -getBalanceSolde(balanceN1, row.comptes) : 0
+          break
+        case 'debit':
+          valN = getBalanceSolde(balance, row.comptes)
+          valN1 = balanceN1.length > 0 ? getBalanceSolde(balanceN1, row.comptes) : 0
+          break
+        default:
+          valN = -getBalanceSolde(balance, row.comptes)
+          valN1 = balanceN1.length > 0 ? -getBalanceSolde(balanceN1, row.comptes) : 0
+      }
+      ws[cellN] = { t: 'n', v: valN, z: '#,##0' }
+      ws[cellN1] = { t: 'n', v: valN1, z: '#,##0' }
+      // Extend range
+      for (const c of [cellN, cellN1]) {
+        const cr = XLSX.utils.decode_cell(c)
+        const rng = XLSX.utils.decode_range(ws['!ref'] || 'A1')
+        if (cr.r > rng.e.r) rng.e.r = cr.r
+        if (cr.c > rng.e.c) rng.e.c = cr.c
+        ws['!ref'] = XLSX.utils.encode_range(rng)
+      }
+      noteDetailCount += 2
+    }
+  }
+
+  console.log(`[Mode B] ${headerCount} en-têtes entreprise, ${noteDetailCount} cellules notes détaillées injectés`)
 
   // 4. Inject cell by cell
   const log: InjectionLog[] = []
