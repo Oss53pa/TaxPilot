@@ -83,7 +83,7 @@ const Note16BBis: React.FC<PageProps> = ({ entreprise }) => {
   }
 
   return (
-    <Box>
+    <Box sx={{ fontFamily: '"Courier New", Courier, monospace' }}>
       <LiasseHeader entreprise={entreprise} noteLabel="NOTE 16B BIS" pageNumber="37" />
 
       <Typography sx={{ fontWeight: 700, fontSize: 12, mb: 1.5, borderTop: '1px solid #000', pt: 0.75 }}>

@@ -105,7 +105,7 @@ const Commentaire: React.FC<PageProps> = ({ entreprise }) => {
   }
 
   return (
-    <Box>
+    <Box sx={{ fontFamily: '"Courier New", Courier, monospace' }}>
       <LiasseHeader entreprise={entreprise} noteLabel="COMMENTAIRES" pageNumber="82" />
       <LiasseTable columns={columns} rows={mergedRows} title="Table des commentaires par note" compact onCellChange={handleCellChange} />
     </Box>

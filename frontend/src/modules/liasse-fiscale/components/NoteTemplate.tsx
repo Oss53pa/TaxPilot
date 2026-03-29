@@ -48,7 +48,7 @@ const NoteTemplate: React.FC<NoteTemplateProps> = ({
   }, [storageKey])
 
   return (
-    <Box>
+    <Box sx={{ fontFamily: '"Courier New", Courier, monospace' }}>
       <LiasseHeader entreprise={entreprise} noteLabel={noteLabel} pageNumber={pageNumber} />
 
       {/* Note title — like System A fullTitle style */}

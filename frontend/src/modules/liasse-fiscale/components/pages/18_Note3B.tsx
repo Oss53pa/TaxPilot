@@ -44,7 +44,7 @@ const Note3B: React.FC<PageProps> = ({ entreprise }) => {
   ]
 
   return (
-    <Box>
+    <Box sx={{ fontFamily: '"Courier New", Courier, monospace' }}>
       <LiasseHeader entreprise={entreprise} noteLabel="NOTE 3B" pageNumber="14" />
 
       {/* Note title */}

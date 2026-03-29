@@ -445,6 +445,55 @@ function computeAllValues(
   n3cLine(['2841', '2842', '2843', '2844', '2941', '2942', '2943', '2944'], 'N3C_19')  // Amort matériel
   n3cLine(['2845', '2945'], 'N3C_20')  // Amort transport
 
+  // NOTE 3C BIS: Dépréciations — mouvements (onglet 20)
+  // Same pattern as NOTE 3C but for depreciation accounts (29x only, not 28x amort)
+  const n3cbLine = (comptes: string[], prefix: string) => {
+    const ouv = balanceN1.length > 0 ? getAmortProv(balanceN1, comptes) : 0
+    const clo = getAmortProv(balance, comptes)
+    vals[`${prefix}_D.val`] = ouv                      // Dépréciations ouverture
+    vals[`${prefix}_F.val`] = Math.max(0, clo - ouv)   // Dotations (augmentations)
+    vals[`${prefix}_H.val`] = Math.max(0, ouv - clo)   // Reprises (diminutions)
+  }
+  n3cbLine(['2911', '2912'], 'N3CB_11')  // Dépréc frais développement
+  n3cbLine(['2913', '2914', '2915'], 'N3CB_12')  // Dépréc brevets
+  n3cbLine(['2916'], 'N3CB_13')  // Dépréc fonds commercial
+  n3cbLine(['2917', '2918', '2919'], 'N3CB_14')  // Dépréc autres immo incorp
+  n3cbLine(['292'], 'N3CB_16')  // Dépréc terrains
+  n3cbLine(['2931', '2932', '2933', '2934'], 'N3CB_18')  // Dépréc bâtiments
+  n3cbLine(['2935', '2937', '2938'], 'N3CB_20')  // Dépréc aménagements
+  n3cbLine(['2941', '2942', '2943', '2944'], 'N3CB_21')  // Dépréc matériel
+  n3cbLine(['2945'], 'N3CB_22')  // Dépréc transport
+
+  // NOTE 28: Dotations & charges pour provisions et dépréciations (onglet 55)
+  // Movement table: E=ouverture, F=dot exploitation, G=dot financières, H=dot HAO,
+  //                 I=reprises exploitation, J=reprises financières, K=reprises HAO
+  // Row 12: Provisions financières risques et charges (19x)
+  const n28_prov_ouv = balanceN1.length > 0 ? getPassif(balanceN1, ['19']) : 0
+  const n28_prov_clo = getPassif(balance, ['19'])
+  vals['N28_E12.val'] = n28_prov_ouv
+  // Dotations financières pour provisions = augmentation
+  vals['N28_G12.val'] = Math.max(0, n28_prov_clo - n28_prov_ouv)
+  // Reprises financières = diminution
+  vals['N28_J12.val'] = Math.max(0, n28_prov_ouv - n28_prov_clo)
+  // Row 17: Dépréciations comptes clients (491)
+  const n28_cli_ouv = balanceN1.length > 0 ? getAmortProv(balanceN1, ['491']) : 0
+  const n28_cli_clo = getAmortProv(balance, ['491'])
+  vals['N28_E17.val'] = n28_cli_ouv
+  vals['N28_F17.val'] = Math.max(0, n28_cli_clo - n28_cli_ouv)  // Dot exploitation
+  vals['N28_I17.val'] = Math.max(0, n28_cli_ouv - n28_cli_clo)  // Reprise exploitation
+  // Row 13: Dépréciations des immobilisations (29x)
+  const n28_immo_ouv = balanceN1.length > 0 ? getAmortProv(balanceN1, ['29']) : 0
+  const n28_immo_clo = getAmortProv(balance, ['29'])
+  vals['N28_E13.val'] = n28_immo_ouv
+  vals['N28_F13.val'] = Math.max(0, n28_immo_clo - n28_immo_ouv)
+  vals['N28_I13.val'] = Math.max(0, n28_immo_ouv - n28_immo_clo)
+  // Row 15: Dépréciations stocks (39x)
+  const n28_stk_ouv = balanceN1.length > 0 ? getAmortProv(balanceN1, ['39']) : 0
+  const n28_stk_clo = getAmortProv(balance, ['39'])
+  vals['N28_E15.val'] = n28_stk_ouv
+  vals['N28_F15.val'] = Math.max(0, n28_stk_clo - n28_stk_ouv)
+  vals['N28_I15.val'] = Math.max(0, n28_stk_ouv - n28_stk_clo)
+
   // NOTE 10: Emprunts et dettes financières détail (onglet 32)
   vals['N10_F9.val'] = getPassif(balance, ['1611'])  // Emprunts obligataires
   vals['N10_G9.val'] = balanceN1.length > 0 ? getPassif(balanceN1, ['1611']) : 0
@@ -1113,7 +1162,50 @@ export async function exportModeB(
     }
   }
 
-  console.log(`[Mode B] ${headerCount} en-têtes entreprise, ${noteDetailCount} cellules notes détaillées injectés`)
+  // 3k. Movement table injection — NOTE 3C BIS (dépréciations) and NOTE 28 (provisions)
+  const movementMappings: { sheet: string; entries: { row: number; cells: Record<string, string> }[] }[] = [
+    // NOTE 3C BIS: Dépréciations movement (onglet 20) — cols D(ouv), F(dot), H(reprises)
+    { sheet: 'NOTE 3C BIS', entries: [
+      { row: 11, cells: { D: 'N3CB_11_D.val', F: 'N3CB_11_F.val', H: 'N3CB_11_H.val' } },
+      { row: 12, cells: { D: 'N3CB_12_D.val', F: 'N3CB_12_F.val', H: 'N3CB_12_H.val' } },
+      { row: 13, cells: { D: 'N3CB_13_D.val', F: 'N3CB_13_F.val', H: 'N3CB_13_H.val' } },
+      { row: 14, cells: { D: 'N3CB_14_D.val', F: 'N3CB_14_F.val', H: 'N3CB_14_H.val' } },
+      { row: 16, cells: { D: 'N3CB_16_D.val', F: 'N3CB_16_F.val', H: 'N3CB_16_H.val' } },
+      { row: 18, cells: { D: 'N3CB_18_D.val', F: 'N3CB_18_F.val', H: 'N3CB_18_H.val' } },
+      { row: 20, cells: { D: 'N3CB_20_D.val', F: 'N3CB_20_F.val', H: 'N3CB_20_H.val' } },
+      { row: 21, cells: { D: 'N3CB_21_D.val', F: 'N3CB_21_F.val', H: 'N3CB_21_H.val' } },
+      { row: 22, cells: { D: 'N3CB_22_D.val', F: 'N3CB_22_F.val', H: 'N3CB_22_H.val' } },
+    ]},
+    // NOTE 28: Provisions movement (onglet 55) — cols E(ouv), F(dot expl), G(dot fin), I(rep expl), J(rep fin)
+    { sheet: 'NOTE 28', entries: [
+      { row: 12, cells: { E: 'N28_E12.val', G: 'N28_G12.val', J: 'N28_J12.val' } },  // Provisions financières
+      { row: 13, cells: { E: 'N28_E13.val', F: 'N28_F13.val', I: 'N28_I13.val' } },  // Dépréc immobilisations
+      { row: 15, cells: { E: 'N28_E15.val', F: 'N28_F15.val', I: 'N28_I15.val' } },  // Dépréc stocks
+      { row: 17, cells: { E: 'N28_E17.val', F: 'N28_F17.val', I: 'N28_I17.val' } },  // Dépréc clients
+    ]},
+  ]
+  let movementCount = 0
+  for (const mvt of movementMappings) {
+    const ws = wb.Sheets[mvt.sheet]
+    if (!ws) continue
+    for (const entry of mvt.entries) {
+      for (const [col, valKey] of Object.entries(entry.cells)) {
+        const cellRef = `${col}${entry.row}`
+        if (ws[cellRef]?.f) continue  // Don't overwrite formulas
+        const val = vals[valKey]
+        if (val === undefined || val === null) continue
+        ws[cellRef] = { t: 'n', v: Number(val), z: '#,##0' }
+        const cr = XLSX.utils.decode_cell(cellRef)
+        const rng = XLSX.utils.decode_range(ws['!ref'] || 'A1')
+        if (cr.r > rng.e.r) rng.e.r = cr.r
+        if (cr.c > rng.e.c) rng.e.c = cr.c
+        ws['!ref'] = XLSX.utils.encode_range(rng)
+        movementCount++
+      }
+    }
+  }
+
+  console.log(`[Mode B] ${headerCount} en-têtes, ${noteDetailCount} notes détaillées, ${movementCount} mouvements injectés`)
 
   // 4. Inject cell by cell
   const log: InjectionLog[] = []
