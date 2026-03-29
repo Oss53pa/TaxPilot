@@ -1,13 +1,14 @@
-import React from 'react'
+import React, { useCallback, useState, useRef, useEffect } from 'react'
 import {
   Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Typography, useTheme,
+  Typography, useTheme, InputBase,
 } from '@mui/material'
 import { alpha } from '@mui/material/styles'
 import NoteTemplate from '../NoteTemplate'
 import type { PageProps } from '../../types'
+import { useLiasseManualData } from '../../hooks/useLiasseManualData'
 
-const FS = 9 // base font size for this wide table
+const FS = 9
 
 const cellSx = {
   fontSize: FS,
@@ -26,59 +27,122 @@ const headerCellSx = {
   bgcolor: 'grey.100',
 } as const
 
-interface DataRow {
+// Column keys for the 14 value columns
+const VAL_COLS = [
+  'eff_nat_m', 'eff_nat_f', 'eff_aut_m', 'eff_aut_f', 'eff_hrs_m', 'eff_hrs_f', 'eff_total',
+  'sal_nat_m', 'sal_nat_f', 'sal_aut_m', 'sal_aut_f', 'sal_hrs_m', 'sal_hrs_f', 'sal_total',
+] as const
+
+interface RowDef {
+  id: string
   ref: string
   label: string
   isTotal?: boolean
   isSectionHeader?: boolean
   bold?: boolean
-  values: (number | null)[]
+  totalOf?: string[] // row ids to sum for totals
+}
+
+const ROW_DEFS: RowDef[] = [
+  { id: 'sh1', ref: '', label: 'PERSONNEL DE L\'ENTITE', isSectionHeader: true },
+  { id: 'r1', ref: 'YA', label: '1. Cadres superieurs' },
+  { id: 'r2', ref: 'YB', label: '2. Techniciens superieurs et cadres moyens' },
+  { id: 'r3', ref: 'YC', label: '3. Techniciens, agents de maitrise et ouvriers qualifies' },
+  { id: 'r4', ref: 'YD', label: '4. Employes, manoeuvres, ouvriers, et apprentis' },
+  { id: 'st1', ref: 'YE', label: 'TOTAL (1) (A)', isTotal: true, bold: true, totalOf: ['r1', 'r2', 'r3', 'r4'] },
+  { id: 'sh2', ref: '', label: 'PERSONNEL EXTERIEUR', isSectionHeader: true },
+  { id: 'r5', ref: 'YF', label: '1. Personnel mis a la disposition de l\'entite par d\'autres entites' },
+  { id: 'r6', ref: 'YG', label: '2. Personnel paye par l\'entite mais affecte a d\'autres entites' },
+  { id: 'st2', ref: 'YH', label: 'TOTAL (2) (B)', isTotal: true, bold: true, totalOf: ['r5', 'r6'] },
+  { id: 'total', ref: 'YI', label: 'TOTAL GENERAL (A)+(B) = (1)+(2)', isTotal: true, bold: true, totalOf: ['r1', 'r2', 'r3', 'r4', 'r5', 'r6'] },
+]
+
+const emptyCells = () => {
+  const cells: Record<string, string | number | null> = { label: '' }
+  for (const col of VAL_COLS) cells[col] = null
+  return cells
+}
+
+const InlineEdit: React.FC<{
+  value: number | null
+  onSave: (v: number | null) => void
+}> = ({ value, onSave }) => {
+  const [editing, setEditing] = useState(false)
+  const [text, setText] = useState('')
+  const ref = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (editing) ref.current?.focus()
+  }, [editing])
+
+  const save = useCallback(() => {
+    setEditing(false)
+    const trimmed = text.trim().replace(/\s/g, '').replace(',', '.')
+    onSave(trimmed === '' ? null : isNaN(Number(trimmed)) ? null : Number(trimmed))
+  }, [text, onSave])
+
+  if (editing) {
+    return (
+      <InputBase
+        inputRef={ref}
+        value={text}
+        onChange={e => setText(e.target.value)}
+        onBlur={save}
+        onKeyDown={e => { if (e.key === 'Enter') save(); if (e.key === 'Escape') setEditing(false) }}
+        sx={{ fontSize: FS, width: '100%', '& input': { textAlign: 'right', py: 0, px: 0.5 } }}
+      />
+    )
+  }
+
+  const fmt = value != null && value !== 0 ? Math.round(value).toLocaleString('fr-FR') : ''
+  return (
+    <Box
+      onClick={() => { setText(value != null ? String(value) : ''); setEditing(true) }}
+      sx={{ cursor: 'text', minHeight: 16, textAlign: 'right', '&:hover': { bgcolor: 'action.hover' } }}
+    >
+      {fmt}
+    </Box>
+  )
 }
 
 const Note27B: React.FC<PageProps> = ({ entreprise, onNoteClick, ...props }) => {
   const theme = useTheme()
 
-  // 18 value columns: EFFECTIFS (Nationaux M, Nationaux F, Autres M, Autres F, Hors M, Hors F, TOTAL)
-  //                    MASSE SALARIALE (Nationaux M, Nationaux F, Autres M, Autres F, Hors M, Hors F, TOTAL)
-  // plus REF column and QUALIFICATIONS label = 2 + 14 = 16 value cols total
-  // Effectifs: Nat M, Nat F, Autres M, Autres F, Hors M, Hors F, TOTAL = 7
-  // Masse:     Nat M, Nat F, Autres M, Autres F, Hors M, Hors F, TOTAL = 7
-  // Total value cols = 14
+  const baseRows = ROW_DEFS.map(d => ({
+    id: d.id,
+    cells: emptyCells(),
+  }))
 
-  const emptyVals = (): (number | null)[] => Array(14).fill(null)
+  const { mergedRows, setCell } = useLiasseManualData('note27b', baseRows)
 
-  const rows: DataRow[] = [
-    // Section: Personnel de l'entite
-    { ref: '', label: 'PERSONNEL DE L\'ENTITE', isSectionHeader: true, values: emptyVals() },
-    { ref: 'YA', label: '1. Cadres superieurs', values: emptyVals() },
-    { ref: 'YB', label: '2. Techniciens superieurs et cadres moyens', values: emptyVals() },
-    { ref: 'YC', label: '3. Techniciens, agents de maitrise et ouvriers qualifies', values: emptyVals() },
-    { ref: 'YD', label: '4. Employes, manoeuvres, ouvriers, et apprentis', values: emptyVals() },
-    { ref: 'YE', label: 'TOTAL (1) (A)', isTotal: true, bold: true, values: emptyVals() },
-    // Section: Personnel exterieur
-    { ref: '', label: 'PERSONNEL EXTERIEUR', isSectionHeader: true, values: emptyVals() },
-    { ref: 'YF', label: '1. Personnel mis a la disposition de l\'entite par d\'autres entites', values: emptyVals() },
-    { ref: 'YG', label: '2. Personnel paye par l\'entite mais affecte a d\'autres entites', values: emptyVals() },
-    { ref: 'YH', label: 'TOTAL (2) (B)', isTotal: true, bold: true, values: emptyVals() },
-    // Grand total
-    { ref: 'YI', label: 'TOTAL GENERAL (A)+(B) = (1)+(2)', isTotal: true, bold: true, values: emptyVals() },
-  ]
-
-  const fmt = (v: number | null): string => {
-    if (v === null || v === undefined || v === 0) return ''
-    return Math.round(v).toLocaleString('fr-FR')
+  // Compute totals
+  const getVal = (rowId: string, col: string): number => {
+    const row = mergedRows.find(r => r.id === rowId)
+    const v = row?.cells[col]
+    return typeof v === 'number' ? v : 0
   }
 
-  const getRowBgColor = (row: DataRow) => {
+  const totalVal = (rowDef: RowDef, col: string): number | null => {
+    if (!rowDef.totalOf) return null
+    const sum = rowDef.totalOf.reduce((acc, id) => acc + getVal(id, col), 0)
+    return sum || null
+  }
+
+  const getRowBgColor = (row: RowDef) => {
     if (row.isSectionHeader) return alpha(theme.palette.primary.main, 0.1)
     if (row.isTotal) return '#1a1a1a'
     return 'transparent'
   }
 
-  const getRowTextColor = (row: DataRow) => {
+  const getRowTextColor = (row: RowDef) => {
     if (row.isTotal) return '#fff'
     if (row.isSectionHeader) return theme.palette.primary.dark
     return undefined
+  }
+
+  const fmt = (v: number | null): string => {
+    if (v === null || v === undefined || v === 0) return ''
+    return Math.round(v).toLocaleString('fr-FR')
   }
 
   return (
@@ -94,7 +158,6 @@ const Note27B: React.FC<PageProps> = ({ entreprise, onNoteClick, ...props }) => 
       <TableContainer>
         <Table size="small" sx={{ minWidth: 900 }}>
           <TableHead>
-            {/* Row 1: top-level group headers */}
             <TableRow sx={{ bgcolor: 'grey.200' }}>
               <TableCell rowSpan={3} sx={{ ...headerCellSx, width: '20%', textAlign: 'left' }}>
                 QUALIFICATIONS
@@ -109,47 +172,39 @@ const Note27B: React.FC<PageProps> = ({ entreprise, onNoteClick, ...props }) => 
                 MASSE SALARIALE
               </TableCell>
             </TableRow>
-            {/* Row 2: sub-group headers */}
             <TableRow sx={{ bgcolor: 'grey.100' }}>
-              {/* Effectifs sub-groups */}
               <TableCell colSpan={2} sx={headerCellSx}>Nationaux</TableCell>
               <TableCell colSpan={2} sx={headerCellSx}>Autres Etats Region (3)</TableCell>
               <TableCell colSpan={2} sx={headerCellSx}>Hors Region</TableCell>
               <TableCell rowSpan={2} sx={headerCellSx}>TOTAL</TableCell>
-              {/* Masse salariale sub-groups */}
               <TableCell colSpan={2} sx={headerCellSx}>Nationaux</TableCell>
               <TableCell colSpan={2} sx={headerCellSx}>Autres Etats Region (3)</TableCell>
               <TableCell colSpan={2} sx={headerCellSx}>Hors Region</TableCell>
               <TableCell rowSpan={2} sx={headerCellSx}>TOTAL</TableCell>
             </TableRow>
-            {/* Row 3: M/F sub-columns */}
             <TableRow sx={{ bgcolor: 'grey.100' }}>
-              {/* Effectifs M/F */}
               <TableCell sx={headerCellSx}>M</TableCell>
               <TableCell sx={headerCellSx}>F</TableCell>
               <TableCell sx={headerCellSx}>M</TableCell>
               <TableCell sx={headerCellSx}>F</TableCell>
               <TableCell sx={headerCellSx}>M</TableCell>
               <TableCell sx={headerCellSx}>F</TableCell>
-              {/* TOTAL already rowSpan=2 */}
-              {/* Masse salariale M/F */}
               <TableCell sx={headerCellSx}>M</TableCell>
               <TableCell sx={headerCellSx}>F</TableCell>
               <TableCell sx={headerCellSx}>M</TableCell>
               <TableCell sx={headerCellSx}>F</TableCell>
               <TableCell sx={headerCellSx}>M</TableCell>
               <TableCell sx={headerCellSx}>F</TableCell>
-              {/* TOTAL already rowSpan=2 */}
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map((row, idx) => {
-              if (row.isSectionHeader) {
+            {ROW_DEFS.map((rowDef) => {
+              if (rowDef.isSectionHeader) {
                 return (
                   <TableRow
-                    key={idx}
+                    key={rowDef.id}
                     sx={{
-                      bgcolor: getRowBgColor(row),
+                      bgcolor: getRowBgColor(rowDef),
                       '&:hover': { bgcolor: alpha(theme.palette.primary.main, 0.15) },
                     }}
                   >
@@ -164,23 +219,25 @@ const Note27B: React.FC<PageProps> = ({ entreprise, onNoteClick, ...props }) => 
                         py: 0.75,
                       }}
                     >
-                      {row.label}
+                      {rowDef.label}
                     </TableCell>
                   </TableRow>
                 )
               }
 
+              const isComputed = !!rowDef.totalOf
+
               return (
                 <TableRow
-                  key={idx}
+                  key={rowDef.id}
                   sx={{
-                    bgcolor: getRowBgColor(row),
-                    ...(row.isTotal && {
+                    bgcolor: getRowBgColor(rowDef),
+                    ...(rowDef.isTotal && {
                       borderTop: '2px solid #333',
                       borderBottom: '2px solid #333',
                     }),
                     '&:hover': {
-                      bgcolor: row.isTotal
+                      bgcolor: rowDef.isTotal
                         ? '#2a2a2a'
                         : alpha(theme.palette.action.hover, 0.05),
                     },
@@ -189,35 +246,39 @@ const Note27B: React.FC<PageProps> = ({ entreprise, onNoteClick, ...props }) => 
                   <TableCell
                     sx={{
                       ...cellSx,
-                      fontWeight: row.bold ? 700 : 400,
-                      color: getRowTextColor(row),
+                      fontWeight: rowDef.bold ? 700 : 400,
+                      color: getRowTextColor(rowDef),
                       textAlign: 'left',
                     }}
                   >
-                    {row.label}
+                    {rowDef.label}
                   </TableCell>
                   <TableCell
                     sx={{
                       ...cellSx,
-                      fontWeight: row.bold ? 700 : 400,
-                      color: getRowTextColor(row),
+                      fontWeight: rowDef.bold ? 700 : 400,
+                      color: getRowTextColor(rowDef),
                       textAlign: 'center',
                     }}
                   >
-                    {row.ref}
+                    {rowDef.ref}
                   </TableCell>
-                  {row.values.map((val, vi) => (
+                  {VAL_COLS.map((col) => (
                     <TableCell
-                      key={vi}
+                      key={col}
                       align="right"
                       sx={{
                         ...cellSx,
-                        fontWeight: row.bold ? 700 : 400,
-                        color: getRowTextColor(row),
-                        borderColor: row.isTotal ? '#444' : undefined,
+                        fontWeight: rowDef.bold ? 700 : 400,
+                        color: getRowTextColor(rowDef),
+                        borderColor: rowDef.isTotal ? '#444' : undefined,
+                        p: isComputed ? undefined : 0,
                       }}
                     >
-                      {fmt(val)}
+                      {isComputed
+                        ? fmt(totalVal(rowDef, col))
+                        : <InlineEdit value={getVal(rowDef.id, col) || null} onSave={v => setCell(rowDef.id, col, v)} />
+                      }
                     </TableCell>
                   ))}
                 </TableRow>
@@ -227,7 +288,6 @@ const Note27B: React.FC<PageProps> = ({ entreprise, onNoteClick, ...props }) => 
         </Table>
       </TableContainer>
 
-      {/* Comment note about Zone OHADA */}
       <Box sx={{
         mt: 1.5,
         p: 1.5,

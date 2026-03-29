@@ -458,7 +458,7 @@ function generateNote37(entries: BalanceEntry[]): NoteData {
   const resultatFiscal = resultatComptable + reintegrations - deductions
   const is25 = Math.round(Math.max(0, resultatFiscal) * 0.25)
   const ca = sumCredit(entries, ['70'])
-  const imf = Math.round(ca * 0.01) // IMF 1% du CA (base = comptes 70x uniquement)
+  const imf = Math.max(Math.round(ca * 0.005), 3_000_000) // IMF 0.5% du CA, min 3M FCFA — CGI CI Art. 33
   const impotDu = Math.max(is25, imf)
   return {
     titre: 'Determination impots sur le resultat',

@@ -392,16 +392,18 @@ const BalanceConsultation: React.FC = () => {
                     <TableCell>
                       <Box sx={{ display: 'flex', gap: 0.5 }}>
                         <Tooltip title="Voir détails">
-                          <IconButton 
-                            size="small" 
+                          <IconButton
+                            size="small"
+                            aria-label="Voir détails"
                             onClick={() => handleViewDetails(balance)}
                           >
                             <Visibility fontSize="small" />
                           </IconButton>
                         </Tooltip>
                         <Tooltip title="Modifier">
-                          <IconButton 
+                          <IconButton
                             size="small"
+                            aria-label="Modifier"
                             onClick={() => handleEdit(balance)}
                           >
                             <Edit fontSize="small" />

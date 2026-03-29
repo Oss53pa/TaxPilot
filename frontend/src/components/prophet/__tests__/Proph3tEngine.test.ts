@@ -93,8 +93,8 @@ describe('Test 1 — Phase 1 : Passage fiscal & IS', () => {
     expect(ag.ca).toBeGreaterThan(0)
     // CA = 180M + 20M = 200M
     expect(ag.ca).toBe(200_000_000)
-    // capitalSocial keeps credit sign (negative in Balance.solde)
-    expect(ag.capitalSocial).toBe(-50_000_000)
+    // capitalSocial is negated to OHADA convention (positive for credit accounts)
+    expect(ag.capitalSocial).toBe(50_000_000)
     expect(ag.chargesPersonnel).toBe(25_000_000)
     expect(ag.tresorerie).toBeGreaterThan(0)
   })

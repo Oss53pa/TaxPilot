@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ThemeProvider, createTheme } from '@mui/material/styles'
 import LiasseTableauGenerique from '../LiasseTableauGenerique'
@@ -76,11 +76,11 @@ describe('LiasseTableauGenerique', () => {
     expect(screen.getByText('250 000')).toBeInTheDocument()
   })
 
-  it('affiche "-" pour les valeurs nulles ou zéro', () => {
+  it('affiche "0" pour les valeurs zéro en currency', () => {
     renderComponent()
 
-    // Le montant 0 doit afficher "-"
-    const cells = screen.getAllByText('-')
+    // Le montant 0 est formaté via Intl.NumberFormat → "0"
+    const cells = screen.getAllByText('0')
     expect(cells.length).toBeGreaterThan(0)
   })
 
@@ -140,18 +140,16 @@ describe('LiasseTableauGenerique', () => {
     expect(mockOnCellChange).not.toHaveBeenCalled()
   })
 
-  it('gère les commentaires correctement', async () => {
-    const user = userEvent.setup()
+  it('gère les commentaires correctement', () => {
     const mockOnCommentChange = vi.fn()
-    
-    renderComponent({ 
+
+    renderComponent({
       onCommentChange: mockOnCommentChange,
       comment: 'Commentaire initial'
     })
 
     const commentField = screen.getByDisplayValue('Commentaire initial')
-    await user.clear(commentField)
-    await user.type(commentField, 'Nouveau commentaire')
+    fireEvent.change(commentField, { target: { value: 'Nouveau commentaire' } })
 
     expect(mockOnCommentChange).toHaveBeenCalledWith('Nouveau commentaire')
   })

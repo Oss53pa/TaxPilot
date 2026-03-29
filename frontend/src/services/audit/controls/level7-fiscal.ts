@@ -449,7 +449,7 @@ export function registerLevel7Controls(): void {
     ['FI-005', 'Dons et liberalites', 'Plafond de deductibilite des dons', 'MINEUR', FI005],
     ['FI-006', 'Provisions non deductibles', 'Verifie la deductibilite des provisions', 'MINEUR', FI006],
     ['FI-007', 'IS calcule vs comptabilise', 'Coherence de l\'impot sur les societes', 'MAJEUR', FI007],
-    ['FI-008', 'Minimum forfaitaire (IMF)', 'IS >= 1% du CA', 'MINEUR', FI008],
+    ['FI-008', 'Minimum forfaitaire (IMF)', 'IS >= IMF (taux par pays)', 'MINEUR', FI008],
     ['FI-009', 'TVA a reverser', 'Coherence TVA collectee/deductible/due', 'MINEUR', FI009],
     ['FI-010', 'Charges personnel vs cotisations', 'Coherence salaires/cotisations', 'INFO', FI010],
     ['FI-011', 'Dons excedentaires (658)', 'Plafond 5‰ du CA — CGI Art. 18-5', 'MINEUR', FI011],

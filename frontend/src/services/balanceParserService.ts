@@ -119,12 +119,12 @@ const PATTERNS = {
   libelle:     /libelle|intitule|designation|description|nom.*compte/,
   debit:       /debit(?!\s*e)/,
   credit:      /credit/,
-  soldeDebit:  /solde.*debit|debit.*solde|^sd$/,
-  soldeCredit: /solde.*credit|credit.*solde|^sc$/,
+  soldeDebit:  /solde.*d[eé]bit|d[eé]bit.*solde|\bsd\b|\bsolde\s*d\b/,
+  soldeCredit: /solde.*cr[eé]dit|cr[eé]dit.*solde|\bsc\b|\bsolde\s*c\b/,
 }
 
 /** N-1 markers */
-const N1_MARKER = /n[\s\-._]*1|precedent|anterieur|previous/
+const N1_MARKER = /n[\s\-._]*1|precedent|anterieur|previous|exercice\s*prec|ex[\.\s]*prec|ouverture/
 
 /** Extract a 4-digit year from a header string */
 function extractYear(header: string): number | null {
@@ -201,7 +201,9 @@ export function detectStructure(sheet: ParsedSheet): DetectionResult {
     })
     seen.forEach((indices, type) => {
       if (indices.length < 2) return
-      const [nIdx, n1Idx] = indices
+      // In SYSCOHADA 8-column format, N-1 columns come FIRST, N columns come LAST
+      const n1Idx = indices[0]
+      const nIdx = indices[indices.length - 1]
       if (type === 'soldeDebit')  { mapping.soldeDebit = nIdx; mapping.soldeDebitN1 = n1Idx }
       if (type === 'soldeCredit') { mapping.soldeCredit = nIdx; mapping.soldeCreditN1 = n1Idx }
       if (type === 'debit')       { mapping.debit = nIdx; mapping.debitN1 = n1Idx }
