@@ -2,7 +2,9 @@ import React from 'react'
 import { Box, Typography, Chip } from '@mui/material'
 import LiasseHeader from '../LiasseHeader'
 import type { PageProps, BalanceEntry } from '../../types'
-import { getActifBrut, getAmortProv, getBalanceSolde, fmt } from '../../services/liasse-calculs'
+import { getActifBrut, getAmortProv, getBalanceSolde, getPassif, fmt, detecterAnomaliesActif, detecterAnomaliesPassif } from '../../services/liasse-calculs'
+import type { AnomalieComptable } from '../../services/liasse-calculs'
+import { BILAN_ACTIF, BILAN_PASSIF, ALL_ACTIF_PREFIXES, ALL_PASSIF_PREFIXES } from '@/constants/syscohada-mappings'
 
 interface ActifRowDef {
   ref: string; label: string; comptes: string[]; amort: string[]
@@ -10,69 +12,69 @@ interface ActifRowDef {
 }
 interface PassifRowDef {
   ref: string; label: string; comptes: string[]
-  note?: string; isTotal?: boolean; indent?: number; bold?: boolean
+  note?: string; isTotal?: boolean; indent?: number; bold?: boolean; special?: 'debit' | 'signed'
 }
 
 const ACTIF_ROWS: ActifRowDef[] = [
-  { ref: 'AD', label: 'IMMOBILISATIONS INCORPORELLES', comptes: ['211','212','213','214','215','216','217'], amort: ['2811','2812','2813','2814','2815','2816','2817','2911','2912','2913','2914','2915','2916','2917'], note: '3', bold: true },
-  { ref: 'AE', label: 'Frais de développement et de prospection', comptes: ['211','212'], amort: ['2811','2812','2911','2912'], indent: 1 },
-  { ref: 'AF', label: 'Brevets, licences, logiciels, et droits similaires', comptes: ['213','214','215'], amort: ['2813','2814','2815','2913','2914','2915'], indent: 1 },
-  { ref: 'AG', label: 'Fonds commercial et droit au bail', comptes: ['216'], amort: ['2816','2916'], indent: 1 },
-  { ref: 'AH', label: 'Autres immobilisations incorporelles', comptes: ['217','218','219'], amort: ['2817','2818','2819','2917','2918','2919'], indent: 1 },
+  { ref: 'AD', label: 'IMMOBILISATIONS INCORPORELLES', comptes: [...BILAN_ACTIF.AE.comptes, ...BILAN_ACTIF.AF.comptes, ...BILAN_ACTIF.AG.comptes, ...BILAN_ACTIF.AH.comptes], amort: [...BILAN_ACTIF.AE.amort, ...BILAN_ACTIF.AF.amort, ...BILAN_ACTIF.AG.amort, ...BILAN_ACTIF.AH.amort], note: '3', bold: true },
+  { ref: 'AE', label: 'Frais de développement et de prospection', comptes: [...BILAN_ACTIF.AE.comptes], amort: [...BILAN_ACTIF.AE.amort], indent: 1 },
+  { ref: 'AF', label: 'Brevets, licences, logiciels, et droits similaires', comptes: [...BILAN_ACTIF.AF.comptes], amort: [...BILAN_ACTIF.AF.amort], indent: 1 },
+  { ref: 'AG', label: 'Fonds commercial et droit au bail', comptes: [...BILAN_ACTIF.AG.comptes], amort: [...BILAN_ACTIF.AG.amort], indent: 1 },
+  { ref: 'AH', label: 'Autres immobilisations incorporelles', comptes: [...BILAN_ACTIF.AH.comptes], amort: [...BILAN_ACTIF.AH.amort], indent: 1 },
   { ref: 'AI', label: 'IMMOBILISATIONS CORPORELLES', comptes: ['22','231','232','233','234','235','237','238','241','242','243','244','245'], amort: ['282','2831','2832','2833','2834','2835','2837','2838','2841','2842','2843','2844','2845','292','2931','2932','2933','2934','2935','2937','2938','2941','2942','2943','2944','2945'], note: '3', bold: true },
-  { ref: 'AJ', label: 'Terrains', comptes: ['22'], amort: ['282','292'], indent: 1 },
-  { ref: 'AK', label: 'Bâtiments', comptes: ['231','232','233','234'], amort: ['2831','2832','2833','2834','2931','2932','2933','2934'], indent: 1 },
-  { ref: 'AL', label: 'Aménagements, agencements et installations', comptes: ['235','237','238'], amort: ['2835','2837','2838','2935','2937','2938'], indent: 1 },
-  { ref: 'AM', label: 'Matériel, mobilier et actifs biologiques', comptes: ['241','242','243','244'], amort: ['2841','2842','2843','2844','2941','2942','2943','2944'], indent: 1 },
-  { ref: 'AN', label: 'Matériel de transport', comptes: ['245'], amort: ['2845','2945'], indent: 1 },
-  { ref: 'AP', label: 'AVANCES ET ACOMPTES VERSES SUR IMMOBILISATIONS', comptes: ['251','252'], amort: [], note: '3', bold: true },
+  { ref: 'AJ', label: 'Terrains', comptes: [...BILAN_ACTIF.AJ.comptes], amort: [...BILAN_ACTIF.AJ.amort], indent: 1 },
+  { ref: 'AK', label: 'Bâtiments', comptes: [...BILAN_ACTIF.AK.comptes], amort: [...BILAN_ACTIF.AK.amort], indent: 1 },
+  { ref: 'AL', label: 'Aménagements, agencements et installations', comptes: [...BILAN_ACTIF.AL.comptes], amort: [...BILAN_ACTIF.AL.amort], indent: 1 },
+  { ref: 'AM', label: 'Matériel, mobilier et actifs biologiques', comptes: [...BILAN_ACTIF.AM.comptes], amort: [...BILAN_ACTIF.AM.amort], indent: 1 },
+  { ref: 'AN', label: 'Matériel de transport', comptes: [...BILAN_ACTIF.AN.comptes], amort: [...BILAN_ACTIF.AN.amort], indent: 1 },
+  { ref: 'AP', label: 'AVANCES ET ACOMPTES VERSES SUR IMMOBILISATIONS', comptes: [...BILAN_ACTIF.AP.comptes], amort: [...BILAN_ACTIF.AP.amort], note: '3', bold: true },
   { ref: 'AQ', label: 'IMMOBILISATIONS FINANCIERES', comptes: ['26','271','272','273','274','275','276','277'], amort: ['296','297'], note: '4', bold: true },
-  { ref: 'AR', label: 'Titres de participation', comptes: ['26'], amort: ['296'], indent: 1 },
-  { ref: 'AS', label: 'Autres immobilisations financières', comptes: ['271','272','273','274','275','276','277'], amort: ['297'], indent: 1 },
+  { ref: 'AR', label: 'Titres de participation', comptes: [...BILAN_ACTIF.AR.comptes], amort: [...BILAN_ACTIF.AR.amort], indent: 1 },
+  { ref: 'AS', label: 'Autres immobilisations financières', comptes: [...BILAN_ACTIF.AS.comptes], amort: [...BILAN_ACTIF.AS.amort], indent: 1 },
   { ref: 'AZ', label: 'TOTAL ACTIF IMMOBILISE', comptes: [], amort: [], isTotal: true },
-  { ref: 'BA', label: 'ACTIF CIRCULANT HAO', comptes: ['485','486','487','488'], amort: ['498'], note: '5', bold: true },
-  { ref: 'BB', label: 'STOCKS ET ENCOURS', comptes: ['31','32','33','34','35','36','37','38'], amort: ['391','392','393','394','395','396','397','398'], note: '6', bold: true },
+  { ref: 'BA', label: 'ACTIF CIRCULANT HAO', comptes: [...BILAN_ACTIF.BA.comptes], amort: [...BILAN_ACTIF.BA.amort], note: '5', bold: true },
+  { ref: 'BB', label: 'STOCKS ET ENCOURS', comptes: [...BILAN_ACTIF.BB.comptes], amort: [...BILAN_ACTIF.BB.amort], note: '6', bold: true },
   { ref: 'BG', label: 'CREANCES ET EMPLOIS ASSIMILES', comptes: ['409','411','412','413','414','415','416','418','43','44','45','46','47'], amort: ['490','491','492','493','494','495','496','497'], bold: true },
-  { ref: 'BH', label: 'Fournisseurs avances versées', comptes: ['409'], amort: ['490'], note: '17', indent: 1 },
-  { ref: 'BI', label: 'Clients', comptes: ['411','412','413','414','415','416','418'], amort: ['491'], note: '7', indent: 1 },
-  { ref: 'BJ', label: 'Autres créances', comptes: ['43','44','45','46','47'], amort: ['492','493','494','495','496','497'], note: '8', indent: 1 },
+  { ref: 'BH', label: 'Fournisseurs avances versées', comptes: [...BILAN_ACTIF.BH.comptes], amort: [...BILAN_ACTIF.BH.amort], note: '17', indent: 1 },
+  { ref: 'BI', label: 'Clients', comptes: [...BILAN_ACTIF.BI.comptes], amort: [...BILAN_ACTIF.BI.amort], note: '7', indent: 1 },
+  { ref: 'BJ', label: 'Autres créances', comptes: [...BILAN_ACTIF.BJ.comptes], amort: [...BILAN_ACTIF.BJ.amort], note: '8', indent: 1 },
   { ref: 'BK', label: 'TOTAL ACTIF CIRCULANT', comptes: [], amort: [], isTotal: true },
-  { ref: 'BQ', label: 'Titres de placement', comptes: ['50'], amort: ['590'], note: '9' },
-  { ref: 'BR', label: 'Valeurs à encaisser', comptes: ['51'], amort: ['591'], note: '10' },
-  { ref: 'BS', label: 'Banques, chèques postaux, caisse et assimilés', comptes: ['52','53','54','55','56','57','58'], amort: ['592','593','594'], note: '11' },
+  { ref: 'BQ', label: 'Titres de placement', comptes: [...BILAN_ACTIF.BQ.comptes], amort: [...BILAN_ACTIF.BQ.amort], note: '9' },
+  { ref: 'BR', label: 'Valeurs à encaisser', comptes: [...BILAN_ACTIF.BR.comptes], amort: [...BILAN_ACTIF.BR.amort], note: '10' },
+  { ref: 'BS', label: 'Banques, chèques postaux, caisse et assimilés', comptes: [...BILAN_ACTIF.BS.comptes], amort: [...BILAN_ACTIF.BS.amort], note: '11' },
   { ref: 'BT', label: 'TOTAL TRESORERIE-ACTIF', comptes: [], amort: [], isTotal: true },
-  { ref: 'BU', label: 'Ecart de conversion-Actif', comptes: ['478'], amort: [], note: '12' },
+  { ref: 'BU', label: 'Ecart de conversion-Actif', comptes: [...BILAN_ACTIF.BU.comptes], amort: [...BILAN_ACTIF.BU.amort], note: '12' },
   { ref: 'BZ', label: 'TOTAL GENERAL', comptes: [], amort: [], isTotal: true },
 ]
 
 const PASSIF_ROWS: PassifRowDef[] = [
-  { ref: 'CA', label: 'Capital', comptes: ['101','102','103'], note: '13' },
-  { ref: 'CB', label: 'Apporteurs capital non appelé (-)', comptes: ['109'], note: '13' },
-  { ref: 'CD', label: 'Primes liées au capital social', comptes: ['104','105'], note: '14' },
-  { ref: 'CE', label: 'Ecarts de réévaluation', comptes: ['106'], note: '3e' },
-  { ref: 'CF', label: 'Réserves indisponibles', comptes: ['111','112'], note: '14' },
-  { ref: 'CG', label: 'Réserves libres', comptes: ['113','118'], note: '14' },
-  { ref: 'CH', label: 'Report à nouveau (+ ou -)', comptes: ['12'], note: '14' },
-  { ref: 'CJ', label: 'Résultat net de l\'exercice (bénéfice + ou perte -)', comptes: ['13'] },
-  { ref: 'CL', label: 'Subventions d\'investissement', comptes: ['14'], note: '15' },
-  { ref: 'CM', label: 'Provisions réglementées', comptes: ['15'], note: '15' },
+  { ref: 'CA', label: 'Capital', comptes: [...BILAN_PASSIF.CA.comptes], note: '13' },
+  { ref: 'CB', label: 'Apporteurs capital non appelé (-)', comptes: [...BILAN_PASSIF.CB.comptes], note: '13', special: 'debit' },
+  { ref: 'CD', label: 'Primes liées au capital social', comptes: [...BILAN_PASSIF.CD.comptes], note: '14' },
+  { ref: 'CE', label: 'Ecarts de réévaluation', comptes: [...BILAN_PASSIF.CE.comptes], note: '3e' },
+  { ref: 'CF', label: 'Réserves indisponibles', comptes: [...BILAN_PASSIF.CF.comptes], note: '14' },
+  { ref: 'CG', label: 'Réserves libres', comptes: [...BILAN_PASSIF.CG.comptes], note: '14' },
+  { ref: 'CH', label: 'Report à nouveau (+ ou -)', comptes: [...BILAN_PASSIF.CH.comptes], note: '14', special: 'signed' },
+  { ref: 'CJ', label: 'Résultat net de l\'exercice (bénéfice + ou perte -)', comptes: [...BILAN_PASSIF.CJ.comptes], special: 'signed' },
+  { ref: 'CL', label: 'Subventions d\'investissement', comptes: [...BILAN_PASSIF.CL.comptes], note: '15' },
+  { ref: 'CM', label: 'Provisions réglementées', comptes: [...BILAN_PASSIF.CM.comptes], note: '15' },
   { ref: 'CP', label: 'TOTAL CAPITAUX PROPRES ET RESSOURCES ASSIMILEES', comptes: [], isTotal: true },
-  { ref: 'DA', label: 'Emprunts et dettes financières diverses', comptes: ['161','162','163','164','165','166','168'], note: '16' },
-  { ref: 'DB', label: 'Dettes de location-acquisition', comptes: ['17'], note: '16' },
-  { ref: 'DC', label: 'Provisions pour risques et charges', comptes: ['19'], note: '16' },
+  { ref: 'DA', label: 'Emprunts et dettes financières diverses', comptes: [...BILAN_PASSIF.DA.comptes], note: '16' },
+  { ref: 'DB', label: 'Dettes de location-acquisition', comptes: [...BILAN_PASSIF.DB.comptes], note: '16' },
+  { ref: 'DC', label: 'Provisions pour risques et charges', comptes: [...BILAN_PASSIF.DC.comptes], note: '16' },
   { ref: 'DD', label: 'TOTAL DETTES FINANCIERES ET RESSOURCES ASSIMILEES', comptes: [], isTotal: true },
   { ref: 'DF', label: 'TOTAL RESSOURCES STABLES', comptes: [], isTotal: true },
-  { ref: 'DH', label: 'Dettes circulantes HAO', comptes: ['481','482','483','484'], note: '5' },
-  { ref: 'DI', label: 'Clients, avances reçues', comptes: ['419'], note: '7' },
-  { ref: 'DJ', label: 'Fournisseurs d\'exploitation', comptes: ['401','402','403','404','405','408'], note: '17' },
-  { ref: 'DK', label: 'Dettes fiscales et sociales', comptes: ['43','44'], note: '18' },
-  { ref: 'DM', label: 'Autres dettes', comptes: ['421','422','423','424','425','426','427','428'], note: '19' },
-  { ref: 'DN', label: 'Provisions pour risques et charges à court terme', comptes: ['499'], note: '19' },
+  { ref: 'DH', label: 'Dettes circulantes HAO', comptes: [...BILAN_PASSIF.DH.comptes], note: '5' },
+  { ref: 'DI', label: 'Clients, avances reçues', comptes: [...BILAN_PASSIF.DI.comptes], note: '7' },
+  { ref: 'DJ', label: 'Fournisseurs d\'exploitation', comptes: [...BILAN_PASSIF.DJ.comptes], note: '17' },
+  { ref: 'DK', label: 'Dettes fiscales et sociales', comptes: [...BILAN_PASSIF.DK.comptes], note: '18' },
+  { ref: 'DM', label: 'Autres dettes', comptes: [...BILAN_PASSIF.DM.comptes], note: '19' },
+  { ref: 'DN', label: 'Provisions pour risques et charges à court terme', comptes: [...BILAN_PASSIF.DN.comptes], note: '19' },
   { ref: 'DP', label: 'TOTAL PASSIF CIRCULANT', comptes: [], isTotal: true },
-  { ref: 'DQ', label: 'Banques, crédits d\'escompte', comptes: ['565'], note: '20' },
-  { ref: 'DR', label: 'Banques, établissements financiers et crédits de trésorerie', comptes: ['52','561','564'], note: '20' },
+  { ref: 'DQ', label: 'Banques, crédits d\'escompte', comptes: [...BILAN_PASSIF.DQ.comptes], note: '20' },
+  { ref: 'DR', label: 'Banques, établissements financiers et crédits de trésorerie', comptes: [...BILAN_PASSIF.DR.comptes], note: '20' },
   { ref: 'DT', label: 'TOTAL TRESORERIE-PASSIF', comptes: [], isTotal: true },
-  { ref: 'DV', label: 'Ecart de conversion-Passif', comptes: ['479'], note: '12' },
+  { ref: 'DV', label: 'Ecart de conversion-Passif', comptes: [...BILAN_PASSIF.DV.comptes], note: '12' },
   { ref: 'DZ', label: 'TOTAL GENERAL', comptes: [], isTotal: true },
 ]
 
@@ -111,14 +113,16 @@ function computePassif(bal: BalanceEntry[]) {
 
   for (const r of PASSIF_ROWS) {
     if (r.isTotal) continue
-    // -getBalanceSolde: credit balance → positive, debit balance → negative
-    const montant = -getBalanceSolde(bal, r.comptes)
+    let montant: number
+    if (r.special === 'debit') montant = Math.abs(getBalanceSolde(bal, r.comptes))
+    else if (r.special === 'signed') montant = -getBalanceSolde(bal, r.comptes)
+    else montant = getPassif(bal, r.comptes)
     vals.set(r.ref, montant)
   }
 
   const sumRefs = (refs: string[]) => refs.reduce((s, ref) => s + (vals.get(ref) || 0), 0)
 
-  vals.set('CP', sumRefs(['CA', 'CB', 'CD', 'CE', 'CF', 'CG', 'CH', 'CJ', 'CL', 'CM']))
+  vals.set('CP', sumRefs(['CA', 'CD', 'CE', 'CF', 'CG', 'CH', 'CJ', 'CL', 'CM']) - (vals.get('CB') || 0))
   vals.set('DD', sumRefs(['DA', 'DB', 'DC']))
   vals.set('DF', sumRefs(['CP', 'DD']))
   vals.set('DP', sumRefs(['DH', 'DI', 'DJ', 'DK', 'DM', 'DN']))
@@ -134,9 +138,16 @@ function computePassif(bal: BalanceEntry[]) {
 
 const Bilan: React.FC<PageProps> = ({ entreprise, balance, balanceN1, onNoteClick }) => {
   const actifData = computeActif(balance)
-  const actifN1 = balanceN1 && balanceN1.length > 0 ? computeActif(balanceN1) : null
+  const actifN1Arr = balanceN1 && balanceN1.length > 0 ? computeActif(balanceN1) : null
+  const actifN1Map = actifN1Arr ? new Map(actifN1Arr.map(r => [r.ref, r])) : null
   const passifData = computePassif(balance)
-  const passifN1 = balanceN1 && balanceN1.length > 0 ? computePassif(balanceN1) : null
+  const passifN1Arr = balanceN1 && balanceN1.length > 0 ? computePassif(balanceN1) : null
+  const passifN1Map = passifN1Arr ? new Map(passifN1Arr.map(r => [r.ref, r])) : null
+
+  // Détection des anomalies comptables (Bugs #7-8)
+  const anomaliesActif = detecterAnomaliesActif(balance, ALL_ACTIF_PREFIXES)
+  const anomaliesPassif = detecterAnomaliesPassif(balance, ALL_PASSIF_PREFIXES)
+  const anomalies: AnomalieComptable[] = [...anomaliesActif, ...anomaliesPassif]
 
   // Build merged rows: pad shorter side with empties so BZ and DZ are on the same line
   const emptyA = { ref: '', label: '', note: '', brut: 0, amort: 0, net: 0, isTotal: false, indent: undefined, bold: false }
@@ -163,7 +174,8 @@ const Bilan: React.FC<PageProps> = ({ entreprise, balance, balanceN1, onNoteClic
     py: 0.15,
     px: 0.5,
     height: 22,
-    whiteSpace: 'nowrap' as const,
+    overflow: 'hidden' as const,
+    textOverflow: 'ellipsis' as const,
     borderBottom: '1px solid #e0e0e0',
     textAlign: align,
     fontFamily: 'inherit',
@@ -198,25 +210,25 @@ const Bilan: React.FC<PageProps> = ({ entreprise, balance, balanceN1, onNoteClic
       </Typography>
 
       {/* Single unified table: ACTIF left | separator | PASSIF right */}
-      <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'auto', fontFamily: 'inherit', minWidth: 1100 }}>
+      <Box component="table" sx={{ width: '100%', minWidth: 'calc(100vw - 160px)', borderCollapse: 'collapse', tableLayout: 'auto', fontFamily: 'inherit' }}>
         {/* Column widths */}
         <colgroup>
           {/* ACTIF: ref, label, note, brut, amort, net, net_n1 */}
-          <col style={{ minWidth: 30 }} />
-          <col style={{ width: '18%', minWidth: 140 }} />
-          <col style={{ minWidth: 30 }} />
-          <col style={{ minWidth: 90 }} />
-          <col style={{ minWidth: 90 }} />
-          <col style={{ minWidth: 90 }} />
-          <col style={{ minWidth: 90 }} />
+          <col style={{ width: '3%' }} />
+          <col style={{ width: '17%' }} />
+          <col style={{ width: '3%' }} />
+          <col style={{ width: '10%' }} />
+          <col style={{ width: '10%' }} />
+          <col style={{ width: '10%' }} />
+          <col style={{ width: '10%' }} />
           {/* Separator */}
-          <col style={{ width: 4 }} />
+          <col style={{ width: '0.5%' }} />
           {/* PASSIF: ref, label, note, net, net_n1 */}
-          <col style={{ minWidth: 30 }} />
-          <col style={{ width: '20%', minWidth: 160 }} />
-          <col style={{ minWidth: 30 }} />
-          <col style={{ minWidth: 90 }} />
-          <col style={{ minWidth: 90 }} />
+          <col style={{ width: '3%' }} />
+          <col style={{ width: '15.5%' }} />
+          <col style={{ width: '3%' }} />
+          <col style={{ width: '8%' }} />
+          <col style={{ width: '8%' }} />
         </colgroup>
 
         {/* Header */}
@@ -275,7 +287,7 @@ const Bilan: React.FC<PageProps> = ({ entreprise, balance, balanceN1, onNoteClic
                 <Box component="td" sx={cellSx(aTotal, aBold, 'right')}>{numFmt(a.brut)}</Box>
                 <Box component="td" sx={cellSx(aTotal, aBold, 'right')}>{numFmt(a.amort)}</Box>
                 <Box component="td" sx={cellSx(aTotal, aBold, 'right')}>{numFmt(a.net)}</Box>
-                <Box component="td" sx={cellSx(aTotal, aBold, 'right')}>{actifN1 ? numFmt(actifN1[i]?.net) : ''}</Box>
+                <Box component="td" sx={cellSx(aTotal, aBold, 'right')}>{actifN1Map && a.ref ? numFmt(actifN1Map.get(a.ref)?.net) : ''}</Box>
                 {/* Separator */}
                 <Box component="td" sx={{ bgcolor: '#d0d0d0', px: 0, borderBottom: '1px solid #d0d0d0' }} />
                 {/* PASSIF cells */}
@@ -285,12 +297,29 @@ const Bilan: React.FC<PageProps> = ({ entreprise, balance, balanceN1, onNoteClic
                   {p.note && <Chip label={p.note} size="small" variant="outlined" clickable color="primary" onClick={() => onNoteClick?.(p.note)} sx={noteChipSx} />}
                 </Box>
                 <Box component="td" sx={cellSx(pTotal, pBold, 'right')}>{numFmt(p.montant)}</Box>
-                <Box component="td" sx={cellSx(pTotal, pBold, 'right')}>{passifN1 ? numFmt(passifN1[i]?.montant) : ''}</Box>
+                <Box component="td" sx={cellSx(pTotal, pBold, 'right')}>{passifN1Map && p.ref ? numFmt(passifN1Map.get(p.ref)?.montant) : ''}</Box>
               </Box>
             )
           })}
         </Box>
       </Box>
+
+      {/* Alertes soldes anormaux */}
+      {anomalies.length > 0 && (
+        <Box sx={{ mt: 0.5, mb: 0.5, px: 1, py: 0.5, bgcolor: '#fff3e0', border: '1px solid #ff9800', borderRadius: 1 }}>
+          <Typography sx={{ fontSize: '8pt', fontWeight: 700, color: '#e65100', fontFamily: 'inherit', mb: 0.25 }}>
+            ALERTES SOLDES ANORMAUX ({anomalies.length})
+          </Typography>
+          {anomalies.map((a, i) => (
+            <Typography key={i} sx={{ fontSize: '7pt', color: '#bf360c', fontFamily: 'inherit' }}>
+              {a.type === 'actif_crediteur'
+                ? `Compte ${a.compte} (${a.libelle}) : solde créditeur ${fmt(a.montant)} sur un compte d'actif`
+                : `Compte ${a.compte} (${a.libelle}) : solde débiteur ${fmt(a.montant)} sur un compte de passif`
+              }
+            </Typography>
+          ))}
+        </Box>
+      )}
 
       <Box sx={{ mt: 0.5, textAlign: 'center' }}>
         <Typography sx={{ fontSize: '8pt', fontWeight: 700, fontFamily: 'inherit' }}>

@@ -68,8 +68,11 @@ export interface Entreprise {
   nombre_etablissements?: number
   effectif_permanent?: number
   effectif_temporaire?: number
+  effectif_feminin?: number
+  effectif_cadres?: number
   masse_salariale?: number
   nom_groupe?: string
+  societe_mere?: string
   pays_siege_groupe?: string
   cac_nom?: string
   cac_adresse?: string
@@ -77,6 +80,9 @@ export interface Entreprise {
   expert_nom?: string
   expert_adresse?: string
   expert_numero_inscription?: string
+  cabinet_expert_comptable?: string
+  cabinet_cac?: string
+  qualite_dirigeant?: string
   // R2 - Dirigeants & Commissaires (JSON)
   dirigeants?: any[]
   commissaires_comptes?: any[]

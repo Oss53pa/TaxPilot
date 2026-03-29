@@ -3,7 +3,7 @@
  * Conforme aux exigences EX-PLAN-001 à EX-PLAN-010
  */
 
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import {
   Box,
   Grid,
@@ -31,7 +31,6 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  TablePagination,
   List,
   ListItem,
   ListItemIcon,
@@ -41,18 +40,11 @@ import {
   Stack,
   Avatar,
   Tooltip,
-  Switch,
-  FormControlLabel,
   Tabs,
   Tab,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
   LinearProgress,
-  Badge,
   useTheme,
   alpha,
-  Skeleton,
   InputAdornment,
   Stepper,
   Step,
@@ -60,16 +52,12 @@ import {
   StepContent,
   ToggleButton,
   ToggleButtonGroup,
-  Breadcrumbs,
-  Link,
 } from '@mui/material'
 import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView'
 import { TreeItem } from '@mui/x-tree-view/TreeItem'
 import { PLAN_SYSCOHADA_REVISE, SYSCOHADA_REVISE_CLASSES, CompteComptable, getSYSCOHADAAccountsByClass } from '../../data/SYSCOHADARevisePlan'
 import {
   AccountTree as TreeIcon,
-  ExpandMore as ExpandMoreIcon,
-  ChevronRight as ChevronRightIcon,
   Add as AddIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
@@ -77,31 +65,16 @@ import {
   Search as SearchIcon,
   FilterList as FilterIcon,
   Download as DownloadIcon,
-  Upload as UploadIcon,
-  Sync as SyncIcon,
-  CompareArrows as CompareIcon,
   CheckCircle as CheckIcon,
-  Error as ErrorIcon,
-  Warning as WarningIcon,
   Info as InfoIcon,
   Business as BusinessIcon,
   AccountBalance as BankIcon,
-  LocalAtm as MoneyIcon,
-  Assessment as AssessmentIcon,
   Flag as FlagIcon,
   Update as UpdateIcon,
-  History as HistoryIcon,
   Lock as LockIcon,
-  LockOpen as UnlockIcon,
   SwapHoriz as ConvertIcon,
-  Verified as VerifiedIcon,
   Article as DocumentIcon,
   Category as CategoryIcon,
-  Label as LabelIcon,
-  Settings as SettingsIcon,
-  AutoAwesome as AutoIcon,
-  ContentCopy as CopyIcon,
-  NavigateNext as NextIcon,
   AccountTree,
   ArrowForward,
   PictureAsPdf,
@@ -118,7 +91,7 @@ interface AccountingPlan {
   version: string
   effectiveDate: string
   status: 'active' | 'draft' | 'obsolete'
-  accounts: Account[]
+  accounts: CompteComptable[]
   totalAccounts: number
   lastUpdate: string
   compliance: number // Pourcentage de conformité
@@ -172,34 +145,21 @@ interface AccountChange {
 }
 
 // EX-PLAN-007: Conversion entre plans
-interface ConversionRule {
-  sourcePlan: string
-  targetPlan: string
-  mappings: {
-    source: string
-    target: string
-    transformRule?: string
-  }[]
-  confidence: number
-  lastUsed: string
-}
-
 const ModernPlansComptables: React.FC = () => {
   const theme = useTheme()
-  const [loading, setLoading] = useState(false)
   const [activeTab, setActiveTab] = useState(0)
   const [selectedPlan, setSelectedPlan] = useState<AccountingPlan | null>(null)
-  const [selectedAccount, setSelectedAccount] = useState<Account | null>(null)
+  const [selectedAccount] = useState<Account | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
-  const [filterSector, setFilterSector] = useState<string>('all')
+  const [, setFilterSector] = useState<string>('all')
   const [expandedNodes, setExpandedNodes] = useState<string[]>(['1'])
   const [viewMode, setViewMode] = useState<'tree' | 'list' | 'grid'>('tree')
-  const [page, setPage] = useState(0)
-  const [rowsPerPage, setRowsPerPage] = useState(25)
+  const [_page, _setPage] = useState(0)
+  const [_rowsPerPage, _setRowsPerPage] = useState(25)
   const [conversionDialogOpen, setConversionDialogOpen] = useState(false)
   const [subdivisionDialogOpen, setSubdivisionDialogOpen] = useState(false)
   const [updateDialogOpen, setUpdateDialogOpen] = useState(false)
-  const [validationErrors, setValidationErrors] = useState<string[]>([])
+  const [_validationErrors] = useState<string[]>([])
 
   // EX-PLAN-001: Plans OHADA complets par pays
   const accountingPlans: AccountingPlan[] = [
@@ -300,18 +260,18 @@ const ModernPlansComptables: React.FC = () => {
     return hierarchy
   }
   
-  const getAccountType = (classe: number): string => {
+  const getAccountType = (classe: number): Account['type'] => {
     switch (classe) {
       case 1: return 'equity'
-      case 2: return 'assets'
-      case 3: return 'inventory' 
-      case 4: return 'thirdparty'
-      case 5: return 'treasury'
+      case 2: return 'asset'
+      case 3: return 'asset'
+      case 4: return 'liability'
+      case 5: return 'asset'
       case 6: return 'expense'
-      case 7: return 'revenue'
-      case 8: return 'exceptional'
-      case 9: return 'special'
-      default: return 'other'
+      case 7: return 'income'
+      case 8: return 'expense'
+      case 9: return 'expense'
+      default: return 'asset'
     }
   }
   
@@ -326,334 +286,20 @@ const ModernPlansComptables: React.FC = () => {
     }
   }
   
-  const mapNatureToType = (nature: string): string => {
+  const mapNatureToType = (nature: string): Account['type'] => {
     switch (nature) {
-      case 'ACTIF': return 'assets'
+      case 'ACTIF': return 'asset'
       case 'PASSIF': return 'equity'
       case 'CHARGE': return 'expense'
-      case 'PRODUIT': return 'revenue'
-      case 'SPECIAL': return 'special'
-      default: return 'other'
+      case 'PRODUIT': return 'income'
+      case 'SPECIAL': return 'expense'
+      default: return 'asset'
     }
   }
 
   // Comptes SYSCOHADA avec structure hiérarchique complète  
   const syscohadaAccounts: Account[] = buildSYSCOHADAHierarchy()
   
-  // Ancien mock remplacé par le vrai plan SYSCOHADA
-  const oldMockAccounts: Account[] = [
-    {
-      code: '1',
-      name: 'COMPTES DE RESSOURCES DURABLES',
-      type: 'equity',
-      nature: 'credit',
-      level: 1,
-      isSystem: true,
-      isActive: true,
-      isSelectable: false,
-      children: [
-        {
-          code: '10',
-          name: 'CAPITAL',
-          type: 'equity',
-          nature: 'credit',
-          level: 2,
-          parent: '1',
-          isSystem: true,
-          isActive: true,
-          isSelectable: false,
-          children: [
-            {
-              code: '101',
-              name: 'Capital social',
-              type: 'equity',
-              nature: 'credit',
-              level: 3,
-              parent: '10',
-              isSystem: true,
-              isActive: true,
-              isSelectable: false,
-              requiredForLiasse: ['normal', 'allege'],
-              children: [
-                {
-                  code: '1011',
-                  name: 'Capital souscrit, non appelé',
-                  type: 'equity',
-                  nature: 'credit',
-                  level: 4,
-                  parent: '101',
-                  isSystem: false,
-                  isActive: true,
-                  isSelectable: true
-                },
-                {
-                  code: '1012',
-                  name: 'Capital souscrit, appelé, non versé',
-                  type: 'equity',
-                  nature: 'credit',
-                  level: 4,
-                  parent: '101',
-                  isSystem: false,
-                  isActive: true,
-                  isSelectable: true
-                },
-                {
-                  code: '1013',
-                  name: 'Capital souscrit, appelé, versé',
-                  type: 'equity',
-                  nature: 'credit',
-                  level: 4,
-                  parent: '101',
-                  isSystem: false,
-                  isActive: true,
-                  isSelectable: true
-                }
-              ]
-            },
-            {
-              code: '104',
-              name: 'Compte de l\'exploitant',
-              type: 'equity',
-              nature: 'credit',
-              level: 3,
-              parent: '10',
-              isSystem: false,
-              isActive: true,
-              isSelectable: true
-            },
-            {
-              code: '105',
-              name: 'Primes liées au capital social',
-              type: 'equity',
-              nature: 'credit',
-              level: 3,
-              parent: '10',
-              isSystem: false,
-              isActive: true,
-              isSelectable: true
-            }
-          ]
-        },
-        {
-          code: '11',
-          name: 'RÉSERVES',
-          type: 'equity',
-          nature: 'credit',
-          level: 2,
-          parent: '1',
-          isSystem: true,
-          isActive: true,
-          isSelectable: false,
-          children: [
-            {
-              code: '111',
-              name: 'Réserve légale',
-              type: 'equity',
-              nature: 'credit',
-              level: 3,
-              parent: '11',
-              isSystem: false,
-              isActive: true,
-              isSelectable: true
-            },
-            {
-              code: '112',
-              name: 'Réserves statutaires',
-              type: 'equity',
-              nature: 'credit',
-              level: 3,
-              parent: '11',
-              isSystem: false,
-              isActive: true,
-              isSelectable: true
-            }
-          ]
-        }
-      ]
-    },
-    {
-      code: '2',
-      name: 'COMPTES D\'ACTIF IMMOBILISÉ',
-      type: 'asset',
-      nature: 'debit',
-      level: 1,
-      isSystem: true,
-      isActive: true,
-      isSelectable: false,
-      children: [
-        {
-          code: '20',
-          name: 'CHARGES IMMOBILISÉES',
-          type: 'asset',
-          nature: 'debit',
-          level: 2,
-          parent: '2',
-          isSystem: true,
-          isActive: true,
-          isSelectable: false,
-          children: [
-            {
-              code: '201',
-              name: 'Frais d\'établissement',
-              type: 'asset',
-              nature: 'debit',
-              level: 3,
-              parent: '20',
-              isSystem: false,
-              isActive: true,
-              isSelectable: true
-            }
-          ]
-        },
-        {
-          code: '21',
-          name: 'IMMOBILISATIONS INCORPORELLES',
-          type: 'asset',
-          nature: 'debit',
-          level: 2,
-          parent: '2',
-          isSystem: true,
-          isActive: true,
-          isSelectable: false
-        }
-      ]
-    },
-    {
-      code: '4',
-      name: 'COMPTES DE TIERS',
-      type: 'asset',
-      nature: 'debit',
-      level: 1,
-      isSystem: true,
-      isActive: true,
-      isSelectable: false,
-      children: [
-        {
-          code: '40',
-          name: 'FOURNISSEURS ET COMPTES RATTACHÉS',
-          type: 'liability',
-          nature: 'credit',
-          level: 2,
-          parent: '4',
-          isSystem: true,
-          isActive: true,
-          isSelectable: false,
-          children: [
-            {
-              code: '401',
-              name: 'Fournisseurs',
-              type: 'liability',
-              nature: 'credit',
-              level: 3,
-              parent: '40',
-              isSystem: false,
-              isActive: true,
-              isSelectable: true,
-              requiredForLiasse: ['normal', 'allege', 'simplifie']
-            }
-          ]
-        },
-        {
-          code: '41',
-          name: 'CLIENTS ET COMPTES RATTACHÉS',
-          type: 'asset',
-          nature: 'debit',
-          level: 2,
-          parent: '4',
-          isSystem: true,
-          isActive: true,
-          isSelectable: false,
-          children: [
-            {
-              code: '411',
-              name: 'Clients',
-              type: 'asset',
-              nature: 'debit',
-              level: 3,
-              parent: '41',
-              isSystem: false,
-              isActive: true,
-              isSelectable: true,
-              requiredForLiasse: ['normal', 'allege', 'simplifie']
-            }
-          ]
-        }
-      ]
-    },
-    {
-      code: '6',
-      name: 'COMPTES DE CHARGES DES ACTIVITÉS ORDINAIRES',
-      type: 'expense',
-      nature: 'debit',
-      level: 1,
-      isSystem: true,
-      isActive: true,
-      isSelectable: false,
-      children: [
-        {
-          code: '60',
-          name: 'ACHATS ET VARIATIONS DE STOCKS',
-          type: 'expense',
-          nature: 'debit',
-          level: 2,
-          parent: '6',
-          isSystem: true,
-          isActive: true,
-          isSelectable: false,
-          children: [
-            {
-              code: '601',
-              name: 'Achats de marchandises',
-              type: 'expense',
-              nature: 'debit',
-              level: 3,
-              parent: '60',
-              isSystem: false,
-              isActive: true,
-              isSelectable: true
-            }
-          ]
-        }
-      ]
-    },
-    {
-      code: '7',
-      name: 'COMPTES DE PRODUITS DES ACTIVITÉS ORDINAIRES',
-      type: 'income',
-      nature: 'credit',
-      level: 1,
-      isSystem: true,
-      isActive: true,
-      isSelectable: false,
-      children: [
-        {
-          code: '70',
-          name: 'VENTES',
-          type: 'income',
-          nature: 'credit',
-          level: 2,
-          parent: '7',
-          isSystem: true,
-          isActive: true,
-          isSelectable: false,
-          children: [
-            {
-              code: '701',
-              name: 'Ventes de marchandises',
-              type: 'income',
-              nature: 'credit',
-              level: 3,
-              parent: '70',
-              isSystem: false,
-              isActive: true,
-              isSelectable: true
-            }
-          ]
-        }
-      ]
-    }
-  ]
-
   // Plans sectoriels EX-PLAN-008
   const sectoralPlans = [
     { code: 'BANK', name: 'Banques', specificAccounts: 156 },
@@ -710,73 +356,6 @@ const ModernPlansComptables: React.FC = () => {
     }
   ]
 
-  // EX-PLAN-002: Création de subdivisions jusqu'à 12 caractères
-  const createSubdivision = (parentCode: string, subdivision: string): string => {
-    if (parentCode.length + subdivision.length > 12) {
-      setValidationErrors(['Code trop long, maximum 12 caractères'])
-      return ''
-    }
-    return parentCode + subdivision
-  }
-
-  // EX-PLAN-004: Validation conformité
-  const validateAccountCompliance = (account: Account, planType: string): boolean => {
-    // Vérifier que le compte respecte la structure du plan
-    if (planType === 'normal' && account.requiredForLiasse?.includes('normal')) {
-      return true
-    }
-    // Autres validations...
-    return true
-  }
-
-  // EX-PLAN-005: Personnalisation des libellés
-  const customizeAccountName = (accountCode: string, newName: string) => {
-    // Mettre à jour le nom personnalisé sans modifier le code
-    const account = findAccountByCode(accountCode)
-    if (account) {
-      account.nameCustom = newName
-      // Sauvegarder avec traçabilité
-      logAccountChange(accountCode, 'rename', account.name, newName)
-    }
-  }
-
-  // EX-PLAN-007: Conversion automatique entre plans
-  const convertBetweenPlans = (accounts: Account[], sourcePlan: string, targetPlan: string): Account[] => {
-    // Logique de conversion basée sur les tables de correspondance
-    const conversionRules = getConversionRules(sourcePlan, targetPlan)
-    return accounts.map(account => {
-      const rule = conversionRules.find(r => r.source === account.code)
-      if (rule) {
-        return {
-          ...account,
-          code: rule.target,
-          mapping: [{
-            targetPlan,
-            targetAccount: rule.target,
-            confidence: rule.confidence || 90,
-            isAutomatic: true
-          }]
-        }
-      }
-      return account
-    })
-  }
-
-  // EX-PLAN-009: Contrôle utilisation selon type de liasse
-  const checkAccountUsageForLiasse = (accountCode: string, liasseType: string): boolean => {
-    const account = findAccountByCode(accountCode)
-    if (!account) return false
-    
-    if (account.requiredForLiasse) {
-      return account.requiredForLiasse.includes(liasseType)
-    }
-    
-    // Comptes de niveau 1 et 2 non sélectionnables
-    if (account.level <= 2) return false
-    
-    return true
-  }
-
   // EX-PLAN-010: Export dans tous les formats
   const exportPlan = (format: 'excel' | 'pdf' | 'xml' | 'json' | 'csv') => {
     // Implémenter l'export selon le format
@@ -797,32 +376,6 @@ const ModernPlansComptables: React.FC = () => {
         exportToCSV()
         break
     }
-  }
-
-  const findAccountByCode = (code: string): Account | undefined => {
-    const search = (accounts: Account[]): Account | undefined => {
-      for (const account of accounts) {
-        if (account.code === code) return account
-        if (account.children) {
-          const found = search(account.children)
-          if (found) return found
-        }
-      }
-      return undefined
-    }
-    return search(syscohadaAccounts)
-  }
-
-  const logAccountChange = (code: string, type: string, oldValue: string, newValue: string) => {
-    console.log('Change logged:', { code, type, oldValue, newValue })
-  }
-
-  const getConversionRules = (source: string, target: string) => {
-    // Retourner les règles de conversion
-    return [
-      { source: '101', target: '1000', confidence: 95 },
-      { source: '401', target: '4000', confidence: 98 }
-    ]
   }
 
   const exportToExcel = () => console.log('Exporting to Excel...')
@@ -861,7 +414,6 @@ const ModernPlansComptables: React.FC = () => {
     return accounts.map(account => (
       <TreeItem
         key={account.code}
-        nodeId={account.code}
         itemId={account.code}
         label={
           <Box sx={{ display: 'flex', alignItems: 'center', py: 0.5 }}>
@@ -935,10 +487,6 @@ const ModernPlansComptables: React.FC = () => {
         {account.children && renderAccountTree(account.children, level + 1)}
       </TreeItem>
     ))
-  }
-
-  const handleNodeToggle = (event: React.SyntheticEvent, nodeIds: string[]) => {
-    setExpandedNodes(nodeIds)
   }
 
   const TabPanel: React.FC<{ children: React.ReactNode; value: number; index: number }> = ({
@@ -1238,10 +786,8 @@ const ModernPlansComptables: React.FC = () => {
                 {/* Vue arborescente des comptes */}
                 {viewMode === 'tree' && (
                   <SimpleTreeView
-                    defaultCollapseIcon={<ExpandMoreIcon />}
-                    defaultExpandIcon={<ChevronRightIcon />}
-                    expanded={expandedNodes}
-                    onNodeToggle={handleNodeToggle}
+                    expandedItems={expandedNodes}
+                    onExpandedItemsChange={(_event, itemIds) => setExpandedNodes(itemIds)}
                   >
                     {renderAccountTree(filterAccounts(syscohadaAccounts, searchTerm))}
                   </SimpleTreeView>

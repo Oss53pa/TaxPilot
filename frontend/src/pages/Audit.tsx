@@ -13,14 +13,12 @@ import {
   Button,
   Chip,
   LinearProgress,
-  Alert,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Paper,
   Avatar,
   Divider,
   IconButton,
@@ -28,9 +26,7 @@ import {
 } from '@mui/material'
 import {
   Security,
-  BugReport,
   AutoFixHigh,
-  TrendingUp,
   Warning,
   CheckCircle,
   Error,
@@ -45,10 +41,10 @@ import { entrepriseService } from '@/services/entrepriseService'
 const Audit: React.FC = () => {
   const [auditEnCours, setAuditEnCours] = useState(false)
   const [progressionAudit, setProgressionAudit] = useState(0)
-  const [loading, setLoading] = useState(true)
-  const [auditSessions, setAuditSessions] = useState<any[]>([])
+  const [, setLoading] = useState(true)
+  const [, setAuditSessions] = useState<any[]>([])
   const [anomalies, setAnomalies] = useState<any[]>([])
-  const [stats, setStats] = useState<any>(null)
+  const [, setStats] = useState<any>(null)
   const [entreprises, setEntreprises] = useState<any[]>([])
   const [selectedSession, setSelectedSession] = useState<any>(null)
 
@@ -65,7 +61,7 @@ const Audit: React.FC = () => {
         auditService.getAuditSessions({ page_size: 10 }),
         auditService.getAuditStats(),
         entrepriseService.getEntreprises({ page_size: 100 })
-      ])
+      ]) as [any, any, any]
 
       setAuditSessions(sessionsResponse.results || [])
       setStats(statsResponse)
@@ -73,7 +69,7 @@ const Audit: React.FC = () => {
 
       // Si on a une session, charger ses anomalies
       if (sessionsResponse.results?.[0]) {
-        const anomaliesResponse = await auditService.getAuditAnomalies(sessionsResponse.results[0].id)
+        const anomaliesResponse: any = await auditService.getAuditAnomalies(sessionsResponse.results[0].id)
         setAnomalies(anomaliesResponse.results || [])
         setSelectedSession(sessionsResponse.results[0])
       }
@@ -173,23 +169,6 @@ const Audit: React.FC = () => {
       case 'AVERTISSEMENT': return <Info color="info" />
       default: return <CheckCircle color="success" />
     }
-  }
-
-  const lancerAudit = () => {
-    setAuditEnCours(true)
-    setProgressionAudit(0)
-    
-    // Simulation de progression
-    const interval = setInterval(() => {
-      setProgressionAudit(prev => {
-        if (prev >= 100) {
-          clearInterval(interval)
-          setAuditEnCours(false)
-          return 100
-        }
-        return prev + 10
-      })
-    }, 500)
   }
 
   return (

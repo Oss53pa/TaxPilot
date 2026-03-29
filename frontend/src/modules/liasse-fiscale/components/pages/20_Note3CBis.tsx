@@ -3,19 +3,20 @@ import NoteTemplate from '../NoteTemplate'
 import type { PageProps } from '../../types'
 import type { Column, Row } from '../LiasseTable'
 import { getProduits } from '../../services/liasse-calculs'
+import { NOTE_3C_BIS } from '@/constants/syscohada-mappings'
 
 // Account prefix mapping for depreciations and provisions
 const DEPREC_LINES: { id: string; label: string; prefixes: readonly string[] }[] = [
-  { id: 'r1', label: 'Immobilisations incorporelles', prefixes: ['290', '291'] },
-  { id: 'r2', label: 'Immobilisations corporelles', prefixes: ['292', '293', '294'] },
-  { id: 'r3', label: 'Immobilisations financieres', prefixes: ['296', '297'] },
-  { id: 'r4', label: 'Stocks', prefixes: ['39'] },
-  { id: 'r5', label: 'Creances et emplois assimiles', prefixes: ['49'] },
+  { id: 'r1', label: 'Immobilisations incorporelles', prefixes: [...NOTE_3C_BIS.deprecIncorporelles.comptes] },
+  { id: 'r2', label: 'Immobilisations corporelles', prefixes: [...NOTE_3C_BIS.deprecCorporelles.comptes] },
+  { id: 'r3', label: 'Immobilisations financieres', prefixes: [...NOTE_3C_BIS.deprecFinancieres.comptes] },
+  { id: 'r4', label: 'Stocks', prefixes: [...NOTE_3C_BIS.deprecStocks.comptes] },
+  { id: 'r5', label: 'Creances et emplois assimiles', prefixes: [...NOTE_3C_BIS.deprecCreances.comptes] },
 ]
 
 const PROV_LINES: { id: string; label: string; prefixes: readonly string[] }[] = [
-  { id: 'r6', label: 'Provisions pour risques', prefixes: ['191', '192'] },
-  { id: 'r7', label: 'Provisions pour charges', prefixes: ['193', '194', '195', '196', '197', '198'] },
+  { id: 'r6', label: 'Provisions pour risques', prefixes: [...NOTE_3C_BIS.provRisques.comptes] },
+  { id: 'r7', label: 'Provisions pour charges', prefixes: [...NOTE_3C_BIS.provCharges.comptes] },
 ]
 
 const ALL_LINES = [...DEPREC_LINES, ...PROV_LINES]

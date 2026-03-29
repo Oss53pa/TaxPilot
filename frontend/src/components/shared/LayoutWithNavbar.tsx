@@ -40,7 +40,8 @@ interface LayoutWithNavbarProps {
 
 const LayoutWithNavbar: React.FC<LayoutWithNavbarProps> = ({ children }) => {
   const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+  const _isMobile: boolean = useMediaQuery(theme.breakpoints.down('md'))
+  void _isMobile
   const navigate = useNavigate()
   const location = useLocation()
   

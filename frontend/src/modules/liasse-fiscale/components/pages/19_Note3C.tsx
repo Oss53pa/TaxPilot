@@ -3,21 +3,22 @@ import NoteTemplate from '../NoteTemplate'
 import type { PageProps } from '../../types'
 import type { Column, Row } from '../LiasseTable'
 import { getProduits } from '../../services/liasse-calculs'
+import { NOTE_3C } from '@/constants/syscohada-mappings'
 
 // Account prefix mapping for amortissements (class 28)
 const AMORT_LINES = [
   // IMMOBILISATIONS INCORPORELLES
-  { id: 'r1', label: 'Frais de recherche et developpement', prefixes: ['2811', '2812'] as const },
-  { id: 'r2', label: 'Brevets, licences, logiciels', prefixes: ['2813', '2814', '2815'] as const },
-  { id: 'r3', label: 'Fonds commercial', prefixes: ['2816'] as const },
-  { id: 'r4', label: 'Autres immobilisations incorporelles', prefixes: ['2817', '2818', '2819'] as const },
+  { id: 'r1', label: 'Frais de recherche et developpement', prefixes: [...NOTE_3C.fraisRD.comptes] },
+  { id: 'r2', label: 'Brevets, licences, logiciels', prefixes: [...NOTE_3C.brevetsLogiciels.comptes] },
+  { id: 'r3', label: 'Fonds commercial', prefixes: [...NOTE_3C.fondsCommercial.comptes] },
+  { id: 'r4', label: 'Autres immobilisations incorporelles', prefixes: [...NOTE_3C.autresIncorporelles.comptes] },
   // IMMOBILISATIONS CORPORELLES
-  { id: 'r5', label: 'Terrains', prefixes: ['282'] as const },
-  { id: 'r6', label: 'Batiments', prefixes: ['2831', '2832'] as const },
-  { id: 'r7', label: 'Installations et agencements', prefixes: ['2833', '2834'] as const },
-  { id: 'r8', label: 'Materiel', prefixes: ['2841', '2842', '2843', '2844'] as const },
-  { id: 'r9', label: 'Materiel de transport', prefixes: ['2845'] as const },
-] as const
+  { id: 'r5', label: 'Terrains', prefixes: [...NOTE_3C.terrains.comptes] },
+  { id: 'r6', label: 'Batiments', prefixes: [...NOTE_3C.batiments.comptes] },
+  { id: 'r7', label: 'Installations et agencements', prefixes: [...NOTE_3C.installationsAgencements.comptes] },
+  { id: 'r8', label: 'Materiel', prefixes: [...NOTE_3C.materiel.comptes] },
+  { id: 'r9', label: 'Materiel de transport', prefixes: [...NOTE_3C.materielTransport.comptes] },
+]
 
 const INCORP_IDS = ['r1', 'r2', 'r3', 'r4']
 const CORP_IDS = ['r5', 'r6', 'r7', 'r8', 'r9']

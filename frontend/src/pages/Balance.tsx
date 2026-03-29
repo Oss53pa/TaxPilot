@@ -3,7 +3,7 @@
  */
 
 import React from 'react'
-import { Routes, Route, useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import {
   Box,
   Container,
@@ -63,7 +63,7 @@ const Balance: React.FC = () => {
 
   const [activeTab, setActiveTab] = React.useState(() => getActiveTab())
 
-  const handleTabChange = React.useCallback((event: React.SyntheticEvent, newValue: number) => {
+  const handleTabChange = React.useCallback((_event: React.SyntheticEvent, newValue: number) => {
     // Éviter de naviguer si on est déjà sur la bonne tab
     if (newValue === activeTab) return
     

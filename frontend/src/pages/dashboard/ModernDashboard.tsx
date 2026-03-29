@@ -24,7 +24,6 @@ import {
   TrendingDown,
   SwapHoriz as SwapIcon,
   Folder as FolderIcon,
-  People as PeopleIcon,
 } from '@mui/icons-material'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'

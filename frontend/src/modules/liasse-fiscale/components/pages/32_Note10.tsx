@@ -3,12 +3,13 @@ import NoteTemplate from '../NoteTemplate'
 import type { PageProps } from '../../types'
 import type { Column } from '../LiasseTable'
 import { buildNoteRows, type NoteLineDef } from '../../services/noteBalanceMapping'
+import { NOTE_10 } from '@/constants/syscohada-mappings'
 
 const LINES: NoteLineDef[] = [
-  { label: 'Capital social souscrit', prefixes: ['101'], side: 'credit_abs' },
-  { label: 'Capital non appele', prefixes: ['109'] },
-  { label: 'Actions propres', prefixes: ['102'], side: 'credit_abs' },
-  { label: 'Apport en nature', prefixes: ['103'], side: 'credit_abs' },
+  { label: 'Capital social souscrit', prefixes: [...NOTE_10.capitalSouscrit.comptes], side: 'credit_abs' },
+  { label: 'Capital non appele', prefixes: [...NOTE_10.capitalNonAppele.comptes] },
+  { label: 'Actions propres', prefixes: [...NOTE_10.actionsPropres.comptes], side: 'credit_abs' },
+  { label: 'Apport en nature', prefixes: [...NOTE_10.apportNature.comptes], side: 'credit_abs' },
   { label: 'TOTAL', prefixes: [], isTotal: true, totalOf: [0, 1, 2, 3] },
 ]
 

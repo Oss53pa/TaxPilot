@@ -1,8 +1,7 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Box,
   Typography,
-  Paper,
   Grid,
   Card,
   CardContent,
@@ -13,7 +12,6 @@ import {
   FormControl,
   InputLabel,
   Chip,
-  IconButton,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -27,8 +25,6 @@ import {
   Alert,
   LinearProgress,
   Divider,
-  Switch,
-  FormControlLabel,
   Accordion,
   AccordionSummary,
   AccordionDetails,
@@ -38,64 +34,36 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Tooltip,
-  Menu,
-  Fade,
   Stepper,
   Step,
   StepLabel,
   StepContent,
-  Checkbox,
-  Radio,
-  RadioGroup,
-  FormGroup,
   Badge,
   CircularProgress
 } from '@mui/material';
 import {
   Description,
   Add,
-  Edit,
-  Delete,
   Download,
-  Print,
-  Send,
   Visibility,
-  Settings,
   Schedule,
-  CloudUpload,
-  FileCopy,
-  Archive,
-  History,
   Refresh,
   CheckCircle,
   Warning,
   Error as ErrorIcon,
   ExpandMore,
-  FilterList,
   Search,
-  MoreVert,
   Folder,
-  InsertDriveFile,
-  PictureAsPdf,
-  TableView,
-  Code,
-  Image,
   BusinessCenter,
   AccountBalance,
   TrendingUp,
   Assessment,
-  Timeline,
   Security,
   VerifiedUser,
   PlayArrow,
-  Pause,
   Stop,
   Speed,
   AutoFixHigh,
-  DataUsage,
-  Calculate,
-  CompareArrows,
   Build
 } from '@mui/icons-material';
 
@@ -326,7 +294,7 @@ const ModernLiasseProduction: React.FC = () => {
   };
 
   // EX-LIASSE-003: Production automatisée avec validation temps réel
-  const startAutomaticProduction = async (liasse: LiasseTemplate) => {
+  const startAutomaticProduction = async (_liasse: LiasseTemplate) => {
     setIsProducing(true);
     setProductionStartTime(new Date());
     setElapsedTime(0);
@@ -437,10 +405,11 @@ const ModernLiasseProduction: React.FC = () => {
   };
 
   // EX-LIASSE-005: Export multi-format
-  const exportLiasse = (liasse: LiasseTemplate, format: 'pdf' | 'excel' | 'xml' | 'json') => {
+  const _exportLiasse = (_liasse: LiasseTemplate, _format: 'pdf' | 'excel' | 'xml' | 'json') => {
     // Simulation de l'export
-    console.log(`Export de la liasse ${liasse.name} au format ${format}`);
+    console.log(`Export de la liasse ${_liasse.name} au format ${_format}`);
   };
+  void _exportLiasse;
 
   const getStatusColor = (status: string) => {
     switch (status) {

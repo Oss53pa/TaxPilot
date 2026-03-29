@@ -218,25 +218,29 @@ const TFT: React.FC<PageProps> = ({ entreprise, balance, balanceN1, onNoteClick 
   // Compute N-1 column (uses empty [] as its own previous year)
   const p = hasN1 ? computeTFT(balN1, []) : null
 
-  const lines: { ref: string; label: string; note: string; valN: number | null; valN1: number | null; isTotal?: boolean }[] = [
+  const lines: { ref: string; label: string; note: string; valN: number | null; valN1: number | null; isTotal?: boolean; isSub?: boolean }[] = [
     { ref: 'ZA', label: 'Trésorerie nette au 1er janvier (= Trésorerie actif N-1 - Trésorerie passif N-1)', note: 'A', valN: v(n.ZA), valN1: p ? v(p.ZA) : null, isTotal: true },
+    { ref: '', label: 'FLUX DE TRESORERIE PROVENANT DES ACTIVITES OPERATIONNELLES', note: '', valN: null, valN1: null, isSub: true },
     { ref: 'FA', label: "Capacité d'Autofinancement Globale (CAFG)", note: '', valN: v(n.FA), valN1: p ? v(p.FA) : null },
     { ref: 'FB', label: "- Variation d'actif circulant HAO", note: '', valN: v(n.FB), valN1: p ? v(p.FB) : null },
     { ref: 'FC', label: '- Variation des stocks', note: '', valN: v(n.FC), valN1: p ? v(p.FC) : null },
     { ref: 'FD', label: '- Variation des créances', note: '', valN: v(n.FD), valN1: p ? v(p.FD) : null },
     { ref: 'FE', label: '+ Variation du passif circulant', note: '', valN: v(n.FE), valN1: p ? v(p.FE) : null },
     { ref: 'ZB', label: 'Flux de trésorerie provenant des activités opérationnelles (Somme FA à FE)', note: 'B', valN: v(n.ZB), valN1: p ? v(p.ZB) : null, isTotal: true },
+    { ref: '', label: 'FLUX DE TRESORERIE PROVENANT DES ACTIVITES D\'INVESTISSEMENT', note: '', valN: null, valN1: null, isSub: true },
     { ref: 'FF', label: "- Décaissements liés aux acquisitions d'immobilisations incorporelles", note: '', valN: v(n.FF), valN1: p ? v(p.FF) : null },
     { ref: 'FG', label: "- Décaissements liés aux acquisitions d'immobilisations corporelles", note: '', valN: v(n.FG), valN1: p ? v(p.FG) : null },
     { ref: 'FH', label: "- Décaissements liés aux acquisitions d'immobilisations financières", note: '', valN: v(n.FH), valN1: p ? v(p.FH) : null },
     { ref: 'FI', label: "+ Encaissements liés aux cessions d'immobilisations incorporelles et corporelles", note: '', valN: v(n.FI), valN1: p ? v(p.FI) : null },
     { ref: 'FJ', label: '+ Encaissements liés aux cessions d\'immobilisations financières', note: '', valN: v(n.FJ), valN1: p ? v(p.FJ) : null },
     { ref: 'ZC', label: "Flux de trésorerie provenant des activités d'investissement (somme FF à FJ)", note: 'C', valN: v(n.ZC), valN1: p ? v(p.ZC) : null, isTotal: true },
+    { ref: '', label: 'FLUX DE TRESORERIE PROVENANT DU FINANCEMENT PAR LES CAPITAUX PROPRES', note: '', valN: null, valN1: null, isSub: true },
     { ref: 'FK', label: '+ Augmentations de capital par apports nouveaux', note: '', valN: v(n.FK), valN1: p ? v(p.FK) : null },
     { ref: 'FL', label: "+ Subventions d'investissement reçues", note: '', valN: v(n.FL), valN1: p ? v(p.FL) : null },
     { ref: 'FM', label: '- Prélèvements sur le capital', note: '', valN: v(n.FM), valN1: p ? v(p.FM) : null },
     { ref: 'FN', label: '- Dividendes versés', note: '', valN: v(n.FN), valN1: p ? v(p.FN) : null },
     { ref: 'ZD', label: 'Flux de trésorerie provenant des capitaux propres (somme FK à FN)', note: 'D', valN: v(n.ZD), valN1: p ? v(p.ZD) : null, isTotal: true },
+    { ref: '', label: 'FLUX DE TRESORERIE PROVENANT DES CAPITAUX ETRANGERS', note: '', valN: null, valN1: null, isSub: true },
     { ref: 'FO', label: '+ Emprunts', note: '', valN: v(n.FO), valN1: p ? v(p.FO) : null },
     { ref: 'FP', label: '+ Autres dettes financières diverses', note: '', valN: v(n.FP), valN1: p ? v(p.FP) : null },
     { ref: 'FQ', label: '- Remboursements des emprunts et autres dettes financières', note: '', valN: v(n.FQ), valN1: p ? v(p.FQ) : null },
@@ -247,11 +251,11 @@ const TFT: React.FC<PageProps> = ({ entreprise, balance, balanceN1, onNoteClick 
   ]
 
   const columns: Column[] = [
-    { key: 'ref', label: 'REF', width: 28, align: 'center' },
-    { key: 'label', label: 'TABLEAU DES FLUX DE TRÉSORERIE', width: '50%' },
-    { key: 'note', label: 'Note', width: 30, align: 'center' },
-    { key: 'valN', label: 'Exercice N', align: 'right' },
-    { key: 'valN1', label: 'Exercice N-1', align: 'right' },
+    { key: 'ref', label: 'REF', width: 52, align: 'center' },
+    { key: 'label', label: 'TABLEAU DES FLUX DE TRÉSORERIE', width: '45%' },
+    { key: 'note', label: 'Note', width: 44, align: 'center' },
+    { key: 'valN', label: 'NET', width: 130, align: 'right', subLabel: 'Exercice N' },
+    { key: 'valN1', label: 'NET', width: 130, align: 'right', subLabel: 'Exercice N-1' },
   ]
 
   const rows: Row[] = lines.map((r, i) => ({
@@ -259,12 +263,13 @@ const TFT: React.FC<PageProps> = ({ entreprise, balance, balanceN1, onNoteClick 
     cells: {
       ref: r.ref,
       label: r.label,
-      note: r.note,
-      valN: r.valN,
-      valN1: r.valN1,
+      note: r.isSub ? '' : r.note,
+      valN: r.isSub ? '' : r.valN,
+      valN1: r.isSub ? '' : r.valN1,
     },
     isTotal: r.isTotal,
-    bold: r.isTotal,
+    isSectionHeader: r.isSub,
+    bold: r.isTotal || r.isSub,
   }))
 
   const hasManualValues = Object.values(manual).some(v => v !== 0)

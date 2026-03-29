@@ -22,8 +22,6 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  LinearProgress,
-  Avatar,
   Divider,
   IconButton,
   Tooltip,
@@ -35,7 +33,6 @@ import {
   Warning,
   Error,
   Schedule,
-  Receipt,
   Visibility,
   GetApp,
   Refresh,
@@ -47,7 +44,7 @@ const Teledeclaration: React.FC = () => {
   const [transmissionEnCours, setTransmissionEnCours] = useState(false)
   const [loading, setLoading] = useState(true)
   const [declarations, setDeclarations] = useState<any[]>([])
-  const [obligations, setObligations] = useState<any[]>([])
+  const [, setObligations] = useState<any[]>([])
 
   useEffect(() => {
     loadTaxData()
@@ -63,8 +60,8 @@ const Teledeclaration: React.FC = () => {
         taxService.getObligations({ page_size: 10 })
       ])
 
-      setDeclarations(declarationsResponse.results || [])
-      setObligations(obligationsResponse.results || [])
+      setDeclarations((declarationsResponse as any).results || [])
+      setObligations((obligationsResponse as any).results || [])
 
       console.log('✅ Tax data loaded successfully')
     } catch (error) {
@@ -193,7 +190,6 @@ const Teledeclaration: React.FC = () => {
             startIcon={<Send />}
             onClick={lancerTransmission}
             disabled={transmissionEnCours || loading}
-            disabled={transmissionEnCours}
           >
             Transmettre
           </Button>

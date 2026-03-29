@@ -2,18 +2,14 @@
  * Module Liasse Fiscale Complet - Gestion de tous les onglets SYSCOHADA
  */
 
-import React, { useState, useEffect, lazy, Suspense } from 'react'
+import React, { useState, useEffect, Suspense } from 'react'
 import {
   Box,
-  Grid,
-  Card,
-  CardContent,
   Typography,
   Button,
   IconButton,
   Drawer,
   List,
-  ListItem,
   ListItemButton,
   ListItemIcon,
   ListItemText,
@@ -27,17 +23,11 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  TextField,
-  Divider,
   useTheme,
   alpha,
-  Badge,
   Tooltip,
   Stack,
   Alert,
-  Skeleton,
-  Tabs,
-  Tab,
   Collapse,
   CircularProgress,
   Breadcrumbs,
@@ -45,18 +35,11 @@ import {
 } from '@mui/material'
 import '../../styles/liasse-fixes.css'
 import {
-  Assignment as AssignmentIcon,
-  AccountBalance as BalanceIcon,
-  TrendingUp as TrendingIcon,
-  TableChart as TableIcon,
-  Notes as NotesIcon,
   Assessment as AssessmentIcon,
-  Description as DocIcon,
   GetApp as ExportIcon,
   Print as PrintIcon,
   Save as SaveIcon,
   Check as CheckIcon,
-  Warning as WarningIcon,
   Error as ErrorIcon,
   NavigateNext as NextIcon,
   NavigateBefore as PrevIcon,
@@ -65,13 +48,10 @@ import {
   ExpandLess as CollapseIcon,
   Folder as FolderIcon,
   FolderOpen as FolderOpenIcon,
-  InsertDriveFile as FileIcon,
   CheckCircle as CompleteIcon,
   RadioButtonUnchecked as EmptyIcon,
   HourglassEmpty as PartialIcon,
   PlayArrow as PlayIcon,
-  Visibility as ViewIcon,
-  Edit as EditIcon,
   Lock as LockIcon,
   LockOpen as UnlockIcon,
 } from '@mui/icons-material'
@@ -115,7 +95,7 @@ import SupplementAvantagesFiscaux from '../../components/liasse/sheets/Supplemen
 import FicheRenseignements from '../../components/liasse/sheets/FicheRenseignements'
 import TablesCalculImpots from '../../components/liasse/sheets/TablesCalculImpots'
 import TableauxSupplementaires from '../../components/liasse/sheets/TableauxSupplementaires'
-import { LIASSE_SHEETS, SHEET_CATEGORIES, SheetConfig } from '../../config/liasseFiscaleSheets'
+import { LIASSE_SHEETS, SHEET_CATEGORIES } from '../../config/liasseFiscaleSheets'
 
 const DRAWER_WIDTH = 380
 

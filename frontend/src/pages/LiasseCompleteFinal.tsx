@@ -21,22 +21,10 @@ import {
   Paper,
   Alert,
   LinearProgress,
-  Tooltip,
   Badge,
 } from '@mui/material'
 import {
   Assignment,
-  AccountBalance,
-  TrendingUp,
-  TableChart,
-  Description,
-  Notes,
-  AttachMoney,
-  BarChart,
-  Assessment,
-  SwapHoriz,
-  AccountTree,
-  Calculate,
   CheckCircle,
   Warning,
   Error,
@@ -49,23 +37,15 @@ import {
 } from '@mui/icons-material'
 
 // Import de la configuration des composants
-import { 
-  LIASSE_COMPONENTS, 
-  getComponentsByCategory, 
-  getGlobalCompletude, 
-  getStatusStats,
-  type LiasseComponentConfig 
+import {
+  LIASSE_COMPONENTS,
+  getComponentsByCategory,
+  getGlobalCompletude,
 } from '../config/liasseComponents'
-
-// Import modal validation
-import ValidationModal from '../components/liasse/modals/ValidationModal'
 
 const DRAWER_WIDTH = 280
 // Palette FiscaSync
-const PRIMARY_COLOR = '#373B4D'        // Bleu foncé principal  
-const SECONDARY_COLOR = '#949597'      // Gris moyen
-const BACKGROUND_COLOR = '#ECECEF'     // Fond global clair
-const SURFACE_COLOR = '#ECEDEF'        // Fond des cartes
+const PRIMARY_COLOR = '#373B4D'        // Bleu foncé principal
 const ACCENT_COLOR = '#BDBFB7'         // Accent pour encadrés
 const TEXT_PRIMARY = '#373B4D'         // Texte principal
 const TEXT_SECONDARY = '#949597'       // Texte secondaire
@@ -74,8 +54,6 @@ const LiasseCompleteFinal: React.FC = () => {
   const [selectedOnglet, setSelectedOnglet] = useState('couverture')
   const [drawerOpen, setDrawerOpen] = useState(true)
   const [modeEdition, setModeEdition] = useState(false)
-  const [validationModalOpen, setValidationModalOpen] = useState(false)
-  const [validationEnCours, setValidationEnCours] = useState(false)
 
   // Utiliser la configuration centralisée
   const ongletsLiasse = LIASSE_COMPONENTS.filter(comp => comp.isVisible)
@@ -94,7 +72,7 @@ const LiasseCompleteFinal: React.FC = () => {
       case 'complete': return <CheckCircle fontSize="small" />
       case 'partial': return <Warning fontSize="small" />
       case 'empty': return <Error fontSize="small" />
-      default: return null
+      default: return undefined
     }
   }
 
@@ -104,7 +82,6 @@ const LiasseCompleteFinal: React.FC = () => {
   // Utiliser les fonctions utilitaires
   const completudeGlobale = getGlobalCompletude()
   const ongletsByCategory = getComponentsByCategory()
-  const statusStats = getStatusStats()
 
   return (
     <Box sx={{ display: 'flex', height: '100vh', backgroundColor: '#f5f5f5' }}>

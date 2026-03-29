@@ -7,7 +7,8 @@
 
 import * as XLSX from 'xlsx'
 import { CELL_MAP, TEMPLATE_PATH, CONTROLES } from '@/config/liasseModelReference'
-import { getActifBrut, getAmortProv, getPassif, getBalanceSolde } from './liasse-calculs'
+import { getActifBrut, getAmortProv, getPassif, getBalanceSolde, detecterAnomaliesActif, detecterAnomaliesPassif } from './liasse-calculs'
+import { ALL_ACTIF_PREFIXES, ALL_PASSIF_PREFIXES, BILAN_ACTIF, BILAN_PASSIF, COMPTE_RESULTAT_MAPPING as CR, TFT_COMPTES } from '@/constants/syscohada-mappings'
 import type { BalanceEntry, EntrepriseData } from '../types'
 
 interface InjectionLog {
@@ -26,34 +27,35 @@ interface InjectionLog {
 function computeAllValues(
   balance: BalanceEntry[],
   balanceN1: BalanceEntry[],
-  entreprise: EntrepriseData
+  entreprise: EntrepriseData,
+  balanceN2: BalanceEntry[] = []
 ): Record<string, number | string> {
   const vals: Record<string, number | string> = {}
 
   // Helper to compute actif line: brut, amort, netN (and N-1 from balanceN1)
   // This mirrors the logic in 10_Actif.tsx / 09_Bilan.tsx
   const actifMapping: Record<string, { comptes: string[]; amort: string[] }> = {
-    AE: { comptes: ['211', '212'], amort: ['2811', '2812', '2911', '2912'] },
-    AF: { comptes: ['213', '214', '215'], amort: ['2813', '2814', '2815', '2913', '2914', '2915'] },
-    AG: { comptes: ['216'], amort: ['2816', '2916'] },
-    AH: { comptes: ['217', '218', '219'], amort: ['2817', '2818', '2819', '2917', '2918', '2919'] },
-    AJ: { comptes: ['22'], amort: ['282', '292'] },
-    AK: { comptes: ['231', '232', '233', '234'], amort: ['2831', '2832', '2833', '2834', '2931', '2932', '2933', '2934'] },
-    AL: { comptes: ['235', '237', '238'], amort: ['2835', '2837', '2838', '2935', '2937', '2938'] },
-    AM: { comptes: ['241', '242', '243', '244'], amort: ['2841', '2842', '2843', '2844', '2941', '2942', '2943', '2944'] },
-    AN: { comptes: ['245'], amort: ['2845', '2945'] },
-    AP: { comptes: ['251', '252'], amort: [] },
-    AR: { comptes: ['26'], amort: ['296'] },
-    AS: { comptes: ['271', '272', '273', '274', '275', '276', '277'], amort: ['297'] },
-    BA: { comptes: ['485', '486', '487', '488'], amort: ['498'] },
-    BB: { comptes: ['31', '32', '33', '34', '35', '36', '37', '38'], amort: ['391', '392', '393', '394', '395', '396', '397', '398'] },
-    BH: { comptes: ['409'], amort: ['490'] },
-    BI: { comptes: ['411', '412', '413', '414', '415', '416', '418'], amort: ['491'] },
-    BJ: { comptes: ['43', '44', '45', '46', '47'], amort: ['492', '493', '494', '495', '496', '497'] },
-    BQ: { comptes: ['50'], amort: ['590'] },
-    BR: { comptes: ['51'], amort: ['591'] },
-    BS: { comptes: ['52', '53', '54', '55', '56', '57', '58'], amort: ['592', '593', '594'] },
-    BU: { comptes: ['478'], amort: [] },
+    AE: { comptes: [...BILAN_ACTIF.AE.comptes], amort: [...BILAN_ACTIF.AE.amort] },
+    AF: { comptes: [...BILAN_ACTIF.AF.comptes], amort: [...BILAN_ACTIF.AF.amort] },
+    AG: { comptes: [...BILAN_ACTIF.AG.comptes], amort: [...BILAN_ACTIF.AG.amort] },
+    AH: { comptes: [...BILAN_ACTIF.AH.comptes], amort: [...BILAN_ACTIF.AH.amort] },
+    AJ: { comptes: [...BILAN_ACTIF.AJ.comptes], amort: [...BILAN_ACTIF.AJ.amort] },
+    AK: { comptes: [...BILAN_ACTIF.AK.comptes], amort: [...BILAN_ACTIF.AK.amort] },
+    AL: { comptes: [...BILAN_ACTIF.AL.comptes], amort: [...BILAN_ACTIF.AL.amort] },
+    AM: { comptes: [...BILAN_ACTIF.AM.comptes], amort: [...BILAN_ACTIF.AM.amort] },
+    AN: { comptes: [...BILAN_ACTIF.AN.comptes], amort: [...BILAN_ACTIF.AN.amort] },
+    AP: { comptes: [...BILAN_ACTIF.AP.comptes], amort: [...BILAN_ACTIF.AP.amort] },
+    AR: { comptes: [...BILAN_ACTIF.AR.comptes], amort: [...BILAN_ACTIF.AR.amort] },
+    AS: { comptes: [...BILAN_ACTIF.AS.comptes], amort: [...BILAN_ACTIF.AS.amort] },
+    BA: { comptes: [...BILAN_ACTIF.BA.comptes], amort: [...BILAN_ACTIF.BA.amort] },
+    BB: { comptes: [...BILAN_ACTIF.BB.comptes], amort: [...BILAN_ACTIF.BB.amort] },
+    BH: { comptes: [...BILAN_ACTIF.BH.comptes], amort: [...BILAN_ACTIF.BH.amort] },
+    BI: { comptes: [...BILAN_ACTIF.BI.comptes], amort: [...BILAN_ACTIF.BI.amort] },
+    BJ: { comptes: [...BILAN_ACTIF.BJ.comptes], amort: [...BILAN_ACTIF.BJ.amort] },
+    BQ: { comptes: [...BILAN_ACTIF.BQ.comptes], amort: [...BILAN_ACTIF.BQ.amort] },
+    BR: { comptes: [...BILAN_ACTIF.BR.comptes], amort: [...BILAN_ACTIF.BR.amort] },
+    BS: { comptes: [...BILAN_ACTIF.BS.comptes], amort: [...BILAN_ACTIF.BS.amort] },
+    BU: { comptes: [...BILAN_ACTIF.BU.comptes], amort: [...BILAN_ACTIF.BU.amort] },
   }
 
   // Compute actif detail lines
@@ -108,28 +110,28 @@ function computeAllValues(
 
   // Passif mapping
   const passifMapping: Record<string, { comptes: string[]; special?: string }> = {
-    CA: { comptes: ['101', '102', '103'] },
-    CB: { comptes: ['109'], special: 'debit' },
-    CD: { comptes: ['104', '105'] },
-    CE: { comptes: ['106'] },
-    CF: { comptes: ['111', '112'] },
-    CG: { comptes: ['113', '118'] },
-    CH: { comptes: ['12'], special: 'signed' },
-    CJ: { comptes: ['13'], special: 'signed' },
-    CL: { comptes: ['14'] },
-    CM: { comptes: ['15'] },
-    DA: { comptes: ['161', '162', '163', '164', '165', '166', '168'] },
-    DB: { comptes: ['17'] },
-    DC: { comptes: ['19'] },
-    DH: { comptes: ['481', '482', '483', '484'] },
-    DI: { comptes: ['419'] },
-    DJ: { comptes: ['401', '402', '403', '404', '405', '408'] },
-    DK: { comptes: ['43', '44'] },
-    DM: { comptes: ['421', '422', '423', '424', '425', '426', '427', '428'] },
-    DN: { comptes: ['499'] },
-    DQ: { comptes: ['565'] },
-    DR: { comptes: ['52', '561', '564'] },
-    DV: { comptes: ['479'] },
+    CA: { comptes: [...BILAN_PASSIF.CA.comptes] },
+    CB: { comptes: [...BILAN_PASSIF.CB.comptes], special: 'debit' },
+    CD: { comptes: [...BILAN_PASSIF.CD.comptes] },
+    CE: { comptes: [...BILAN_PASSIF.CE.comptes] },
+    CF: { comptes: [...BILAN_PASSIF.CF.comptes] },
+    CG: { comptes: [...BILAN_PASSIF.CG.comptes] },
+    CH: { comptes: [...BILAN_PASSIF.CH.comptes], special: 'signed' },
+    CJ: { comptes: [...BILAN_PASSIF.CJ.comptes], special: 'signed' },
+    CL: { comptes: [...BILAN_PASSIF.CL.comptes] },
+    CM: { comptes: [...BILAN_PASSIF.CM.comptes] },
+    DA: { comptes: [...BILAN_PASSIF.DA.comptes] },
+    DB: { comptes: [...BILAN_PASSIF.DB.comptes] },
+    DC: { comptes: [...BILAN_PASSIF.DC.comptes] },
+    DH: { comptes: [...BILAN_PASSIF.DH.comptes] },
+    DI: { comptes: [...BILAN_PASSIF.DI.comptes] },
+    DJ: { comptes: [...BILAN_PASSIF.DJ.comptes] },
+    DK: { comptes: [...BILAN_PASSIF.DK.comptes] },
+    DM: { comptes: [...BILAN_PASSIF.DM.comptes] },
+    DN: { comptes: [...BILAN_PASSIF.DN.comptes] },
+    DQ: { comptes: [...BILAN_PASSIF.DQ.comptes] },
+    DR: { comptes: [...BILAN_PASSIF.DR.comptes] },
+    DV: { comptes: [...BILAN_PASSIF.DV.comptes] },
   }
 
   for (const [ref, map] of Object.entries(passifMapping)) {
@@ -169,39 +171,39 @@ function computeAllValues(
 
   // Resultat — use getBalanceSolde for credit/debit determination
   const resultatMapping: Record<string, { comptes: string[]; sens: 'credit' | 'debit' | 'signed' }> = {
-    TA: { comptes: ['701'], sens: 'credit' },
-    RA: { comptes: ['601'], sens: 'debit' },
-    RB: { comptes: ['6031'], sens: 'signed' },
-    TB: { comptes: ['702', '703', '704'], sens: 'credit' },
-    TC: { comptes: ['705', '706', '707'], sens: 'credit' },
-    TD: { comptes: ['708'], sens: 'credit' },
-    TE: { comptes: ['73'], sens: 'signed' },
-    TF: { comptes: ['72'], sens: 'credit' },
-    TG: { comptes: ['71'], sens: 'credit' },
-    TH: { comptes: ['75'], sens: 'credit' },
-    TI: { comptes: ['781', '791'], sens: 'credit' },
-    RC: { comptes: ['602'], sens: 'debit' },
-    RD: { comptes: ['6032'], sens: 'signed' },
-    RE: { comptes: ['604', '605', '608'], sens: 'debit' },
-    RF: { comptes: ['6033', '6038'], sens: 'signed' },
-    RG: { comptes: ['61'], sens: 'debit' },
-    RH: { comptes: ['62', '63'], sens: 'debit' },
-    RI: { comptes: ['64'], sens: 'debit' },
-    RJ: { comptes: ['65'], sens: 'debit' },
-    RK: { comptes: ['66'], sens: 'debit' },
-    TJ: { comptes: ['791', '797', '798', '799'], sens: 'credit' },
-    RL: { comptes: ['681', '691'], sens: 'debit' },
-    TK: { comptes: ['77'], sens: 'credit' },
-    TL: { comptes: ['797'], sens: 'credit' },
-    TM: { comptes: ['787'], sens: 'credit' },
-    RM: { comptes: ['67'], sens: 'debit' },
-    RN: { comptes: ['697'], sens: 'debit' },
-    TN: { comptes: ['82'], sens: 'credit' },
-    TO: { comptes: ['84', '86', '88'], sens: 'credit' },
-    RO: { comptes: ['81'], sens: 'debit' },
-    RP: { comptes: ['83', '85', '87'], sens: 'debit' },
-    RQ: { comptes: ['87'], sens: 'debit' },
-    RS: { comptes: ['89'], sens: 'debit' },
+    TA: { comptes: [...CR.TA.comptes], sens: 'credit' },
+    RA: { comptes: [...CR.RA.comptes], sens: 'debit' },
+    RB: { comptes: [...CR.RB.comptes], sens: 'signed' },
+    TB: { comptes: [...CR.TB.comptes], sens: 'credit' },
+    TC: { comptes: [...CR.TC.comptes], sens: 'credit' },
+    TD: { comptes: [...CR.TD.comptes], sens: 'credit' },
+    TE: { comptes: [...CR.TE.comptes], sens: 'signed' },
+    TF: { comptes: [...CR.TF.comptes], sens: 'credit' },
+    TG: { comptes: [...CR.TG.comptes], sens: 'credit' },
+    TH: { comptes: [...CR.TH.comptes], sens: 'credit' },
+    TI: { comptes: [...CR.TI.comptes], sens: 'credit' },  // 791 → TJ uniquement
+    RC: { comptes: [...CR.RC.comptes], sens: 'debit' },
+    RD: { comptes: [...CR.RD.comptes], sens: 'signed' },
+    RE: { comptes: [...CR.RE.comptes], sens: 'debit' },
+    RF: { comptes: [...CR.RF.comptes], sens: 'signed' },
+    RG: { comptes: [...CR.RG.comptes], sens: 'debit' },
+    RH: { comptes: [...CR.RH.comptes], sens: 'debit' },
+    RI: { comptes: [...CR.RI.comptes], sens: 'debit' },
+    RJ: { comptes: [...CR.RJ.comptes], sens: 'debit' },
+    RK: { comptes: [...CR.RK.comptes], sens: 'debit' },
+    TJ: { comptes: [...CR.TJ.comptes], sens: 'credit' },  // 797 → TL uniquement
+    RL: { comptes: [...CR.RL.comptes], sens: 'debit' },
+    TK: { comptes: [...CR.TK.comptes], sens: 'credit' },
+    TL: { comptes: [...CR.TL.comptes], sens: 'credit' },
+    TM: { comptes: [...CR.TM.comptes], sens: 'credit' },
+    RM: { comptes: [...CR.RM.comptes], sens: 'debit' },
+    RN: { comptes: [...CR.RN.comptes], sens: 'debit' },
+    TN: { comptes: [...CR.TN.comptes], sens: 'credit' },
+    TO: { comptes: [...CR.TO.comptes], sens: 'credit' },
+    RO: { comptes: [...CR.RO.comptes], sens: 'debit' },
+    RP: { comptes: [...CR.RP.comptes], sens: 'debit' },  // 87 exclusif à RQ
+    RQ: { comptes: [...CR.RQ.comptes], sens: 'debit' },
+    RS: { comptes: [...CR.RS.comptes], sens: 'debit' },
   }
 
   // In the Excel model, ALL values use the same sign convention:
@@ -229,71 +231,147 @@ function computeAllValues(
   vals['XH.netN'] = n('TN.netN') + n('TO.netN') + n('RO.netN') + n('RP.netN')
   vals['XI.netN'] = n('XG.netN') + n('XH.netN') + n('RQ.netN') + n('RS.netN')
 
+  // ── Résultat N-1 totals (nécessaires pour TFT N-1) ──
+  if (balanceN1.length > 0) {
+    vals['XA.netN1'] = n('TA.netN1') + n('RA.netN1') + n('RB.netN1')
+    vals['XB.netN1'] = n('TA.netN1') + n('TB.netN1') + n('TC.netN1') + n('TD.netN1')
+    vals['XC.netN1'] = n('XB.netN1') + n('RA.netN1') + n('RB.netN1') + n('TE.netN1') + n('TF.netN1') + n('TG.netN1') + n('TH.netN1') + n('TI.netN1') + n('RC.netN1') + n('RD.netN1') + n('RE.netN1') + n('RF.netN1') + n('RG.netN1') + n('RH.netN1') + n('RI.netN1') + n('RJ.netN1')
+    vals['XD.netN1'] = n('XC.netN1') + n('RK.netN1')
+    vals['XE.netN1'] = n('XD.netN1') + n('TJ.netN1') + n('RL.netN1')
+    vals['XF.netN1'] = n('TK.netN1') + n('TL.netN1') + n('TM.netN1') + n('RM.netN1') + n('RN.netN1')
+    vals['XG.netN1'] = n('XE.netN1') + n('XF.netN1')
+    vals['XH.netN1'] = n('TN.netN1') + n('TO.netN1') + n('RO.netN1') + n('RP.netN1')
+    vals['XI.netN1'] = n('XG.netN1') + n('XH.netN1') + n('RQ.netN1') + n('RS.netN1')
+  }
+
   // ── TFT — Tableau des Flux de Trésorerie ──
 
   // ZA: Trésorerie nette ouverture = Trésorerie actif N-1 - Trésorerie passif N-1
   if (balanceN1.length > 0) {
-    const btN1 = getActifBrut(balanceN1, ['50','51','52','53','54','55','56','57','58']) - getAmortProv(balanceN1, ['590','591','592','593','594'])
-    const dtN1 = getPassif(balanceN1, ['565','52','561','564'])
+    const btN1 = getActifBrut(balanceN1, [...TFT_COMPTES.TRESORERIE_ACTIF]) - getAmortProv(balanceN1, [...TFT_COMPTES.TRESORERIE_ACTIF_AMORT])
+    const dtN1 = getPassif(balanceN1, [...TFT_COMPTES.TRESORERIE_PASSIF])
     vals['ZA.valN'] = btN1 - dtN1
   } else {
     vals['ZA.valN'] = 0
   }
 
   // FA: CAFG = Résultat net + Dotations amort/prov - Reprises amort/prov + VC cessions - Produits cessions
-  const dotations = getBalanceSolde(balance, ['681','691','697'])
-  const reprises = -getBalanceSolde(balance, ['791','797','798','799'])
-  const vcCessions = getBalanceSolde(balance, ['81'])
-  const prodCessions = -getBalanceSolde(balance, ['82'])
+  const dotations = getBalanceSolde(balance, [...TFT_COMPTES.DOTATIONS])
+  const reprises = -getBalanceSolde(balance, [...TFT_COMPTES.REPRISES])
+  const vcCessions = getBalanceSolde(balance, [...TFT_COMPTES.VC_CESSIONS])
+  const prodCessions = -getBalanceSolde(balance, [...TFT_COMPTES.PROD_CESSIONS])
   vals['FA.valN'] = n('XI.netN') + dotations - reprises + vcCessions - prodCessions
 
   // FB-FE: Variations BFR
 
   // FB: -Variation actif circulant HAO
-  const baComptes = ['485','486','487','488']
+  const baComptes = [...TFT_COMPTES.ACTIF_CIRCULANT_HAO]
   vals['FB.valN'] = -(getActifBrut(balance, baComptes) - (balanceN1.length > 0 ? getActifBrut(balanceN1, baComptes) : 0))
 
   // FC: -Variation stocks
-  const bbComptes = ['31','32','33','34','35','36','37','38']
+  const bbComptes = [...TFT_COMPTES.STOCKS]
   vals['FC.valN'] = -(getActifBrut(balance, bbComptes) - (balanceN1.length > 0 ? getActifBrut(balanceN1, bbComptes) : 0))
 
   // FD: -Variation créances
-  const crComptes = ['409','411','412','413','414','415','416','418','43','44','45','46','47']
+  const crComptes = [...TFT_COMPTES.CREANCES]
   vals['FD.valN'] = -(getActifBrut(balance, crComptes) - (balanceN1.length > 0 ? getActifBrut(balanceN1, crComptes) : 0))
 
   // FE: +Variation passif circulant
-  const pcComptes = ['481','482','483','484','419','401','402','403','404','405','408','43','44','421','422','423','424','425','426','427','428','499']
+  const pcComptes = [...TFT_COMPTES.PASSIF_CIRCULANT]
   vals['FE.valN'] = getPassif(balance, pcComptes) - (balanceN1.length > 0 ? getPassif(balanceN1, pcComptes) : 0)
 
   // FF-FH: Décaissements acquisitions immo (variation brut négatif = acquisition)
-  const incComptes = ['211','212','213','214','215','216','217','218','219']
+  const incComptes = [...TFT_COMPTES.IMMO_INCORPORELLES]
   vals['FF.valN'] = -(getActifBrut(balance, incComptes) - (balanceN1.length > 0 ? getActifBrut(balanceN1, incComptes) : 0))
-  const corComptes = ['22','231','232','233','234','235','237','238','241','242','243','244','245','251','252']
+  const corComptes = [...TFT_COMPTES.IMMO_CORPORELLES]
   vals['FG.valN'] = -(getActifBrut(balance, corComptes) - (balanceN1.length > 0 ? getActifBrut(balanceN1, corComptes) : 0))
-  const finComptes = ['26','271','272','273','274','275','276','277']
+  const finComptes = [...TFT_COMPTES.IMMO_FINANCIERES]
   vals['FH.valN'] = -(getActifBrut(balance, finComptes) - (balanceN1.length > 0 ? getActifBrut(balanceN1, finComptes) : 0))
 
   // FI: Encaissements cessions immo incorporelles et corporelles
-  vals['FI.valN'] = -getBalanceSolde(balance, ['82'])
+  vals['FI.valN'] = -getBalanceSolde(balance, [...TFT_COMPTES.PROD_CESSIONS])
 
   // FJ: Encaissements cessions immo financières
   vals['FJ.valN'] = 0
 
   // FK-FN: Financement capitaux propres
-  vals['FK.valN'] = getPassif(balance, ['101','102','103']) - (balanceN1.length > 0 ? getPassif(balanceN1, ['101','102','103']) : 0)
-  vals['FL.valN'] = getPassif(balance, ['14']) - (balanceN1.length > 0 ? getPassif(balanceN1, ['14']) : 0)
+  vals['FK.valN'] = getPassif(balance, [...TFT_COMPTES.CAPITAL]) - (balanceN1.length > 0 ? getPassif(balanceN1, [...TFT_COMPTES.CAPITAL]) : 0)
+  vals['FL.valN'] = getPassif(balance, [...TFT_COMPTES.SUBVENTIONS_INVEST]) - (balanceN1.length > 0 ? getPassif(balanceN1, [...TFT_COMPTES.SUBVENTIONS_INVEST]) : 0)
   vals['FM.valN'] = 0
   vals['FN.valN'] = 0
 
   // FO-FQ: Financement capitaux étrangers
-  vals['FO.valN'] = Math.max(0, getPassif(balance, ['161','162','163','164']) - (balanceN1.length > 0 ? getPassif(balanceN1, ['161','162','163','164']) : 0))
-  vals['FP.valN'] = Math.max(0, getPassif(balance, ['165','166','168','17']) - (balanceN1.length > 0 ? getPassif(balanceN1, ['165','166','168','17']) : 0))
-  vals['FQ.valN'] = Math.min(0, getPassif(balance, ['161','162','163','164','165','166','168','17']) - (balanceN1.length > 0 ? getPassif(balanceN1, ['161','162','163','164','165','166','168','17']) : 0))
+  vals['FO.valN'] = Math.max(0, getPassif(balance, [...TFT_COMPTES.EMPRUNTS_LT]) - (balanceN1.length > 0 ? getPassif(balanceN1, [...TFT_COMPTES.EMPRUNTS_LT]) : 0))
+  vals['FP.valN'] = Math.max(0, getPassif(balance, [...TFT_COMPTES.AUTRES_DETTES_FIN]) - (balanceN1.length > 0 ? getPassif(balanceN1, [...TFT_COMPTES.AUTRES_DETTES_FIN]) : 0))
+  vals['FQ.valN'] = Math.min(0, getPassif(balance, [...TFT_COMPTES.TOUS_EMPRUNTS]) - (balanceN1.length > 0 ? getPassif(balanceN1, [...TFT_COMPTES.TOUS_EMPRUNTS]) : 0))
 
-  // N-1 for TFT lines
-  vals['ZA.valN1'] = 0
-  for (const ref of ['FA','FB','FC','FD','FE','FF','FG','FH','FI','FJ','FK','FL','FM','FN','FO','FP','FQ']) {
-    vals[`${ref}.valN1`] = 0
+  // N-1 for TFT lines — computed from balanceN1 and balanceN2 when available
+  if (balanceN1.length > 0) {
+    // ZA N-1: Trésorerie ouverture N-1 = Trésorerie actif N-2 - Trésorerie passif N-2
+    if (balanceN2.length > 0) {
+      const btN2 = getActifBrut(balanceN2, [...TFT_COMPTES.TRESORERIE_ACTIF]) - getAmortProv(balanceN2, [...TFT_COMPTES.TRESORERIE_ACTIF_AMORT])
+      const dtN2 = getPassif(balanceN2, [...TFT_COMPTES.TRESORERIE_PASSIF])
+      vals['ZA.valN1'] = btN2 - dtN2
+    } else {
+      vals['ZA.valN1'] = 0
+    }
+
+    // FA N-1: CAFG from N-1 income statement
+    const dotN1 = getBalanceSolde(balanceN1, [...TFT_COMPTES.DOTATIONS])
+    const repN1 = -getBalanceSolde(balanceN1, [...TFT_COMPTES.REPRISES])
+    const vcN1 = getBalanceSolde(balanceN1, [...TFT_COMPTES.VC_CESSIONS])
+    const pcN1 = -getBalanceSolde(balanceN1, [...TFT_COMPTES.PROD_CESSIONS])
+    vals['FA.valN1'] = n('XI.netN1') + dotN1 - repN1 + vcN1 - pcN1
+
+    // FB-FE N-1: Variations BFR (N-1 vs N-2)
+    if (balanceN2.length > 0) {
+      vals['FB.valN1'] = -(getActifBrut(balanceN1, baComptes) - getActifBrut(balanceN2, baComptes))
+      vals['FC.valN1'] = -(getActifBrut(balanceN1, bbComptes) - getActifBrut(balanceN2, bbComptes))
+      vals['FD.valN1'] = -(getActifBrut(balanceN1, crComptes) - getActifBrut(balanceN2, crComptes))
+      vals['FE.valN1'] = getPassif(balanceN1, pcComptes) - getPassif(balanceN2, pcComptes)
+    } else {
+      vals['FB.valN1'] = 0
+      vals['FC.valN1'] = 0
+      vals['FD.valN1'] = 0
+      vals['FE.valN1'] = 0
+    }
+
+    // FF-FJ N-1: Investissements
+    if (balanceN2.length > 0) {
+      vals['FF.valN1'] = -(getActifBrut(balanceN1, incComptes) - getActifBrut(balanceN2, incComptes))
+      vals['FG.valN1'] = -(getActifBrut(balanceN1, corComptes) - getActifBrut(balanceN2, corComptes))
+      vals['FH.valN1'] = -(getActifBrut(balanceN1, finComptes) - getActifBrut(balanceN2, finComptes))
+    } else {
+      vals['FF.valN1'] = 0
+      vals['FG.valN1'] = 0
+      vals['FH.valN1'] = 0
+    }
+    vals['FI.valN1'] = -getBalanceSolde(balanceN1, [...TFT_COMPTES.PROD_CESSIONS])
+    vals['FJ.valN1'] = 0
+
+    // FK-FQ N-1: Financement
+    if (balanceN2.length > 0) {
+      vals['FK.valN1'] = getPassif(balanceN1, [...TFT_COMPTES.CAPITAL]) - getPassif(balanceN2, [...TFT_COMPTES.CAPITAL])
+      vals['FL.valN1'] = getPassif(balanceN1, [...TFT_COMPTES.SUBVENTIONS_INVEST]) - getPassif(balanceN2, [...TFT_COMPTES.SUBVENTIONS_INVEST])
+      vals['FM.valN1'] = 0
+      vals['FN.valN1'] = 0
+      vals['FO.valN1'] = Math.max(0, getPassif(balanceN1, [...TFT_COMPTES.EMPRUNTS_LT]) - getPassif(balanceN2, [...TFT_COMPTES.EMPRUNTS_LT]))
+      vals['FP.valN1'] = Math.max(0, getPassif(balanceN1, [...TFT_COMPTES.AUTRES_DETTES_FIN]) - getPassif(balanceN2, [...TFT_COMPTES.AUTRES_DETTES_FIN]))
+      vals['FQ.valN1'] = Math.min(0, getPassif(balanceN1, [...TFT_COMPTES.TOUS_EMPRUNTS]) - getPassif(balanceN2, [...TFT_COMPTES.TOUS_EMPRUNTS]))
+    } else {
+      vals['FK.valN1'] = 0
+      vals['FL.valN1'] = 0
+      vals['FM.valN1'] = 0
+      vals['FN.valN1'] = 0
+      vals['FO.valN1'] = 0
+      vals['FP.valN1'] = 0
+      vals['FQ.valN1'] = 0
+    }
+  } else {
+    vals['ZA.valN1'] = 0
+    for (const ref of ['FA','FB','FC','FD','FE','FF','FG','FH','FI','FJ','FK','FL','FM','FN','FO','FP','FQ']) {
+      vals[`${ref}.valN1`] = 0
+    }
   }
 
   // Enterprise info
@@ -315,6 +393,7 @@ export async function exportModeB(
   balance: BalanceEntry[],
   balanceN1: BalanceEntry[],
   entreprise: EntrepriseData,
+  balanceN2: BalanceEntry[] = [],
 ): Promise<void> {
   // 1. Fetch the template
   const response = await fetch(TEMPLATE_PATH)
@@ -329,7 +408,7 @@ export async function exportModeB(
   })
 
   // 3. Compute all values
-  const vals = computeAllValues(balance, balanceN1, entreprise)
+  const vals = computeAllValues(balance, balanceN1, entreprise, balanceN2)
 
   // 3b. Audit de calcul — vérifier les contrôles avant injection
   const auditVals: Record<string, number> = {}
@@ -361,11 +440,32 @@ export async function exportModeB(
     }
   }
 
+  // 3c. Détection des anomalies de soldes (Bugs #7-8)
+  const anomaliesActif = detecterAnomaliesActif(balance, ALL_ACTIF_PREFIXES)
+  const anomaliesPassif = detecterAnomaliesPassif(balance, ALL_PASSIF_PREFIXES)
+  if (anomaliesActif.length > 0 || anomaliesPassif.length > 0) {
+    const allAnomalies = [...anomaliesActif, ...anomaliesPassif]
+    for (const a of allAnomalies) {
+      const msg = a.type === 'actif_crediteur'
+        ? `[AVERTISSEMENT] Compte ${a.compte} (${a.libelle}) : solde créditeur ${a.montant.toLocaleString('fr-FR')} sur un compte d'actif`
+        : `[AVERTISSEMENT] Compte ${a.compte} (${a.libelle}) : solde débiteur ${a.montant.toLocaleString('fr-FR')} sur un compte de passif`
+      auditErrors.push(msg)
+      console.warn('[Audit anomalie]', msg)
+    }
+  }
+
   const bloquants = auditErrors.filter(e => e.startsWith('[BLOQUANT]'))
   if (bloquants.length > 0) {
-    console.error(`[Audit] ${bloquants.length} contrôle(s) bloquant(s) — export autorisé avec avertissement`)
-    console.warn('[Audit] Détail:', bloquants)
-    // Note: on ne bloque pas l'export car les écarts peuvent venir de l'absence de balance N-1
+    const totalActifNet = (Number(vals['BZ.brut']) || 0) - (Number(vals['BZ.amort']) || 0)
+    const totalPassif = Number(vals['DZ.netN']) || 0
+    const ecartBilan = Math.abs(totalActifNet - totalPassif)
+    // Bloquer l'export uniquement si BZ ≠ DZ (erreur critique)
+    if (ecartBilan > 1) {
+      throw new Error(
+        `Export bloqué — Bilan déséquilibré : Total Actif Net (${totalActifNet.toLocaleString('fr-FR')}) ≠ Total Passif (${totalPassif.toLocaleString('fr-FR')}). Écart: ${ecartBilan.toLocaleString('fr-FR')} FCFA. Vérifiez la balance importée.`
+      )
+    }
+    console.warn(`[Audit] ${bloquants.length} contrôle(s) bloquant(s) — export autorisé (bilan équilibré)`)
   }
 
   // 4. Inject cell by cell

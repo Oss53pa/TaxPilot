@@ -10,9 +10,9 @@
  */
 
 import React from 'react'
-import { Box, Typography, Divider } from '@mui/material'
+import { Box, Typography } from '@mui/material'
 import type { Entreprise } from '@/services/entrepriseService'
-import { getPaysVisualConfig, resolvePaysTheme, type PaysTheme, type PaysVisualConfig } from '@/config/paysTheme'
+import { getPaysVisualConfig, resolvePaysTheme, type PaysTheme } from '@/config/paysTheme'
 import { DrapeauPays } from '@/components/ui/DrapeauPays'
 
 // ─── Props ──────────────────────────────────────────────────────────────────

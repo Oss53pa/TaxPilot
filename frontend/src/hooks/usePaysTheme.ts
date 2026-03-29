@@ -3,7 +3,7 @@
  */
 
 import { useMemo } from 'react'
-import { resolvePaysTheme, getPaysVisualConfig, type PaysTheme, type PaysVisualConfig } from '@/config/paysTheme'
+import { resolvePaysTheme, getPaysVisualConfig, type PaysTheme } from '@/config/paysTheme'
 
 export function usePaysTheme(codePays?: string, surcharge?: Partial<PaysTheme>) {
   return useMemo(() => {

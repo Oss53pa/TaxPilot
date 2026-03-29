@@ -128,3 +128,64 @@ export const fmt = (v: number | null | undefined): string => {
   if (v === null || v === undefined || v === 0) return ''
   return Math.round(v).toLocaleString('fr-FR')
 }
+
+// ── Détection des anomalies comptables ──
+
+export interface AnomalieComptable {
+  compte: string
+  libelle: string
+  type: 'actif_crediteur' | 'passif_debiteur'
+  montant: number
+}
+
+/** Détecte les comptes d'actif avec solde créditeur anormal */
+export const detecterAnomaliesActif = (
+  balance: BalanceEntry[],
+  prefixes: readonly string[]
+): AnomalieComptable[] => {
+  const anomalies: AnomalieComptable[] = []
+  for (const entry of balance) {
+    const compte = entry.compte.replace(/\s/g, '')
+    for (const prefix of prefixes) {
+      if (compte === prefix || compte.startsWith(prefix)) {
+        const solde = entry.solde_debit - entry.solde_credit
+        if (solde < 0) {
+          anomalies.push({
+            compte,
+            libelle: entry.libelle || compte,
+            type: 'actif_crediteur',
+            montant: Math.abs(solde),
+          })
+        }
+        break
+      }
+    }
+  }
+  return anomalies
+}
+
+/** Détecte les comptes de passif avec solde débiteur anormal */
+export const detecterAnomaliesPassif = (
+  balance: BalanceEntry[],
+  prefixes: readonly string[]
+): AnomalieComptable[] => {
+  const anomalies: AnomalieComptable[] = []
+  for (const entry of balance) {
+    const compte = entry.compte.replace(/\s/g, '')
+    for (const prefix of prefixes) {
+      if (compte === prefix || compte.startsWith(prefix)) {
+        const solde = entry.solde_debit - entry.solde_credit
+        if (solde > 0) {
+          anomalies.push({
+            compte,
+            libelle: entry.libelle || compte,
+            type: 'passif_debiteur',
+            montant: solde,
+          })
+        }
+        break
+      }
+    }
+  }
+  return anomalies
+}

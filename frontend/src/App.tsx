@@ -1,6 +1,6 @@
 import React, { Suspense } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
-import { CircularProgress, Box, Typography, Paper, Chip } from '@mui/material'
+import { CircularProgress, Box, Typography, Chip } from '@mui/material'
 import ModernLayout from './components/shared/Layout'
 import ErrorBoundary from './components/ui/ErrorBoundary'
 import DossierGuard from './components/guards/DossierGuard'

@@ -40,7 +40,6 @@ import {
   Warning,
   Schedule,
   Description,
-  Calculate,
 } from '@mui/icons-material'
 import { useNavigate } from 'react-router-dom'
 
@@ -460,7 +459,7 @@ const Liasses: React.FC = () => {
                     </Box>
                     
                     {selectedLiasse.notes.notes_manquantes.length > 0 && (
-                      <Alert severity="warning" size="small">
+                      <Alert severity="warning">
                         <Typography variant="caption">
                           <strong>Notes manquantes:</strong><br />
                           {selectedLiasse.notes.notes_manquantes.join(', ')}

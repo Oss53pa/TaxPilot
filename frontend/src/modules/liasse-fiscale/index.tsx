@@ -271,7 +271,7 @@ const LiasseFiscaleModule: React.FC = () => {
       <LinearProgress variant="determinate" value={(exportProgress?.current || 0) / (exportProgress?.total || 84) * 100} />
     </Dialog>
 
-    <Box sx={{ display: 'flex', gap: 0, height: '100%', overflow: 'hidden' }}>
+    <Box sx={{ display: 'flex', gap: 0, height: '100%', overflow: 'hidden', mx: -1 }}>
       {/* ── Left sidebar ── */}
       <Box sx={{
         width: leftOpen ? 280 : COLLAPSED_WIDTH,
@@ -279,6 +279,7 @@ const LiasseFiscaleModule: React.FC = () => {
         transition: SIDEBAR_TRANSITION,
         overflow: 'hidden',
         flexShrink: 0,
+        zIndex: 10,
         '@media print': { display: 'none' },
       }}>
         {leftOpen ? (
@@ -324,7 +325,7 @@ const LiasseFiscaleModule: React.FC = () => {
       </Box>
 
       {/* ── Main content ── */}
-      <Box sx={{ flexGrow: 1, minWidth: 0, mx: 2, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <Box sx={{ flexGrow: 1, minWidth: 0, mx: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', overflowX: 'auto' }}>
         {/* Header */}
         <Paper
           elevation={1}
@@ -454,7 +455,7 @@ const LiasseFiscaleModule: React.FC = () => {
             </Typography>
           </Box>
 
-          <Box sx={{ p: 2 }}>
+          <Box sx={{ p: 0 }}>
             <Suspense fallback={
               <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 400 }}>
                 <CircularProgress size={32} />

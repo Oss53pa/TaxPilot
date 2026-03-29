@@ -13,14 +13,12 @@ import {
   Button,
   Tab,
   Tabs,
-  Paper,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  LinearProgress,
   Avatar,
   Divider,
   IconButton,
@@ -29,8 +27,6 @@ import {
 } from '@mui/material'
 import {
   Analytics,
-  BarChart,
-  PieChart,
   TrendingUp,
   TrendingDown,
   GetApp,
@@ -66,8 +62,8 @@ const Reporting: React.FC = () => {
       ])
 
       setDashboardStats(statsResponse)
-      setReports(reportsResponse.results || [])
-      setReportTemplates(templatesResponse.results || [])
+      setReports((reportsResponse as any).results || [])
+      setReportTemplates((templatesResponse as any).results || [])
 
       console.log('✅ Reporting data loaded successfully')
     } catch (error) {
@@ -187,7 +183,7 @@ const Reporting: React.FC = () => {
         </Box>
       </Box>
 
-      <Tabs value={tabValue} onChange={(e, newValue) => setTabValue(newValue)} sx={{ mb: 3 }}>
+      <Tabs value={tabValue} onChange={(_e, newValue) => setTabValue(newValue)} sx={{ mb: 3 }}>
         <Tab label="Tableaux de Bord" />
         <Tab label="Rapports Personnalisés" />
         <Tab label="KPI & Métriques" />

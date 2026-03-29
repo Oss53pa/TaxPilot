@@ -23,8 +23,8 @@ export const COMPTE_RESULTAT: FormatEtatFinancier = {
     { ref: 'XA', libelle: 'MARGE COMMERCIALE (Somme TA à RB)', comptesAssocies: [], formule: 'TA+RA+RB' },
 
     { ref: 'TB', libelle: 'Ventes de produits fabriqués', comptesAssocies: ['702', '703', '704'], signe: '+', note: '21' },
-    { ref: 'TC', libelle: 'Travaux, services vendus', comptesAssocies: ['705', '706'], signe: '+', note: '21' },
-    { ref: 'TD', libelle: 'Produits accessoires', comptesAssocies: ['707'], signe: '+', note: '21' },
+    { ref: 'TC', libelle: 'Travaux, services vendus', comptesAssocies: ['705', '706', '707'], signe: '+', note: '21' },
+    { ref: 'TD', libelle: 'Produits accessoires', comptesAssocies: ['708'], signe: '+', note: '21' },
     { ref: 'XB', libelle: 'CHIFFRE D\'AFFAIRES (A + B + C + D)', comptesAssocies: [], formule: 'TA+TB+TC+TD' },
 
     { ref: 'TE', libelle: 'Production stockée (ou déstockage)', comptesAssocies: ['73'], signe: '-/+', note: '6' },
@@ -34,7 +34,7 @@ export const COMPTE_RESULTAT: FormatEtatFinancier = {
     { ref: 'RC', libelle: 'Achats de matières premières et fournitures liées', comptesAssocies: ['602'], signe: '-', note: '22' },
     { ref: 'RD', libelle: 'Variation de stocks de matières premières', comptesAssocies: ['6032'], signe: '-/+', note: '6' },
     { ref: 'RE', libelle: 'Autres achats', comptesAssocies: ['604', '605', '608'], signe: '-', note: '22' },
-    { ref: 'RF', libelle: 'Variation de stocks d\'autres approvisionnements', comptesAssocies: ['6033'], signe: '-/+', note: '6' },
+    { ref: 'RF', libelle: 'Variation de stocks d\'autres approvisionnements', comptesAssocies: ['6033', '6038'], signe: '-/+', note: '6' },
     { ref: 'RG', libelle: 'Transports', comptesAssocies: ['61'], signe: '-', note: '23' },
     { ref: 'RH', libelle: 'Services extérieurs', comptesAssocies: ['62', '63'], signe: '-', note: '24' },
     { ref: 'RI', libelle: 'Impôts et taxes', comptesAssocies: ['64'], signe: '-', note: '25' },
@@ -45,29 +45,36 @@ export const COMPTE_RESULTAT: FormatEtatFinancier = {
     { ref: 'RK', libelle: 'Charges de personnel', comptesAssocies: ['66'], signe: '-', note: '27' },
     { ref: 'XD', libelle: 'EXCEDENT BRUT D\'EXPLOITATION (XC+RK)', comptesAssocies: [], formule: 'XC+RK' },
 
-    { ref: 'TI', libelle: 'Reprises d\'amortissements, provisions et dépréciations', comptesAssocies: ['791', '798', '799'], signe: '+' },
+    // SYSCOHADA Révisé 2017 — Classe 78/79 :
+    // 781 = Transferts de charges d'exploitation → poste TI uniquement
+    // 791 = Reprises de provisions d'exploitation → poste TJ uniquement (ne pas dupliquer dans TI)
+    // 797 = Reprises de provisions financières → poste TL uniquement (ne pas dupliquer dans TJ)
+    // 798 = Reprises d'amortissements → poste TJ
+    // 799 = Reprises de dépréciations → poste TJ
+    { ref: 'TI', libelle: 'Transferts de charges d\'exploitation', comptesAssocies: ['781'], signe: '+' },
+    { ref: 'TJ', libelle: 'Reprises d\'amortissements, provisions et dépréciations', comptesAssocies: ['791', '798', '799'], signe: '+' },
     { ref: 'RL', libelle: 'Dotations aux amortissements, aux provisions et dépréciations', comptesAssocies: ['681', '691'], signe: '-' },
 
-    { ref: 'XE', libelle: 'RESULTAT D\'EXPLOITATION (XD+TI+RL)', comptesAssocies: [], formule: 'XD+TI+RL' },
+    { ref: 'XE', libelle: 'RESULTAT D\'EXPLOITATION (XD+TI+TJ+RL)', comptesAssocies: [], formule: 'XD+TI+TJ+RL' },
 
     // ACTIVITE FINANCIERE
-    { ref: 'TJ', libelle: 'Revenus financiers et assimilés', comptesAssocies: ['77'], signe: '+', note: '29' },
-    { ref: 'TK', libelle: 'Reprises de provisions et dépréciations financières', comptesAssocies: ['797'], signe: '+' },
-    { ref: 'TL', libelle: 'Transferts de charges financières', comptesAssocies: ['787'], signe: '+' },
+    { ref: 'TK', libelle: 'Revenus financiers et assimilés', comptesAssocies: ['77'], signe: '+', note: '29' },
+    { ref: 'TL', libelle: 'Reprises de provisions et dépréciations financières', comptesAssocies: ['797'], signe: '+' },
+    { ref: 'TM', libelle: 'Transferts de charges financières', comptesAssocies: ['787'], signe: '+' },
     { ref: 'RM', libelle: 'Frais financiers et charges assimilées', comptesAssocies: ['67'], signe: '-', note: '29' },
     { ref: 'RN', libelle: 'Dotations aux provisions et aux dépréciations financières', comptesAssocies: ['697'], signe: '-' },
 
-    { ref: 'XF', libelle: 'RESULTAT FINANCIER (somme TJ à RN)', comptesAssocies: [], formule: 'TJ+TK+TL+RM+RN' },
+    { ref: 'XF', libelle: 'RESULTAT FINANCIER (somme TK à RN)', comptesAssocies: [], formule: 'TK+TL+TM+RM+RN' },
 
     { ref: 'XG', libelle: 'RESULTAT DES ACTIVITES ORDINAIRES (XE+XF)', comptesAssocies: [], formule: 'XE+XF' },
 
     // HORS ACTIVITES ORDINAIRES (HAO)
-    { ref: 'TM', libelle: 'Produits des cessions d\'immobilisations', comptesAssocies: ['82'], signe: '+', note: '3c' },
-    { ref: 'TN', libelle: 'Autres produits HAO', comptesAssocies: ['84', '86', '88'], signe: '+', note: '30' },
+    { ref: 'TN', libelle: 'Produits des cessions d\'immobilisations', comptesAssocies: ['82'], signe: '+', note: '3c' },
+    { ref: 'TO', libelle: 'Autres produits HAO', comptesAssocies: ['84', '86', '88'], signe: '+', note: '30' },
     { ref: 'RO', libelle: 'Valeurs comptables des cessions d\'immobilisations', comptesAssocies: ['81'], signe: '-', note: '3c' },
-    { ref: 'RP', libelle: 'Autres charges HAO', comptesAssocies: ['83', '85', '87'], signe: '-', note: '30' },
+    { ref: 'RP', libelle: 'Autres charges HAO', comptesAssocies: ['83', '85'], signe: '-', note: '30' },  // 87 exclusif à RQ
 
-    { ref: 'XH', libelle: 'RESULTAT HORS ACTIVITES ORDINAIRES (somme TM à RP)', comptesAssocies: [], formule: 'TM+TN+RO+RP' },
+    { ref: 'XH', libelle: 'RESULTAT HORS ACTIVITES ORDINAIRES (somme TN à RP)', comptesAssocies: [], formule: 'TN+TO+RO+RP' },
 
     // RESULTAT
     { ref: 'RQ', libelle: 'Participation des travailleurs', comptesAssocies: ['87'], signe: '-' },

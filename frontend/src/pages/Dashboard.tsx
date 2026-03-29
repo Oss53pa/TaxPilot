@@ -10,7 +10,6 @@ import {
   CardContent,
   Typography,
   Button,
-  Paper,
   Chip,
   LinearProgress,
   Alert,
@@ -30,17 +29,22 @@ import {
 import { useAuthStore } from '@/store/authStore'
 import { useAppSelector } from '@/store'
 import { KPICard } from '@/types'
-import { ratiosService } from '@/services/ratiosService'
+import { ratiosService, type RatioFinancier, type IndicateurEntreprise } from '@/services/ratiosService'
 
 const Dashboard: React.FC = () => {
   const { user } = useAuthStore()
   const { currentAudit } = useAppSelector(state => state.audit)
-  const { balances } = useAppSelector(state => state.balance)
-  
+
   // État pour les données réelles
-  const [ratiosReels, setRatiosReels] = React.useState([])
-  const [kpisReels, setKpisReels] = React.useState([])
-  const [situationReelle, setSituationReelle] = React.useState(null)
+  const [ratiosReels, setRatiosReels] = React.useState<RatioFinancier[]>([])
+  const [kpisReels, setKpisReels] = React.useState<IndicateurEntreprise[]>([])
+  const [situationReelle, setSituationReelle] = React.useState<{
+    total_actif: string;
+    capitaux_propres: string;
+    dettes_totales: string;
+    ratio_solvabilite: number;
+    status_financier: string;
+  } | null>(null)
   const [chargementDonnees, setChargementDonnees] = React.useState(true)
   
   // Chargement des vraies données au démarrage avec AbortController
@@ -177,7 +181,7 @@ const Dashboard: React.FC = () => {
 
       {/* KPIs Entreprise */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        {companyKPIs.map(renderKPICard)}
+        {companyKPIs.map(kpi => renderKPICard(kpi as KPICard))}
       </Grid>
 
       {/* Ratios Financiers */}
@@ -209,19 +213,19 @@ const Dashboard: React.FC = () => {
                 <Box sx={{ 
                   p: 1.5, 
                   backgroundColor: ratio.status === 'excellent' ? 'success.light' : 
-                                 ratio.status === 'good' ? 'info.light' : 
-                                 ratio.status === 'warning' ? 'warning.light' : 'error.light',
+                                 ratio.status === 'bon' ? 'info.light' : 
+                                 ratio.status === 'acceptable' ? 'warning.light' : 'error.light',
                   borderRadius: 1,
                   border: 1,
                   borderColor: ratio.status === 'excellent' ? 'success.main' : 
-                             ratio.status === 'good' ? 'info.main' : 
-                             ratio.status === 'warning' ? 'warning.main' : 'error.main',
+                             ratio.status === 'bon' ? 'info.main' : 
+                             ratio.status === 'acceptable' ? 'warning.main' : 'error.main',
                 }}>
                   <Typography variant="caption" sx={{ 
                     fontWeight: 600,
                     color: ratio.status === 'excellent' ? 'success.dark' : 
-                           ratio.status === 'good' ? 'info.dark' : 
-                           ratio.status === 'warning' ? 'warning.dark' : 'error.dark',
+                           ratio.status === 'bon' ? 'info.dark' : 
+                           ratio.status === 'acceptable' ? 'warning.dark' : 'error.dark',
                   }}>
                     💡 {ratio.interpretation}
                   </Typography>
@@ -231,13 +235,13 @@ const Dashboard: React.FC = () => {
                 <Chip
                   label={
                     ratio.status === 'excellent' ? 'Excellent' :
-                    ratio.status === 'good' ? 'Bon' :
-                    ratio.status === 'warning' ? 'Acceptable' : 'À surveiller'
+                    ratio.status === 'bon' ? 'Bon' :
+                    ratio.status === 'acceptable' ? 'Acceptable' : 'À surveiller'
                   }
                   color={
                     ratio.status === 'excellent' ? 'success' :
-                    ratio.status === 'good' ? 'primary' :
-                    ratio.status === 'warning' ? 'warning' : 'error'
+                    ratio.status === 'bon' ? 'primary' :
+                    ratio.status === 'acceptable' ? 'warning' : 'error'
                   }
                   size="small"
                   sx={{ position: 'absolute', top: 12, right: 12 }}

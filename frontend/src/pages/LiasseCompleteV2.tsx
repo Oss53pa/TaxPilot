@@ -25,7 +25,6 @@ import {
   AccountBalance,
   TrendingUp,
   TableChart,
-  Description,
   Notes,
   AttachMoney,
   Assessment,
@@ -37,7 +36,6 @@ import {
   Print,
   Save,
   Edit,
-  ArrowDropDown,
   ExpandMore,
   FolderOpen,
   Receipt,
@@ -332,7 +330,7 @@ const LiasseCompleteV2: React.FC = () => {
       case 'complete': return <CheckCircle fontSize="small" />
       case 'partial': return <Warning fontSize="small" />
       case 'empty': return <Error fontSize="small" />
-      default: return null
+      default: return undefined
     }
   }
 

@@ -3,6 +3,7 @@ import NoteTemplate from '../NoteTemplate'
 import type { PageProps, BalanceEntry } from '../../types'
 import type { Column, Row } from '../LiasseTable'
 import { getActifBrut, getAmortProv } from '../../services/liasse-calculs'
+import { NOTE_3D } from '@/constants/syscohada-mappings'
 
 interface LineSpec {
   id: string
@@ -12,13 +13,13 @@ interface LineSpec {
 }
 
 const TITRES_LINES: LineSpec[] = [
-  { id: 'titres_part', label: 'Titres de participation', comptes: ['261', '262', '263', '264', '265'], amort: ['296'] },
+  { id: 'titres_part', label: 'Titres de participation', comptes: [...NOTE_3D.titresParticipation.comptes], amort: [...NOTE_3D.titresParticipation.amort] },
 ]
 
 const AUTRES_LINES: LineSpec[] = [
-  { id: 'prets', label: 'Prets et creances non commerciales', comptes: ['271', '272', '273'], amort: ['297'] },
-  { id: 'depots', label: 'Depots et cautionnements', comptes: ['275'], amort: [] },
-  { id: 'autres_titres', label: 'Autres titres immobilises', comptes: ['274', '276', '277', '278'], amort: [] },
+  { id: 'prets', label: 'Prets et creances non commerciales', comptes: [...NOTE_3D.pretsCreances.comptes], amort: [...NOTE_3D.pretsCreances.amort] },
+  { id: 'depots', label: 'Depots et cautionnements', comptes: [...NOTE_3D.depotsCautionnements.comptes], amort: [...NOTE_3D.depotsCautionnements.amort] },
+  { id: 'autres_titres', label: 'Autres titres immobilises', comptes: [...NOTE_3D.autresTitres.comptes], amort: [...NOTE_3D.autresTitres.amort] },
 ]
 
 function computeLine(bal: BalanceEntry[], spec: LineSpec) {

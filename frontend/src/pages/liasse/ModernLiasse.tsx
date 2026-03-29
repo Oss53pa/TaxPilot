@@ -2,12 +2,9 @@
  * Module Liasse Fiscale Moderne - Interface SaaS Professionnelle SYSCOHADA
  */
 
-import React, { useState, useEffect, lazy, Suspense } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   Box,
-  Grid,
-  Card,
-  CardContent,
   Typography,
   Button,
   IconButton,
@@ -28,40 +25,19 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   Divider,
   useTheme,
   alpha,
   Badge,
-  Tooltip,
   Stack,
   Alert,
   Skeleton,
-  Tabs,
-  Tab,
-  Collapse,
-  ListItemSecondaryAction,
 } from '@mui/material'
 import {
-  Assignment as AssignmentIcon,
-  AccountBalance as BalanceIcon,
-  TrendingUp as TrendingIcon,
-  TableChart as TableIcon,
   AttachMoney as MoneyIcon,
-  Timeline as TimelineIcon,
-  Notes as NotesIcon,
   Assessment as AssessmentIcon,
-  Description as DocIcon,
   Calculate as CalcIcon,
-  Security as SecurityIcon,
   GetApp as ExportIcon,
   Print as PrintIcon,
   Save as SaveIcon,
@@ -69,24 +45,19 @@ import {
   Check as CheckIcon,
   Warning as WarningIcon,
   Error as ErrorIcon,
-  Add as AddIcon,
   NavigateNext as NextIcon,
   NavigateBefore as PrevIcon,
-  Visibility as ViewIcon,
-  ChevronRight as ChevronRightIcon,
   ExpandMore as ExpandIcon,
   ExpandLess as CollapseIcon,
-  Folder as FolderIcon,
-  FolderOpen as FolderOpenIcon,
-  InsertDriveFile as FileIcon,
-  CheckCircle as CompleteIcon,
-  RadioButtonUnchecked as EmptyIcon,
-  HourglassEmpty as PartialIcon,
+  AccountBalance as BalanceIcon,
+  TrendingUp as TrendingIcon,
+  TableChart as TableIcon,
+  Timeline as TimelineIcon,
+  Notes as NotesIcon,
+  Assignment as AssignmentIcon,
+  Visibility as ViewIcon,
 } from '@mui/icons-material'
 
-// Import des composants de tableaux
-import BilanActif from '../../components/liasse/sheets/BilanActif'
-import { LIASSE_SHEETS, SHEET_CATEGORIES, SheetConfig } from '../../config/liasseFiscaleSheets'
 import '../../styles/liasse-fixes.css'
 
 const DRAWER_WIDTH = 360
@@ -733,11 +704,10 @@ const ModernLiasse: React.FC = () => {
                         }}
                         secondary={
                           <Box sx={{ mt: 0.5 }}>
-                            <LinearProgress 
-                              variant="determinate" 
+                            <LinearProgress
+                              variant="determinate"
                               value={section.completion}
-                              size="small"
-                              sx={{ 
+                              sx={{
                                 height: 4, 
                                 borderRadius: 2,
                                 backgroundColor: alpha(theme.palette.divider, 0.2),
@@ -794,8 +764,8 @@ const ModernLiasse: React.FC = () => {
             </Box>
 
             <Stack direction="row" spacing={2}>
-              <Chip 
-                icon={getStatusIcon(getCurrentSection()?.status || '')}
+              <Chip
+                icon={getStatusIcon(getCurrentSection()?.status || '') || undefined}
                 label={`${getCurrentSection()?.completion}% complété`}
                 color={getCurrentSection()?.status === 'complete' ? 'success' : 
                        getCurrentSection()?.status === 'partial' ? 'warning' : 'default'}

@@ -3,7 +3,7 @@
  * Conforme aux exigences EX-PARAM-001 à EX-PARAM-010
  */
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react'
+import React, { useState, useCallback } from 'react'
 import {
   Box,
   Grid,
@@ -19,7 +19,6 @@ import {
   Stepper,
   Step,
   StepLabel,
-  StepContent,
   Alert,
   AlertTitle,
   Paper,
@@ -50,15 +49,12 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Tooltip,
   Accordion,
   AccordionSummary,
   AccordionDetails,
   useTheme,
   alpha,
-  Skeleton,
   InputAdornment,
-  Badge,
   FormHelperText,
 } from '@mui/material'
 import {
@@ -70,27 +66,19 @@ import {
   CheckCircle as CheckIcon,
   Error as ErrorIcon,
   Warning as WarningIcon,
-  Info as InfoIcon,
   Save as SaveIcon,
   Upload as UploadIcon,
   Download as DownloadIcon,
   Sync as SyncIcon,
   History as HistoryIcon,
-  Lock as LockIcon,
   VpnKey as KeyIcon,
-  Flag as FlagIcon,
   Timer as TimerIcon,
-  AutoAwesome as AutoIcon,
   ContentCopy as CopyIcon,
   CloudUpload as CloudIcon,
-  Visibility as ViewIcon,
-  VisibilityOff as HideIcon,
   Add as AddIcon,
   Edit as EditIcon,
-  Delete as DeleteIcon,
   DeleteForever as DeleteForeverIcon,
   ExpandMore as ExpandMoreIcon,
-  Speed as SpeedIcon,
   Assessment as AssessmentIcon,
   LocationOn as LocationIcon,
   Email as EmailIcon,
@@ -98,25 +86,12 @@ import {
   Language as LanguageIcon,
   AttachMoney as MoneyIcon,
   CalendarToday as CalendarIcon,
-  Description as DocumentIcon,
-  SupervisorAccount as AdminIcon,
-  VerifiedUser as VerifiedIcon,
   Palette as PaletteIcon,
   DarkMode as DarkModeIcon,
   TextFields as TextFieldsIcon,
   FormatSize as FormatSizeIcon,
   Notifications as NotificationsIcon,
 } from '@mui/icons-material'
-
-// EX-PARAM-001: Configuration complète en moins de 2 heures
-interface ConfigurationWizard {
-  currentStep: number
-  startTime: Date
-  estimatedTime: number // en minutes
-  completionPercentage: number
-  canResumeLater: boolean
-  autoSaveEnabled: boolean
-}
 
 // Structure entreprise avec tous les paramètres requis
 interface CompanyConfig {
@@ -212,10 +187,9 @@ interface ValidationResult {
 
 const ModernParametrage: React.FC = () => {
   const theme = useTheme()
-  const [loading, setLoading] = useState(false)
   const [activeTab, setActiveTab] = useState(0)
-  const [wizardStep, setWizardStep] = useState(0)
-  const [configProgress, setConfigProgress] = useState(0)
+  const [wizardStep] = useState(0)
+  const [configProgress] = useState(0)
   const [validationErrors, setValidationErrors] = useState<ValidationResult[]>([])
   const [importDialogOpen, setImportDialogOpen] = useState(false)
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false)
@@ -237,8 +211,6 @@ const ModernParametrage: React.FC = () => {
     setResetConfirmText('')
     window.location.reload()
   }, [])
-  const [showPassword, setShowPassword] = useState(false)
-
   // Paramètres de thème
   const [selectedTheme, setSelectedTheme] = useState('fiscasync')
   const [darkMode, setDarkMode] = useState(false)
@@ -246,8 +218,7 @@ const ModernParametrage: React.FC = () => {
   const [fontSize, setFontSize] = useState('normal')
 
   // Timer pour EX-PARAM-001
-  const [configStartTime] = useState(new Date())
-  const [elapsedTime, setElapsedTime] = useState(0)
+  const [elapsedTime] = useState(0)
   
   // Auto-save pour EX-PARAM-001
   const [autoSaveEnabled, setAutoSaveEnabled] = useState(true)
@@ -305,19 +276,6 @@ const ModernParametrage: React.FC = () => {
   //   }
   // }, [autoSaveEnabled, handleAutoSave])
 
-  // EX-PARAM-003: Détection automatique du type de liasse
-  const calculatedLiasseType = useMemo(() => {
-    const { revenue, totalAssets, employees } = companyConfig
-    
-    // Seuils SYSCOHADA
-    if (revenue > 1000000000 || totalAssets > 500000000 || employees > 100) {
-      return 'normal'
-    } else if (revenue > 30000000 || totalAssets > 125000000 || employees > 20) {
-      return 'allege'
-    }
-    return 'simplifie'
-  }, [companyConfig.revenue, companyConfig.totalAssets, companyConfig.employees])
-  
   // Désactivé temporairement pour éviter la boucle infinie
   // const updateLiasseTypeIfNeeded = useCallback(() => {
   //   const newLiasseType = calculatedLiasseType;
@@ -690,24 +648,6 @@ const ModernParametrage: React.FC = () => {
       setLastSaveTime(new Date())
     }
   }, [autoSaveEnabled, companyConfig])
-
-  const handleNextStep = () => {
-    // Valider l'étape actuelle avant de continuer
-    if (validateAllFields()) {
-      setWizardStep(prev => prev + 1)
-      updateProgress()
-    }
-  }
-
-  const handlePreviousStep = () => {
-    setWizardStep(prev => prev - 1)
-  }
-
-  const updateProgress = () => {
-    const totalSteps = 6
-    const progress = ((wizardStep + 1) / totalSteps) * 100
-    setConfigProgress(progress)
-  }
 
   const formatTime = (seconds: number): string => {
     const hours = Math.floor(seconds / 3600)

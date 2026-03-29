@@ -3,7 +3,7 @@
  * Module de production finale avec contrôles de cohérence SYSCOHADA
  */
 
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import {
   Box,
   Grid,
@@ -25,7 +25,6 @@ import {
   ListItemSecondaryAction,
   Chip,
   Avatar,
-  Divider,
   Stack,
   Dialog,
   DialogTitle,
@@ -38,52 +37,31 @@ import {
   TableHead,
   TableRow,
   Paper,
-  IconButton,
   Tooltip,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  FormControlLabel,
-  Checkbox,
-  TextField,
   useTheme,
   alpha,
   Fab,
   Badge,
   Zoom,
-  Collapse,
 } from '@mui/material'
 import {
   CheckCircle as CheckIcon,
   Error as ErrorIcon,
   Warning as WarningIcon,
-  Assignment as AssignmentIcon,
-  AccountBalance as BalanceIcon,
-  Assessment as AssessmentIcon,
-  Security as SecurityIcon,
   Print as PrintIcon,
-  GetApp as DownloadIcon,
   Send as SendIcon,
   Refresh as RefreshIcon,
   Visibility as ViewIcon,
   Edit as EditIcon,
   Schedule as ScheduleIcon,
-  CloudUpload as UploadIcon,
   VerifiedUser as VerifiedIcon,
   History as HistoryIcon,
-  Speed as SpeedIcon,
-  Timeline as TimelineIcon,
-  TrendingUp as TrendingUpIcon,
-  ExpandMore as ExpandMoreIcon,
-  PictureAsPdf as PdfIcon,
-  AttachMoney as MoneyIcon,
   CalendarToday as CalendarIcon,
   CompareArrows as CompareIcon,
   Gavel as LegalIcon,
   Settings as SettingsIcon,
   Flag as FlagIcon,
   Lock as LockIcon,
-  Save as SaveIcon,
 } from '@mui/icons-material'
 
 interface LiasseSection {
@@ -128,17 +106,17 @@ interface ValidationReport {
 
 const LiasseCompleteFinal: React.FC = () => {
   const theme = useTheme()
-  const [activeStep, setActiveStep] = useState(0)
-  const [loading, setLoading] = useState(false)
+  const [activeStep] = useState(0)
+  const [, setLoading] = useState(false)
   const [validationDialogOpen, setValidationDialogOpen] = useState(false)
   const [controlsDialogOpen, setControlsDialogOpen] = useState(false)
   const [generationInProgress, setGenerationInProgress] = useState(false)
   const [selectedSection, setSelectedSection] = useState<string | null>(null)
   
   // États des contrôles
-  const [overallProgress, setOverallProgress] = useState(85)
-  const [criticalErrorsCount, setCriticalErrorsCount] = useState(2)
-  const [warningsCount, setWarningsCount] = useState(5)
+  const [overallProgress] = useState(85)
+  const [criticalErrorsCount] = useState(2)
+  const [warningsCount] = useState(5)
   
   const liasseSections: LiasseSection[] = [
     {
@@ -553,7 +531,7 @@ const LiasseCompleteFinal: React.FC = () => {
               </Typography>
               
               <Stepper activeStep={activeStep} orientation="vertical">
-                {generationSteps.map((step, index) => (
+                {generationSteps.map((step) => (
                   <Step key={step.id}>
                     <StepLabel
                       StepIconComponent={() => (

@@ -13,7 +13,7 @@ interface LigneBalance {
   libelle: string;
 }
 
-interface RatioFinancier {
+export interface RatioFinancier {
   nom: string;
   valeur: string;
   interpretation: string;
@@ -27,7 +27,7 @@ interface RatioFinancier {
   };
 }
 
-interface IndicateurEntreprise {
+export interface IndicateurEntreprise {
   titre: string;
   valeur: string;
   evolution: number;

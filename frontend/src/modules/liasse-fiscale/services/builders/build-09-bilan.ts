@@ -1,6 +1,7 @@
 import { SheetData, Row, emptyRow, rowAt, m, headerRows } from './helpers'
 import type { EntrepriseData, ExerciceData, BalanceEntry } from './helpers'
 import { getActifBrut, getAmortProv, getBalanceSolde } from './helpers'
+import { BILAN_ACTIF, BILAN_PASSIF } from '@/constants/syscohada-mappings'
 
 // ────────────────────────────────────────────────────────────────────────────
 // Account prefix mappings for ACTIF side
@@ -14,28 +15,29 @@ interface ActifLine {
   amortPfx: readonly string[]
 }
 
+// SYSCOHADA Révisé 2017 — Aligné avec 09_Bilan.tsx (source de vérité)
 const ACTIF_LINES: ActifLine[] = [
-  // AE - Frais de développement
-  { ref: 'AE', label: 'Frais de développement', note: null, brutPfx: ['201','202','206'], amortPfx: ['2801','2802','2806'] },
-  // AF - Brevets, licences, logiciels
-  { ref: 'AF', label: 'Brevets, licences, logiciels, et droits similaires', note: null, brutPfx: ['212','213','214','215'], amortPfx: ['2812','2813','2814','2815'] },
+  // AE - Frais de développement et de prospection
+  { ref: 'AE', label: 'Frais de développement et de prospection', note: null, brutPfx: BILAN_ACTIF.AE.comptes, amortPfx: BILAN_ACTIF.AE.amort },
+  // AF - Brevets, licences, logiciels, et droits similaires
+  { ref: 'AF', label: 'Brevets, licences, logiciels, et droits similaires', note: null, brutPfx: BILAN_ACTIF.AF.comptes, amortPfx: BILAN_ACTIF.AF.amort },
   // AG - Fonds commercial et droit au bail
-  { ref: 'AG', label: 'Fonds commercial et droit au bail', note: null, brutPfx: ['216','217'], amortPfx: ['2816','2817'] },
+  { ref: 'AG', label: 'Fonds commercial et droit au bail', note: null, brutPfx: BILAN_ACTIF.AG.comptes, amortPfx: BILAN_ACTIF.AG.amort },
   // AH - Autres immobilisations incorporelles
-  { ref: 'AH', label: 'Autres immobilisations incorporelles', note: null, brutPfx: ['211','218','219'], amortPfx: ['2811','2818','2819'] },
+  { ref: 'AH', label: 'Autres immobilisations incorporelles', note: null, brutPfx: BILAN_ACTIF.AH.comptes, amortPfx: BILAN_ACTIF.AH.amort },
 ]
 
 const ACTIF_CORPO_LINES: ActifLine[] = [
   // AJ - Terrains
-  { ref: 'AJ', label: 'Terrains (1)', note: null, brutPfx: ['22'], amortPfx: ['282'] },
+  { ref: 'AJ', label: 'Terrains', note: null, brutPfx: BILAN_ACTIF.AJ.comptes, amortPfx: BILAN_ACTIF.AJ.amort },
   // AK - Bâtiments
-  { ref: 'AK', label: 'Bâtiments (1)', note: null, brutPfx: ['23'], amortPfx: ['283'] },
+  { ref: 'AK', label: 'Bâtiments', note: null, brutPfx: BILAN_ACTIF.AK.comptes, amortPfx: BILAN_ACTIF.AK.amort },
   // AL - Aménagements, agencements et installations
-  { ref: 'AL', label: 'Aménagements, agencements et installations', note: null, brutPfx: ['241','242','243'], amortPfx: ['2841','2842','2843'] },
+  { ref: 'AL', label: 'Aménagements, agencements et installations', note: null, brutPfx: BILAN_ACTIF.AL.comptes, amortPfx: BILAN_ACTIF.AL.amort },
   // AM - Matériel, mobilier et actifs biologiques
-  { ref: 'AM', label: 'Matériel, mobilier et actifs biologiques', note: null, brutPfx: ['244','246','247','248'], amortPfx: ['2844','2846','2847','2848'] },
+  { ref: 'AM', label: 'Matériel, mobilier et actifs biologiques', note: null, brutPfx: BILAN_ACTIF.AM.comptes, amortPfx: BILAN_ACTIF.AM.amort },
   // AN - Matériel de transport
-  { ref: 'AN', label: 'Matériel de transport', note: null, brutPfx: ['245'], amortPfx: ['2845'] },
+  { ref: 'AN', label: 'Matériel de transport', note: null, brutPfx: BILAN_ACTIF.AN.comptes, amortPfx: BILAN_ACTIF.AN.amort },
 ]
 
 interface PassifLine {
@@ -45,37 +47,38 @@ interface PassifLine {
   prefixes: readonly string[]
 }
 
+// SYSCOHADA Révisé 2017 — Aligné avec 09_Bilan.tsx (source de vérité)
 const PASSIF_LINES_CP: PassifLine[] = [
-  { ref: 'CA', label: 'Capital', note: 13, prefixes: ['101','102','103','104','105'] },
-  { ref: 'CB', label: 'Apporteurs capital non appelé (-)', note: 13, prefixes: ['109'] },
-  { ref: 'CD', label: 'Primes liées au capital social', note: 14, prefixes: ['11'] },
-  { ref: 'CE', label: 'Ecarts de réévaluation', note: '3e', prefixes: ['106'] },
-  { ref: 'CF', label: 'Réserves indisponibles', note: 14, prefixes: ['111','112','113'] },
-  { ref: 'CG', label: 'Réserves libres', note: 14, prefixes: ['118'] },
-  { ref: 'CH', label: 'Report à nouveau (+ ou -)', note: 14, prefixes: ['12'] },
-  { ref: 'CJ', label: 'Résultat net (bénéfice + ou perte -)', note: null, prefixes: ['13'] },
-  { ref: 'CL', label: 'Subventions d\'investissement', note: 15, prefixes: ['14'] },
-  { ref: 'CM', label: 'Provisions réglementées', note: 15, prefixes: ['15'] },
+  { ref: 'CA', label: 'Capital', note: 13, prefixes: BILAN_PASSIF.CA.comptes },
+  { ref: 'CB', label: 'Apporteurs capital non appelé (-)', note: 13, prefixes: BILAN_PASSIF.CB.comptes },
+  { ref: 'CD', label: 'Primes liées au capital social', note: 14, prefixes: BILAN_PASSIF.CD.comptes },
+  { ref: 'CE', label: 'Ecarts de réévaluation', note: '3e', prefixes: BILAN_PASSIF.CE.comptes },
+  { ref: 'CF', label: 'Réserves indisponibles', note: 14, prefixes: BILAN_PASSIF.CF.comptes },
+  { ref: 'CG', label: 'Réserves libres', note: 14, prefixes: BILAN_PASSIF.CG.comptes },
+  { ref: 'CH', label: 'Report à nouveau (+ ou -)', note: 14, prefixes: BILAN_PASSIF.CH.comptes },
+  { ref: 'CJ', label: 'Résultat net (bénéfice + ou perte -)', note: null, prefixes: BILAN_PASSIF.CJ.comptes },
+  { ref: 'CL', label: 'Subventions d\'investissement', note: 15, prefixes: BILAN_PASSIF.CL.comptes },
+  { ref: 'CM', label: 'Provisions réglementées', note: 15, prefixes: BILAN_PASSIF.CM.comptes },
 ]
 
 const PASSIF_LINES_DF: PassifLine[] = [
-  { ref: 'DA', label: 'Emprunts et dettes financières diverses', note: 16, prefixes: ['16'] },
-  { ref: 'DB', label: 'Dettes de location-acquisition', note: 16, prefixes: ['17'] },
-  { ref: 'DC', label: 'Provisions pour risques et charges', note: 16, prefixes: ['19'] },
+  { ref: 'DA', label: 'Emprunts et dettes financières diverses', note: 16, prefixes: BILAN_PASSIF.DA.comptes },
+  { ref: 'DB', label: 'Dettes de location-acquisition', note: 16, prefixes: BILAN_PASSIF.DB.comptes },
+  { ref: 'DC', label: 'Provisions pour risques et charges', note: 16, prefixes: BILAN_PASSIF.DC.comptes },
 ]
 
 const PASSIF_LINES_CIRC: PassifLine[] = [
-  { ref: 'DH', label: 'Dettes circulantes HAO', note: 5, prefixes: ['481','482','484','485','486','488'] },
-  { ref: 'DI', label: 'Clients, avances reçues', note: 7, prefixes: ['419'] },
-  { ref: 'DJ', label: 'Fournisseurs d\'exploitation', note: 17, prefixes: ['40'] },
-  { ref: 'DK', label: 'Dettes fiscales et sociales', note: 18, prefixes: ['42','43','44'] },
-  { ref: 'DM', label: 'Autres dettes', note: 19, prefixes: ['45','46','47','483','487'] },
-  { ref: 'DN', label: 'Provisions pour risques à court terme', note: 19, prefixes: ['499','599'] },
+  { ref: 'DH', label: 'Dettes circulantes HAO', note: 5, prefixes: BILAN_PASSIF.DH.comptes },
+  { ref: 'DI', label: 'Clients, avances reçues', note: 7, prefixes: BILAN_PASSIF.DI.comptes },
+  { ref: 'DJ', label: 'Fournisseurs d\'exploitation', note: 17, prefixes: BILAN_PASSIF.DJ.comptes },
+  { ref: 'DK', label: 'Dettes fiscales et sociales', note: 18, prefixes: BILAN_PASSIF.DK.comptes },
+  { ref: 'DM', label: 'Autres dettes', note: 19, prefixes: BILAN_PASSIF.DM.comptes },
+  { ref: 'DN', label: 'Provisions pour risques à court terme', note: 19, prefixes: BILAN_PASSIF.DN.comptes },
 ]
 
 const PASSIF_LINES_TRESO: PassifLine[] = [
-  { ref: 'DQ', label: 'Banques, crédits d\'escompte', note: 20, prefixes: ['564','565'] },
-  { ref: 'DR', label: 'Banques, établissements financiers et crédits de trésorerie', note: 20, prefixes: ['560','561','562','563','566','567','568','569'] },
+  { ref: 'DQ', label: 'Banques, crédits d\'escompte', note: 20, prefixes: BILAN_PASSIF.DQ.comptes },
+  { ref: 'DR', label: 'Banques, établissements financiers et crédits de trésorerie', note: 20, prefixes: BILAN_PASSIF.DR.comptes },
 ]
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -172,26 +175,26 @@ function buildActifRows(
   }
 
   // ── AVANCES ET ACOMPTES VERSES SUR IMMOB (AP) ──
-  const AP_brut = computeActifBrut(bal, ['25'])
+  const AP_brut = computeActifBrut(bal, [...BILAN_ACTIF.AP.comptes])
   const AP_amort = 0
   const AP_net = AP_brut
-  const AP_brutN1 = computeActifBrut(balN1, ['25'])
+  const AP_brutN1 = computeActifBrut(balN1, [...BILAN_ACTIF.AP.comptes])
   const AP_netN1 = AP_brutN1
   rows.push(makeRow('AP', 'AVANCES ET ACOMPTES VERSES SUR IMMOBILISATIONS', 3, AP_brut, AP_amort, AP_net, AP_netN1))
 
   // ── IMMOBILISATIONS FINANCIERES (AQ = sum AR+AS) ──
-  const AR_brut = computeActifBrut(bal, ['26'])
-  const AR_amort = computeAmort(bal, ['296'])
+  const AR_brut = computeActifBrut(bal, [...BILAN_ACTIF.AR.comptes])
+  const AR_amort = computeAmort(bal, [...BILAN_ACTIF.AR.amort])
   const AR_net = AR_brut - AR_amort
-  const AR_brutN1 = computeActifBrut(balN1, ['26'])
-  const AR_amortN1 = computeAmort(balN1, ['296'])
+  const AR_brutN1 = computeActifBrut(balN1, [...BILAN_ACTIF.AR.comptes])
+  const AR_amortN1 = computeAmort(balN1, [...BILAN_ACTIF.AR.amort])
   const AR_netN1 = AR_brutN1 - AR_amortN1
 
-  const AS_brut = computeActifBrut(bal, ['271','272','273','274','275','276','277','278'])
-  const AS_amort = computeAmort(bal, ['297'])
+  const AS_brut = computeActifBrut(bal, [...BILAN_ACTIF.AS.comptes])
+  const AS_amort = computeAmort(bal, [...BILAN_ACTIF.AS.amort])
   const AS_net = AS_brut - AS_amort
-  const AS_brutN1 = computeActifBrut(balN1, ['271','272','273','274','275','276','277','278'])
-  const AS_amortN1 = computeAmort(balN1, ['297'])
+  const AS_brutN1 = computeActifBrut(balN1, [...BILAN_ACTIF.AS.comptes])
+  const AS_amortN1 = computeAmort(balN1, [...BILAN_ACTIF.AS.amort])
   const AS_netN1 = AS_brutN1 - AS_amortN1
 
   const AQ_brut = AR_brut + AS_brut
@@ -210,41 +213,41 @@ function buildActifRows(
   rows.push(makeRow('AZ', 'TOTAL ACTIF IMMOBILISE', null, AZ_brut, AZ_amort, AZ_net, AZ_netN1))
 
   // ── ACTIF CIRCULANT HAO (BA) ──
-  const BA_brut = computeActifBrut(bal, ['481','482','485','488'])
+  const BA_brut = computeActifBrut(bal, [...BILAN_ACTIF.BA.comptes])
   const BA_amort = 0
   const BA_net = BA_brut
-  const BA_brutN1 = computeActifBrut(balN1, ['481','482','485','488'])
+  const BA_brutN1 = computeActifBrut(balN1, [...BILAN_ACTIF.BA.comptes])
   const BA_netN1 = BA_brutN1
   rows.push(makeRow('BA', 'ACTIF CIRCULANT HAO', 5, BA_brut, BA_amort, BA_net, BA_netN1))
 
   // ── STOCKS ET ENCOURS (BB) ──
-  const BB_brut = computeActifBrut(bal, ['31','32','33','34','35','36','37','38'])
-  const BB_amort = computeAmort(bal, ['39'])
+  const BB_brut = computeActifBrut(bal, [...BILAN_ACTIF.BB.comptes])
+  const BB_amort = computeAmort(bal, [...BILAN_ACTIF.BB.amort])
   const BB_net = BB_brut - BB_amort
-  const BB_brutN1 = computeActifBrut(balN1, ['31','32','33','34','35','36','37','38'])
-  const BB_amortN1 = computeAmort(balN1, ['39'])
+  const BB_brutN1 = computeActifBrut(balN1, [...BILAN_ACTIF.BB.comptes])
+  const BB_amortN1 = computeAmort(balN1, [...BILAN_ACTIF.BB.amort])
   const BB_netN1 = BB_brutN1 - BB_amortN1
   rows.push(makeRow('BB', 'STOCKS ET ENCOURS', 6, BB_brut, BB_amort, BB_net, BB_netN1))
 
   // ── CREANCES ET EMPLOIS ASSIMILES (BG = BH+BI+BJ) ──
-  const BH_brut = computeActifBrut(bal, ['409'])
+  const BH_brut = computeActifBrut(bal, [...BILAN_ACTIF.BH.comptes])
   const BH_amort = 0
   const BH_net = BH_brut
-  const BH_brutN1 = computeActifBrut(balN1, ['409'])
+  const BH_brutN1 = computeActifBrut(balN1, [...BILAN_ACTIF.BH.comptes])
   const BH_netN1 = BH_brutN1
 
-  const BI_brut = computeActifBrut(bal, ['411','412','413','414','415','416','417','418'])
-  const BI_amort = computeAmort(bal, ['491'])
+  const BI_brut = computeActifBrut(bal, [...BILAN_ACTIF.BI.comptes])
+  const BI_amort = computeAmort(bal, [...BILAN_ACTIF.BI.amort])
   const BI_net = BI_brut - BI_amort
-  const BI_brutN1 = computeActifBrut(balN1, ['411','412','413','414','415','416','417','418'])
-  const BI_amortN1 = computeAmort(balN1, ['491'])
+  const BI_brutN1 = computeActifBrut(balN1, [...BILAN_ACTIF.BI.comptes])
+  const BI_amortN1 = computeAmort(balN1, [...BILAN_ACTIF.BI.amort])
   const BI_netN1 = BI_brutN1 - BI_amortN1
 
-  const BJ_brut = computeActifBrut(bal, ['42','43','44','45','46','47','48'])
-  const BJ_amort = computeAmort(bal, ['492','493','494','495','496','497','498'])
+  const BJ_brut = computeActifBrut(bal, [...BILAN_ACTIF.BJ.comptes])
+  const BJ_amort = computeAmort(bal, [...BILAN_ACTIF.BJ.amort])
   const BJ_net = BJ_brut - BJ_amort
-  const BJ_brutN1 = computeActifBrut(balN1, ['42','43','44','45','46','47','48'])
-  const BJ_amortN1 = computeAmort(balN1, ['492','493','494','495','496','497','498'])
+  const BJ_brutN1 = computeActifBrut(balN1, [...BILAN_ACTIF.BJ.comptes])
+  const BJ_amortN1 = computeAmort(balN1, [...BILAN_ACTIF.BJ.amort])
   const BJ_netN1 = BJ_brutN1 - BJ_amortN1
 
   const BG_brut = BH_brut + BI_brut + BJ_brut
@@ -264,23 +267,23 @@ function buildActifRows(
   rows.push(makeRow('BK', 'TOTAL ACTIF CIRCULANT', null, BK_brut, BK_amort, BK_net, BK_netN1))
 
   // ── TRESORERIE-ACTIF ──
-  const BQ_brut = computeActifBrut(bal, ['50'])
-  const BQ_amort = computeAmort(bal, ['590'])
+  const BQ_brut = computeActifBrut(bal, [...BILAN_ACTIF.BQ.comptes])
+  const BQ_amort = computeAmort(bal, [...BILAN_ACTIF.BQ.amort])
   const BQ_net = BQ_brut - BQ_amort
-  const BQ_brutN1 = computeActifBrut(balN1, ['50'])
-  const BQ_amortN1 = computeAmort(balN1, ['590'])
+  const BQ_brutN1 = computeActifBrut(balN1, [...BILAN_ACTIF.BQ.comptes])
+  const BQ_amortN1 = computeAmort(balN1, [...BILAN_ACTIF.BQ.amort])
   const BQ_netN1 = BQ_brutN1 - BQ_amortN1
 
-  const BR_brut = computeActifBrut(bal, ['51'])
+  const BR_brut = computeActifBrut(bal, [...BILAN_ACTIF.BR.comptes])
   const BR_amort = 0
   const BR_net = BR_brut
-  const BR_brutN1 = computeActifBrut(balN1, ['51'])
+  const BR_brutN1 = computeActifBrut(balN1, [...BILAN_ACTIF.BR.comptes])
   const BR_netN1 = BR_brutN1
 
-  const BS_brut = computeActifBrut(bal, ['52','53','54','55','56','57','58'])
+  const BS_brut = computeActifBrut(bal, [...BILAN_ACTIF.BS.comptes])
   const BS_amort = 0
   const BS_net = BS_brut
-  const BS_brutN1 = computeActifBrut(balN1, ['52','53','54','55','56','57','58'])
+  const BS_brutN1 = computeActifBrut(balN1, [...BILAN_ACTIF.BS.comptes])
   const BS_netN1 = BS_brutN1
 
   rows.push(makeRow('BQ', 'Titres de placement', 9, BQ_brut, BQ_amort, BQ_net, BQ_netN1))
@@ -295,10 +298,10 @@ function buildActifRows(
   rows.push(makeRow('BT', 'TOTAL TRESORERIE-ACTIF', null, BT_brut, BT_amort, BT_net, BT_netN1))
 
   // ── ECART DE CONVERSION-ACTIF (BU) ──
-  const BU_brut = computeActifBrut(bal, ['478'])
+  const BU_brut = computeActifBrut(bal, [...BILAN_ACTIF.BU.comptes])
   const BU_amort = 0
   const BU_net = BU_brut
-  const BU_brutN1 = computeActifBrut(balN1, ['478'])
+  const BU_brutN1 = computeActifBrut(balN1, [...BILAN_ACTIF.BU.comptes])
   const BU_netN1 = BU_brutN1
   rows.push(makeRow('BU', 'Ecart de conversion-Actif', 12, BU_brut, BU_amort, BU_net, BU_netN1))
 
@@ -405,8 +408,8 @@ function buildPassifRows(
   rows.push(makeRow('DT', 'TOTAL TRESORERIE-PASSIF', null, DT_net, DT_netN1))
 
   // ── ECART DE CONVERSION-PASSIF (DV) ──
-  const DV_net = pv(['479'])
-  const DV_netN1 = pvN1(['479'])
+  const DV_net = pv(BILAN_PASSIF.DV.comptes)
+  const DV_netN1 = pvN1(BILAN_PASSIF.DV.comptes)
   rows.push(makeRow('DV', 'Ecart de conversion-Passif', 12, DV_net, DV_netN1))
 
   // ── TOTAL GENERAL (DZ = DF + DP + DT + DV) ──

@@ -3,6 +3,7 @@ import NoteTemplate from '../NoteTemplate'
 import type { PageProps } from '../../types'
 import type { Column, Row } from '../LiasseTable'
 import { getPassif } from '../../services/liasse-calculs'
+import { NOTE_01 } from '@/constants/syscohada-mappings'
 
 const v = (n: number) => n || null
 
@@ -17,28 +18,28 @@ const Note01: React.FC<PageProps> = ({ balance, balanceN1, onNoteClick, ...props
   ]
 
   // ── Section 1: Emprunts et dettes financieres diverses ──
-  const empruntsObligConv = getPassif(balance, ['161'])
-  const autresEmpruntsOblig = getPassif(balance, ['162'])
-  const empruntsEtabCredit = getPassif(balance, ['163', '164'])
-  const autresDettesFinanc = getPassif(balance, ['165', '166', '168'])
+  const empruntsObligConv = getPassif(balance, [...NOTE_01.empruntsObligConv.comptes])
+  const autresEmpruntsOblig = getPassif(balance, [...NOTE_01.autresEmpruntsOblig.comptes])
+  const empruntsEtabCredit = getPassif(balance, [...NOTE_01.empruntsEtabCredit.comptes])
+  const autresDettesFinanc = getPassif(balance, [...NOTE_01.autresDettesFinanc.comptes])
   const sousTot1 = empruntsObligConv + autresEmpruntsOblig + empruntsEtabCredit + autresDettesFinanc
 
   // ── Section 2: Dettes de location-acquisition ──
-  const creditBailImmo = getPassif(balance, ['171'])
-  const creditBailMob = getPassif(balance, ['172'])
-  const locationVente = getPassif(balance, ['173'])
-  const autresLocAcq = getPassif(balance, ['174', '178'])
+  const creditBailImmo = getPassif(balance, [...NOTE_01.creditBailImmo.comptes])
+  const creditBailMob = getPassif(balance, [...NOTE_01.creditBailMob.comptes])
+  const locationVente = getPassif(balance, [...NOTE_01.locationVente.comptes])
+  const autresLocAcq = getPassif(balance, [...NOTE_01.autresLocAcq.comptes])
   const sousTot2 = creditBailImmo + creditBailMob + locationVente + autresLocAcq
 
   // ── Section 3: Dettes du passif circulant ──
-  const fournisseurs = getPassif(balance, ['401', '402', '403', '404', '405', '408'])
-  const clients = getPassif(balance, ['419'])
-  const personnel = getPassif(balance, ['42'])
-  const securiteSociale = getPassif(balance, ['43'])
-  const etat = getPassif(balance, ['44'])
-  const orgInternat = getPassif(balance, ['45'])
-  const associesGroupe = getPassif(balance, ['46'])
-  const crediteursDivers = getPassif(balance, ['47'])
+  const fournisseurs = getPassif(balance, [...NOTE_01.fournisseurs.comptes])
+  const clients = getPassif(balance, [...NOTE_01.clients.comptes])
+  const personnel = getPassif(balance, [...NOTE_01.personnel.comptes])
+  const securiteSociale = getPassif(balance, [...NOTE_01.securiteSociale.comptes])
+  const etat = getPassif(balance, [...NOTE_01.etat.comptes])
+  const orgInternat = getPassif(balance, [...NOTE_01.orgInternat.comptes])
+  const associesGroupe = getPassif(balance, [...NOTE_01.associesGroupe.comptes])
+  const crediteursDivers = getPassif(balance, [...NOTE_01.crediteursDivers.comptes])
   const sousTot3 = fournisseurs + clients + personnel + securiteSociale + etat + orgInternat + associesGroupe + crediteursDivers
 
   const total = sousTot1 + sousTot2 + sousTot3

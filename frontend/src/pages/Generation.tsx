@@ -31,15 +31,10 @@ import {
 } from '@mui/material'
 import {
   Assignment,
-  CheckCircle,
   PlayArrow,
   GetApp,
   Visibility,
   Settings,
-  Description,
-  TableChart,
-  BarChart,
-  AccountBalance,
 } from '@mui/icons-material'
 
 const Generation: React.FC = () => {

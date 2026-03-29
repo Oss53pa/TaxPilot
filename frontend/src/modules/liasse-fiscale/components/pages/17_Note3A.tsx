@@ -3,23 +3,24 @@ import NoteTemplate from '../NoteTemplate'
 import type { PageProps } from '../../types'
 import type { Column, Row } from '../LiasseTable'
 import { getActifBrut } from '../../services/liasse-calculs'
+import { NOTE_3A } from '@/constants/syscohada-mappings'
 
 // Account prefix mapping for gross immobilisation values (class 2)
 const IMMOB_LINES = [
   // IMMOBILISATIONS INCORPORELLES
-  { id: 'r1', label: 'Frais de recherche et developpement', prefixes: ['211', '212'] as const },
-  { id: 'r2', label: 'Brevets, licences, logiciels', prefixes: ['213', '214', '215'] as const },
-  { id: 'r3', label: 'Fonds commercial', prefixes: ['216'] as const },
-  { id: 'r4', label: 'Autres immobilisations incorporelles', prefixes: ['217', '218', '219'] as const },
+  { id: 'r1', label: 'Frais de recherche et developpement', prefixes: [...NOTE_3A.fraisRD.comptes] },
+  { id: 'r2', label: 'Brevets, licences, logiciels', prefixes: [...NOTE_3A.brevetsLogiciels.comptes] },
+  { id: 'r3', label: 'Fonds commercial', prefixes: [...NOTE_3A.fondsCommercial.comptes] },
+  { id: 'r4', label: 'Autres immobilisations incorporelles', prefixes: [...NOTE_3A.autresIncorporelles.comptes] },
   // IMMOBILISATIONS CORPORELLES
-  { id: 'r5', label: 'Terrains', prefixes: ['22'] as const },
-  { id: 'r6', label: 'Batiments', prefixes: ['231', '232'] as const },
-  { id: 'r7', label: 'Installations et agencements', prefixes: ['233', '234'] as const },
-  { id: 'r8', label: 'Materiel', prefixes: ['241', '242', '243', '244'] as const },
-  { id: 'r9', label: 'Materiel de transport', prefixes: ['245'] as const },
+  { id: 'r5', label: 'Terrains', prefixes: [...NOTE_3A.terrains.comptes] },
+  { id: 'r6', label: 'Batiments', prefixes: [...NOTE_3A.batiments.comptes] },
+  { id: 'r7', label: 'Installations et agencements', prefixes: [...NOTE_3A.installationsAgencements.comptes] },
+  { id: 'r8', label: 'Materiel', prefixes: [...NOTE_3A.materiel.comptes] },
+  { id: 'r9', label: 'Materiel de transport', prefixes: [...NOTE_3A.materielTransport.comptes] },
   // AVANCES ET ACOMPTES
-  { id: 'r10', label: 'Avances et acomptes sur immobilisations', prefixes: ['251', '252'] as const },
-] as const
+  { id: 'r10', label: 'Avances et acomptes sur immobilisations', prefixes: [...NOTE_3A.avancesAcomptes.comptes] },
+]
 
 // Section boundaries: incorporelles = r1..r4, corporelles = r5..r9, avances = r10
 const INCORP_IDS = ['r1', 'r2', 'r3', 'r4']

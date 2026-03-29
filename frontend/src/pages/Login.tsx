@@ -47,7 +47,7 @@ interface LoginFormData {
 
 const Login: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false)
-  const { login, setLoading, setError, isLoading, error } = useAuthStore()
+  const { login, isLoading, error } = useAuthStore()
 
   const {
     control,

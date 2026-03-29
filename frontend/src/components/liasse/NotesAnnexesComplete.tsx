@@ -16,7 +16,6 @@ import {
   TextField,
   Tabs,
   Tab,
-  Grid,
   Card,
   CardContent,
   Divider,
@@ -29,7 +28,7 @@ interface NotesAnnexesCompleteProps {
   modeEdition?: boolean
 }
 
-const NotesAnnexesComplete: React.FC<NotesAnnexesCompleteProps> = ({ modeEdition = false }) => {
+const NotesAnnexesComplete: React.FC<NotesAnnexesCompleteProps> = ({ modeEdition: _modeEdition = false }) => {
   const [tabValue, setTabValue] = useState(0)
   const [editMode, setEditMode] = useState(false)
 
@@ -400,7 +399,7 @@ const NotesAnnexesComplete: React.FC<NotesAnnexesCompleteProps> = ({ modeEdition
 
       <Tabs 
         value={tabValue} 
-        onChange={(e, newValue) => setTabValue(newValue)}
+        onChange={(_e, newValue) => setTabValue(newValue)}
         sx={{ 
           borderBottom: 1, 
           borderColor: 'divider',

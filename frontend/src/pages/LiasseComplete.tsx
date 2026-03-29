@@ -21,7 +21,6 @@ import {
   Paper,
   Alert,
   LinearProgress,
-  Tooltip,
   Badge,
 } from '@mui/material'
 import {
@@ -32,7 +31,6 @@ import {
   Description,
   Notes,
   AttachMoney,
-  BarChart,
   Assessment,
   SwapHoriz,
   AccountTree,
@@ -46,7 +44,6 @@ import {
   Edit,
   Menu as MenuIcon,
   ChevronLeft,
-  ChevronRight,
 } from '@mui/icons-material'
 
 // Import des composants pour chaque onglet
@@ -433,8 +430,8 @@ const LiasseComplete: React.FC = () => {
             </Box>
 
             <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-              <Chip 
-                icon={getStatusIcon(currentOnglet?.status || '')}
+              <Chip
+                icon={getStatusIcon(currentOnglet?.status || '') || undefined}
                 label={`${currentOnglet?.completude}% complété`}
                 color={getStatusColor(currentOnglet?.status || '') as any}
                 size="small"
@@ -471,7 +468,7 @@ const LiasseComplete: React.FC = () => {
           )}
           
           <Paper elevation={1} sx={{ p: 3, backgroundColor: 'white' }}>
-            <CurrentComponent modeEdition={modeEdition} />
+            <CurrentComponent {...{ modeEdition } as any} />
           </Paper>
         </Box>
       </Box>

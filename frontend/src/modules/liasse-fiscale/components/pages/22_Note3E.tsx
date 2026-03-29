@@ -3,6 +3,7 @@ import NoteTemplate from '../NoteTemplate'
 import type { PageProps, BalanceEntry } from '../../types'
 import type { Column, Row } from '../LiasseTable'
 import { getCharges, getProduits, getActifBrut } from '../../services/liasse-calculs'
+import { NOTE_3E } from '@/constants/syscohada-mappings'
 
 interface LineSpec {
   id: string
@@ -12,14 +13,14 @@ interface LineSpec {
 }
 
 const LINES: LineSpec[] = [
-  { id: 'redevances', label: 'Redevances de credit-bail', comptes: ['622'], compute: (bal) => getCharges(bal, ['622']) },
-  { id: 'immo_credit_bail', label: 'Immobilisations acquises en credit-bail', comptes: ['17'], compute: (bal) => getProduits(bal, ['17']) },
+  { id: 'redevances', label: 'Redevances de credit-bail', comptes: [...NOTE_3E.redevancesCreditBail.comptes], compute: (bal) => getCharges(bal, [...NOTE_3E.redevancesCreditBail.comptes]) },
+  { id: 'immo_credit_bail', label: 'Immobilisations acquises en credit-bail', comptes: [...NOTE_3E.immoCreditBail.comptes], compute: (bal) => getProduits(bal, [...NOTE_3E.immoCreditBail.comptes]) },
   { id: 'immo_concession', label: 'Immobilisations mises en concession', comptes: [], compute: () => 0 },
   { id: 'immo_reevaluees', label: 'Immobilisations reevaluees', comptes: [], compute: () => 0 },
-  { id: 'immo_en_cours', label: 'Immobilisations en cours', comptes: ['23'], compute: (bal) => getActifBrut(bal, ['23']) },
-  { id: 'avances_acomptes', label: 'Avances et acomptes verses sur immobilisations', comptes: ['251', '252'], compute: (bal) => getActifBrut(bal, ['251', '252']) },
+  { id: 'immo_en_cours', label: 'Immobilisations en cours', comptes: [...NOTE_3E.immoEnCours.comptes], compute: (bal) => getActifBrut(bal, [...NOTE_3E.immoEnCours.comptes]) },
+  { id: 'avances_acomptes', label: 'Avances et acomptes verses sur immobilisations', comptes: [...NOTE_3E.avancesAcomptes.comptes], compute: (bal) => getActifBrut(bal, [...NOTE_3E.avancesAcomptes.comptes]) },
   { id: 'immo_amorties', label: 'Immobilisations totalement amorties', comptes: [], compute: () => 0 },
-  { id: 'charges_hao', label: 'Charges immobilisees (HAO)', comptes: ['201', '202'], compute: (bal) => getActifBrut(bal, ['201', '202']) },
+  { id: 'charges_hao', label: 'Charges immobilisees (HAO)', comptes: [...NOTE_3E.chargesImmobilisees.comptes], compute: (bal) => getActifBrut(bal, [...NOTE_3E.chargesImmobilisees.comptes]) },
 ]
 
 const Note3E: React.FC<PageProps> = ({ balance, balanceN1, ...props }) => {

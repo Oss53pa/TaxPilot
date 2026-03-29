@@ -543,7 +543,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         }}
       >
         <Toolbar />
-        <Box sx={{ flexGrow: 1, p: 3, overflow: 'auto', minHeight: 0 }}>
+        <Box sx={{ flexGrow: 1, p: 1, overflow: 'auto', minHeight: 0 }}>
           {children}
         </Box>
       </Box>

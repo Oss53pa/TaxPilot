@@ -22,7 +22,6 @@ import {
   Button,
   IconButton,
   TextField,
-  Divider,
   Alert,
   Tooltip,
   AppBar,
@@ -35,9 +34,6 @@ import {
   Edit,
   Save,
   CheckCircle,
-  Warning,
-  Visibility,
-  Calculate,
   Notes,
 } from '@mui/icons-material'
 
@@ -341,7 +337,7 @@ const LiasseViewer: React.FC = () => {
       <Box sx={{ borderBottom: 1, borderColor: 'divider', backgroundColor: 'background.paper' }}>
         <Tabs 
           value={tabValue} 
-          onChange={(e, newValue) => setTabValue(newValue)}
+          onChange={(_e, newValue) => setTabValue(newValue)}
           variant="scrollable"
           scrollButtons="auto"
           sx={{ px: 2 }}
