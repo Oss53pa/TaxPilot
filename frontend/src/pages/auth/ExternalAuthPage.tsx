@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuthStore } from '../../store/authStore';
+import { useModeStore } from '../../store/modeStore';
 
 type Status = 'loading' | 'error';
 
@@ -11,6 +12,8 @@ export default function ExternalAuthPage() {
   const [status, setStatus] = useState<Status>('loading');
   const [errorMessage, setErrorMessage] = useState('');
   const setUser = useAuthStore((s) => s.setUser);
+  const setMode = useModeStore((s) => s.setUserMode);
+  const completeOnboarding = useModeStore((s) => s.completeOnboarding);
 
   useEffect(() => {
     const token = searchParams.get('token');
@@ -71,6 +74,23 @@ export default function ExternalAuthPage() {
           is_staff: false,
           is_superuser: false,
         });
+      }
+
+      // Decode the original Atlas Studio JWT to extract the plan
+      // and auto-configure Liass'Pilot mode (entreprise vs cabinet)
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const plan = (payload.plan || '').toLowerCase();
+        if (plan.includes('cabinet') || plan.includes('illimit')) {
+          setMode('cabinet');
+        } else {
+          setMode('entreprise');
+        }
+        completeOnboarding();
+      } catch {
+        // Default to entreprise if JWT decode fails
+        setMode('entreprise');
+        completeOnboarding();
       }
 
       navigate('/dashboard', { replace: true });
