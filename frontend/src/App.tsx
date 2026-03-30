@@ -58,6 +58,7 @@ const DossiersPage = React.lazy(() => import('@/pages/dossiers/DossiersPage'))
 const LoginPage = React.lazy(() => import('@/pages/auth/LoginPage'))
 const RegisterPage = React.lazy(() => import('@/pages/auth/RegisterPage'))
 const ForgotPasswordPage = React.lazy(() => import('@/pages/auth/ForgotPasswordPage'))
+const ExternalAuthPage = React.lazy(() => import('@/pages/auth/ExternalAuthPage'))
 
 import { useAuthStore } from './store/authStore'
 import { useModeStore } from './store/modeStore'
@@ -138,6 +139,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/auth" element={<ExternalAuthPage />} />
 
           {/* P1-1: First launch → mode selection if no mode chosen yet */}
           <Route path="/mode-selection" element={<ModeSelection />} />
