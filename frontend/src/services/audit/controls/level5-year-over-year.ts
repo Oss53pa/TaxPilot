@@ -286,7 +286,7 @@ function NN009(ctx: AuditContext): ResultatControle {
   if (caN1 > 0 && Math.abs(caN - caN1) / caN1 > 0.5) {
     return anomalie(ref, nom, 'MINEUR',
       `CA variation > 50% : N=${caN.toLocaleString('fr-FR')} vs N-1=${caN1.toLocaleString('fr-FR')}`,
-      { montants: { caN, caN1, variation: ((caN - caN1) / caN1 * 100).toFixed(1) + '%' } },
+      { montants: { caN, caN1, variation: parseFloat(((caN - caN1) / caN1 * 100).toFixed(1)) } },
       'Justifier la variation significative du chiffre d\'affaires.')
   }
   return ok(ref, nom, 'CA stable entre exercices')

@@ -4,6 +4,7 @@ import { CircularProgress, Box, Typography, Chip } from '@mui/material'
 import ModernLayout from './components/shared/Layout'
 import ErrorBoundary from './components/ui/ErrorBoundary'
 import DossierGuard from './components/guards/DossierGuard'
+import AuthGuard from './components/guards/AuthGuard'
 
 import './styles/liasse-fixes.css'
 import './styles/wcag-conformity.css'
@@ -40,6 +41,7 @@ const ModernReporting = React.lazy(() => import('@/pages/reporting/ModernReporti
 const ArchivesPage = React.lazy(() => import('@/pages/archives/ArchivesPage'))
 const SupportPage = React.lazy(() => import('@/pages/support/SupportPage'))
 const FormationPage = React.lazy(() => import('@/pages/formation/FormationPage'))
+const DocumentationPage = React.lazy(() => import('@/pages/documentation/DocumentationPage'))
 const ModernVeilleReglementaire = React.lazy(() => import('@/pages/veille/ModernVeilleReglementaire'))
 const ModernCollaboration = React.lazy(() => import('@/pages/collaboration/ModernCollaboration'))
 const ModernIntegrations = React.lazy(() => import('@/pages/integrations/ModernIntegrations'))
@@ -48,6 +50,11 @@ const OrganizationWrapper = React.lazy(() => import('@/pages/organization/Organi
 const OrganizationMembersPage = React.lazy(() => import('@/pages/organization/OrganizationMembersPage'))
 const SubscriptionPage = React.lazy(() => import('@/pages/organization/SubscriptionPage'))
 const InvitationsPage = React.lazy(() => import('@/pages/organization/InvitationsPage'))
+
+// Legal pages
+const MentionsLegales = React.lazy(() => import('@/pages/legal/MentionsLegales'))
+const CGU = React.lazy(() => import('@/pages/legal/CGU'))
+const PolitiqueConfidentialite = React.lazy(() => import('@/pages/legal/PolitiqueConfidentialite'))
 
 // P1: Onboarding & dossiers
 const ModeSelection = React.lazy(() => import('@/pages/onboarding/ModeSelection'))
@@ -88,16 +95,18 @@ const WithSidebar: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   </ModernLayout>
 )
 
-/** Shortcut: sidebar only (no dossier guard) */
+/** Shortcut: sidebar only (no dossier guard) — requires authentication */
 const S: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <WithSidebar>{children}</WithSidebar>
+  <AuthGuard><WithSidebar>{children}</WithSidebar></AuthGuard>
 )
 
-/** Shortcut: sidebar + dossier guard (cabinet mode requires active dossier) */
+/** Shortcut: sidebar + dossier guard (cabinet mode requires active dossier) — requires authentication */
 const DS: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <WithSidebar>
-    <DossierGuard>{children}</DossierGuard>
-  </WithSidebar>
+  <AuthGuard>
+    <WithSidebar>
+      <DossierGuard>{children}</DossierGuard>
+    </WithSidebar>
+  </AuthGuard>
 )
 
 // Purge seed/mock data from FiscaSync-Lite on first run
@@ -123,13 +132,13 @@ function purgeSeedData() {
 }
 
 function App() {
-  const { checkAuth } = useAuthStore()
+  const { initialize } = useAuthStore()
   const { userMode, onboardingCompleted } = useModeStore()
 
   React.useEffect(() => {
-    checkAuth()
+    initialize()
     purgeSeedData()
-  }, [checkAuth])
+  }, [initialize])
 
   return (
     <ErrorBoundary>
@@ -142,20 +151,24 @@ function App() {
           <Route path="/auth" element={<ExternalAuthPage />} />
 
           {/* P1-1: First launch → mode selection if no mode chosen yet */}
-          <Route path="/mode-selection" element={<ModeSelection />} />
-          <Route path="/onboarding" element={<OnboardingWizard />} />
+          <Route path="/mode-selection" element={<AuthGuard><ModeSelection /></AuthGuard>} />
+          <Route path="/onboarding" element={<AuthGuard><OnboardingWizard /></AuthGuard>} />
 
           {/* Landing page — redirect based on mode */}
           <Route path="/" element={
-            !userMode ? <Navigate to="/mode-selection" replace /> :
-            !onboardingCompleted ? <Navigate to="/onboarding" replace /> :
-            userMode === 'cabinet' ? <Navigate to="/dossiers" replace /> :
-            <Navigate to="/dashboard" replace />
+            <AuthGuard>
+              {!userMode ? <Navigate to="/mode-selection" replace /> :
+              !onboardingCompleted ? <Navigate to="/onboarding" replace /> :
+              userMode === 'cabinet' ? <Navigate to="/dossiers" replace /> :
+              <Navigate to="/dashboard" replace />}
+            </AuthGuard>
           } />
           <Route path="/accueil" element={
-            !userMode ? <Navigate to="/mode-selection" replace /> :
-            !onboardingCompleted ? <Navigate to="/onboarding" replace /> :
-            <ModernDashboard />
+            <AuthGuard>
+              {!userMode ? <Navigate to="/mode-selection" replace /> :
+              !onboardingCompleted ? <Navigate to="/onboarding" replace /> :
+              <ModernDashboard />}
+            </AuthGuard>
           } />
 
           {/* Pages accessibles sans dossier actif (cabinet: liste dossiers, paramètres) */}
@@ -204,8 +217,14 @@ function App() {
           {/* Support & Formation */}
           <Route path="/support" element={<S><SupportPage /></S>} />
           <Route path="/formation" element={<S><FormationPage /></S>} />
+          <Route path="/documentation" element={<S><DocumentationPage /></S>} />
 
           {/* Debug routes removed for production */}
+
+          {/* Legal pages — publicly accessible */}
+          <Route path="/mentions-legales" element={<MentionsLegales />} />
+          <Route path="/cgu" element={<CGU />} />
+          <Route path="/confidentialite" element={<PolitiqueConfidentialite />} />
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

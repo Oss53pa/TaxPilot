@@ -59,7 +59,8 @@ import {
   Api as IntegrationsIcon,
   Shield as SecurityAdminIcon,
   BugReport as AuditIcon,
-  Folder as TemplatesIcon
+  Folder as TemplatesIcon,
+  MenuBook as DocumentationIcon
 } from '@mui/icons-material'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
@@ -266,6 +267,13 @@ const ModernLayout: React.FC<ModernLayoutProps> = ({ children }) => {
           path: '/security'
         }
       ]
+    },
+    {
+      id: 'documentation',
+      label: 'Documentation',
+      icon: <DocumentationIcon />,
+      path: '/documentation',
+      category: 'tools'
     }
   ]
 
@@ -635,7 +643,7 @@ const ModernLayout: React.FC<ModernLayoutProps> = ({ children }) => {
                     fontSize: '0.9rem',
                   }}
                 >
-                  {user?.first_name?.charAt(0) || user?.username?.charAt(0) || 'U'}
+                  {user?.firstName?.charAt(0) || user?.email?.charAt(0) || 'U'}
                 </Avatar>
               </IconButton>
             </Box>

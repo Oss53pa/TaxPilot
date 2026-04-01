@@ -14,23 +14,20 @@ import {
   getPassif,
 } from '../modules/liasse-fiscale/services/liasse-calculs'
 
-interface TestBalanceEntry {
-  compte: string
-  libelle: string
-  solde_debit: number
-  solde_credit: number
-}
+import type { BalanceEntry } from '../modules/liasse-fiscale/types'
 
-const mkEntry = (compte: string, debit: number, credit: number): TestBalanceEntry => ({
+const mkEntry = (compte: string, debit: number, credit: number): BalanceEntry => ({
   compte,
   libelle: `Compte ${compte}`,
+  debit,
+  credit,
   solde_debit: debit,
   solde_credit: credit,
 })
 
 describe('Note 28 — Provisions & Depreciations', () => {
   // Balance N with provision accounts (credit side) and dotation/reprise P&L accounts
-  const balanceN: TestBalanceEntry[] = [
+  const balanceN: BalanceEntry[] = [
     // Provision accounts (balance sheet — credit side = closing)
     mkEntry('151000', 0, 5_000_000),    // Provisions reglementees
     mkEntry('191000', 0, 3_000_000),    // Provisions financieres
@@ -61,7 +58,7 @@ describe('Note 28 — Provisions & Depreciations', () => {
   ]
 
   // Balance N-1 for opening values
-  const balanceN1: TestBalanceEntry[] = [
+  const balanceN1: BalanceEntry[] = [
     mkEntry('151000', 0, 4_000_000),    // Provisions reglementees N-1
     mkEntry('191000', 0, 2_500_000),    // Provisions financieres N-1
     mkEntry('281000', 0, 10_000_000),   // Amort immobilisations N-1

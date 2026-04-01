@@ -74,9 +74,9 @@ describe('LiasseDataService - Mapping SYSCOHADA', () => {
       const posteAD = bilanActif.find((row: any) => row.ref === 'AD')
 
       expect(posteAD).toBeDefined()
-      expect(posteAD.brut).toBe(50000) // Compte 211
-      expect(posteAD.amortProv).toBe(10000) // Compte 2811
-      expect(posteAD.net).toBe(40000) // 50000 - 10000
+      expect(posteAD!.brut).toBe(50000) // Compte 211
+      expect(posteAD!.amortProv).toBe(10000) // Compte 2811
+      expect(posteAD!.net).toBe(40000) // 50000 - 10000
     })
 
     it('devrait calculer correctement les terrains (AJ)', () => {
@@ -84,8 +84,8 @@ describe('LiasseDataService - Mapping SYSCOHADA', () => {
       const posteAJ = bilanActif.find((row: any) => row.ref === 'AJ')
 
       expect(posteAJ).toBeDefined()
-      expect(posteAJ.brut).toBe(200000)
-      expect(posteAJ.net).toBe(200000)
+      expect(posteAJ!.brut).toBe(200000)
+      expect(posteAJ!.net).toBe(200000)
     })
 
     it('devrait calculer correctement les bâtiments (AK)', () => {
@@ -93,9 +93,9 @@ describe('LiasseDataService - Mapping SYSCOHADA', () => {
       const posteAK = bilanActif.find((row: any) => row.ref === 'AK')
 
       expect(posteAK).toBeDefined()
-      expect(posteAK.brut).toBe(500000)
-      expect(posteAK.amortProv).toBe(100000)
-      expect(posteAK.net).toBe(400000)
+      expect(posteAK!.brut).toBe(500000)
+      expect(posteAK!.amortProv).toBe(100000)
+      expect(posteAK!.net).toBe(400000)
     })
 
     it('devrait calculer correctement les stocks marchandises (BC)', () => {
@@ -103,7 +103,7 @@ describe('LiasseDataService - Mapping SYSCOHADA', () => {
       const posteBC = bilanActif.find((row: any) => row.ref === 'BC')
 
       expect(posteBC).toBeDefined()
-      expect(posteBC.brut).toBe(80000)
+      expect(posteBC!.brut).toBe(80000)
     })
 
     it('devrait calculer correctement les créances clients (BJ)', () => {
@@ -111,7 +111,7 @@ describe('LiasseDataService - Mapping SYSCOHADA', () => {
       const posteBJ = bilanActif.find((row: any) => row.ref === 'BJ')
 
       expect(posteBJ).toBeDefined()
-      expect(posteBJ.brut).toBe(150000)
+      expect(posteBJ!.brut).toBe(150000)
     })
   })
 
@@ -128,7 +128,7 @@ describe('LiasseDataService - Mapping SYSCOHADA', () => {
       const posteCA = bilanPassif.find((row: any) => row.ref === 'CA')
 
       expect(posteCA).toBeDefined()
-      expect(posteCA.montant).toBe(500000)
+      expect(posteCA!.montant).toBe(500000)
     })
 
     it('devrait calculer correctement les réserves (CE)', () => {
@@ -136,7 +136,7 @@ describe('LiasseDataService - Mapping SYSCOHADA', () => {
       const posteCE = bilanPassif.find((row: any) => row.ref === 'CE')
 
       expect(posteCE).toBeDefined()
-      expect(posteCE.montant).toBe(100000)
+      expect(posteCE!.montant).toBe(100000)
     })
 
     it('devrait calculer correctement le résultat (CH) depuis le CdR', () => {
@@ -145,7 +145,7 @@ describe('LiasseDataService - Mapping SYSCOHADA', () => {
 
       // Résultat = Produits (700000) - Charges (200000+30000+150000+50000) = 270000
       expect(posteCH).toBeDefined()
-      expect(posteCH.montant).toBe(270000)
+      expect(posteCH!.montant).toBe(270000)
     })
 
     it('devrait calculer correctement les emprunts (DA)', () => {
@@ -153,7 +153,7 @@ describe('LiasseDataService - Mapping SYSCOHADA', () => {
       const posteDA = bilanPassif.find((row: any) => row.ref === 'DA')
 
       expect(posteDA).toBeDefined()
-      expect(posteDA.montant).toBe(200000)
+      expect(posteDA!.montant).toBe(200000)
     })
   })
 
@@ -172,7 +172,7 @@ describe('LiasseDataService - Mapping SYSCOHADA', () => {
       const posteRA = charges.find((row: any) => row.ref === 'RA')
 
       expect(posteRA).toBeDefined()
-      expect(posteRA.montant).toBe(200000)
+      expect(posteRA!.montant).toBe(200000)
     })
 
     it('devrait calculer correctement les charges de personnel (RK)', () => {
@@ -180,7 +180,7 @@ describe('LiasseDataService - Mapping SYSCOHADA', () => {
       const posteRK = charges.find((row: any) => row.ref === 'RK')
 
       expect(posteRK).toBeDefined()
-      expect(posteRK.montant).toBe(150000)
+      expect(posteRK!.montant).toBe(150000)
     })
 
     it('devrait calculer correctement les ventes de marchandises (TA)', () => {
@@ -188,7 +188,7 @@ describe('LiasseDataService - Mapping SYSCOHADA', () => {
       const posteTA = produits.find((row: any) => row.ref === 'TA')
 
       expect(posteTA).toBeDefined()
-      expect(posteTA.montant).toBe(700000)
+      expect(posteTA!.montant).toBe(700000)
     })
   })
 
@@ -267,7 +267,7 @@ describe('LiasseDataService - Mapping SYSCOHADA', () => {
       const posteAD = bilanActif.find((row: any) => row.ref === 'AD')
 
       // Doit inclure tous les sous-comptes 211*
-      expect(posteAD.brut).toBe(15000)
+      expect(posteAD!.brut).toBe(15000)
     })
   })
 
@@ -315,7 +315,7 @@ describe('LiasseDataService - Mapping SYSCOHADA', () => {
       const bilanActif = liasseDataService.generateBilanActif()
       const posteAJ = bilanActif.find((row: any) => row.ref === 'AJ')
 
-      expect(posteAJ.brut).toBe(0)
+      expect(posteAJ!.brut).toBe(0)
     })
 
     it('devrait gérer des comptes inexistants dans le mapping', () => {

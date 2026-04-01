@@ -392,7 +392,7 @@ const ModernConsolidation: React.FC = () => {
       const adjustments: ConsolidationAdjustment[] = []
 
       // Rechercher l'écart d'acquisition (compte 207)
-      const goodwillAccount = comptesBackend.find((c: any) => c.numero?.startsWith('207'))
+      const goodwillAccount: any = comptesBackend.find((c: any) => c.numero?.startsWith('207'))
       if (goodwillAccount && entities[1]) {
         adjustments.push({
           id: '1',
@@ -406,7 +406,7 @@ const ModernConsolidation: React.FC = () => {
       }
 
       // Rechercher les intérêts minoritaires (compte 104)
-      const minorityAccount = comptesBackend.find((c: any) => c.numero?.startsWith('104'))
+      const minorityAccount: any = comptesBackend.find((c: any) => c.numero?.startsWith('104'))
       if (minorityAccount && entities[2]) {
         adjustments.push({
           id: '2',

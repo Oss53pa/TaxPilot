@@ -6,6 +6,7 @@
 import { liasseDataService } from './liasseDataService'
 import { arrondiFCFA } from '@/config/taux-fiscaux-ci'
 import type { RegimeFiscal, EntrepriseInfo } from '@/components/liasse/templates/LiassePrintTemplate'
+import type { BilanActifRow, BilanPassifRow, SIGRow } from './liasseDataService'
 
 // ── Libelles ──
 
@@ -111,7 +112,7 @@ function generateBilanActifHTML(typeLiasse: 'SN' | 'SMT'): string {
     ? '<th>Ref</th><th>ACTIF</th><th class="num">Brut</th><th class="num">Amort./Prov.</th><th class="num">Net N</th><th class="num">Net N-1</th>'
     : '<th>Ref</th><th>ACTIF</th><th class="num">Net N</th><th class="num">Net N-1</th>'
 
-  const rows = actif.map((r: any) => {
+  const rows = actif.map((r: BilanActifRow) => {
     const brutCols = typeLiasse === 'SN'
       ? `<td class="num">${fmt(r.brut)}</td><td class="num">${fmt(r.amortProv)}</td>`
       : ''
@@ -136,7 +137,7 @@ function generateBilanPassifHTML(typeLiasse: 'SN' | 'SMT'): string {
   const totalN = arrondiFCFA(passif.reduce((s: number, r: any) => s + r.montant, 0))
   const totalN1 = arrondiFCFA(passif.reduce((s: number, r: any) => s + r.montant_n1, 0))
 
-  const rows = passif.map((r: any) =>
+  const rows = passif.map((r: BilanPassifRow) =>
     `<tr><td style="font-weight:600">${r.ref}</td><td>${LIBELLES_PASSIF[r.ref] || r.ref}</td><td class="num">${fmt(r.montant)}</td><td class="num">${fmt(r.montant_n1)}</td></tr>`
   ).join('')
 
@@ -268,7 +269,7 @@ function generateTFTHTML(): string {
 
 function generatePassageFiscalHTML(): string {
   const sig = liasseDataService.generateSIG()
-  const resultatNet = sig.find((s: any) => s.ref === 'SIG9')?.montant ?? 0
+  const resultatNet = sig.find((s: SIGRow) => s.ref === 'SIG9')?.montant ?? 0
 
   return `
     <div class="page-break">
