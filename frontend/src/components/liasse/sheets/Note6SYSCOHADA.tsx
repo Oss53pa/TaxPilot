@@ -44,7 +44,7 @@ const Note6SYSCOHADA: React.FC = () => {
 
   useEffect(() => {
     if (!liasseDataService.isLoaded()) { setHasData(false); return }
-    const data = liasseDataService.generateNote6()
+    const data = liasseDataService.generateNote6() as unknown as CorpLine[]
     setLignes(data)
     setHasData(data.length > 0)
   }, [])

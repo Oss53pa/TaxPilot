@@ -15,7 +15,7 @@ import type { BalanceEntry } from './liasseDataService'
 export interface ParsedSheet {
   name: string
   headers: string[]
-  rows: any[][]
+  rows: (string | number)[][]
   rawSheet: XLSX.WorkSheet
 }
 
@@ -35,7 +35,7 @@ export interface ColumnMapping {
 export interface DetectionResult {
   mapping: ColumnMapping | null
   headers: string[]
-  sampleData: any[][]
+  sampleData: (string | number)[][]
   confidence: number
   rowCount: number
 }
@@ -86,7 +86,7 @@ export function parseExcelFile(buffer: ArrayBuffer): ParsedSheet[] {
   const workbook = XLSX.read(buffer, { type: 'array' })
   return workbook.SheetNames.map(name => {
     const sheet = workbook.Sheets[name]
-    const json: any[][] = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' })
+    const json: (string | number)[][] = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' })
     const headers = json.length > 0 ? json[0].map(String) : []
     const rows = json.slice(1)
     return { name, headers, rows, rawSheet: sheet }
@@ -100,7 +100,7 @@ export function parseCsvFile(text: string, separator?: string): ParsedSheet {
   })
   const name = workbook.SheetNames[0]
   const sheet = workbook.Sheets[name]
-  const json: any[][] = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' })
+  const json: (string | number)[][] = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' })
   const headers = json.length > 0 ? json[0].map(String) : []
   const rows = json.slice(1)
   return { name, headers, rows, rawSheet: sheet }
@@ -248,7 +248,7 @@ export function detectStructure(sheet: ParsedSheet): DetectionResult {
 
 // ────────── Number parsing (French format) ──────────
 
-function parseFrenchNumber(value: any): number {
+function parseFrenchNumber(value: string | number | null | undefined): number {
   if (typeof value === 'number') return value
   if (value == null || value === '') return 0
 

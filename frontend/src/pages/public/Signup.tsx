@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import { Link as RouterLink, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
-import type { SignupData as ApiSignupData } from '@/services/apiClient'
 import {
   Box,
   Container,
@@ -188,33 +187,13 @@ const Signup: React.FC = () => {
     setError('')
 
     try {
-      // Mapper les données du formulaire vers le format API
-      const apiData: ApiSignupData = {
-        // Informations entreprise
-        name: formData.nom_entreprise,
-        legal_form: formData.forme_juridique,
-        rccm: formData.rccm,
-        ifu: formData.ifu,
-        country: formData.pays,
-        city: formData.ville,
-        address: '',
-        sector: formData.secteur,
-        annual_revenue_range: formData.ca_annuel,
-        billing_email: formData.email,
-
-        // Informations utilisateur propriétaire
-        user_first_name: formData.prenom,
-        user_last_name: formData.nom,
-        user_email: formData.email,
-        user_password: formData.password,
-        user_fonction: formData.fonction,
-        user_telephone: formData.telephone,
-      }
-
-      // Appeler l'API d'inscription via le store
-      const response = await signup(apiData)
-
-      console.log('✅ Inscription réussie:', response)
+      // Appeler Supabase Auth via le store
+      await signup(
+        formData.email,
+        formData.password,
+        formData.prenom,
+        formData.nom,
+      )
 
       // Redirection vers dashboard avec message de succès
       navigate('/dashboard')

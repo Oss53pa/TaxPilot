@@ -11,7 +11,7 @@ export default function ExternalAuthPage() {
   const [searchParams] = useSearchParams();
   const [status, setStatus] = useState<Status>('loading');
   const [errorMessage, setErrorMessage] = useState('');
-  const setUser = useAuthStore((s) => s.setUser);
+  const initialize = useAuthStore((s) => s.initialize);
   const setMode = useModeStore((s) => s.setUserMode);
   const completeOnboarding = useModeStore((s) => s.completeOnboarding);
 
@@ -62,19 +62,8 @@ export default function ExternalAuthPage() {
         throw new Error(otpError.message);
       }
 
-      // Get user from session
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (user) {
-        setUser({
-          id: parseInt(user.id.slice(0, 8), 16),
-          username: user.email || '',
-          email: user.email || '',
-          is_staff: false,
-          is_superuser: false,
-        });
-      }
+      // Re-initialize the auth store so it picks up the new session
+      await initialize();
 
       // Decode the original Atlas Studio JWT to extract the plan
       // and auto-configure Liass'Pilot mode (entreprise vs cabinet)

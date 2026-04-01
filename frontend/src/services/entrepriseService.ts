@@ -4,6 +4,7 @@ import { logger } from '@/utils/logger'
  */
 
 import { apiClient } from './apiClient'
+import type { DirigeantEntry, CommissaireEntry, ParticipationEntry } from '@/types'
 
 export interface Entreprise {
   id: string
@@ -84,10 +85,10 @@ export interface Entreprise {
   cabinet_cac?: string
   qualite_dirigeant?: string
   // R2 - Dirigeants & Commissaires (JSON)
-  dirigeants?: any[]
-  commissaires_comptes?: any[]
+  dirigeants?: DirigeantEntry[]
+  commissaires_comptes?: CommissaireEntry[]
   // R3 - Participations (JSON)
-  participations_filiales?: any[]
+  participations_filiales?: ParticipationEntry[]
 
   // ─── Branding / Page de garde ────────────────────────────────────
   code_pays_iso?: string              // 'CI' | 'CM' | 'SN' | 'GA' | 'BJ' | 'TG' | 'ML' | 'BF'
@@ -96,7 +97,7 @@ export interface Entreprise {
   branding_logo_height?: number       // hauteur en px (défaut 60)
   branding_image_fond_url?: string    // URL image de fond optionnelle
   branding_image_fond_opacite?: number // 0-100 (défaut 10)
-  branding_surcharge_theme?: Record<string, any>  // Partial<PaysTheme> pour surcharger les couleurs pays
+  branding_surcharge_theme?: Record<string, unknown>  // Partial<PaysTheme> pour surcharger les couleurs pays
   branding_pied_page_texte?: string   // texte personnalisé en pied de page
   branding_pied_page_logo?: boolean   // afficher "Généré par Liass'Pilot"
 
@@ -120,7 +121,7 @@ export interface TypeLiasse {
 
 export interface EntrepriseStats {
   nb_exercices: number
-  exercice_actuel?: any
+  exercice_actuel?: Record<string, unknown>
   nb_balances_importees: number
   nb_liasses_generees: number
   derniere_connexion?: string
@@ -179,7 +180,7 @@ class EntrepriseService {
     return apiClient.get(`${this.baseUrl}/${id}/configuration/`)
   }
 
-  async updateConfiguration(id: string, config: any) {
+  async updateConfiguration(id: string, config: Record<string, unknown>) {
     return apiClient.patch(`${this.baseUrl}/${id}/configuration/`, config)
   }
 

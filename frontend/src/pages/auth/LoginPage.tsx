@@ -14,26 +14,25 @@ import {
   Link,
   CircularProgress,
 } from '@mui/material'
-import { signIn } from '@/services/supabaseAuthService'
+import { useAuth } from '@/hooks/useAuth'
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate()
+  const { login, error: authError, isLoading, clearError } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [localError, setLocalError] = useState('')
+
+  const error = localError || authError
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError('')
-    setLoading(true)
+    setLocalError('')
+    clearError()
     try {
-      await signIn(email, password)
-      navigate('/')
+      await login(email, password)
     } catch (err: any) {
-      setError(err.message || 'Erreur de connexion')
-    } finally {
-      setLoading(false)
+      setLocalError(err.message || 'Erreur de connexion')
     }
   }
 
@@ -103,7 +102,7 @@ const LoginPage: React.FC = () => {
               fullWidth
               variant="contained"
               size="large"
-              disabled={loading}
+              disabled={isLoading}
               sx={{
                 mb: 2,
                 height: 48,
@@ -114,7 +113,7 @@ const LoginPage: React.FC = () => {
                 '&:hover': { bgcolor: '#404040' },
               }}
             >
-              {loading ? (
+              {isLoading ? (
                 <CircularProgress size={24} sx={{ color: '#fafafa' }} />
               ) : (
                 'Se connecter'

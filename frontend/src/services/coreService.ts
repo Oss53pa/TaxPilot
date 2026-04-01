@@ -11,7 +11,7 @@ import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
 export interface ParametreSysteme {
   id: number
   cle: string
-  valeur: any
+  valeur: string | number | boolean | Record<string, unknown>
   type_valeur: 'STRING' | 'INTEGER' | 'FLOAT' | 'BOOLEAN' | 'JSON'
   description: string
   categorie: string
@@ -80,7 +80,7 @@ export interface AuditTrailEntry {
   model: string
   object_id: string
   object_repr: string
-  changes: Record<string, any>
+  changes: Record<string, unknown>
   ip_address: string
   user_agent: string
   timestamp: string
@@ -101,6 +101,14 @@ export interface Notification {
   created_at: string
 }
 
+/** Paginated response from the API */
+interface PaginatedResponse<T> {
+  results: T[]
+  count?: number
+  next?: string | null
+  previous?: string | null
+}
+
 class CoreService {
   private baseUrl = '/api/v1/core'
 
@@ -108,7 +116,7 @@ class CoreService {
 
   async getParametres(categorie?: string): Promise<ParametreSysteme[]> {
     const params = categorie ? { categorie } : undefined
-    const data = await apiClient.get<Record<string, any>>(`${this.baseUrl}/parametres-systeme`, params)
+    const data = await apiClient.get<PaginatedResponse<ParametreSysteme>>(`${this.baseUrl}/parametres-systeme`, params)
     return data.results || []
   }
 
@@ -116,14 +124,14 @@ class CoreService {
     return apiClient.get(`${this.baseUrl}/parametres-systeme/${id}/`)
   }
 
-  async updateParametre(id: number, valeur: any): Promise<ParametreSysteme> {
+  async updateParametre(id: number, valeur: string | number | boolean | Record<string, unknown>): Promise<ParametreSysteme> {
     return apiClient.patch(`${this.baseUrl}/parametres-systeme/${id}/`, { valeur })
   }
 
   // ===== PAYS =====
 
   async getPays(): Promise<Pays[]> {
-    const data = await apiClient.get<Record<string, any>>(`${this.baseUrl}/pays`, { page_size: 1000 })
+    const data = await apiClient.get<PaginatedResponse<Pays>>(`${this.baseUrl}/pays`, { page_size: 1000 })
     return data.results || []
   }
 
@@ -132,14 +140,14 @@ class CoreService {
   }
 
   async getPaysActifs(): Promise<Pays[]> {
-    const data = await apiClient.get<Record<string, any>>(`${this.baseUrl}/pays`, { is_actif: true, page_size: 1000 })
+    const data = await apiClient.get<PaginatedResponse<Pays>>(`${this.baseUrl}/pays`, { is_actif: true, page_size: 1000 })
     return data.results || []
   }
 
   // ===== DEVISES =====
 
   async getDevises(): Promise<DeviseMonnaie[]> {
-    const data = await apiClient.get<Record<string, any>>(`${this.baseUrl}/devises`, { page_size: 1000 })
+    const data = await apiClient.get<PaginatedResponse<DeviseMonnaie>>(`${this.baseUrl}/devises`, { page_size: 1000 })
     return data.results || []
   }
 
@@ -148,12 +156,12 @@ class CoreService {
   }
 
   async getDevisesActives(): Promise<DeviseMonnaie[]> {
-    const data = await apiClient.get<Record<string, any>>(`${this.baseUrl}/devises`, { is_active: true, page_size: 1000 })
+    const data = await apiClient.get<PaginatedResponse<DeviseMonnaie>>(`${this.baseUrl}/devises`, { is_active: true, page_size: 1000 })
     return data.results || []
   }
 
   async getDevisePrincipale(): Promise<DeviseMonnaie | null> {
-    const data = await apiClient.get<Record<string, any>>(`${this.baseUrl}/devises`, { is_principale: true })
+    const data = await apiClient.get<PaginatedResponse<DeviseMonnaie>>(`${this.baseUrl}/devises`, { is_principale: true })
     const devises = data.results || []
     return devises.length > 0 ? devises[0] : null
   }
@@ -165,7 +173,7 @@ class CoreService {
     devise_cible?: number
     date_application?: string
   }): Promise<TauxChange[]> {
-    const data = await apiClient.get<Record<string, any>>(`${this.baseUrl}/taux-change`, filters)
+    const data = await apiClient.get<PaginatedResponse<TauxChange>>(`${this.baseUrl}/taux-change`, filters)
     return data.results || []
   }
 
@@ -184,7 +192,7 @@ class CoreService {
   }
 
   async getTauxActuel(deviseSourceId: number, deviseCibleId: number): Promise<number | null> {
-    const data = await apiClient.get<Record<string, any>>(`${this.baseUrl}/taux-change`, {
+    const data = await apiClient.get<PaginatedResponse<TauxChange>>(`${this.baseUrl}/taux-change`, {
       devise_source: deviseSourceId,
       devise_cible: deviseCibleId,
       is_actif: true,
@@ -213,7 +221,7 @@ class CoreService {
   }
 
   async getAuditTrailForObject(model: string, objectId: string): Promise<AuditTrailEntry[]> {
-    const data = await apiClient.get<Record<string, any>>(`${this.baseUrl}/audit-trail`, {
+    const data = await apiClient.get<PaginatedResponse<AuditTrailEntry>>(`${this.baseUrl}/audit-trail`, {
       model,
       object_id: objectId,
       page_size: 1000
@@ -248,7 +256,7 @@ class CoreService {
   }
 
   async getNotificationsNonLues(): Promise<Notification[]> {
-    const data = await apiClient.get<Record<string, any>>(`${this.baseUrl}/notifications`, {
+    const data = await apiClient.get<PaginatedResponse<Notification>>(`${this.baseUrl}/notifications`, {
       est_lue: false,
       page_size: 100
     })

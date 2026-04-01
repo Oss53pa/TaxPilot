@@ -171,7 +171,7 @@ function scanDeductibility(balance: Balance[], ca: number): DeductibilityIssue[]
 
 // ── Main handler ────────────────────────────────────────────────────
 
-export function handleConditionalDiagnostic(
+export async function handleConditionalDiagnostic(
   balanceN: Balance[],
   regime?: string,
   entreprise?: {
@@ -181,7 +181,7 @@ export function handleConditionalDiagnostic(
     effectifs?: number
     secteur_activite?: string
   },
-): Proph3tResponse {
+): Promise<Proph3tResponse> {
   // ── 1. Calculer les agregats ──
   const ca = sumCreditByPrefix(balanceN, ['701', '702', '703', '704', '705', '706', '707'])
   const totalCharges = sumDebitByPrefix(balanceN, ['6'])
@@ -207,7 +207,7 @@ export function handleConditionalDiagnostic(
     solde_debit: Math.max(0, b.solde),
     solde_credit: Math.max(0, -b.solde),
   }))
-  const passageFiscal = calculerPassageFiscal(entries)
+  const passageFiscal = await calculerPassageFiscal(entries)
   const isResult = calculerIS(passageFiscal.resultat_fiscal, ca)
 
   // ── 4. Scan deductibilite ──

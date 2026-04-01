@@ -1,4 +1,5 @@
 import { logger } from '@/utils/logger'
+import { SafeHtml } from '@/components/ui/SafeHtml'
 /**
  * Composant pour gérer les templates et modèles
  * Consomme les données locales
@@ -712,7 +713,7 @@ export default function TemplateManagerView() {
             <DialogTitle>Aperçu du template</DialogTitle>
           </DialogHeader>
           <div className="overflow-auto p-4 border rounded-lg bg-white">
-            <div dangerouslySetInnerHTML={{ __html: previewContent }} />
+            <SafeHtml html={previewContent} />
           </div>
           <DialogFooter>
             <Button onClick={() => setShowPreviewDialog(false)}>

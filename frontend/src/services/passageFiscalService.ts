@@ -1,11 +1,16 @@
 /**
  * Service de calcul automatique du tableau de passage fiscal
  * Extrait les réintégrations et déductions depuis la balance importée
- * Conforme au CGI Côte d'Ivoire — Loi de Finances 2025
+ * Multi-country OHADA — uses getFiscalConfig(countryCode)
+ *
+ * DONE: Refactored to accept countryCode parameter and use getFiscalConfig()
+ * from '@/services/fiscalConfigService' for multi-country OHADA support.
  */
 
 import type { BalanceEntry } from './liasseDataService'
-import { getTauxFiscaux, arrondiFCFA, calculerIS } from '@/config/taux-fiscaux-ci'
+import { getFiscalConfig } from '@/services/fiscalConfigService'
+import { arrondiFCFA } from '@/config/taux-fiscaux-ci'
+import { fiscalApplyRate } from '@/utils/fiscal-math'
 
 export interface ReintegrationLigne {
   code: string
@@ -59,12 +64,20 @@ function formatM(n: number): string {
   return Math.round(n).toLocaleString('fr-FR')
 }
 
+function formatRate(rate: number): string {
+  if (rate < 0.01) return `${(rate * 1000).toFixed(0)}\u2030`
+  return `${(rate * 100).toFixed(0)}%`
+}
+
 /**
  * Calcule automatiquement le tableau de passage fiscal
- * depuis la balance importée
+ * depuis la balance importée, en utilisant la config fiscale du pays.
+ *
+ * @param entries Balance entries
+ * @param countryCode ISO country code (e.g. 'CI', 'SN', 'BF')
  */
-export function calculerPassageFiscal(entries: BalanceEntry[]): TableauPassageResult {
-  const taux = getTauxFiscaux()
+export async function calculerPassageFiscal(entries: BalanceEntry[], countryCode: string = 'CI'): Promise<TableauPassageResult> {
+  const config = await getFiscalConfig(countryCode)
 
   // Résultat comptable = Produits (classe 7) - Charges (classe 6) + HAO net (classe 8)
   const produits = soldeCredit(entries, ['7'])
@@ -104,28 +117,30 @@ export function calculerPassageFiscal(entries: BalanceEntry[]): TableauPassageRe
     })
   }
 
-  // R03 — Cadeaux excédentaires (6234) — au-delà de 1‰ du CA
+  // R03 — Cadeaux excédentaires — threshold from fiscal config (giftThresholdRate)
   const cadeaux = soldeDebit(entries, ['6234'])
-  const plafond_cadeaux = arrondiFCFA(chiffre_affaires * taux.DEDUCTIBILITE.plafond_cadeaux)
+  const giftRate = config.giftThresholdRate ?? 0.001
+  const plafond_cadeaux = arrondiFCFA(chiffre_affaires * giftRate)
   const exces_cadeaux = Math.max(0, cadeaux - plafond_cadeaux)
   if (exces_cadeaux > 0) {
     reintegrations.push({
       code: 'R03',
-      libelle: `Cadeaux excedentaires (total ${formatM(cadeaux)}, plafond 1\u2030 CA = ${formatM(plafond_cadeaux)})`,
+      libelle: `Cadeaux excedentaires (total ${formatM(cadeaux)}, plafond ${formatRate(giftRate)} CA = ${formatM(plafond_cadeaux)})`,
       montant: exces_cadeaux,
       compte_source: '6234',
       base_legale: 'CGI Art. 18-4',
     })
   }
 
-  // R04 — Dons excédentaires (658) — au-delà de 5‰ du CA
+  // R04 — Dons excédentaires — threshold from fiscal config (donationThresholdRate)
   const dons = soldeDebit(entries, ['658'])
-  const plafond_dons = arrondiFCFA(chiffre_affaires * taux.DEDUCTIBILITE.plafond_dons)
+  const donationRate = config.donationThresholdRate ?? 0.005
+  const plafond_dons = arrondiFCFA(chiffre_affaires * donationRate)
   const exces_dons = Math.max(0, dons - plafond_dons)
   if (exces_dons > 0) {
     reintegrations.push({
       code: 'R04',
-      libelle: `Dons excedentaires (total ${formatM(dons)}, plafond 5\u2030 CA = ${formatM(plafond_dons)})`,
+      libelle: `Dons excedentaires (total ${formatM(dons)}, plafond ${formatRate(donationRate)} CA = ${formatM(plafond_dons)})`,
       montant: exces_dons,
       compte_source: '658',
       base_legale: 'CGI Art. 18-5',
@@ -145,16 +160,18 @@ export function calculerPassageFiscal(entries: BalanceEntry[]): TableauPassageRe
   }
 
   // R06 — Amortissements excédentaires VP (brut > plafond)
+  // CI-specific: vehicle amortization cap 14M FCFA. No multi-country config field yet.
+  const AMORT_VEHICULE_PLAFOND = 14_000_000
   const brut_vp = soldeDebit(entries, ['245'])
-  if (brut_vp > taux.DEDUCTIBILITE.amort_vehicule_plafond) {
+  if (brut_vp > AMORT_VEHICULE_PLAFOND) {
     const dotation_vp = soldeDebit(entries, ['6845', '68145', '2845'])
     if (dotation_vp > 0) {
-      const ratio_exces = Math.max(0, (brut_vp - taux.DEDUCTIBILITE.amort_vehicule_plafond) / brut_vp)
+      const ratio_exces = Math.max(0, (brut_vp - AMORT_VEHICULE_PLAFOND) / brut_vp)
       const amort_exces = arrondiFCFA(dotation_vp * ratio_exces)
       if (amort_exces > 0) {
         reintegrations.push({
           code: 'R06',
-          libelle: `Amort. VP excedentaires (brut ${formatM(brut_vp)}, plafond ${formatM(taux.DEDUCTIBILITE.amort_vehicule_plafond)})`,
+          libelle: `Amort. VP excedentaires (brut ${formatM(brut_vp)}, plafond ${formatM(AMORT_VEHICULE_PLAFOND)})`,
           montant: amort_exces,
           compte_source: '245/2845',
           base_legale: 'CGI Art. 18-3',
@@ -163,14 +180,15 @@ export function calculerPassageFiscal(entries: BalanceEntry[]): TableauPassageRe
     }
   }
 
-  // R07 — Frais de réception excédentaires (627x) — au-delà de 1% du CA
+  // R07 — Frais de réception excédentaires — threshold from fiscal config (entertainmentThresholdRate)
   const receptions = soldeDebit(entries, ['627'])
-  const plafond_receptions = arrondiFCFA(chiffre_affaires * 0.01)
+  const entertainmentRate = config.entertainmentThresholdRate ?? 0.01
+  const plafond_receptions = arrondiFCFA(chiffre_affaires * entertainmentRate)
   const exces_receptions = Math.max(0, receptions - plafond_receptions)
   if (exces_receptions > 0) {
     reintegrations.push({
       code: 'R07',
-      libelle: `Frais de reception excedentaires (total ${formatM(receptions)}, plafond 1% CA = ${formatM(plafond_receptions)})`,
+      libelle: `Frais de reception excedentaires (total ${formatM(receptions)}, plafond ${formatRate(entertainmentRate)} CA = ${formatM(plafond_receptions)})`,
       montant: exces_receptions,
       compte_source: '627',
       base_legale: 'CGI Art. 18-4',
@@ -197,7 +215,16 @@ export function calculerPassageFiscal(entries: BalanceEntry[]): TableauPassageRe
   const total_deductions = arrondiFCFA(deductions.reduce((s, d) => s + d.montant, 0))
   const resultat_fiscal = arrondiFCFA(resultat_comptable + total_reintegrations - total_deductions)
 
-  const { is_brut, imf, is_du, base } = calculerIS(resultat_fiscal, chiffre_affaires)
+  // IS computation using config rates
+  const isRate = config.isRate
+  const is_brut = resultat_fiscal > 0 ? fiscalApplyRate(resultat_fiscal, isRate) : 0
+
+  // IMF computation using config rates
+  let imf = fiscalApplyRate(chiffre_affaires, config.imfRate)
+  if (imf < config.imfMinimum) imf = config.imfMinimum
+  if (config.imfMaximum && imf > config.imfMaximum) imf = config.imfMaximum
+
+  const is_du = Math.max(is_brut, imf)
 
   return {
     resultat_comptable,
@@ -210,6 +237,6 @@ export function calculerPassageFiscal(entries: BalanceEntry[]): TableauPassageRe
     is_brut,
     imf,
     is_du,
-    base_is: base,
+    base_is: is_brut >= imf ? 'IS' : 'IMF',
   }
 }

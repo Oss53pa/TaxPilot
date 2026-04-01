@@ -421,3 +421,95 @@ export const fiscasyncTheme = createTheme({
 })
 
 export default fiscasyncTheme
+
+export const fiscasyncDarkPalette = {
+  primary50: '#1a1a1a',
+  primary100: '#262626',
+  primary200: '#333333',
+  primary300: '#404040',
+  primary400: '#666666',
+  primary500: '#999999',
+  primary600: '#b3b3b3',
+  primary700: '#cccccc',
+  primary800: '#e5e5e5',
+  primary900: '#f0f0f0',
+  primary950: '#fafafa',
+  success: '#22c55e',
+  warning: '#f59e0b',
+  error: '#ef4444',
+  info: '#3b82f6',
+}
+
+export function createFiscaSyncTheme(mode: 'light' | 'dark') {
+  const palette = mode === 'dark' ? fiscasyncDarkPalette : fiscasyncPalette
+
+  return createTheme({
+    palette: {
+      mode,
+      primary: { main: mode === 'dark' ? '#e5e5e5' : '#171717' },
+      secondary: { main: mode === 'dark' ? '#999999' : '#737373' },
+      background: {
+        default: mode === 'dark' ? '#0a0a0a' : '#fafafa',
+        paper: mode === 'dark' ? '#171717' : '#ffffff',
+      },
+      text: {
+        primary: mode === 'dark' ? '#f0f0f0' : '#171717',
+        secondary: mode === 'dark' ? '#999999' : '#737373',
+      },
+      error: { main: palette.error },
+      warning: { main: palette.warning },
+      success: { main: palette.success },
+      info: { main: palette.info },
+      divider: mode === 'dark' ? '#333333' : '#e5e5e5',
+    },
+    typography: {
+      fontFamily: '"Exo 2", "Poppins", "Inter", -apple-system, BlinkMacSystemFont, sans-serif',
+    },
+    shape: { borderRadius: 12 },
+    components: {
+      MuiPaper: {
+        styleOverrides: {
+          root: {
+            backgroundImage: 'none',
+            backgroundColor: mode === 'dark' ? '#171717' : '#ffffff',
+          },
+        },
+      },
+      MuiCard: {
+        styleOverrides: {
+          root: {
+            border: `1px solid ${mode === 'dark' ? '#333333' : '#e5e5e5'}`,
+            backgroundColor: mode === 'dark' ? '#171717' : '#ffffff',
+          },
+        },
+      },
+      MuiButton: {
+        styleOverrides: {
+          containedPrimary: {
+            backgroundColor: mode === 'dark' ? '#e5e5e5' : '#171717',
+            color: mode === 'dark' ? '#0a0a0a' : '#ffffff',
+            '&:hover': {
+              backgroundColor: mode === 'dark' ? '#cccccc' : '#333333',
+            },
+          },
+        },
+      },
+      MuiDrawer: {
+        styleOverrides: {
+          paper: {
+            backgroundColor: mode === 'dark' ? '#0a0a0a' : '#ffffff',
+            borderRight: `1px solid ${mode === 'dark' ? '#262626' : '#e5e5e5'}`,
+          },
+        },
+      },
+      MuiAppBar: {
+        styleOverrides: {
+          root: {
+            backgroundColor: mode === 'dark' ? '#0a0a0a' : '#ffffff',
+            color: mode === 'dark' ? '#f0f0f0' : '#171717',
+          },
+        },
+      },
+    },
+  })
+}

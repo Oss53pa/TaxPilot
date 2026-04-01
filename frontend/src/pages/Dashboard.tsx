@@ -149,7 +149,7 @@ const Dashboard: React.FC = () => {
       {/* En-tête */}
       <Box sx={{ mb: 4 }}>
         <Typography variant="h4" sx={{ fontWeight: 600, mb: 1 }}>
-          Bonjour, {user?.first_name || user?.username} !
+          Bonjour, {user?.firstName || user?.email} !
         </Typography>
         <Typography variant="body1" color="text.secondary">
           Tableau de bord alimenté par la balance comptable réelle (Exercice 2024)

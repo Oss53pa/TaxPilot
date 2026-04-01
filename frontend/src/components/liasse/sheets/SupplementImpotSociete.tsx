@@ -2,7 +2,7 @@
  * Supplément Impôt sur les Sociétés - Calcul détaillé de l'IS
  */
 
-import React, { useMemo } from 'react'
+import React, { useState, useEffect } from 'react'
 import { calculerPassageFiscal, type TableauPassageResult } from '@/services/passageFiscalService'
 import { getLatestBalance } from '@/services/balanceStorageService'
 import {
@@ -29,11 +29,19 @@ import {
 const SupplementImpotSociete: React.FC = () => {
   const theme = useTheme()
 
-  // Charger la balance importée
-  const passage = useMemo<TableauPassageResult>(() => {
+  // Charger la balance importée (async because calculerPassageFiscal is now async)
+  const defaultPassage: TableauPassageResult = {
+    resultat_comptable: 0, chiffre_affaires: 0,
+    reintegrations: [], deductions: [],
+    total_reintegrations: 0, total_deductions: 0,
+    resultat_fiscal: 0, is_brut: 0, imf: 0, is_du: 0, base_is: 'IMF',
+  }
+  const [passage, setPassage] = useState<TableauPassageResult>(defaultPassage)
+
+  useEffect(() => {
     const stored = getLatestBalance()
     const entries = stored?.entries?.length ? stored.entries : []
-    return calculerPassageFiscal(entries)
+    calculerPassageFiscal(entries).then(setPassage)
   }, [])
 
   const usingImported = !!getLatestBalance()?.entries?.length

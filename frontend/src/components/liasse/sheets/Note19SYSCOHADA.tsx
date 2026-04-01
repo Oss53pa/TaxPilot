@@ -25,7 +25,7 @@ const Note19SYSCOHADA: React.FC = () => {
 
   useEffect(() => {
     if (!liasseDataService.isLoaded()) { setHasData(false); return }
-    const data = liasseDataService.generateNote19()
+    const data = liasseDataService.generateNote19() as unknown as ChargeLine[]
     setLignes(data)
     setHasData(data.length > 0)
   }, [])

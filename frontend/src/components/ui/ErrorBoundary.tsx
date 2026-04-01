@@ -1,4 +1,5 @@
 import { logger } from '@/utils/logger'
+import * as Sentry from '@sentry/react'
 /**
  * Error Boundary pour capturer les erreurs React et API
  */
@@ -32,18 +33,13 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    logger.error('🚨 ErrorBoundary caught an error:', error, errorInfo)
+    Sentry.captureException(error, { extra: { componentStack: errorInfo.componentStack } })
+    logger.error('ErrorBoundary caught an error:', error, errorInfo)
 
     this.setState({
       error,
       errorInfo
     })
-
-    // Envoyer l'erreur à un service de monitoring si configuré
-    if (import.meta.env.PROD) {
-      // TODO: Intégrer avec Sentry ou autre service d'erreur
-      // Sentry.captureException(error)
-    }
   }
 
   private handleRetry = () => {

@@ -24,17 +24,82 @@ export interface BalanceEntry {
   solde_credit_n1?: number
 }
 
+export interface BilanActifRow {
+  ref: string
+  libelle?: string
+  brut: number
+  amortProv: number
+  net: number
+  net_n1: number
+}
+
+export interface BilanPassifRow {
+  ref: string
+  libelle?: string
+  montant: number
+  montant_n1: number
+}
+
+export interface CompteResultatRow {
+  ref: string
+  libelle?: string
+  montant: number
+  montant_n1: number
+}
+
+export interface CompteResultatData {
+  charges: CompteResultatRow[]
+  produits: CompteResultatRow[]
+}
+
+export interface SIGRow {
+  ref: string
+  label: string
+  type: 'line' | 'sig' | 'grandtotal'
+  montant: number
+  montant_n1: number
+  negative?: boolean
+}
+
+export interface TFTResult {
+  FA: number; FB: number; FC: number; FD: number; FE: number; FF: number; FG: number
+  FH: number; FI: number; FJ: number; FK: number
+  FL: number; FM: number; FN: number; FO: number; FP: number
+  FQ: number; FR: number; FS: number; FT: number
+  FA_N1: number; FB_N1: number; FC_N1: number; FD_N1: number; FE_N1: number; FF_N1: number; FG_N1: number
+  FH_N1: number; FI_N1: number; FJ_N1: number; FK_N1: number
+  FL_N1: number; FM_N1: number; FN_N1: number; FO_N1: number; FP_N1: number
+  FQ_N1: number; FR_N1: number; FS_N1: number; FT_N1: number
+  tresoActif: number; tresoPassif: number
+  hasN1: boolean
+}
+
+export interface TAFIREResult {
+  CAFG: number; CAFG_N1: number
+  dividendes: number; autofinancement: number
+  acquisImmo: number; cessions: number; varImmoFin: number
+  augCapital: number; empruntsNouveaux: number; remboursements: number
+  varStocks: number; varCreances: number; varFournisseurs: number; varBFR: number
+  totalEmplois: number; totalRessources: number; varTresorerie: number
+  [key: string]: number | boolean
+}
+
+/** Generic note row — each Note has its own shape; the index signature allows flexibility */
+export interface NoteRow {
+  [key: string]: string | number | boolean | undefined
+}
+
 export interface LiasseData {
   exercice: string
-  entreprise: any
+  entreprise: Record<string, unknown>
   balance: BalanceEntry[]
   etats: {
-    actif: any
-    passif: any
-    resultat: any
-    tft: any
+    actif: BilanActifRow[]
+    passif: BilanPassifRow[]
+    resultat: CompteResultatData
+    tft: Record<string, number>
   }
-  notes: any[]
+  notes: Record<string, unknown>[]
 }
 
 /**
@@ -470,10 +535,10 @@ export class LiasseDataService {
 
   // ────────── Génération Bilan Actif ──────────
 
-  generateBilanActif(typeLiasse: TypeLiasse = 'SN'): any {
+  generateBilanActif(typeLiasse: TypeLiasse = 'SN'): BilanActifRow[] {
     if (typeLiasse === 'SMT') return this.generateBilanActifSMT()
 
-    const rows: any[] = []
+    const rows: BilanActifRow[] = []
 
     Object.entries(SYSCOHADA_MAPPING.actif).forEach(([ref, mapping]) => {
       const brut = this.calculateActifBrut(mapping.comptes)
@@ -495,10 +560,10 @@ export class LiasseDataService {
 
   // ────────── Génération Bilan Passif ──────────
 
-  generateBilanPassif(typeLiasse: TypeLiasse = 'SN'): any {
+  generateBilanPassif(typeLiasse: TypeLiasse = 'SN'): BilanPassifRow[] {
     if (typeLiasse === 'SMT') return this.generateBilanPassifSMT()
 
-    const rows: any[] = []
+    const rows: BilanPassifRow[] = []
 
     // Comptes réciproques pour le passif (42x côté créditeur, 48x côté créditeur, 52x côté créditeur)
     const reciprocalRefs = ['DH', 'DL', 'DQ', 'DR']
@@ -513,10 +578,19 @@ export class LiasseDataService {
     Object.entries(SYSCOHADA_MAPPING.passif).forEach(([ref, mapping]) => {
       let montant: number
       if (ref === 'CH') {
-        // Résultat net : calculé depuis le CdR si balance pré-clôture,
-        // sinon depuis le compte 13
-        const cdrResult = this.getResultatFromCompteResultat()
-        montant = hasClassesPL ? cdrResult : -this.sumSoldes(mapping.comptes)
+        // Priority for Resultat Net (poste CH):
+        // 1. If Class 13 accounts exist with non-zero balance -> use Class 13 (post-cloture balance)
+        // 2. If Classes 6-7 exist (pre-cloture) -> compute from CdR (Produits - Charges)
+        // 3. Never use both simultaneously
+        const class13Balance = -this.sumSoldes(mapping.comptes)
+        const hasClass13 = class13Balance !== 0
+        if (hasClass13) {
+          montant = class13Balance
+        } else if (hasClassesPL) {
+          montant = this.getResultatFromCompteResultat()
+        } else {
+          montant = 0
+        }
       } else if (reciprocalRefs.includes(ref)) {
         montant = this.calculatePassifReciprocal(mapping.comptes)
       } else if (signedRefs.includes(ref)) {
@@ -533,8 +607,16 @@ export class LiasseDataService {
       if (this.hasN1) {
         const hasClassesPLN1 = Array.from(this.mappingCacheN1.keys()).some(k => k.startsWith('6') || k.startsWith('7'))
         if (ref === 'CH') {
-          const cdrN1 = this.getResultatFromCompteResultatN1()
-          montant_n1 = hasClassesPLN1 ? cdrN1 : -this.sumSoldesN1(mapping.comptes)
+          // Same priority rule as N: Class 13 first, then CdR
+          const class13BalanceN1 = -this.sumSoldesN1(mapping.comptes)
+          const hasClass13N1 = class13BalanceN1 !== 0
+          if (hasClass13N1) {
+            montant_n1 = class13BalanceN1
+          } else if (hasClassesPLN1) {
+            montant_n1 = this.getResultatFromCompteResultatN1()
+          } else {
+            montant_n1 = 0
+          }
         } else if (reciprocalRefs.includes(ref)) {
           montant_n1 = this.calculatePassifReciprocalN1(mapping.comptes)
         } else if (signedRefs.includes(ref)) {
@@ -554,11 +636,11 @@ export class LiasseDataService {
 
   // ────────── Génération Compte de Résultat ──────────
 
-  generateCompteResultat(typeLiasse: TypeLiasse = 'SN'): any {
+  generateCompteResultat(typeLiasse: TypeLiasse = 'SN'): CompteResultatData {
     if (typeLiasse === 'SMT') return this.generateCompteResultatSMT()
 
-    const charges: any[] = []
-    const produits: any[] = []
+    const charges: CompteResultatRow[] = []
+    const produits: CompteResultatRow[] = []
 
     // Refs de variation de stocks (signe conservé)
     const variationRefs = ['RB', 'RD', 'RF']
@@ -591,8 +673,8 @@ export class LiasseDataService {
 
   // ────────── SMT Generation Methods ──────────
 
-  private generateBilanActifSMT(): any {
-    const rows: any[] = []
+  private generateBilanActifSMT(): BilanActifRow[] {
+    const rows: BilanActifRow[] = []
     Object.entries(SMT_MAPPING.actif).forEach(([ref, mapping]) => {
       const brut = this.calculateActifBrut(mapping.comptes)
       const amortProv = this.calculateAmortProv(mapping.amortComptes || [])
@@ -609,8 +691,8 @@ export class LiasseDataService {
     return rows
   }
 
-  private generateBilanPassifSMT(): any {
-    const rows: any[] = []
+  private generateBilanPassifSMT(): BilanPassifRow[] {
+    const rows: BilanPassifRow[] = []
     Object.entries(SMT_MAPPING.passif).forEach(([ref, mapping]) => {
       const montant = this.calculatePassif(mapping.comptes)
       const montantN1 = this.hasN1 ? this.calculatePassifN1(mapping.comptes) : 0
@@ -623,9 +705,9 @@ export class LiasseDataService {
     return rows
   }
 
-  private generateCompteResultatSMT(): any {
-    const charges: any[] = []
-    const produits: any[] = []
+  private generateCompteResultatSMT(): CompteResultatData {
+    const charges: CompteResultatRow[] = []
+    const produits: CompteResultatRow[] = []
 
     // CH_3 = variations de stocks (603): conserve le signe (débit=déstockage, crédit=stockage)
     const chargeVariationRefs = ['CH_3']
@@ -743,12 +825,12 @@ export class LiasseDataService {
 
   private calculateTotalActif(): number {
     const actifData = this.generateBilanActif()
-    return actifData.reduce((sum: number, row: any) => sum + row.net, 0)
+    return actifData.reduce((sum: number, row: BilanActifRow) => sum + row.net, 0)
   }
 
   private calculateTotalPassif(): number {
     const passifData = this.generateBilanPassif()
-    return passifData.reduce((sum: number, row: any) => {
+    return passifData.reduce((sum: number, row: BilanPassifRow) => {
       // CB (capital non appelé) est un contre-compte affiché en déduction
       if (row.ref === 'CB') return sum - row.montant
       return sum + row.montant
@@ -765,21 +847,21 @@ export class LiasseDataService {
 
   getResultatFromCompteResultat(): number {
     const { charges, produits } = this.generateCompteResultat()
-    const totalCharges = charges.reduce((sum: number, row: any) => sum + row.montant, 0)
-    const totalProduits = produits.reduce((sum: number, row: any) => sum + row.montant, 0)
+    const totalCharges = charges.reduce((sum: number, row: CompteResultatRow) => sum + row.montant, 0)
+    const totalProduits = produits.reduce((sum: number, row: CompteResultatRow) => sum + row.montant, 0)
     return totalProduits - totalCharges
   }
 
   private getResultatFromCompteResultatN1(): number {
     const { charges, produits } = this.generateCompteResultat()
-    const totalCharges = charges.reduce((sum: number, row: any) => sum + (row.montant_n1 || 0), 0)
-    const totalProduits = produits.reduce((sum: number, row: any) => sum + (row.montant_n1 || 0), 0)
+    const totalCharges = charges.reduce((sum: number, row: CompteResultatRow) => sum + (row.montant_n1 || 0), 0)
+    const totalProduits = produits.reduce((sum: number, row: CompteResultatRow) => sum + (row.montant_n1 || 0), 0)
     return totalProduits - totalCharges
   }
 
   // ────────── Génération SIG (Soldes Intermédiaires de Gestion) ──────────
 
-  generateSIG(): any[] {
+  generateSIG(): SIGRow[] {
     // Helper: calcul N et N-1 en une passe
     const p = (comptes: string[]) => this.calculateProduits(comptes)
     const c = (comptes: string[]) => this.calculateCharges(comptes)
@@ -894,7 +976,7 @@ export class LiasseDataService {
 
   // ────────── Génération TFT (Tableau des Flux de Trésorerie) ──────────
 
-  generateTFT(): any {
+  generateTFT(): TFTResult {
     // ── Helpers N et N-1 ──
     const cN1 = (comptes: string[]) => this.hasN1 ? this.calculateChargesN1(comptes) : 0
     const pN1 = (comptes: string[]) => this.hasN1 ? this.calculateProduitsN1(comptes) : 0
@@ -1026,10 +1108,10 @@ export class LiasseDataService {
 
   // ────────── Génération TAFIRE (Tableau Financier des Ressources et Emplois) ──────────
 
-  generateTAFIRE(): any {
+  generateTAFIRE(): TAFIREResult {
     const tft = this.generateTFT()
     const sig = this.generateSIG()
-    const findSIG = (ref: string) => sig.find((s: any) => s.ref === ref)?.montant ?? 0
+    const findSIG = (ref: string) => sig.find((s: SIGRow) => s.ref === ref)?.montant ?? 0
 
     // ═══ PARTIE I : ACTIVITÉ ═══
 
@@ -1166,7 +1248,7 @@ export class LiasseDataService {
 
   // ────────── Génération Note 3A - Immobilisations (Brutes) ──────────
 
-  generateNote3A(): any[] {
+  generateNote3A(): Record<string, unknown>[] {
     const IMMO_MAP: Record<string, { label: string; categorie: string; prefixes: string[]; amortPrefixes: string[] }> = {
       'frais_etabl': { label: 'Frais d\'établissement', categorie: 'incorporelles', prefixes: ['201'], amortPrefixes: ['2801'] },
       'brevets': { label: 'Brevets, licences, logiciels', categorie: 'incorporelles', prefixes: ['212', '213', '214'], amortPrefixes: ['2812', '2813', '2814'] },
@@ -1182,7 +1264,7 @@ export class LiasseDataService {
       'avances': { label: 'Avances et acomptes', categorie: 'avances', prefixes: ['251', '252'], amortPrefixes: [] },
     }
 
-    const lines: any[] = []
+    const lines: Record<string, unknown>[] = []
     Object.entries(IMMO_MAP).forEach(([key, { label, categorie, prefixes, amortPrefixes }]) => {
       const brut = this.sumDebit(prefixes)
       const amort = amortPrefixes.length > 0 ? this.sumCredit(amortPrefixes) : 0
@@ -1194,7 +1276,7 @@ export class LiasseDataService {
 
   // ────────── Génération Note 3C - Amortissements ──────────
 
-  generateNote3C(): any[] {
+  generateNote3C(): Record<string, unknown>[] {
     const AMORT_MAP: Record<string, { label: string; prefixes: string[] }> = {
       'frais_etabl': { label: 'Frais d\'établissement', prefixes: ['2801', '2901'] },
       'brevets': { label: 'Brevets, licences, logiciels', prefixes: ['2812', '2813', '2814'] },
@@ -1206,7 +1288,7 @@ export class LiasseDataService {
       'transport': { label: 'Matériel de transport', prefixes: ['2845'] },
     }
 
-    const lines: any[] = []
+    const lines: Record<string, unknown>[] = []
     Object.entries(AMORT_MAP).forEach(([key, { label, prefixes }]) => {
       const cumulDebut = 0 // N-1 amort not tracked separately
       const dotation = this.sumCredit(prefixes)
@@ -1218,14 +1300,14 @@ export class LiasseDataService {
 
   // ────────── Génération Note 3C BIS - Dépréciations ──────────
 
-  generateNote3CBis(): any[] {
+  generateNote3CBis(): Record<string, unknown>[] {
     const DEPREC_MAP: Record<string, { label: string; prefixes: string[] }> = {
       'incorp': { label: 'Immobilisations incorporelles', prefixes: ['291', '292'] },
       'corp': { label: 'Immobilisations corporelles', prefixes: ['293', '294'] },
       'fin': { label: 'Immobilisations financières', prefixes: ['296', '297'] },
     }
 
-    const lines: any[] = []
+    const lines: Record<string, unknown>[] = []
     Object.entries(DEPREC_MAP).forEach(([key, { label, prefixes }]) => {
       const montant = this.sumCredit(prefixes)
       if (montant === 0) return
@@ -1236,7 +1318,7 @@ export class LiasseDataService {
 
   // ────────── Génération Note 6 - Immobilisations corporelles ──────────
 
-  generateNote6(): any[] {
+  generateNote6(): Record<string, unknown>[] {
     const CORP_MAP: Record<string, { label: string; categorie: string; prefixes: string[]; amortPrefixes: string[] }> = {
       'terrains': { label: 'Terrains', categorie: 'terrains', prefixes: ['22'], amortPrefixes: ['282', '292'] },
       'constructions': { label: 'Bâtiments, constructions', categorie: 'constructions', prefixes: ['231', '232', '233', '234'], amortPrefixes: ['2831', '2832', '2833', '2834'] },
@@ -1245,7 +1327,7 @@ export class LiasseDataService {
       'materiel_transport': { label: 'Matériel de transport', categorie: 'materiel_transport', prefixes: ['245'], amortPrefixes: ['2845', '2945'] },
     }
 
-    const lines: any[] = []
+    const lines: Record<string, unknown>[] = []
     Object.entries(CORP_MAP).forEach(([key, { label, categorie, prefixes, amortPrefixes }]) => {
       const brut = this.sumDebit(prefixes)
       const amort = this.sumCredit(amortPrefixes)
@@ -1257,7 +1339,7 @@ export class LiasseDataService {
 
   // ────────── Génération Note 8 - Stocks ──────────
 
-  generateNote8(): any[] {
+  generateNote8(): Record<string, unknown>[] {
     const STOCK_MAP: Record<string, { label: string; categorie: string; prefixes: string[]; provPrefixes: string[] }> = {
       'matieres': { label: 'Matières premières', categorie: 'matieres_premieres', prefixes: ['31'], provPrefixes: ['391'] },
       'en_cours': { label: 'Produits en cours', categorie: 'en_cours', prefixes: ['34', '35'], provPrefixes: ['394', '395'] },
@@ -1266,7 +1348,7 @@ export class LiasseDataService {
       'autres': { label: 'Autres approvisionnements', categorie: 'autres', prefixes: ['32', '33'], provPrefixes: ['392', '393'] },
     }
 
-    const lines: any[] = []
+    const lines: Record<string, unknown>[] = []
     Object.entries(STOCK_MAP).forEach(([key, { label, categorie, prefixes, provPrefixes }]) => {
       const brut = this.sumDebit(prefixes)
       const provision = this.sumCredit(provPrefixes)
@@ -1278,7 +1360,7 @@ export class LiasseDataService {
 
   // ────────── Génération Note 11 - Capitaux propres ──────────
 
-  generateNote11(): any[] {
+  generateNote11(): Record<string, unknown>[] {
     const CAPITAUX_MAP: Record<string, { label: string; prefixes: string[] }> = {
       'capital': { label: 'Capital social', prefixes: ['101', '102', '103', '104'] },
       'primes': { label: 'Primes liées au capital', prefixes: ['105'] },
@@ -1291,7 +1373,7 @@ export class LiasseDataService {
       'provisions_reglementees': { label: 'Provisions réglementées', prefixes: ['15'] },
     }
 
-    const lines: any[] = []
+    const lines: Record<string, unknown>[] = []
     Object.entries(CAPITAUX_MAP).forEach(([key, { label, prefixes }]) => {
       // Most capital accounts are credit-balance
       const debit = this.sumDebit(prefixes)
@@ -1308,7 +1390,7 @@ export class LiasseDataService {
 
   // ────────── Génération Note 14 - Dettes financières ──────────
 
-  generateNote14(): any[] {
+  generateNote14(): Record<string, unknown>[] {
     const DETTES_MAP: Record<string, { label: string; categorie: string; prefixes: string[] }> = {
       'emprunts_obligataires': { label: 'Emprunts obligataires', categorie: 'long_terme', prefixes: ['161'] },
       'emprunts_creditbail': { label: 'Emprunts et dettes de crédit-bail', categorie: 'long_terme', prefixes: ['162', '163', '164'] },
@@ -1318,7 +1400,7 @@ export class LiasseDataService {
       'provisions': { label: 'Provisions pour risques et charges', categorie: 'provisions', prefixes: ['19'] },
     }
 
-    const lines: any[] = []
+    const lines: Record<string, unknown>[] = []
     Object.entries(DETTES_MAP).forEach(([key, { label, categorie, prefixes }]) => {
       const montant = this.sumCredit(prefixes)
       if (montant === 0) return
@@ -1330,7 +1412,7 @@ export class LiasseDataService {
 
   // ────────── Génération Note 17 - Chiffre d'affaires ──────────
 
-  generateNote17(): any[] {
+  generateNote17(): Record<string, unknown>[] {
     const CA_MAP: Record<string, { label: string; categorie: string; prefixes: string[] }> = {
       'ventes_marchandises': { label: 'Ventes de marchandises', categorie: 'ventes', prefixes: ['701'] },
       'ventes_produits': { label: 'Ventes de produits fabriqués', categorie: 'ventes', prefixes: ['702', '703'] },
@@ -1341,7 +1423,7 @@ export class LiasseDataService {
       'subventions': { label: 'Subventions d\'exploitation', categorie: 'subventions', prefixes: ['71'] },
     }
 
-    const lines: any[] = []
+    const lines: Record<string, unknown>[] = []
     Object.entries(CA_MAP).forEach(([key, { label, categorie, prefixes }]) => {
       // Revenue accounts have credit balance
       const montant = this.sumCredit(prefixes)
@@ -1354,7 +1436,7 @@ export class LiasseDataService {
 
   // ────────── Génération Note 19 - Charges de personnel ──────────
 
-  generateNote19(): any[] {
+  generateNote19(): Record<string, unknown>[] {
     const PERSONNEL_MAP: Record<string, { label: string; prefixes: string[] }> = {
       'salaires': { label: 'Salaires et traitements', prefixes: ['641', '642'] },
       'charges_sociales': { label: 'Charges sociales', prefixes: ['643', '644', '645', '646'] },
@@ -1362,7 +1444,7 @@ export class LiasseDataService {
       'impots_salaires': { label: 'Impôts sur salaires', prefixes: ['637'] },
     }
 
-    const lines: any[] = []
+    const lines: Record<string, unknown>[] = []
     Object.entries(PERSONNEL_MAP).forEach(([key, { label, prefixes }]) => {
       const montant = this.sumDebit(prefixes)
       if (montant === 0) return

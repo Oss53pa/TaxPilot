@@ -2,6 +2,10 @@
  * Taux fiscaux Côte d'Ivoire — Code Général des Impôts
  * Dernière mise à jour : Loi de Finances 2025
  * ⚠️ TOUS les calculs fiscaux DOIVENT utiliser getTauxFiscaux() pour lire les taux
+ *
+ * TODO: This file is CI-specific. For multi-country support, migrate callers
+ * to use getFiscalConfig(countryCode) from '@/services/fiscalConfigService'
+ * which reads rates from the fiscal_config Supabase table (17 OHADA countries).
  */
 
 import { getTauxFiscaux } from '@/store/tauxFiscauxStore'

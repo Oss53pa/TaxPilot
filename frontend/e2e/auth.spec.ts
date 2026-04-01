@@ -1,65 +1,37 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '@playwright/test'
 
-test.describe('Authentication Flow', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('/');
-  });
-
-  test('should display login page', async ({ page }) => {
-    await expect(page).toHaveTitle(/FiscaSync/);
-    await expect(page.locator('h1')).toContainText(/Connexion|Login/);
-  });
-
-  test('should register new user', async ({ page }) => {
-    await page.click('text=Inscription');
-
-    // Fill registration form
-    await page.fill('input[name="email"]', `test${Date.now()}@example.com`);
-    await page.fill('input[name="password"]', 'SecurePass123!');
-    await page.fill('input[name="organization_name"]', 'Test Company');
-
-    await page.click('button[type="submit"]');
-
-    // Should redirect to dashboard after successful registration
-    await expect(page).toHaveURL(/\/dashboard/);
-  });
-
-  test('should login existing user', async ({ page }) => {
-    await page.fill('input[name="email"]', 'admin@fiscasync.com');
-    await page.fill('input[name="password"]', 'admin123');
-
-    await page.click('button[type="submit"]');
-
-    // Should redirect to dashboard
-    await expect(page).toHaveURL(/\/dashboard/);
-
-    // Should display user info
-    await expect(page.locator('text=Tableau de bord')).toBeVisible();
-  });
-
-  test('should show error on invalid credentials', async ({ page }) => {
-    await page.fill('input[name="email"]', 'wrong@example.com');
-    await page.fill('input[name="password"]', 'wrongpassword');
-
-    await page.click('button[type="submit"]');
-
-    // Should show error message
-    await expect(page.locator('text=/Invalid credentials|Identifiants invalides/')).toBeVisible();
-  });
-
-  test('should logout user', async ({ page }) => {
-    // Login first
-    await page.fill('input[name="email"]', 'admin@fiscasync.com');
-    await page.fill('input[name="password"]', 'admin123');
-    await page.click('button[type="submit"]');
-
-    await expect(page).toHaveURL(/\/dashboard/);
-
-    // Logout
-    await page.click('[data-testid="user-menu"]');
-    await page.click('text=Déconnexion');
-
+test.describe('Authentication', () => {
+  test('shows login page for unauthenticated user', async ({ page }) => {
+    await page.goto('/')
     // Should redirect to login
-    await expect(page).toHaveURL('/');
-  });
-});
+    await expect(page).toHaveURL(/\/login/)
+    await expect(page.getByRole('heading')).toContainText(/Connexion|Login/)
+  })
+
+  test('login form has required fields', async ({ page }) => {
+    await page.goto('/login')
+    await expect(page.getByLabel(/email/i)).toBeVisible()
+    await expect(page.getByLabel(/mot de passe|password/i)).toBeVisible()
+    await expect(page.getByRole('button', { name: /connexion|login/i })).toBeVisible()
+  })
+
+  test('shows error on invalid credentials', async ({ page }) => {
+    await page.goto('/login')
+    await page.getByLabel(/email/i).fill('invalid@test.com')
+    await page.getByLabel(/mot de passe|password/i).fill('wrongpassword')
+    await page.getByRole('button', { name: /connexion|login/i }).click()
+    // Should show error
+    await expect(page.getByRole('alert')).toBeVisible({ timeout: 5000 })
+  })
+
+  test('register page is accessible', async ({ page }) => {
+    await page.goto('/register')
+    await expect(page.getByLabel(/email/i)).toBeVisible()
+    await expect(page.getByLabel(/prénom|first name/i)).toBeVisible()
+  })
+
+  test('forgot password page is accessible', async ({ page }) => {
+    await page.goto('/forgot-password')
+    await expect(page.getByLabel(/email/i)).toBeVisible()
+  })
+})

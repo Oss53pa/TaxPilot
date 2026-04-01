@@ -40,7 +40,7 @@ const Login: React.FC = () => {
   const { login, isLoading, error, clearError } = useAuthStore()
   
   const [formData, setFormData] = useState({
-    username: '',
+    email: '',
     password: '',
   })
   const [showPassword, setShowPassword] = useState(false)
@@ -86,7 +86,7 @@ const Login: React.FC = () => {
     e.preventDefault()
 
     try {
-      await login(formData.username, formData.password)
+      await login(formData.email, formData.password)
       navigate('/dashboard')
     } catch (err) {
       console.error('Erreur de connexion:', err)
@@ -271,9 +271,10 @@ const Login: React.FC = () => {
                   <Box component="form" onSubmit={handleSubmit}>
                     <TextField
                       fullWidth
-                      name="username"
-                      label="Nom d'utilisateur"
-                      value={formData.username}
+                      name="email"
+                      label="Adresse email"
+                      type="email"
+                      value={formData.email}
                       onChange={handleChange}
                       required
                       disabled={isLoading}
@@ -356,7 +357,7 @@ const Login: React.FC = () => {
                       fullWidth
                       variant="contained"
                       size="large"
-                      disabled={isLoading || !formData.username || !formData.password}
+                      disabled={isLoading || !formData.email || !formData.password}
                       sx={{
                         height: 56,
                         borderRadius: 2,

@@ -206,7 +206,7 @@ const ModernDashboard: React.FC = () => {
           <NotificationCenter sx={{ p: 0.5 }} />
 
           <Typography variant="body2" sx={{ color: 'text.primary', fontWeight: 600, fontSize: '0.85rem' }}>
-            {user?.username || 'Admin'}
+            {user?.firstName || user?.email || 'Admin'}
           </Typography>
 
           <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.5 }}>

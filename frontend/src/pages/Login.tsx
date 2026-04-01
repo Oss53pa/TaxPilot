@@ -31,9 +31,10 @@ import { useAuthStore } from '@/store/authStore'
 
 // Schéma de validation
 const loginSchema = yup.object({
-  username: yup
+  email: yup
     .string()
-    .required('Nom d\'utilisateur requis'),
+    .email('Adresse email invalide')
+    .required('Adresse email requise'),
   password: yup
     .string()
     .min(3, 'Mot de passe trop court')
@@ -41,7 +42,7 @@ const loginSchema = yup.object({
 })
 
 interface LoginFormData {
-  username: string
+  email: string
   password: string
 }
 
@@ -57,14 +58,14 @@ const Login: React.FC = () => {
     resolver: yupResolver(loginSchema),
     mode: 'onChange',
     defaultValues: {
-      username: '',
+      email: '',
       password: '',
     },
   })
 
   const onSubmit = async (data: LoginFormData) => {
     try {
-      await login(data.username, data.password)
+      await login(data.email, data.password)
     } catch (err: any) {
       // L'erreur est déjà gérée dans le store
       console.error('Erreur de connexion:', err)
@@ -117,16 +118,16 @@ const Login: React.FC = () => {
           {/* Formulaire de connexion */}
           <Box component="form" onSubmit={handleSubmit(onSubmit)}>
             <Controller
-              name="username"
+              name="email"
               control={control}
               render={({ field }) => (
                 <TextField
                   {...field}
                   fullWidth
-                  label="Nom d'utilisateur"
-                  type="text"
-                  error={!!errors.username}
-                  helperText={errors.username?.message}
+                  label="Adresse email"
+                  type="email"
+                  error={!!errors.email}
+                  helperText={errors.email?.message}
                   sx={{ mb: 3 }}
                   InputProps={{
                     startAdornment: (

@@ -25,6 +25,7 @@ import {
   MenuBook,
   Description,
   RestartAlt,
+  Flag,
 } from '@mui/icons-material'
 import EntrepriseSettings from '@/components/Parametrage/EntrepriseSettings'
 import UserManagement from '@/components/Parametrage/UserManagement'
@@ -38,6 +39,7 @@ import BackupRestoreSettings from '@/components/Parametrage/BackupRestoreSetting
 import DocumentationJuridique from '@/components/Parametrage/DocumentationJuridique'
 import ResetSettings from '@/components/Parametrage/ResetSettings'
 import BrandingPage from '@/pages/parametres/BrandingPage'
+import FiscalConfigPage from '@/pages/parametrage/FiscalConfigPage'
 import { TabPanel } from '@/components/shared/TabPanel'
 
 const Parametrage: React.FC = () => {
@@ -59,6 +61,7 @@ const Parametrage: React.FC = () => {
     if (path.includes('/sauvegarde')) return 9
     if (path.includes('/documentation-juridique')) return 10
     if (path.includes('/reinitialisation')) return 11
+    if (path.includes('/fiscal-config')) return 12
     return 0
   }
 
@@ -80,6 +83,7 @@ const Parametrage: React.FC = () => {
       '/parametrage/sauvegarde',
       '/parametrage/documentation-juridique',
       '/parametrage/reinitialisation',
+      '/parametrage/fiscal-config',
     ]
     
     navigate(tabPaths[newValue])
@@ -203,6 +207,13 @@ const Parametrage: React.FC = () => {
               aria-controls="parametrage-tabpanel-11"
               sx={{ color: 'error.main' }}
             />
+            <Tab
+              label="Config. Fiscale"
+              icon={<Flag />}
+              iconPosition="start"
+              id="parametrage-tab-12"
+              aria-controls="parametrage-tabpanel-12"
+            />
           </Tabs>
         </Box>
 
@@ -253,6 +264,10 @@ const Parametrage: React.FC = () => {
 
         <TabPanel value={activeTab} index={11}>
           <ResetSettings />
+        </TabPanel>
+
+        <TabPanel value={activeTab} index={12}>
+          <FiscalConfigPage />
         </TabPanel>
       </Paper>
     </Box>

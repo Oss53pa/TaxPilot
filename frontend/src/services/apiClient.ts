@@ -158,7 +158,7 @@ class ApiClient {
     return this.api
   }
 
-  public async get<T>(_url: string, _params?: Record<string, any>): Promise<T> {
+  public async get<T>(_url: string, _params?: object): Promise<T> {
     return { results: [], count: 0 } as unknown as T
   }
 
@@ -178,7 +178,7 @@ class ApiClient {
     return {} as T
   }
 
-  public async upload<T>(_url: string, _file: File, _additionalData?: Record<string, any>): Promise<T> {
+  public async upload<T>(_url: string, _file: File, _additionalData?: object): Promise<T> {
     return {} as T
   }
 }

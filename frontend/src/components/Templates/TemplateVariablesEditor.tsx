@@ -1,4 +1,5 @@
 import { logger } from '@/utils/logger'
+import { SafeHtml } from '@/components/ui/SafeHtml'
 /**
  * Composant pour l'édition des variables et formules de templates
  * Utilise les APIs du module Templates Engine
@@ -1038,7 +1039,7 @@ export default function TemplateVariablesEditor() {
             </DialogDescription>
           </DialogHeader>
           <div className="overflow-auto p-4 border rounded-lg bg-white">
-            <div dangerouslySetInnerHTML={{ __html: templateTest.preview }} />
+            <SafeHtml html={templateTest.preview} />
           </div>
           <DialogFooter>
             <Button onClick={() => setShowTestDialog(false)}>

@@ -316,13 +316,13 @@ const Sidebar: React.FC<SidebarProps> = ({ onNavigate }) => {
           Solution Fiscale OHADA
         </Typography>
         
-        {user?.entreprise_courante && (
+        {user && (
           <Box sx={{ mt: 1 }}>
             <Typography variant="body2" sx={{ fontWeight: 500 }}>
-              {user.entreprise_courante.raison_sociale}
+              {user.firstName} {user.lastName}
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              {user.role}
+              {user.email}
             </Typography>
           </Box>
         )}

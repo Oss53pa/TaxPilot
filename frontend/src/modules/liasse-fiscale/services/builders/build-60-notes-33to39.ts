@@ -618,11 +618,11 @@ function buildNote37(
   // ── Row 35 (L36): IMPOTS SUR LE RESULTAT ──
   const impotRow = emptyRow(C)
   impotRow[0] = 'IMPOTS SUR LE RESULTAT AU TAUX DE :'
-  impotRow[3] = 0.25
+  impotRow[3] = 0.25 // TODO: Use getFiscalConfig(countryCode).isRate — currently hardcoded for CI
   impotRow[7] = 0
   rows.push(impotRow)
   merges.push(m(35, 0, 35, 2)) // A36:C36 - label
-  // D36 has the tax rate (0.25)
+  // D36 has the tax rate — TODO: replace hardcoded 0.25 with config.isRate
 
   // ── Row 36 (L37): empty separator ──
   rows.push(emptyRow(C))

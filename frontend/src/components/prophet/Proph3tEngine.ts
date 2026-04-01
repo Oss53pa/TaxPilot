@@ -506,7 +506,7 @@ export async function processQuery(
       // ── Predictions ──
       case 'PREDICTION_IS':
         if (!context.balanceData?.balanceN) { response = noBalanceResponse(); break }
-        response = handlePredictionIS(context.balanceData.balanceN)
+        response = await handlePredictionIS(context.balanceData.balanceN)
         break
 
       case 'PREDICTION_TVA':
@@ -556,7 +556,7 @@ export async function processQuery(
 
       case 'CONDITIONAL_DIAGNOSTIC':
         if (!context.balanceData?.balanceN) { response = noBalanceResponse(); break }
-        response = handleConditionalDiagnostic(context.balanceData.balanceN, context.regime, context.entreprise)
+        response = await handleConditionalDiagnostic(context.balanceData.balanceN, context.regime, context.entreprise)
         break
 
       default:
@@ -607,7 +607,7 @@ async function processSecondaryIntents(
 
     switch (intent) {
       case 'PREDICTION_IS':
-        if (balance) resp = handlePredictionIS(balance)
+        if (balance) resp = await handlePredictionIS(balance)
         break
       case 'PREDICTION_TVA':
         if (balance) resp = handlePredictionTVA(balance)
@@ -637,7 +637,7 @@ async function processSecondaryIntents(
         if (balance) resp = handlePredictionGeneral(balance, balanceN1)
         break
       case 'CONDITIONAL_DIAGNOSTIC':
-        if (balance) resp = handleConditionalDiagnostic(balance, context.regime, context.entreprise)
+        if (balance) resp = await handleConditionalDiagnostic(balance, context.regime, context.entreprise)
         break
       case 'AUDIT_EXECUTE':
         if (balance) resp = handleAuditExecute(balance, balanceN1)

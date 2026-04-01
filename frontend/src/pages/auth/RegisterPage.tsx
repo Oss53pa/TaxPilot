@@ -14,40 +14,42 @@ import {
   Link,
   CircularProgress,
 } from '@mui/material'
-import { signUp } from '@/services/supabaseAuthService'
+import { useAuth } from '@/hooks/useAuth'
 
 const RegisterPage: React.FC = () => {
   const navigate = useNavigate()
+  const { signup, error: authError, isLoading, clearError } = useAuth()
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [localError, setLocalError] = useState('')
+  const [success, setSuccess] = useState(false)
+
+  const error = localError || authError
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError('')
+    setLocalError('')
+    clearError()
 
     if (password !== confirmPassword) {
-      setError('Les mots de passe ne correspondent pas')
+      setLocalError('Les mots de passe ne correspondent pas')
       return
     }
 
     if (password.length < 6) {
-      setError('Le mot de passe doit contenir au moins 6 caractères')
+      setLocalError('Le mot de passe doit contenir au moins 6 caractères')
       return
     }
 
-    setLoading(true)
     try {
-      await signUp(email, password, firstName, lastName)
-      navigate('/')
+      await signup(email, password, firstName, lastName)
+      // If we get here without being redirected, email confirmation may be required
+      setSuccess(true)
     } catch (err: any) {
-      setError(err.message || 'Erreur lors de l\'inscription')
-    } finally {
-      setLoading(false)
+      setLocalError(err.message || 'Erreur lors de l\'inscription')
     }
   }
 
@@ -83,6 +85,13 @@ const RegisterPage: React.FC = () => {
               Créer un compte
             </Typography>
           </Box>
+
+          {/* Success message for email confirmation */}
+          {success && (
+            <Alert severity="success" sx={{ mb: 3 }}>
+              Inscription réussie ! Vérifiez votre email pour confirmer votre compte.
+            </Alert>
+          )}
 
           {/* Error */}
           {error && (
@@ -142,7 +151,7 @@ const RegisterPage: React.FC = () => {
               fullWidth
               variant="contained"
               size="large"
-              disabled={loading}
+              disabled={isLoading || success}
               sx={{
                 mb: 2,
                 height: 48,
@@ -153,7 +162,7 @@ const RegisterPage: React.FC = () => {
                 '&:hover': { bgcolor: '#404040' },
               }}
             >
-              {loading ? (
+              {isLoading ? (
                 <CircularProgress size={24} sx={{ color: '#fafafa' }} />
               ) : (
                 'S\'inscrire'

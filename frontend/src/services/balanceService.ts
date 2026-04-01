@@ -138,8 +138,8 @@ class BalanceService {
     file: File,
     params?: {
       format?: string
-      mapping?: any
-      options?: any
+      mapping?: Record<string, unknown>
+      options?: Record<string, unknown>
     }
   ): Promise<ImportBalance> {
     const formData = new FormData()
@@ -268,50 +268,50 @@ class BalanceService {
 
   // ===== PLANS COMPTABLES D'ENTREPRISE =====
 
-  async getPlansComptables(entrepriseId: number): Promise<any[]> {
+  async getPlansComptables(entrepriseId: number): Promise<Record<string, unknown>[]> {
     logger.debug(`Fetching plans comptables for entreprise ${entrepriseId}...`)
-    const data = await apiClient.get<Record<string, any>>(`${this.baseUrl}/plans-comptables`, { entreprise: entrepriseId })
-    return data.results || []
+    const data = await apiClient.get<Record<string, unknown>>(`${this.baseUrl}/plans-comptables`, { entreprise: entrepriseId })
+    return (data as Record<string, unknown> & { results?: Record<string, unknown>[] }).results || []
   }
 
-  async getPlanComptable(id: number): Promise<any> {
+  async getPlanComptable(id: number): Promise<Record<string, unknown>> {
     return apiClient.get(`${this.baseUrl}/plans-comptables/${id}/`)
   }
 
-  async createPlanComptable(data: any): Promise<any> {
+  async createPlanComptable(data: Record<string, unknown>): Promise<Record<string, unknown>> {
     logger.debug('Creating plan comptable...', data)
     return apiClient.post(`${this.baseUrl}/plans-comptables`, data)
   }
 
   // ===== COMPTES D'ENTREPRISE =====
 
-  async getComptes(planComptableId?: number): Promise<any[]> {
+  async getComptes(planComptableId?: number): Promise<Record<string, unknown>[]> {
     const params = planComptableId ? { plan_comptable: planComptableId } : undefined
-    const data = await apiClient.get<Record<string, any>>(`${this.baseUrl}/comptes`, params)
-    return data.results || []
+    const data = await apiClient.get<Record<string, unknown>>(`${this.baseUrl}/comptes`, params)
+    return (data as Record<string, unknown> & { results?: Record<string, unknown>[] }).results || []
   }
 
-  async getCompte(id: number): Promise<any> {
+  async getCompte(id: number): Promise<Record<string, unknown>> {
     return apiClient.get(`${this.baseUrl}/comptes/${id}/`)
   }
 
-  async createCompte(data: any): Promise<any> {
+  async createCompte(data: Record<string, unknown>): Promise<Record<string, unknown>> {
     logger.debug('Creating compte...', data)
     return apiClient.post(`${this.baseUrl}/comptes`, data)
   }
 
-  async updateCompte(id: number, data: any): Promise<any> {
+  async updateCompte(id: number, data: Record<string, unknown>): Promise<Record<string, unknown>> {
     return apiClient.patch(`${this.baseUrl}/comptes/${id}/`, data)
   }
 
   // ===== MAPPINGS =====
 
-  async getMappings(filters?: { compte_local?: number; compte_reference?: number }): Promise<any[]> {
-    const data = await apiClient.get<Record<string, any>>(`${this.baseUrl}/mappings`, filters)
-    return data.results || []
+  async getMappings(filters?: { compte_local?: number; compte_reference?: number }): Promise<Record<string, unknown>[]> {
+    const data = await apiClient.get<Record<string, unknown>>(`${this.baseUrl}/mappings`, filters)
+    return (data as Record<string, unknown> & { results?: Record<string, unknown>[] }).results || []
   }
 
-  async createMapping(data: { compte_local: number; compte_reference: number }): Promise<any> {
+  async createMapping(data: { compte_local: number; compte_reference: number }): Promise<Record<string, unknown>> {
     logger.debug('Creating mapping...', data)
     return apiClient.post(`${this.baseUrl}/mappings`, data)
   }

@@ -14,10 +14,11 @@ import {
   Link,
   CircularProgress,
 } from '@mui/material'
-import { resetPassword } from '@/services/supabaseAuthService'
+import { useAuth } from '@/hooks/useAuth'
 
 const ForgotPasswordPage: React.FC = () => {
   const navigate = useNavigate()
+  const { resetPassword } = useAuth()
   const [email, setEmail] = useState('')
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)

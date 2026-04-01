@@ -3,7 +3,7 @@
  */
 
 import { calculerIS } from '@/config/taux-fiscaux-ci'
-import { calculerPassageFiscal } from '@/services/passageFiscalService'
+import { calculerPassageFiscal, type TableauPassageResult } from '@/services/passageFiscalService'
 import { generateAnnexeData } from '@/services/annexeDataService'
 import type { Balance } from '@/types'
 import type { Proph3tResponse, PredictionCard, FiscalInfoCard } from '../types'
@@ -156,12 +156,12 @@ function toPassageFiscalEntries(balance: Balance[]) {
 
 // ── Prediction IS (via Passage Fiscal) ───────────────────────────────
 
-export function handlePredictionIS(balance: Balance[]): Proph3tResponse {
+export async function handlePredictionIS(balance: Balance[]): Promise<Proph3tResponse> {
   if (!balance || balance.length === 0) return noBalanceResponse()
 
   // Utiliser le vrai passage fiscal au lieu du calcul simplifié
   const entries = toPassageFiscalEntries(balance)
-  const passage = calculerPassageFiscal(entries)
+  const passage = await calculerPassageFiscal(entries)
 
   const status: Status = passage.resultat_fiscal > 0
     ? (passage.base_is === 'IS' ? 'bon' : 'acceptable')
@@ -253,7 +253,7 @@ export function handlePredictionIS(balance: Balance[]): Proph3tResponse {
   }
 }
 
-function buildISNarrative(passage: ReturnType<typeof calculerPassageFiscal>): string {
+function buildISNarrative(passage: TableauPassageResult): string {
   const parts: string[] = []
 
   // Écart comptable / fiscal
@@ -276,7 +276,7 @@ function buildISNarrative(passage: ReturnType<typeof calculerPassageFiscal>): st
   return parts.join(' ')
 }
 
-function buildISRecommendations(passage: ReturnType<typeof calculerPassageFiscal>): string[] {
+function buildISRecommendations(passage: TableauPassageResult): string[] {
   const recs: string[] = []
 
   if (passage.resultat_fiscal < 0) {

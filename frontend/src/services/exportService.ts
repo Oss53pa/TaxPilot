@@ -8,6 +8,7 @@ import { saveAs } from 'file-saver'
 import { arrondiFCFA } from '@/config/taux-fiscaux-ci'
 import { liasseDataService } from './liasseDataService'
 import type { TypeLiasse } from '../types'
+import type { BilanActifRow, BilanPassifRow, CompteResultatRow, SIGRow } from './liasseDataService'
 import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
 import { createLiasseArchive, type LiasseArchiveRecord } from './archiveService'
 import type { StoredBalance } from './balanceStorageService'
@@ -63,7 +64,7 @@ export function exportLiasseExcel(
     ['Exercice clos le:', exercice, '', '', ''],
     ['', '', '', '', ''],
     ['Réf.', 'Poste', 'Brut', 'Amort./Prov.', 'Net N', 'Net N-1'],
-    ...actif.map((row: any) => [
+    ...actif.map((row: BilanActifRow) => [
       row.ref,
       LIBELLES_ACTIF[row.ref] || row.ref,
       arrondiFCFA(row.brut),
@@ -72,8 +73,8 @@ export function exportLiasseExcel(
       arrondiFCFA(row.net_n1),
     ]),
     ['', 'TOTAL ACTIF', '', '',
-      arrondiFCFA(actif.reduce((s: number, r: any) => s + r.net, 0)),
-      arrondiFCFA(actif.reduce((s: number, r: any) => s + r.net_n1, 0)),
+      arrondiFCFA(actif.reduce((s: number, r: BilanActifRow) => s + r.net, 0)),
+      arrondiFCFA(actif.reduce((s: number, r: BilanActifRow) => s + r.net_n1, 0)),
     ],
   ]
   const wsActif = XLSX.utils.aoa_to_sheet(actifRows)
@@ -87,15 +88,15 @@ export function exportLiasseExcel(
     [entreprise.raison_sociale, '', 'Exercice:', exercice],
     ['', '', ''],
     ['Réf.', 'Poste', 'Montant N', 'Montant N-1'],
-    ...passif.map((row: any) => [
+    ...passif.map((row: BilanPassifRow) => [
       row.ref,
       LIBELLES_PASSIF[row.ref] || row.ref,
       arrondiFCFA(row.montant),
       arrondiFCFA(row.montant_n1),
     ]),
     ['', 'TOTAL PASSIF',
-      arrondiFCFA(passif.reduce((s: number, r: any) => s + r.montant, 0)),
-      arrondiFCFA(passif.reduce((s: number, r: any) => s + r.montant_n1, 0)),
+      arrondiFCFA(passif.reduce((s: number, r: BilanPassifRow) => s + r.montant, 0)),
+      arrondiFCFA(passif.reduce((s: number, r: BilanPassifRow) => s + r.montant_n1, 0)),
     ],
   ]
   const wsPassif = XLSX.utils.aoa_to_sheet(passifRows)
@@ -110,11 +111,11 @@ export function exportLiasseExcel(
     ['', '', ''],
     ['CHARGES', '', ''],
     ['Réf.', 'Poste', 'Montant N', 'Montant N-1'],
-    ...cdr.charges.map((row: any) => [row.ref, row.ref, arrondiFCFA(row.montant), arrondiFCFA(row.montant_n1)]),
+    ...cdr.charges.map((row: CompteResultatRow) => [row.ref, row.ref, arrondiFCFA(row.montant), arrondiFCFA(row.montant_n1)]),
     ['', '', '', ''],
     ['PRODUITS', '', ''],
     ['Réf.', 'Poste', 'Montant N', 'Montant N-1'],
-    ...cdr.produits.map((row: any) => [row.ref, row.ref, arrondiFCFA(row.montant), arrondiFCFA(row.montant_n1)]),
+    ...cdr.produits.map((row: CompteResultatRow) => [row.ref, row.ref, arrondiFCFA(row.montant), arrondiFCFA(row.montant_n1)]),
   ]
   const wsCdr = XLSX.utils.aoa_to_sheet(cdrRows)
   wsCdr['!cols'] = [{ wch: 6 }, { wch: 40 }, { wch: 15 }, { wch: 15 }]
@@ -126,7 +127,7 @@ export function exportLiasseExcel(
     ['SOLDES INTERMÉDIAIRES DE GESTION', '', ''],
     ['', '', ''],
     ['Réf.', 'Libellé', 'Montant N', 'Montant N-1'],
-    ...sig.map((row: any) => [row.ref, row.label, arrondiFCFA(row.montant), arrondiFCFA(row.montant_n1)]),
+    ...sig.map((row: SIGRow) => [row.ref, row.label, arrondiFCFA(row.montant), arrondiFCFA(row.montant_n1)]),
   ]
   const wsSig = XLSX.utils.aoa_to_sheet(sigRows)
   wsSig['!cols'] = [{ wch: 8 }, { wch: 50 }, { wch: 15 }, { wch: 15 }]
@@ -201,7 +202,7 @@ export function exportLiasseExcel(
   XLSX.utils.book_append_sheet(wb, wsTafire, 'TAFIRE')
 
   // 7. Passage Fiscal
-  const resultatNet = sig.find((s: any) => s.ref === 'SIG9')?.montant ?? 0
+  const resultatNet = sig.find((s: SIGRow) => s.ref === 'SIG9')?.montant ?? 0
   const passageFiscalRows = [
     ['TABLEAU DE PASSAGE — RÉSULTAT COMPTABLE AU RÉSULTAT FISCAL', ''],
     ['', ''],
@@ -251,10 +252,10 @@ export function exportLiassePDF(
   const tft = liasseDataService.generateTFT()
 
   const fmt = (n: number) => arrondiFCFA(n).toLocaleString('fr-FR')
-  const totalActifNet = arrondiFCFA(actif.reduce((s: number, r: any) => s + r.net, 0))
-  const totalPassif = arrondiFCFA(passif.reduce((s: number, r: any) => s + r.montant, 0))
-  const totalCharges = arrondiFCFA(cdr.charges.reduce((s: number, r: any) => s + r.montant, 0))
-  const totalProduits = arrondiFCFA(cdr.produits.reduce((s: number, r: any) => s + r.montant, 0))
+  const totalActifNet = arrondiFCFA(actif.reduce((s: number, r: BilanActifRow) => s + r.net, 0))
+  const totalPassif = arrondiFCFA(passif.reduce((s: number, r: BilanPassifRow) => s + r.montant, 0))
+  const totalCharges = arrondiFCFA(cdr.charges.reduce((s: number, r: CompteResultatRow) => s + r.montant, 0))
+  const totalProduits = arrondiFCFA(cdr.produits.reduce((s: number, r: CompteResultatRow) => s + r.montant, 0))
 
   const html = `<!DOCTYPE html>
 <html><head>
@@ -286,14 +287,14 @@ export function exportLiassePDF(
 <h2>BILAN ACTIF</h2>
 <table>
   <tr><th>Réf.</th><th>Poste</th><th class="num">Brut</th><th class="num">Amort./Prov.</th><th class="num">Net N</th><th class="num">Net N-1</th></tr>
-  ${actif.map((r: any) => `<tr><td>${r.ref}</td><td>${LIBELLES_ACTIF[r.ref] || r.ref}</td><td class="num">${fmt(r.brut)}</td><td class="num">${fmt(r.amortProv)}</td><td class="num">${fmt(r.net)}</td><td class="num">${fmt(r.net_n1)}</td></tr>`).join('')}
+  ${actif.map((r: BilanActifRow) => `<tr><td>${r.ref}</td><td>${LIBELLES_ACTIF[r.ref] || r.ref}</td><td class="num">${fmt(r.brut)}</td><td class="num">${fmt(r.amortProv)}</td><td class="num">${fmt(r.net)}</td><td class="num">${fmt(r.net_n1)}</td></tr>`).join('')}
   <tr class="total"><td></td><td>TOTAL ACTIF</td><td></td><td></td><td class="num">${fmt(totalActifNet)}</td><td></td></tr>
 </table>
 
 <h2>BILAN PASSIF</h2>
 <table>
   <tr><th>Réf.</th><th>Poste</th><th class="num">Montant N</th><th class="num">Montant N-1</th></tr>
-  ${passif.map((r: any) => `<tr><td>${r.ref}</td><td>${LIBELLES_PASSIF[r.ref] || r.ref}</td><td class="num">${fmt(r.montant)}</td><td class="num">${fmt(r.montant_n1)}</td></tr>`).join('')}
+  ${passif.map((r: BilanPassifRow) => `<tr><td>${r.ref}</td><td>${LIBELLES_PASSIF[r.ref] || r.ref}</td><td class="num">${fmt(r.montant)}</td><td class="num">${fmt(r.montant_n1)}</td></tr>`).join('')}
   <tr class="total"><td></td><td>TOTAL PASSIF</td><td class="num">${fmt(totalPassif)}</td><td></td></tr>
 </table>
 
@@ -301,20 +302,20 @@ export function exportLiassePDF(
 <table>
   <tr><th colspan="4">CHARGES</th></tr>
   <tr><th>Réf.</th><th>Poste</th><th class="num">N</th><th class="num">N-1</th></tr>
-  ${cdr.charges.map((r: any) => `<tr><td>${r.ref}</td><td>${r.ref}</td><td class="num">${fmt(r.montant)}</td><td class="num">${fmt(r.montant_n1)}</td></tr>`).join('')}
+  ${cdr.charges.map((r: CompteResultatRow) => `<tr><td>${r.ref}</td><td>${r.ref}</td><td class="num">${fmt(r.montant)}</td><td class="num">${fmt(r.montant_n1)}</td></tr>`).join('')}
   <tr class="total"><td></td><td>TOTAL CHARGES</td><td class="num">${fmt(totalCharges)}</td><td></td></tr>
 </table>
 <table>
   <tr><th colspan="4">PRODUITS</th></tr>
   <tr><th>Réf.</th><th>Poste</th><th class="num">N</th><th class="num">N-1</th></tr>
-  ${cdr.produits.map((r: any) => `<tr><td>${r.ref}</td><td>${r.ref}</td><td class="num">${fmt(r.montant)}</td><td class="num">${fmt(r.montant_n1)}</td></tr>`).join('')}
+  ${cdr.produits.map((r: CompteResultatRow) => `<tr><td>${r.ref}</td><td>${r.ref}</td><td class="num">${fmt(r.montant)}</td><td class="num">${fmt(r.montant_n1)}</td></tr>`).join('')}
   <tr class="total"><td></td><td>TOTAL PRODUITS</td><td class="num">${fmt(totalProduits)}</td><td></td></tr>
 </table>
 
 <h2>SOLDES INTERMÉDIAIRES DE GESTION</h2>
 <table>
   <tr><th>Réf.</th><th>Libellé</th><th class="num">N</th><th class="num">N-1</th></tr>
-  ${sig.map((r: any) => `<tr class="${r.type === 'grandtotal' ? 'grandtotal' : r.type === 'sig' ? 'sig' : ''}"><td>${r.ref}</td><td>${r.label}</td><td class="num">${fmt(r.montant)}</td><td class="num">${fmt(r.montant_n1)}</td></tr>`).join('')}
+  ${sig.map((r: SIGRow) => `<tr class="${r.type === 'grandtotal' ? 'grandtotal' : r.type === 'sig' ? 'sig' : ''}"><td>${r.ref}</td><td>${r.label}</td><td class="num">${fmt(r.montant)}</td><td class="num">${fmt(r.montant_n1)}</td></tr>`).join('')}
 </table>
 
 <h2>TABLEAU DES FLUX DE TRÉSORERIE</h2>

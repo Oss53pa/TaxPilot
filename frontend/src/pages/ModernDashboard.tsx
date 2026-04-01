@@ -169,7 +169,7 @@ const ModernDashboard = () => {
       {/* Header moderne */}
       <Box sx={{ mb: 4 }}>
         <Typography variant="h4" sx={{ fontWeight: 600, color: 'text.primary', mb: 0.5 }}>
-          Good Morning, {user?.first_name || user?.username}
+          Good Morning, {user?.firstName || user?.email}
         </Typography>
         <Typography variant="body1" sx={{ color: '#6b7280', fontWeight: 400 }}>
           {new Date().toLocaleDateString('fr-FR', {

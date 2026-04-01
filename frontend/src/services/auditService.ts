@@ -47,8 +47,8 @@ export interface AuditAnomalie {
     cellule?: string
     compte?: string
   }
-  valeur_attendue?: any
-  valeur_trouvee?: any
+  valeur_attendue?: string | number | boolean
+  valeur_trouvee?: string | number | boolean
   impact_fiscal?: number
   suggestion?: string
   statut: 'NOUVELLE' | 'EN_COURS' | 'RESOLUE' | 'IGNOREE'
@@ -148,7 +148,7 @@ class AuditService {
   async resolveAnomalie(id: string, resolution: {
     action: string
     commentaire: string
-    nouvelle_valeur?: any
+    nouvelle_valeur?: string | number | boolean
   }) {
     logger.debug(`Resolving anomalie ${id}...`)
     return apiClient.post(`${this.baseUrl}/anomalies/${id}/resolve/`, resolution)
@@ -186,7 +186,7 @@ class AuditService {
   }
 
   // Tests et validations - Stub service
-  async testControlRule(ruleId: string, testData: any) {
+  async testControlRule(ruleId: string, testData: Record<string, unknown>) {
     logger.debug(`Testing control rule ${ruleId} ...`)
     return apiClient.post(`${this.baseUrl}/rules/${ruleId}/test/`, testData)
   }

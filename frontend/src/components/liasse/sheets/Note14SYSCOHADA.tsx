@@ -25,7 +25,7 @@ const Note14SYSCOHADA: React.FC = () => {
 
   useEffect(() => {
     if (!liasseDataService.isLoaded()) { setHasData(false); return }
-    const data = liasseDataService.generateNote14()
+    const data = liasseDataService.generateNote14() as unknown as DetteLine[]
     setLignes(data)
     setHasData(data.length > 0)
   }, [])

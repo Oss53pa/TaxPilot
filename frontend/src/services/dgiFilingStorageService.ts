@@ -336,7 +336,7 @@ export function getReceipt(id: string): FilingReceipt | null {
 
 // ────────── DSF Auto-generation ──────────
 
-export function generateDSF(_exercice: string): DSFData | null {
+export async function generateDSF(_exercice: string): Promise<DSFData | null> {
   try {
     // Load balance from balanceStorageService
     const balanceRaw = localStorage.getItem('fiscasync_balance_latest')
@@ -344,7 +344,7 @@ export function generateDSF(_exercice: string): DSFData | null {
     const balance = JSON.parse(balanceRaw)
     if (!balance?.entries?.length) return null
 
-    const passage = calculerPassageFiscal(balance.entries)
+    const passage = await calculerPassageFiscal(balance.entries)
 
     // Calculate bilan totals from balance entries
     const entries = balance.entries as Array<{ compte: string; solde_debit: number; solde_credit: number }>

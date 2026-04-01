@@ -17,6 +17,64 @@ export interface ControleCoherence {
   recommandation?: string
 }
 
+/** Loosely-typed financial data structures used by coherence checks */
+interface BilanActifData {
+  immobilisationsCorporelles?: number
+  immobilisationsIncorporelles?: number
+  stocks?: number
+  creancesClients?: number
+  totalActif?: number
+  [key: string]: unknown
+}
+
+interface BilanPassifData {
+  dettesFinancieres?: number
+  provisions?: number
+  totalPassif?: number
+  [key: string]: unknown
+}
+
+interface NotesAnnexesData {
+  tableauImmobilisations?: {
+    totalNetCorporelles?: number
+    totalNetIncorporelles?: number
+    mouvements?: { augmentations?: number; diminutions?: number }
+    amortissements?: { dotationsExercice?: number }
+    subventions?: { recuesExercice?: number }
+    [key: string]: unknown
+  }
+  dettesSurEtablissementCredit?: { totalDettes?: number; [key: string]: unknown }
+  tableauProvisions?: { totalProvisions?: number; dotationsExercice?: number; [key: string]: unknown }
+  mouvementStocks?: { valeurFinale?: number; [key: string]: unknown }
+  chiffreAffaires?: { totalCA?: number; [key: string]: unknown }
+  tableauAmortissements?: { dotationsExercice?: number; [key: string]: unknown }
+  [key: string]: unknown
+}
+
+interface TFTData {
+  fluxExploitation: { total?: number; dotationsAmortissements?: number; [key: string]: unknown }
+  fluxInvestissement: { total?: number; acquisitionsImmobilisations?: number; cessionImmobilisations?: number; subventionsRecues?: number; [key: string]: unknown }
+  fluxFinancement: { total?: number; [key: string]: unknown }
+  variationTresorerie?: number
+  [key: string]: unknown
+}
+
+interface CompteResultatData {
+  chiffreAffaires?: number
+  dotationsAmortissements?: number
+  dotationsProvisions?: number
+  [key: string]: unknown
+}
+
+interface DonneesLiasse {
+  bilanActif: BilanActifData
+  bilanPassif: BilanPassifData
+  notesAnnexes: NotesAnnexesData
+  tft: TFTData
+  compteResultat: CompteResultatData
+  [key: string]: unknown
+}
+
 export interface ResultatValidation {
   nombreControles: number
   controlesConformes: number
@@ -32,9 +90,9 @@ class CoherenceService {
    * ALGORITHME 1: Contrôle cohérence Bilan vs Notes Annexes
    */
   async verifierCoherenceBilanNotes(
-    bilanActif: any, 
-    bilanPassif: any, 
-    notesAnnexes: any
+    bilanActif: BilanActifData,
+    bilanPassif: BilanPassifData,
+    notesAnnexes: NotesAnnexesData
   ): Promise<ControleCoherence[]> {
     const controles: ControleCoherence[] = []
 
@@ -126,8 +184,8 @@ class CoherenceService {
    * ALGORITHME 2: Contrôle cohérence TFT vs Tableau des Immobilisations
    */
   async verifierCoherenceTFTImmobilisations(
-    tft: any, 
-    tableauImmobilisations: any
+    tft: TFTData,
+    tableauImmobilisations: NonNullable<NotesAnnexesData['tableauImmobilisations']>
   ): Promise<ControleCoherence[]> {
     const controles: ControleCoherence[] = []
 
@@ -222,8 +280,8 @@ class CoherenceService {
    * ALGORITHME 3: Contrôle cohérence Compte de Résultat vs Notes
    */
   async verifierCoherenceResultatNotes(
-    compteResultat: any,
-    notesAnnexes: any
+    compteResultat: CompteResultatData,
+    notesAnnexes: NotesAnnexesData
   ): Promise<ControleCoherence[]> {
     const controles: ControleCoherence[] = []
 
@@ -282,7 +340,7 @@ class CoherenceService {
   /**
    * ALGORITHME 4: Validation croisée mathématique du TFT
    */
-  async verifierCoherenceMathematiqueTFT(tft: any): Promise<ControleCoherence[]> {
+  async verifierCoherenceMathematiqueTFT(tft: TFTData): Promise<ControleCoherence[]> {
     const controles: ControleCoherence[] = []
 
     // Calculs de vérification
@@ -313,7 +371,7 @@ class CoherenceService {
   /**
    * MÉTHODE PRINCIPALE: Lancer tous les contrôles de cohérence
    */
-  async lancerControlesCoherence(donneesLiasse: any): Promise<ResultatValidation> {
+  async lancerControlesCoherence(donneesLiasse: DonneesLiasse): Promise<ResultatValidation> {
     const todControles: ControleCoherence[] = []
 
     try {
@@ -328,7 +386,7 @@ class CoherenceService {
       // 2. Contrôles TFT vs Immobilisations
       const controlesTFT = await this.verifierCoherenceTFTImmobilisations(
         donneesLiasse.tft,
-        donneesLiasse.notesAnnexes.tableauImmobilisations
+        donneesLiasse.notesAnnexes.tableauImmobilisations ?? {}
       )
       todControles.push(...controlesTFT)
 
@@ -403,7 +461,7 @@ class CoherenceService {
   /**
    * ALGORITHME AVANCÉ: Détection automatique d'incohérences suspectes
    */
-  async detecterIncoherencesSuspectes(donneesLiasse: any): Promise<ControleCoherence[]> {
+  async detecterIncoherencesSuspectes(donneesLiasse: DonneesLiasse): Promise<ControleCoherence[]> {
     const controles: ControleCoherence[] = []
 
     // Détection de ratios anormaux qui indiquent des incohérences

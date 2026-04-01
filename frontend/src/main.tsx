@@ -1,4 +1,6 @@
+import './i18n'
 import { logger } from '@/utils/logger'
+import * as Sentry from '@sentry/react'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
@@ -8,7 +10,8 @@ import { SnackbarProvider, MaterialDesignContent } from 'notistack'
 import { Provider } from 'react-redux'
 import App from './App.tsx'
 import { store } from './store/index.ts'
-import fiscasyncTheme, { fiscasyncPalette } from './theme/fiscasyncTheme.ts'
+import { fiscasyncPalette, createFiscaSyncTheme } from './theme/fiscasyncTheme.ts'
+import { useThemeStore } from './store/themeStore.ts'
 import './index.css'
 
 // Notistack styled snackbar variants - prevent white-on-white from MuiPaper override
@@ -36,15 +39,34 @@ const StyledMaterialDesignContent = styled(MaterialDesignContent)(() => ({
 }))
 import './styles/contrast-fix.css'
 
+// Initialize Sentry (only in production)
+const sentryDsn = import.meta.env.VITE_SENTRY_DSN
+if (sentryDsn) {
+  Sentry.init({
+    dsn: sentryDsn,
+    environment: import.meta.env.MODE,
+    integrations: [
+      Sentry.browserTracingIntegration(),
+      Sentry.replayIntegration({ maskAllText: true, blockAllMedia: true }),
+    ],
+    tracesSampleRate: import.meta.env.MODE === 'production' ? 0.1 : 1.0,
+    replaysSessionSampleRate: 0.1,
+    replaysOnErrorSampleRate: 1.0,
+  })
+}
+
 // Configuration du client React Query
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 5 * 60 * 1000, // 5 minutes
       gcTime: 10 * 60 * 1000, // 10 minutes
-      retry: (failureCount, error: any) => {
+      retry: (failureCount, error: unknown) => {
         // Ne pas retry pour les erreurs d'authentification
-        if (error?.response?.status === 401) return false
+        if (error && typeof error === 'object' && 'response' in error) {
+          const axiosError = error as { response?: { status?: number } }
+          if (axiosError.response?.status === 401) return false
+        }
         return failureCount < 3
       }
     }
@@ -54,62 +76,53 @@ const queryClient = new QueryClient({
 // Global unhandled promise rejection handler
 // Prevents silent failures and logs errors for debugging
 window.addEventListener('unhandledrejection', (event) => {
-  logger.error('🚨 Unhandled promise rejection:', event.reason)
-
-  // Log detailed error information for debugging
-  if (event.reason instanceof Error) {
-    logger.error('Error name:', event.reason.name)
-    logger.error('Error message:', event.reason.message)
-    logger.error('Error stack:', event.reason.stack)
-  }
-
-  // TODO: Send to error tracking service (Sentry, LogRocket, etc.)
-  // if (window.Sentry) {
-  //   window.Sentry.captureException(event.reason)
-  // }
-
-  // Prevent the default browser error logging
+  logger.error('Unhandled promise rejection:', event.reason)
+  if (sentryDsn) Sentry.captureException(event.reason)
   event.preventDefault()
 })
 
-// Global error handler for synchronous errors
 window.addEventListener('error', (event) => {
-  logger.error('🚨 Global error:', event.error || event.message)
-
-  // TODO: Send to error tracking service
-  // if (window.Sentry) {
-  //   window.Sentry.captureException(event.error)
-  // }
+  logger.error('Global error:', event.error || event.message)
+  if (sentryDsn) Sentry.captureException(event.error)
 })
+
+function ThemedApp() {
+  const { resolvedMode } = useThemeStore()
+  const theme = React.useMemo(() => createFiscaSyncTheme(resolvedMode), [resolvedMode])
+
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <SnackbarProvider
+        maxSnack={3}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        autoHideDuration={4000}
+        Components={{
+          success: StyledMaterialDesignContent,
+          error: StyledMaterialDesignContent,
+          warning: StyledMaterialDesignContent,
+          info: StyledMaterialDesignContent,
+          default: StyledMaterialDesignContent,
+        }}
+      >
+        <BrowserRouter
+          future={{
+            v7_startTransition: true,
+            v7_relativeSplatPath: true
+          }}
+        >
+          <App />
+        </BrowserRouter>
+      </SnackbarProvider>
+    </ThemeProvider>
+  )
+}
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <Provider store={store}>
       <QueryClientProvider client={queryClient}>
-        <ThemeProvider theme={fiscasyncTheme}>
-          <CssBaseline />
-          <SnackbarProvider
-            maxSnack={3}
-            anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-            autoHideDuration={4000}
-            Components={{
-              success: StyledMaterialDesignContent,
-              error: StyledMaterialDesignContent,
-              warning: StyledMaterialDesignContent,
-              info: StyledMaterialDesignContent,
-              default: StyledMaterialDesignContent,
-            }}
-          >
-            <BrowserRouter
-              future={{
-                v7_startTransition: true,
-                v7_relativeSplatPath: true
-              }}
-            >
-              <App />
-            </BrowserRouter>
-          </SnackbarProvider>
-        </ThemeProvider>
+        <ThemedApp />
       </QueryClientProvider>
     </Provider>
   </React.StrictMode>,

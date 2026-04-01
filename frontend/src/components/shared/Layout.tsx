@@ -40,6 +40,7 @@ import {
   Description,
   CloudUpload,
   Analytics,
+  Flag as FlagIcon,
   Home as HomeIcon,
   History as HistoryIcon,
   ChevronLeft as ChevronLeftIcon,
@@ -135,6 +136,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     { text: 'Tableau de bord', icon: <DashboardIcon />, path: '/dashboard' },
 
     { text: 'Configuration', icon: <Settings />, path: '/parametrage', divider: 'Configuration' },
+    { text: 'Config. Fiscale', icon: <FlagIcon />, path: '/parametrage/fiscal-config' },
     { text: 'Plans Comptables', icon: <AccountBalance />, path: '/plans-comptables' },
     { text: 'Points de Contrôle IA', icon: <Security />, path: '/control-points' },
 
@@ -460,7 +462,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <Avatar
               sx={{ width: 32, height: 32, bgcolor: 'text.primary', color: P.white, fontSize: '0.85rem', fontWeight: 600 }}
             >
-              {user?.first_name?.[0] || user?.username?.[0] || <AccountCircle />}
+              {user?.firstName?.[0] || user?.email?.[0] || <AccountCircle />}
             </Avatar>
           </IconButton>
 
@@ -475,7 +477,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           >
             <MenuItem onClick={handleUserMenuClose} disabled>
               <Typography variant="subtitle2" color="text.secondary">
-                {user?.first_name} {user?.last_name}
+                {user?.firstName} {user?.lastName}
               </Typography>
             </MenuItem>
             <MenuItem onClick={handleUserMenuClose} disabled>

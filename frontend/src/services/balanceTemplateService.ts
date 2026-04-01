@@ -23,7 +23,7 @@ export const BALANCE_HEADERS = [
 export function downloadBalanceTemplate(): string {
   const wb = XLSX.utils.book_new()
 
-  const rows: any[][] = [
+  const rows: (string | number)[][] = [
     [...BALANCE_HEADERS],
     [101000, 'Capital social',         0, 9000000,        0, 10000000,       0, 10000000],
     [411000, 'Clients',         4500000,       0,  5000000,        0, 5000000,        0],
@@ -56,7 +56,7 @@ export function downloadBalanceTemplate(): string {
 export function exportBalanceToExcel(entries: BalanceEntry[], filename?: string): string {
   const wb = XLSX.utils.book_new()
 
-  const rows: any[][] = [
+  const rows: (string | number)[][] = [
     [...BALANCE_HEADERS],
     ...entries.map(e => [
       e.compte,

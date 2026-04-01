@@ -25,7 +25,7 @@ const Note17SYSCOHADA: React.FC = () => {
 
   useEffect(() => {
     if (!liasseDataService.isLoaded()) { setHasData(false); return }
-    const data = liasseDataService.generateNote17()
+    const data = liasseDataService.generateNote17() as unknown as CALine[]
     setLignes(data)
     setHasData(data.length > 0)
   }, [])

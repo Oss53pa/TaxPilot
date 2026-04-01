@@ -130,7 +130,7 @@ function FI005(ctx: AuditContext): ResultatControle {
   const ref = 'FI-005', nom = 'Dons et liberalites'
   const dons = absSum(find(ctx.balanceN, '6234'))
   const ca = absSum(find(ctx.balanceN, '70'))
-  const plafond = ca * 0.001 // 1 pour mille
+  const plafond = ca * 0.001 // 1 pour mille — TODO: Use getFiscalConfig(countryCode).giftThresholdRate
   if (dons > plafond && plafond > 0) {
     const exces = dons - plafond
     return anomalie(ref, nom, 'MINEUR',

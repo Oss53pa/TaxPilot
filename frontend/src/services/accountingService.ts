@@ -340,7 +340,7 @@ class AccountingService {
   async importEcritures(file: File, options?: {
     journal_id: string
     format: 'CSV' | 'EXCEL' | 'FEC'
-    mapping?: any
+    mapping?: Record<string, unknown>
   }) {
     logger.debug('Importing écritures ...', options)
     return apiClient.upload(`${this.baseUrl}/import/ecritures/`, file, options)

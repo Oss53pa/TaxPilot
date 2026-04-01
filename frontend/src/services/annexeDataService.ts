@@ -456,9 +456,10 @@ function generateNote37(entries: BalanceEntry[]): NoteData {
   const reintegrations = sumDebit(entries, ['671']) // interets excessifs
   const deductions = sumCredit(entries, ['771']) // revenus non imposables
   const resultatFiscal = resultatComptable + reintegrations - deductions
-  const is25 = Math.round(Math.max(0, resultatFiscal) * 0.25)
+  // TODO: Use getFiscalConfig(countryCode) — currently hardcoded for CI
+  const is25 = Math.round(Math.max(0, resultatFiscal) * 0.25) // TODO: replace 0.25 with config.isRate
   const ca = sumCredit(entries, ['70'])
-  const imf = Math.max(Math.round(ca * 0.005), 3_000_000) // IMF 0.5% du CA, min 3M FCFA — CGI CI Art. 33
+  const imf = Math.max(Math.round(ca * 0.005), 3_000_000) // TODO: replace 0.005 with config.imfRate, 3_000_000 with config.imfMinimum
   const impotDu = Math.max(is25, imf)
   return {
     titre: 'Determination impots sur le resultat',

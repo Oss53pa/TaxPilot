@@ -1,157 +1,199 @@
 /**
- * Store Zustand pour l'authentification
+ * Store Zustand pour l'authentification — Supabase Auth
  */
-
 import { create } from 'zustand'
-import { persist, createJSONStorage } from 'zustand/middleware'
-import { authService, type User, type SignupData, type SignupResponse } from '../services/authService'
+import { supabase, isSupabaseEnabled } from '@/lib/supabase'
 import { useOrganizationStore } from './organizationStore'
+import type { User as SupabaseUser, Session } from '@supabase/supabase-js'
+
+export interface AppUser {
+  id: string
+  email: string
+  firstName: string
+  lastName: string
+  userType: 'entreprise' | 'cabinet'
+  avatarUrl?: string
+}
 
 interface AuthState {
-  user: User | null
+  user: AppUser | null
+  session: Session | null
   isAuthenticated: boolean
   isLoading: boolean
   error: string | null
+  initialized: boolean
 
   // Actions
-  login: (username: string, password: string) => Promise<void>
-  signup: (signupData: SignupData) => Promise<SignupResponse>
-  logout: () => void
-  setUser: (user: User) => void
-  setLoading: (loading: boolean) => void
+  initialize: () => Promise<void>
+  login: (email: string, password: string) => Promise<void>
+  signup: (email: string, password: string, firstName: string, lastName: string) => Promise<void>
+  logout: () => Promise<void>
+  resetPassword: (email: string) => Promise<void>
   setError: (error: string | null) => void
   clearError: () => void
-  checkAuth: () => void
 }
 
-export const useAuthStore = create<AuthState>()(
-  persist(
-    (set, _get) => ({
-      user: null,
-      isAuthenticated: false,
-      isLoading: false,
-      error: null,
+function mapSupabaseUser(user: SupabaseUser): AppUser {
+  const meta = user.user_metadata || {}
+  return {
+    id: user.id,
+    email: user.email || '',
+    firstName: meta.first_name || '',
+    lastName: meta.last_name || '',
+    userType: meta.user_type || 'entreprise',
+    avatarUrl: meta.avatar_url,
+  }
+}
 
-      login: async (username: string, password: string) => {
-        set({ isLoading: true, error: null })
+export const useAuthStore = create<AuthState>()((set, get) => ({
+  user: null,
+  session: null,
+  isAuthenticated: false,
+  isLoading: true,
+  error: null,
+  initialized: false,
 
-        try {
-          // Utiliser le service d'authentification
-          const response = await authService.login({ username, password })
+  initialize: async () => {
+    if (get().initialized) return
 
-          if (response.success && response.data.user) {
-            set({
-              user: response.data.user,
-              isAuthenticated: true,
-              isLoading: false,
-              error: null,
-            })
-          } else {
-            throw new Error(response.message || 'Échec de l\'authentification')
-          }
-        } catch (error) {
-          set({
-            error: error instanceof Error ? error.message : 'Erreur de connexion',
-            isLoading: false,
-            isAuthenticated: false,
-          })
-          throw error
-        }
-      },
-
-      signup: async (signupData: SignupData) => {
-        set({ isLoading: true, error: null })
-
-        try {
-          // Appeler l'API d'inscription
-          const response = await authService.signup(signupData)
-
-          // Créer l'objet User depuis la réponse
-          const user: User = {
-            id: response.user.id,
-            username: response.user.email,
-            email: response.user.email,
-            first_name: response.user.first_name,
-            last_name: response.user.last_name,
-            is_staff: false,
-            is_superuser: false,
-          }
-
-          set({
-            user: user,
-            isAuthenticated: true,
-            isLoading: false,
-            error: null,
-          })
-
-          // Sauvegarder l'organisation dans le store dédié
-          if (response.organization) {
-            useOrganizationStore.getState().setOrganization(response.organization)
-          }
-
-          return response
-        } catch (error) {
-          set({
-            error: error instanceof Error ? error.message : 'Erreur lors de l\'inscription',
-            isLoading: false,
-            isAuthenticated: false,
-          })
-          throw error
-        }
-      },
-
-      logout: () => {
-        authService.logout()
-        set({
-          user: null,
-          isAuthenticated: false,
-          error: null,
-        })
-
-        // Nettoyer l'organisation
-        useOrganizationStore.getState().clearOrganization()
-      },
-
-      setUser: (user: User) => {
-        set({ user })
-      },
-
-      setLoading: (loading: boolean) => {
-        set({ isLoading: loading })
-      },
-
-      setError: (error: string | null) => {
-        set({ error })
-      },
-
-      clearError: () => {
-        set({ error: null })
-      },
-
-      checkAuth: () => {
-        // Auth désactivée temporairement - toujours connecté
-        const user = authService.getCurrentUser()
-        set({
-          isAuthenticated: true,
-          user: user || {
-            id: 1,
-            username: 'admin',
-            email: 'admin@liasspilot.com',
-            first_name: 'Admin',
-            last_name: 'LiassPilot',
-            is_staff: true,
-            is_superuser: true,
-          },
-        })
-      },
-    }),
-    {
-      name: 'fiscasync-auth',
-      storage: createJSONStorage(() => localStorage),
-      partialize: (state) => ({
-        user: state.user,
-        isAuthenticated: state.isAuthenticated,
-      }),
+    if (!isSupabaseEnabled || !supabase) {
+      set({ isLoading: false, initialized: true, isAuthenticated: false })
+      return
     }
-  )
-)
+
+    try {
+      // Get current session
+      const { data: { session }, error } = await supabase.auth.getSession()
+      if (error) throw error
+
+      if (session?.user) {
+        set({
+          user: mapSupabaseUser(session.user),
+          session,
+          isAuthenticated: true,
+          isLoading: false,
+          initialized: true,
+        })
+      } else {
+        set({ isLoading: false, initialized: true, isAuthenticated: false })
+      }
+
+      // Listen for auth state changes (token refresh, sign out from other tab, etc.)
+      supabase.auth.onAuthStateChange((_event, session) => {
+        if (session?.user) {
+          set({
+            user: mapSupabaseUser(session.user),
+            session,
+            isAuthenticated: true,
+          })
+        } else {
+          set({
+            user: null,
+            session: null,
+            isAuthenticated: false,
+          })
+          useOrganizationStore.getState().clearOrganization()
+        }
+      })
+    } catch (error) {
+      set({
+        error: error instanceof Error ? error.message : 'Erreur d\'initialisation',
+        isLoading: false,
+        initialized: true,
+        isAuthenticated: false,
+      })
+    }
+  },
+
+  login: async (email: string, password: string) => {
+    if (!isSupabaseEnabled || !supabase) {
+      set({ error: 'Supabase non configuré' })
+      throw new Error('Supabase non configuré')
+    }
+
+    set({ isLoading: true, error: null })
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+      if (error) throw new Error(error.message)
+      if (!data.user) throw new Error('Connexion échouée')
+
+      set({
+        user: mapSupabaseUser(data.user),
+        session: data.session,
+        isAuthenticated: true,
+        isLoading: false,
+        error: null,
+      })
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : 'Erreur de connexion'
+      set({ error: msg, isLoading: false, isAuthenticated: false })
+      throw error
+    }
+  },
+
+  signup: async (email: string, password: string, firstName: string, lastName: string) => {
+    if (!isSupabaseEnabled || !supabase) {
+      set({ error: 'Supabase non configuré' })
+      throw new Error('Supabase non configuré')
+    }
+
+    set({ isLoading: true, error: null })
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { first_name: firstName, last_name: lastName },
+        },
+      })
+      if (error) throw new Error(error.message)
+      if (!data.user) throw new Error('Inscription échouée')
+
+      // If email confirmation is required, user won't have a session yet
+      if (data.session) {
+        set({
+          user: mapSupabaseUser(data.user),
+          session: data.session,
+          isAuthenticated: true,
+          isLoading: false,
+        })
+      } else {
+        // Email confirmation required
+        set({ isLoading: false })
+      }
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : 'Erreur lors de l\'inscription'
+      set({ error: msg, isLoading: false, isAuthenticated: false })
+      throw error
+    }
+  },
+
+  logout: async () => {
+    if (supabase) {
+      await supabase.auth.signOut()
+    }
+    set({
+      user: null,
+      session: null,
+      isAuthenticated: false,
+      error: null,
+    })
+    useOrganizationStore.getState().clearOrganization()
+    // Clear any localStorage remnants
+    localStorage.removeItem('fiscasync-auth')
+    localStorage.removeItem('fiscasync-organization')
+  },
+
+  resetPassword: async (email: string) => {
+    if (!isSupabaseEnabled || !supabase) {
+      throw new Error('Supabase non configuré')
+    }
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth/reset`,
+    })
+    if (error) throw new Error(error.message)
+  },
+
+  setError: (error: string | null) => set({ error }),
+  clearError: () => set({ error: null }),
+}))

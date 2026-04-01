@@ -219,7 +219,7 @@ const ModernTeledeclaration: React.FC = () => {
   useEffect(() => { loadDeclarations() }, [])
 
   // ── Create new DGI declaration ──
-  const handleCreateDeclaration = () => {
+  const handleCreateDeclaration = async () => {
     let companyName = 'Mon entreprise'
     let nif = ''
     try {
@@ -240,7 +240,7 @@ const ModernTeledeclaration: React.FC = () => {
 
     // Auto-populate DSF data if available
     if (newDeclType === 'DSF' || newDeclType === 'LIASSE') {
-      const dsfData = generateDSF(decl.exercice)
+      const dsfData = await generateDSF(decl.exercice)
       if (dsfData) {
         updateDeclaration(decl.id, { dsfData, montantDu: dsfData.isDu })
       }

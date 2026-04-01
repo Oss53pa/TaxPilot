@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
 import { Box, Typography, IconButton, LinearProgress } from '@mui/material'
 import {
   ChevronRight,
@@ -69,14 +69,14 @@ type AnalysisSection = {
   cards: PredictionCard[]
 }
 
-function buildPageAnalysis(
+async function buildPageAnalysis(
   pageId: string,
   section: string,
   balN: Balance[],
   balN1: Balance[],
   agg: Agregats,
   entreprise: EntrepriseData,
-): AnalysisSection {
+): Promise<AnalysisSection> {
 
   // ── ETATS FINANCIERS: each statement gets its own Proph3t analysis ──
   if (pageId === 'bilan' || pageId === 'actif' || pageId === 'passif') {
@@ -130,7 +130,7 @@ function buildPageAnalysis(
   }
 
   if (pageId === 'resultat') {
-    const isResp = handlePredictionIS(balN)
+    const isResp = await handlePredictionIS(balN)
     const isCard = isResp.content?.find(c => c.type === 'prediction') as PredictionCard | undefined
 
     // Build SIG card
@@ -212,7 +212,7 @@ function buildPageAnalysis(
 
   // ── NOTES ANNEXES: each note gets analysis specific to its topic ──
   if (section === 'notes') {
-    return buildNoteAnalysis(pageId, balN, balN1, agg)
+    return await buildNoteAnalysis(pageId, balN, balN1, agg)
   }
 
   // ── COUVERTURE / FICHES: show global health ──
@@ -251,7 +251,7 @@ function buildPageAnalysis(
   return { title: 'Controles', cards }
 }
 
-function buildNoteAnalysis(pageId: string, balN: Balance[], _balN1: Balance[], agg: Agregats): AnalysisSection {
+async function buildNoteAnalysis(pageId: string, balN: Balance[], _balN1: Balance[], agg: Agregats): Promise<AnalysisSection> {
 
   // Note 3A-3E only (note-3a, note-3b, note-3c, note-3c-bis, note-3d, note-3e)
   if (/^note-3[a-e]/.test(pageId) || pageId === 'note-3c-bis') {
@@ -441,7 +441,7 @@ function buildNoteAnalysis(pageId: string, balN: Balance[], _balN1: Balance[], a
 
   // Notes 26, 34: Fiscalite / Resultat fiscal
   if (pageId === 'note-26' || pageId === 'note-34') {
-    const isResp = handlePredictionIS(balN)
+    const isResp = await handlePredictionIS(balN)
     const isCard = isResp.content?.find(c => c.type === 'prediction') as PredictionCard | undefined
     return { title: 'Fiscalite', cards: isCard ? [isCard] : [] }
   }
@@ -753,9 +753,13 @@ const LiasseStats: React.FC<LiasseStatsProps> = ({ currentPage, entreprise, bala
   const balN1Conv = useMemo(() => toProph3tBalance(balanceN1), [balanceN1])
   const agg = useMemo(() => balN.length > 0 ? calculerAgregats(balN) : null, [balN])
 
-  const analysis = useMemo((): AnalysisSection | null => {
-    if (!agg || balN.length === 0) return null
-    return buildPageAnalysis(currentPage.id, currentPage.section, balN, balN1Conv, agg, entreprise)
+  const [analysis, setAnalysis] = useState<AnalysisSection | null>(null)
+  useEffect(() => {
+    if (!agg || balN.length === 0) { setAnalysis(null); return }
+    let cancelled = false
+    buildPageAnalysis(currentPage.id, currentPage.section, balN, balN1Conv, agg, entreprise)
+      .then(result => { if (!cancelled) setAnalysis(result) })
+    return () => { cancelled = true }
   }, [currentPage.id, currentPage.section, balN, balN1Conv, agg, entreprise])
 
   // Extract health score from general analysis

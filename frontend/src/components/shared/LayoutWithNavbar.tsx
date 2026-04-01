@@ -152,7 +152,7 @@ const LayoutWithNavbar: React.FC<LayoutWithNavbarProps> = ({ children }) => {
           {/* Menu utilisateur */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.9)' }}>
-              Bienvenue, {user?.name || 'Utilisateur'}
+              Bienvenue, {user?.firstName || user?.email || 'Utilisateur'}
             </Typography>
             
             <IconButton

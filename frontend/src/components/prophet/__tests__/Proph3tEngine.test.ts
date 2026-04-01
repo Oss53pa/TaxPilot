@@ -4,7 +4,19 @@
  * 19+ tests couvrant les phases de l'upgrade 60% → 100%
  */
 
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
+
+// Mock fiscalConfigService to avoid Supabase dependency in tests
+vi.mock('@/services/fiscalConfigService', () => ({
+  getFiscalConfig: vi.fn(async () => ({
+    id: 'test-ci', countryCode: 'CI', countryName: "Côte d'Ivoire", currency: 'XOF',
+    isRate: 0.25, isReducedRate: null, isReducedThreshold: null,
+    imfRate: 0.01, imfMinimum: 3000000, imfMaximum: null,
+    giftThresholdRate: 0.001, donationThresholdRate: 0.005, entertainmentThresholdRate: 0.01,
+    lossCarryforwardYears: 5, vatStandardRate: 0.18, vatReducedRate: 0.09, notes: null,
+  })),
+}))
+
 import { detectIntent } from '../nlp'
 import { detectNegation, detectTemporal, extractNumericValue, normalize, tokenize } from '../nlp/normalize'
 import { canonicalize } from '../nlp/synonyms'
@@ -99,14 +111,14 @@ describe('Test 1 — Phase 1 : Passage fiscal & IS', () => {
     expect(ag.tresorerie).toBeGreaterThan(0)
   })
 
-  it('devrait produire une estimation IS via handlePredictionIS', () => {
-    const resp = handlePredictionIS(BALANCE_COMPLETE)
+  it('devrait produire une estimation IS via handlePredictionIS', async () => {
+    const resp = await handlePredictionIS(BALANCE_COMPLETE)
 
     expect(resp.text).toContain('IS')
     expect(resp.content).toBeDefined()
     expect(resp.content!.length).toBeGreaterThan(0)
     // Should have a PredictionCard
-    const pred = resp.content!.find(c => c.type === 'prediction')
+    const pred = resp.content!.find((c: any) => c.type === 'prediction')
     expect(pred).toBeDefined()
   })
 })
@@ -194,8 +206,8 @@ describe('Test 5 — Phase 5 : Audit execute', () => {
 // TEST 6 — Phase 6 : Diagnostic conditionnel (regime, deductibilite)
 // ══════════════════════════════════════════════════════════════════════
 describe('Test 6 — Phase 6 : Diagnostic conditionnel', () => {
-  it('devrait produire un diagnostic fiscal avec regime et deductibilite', () => {
-    const resp = handleConditionalDiagnostic(
+  it('devrait produire un diagnostic fiscal avec regime et deductibilite', async () => {
+    const resp = await handleConditionalDiagnostic(
       BALANCE_COMPLETE,
       undefined,
       { regime_imposition: 'REEL_NORMAL', capital: 50_000_000 },
@@ -206,14 +218,14 @@ describe('Test 6 — Phase 6 : Diagnostic conditionnel', () => {
     expect(resp.content!.length).toBeGreaterThan(0)
 
     // Should have PredictionCard and/or FiscalInfoCard
-    const hasPred = resp.content!.some(c => c.type === 'prediction')
-    const hasFiscal = resp.content!.some(c => c.type === 'fiscal_info')
+    const hasPred = resp.content!.some((c: any) => c.type === 'prediction')
+    const hasFiscal = resp.content!.some((c: any) => c.type === 'fiscal_info')
     expect(hasPred || hasFiscal).toBe(true)
   })
 
-  it('devrait detecter le regime correct depuis le CA', () => {
+  it('devrait detecter le regime correct depuis le CA', async () => {
     // CA = 200M → should detect Reel Normal (> 150M threshold)
-    const resp = handleConditionalDiagnostic(
+    const resp = await handleConditionalDiagnostic(
       BALANCE_COMPLETE,
       undefined,
       undefined,
