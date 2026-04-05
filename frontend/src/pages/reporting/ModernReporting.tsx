@@ -47,6 +47,7 @@ import {
   Send as SendIcon,
 } from '@mui/icons-material'
 import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
+import { PrintButton } from '@/shared/print-engine'
 import { useBalanceData } from '@/hooks/useBalanceData'
 import { getLatestBalance, getLatestBalanceN1 } from '@/services/balanceStorageService'
 import { getWorkflowState } from '@/services/workflowStateService'
@@ -988,6 +989,42 @@ const ModernReporting = () => {
             >
               Actualiser
             </Button>
+            <PrintButton
+              config={{
+                title: 'Analyse Financiere',
+                subtitle: `Exercice ${exerciceYear}`,
+                appName: "Liass'Pilot",
+                format: 'A4',
+              }}
+            >
+              <Box>
+                <Typography variant="h6" sx={{ mb: 2 }}>Ratios Financiers — Exercice {exerciceYear}</Typography>
+                {ratios.length > 0 ? (
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
+                    <thead>
+                      <tr>
+                        <th style={{ textAlign: 'left', borderBottom: '1px solid #ccc', padding: 4 }}>Ratio</th>
+                        <th style={{ textAlign: 'right', borderBottom: '1px solid #ccc', padding: 4 }}>Valeur</th>
+                        <th style={{ textAlign: 'center', borderBottom: '1px solid #ccc', padding: 4 }}>Statut</th>
+                        <th style={{ textAlign: 'left', borderBottom: '1px solid #ccc', padding: 4 }}>Interpretation</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {ratios.map(r => (
+                        <tr key={r.code}>
+                          <td style={{ padding: 4, borderBottom: '1px solid #eee' }}>{r.nom}</td>
+                          <td style={{ padding: 4, borderBottom: '1px solid #eee', textAlign: 'right' }}>{r.valeur.toFixed(2)} {r.unite}</td>
+                          <td style={{ padding: 4, borderBottom: '1px solid #eee', textAlign: 'center' }}>{r.statut}</td>
+                          <td style={{ padding: 4, borderBottom: '1px solid #eee', fontSize: 10 }}>{r.interpretation}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : (
+                  <Typography variant="body2" color="text.secondary">Aucun ratio calcule. Importez une balance pour generer l'analyse.</Typography>
+                )}
+              </Box>
+            </PrintButton>
           </Box>
         </Box>
 

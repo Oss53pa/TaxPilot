@@ -62,6 +62,7 @@ import {
   Code
 } from '@mui/icons-material';
 import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme';
+import { PrintButton } from '@/shared/print-engine';
 
 interface DocumentTemplate {
   id: string;
@@ -521,6 +522,41 @@ const ModernDocuments: React.FC = () => {
           </Select>
         </FormControl>
 
+        <PrintButton
+          config={{
+            title: 'Documents Comptables',
+            appName: "Liass'Pilot",
+            format: 'A4',
+          }}
+        >
+          <Box>
+            <Typography variant="h6" sx={{ mb: 2 }}>Liste des Documents</Typography>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
+              <thead>
+                <tr>
+                  <th style={{ textAlign: 'left', borderBottom: '1px solid #ccc', padding: 4 }}>Nom</th>
+                  <th style={{ textAlign: 'left', borderBottom: '1px solid #ccc', padding: 4 }}>Type</th>
+                  <th style={{ textAlign: 'left', borderBottom: '1px solid #ccc', padding: 4 }}>Format</th>
+                  <th style={{ textAlign: 'left', borderBottom: '1px solid #ccc', padding: 4 }}>Categorie</th>
+                  <th style={{ textAlign: 'left', borderBottom: '1px solid #ccc', padding: 4 }}>Statut</th>
+                  <th style={{ textAlign: 'left', borderBottom: '1px solid #ccc', padding: 4 }}>Version</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredTemplates.map(t => (
+                  <tr key={t.id}>
+                    <td style={{ padding: 4, borderBottom: '1px solid #eee' }}>{t.name}</td>
+                    <td style={{ padding: 4, borderBottom: '1px solid #eee' }}>{t.type}</td>
+                    <td style={{ padding: 4, borderBottom: '1px solid #eee' }}>{t.format}</td>
+                    <td style={{ padding: 4, borderBottom: '1px solid #eee' }}>{t.category}</td>
+                    <td style={{ padding: 4, borderBottom: '1px solid #eee' }}>{t.status}</td>
+                    <td style={{ padding: 4, borderBottom: '1px solid #eee' }}>{t.version}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </Box>
+        </PrintButton>
         <Button
           variant="contained"
           startIcon={<Add />}

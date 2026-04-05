@@ -83,6 +83,7 @@ import {
   getFilingStats,
 } from '@/services/dgiFilingStorageService'
 import { generateXmlForDeclaration, downloadXml } from '@/services/dgiXmlGeneratorService'
+import { PrintButton } from '@/shared/print-engine'
 
 interface Declaration {
   id: string
@@ -474,6 +475,41 @@ const ModernTeledeclaration: React.FC = () => {
           </Box>
           
           <Stack direction="row" spacing={2}>
+            <PrintButton
+              config={{
+                title: 'Declarations Fiscales',
+                appName: "Liass'Pilot",
+                format: 'A4',
+              }}
+            >
+              <Box>
+                <Typography variant="h6" sx={{ mb: 2 }}>Declarations Fiscales</Typography>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
+                  <thead>
+                    <tr>
+                      <th style={{ textAlign: 'left', borderBottom: '1px solid #ccc', padding: 4 }}>Type</th>
+                      <th style={{ textAlign: 'left', borderBottom: '1px solid #ccc', padding: 4 }}>Periode</th>
+                      <th style={{ textAlign: 'left', borderBottom: '1px solid #ccc', padding: 4 }}>Entreprise</th>
+                      <th style={{ textAlign: 'center', borderBottom: '1px solid #ccc', padding: 4 }}>Statut</th>
+                      <th style={{ textAlign: 'left', borderBottom: '1px solid #ccc', padding: 4 }}>Echeance</th>
+                      <th style={{ textAlign: 'right', borderBottom: '1px solid #ccc', padding: 4 }}>Montant</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {declarations.map(d => (
+                      <tr key={d.id}>
+                        <td style={{ padding: 4, borderBottom: '1px solid #eee' }}>{d.type}</td>
+                        <td style={{ padding: 4, borderBottom: '1px solid #eee' }}>{d.period}</td>
+                        <td style={{ padding: 4, borderBottom: '1px solid #eee' }}>{d.company}</td>
+                        <td style={{ padding: 4, borderBottom: '1px solid #eee', textAlign: 'center' }}>{d.status}</td>
+                        <td style={{ padding: 4, borderBottom: '1px solid #eee' }}>{d.dueDate}</td>
+                        <td style={{ padding: 4, borderBottom: '1px solid #eee', textAlign: 'right' }}>{d.amount?.toLocaleString('fr-FR') ?? '-'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </Box>
+            </PrintButton>
             <Button
               variant="outlined"
               startIcon={<AddIcon />}

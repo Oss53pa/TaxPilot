@@ -54,6 +54,7 @@ import {
 } from '@mui/icons-material'
 import { StatCard } from '@/components/shared/StatCard'
 import { getLatestBalance } from '@/services/balanceStorageService'
+import { PrintButton } from '@/shared/print-engine'
 
 interface DisplayEntry {
   id: string
@@ -191,6 +192,52 @@ const ModernBalance: React.FC = () => {
           <Button variant="outlined" startIcon={<ExportIcon />}>
             Exporter
           </Button>
+          <PrintButton
+            config={{
+              title: 'Balance Generale',
+              subtitle: `Exercice N / N-1`,
+              appName: "Liass'Pilot",
+              format: 'A4',
+            }}
+          >
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell sx={{ fontWeight: 700 }}>Compte</TableCell>
+                  <TableCell sx={{ fontWeight: 700 }}>Description</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 700 }}>SD N-1</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 700 }}>SC N-1</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 700 }}>Mvt Debit</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 700 }}>Mvt Credit</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 700 }}>SD N</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 700 }}>SC N</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {filteredData.map((entry) => (
+                  <TableRow key={entry.id}>
+                    <TableCell>{entry.compte}</TableCell>
+                    <TableCell>{entry.intitule}</TableCell>
+                    <TableCell align="right">{fmt(entry.soldeDebitN1)}</TableCell>
+                    <TableCell align="right">{fmt(entry.soldeCreditN1)}</TableCell>
+                    <TableCell align="right">{fmt(entry.mouvementDebit)}</TableCell>
+                    <TableCell align="right">{fmt(entry.mouvementCredit)}</TableCell>
+                    <TableCell align="right">{fmt(entry.soldeDebit)}</TableCell>
+                    <TableCell align="right">{fmt(entry.soldeCredit)}</TableCell>
+                  </TableRow>
+                ))}
+                <TableRow>
+                  <TableCell colSpan={2} sx={{ fontWeight: 700 }}>TOTAUX</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 700 }}>{fmt(totals.soldeDebitN1)}</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 700 }}>{fmt(totals.soldeCreditN1)}</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 700 }}>{fmt(totals.mouvementDebit)}</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 700 }}>{fmt(totals.mouvementCredit)}</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 700 }}>{fmt(totals.soldeDebit)}</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 700 }}>{fmt(totals.soldeCredit)}</TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </PrintButton>
           <Button variant="contained" startIcon={<AddIcon />}>
             Importer balance
           </Button>

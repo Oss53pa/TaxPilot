@@ -40,6 +40,7 @@ import {
 } from '@mui/icons-material'
 
 import { auditOrchestrator, reportGenerator } from '@/services/audit'
+import { PrintButton } from '@/shared/print-engine'
 import { getAllSessions } from '@/services/audit/auditStorage'
 import type { SessionAudit, Severite, NiveauControle, ResultatControle } from '@/types/audit.types'
 import { NIVEAUX_NOMS } from '@/types/audit.types'
@@ -731,6 +732,41 @@ const LiasseControlInterface: React.FC = () => {
                   CSV
                 </Button>
               </Tooltip>
+              <PrintButton
+                config={{
+                  title: 'Rapport de Controle',
+                  subtitle: `Score: ${session.resume.scoreGlobal}/100`,
+                  appName: "Liass'Pilot",
+                  format: 'A4',
+                }}
+              >
+                <Box>
+                  <Typography variant="h6" sx={{ mb: 1 }}>Rapport de Controle de Liasse Fiscale</Typography>
+                  <Typography variant="body2" sx={{ mb: 2 }}>Score global: {session.resume.scoreGlobal}/100 — {session.resume.totalControles} controles, {session.resume.bloquantsRestants} bloquant(s)</Typography>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 10 }}>
+                    <thead>
+                      <tr>
+                        <th style={{ textAlign: 'left', borderBottom: '1px solid #ccc', padding: 4 }}>Ref</th>
+                        <th style={{ textAlign: 'left', borderBottom: '1px solid #ccc', padding: 4 }}>Controle</th>
+                        <th style={{ textAlign: 'center', borderBottom: '1px solid #ccc', padding: 4 }}>Severite</th>
+                        <th style={{ textAlign: 'center', borderBottom: '1px solid #ccc', padding: 4 }}>Statut</th>
+                        <th style={{ textAlign: 'left', borderBottom: '1px solid #ccc', padding: 4 }}>Message</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {session.resultats.map(r => (
+                        <tr key={r.ref}>
+                          <td style={{ padding: 4, borderBottom: '1px solid #eee', fontFamily: 'monospace' }}>{r.ref}</td>
+                          <td style={{ padding: 4, borderBottom: '1px solid #eee' }}>{r.nom}</td>
+                          <td style={{ padding: 4, borderBottom: '1px solid #eee', textAlign: 'center' }}>{r.severite}</td>
+                          <td style={{ padding: 4, borderBottom: '1px solid #eee', textAlign: 'center' }}>{r.statut}</td>
+                          <td style={{ padding: 4, borderBottom: '1px solid #eee', fontSize: 9 }}>{r.message}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </Box>
+              </PrintButton>
             </>
           )}
         </Box>
