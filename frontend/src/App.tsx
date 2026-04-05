@@ -66,6 +66,14 @@ const LoginPage = React.lazy(() => import('@/pages/auth/LoginPage'))
 const RegisterPage = React.lazy(() => import('@/pages/auth/RegisterPage'))
 const ForgotPasswordPage = React.lazy(() => import('@/pages/auth/ForgotPasswordPage'))
 const ExternalAuthPage = React.lazy(() => import('@/pages/auth/ExternalAuthPage'))
+const Landing = React.lazy(() => import('@/pages/public/Landing'))
+const Modules = React.lazy(() => import('@/pages/public/Modules'))
+const Pricing = React.lazy(() => import('@/pages/public/Pricing'))
+const Demo = React.lazy(() => import('@/pages/public/Demo'))
+const FAQ = React.lazy(() => import('@/pages/public/FAQ'))
+const Contact = React.lazy(() => import('@/pages/public/Contact'))
+const Blog = React.lazy(() => import('@/pages/public/Blog'))
+const About = React.lazy(() => import('@/pages/public/About'))
 
 import { useAuthStore } from './store/authStore'
 import { useModeStore } from './store/modeStore'
@@ -132,7 +140,7 @@ function purgeSeedData() {
 }
 
 function App() {
-  const { initialize } = useAuthStore()
+  const { initialize, isAuthenticated } = useAuthStore()
   const { userMode, onboardingCompleted } = useModeStore()
 
   React.useEffect(() => {
@@ -144,6 +152,16 @@ function App() {
     <ErrorBoundary>
       <Suspense fallback={<PageLoader />}>
         <Routes>
+          {/* Public pages (landing, modules, pricing, demo, faq, contact) */}
+          <Route path="/landing" element={<Landing />} />
+          <Route path="/modules" element={<Modules />} />
+          <Route path="/pricing" element={<Pricing />} />
+          <Route path="/demo" element={<Demo />} />
+          <Route path="/faq" element={<FAQ />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/about" element={<About />} />
+
           {/* P2-3: Auth routes */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
@@ -154,14 +172,13 @@ function App() {
           <Route path="/mode-selection" element={<AuthGuard><ModeSelection /></AuthGuard>} />
           <Route path="/onboarding" element={<AuthGuard><OnboardingWizard /></AuthGuard>} />
 
-          {/* Landing page — redirect based on mode */}
+          {/* "/" — Landing for visitors, redirect for authenticated users */}
           <Route path="/" element={
-            <AuthGuard>
-              {!userMode ? <Navigate to="/mode-selection" replace /> :
-              !onboardingCompleted ? <Navigate to="/onboarding" replace /> :
-              userMode === 'cabinet' ? <Navigate to="/dossiers" replace /> :
-              <Navigate to="/dashboard" replace />}
-            </AuthGuard>
+            !isAuthenticated ? <Landing /> :
+            !userMode ? <Navigate to="/mode-selection" replace /> :
+            !onboardingCompleted ? <Navigate to="/onboarding" replace /> :
+            userMode === 'cabinet' ? <Navigate to="/dossiers" replace /> :
+            <Navigate to="/dashboard" replace />
           } />
           <Route path="/accueil" element={
             <AuthGuard>

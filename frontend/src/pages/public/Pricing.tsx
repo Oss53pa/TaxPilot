@@ -1,446 +1,209 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { Link as RouterLink } from 'react-router-dom'
-import {
-  Box,
-  Container,
-  Typography,
-  Button,
-  Grid,
-  Card,
-  CardContent,
-  Stack,
-  Chip,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  AppBar,
-  Toolbar,
-  ToggleButtonGroup,
-  ToggleButton,
-  Divider,
-  Paper,
-  useTheme,
-  alpha,
-} from '@mui/material'
-import {
-  CheckCircle,
-  AccountBalance,
-  ArrowForward,
-  Star,
-  Close,
-} from '@mui/icons-material'
+import { Box } from '@mui/material'
+import { CheckCircle, ArrowForward } from '@mui/icons-material'
+import PublicLayout from './PublicLayout'
+import { DARK_SURFACE, GOLD, TEXT_PRIMARY, TEXT_SECONDARY, BORDER, HEADING, BODY } from './theme'
 
-interface PricingPlan {
-  name: string
-  price: number
-  priceAnnual: number
-  liasses: string
-  features: string[]
-  notIncluded?: string[]
-  recommended?: boolean
-  cta: string
-  color: string
-}
-
-const plans: PricingPlan[] = [
-  {
-    name: 'Starter',
-    price: 0,
-    priceAnnual: 0,
-    liasses: '2 liasses/an',
-    features: [
-      '2 liasses fiscales gratuites',
-      'Système Minimal de Trésorerie (SMT)',
-      'Import balance Excel/CSV',
-      'Export PDF basique',
-      'Contrôles de cohérence de base',
-      'Support par email',
-      'Données conservées 1 an',
-    ],
-    notIncluded: [
-      'Système Normal (SN)',
-      'Système Allégé (SA)',
-      'Contrôles avancés',
-      'API',
-    ],
-    cta: 'Commencer Gratuitement',
-    color: 'grey',
-  },
-  {
-    name: 'Business',
-    price: 49000,
-    priceAnnual: 490000,
-    liasses: 'Jusqu\'à 12 liasses/an',
-    features: [
-      'Jusqu\'à 12 liasses fiscales par an',
-      'Tous types de liasses (SMT, SA, SN)',
-      'SYSCOHADA 2017 & 2024',
-      'Import automatique (Excel, CSV, FEC)',
-      'Export PDF/Excel/XML avancé',
-      'Contrôles de cohérence avancés',
-      'Machine à états (workflow)',
-      'Multi-utilisateurs (5 max)',
-      'Audit trail complet',
-      'Support prioritaire par email',
-      'Données conservées 3 ans',
-    ],
-    recommended: true,
-    cta: 'Essayer 30 jours',
-    color: 'primary',
-  },
-  {
-    name: 'Enterprise',
-    price: 149000,
-    priceAnnual: 1490000,
-    liasses: 'Liasses illimitées',
-    features: [
-      'Liasses fiscales illimitées',
-      'Tous types de liasses (SMT, SA, SN)',
-      'Multi-entités / Consolidation',
-      'SYSCOHADA 2017 & 2024',
-      'Import automatique tous formats',
-      'API REST complète',
-      'Webhooks personnalisés',
-      'Multi-utilisateurs illimités',
-      'Rôles et permissions avancés',
-      'Audit trail + logs immuables',
-      'Verrouillage cryptographique',
-      'Intégrations ERP (SAP, Sage, etc.)',
-      'Support téléphone prioritaire',
-      'Account manager dédié',
-      'Données conservées 10 ans',
-      'SLA 99.9% garanti',
-    ],
-    cta: 'Contactez-nous',
-    color: 'secondary',
-  },
+const features = [
+  'Import balance CSV & Excel',
+  'Plan comptable SYSCOHADA révisé (1 005 comptes)',
+  'Bilan Actif & Passif complet',
+  'Compte de résultat & 9 SIG',
+  'TAFIRE / TFT (CAFG, FR, BFR, TN)',
+  '18 notes annexes calculées',
+  '129 contrôles de cohérence Proph3t',
+  'Passage fiscal automatique CI',
+  '7 réintégrations fiscales auto (CGI)',
+  'Calcul IS & IMF',
+  'Export Excel 84 onglets (Mode A)',
+  'Export Excel template DGI (Mode B)',
+  'Comparatif N / N-1',
+  'Ratios financiers',
+  'Archivage SHA-256',
+  'Proph3t chatbot',
+  'Multi-pays OHADA (17 pays)',
+  'Secteurs spécialisés (banque, assurance, microfinance, EBNL)',
+  'E-Invoicing (UBL 2.1, CII, PEPPOL)',
+  'XML télédéclaration (DSF, DAS, TVA, IS)',
+  'Audit trail & workflow de validation',
+  'Support email & prioritaire',
 ]
 
-const Pricing: React.FC = () => {
-  const theme = useTheme()
-  const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'annual'>('annual')
-
-  const handleBillingChange = (_: React.MouseEvent<HTMLElement>, newPeriod: 'monthly' | 'annual' | null) => {
-    if (newPeriod !== null) {
-      setBillingPeriod(newPeriod)
-    }
-  }
-
-  return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
-      {/* Navigation */}
-      <AppBar
-        position="sticky"
-        elevation={0}
-        sx={{
-          bgcolor: 'background.paper',
-          borderBottom: 1,
-          borderColor: 'divider'
-        }}
-      >
-        <Toolbar>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexGrow: 1 }}>
-            <AccountBalance sx={{ fontSize: 32, color: 'primary.main' }} />
-            <Typography variant="h5" sx={{ fontWeight: 700, color: 'primary.main' }}>
-              FiscaSync
-            </Typography>
-          </Box>
-          <Stack direction="row" spacing={2}>
-            <Button color="inherit" component={RouterLink} to="/">
-              Accueil
-            </Button>
-            <Button color="inherit" component={RouterLink} to="/login">
-              Connexion
-            </Button>
-            <Button
-              variant="contained"
-              component={RouterLink}
-              to="/signup"
-              endIcon={<ArrowForward />}
-            >
-              Essayer Gratuitement
-            </Button>
-          </Stack>
-        </Toolbar>
-      </AppBar>
-
-      {/* Header */}
-      <Box
-        sx={{
-          background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.1)} 0%, ${alpha(theme.palette.secondary.main, 0.05)} 100%)`,
-          pt: 8,
-          pb: 4,
-        }}
-      >
-        <Container maxWidth="lg">
-          <Box sx={{ textAlign: 'center', mb: 4 }}>
-            <Typography variant="h2" fontWeight={800} gutterBottom>
-              Tarifs Simples et Transparents
-            </Typography>
-            <Typography variant="h5" color="text.secondary" paragraph>
-              Choisissez le plan adapté à votre volume de liasses annuel
-            </Typography>
-
-            <Stack direction="row" spacing={2} justifyContent="center" alignItems="center" sx={{ mt: 4 }}>
-              <ToggleButtonGroup
-                value={billingPeriod}
-                exclusive
-                onChange={handleBillingChange}
-                aria-label="billing period"
-                sx={{
-                  bgcolor: 'background.paper',
-                  '& .MuiToggleButton-root': {
-                    px: 3,
-                    py: 1,
-                  }
-                }}
-              >
-                <ToggleButton value="monthly" aria-label="monthly">
-                  Mensuel
-                </ToggleButton>
-                <ToggleButton value="annual" aria-label="annual">
-                  Annuel
-                </ToggleButton>
-              </ToggleButtonGroup>
-              {billingPeriod === 'annual' && (
-                <Chip
-                  label="Économisez 17%"
-                  color="success"
-                  size="small"
-                  icon={<Star />}
-                />
-              )}
-            </Stack>
-          </Box>
-        </Container>
-      </Box>
-
-      {/* Pricing Cards */}
-      <Container maxWidth="lg" sx={{ py: 6 }}>
-        <Grid container spacing={4} alignItems="stretch">
-          {plans.map((plan) => (
-            <Grid item xs={12} md={4} key={plan.name}>
-              <Card
-                sx={{
-                  height: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  position: 'relative',
-                  transition: 'transform 0.2s, box-shadow 0.2s',
-                  ...(plan.recommended && {
-                    border: 2,
-                    borderColor: 'primary.main',
-                    transform: 'scale(1.05)',
-                    zIndex: 1,
-                  }),
-                  '&:hover': {
-                    transform: plan.recommended ? 'scale(1.06)' : 'scale(1.02)',
-                    boxShadow: 8,
-                  }
-                }}
-              >
-                {plan.recommended && (
-                  <Chip
-                    label="Recommandé"
-                    color="primary"
-                    sx={{
-                      position: 'absolute',
-                      top: -12,
-                      left: '50%',
-                      transform: 'translateX(-50%)',
-                      fontWeight: 600,
-                    }}
-                    icon={<Star />}
-                  />
-                )}
-
-                <CardContent sx={{ p: 4, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                  <Typography
-                    variant="h4"
-                    fontWeight={700}
-                    color={plan.color === 'grey' ? 'text.secondary' : `${plan.color}.main`}
-                    gutterBottom
-                  >
-                    {plan.name}
-                  </Typography>
-
-                  <Box sx={{ mb: 3 }}>
-                    {plan.price === 0 ? (
-                      <Typography variant="h3" fontWeight={800}>
-                        Gratuit
-                      </Typography>
-                    ) : (
-                      <>
-                        <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
-                          <Typography variant="h3" fontWeight={800}>
-                            {billingPeriod === 'monthly'
-                              ? plan.price.toLocaleString('fr-FR')
-                              : Math.round(plan.priceAnnual / 12).toLocaleString('fr-FR')}
-                          </Typography>
-                          <Typography variant="h6" color="text.secondary">
-                            FCFA/mois
-                          </Typography>
-                        </Box>
-                        {billingPeriod === 'annual' && (
-                          <Typography variant="body2" color="text.secondary">
-                            {plan.priceAnnual.toLocaleString('fr-FR')} FCFA facturés annuellement
-                          </Typography>
-                        )}
-                      </>
-                    )}
-                  </Box>
-
-                  <Paper
-                    variant="outlined"
-                    sx={{
-                      p: 2,
-                      mb: 3,
-                      bgcolor: alpha(
-                        plan.color === 'grey'
-                          ? theme.palette.grey[500]
-                          : (theme.palette[plan.color as 'primary' | 'secondary'] as { main: string }).main,
-                        0.05
-                      ),
-                      borderColor: alpha(
-                        plan.color === 'grey'
-                          ? theme.palette.grey[500]
-                          : (theme.palette[plan.color as 'primary' | 'secondary'] as { main: string }).main,
-                        0.2
-                      ),
-                    }}
-                  >
-                    <Typography variant="h6" fontWeight={600} textAlign="center">
-                      {plan.liasses}
-                    </Typography>
-                  </Paper>
-
-                  <Button
-                    variant={plan.recommended ? 'contained' : 'outlined'}
-                    size="large"
-                    fullWidth
-                    component={RouterLink}
-                    to={plan.name === 'Enterprise' ? '/contact' : '/signup'}
-                    endIcon={<ArrowForward />}
-                    sx={{ mb: 3 }}
-                  >
-                    {plan.cta}
-                  </Button>
-
-                  <Divider sx={{ mb: 2 }} />
-
-                  <List dense sx={{ flexGrow: 1 }}>
-                    {plan.features.map((feature, index) => (
-                      <ListItem key={index} sx={{ px: 0 }}>
-                        <ListItemIcon sx={{ minWidth: 36 }}>
-                          <CheckCircle color="success" fontSize="small" />
-                        </ListItemIcon>
-                        <ListItemText
-                          primary={feature}
-                          primaryTypographyProps={{
-                            variant: 'body2',
-                            fontWeight: feature.includes('illimité') ? 600 : 400,
-                          }}
-                        />
-                      </ListItem>
-                    ))}
-                    {plan.notIncluded?.map((feature, index) => (
-                      <ListItem key={`not-${index}`} sx={{ px: 0, opacity: 0.4 }}>
-                        <ListItemIcon sx={{ minWidth: 36 }}>
-                          <Close fontSize="small" />
-                        </ListItemIcon>
-                        <ListItemText
-                          primary={feature}
-                          primaryTypographyProps={{ variant: 'body2' }}
-                        />
-                      </ListItem>
-                    ))}
-                  </List>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
-
-        {/* Additional Info */}
-        <Paper sx={{ p: 4, mt: 6, bgcolor: alpha(theme.palette.info.main, 0.05) }}>
-          <Typography variant="h5" fontWeight={600} gutterBottom textAlign="center">
-            Questions Fréquentes
-          </Typography>
-          <Grid container spacing={3} sx={{ mt: 2 }}>
-            <Grid item xs={12} md={6}>
-              <Typography variant="subtitle1" fontWeight={600} gutterBottom>
-                Qu'est-ce qu'une liasse fiscale ?
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Une liasse fiscale est l'ensemble des états financiers (Bilan, Compte de Résultat, TFT, etc.)
-                que vous devez produire annuellement selon le référentiel SYSCOHADA.
-              </Typography>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Typography variant="subtitle1" fontWeight={600} gutterBottom>
-                Puis-je changer de plan ?
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Oui, vous pouvez upgrader ou downgrader à tout moment.
-                La différence est calculée au prorata pour la période restante.
-              </Typography>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Typography variant="subtitle1" fontWeight={600} gutterBottom>
-                Y a-t-il une période d'essai ?
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Oui ! Vous commencez avec 2 liasses gratuites sur le plan Starter.
-                Le plan Business offre 30 jours d'essai sans engagement.
-              </Typography>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Typography variant="subtitle1" fontWeight={600} gutterBottom>
-                Quels sont les moyens de paiement acceptés ?
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Nous acceptons les cartes bancaires (Visa, Mastercard), Mobile Money
-                (Orange Money, MTN Money, Moov Money) et virement bancaire.
-              </Typography>
-            </Grid>
-          </Grid>
-        </Paper>
-      </Container>
-
-      {/* CTA Section */}
-      <Box sx={{ bgcolor: alpha(theme.palette.primary.main, 0.05), py: 8 }}>
-        <Container maxWidth="md" sx={{ textAlign: 'center' }}>
-          <Typography variant="h3" fontWeight={700} gutterBottom>
-            Besoin d'un plan personnalisé ?
-          </Typography>
-          <Typography variant="h6" color="text.secondary" paragraph>
-            Pour les grandes entreprises ou besoins spécifiques, contactez notre équipe commerciale
-          </Typography>
-          <Button
-            variant="contained"
-            size="large"
-            component={RouterLink}
-            to="/contact"
-            sx={{ px: 5, py: 2 }}
-          >
-            Contactez-nous
-          </Button>
-        </Container>
-      </Box>
-
-      {/* Footer */}
-      <Box sx={{ bgcolor: 'grey.900', color: 'white', py: 6 }}>
-        <Container maxWidth="lg">
-          <Box sx={{ textAlign: 'center' }}>
-            <Typography variant="body2" sx={{ opacity: 0.6, color: 'white' }}>
-              © 2025 FiscaSync. Tous droits réservés.
-            </Typography>
-          </Box>
-        </Container>
+const Pricing: React.FC = () => (
+  <PublicLayout>
+    {/* Header */}
+    <Box sx={{ pt: { xs: 8, md: 12 }, pb: { xs: 2, md: 4 }, textAlign: 'center' }}>
+      <Box sx={{ maxWidth: 600, mx: 'auto', px: 3 }}>
+        <Box component="h1" sx={{ fontFamily: HEADING, fontWeight: 500, fontSize: { xs: '2.4rem', md: '3.4rem' }, color: TEXT_PRIMARY, m: 0, mb: 1 }}>
+          Choisissez votre plan
+        </Box>
+        <Box component="p" sx={{ fontFamily: BODY, fontSize: '1.05rem', color: TEXT_SECONDARY, m: 0, lineHeight: 1.7 }}>
+          Toutes les fonctionnalités incluses. Choisissez la formule adaptée à votre taille.
+        </Box>
       </Box>
     </Box>
-  )
-}
+
+    {/* Plans */}
+    <Box sx={{ maxWidth: 900, mx: 'auto', px: 3, py: { xs: 4, md: 6 } }}>
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3, alignItems: 'stretch' }}>
+        {/* Entreprise */}
+        <Box
+          sx={{
+            flex: 1, p: 4, borderRadius: '14px',
+            border: `1px solid ${BORDER}`, bgcolor: DARK_SURFACE,
+            display: 'flex', flexDirection: 'column',
+          }}
+        >
+          <Box sx={{ fontFamily: HEADING, fontWeight: 600, fontSize: '1.3rem', color: TEXT_PRIMARY, mb: 0.5 }}>
+            Entreprise · 1 société
+          </Box>
+          <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.8, mb: 3 }}>
+            <Box sx={{ fontFamily: HEADING, fontWeight: 700, fontSize: '2.8rem', color: GOLD, lineHeight: 1 }}>250 000</Box>
+            <Box sx={{ fontFamily: BODY, fontSize: '0.9rem', color: TEXT_SECONDARY }}>FCFA/an</Box>
+          </Box>
+
+          <Box
+            component={RouterLink} to="/register"
+            sx={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1,
+              border: `1px solid ${BORDER}`, bgcolor: 'transparent',
+              color: `${TEXT_PRIMARY} !important`, fontWeight: 500, fontFamily: BODY,
+              fontSize: '0.92rem', textDecoration: 'none', borderRadius: '8px', px: 3, py: 1.4, mb: 3,
+              transition: 'all 0.2s', '&:hover': { borderColor: 'rgba(255,255,255,0.3)', bgcolor: 'rgba(255,255,255,0.03)' },
+            }}
+          >
+            Souscrire <ArrowForward sx={{ fontSize: 16 }} />
+          </Box>
+
+          <Box sx={{ borderTop: `1px solid ${BORDER}`, pt: 2.5, display: 'flex', flexDirection: 'column', gap: 1, flex: 1 }}>
+            {features.map((f) => (
+              <Box key={f} sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+                <CheckCircle sx={{ fontSize: 15, color: '#22c55e', mt: 0.3, flexShrink: 0 }} />
+                <Box sx={{ fontFamily: BODY, fontSize: '0.82rem', color: TEXT_SECONDARY, lineHeight: 1.4 }}>{f}</Box>
+              </Box>
+            ))}
+          </Box>
+        </Box>
+
+        {/* Cabinet */}
+        <Box
+          sx={{
+            flex: 1, p: 4, borderRadius: '14px',
+            border: `2px solid ${GOLD}`, bgcolor: DARK_SURFACE,
+            display: 'flex', flexDirection: 'column',
+            position: 'relative',
+            transform: { md: 'scale(1.03)' }, zIndex: 1,
+          }}
+        >
+          <Box sx={{ position: 'absolute', top: -13, left: '50%', transform: 'translateX(-50%)', display: 'inline-flex', alignItems: 'center', gap: 0.5, bgcolor: GOLD, color: '#1a1200', fontFamily: BODY, fontSize: '0.73rem', fontWeight: 600, px: 2, py: 0.4, borderRadius: '999px' }}>
+            POPULAIRE
+          </Box>
+
+          <Box sx={{ fontFamily: HEADING, fontWeight: 600, fontSize: '1.3rem', color: TEXT_PRIMARY, mb: 0.5 }}>
+            Cabinet · illimité
+          </Box>
+          <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.8, mb: 3 }}>
+            <Box sx={{ fontFamily: HEADING, fontWeight: 700, fontSize: '2.8rem', color: GOLD, lineHeight: 1 }}>1 500 000</Box>
+            <Box sx={{ fontFamily: BODY, fontSize: '0.9rem', color: TEXT_SECONDARY }}>FCFA/an</Box>
+          </Box>
+
+          <Box
+            component={RouterLink} to="/register"
+            sx={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1,
+              bgcolor: GOLD, color: '#1a1200 !important', fontWeight: 500, fontFamily: BODY,
+              fontSize: '0.92rem', textDecoration: 'none', borderRadius: '8px', px: 3, py: 1.4, mb: 3,
+              transition: 'background 0.2s', '&:hover': { bgcolor: '#d4b35a' },
+            }}
+          >
+            Souscrire <ArrowForward sx={{ fontSize: 16 }} />
+          </Box>
+
+          <Box sx={{ borderTop: `1px solid ${BORDER}`, pt: 2.5, display: 'flex', flexDirection: 'column', gap: 1, flex: 1 }}>
+            {features.map((f) => (
+              <Box key={f} sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+                <CheckCircle sx={{ fontSize: 15, color: '#22c55e', mt: 0.3, flexShrink: 0 }} />
+                <Box sx={{ fontFamily: BODY, fontSize: '0.82rem', color: TEXT_SECONDARY, lineHeight: 1.4 }}>{f}</Box>
+              </Box>
+            ))}
+          </Box>
+        </Box>
+      </Box>
+
+      <Box sx={{ fontFamily: BODY, fontSize: '0.78rem', color: TEXT_SECONDARY, textAlign: 'center', mt: 3 }}>
+        14 jours d'essai gratuit · Sans carte bancaire · Annulation à tout moment
+      </Box>
+    </Box>
+
+    {/* ─── Comparison table ───────────────────────────── */}
+    <Box sx={{ maxWidth: 900, mx: 'auto', px: 3, pb: { xs: 6, md: 10 } }}>
+      <Box component="h2" sx={{ fontFamily: HEADING, fontWeight: 600, fontSize: { xs: '1.6rem', md: '2rem' }, color: TEXT_PRIMARY, m: 0, mb: 4, textAlign: 'center' }}>
+        Comparez les plans en détail
+      </Box>
+
+      <Box
+        sx={{
+          borderRadius: '14px',
+          border: `1px solid ${BORDER}`,
+          bgcolor: DARK_SURFACE,
+          overflow: 'hidden',
+        }}
+      >
+        {/* Header row */}
+        <Box sx={{ display: 'flex', borderBottom: `1px solid ${BORDER}`, bgcolor: 'rgba(201,168,76,0.04)' }}>
+          <Box sx={{ flex: 2, px: 3, py: 1.5, fontFamily: BODY, fontSize: '0.82rem', fontWeight: 600, color: TEXT_PRIMARY }}>Fonctionnalité</Box>
+          <Box sx={{ flex: 1, px: 2, py: 1.5, fontFamily: BODY, fontSize: '0.82rem', fontWeight: 600, color: TEXT_PRIMARY, textAlign: 'center' }}>Entreprise</Box>
+          <Box sx={{ flex: 1, px: 2, py: 1.5, fontFamily: BODY, fontSize: '0.82rem', fontWeight: 600, color: GOLD, textAlign: 'center' }}>Cabinet</Box>
+        </Box>
+        {/* Feature rows */}
+        {features.map((f, i) => (
+          <Box key={f} sx={{ display: 'flex', borderBottom: i < features.length - 1 ? `1px solid ${BORDER}` : 'none' }}>
+            <Box sx={{ flex: 2, px: 3, py: 1.2, fontFamily: BODY, fontSize: '0.8rem', color: TEXT_SECONDARY }}>{f}</Box>
+            <Box sx={{ flex: 1, px: 2, py: 1.2, textAlign: 'center' }}>
+              <CheckCircle sx={{ fontSize: 16, color: '#22c55e' }} />
+            </Box>
+            <Box sx={{ flex: 1, px: 2, py: 1.2, textAlign: 'center' }}>
+              <CheckCircle sx={{ fontSize: 16, color: '#22c55e' }} />
+            </Box>
+          </Box>
+        ))}
+        {/* Price row */}
+        <Box sx={{ display: 'flex', borderTop: `1px solid ${BORDER}`, bgcolor: 'rgba(201,168,76,0.04)' }}>
+          <Box sx={{ flex: 2, px: 3, py: 1.5, fontFamily: BODY, fontSize: '0.85rem', fontWeight: 600, color: TEXT_PRIMARY }}>Prix</Box>
+          <Box sx={{ flex: 1, px: 2, py: 1.5, textAlign: 'center' }}>
+            <Box sx={{ fontFamily: HEADING, fontWeight: 700, fontSize: '1.1rem', color: GOLD }}>250 000</Box>
+            <Box sx={{ fontFamily: BODY, fontSize: '0.7rem', color: TEXT_SECONDARY }}>FCFA/an</Box>
+          </Box>
+          <Box sx={{ flex: 1, px: 2, py: 1.5, textAlign: 'center' }}>
+            <Box sx={{ fontFamily: HEADING, fontWeight: 700, fontSize: '1.1rem', color: GOLD }}>1 500 000</Box>
+            <Box sx={{ fontFamily: BODY, fontSize: '0.7rem', color: TEXT_SECONDARY }}>FCFA/an</Box>
+          </Box>
+        </Box>
+      </Box>
+    </Box>
+
+    {/* CTA */}
+    <Box sx={{ textAlign: 'center', py: { xs: 6, md: 8 } }}>
+      <Box component="h2" sx={{ fontFamily: HEADING, fontWeight: 600, fontSize: { xs: '1.8rem', md: '2.2rem' }, color: TEXT_PRIMARY, m: 0, mb: 1.5 }}>
+        Des questions sur nos tarifs ?
+      </Box>
+      <Box component="p" sx={{ fontFamily: BODY, color: TEXT_SECONDARY, fontSize: '0.95rem', m: 0, mb: 4 }}>
+        Notre équipe est disponible pour vous accompagner.
+      </Box>
+      <Box
+        component={RouterLink} to="/contact"
+        sx={{
+          display: 'inline-flex', alignItems: 'center', gap: 1,
+          bgcolor: GOLD, color: '#1a1200 !important', fontWeight: 500, fontFamily: BODY,
+          fontSize: '0.95rem', textDecoration: 'none', borderRadius: '8px', px: 4, py: 1.6,
+          transition: 'background 0.2s', '&:hover': { bgcolor: '#d4b35a' },
+        }}
+      >
+        Contactez-nous <ArrowForward sx={{ fontSize: 16 }} />
+      </Box>
+    </Box>
+  </PublicLayout>
+)
 
 export default Pricing

@@ -1,455 +1,435 @@
-import React from 'react'
+import React, { useEffect, useRef } from 'react'
 import { Link as RouterLink } from 'react-router-dom'
-import {
-  Box,
-  Container,
-  Typography,
-  Button,
-  Grid,
-  Card,
-  CardContent,
-  Stack,
-  Chip,
-  Paper,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  AppBar,
-  Toolbar,
-  useTheme,
-  alpha,
-} from '@mui/material'
-import {
-  CheckCircle,
-  TrendingUp,
-  Speed,
-  Security,
-  CloudUpload,
-  Description,
-  Assessment,
-  Verified,
-  Business,
-  AccountBalance,
-  Calculate,
-  ArrowForward,
-} from '@mui/icons-material'
+import { Box, Avatar, AvatarGroup, keyframes } from '@mui/material'
+import { AutoAwesome, ArrowForward } from '@mui/icons-material'
+import PublicLayout from './PublicLayout'
+import { DARK, DARK_SURFACE, GOLD, GOLD_MUTED, TEXT_PRIMARY, TEXT_SECONDARY, BORDER, HEADING, BODY } from './theme'
 
-const Landing: React.FC = () => {
-  const theme = useTheme()
+// ─── Keyframe animations ─────────────────────────────────────
+const fadeUp = keyframes`
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0); }
+`
+const fadeIn = keyframes`
+  from { opacity: 0; }
+  to   { opacity: 1; }
+`
+const scaleIn = keyframes`
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+`
+const slideRight = keyframes`
+  from { opacity: 0; transform: translateX(-20px); }
+  to   { opacity: 1; transform: translateX(0); }
+`
+const shimmer = keyframes`
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+`
+const pulse = keyframes`
+  0%, 100% { box-shadow: 0 0 0 0 rgba(201,168,76,0.3); }
+  50%      { box-shadow: 0 0 0 8px rgba(201,168,76,0); }
+`
+const countUp = keyframes`
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+`
 
+// ─── Scroll-reveal hook ──────────────────────────────────────
+function useReveal() {
+  const ref = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          el.classList.add('revealed')
+          observer.unobserve(el)
+        }
+      },
+      { threshold: 0.15 }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+  return ref
+}
+
+const Reveal: React.FC<{ children: React.ReactNode; delay?: number; direction?: 'up' | 'scale' | 'left' }> = ({ children, delay = 0, direction = 'up' }) => {
+  const ref = useReveal()
+  const anim = direction === 'scale' ? scaleIn : direction === 'left' ? slideRight : fadeUp
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
-      {/* Navigation */}
-      <AppBar
-        position="sticky"
-        elevation={0}
-        sx={{
-          bgcolor: 'background.paper',
-          borderBottom: 1,
-          borderColor: 'divider'
-        }}
-      >
-        <Toolbar>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexGrow: 1 }}>
-            <AccountBalance sx={{ fontSize: 32, color: 'primary.main' }} />
-            <Typography variant="h5" sx={{ fontWeight: 700, color: 'primary.main' }}>
-              FiscaSync
-            </Typography>
-          </Box>
-          <Stack direction="row" spacing={2}>
-            <Button color="inherit" component={RouterLink} to="/pricing">
-              Tarifs
-            </Button>
-            <Button color="inherit" component={RouterLink} to="/login">
-              Connexion
-            </Button>
-            <Button
-              variant="contained"
-              component={RouterLink}
-              to="/signup"
-              endIcon={<ArrowForward />}
-            >
-              Essayer Gratuitement
-            </Button>
-          </Stack>
-        </Toolbar>
-      </AppBar>
-
-      {/* Hero Section */}
-      <Box
-        sx={{
-          background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.1)} 0%, ${alpha(theme.palette.secondary.main, 0.05)} 100%)`,
-          pt: 10,
-          pb: 12,
-        }}
-      >
-        <Container maxWidth="lg">
-          <Grid container spacing={4} alignItems="center">
-            <Grid item xs={12} md={6}>
-              <Chip
-                label="Conforme SYSCOHADA Révisé 2024"
-                color="primary"
-                sx={{ mb: 3 }}
-                icon={<Verified />}
-              />
-              <Typography
-                variant="h2"
-                sx={{
-                  fontWeight: 800,
-                  mb: 3,
-                  fontSize: { xs: '2.5rem', md: '3.5rem' }
-                }}
-              >
-                Générez vos liasses fiscales en quelques clics
-              </Typography>
-              <Typography
-                variant="h5"
-                color="text.secondary"
-                sx={{ mb: 4, lineHeight: 1.6 }}
-              >
-                Solution SaaS pour les entreprises de la zone OHADA.
-                Automatisez la production de vos états financiers SYSCOHADA.
-              </Typography>
-              <Stack direction="row" spacing={2}>
-                <Button
-                  variant="contained"
-                  size="large"
-                  component={RouterLink}
-                  to="/signup"
-                  endIcon={<ArrowForward />}
-                  sx={{ px: 4, py: 1.5 }}
-                >
-                  Commencer Gratuitement
-                </Button>
-                <Button
-                  variant="outlined"
-                  size="large"
-                  component={RouterLink}
-                  to="/demo"
-                  sx={{ px: 4, py: 1.5 }}
-                >
-                  Voir une Démo
-                </Button>
-              </Stack>
-              <Typography variant="caption" color="text.secondary" sx={{ mt: 2, display: 'block' }}>
-                ✨ 2 liasses gratuites • Sans carte bancaire • Activation immédiate
-              </Typography>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Paper
-                elevation={8}
-                sx={{
-                  p: 4,
-                  borderRadius: 4,
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  color: 'white',
-                }}
-              >
-                <Stack spacing={3}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Description sx={{ fontSize: 40 }} />
-                    <Box>
-                      <Typography variant="h6" fontWeight={600}>
-                        États Financiers Complets
-                      </Typography>
-                      <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                        Bilan, Compte de Résultat, TFT, Notes Annexes
-                      </Typography>
-                    </Box>
-                  </Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <CloudUpload sx={{ fontSize: 40 }} />
-                    <Box>
-                      <Typography variant="h6" fontWeight={600}>
-                        Import Balance
-                      </Typography>
-                      <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                        Excel, CSV, FEC - Compatible tous logiciels
-                      </Typography>
-                    </Box>
-                  </Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Calculate sx={{ fontSize: 40 }} />
-                    <Box>
-                      <Typography variant="h6" fontWeight={600}>
-                        Calculs Automatiques
-                      </Typography>
-                      <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                        Respect strict des normes SYSCOHADA
-                      </Typography>
-                    </Box>
-                  </Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Assessment sx={{ fontSize: 40 }} />
-                    <Box>
-                      <Typography variant="h6" fontWeight={600}>
-                        Contrôles de Cohérence
-                      </Typography>
-                      <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                        Détection automatique des anomalies
-                      </Typography>
-                    </Box>
-                  </Box>
-                </Stack>
-              </Paper>
-            </Grid>
-          </Grid>
-        </Container>
-      </Box>
-
-      {/* Features Section */}
-      <Container maxWidth="lg" sx={{ py: 10 }}>
-        <Box sx={{ textAlign: 'center', mb: 8 }}>
-          <Typography variant="h3" fontWeight={700} gutterBottom>
-            Tout ce dont vous avez besoin
-          </Typography>
-          <Typography variant="h6" color="text.secondary">
-            Une solution complète pour vos déclarations fiscales
-          </Typography>
-        </Box>
-
-        <Grid container spacing={4}>
-          <Grid item xs={12} md={4}>
-            <Card sx={{ height: '100%', transition: 'transform 0.2s', '&:hover': { transform: 'translateY(-8px)' } }}>
-              <CardContent sx={{ p: 4 }}>
-                <Speed sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
-                <Typography variant="h5" fontWeight={600} gutterBottom>
-                  Rapide et Simple
-                </Typography>
-                <Typography color="text.secondary">
-                  Importez votre balance comptable et générez vos états financiers en moins de 5 minutes.
-                  Interface intuitive, aucune formation nécessaire.
-                </Typography>
-                <List dense sx={{ mt: 2 }}>
-                  <ListItem>
-                    <ListItemIcon><CheckCircle color="success" fontSize="small" /></ListItemIcon>
-                    <ListItemText primary="Import automatique" />
-                  </ListItem>
-                  <ListItem>
-                    <ListItemIcon><CheckCircle color="success" fontSize="small" /></ListItemIcon>
-                    <ListItemText primary="Calculs en temps réel" />
-                  </ListItem>
-                  <ListItem>
-                    <ListItemIcon><CheckCircle color="success" fontSize="small" /></ListItemIcon>
-                    <ListItemText primary="Export PDF/Excel" />
-                  </ListItem>
-                </List>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          <Grid item xs={12} md={4}>
-            <Card sx={{ height: '100%', transition: 'transform 0.2s', '&:hover': { transform: 'translateY(-8px)' } }}>
-              <CardContent sx={{ p: 4 }}>
-                <Verified sx={{ fontSize: 48, color: 'success.main', mb: 2 }} />
-                <Typography variant="h5" fontWeight={600} gutterBottom>
-                  100% Conforme
-                </Typography>
-                <Typography color="text.secondary">
-                  Respect strict du référentiel SYSCOHADA Révisé. Millésimes 2017 et 2024 intégrés.
-                  Mise à jour automatique des normes.
-                </Typography>
-                <List dense sx={{ mt: 2 }}>
-                  <ListItem>
-                    <ListItemIcon><CheckCircle color="success" fontSize="small" /></ListItemIcon>
-                    <ListItemText primary="SYSCOHADA 2017/2024" />
-                  </ListItem>
-                  <ListItem>
-                    <ListItemIcon><CheckCircle color="success" fontSize="small" /></ListItemIcon>
-                    <ListItemText primary="Contrôles automatiques" />
-                  </ListItem>
-                  <ListItem>
-                    <ListItemIcon><CheckCircle color="success" fontSize="small" /></ListItemIcon>
-                    <ListItemText primary="Audit trail complet" />
-                  </ListItem>
-                </List>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          <Grid item xs={12} md={4}>
-            <Card sx={{ height: '100%', transition: 'transform 0.2s', '&:hover': { transform: 'translateY(-8px)' } }}>
-              <CardContent sx={{ p: 4 }}>
-                <Security sx={{ fontSize: 48, color: 'error.main', mb: 2 }} />
-                <Typography variant="h5" fontWeight={600} gutterBottom>
-                  Sécurisé et Fiable
-                </Typography>
-                <Typography color="text.secondary">
-                  Vos données sont chiffrées et hébergées dans la zone OHADA.
-                  Sauvegardes automatiques, accès multi-utilisateurs sécurisé.
-                </Typography>
-                <List dense sx={{ mt: 2 }}>
-                  <ListItem>
-                    <ListItemIcon><CheckCircle color="success" fontSize="small" /></ListItemIcon>
-                    <ListItemText primary="Chiffrement SSL/TLS" />
-                  </ListItem>
-                  <ListItem>
-                    <ListItemIcon><CheckCircle color="success" fontSize="small" /></ListItemIcon>
-                    <ListItemText primary="Sauvegardes quotidiennes" />
-                  </ListItem>
-                  <ListItem>
-                    <ListItemIcon><CheckCircle color="success" fontSize="small" /></ListItemIcon>
-                    <ListItemText primary="Accès par rôles" />
-                  </ListItem>
-                </List>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
-      </Container>
-
-      {/* Use Cases Section */}
-      <Box sx={{ bgcolor: alpha(theme.palette.primary.main, 0.03), py: 10 }}>
-        <Container maxWidth="lg">
-          <Box sx={{ textAlign: 'center', mb: 8 }}>
-            <Typography variant="h3" fontWeight={700} gutterBottom>
-              Pour toutes les entreprises
-            </Typography>
-            <Typography variant="h6" color="text.secondary">
-              Quelle que soit votre taille ou votre secteur
-            </Typography>
-          </Box>
-
-          <Grid container spacing={4}>
-            <Grid item xs={12} md={4}>
-              <Paper sx={{ p: 4, textAlign: 'center', height: '100%' }}>
-                <Business sx={{ fontSize: 60, color: 'primary.main', mb: 2 }} />
-                <Typography variant="h5" fontWeight={600} gutterBottom>
-                  PME
-                </Typography>
-                <Typography color="text.secondary" paragraph>
-                  Système Minimal de Trésorerie ou Système Allégé.
-                  Solution économique adaptée aux petites structures.
-                </Typography>
-                <Chip label="Starter" color="primary" variant="outlined" />
-              </Paper>
-            </Grid>
-
-            <Grid item xs={12} md={4}>
-              <Paper sx={{ p: 4, textAlign: 'center', height: '100%' }}>
-                <TrendingUp sx={{ fontSize: 60, color: 'success.main', mb: 2 }} />
-                <Typography variant="h5" fontWeight={600} gutterBottom>
-                  ETI
-                </Typography>
-                <Typography color="text.secondary" paragraph>
-                  Système Normal complet avec tous les états financiers.
-                  Contrôles avancés et reporting détaillé.
-                </Typography>
-                <Chip label="Business" color="success" variant="outlined" />
-              </Paper>
-            </Grid>
-
-            <Grid item xs={12} md={4}>
-              <Paper sx={{ p: 4, textAlign: 'center', height: '100%' }}>
-                <AccountBalance sx={{ fontSize: 60, color: 'secondary.main', mb: 2 }} />
-                <Typography variant="h5" fontWeight={600} gutterBottom>
-                  Grandes Entreprises
-                </Typography>
-                <Typography color="text.secondary" paragraph>
-                  Multi-entités, consolidation, API dédiée.
-                  Support prioritaire et accompagnement personnalisé.
-                </Typography>
-                <Chip label="Enterprise" color="secondary" variant="outlined" />
-              </Paper>
-            </Grid>
-          </Grid>
-        </Container>
-      </Box>
-
-      {/* CTA Section */}
-      <Container maxWidth="md" sx={{ py: 10, textAlign: 'center' }}>
-        <Typography variant="h3" fontWeight={700} gutterBottom>
-          Prêt à simplifier vos déclarations fiscales ?
-        </Typography>
-        <Typography variant="h6" color="text.secondary" paragraph sx={{ mb: 4 }}>
-          Commencez gratuitement avec 2 liasses offertes.
-          Aucune carte bancaire requise.
-        </Typography>
-        <Stack direction="row" spacing={2} justifyContent="center">
-          <Button
-            variant="contained"
-            size="large"
-            component={RouterLink}
-            to="/signup"
-            endIcon={<ArrowForward />}
-            sx={{ px: 5, py: 2, fontSize: '1.1rem' }}
-          >
-            Créer mon compte gratuitement
-          </Button>
-          <Button
-            variant="outlined"
-            size="large"
-            component={RouterLink}
-            to="/pricing"
-            sx={{ px: 5, py: 2, fontSize: '1.1rem' }}
-          >
-            Voir les tarifs
-          </Button>
-        </Stack>
-        <Typography variant="caption" color="text.secondary" sx={{ mt: 3, display: 'block' }}>
-          Rejoignez des centaines d'entreprises qui nous font confiance
-        </Typography>
-      </Container>
-
-      {/* Footer */}
-      <Box sx={{ bgcolor: 'grey.900', color: 'white', py: 6 }}>
-        <Container maxWidth="lg">
-          <Grid container spacing={4}>
-            <Grid item xs={12} md={4}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                <AccountBalance sx={{ fontSize: 32, color: 'white' }} />
-                <Typography variant="h6" fontWeight={700} color="white">
-                  FiscaSync
-                </Typography>
-              </Box>
-              <Typography variant="body2" sx={{ opacity: 0.8, color: 'white' }}>
-                Solution SaaS de génération de liasses fiscales SYSCOHADA
-                pour les entreprises de la zone OHADA.
-              </Typography>
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <Typography variant="h6" fontWeight={600} gutterBottom color="white">
-                Produit
-              </Typography>
-              <Stack spacing={1}>
-                <Button color="inherit" component={RouterLink} to="/pricing" sx={{ justifyContent: 'flex-start', color: 'white' }}>
-                  Tarifs
-                </Button>
-                <Button color="inherit" component={RouterLink} to="/features" sx={{ justifyContent: 'flex-start', color: 'white' }}>
-                  Fonctionnalités
-                </Button>
-                <Button color="inherit" component={RouterLink} to="/demo" sx={{ justifyContent: 'flex-start', color: 'white' }}>
-                  Démo
-                </Button>
-              </Stack>
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <Typography variant="h6" fontWeight={600} gutterBottom color="white">
-                Support
-              </Typography>
-              <Stack spacing={1}>
-                <Button color="inherit" component={RouterLink} to="/docs" sx={{ justifyContent: 'flex-start', color: 'white' }}>
-                  Documentation
-                </Button>
-                <Button color="inherit" component={RouterLink} to="/contact" sx={{ justifyContent: 'flex-start', color: 'white' }}>
-                  Contact
-                </Button>
-                <Button color="inherit" component={RouterLink} to="/legal" sx={{ justifyContent: 'flex-start', color: 'white' }}>
-                  Mentions légales
-                </Button>
-              </Stack>
-            </Grid>
-          </Grid>
-          <Box sx={{ mt: 4, pt: 4, borderTop: 1, borderColor: 'grey.800', textAlign: 'center' }}>
-            <Typography variant="body2" sx={{ opacity: 0.6, color: 'white' }}>
-              © 2025 FiscaSync. Tous droits réservés.
-            </Typography>
-          </Box>
-        </Container>
-      </Box>
+    <Box
+      ref={ref}
+      sx={{
+        opacity: 0,
+        '&.revealed': {
+          animation: `${anim} 0.7s cubic-bezier(0.22,1,0.36,1) ${delay}s forwards`,
+        },
+      }}
+    >
+      {children}
     </Box>
   )
 }
+
+// ─── Data ────────────────────────────────────────────────────
+const allFeatures = [
+  'Import balance CSV & Excel',
+  'Plan comptable SYSCOHADA révisé (1 005 comptes)',
+  'Bilan Actif & Passif complet',
+  'Compte de résultat & 9 SIG',
+  'TAFIRE / TFT (CAFG, FR, BFR, TN)',
+  '18 notes annexes calculées',
+  '129 contrôles de cohérence Proph3t',
+  'Passage fiscal automatique CI',
+  '7 réintégrations fiscales auto (CGI)',
+  'Calcul IS & IMF',
+  'Export Excel 84 onglets (Mode A)',
+  'Export Excel template DGI (Mode B)',
+  'Comparatif N / N-1',
+  'Ratios financiers',
+  'Archivage SHA-256',
+  'Proph3t chatbot',
+]
+
+// ─── Component ───────────────────────────────────────────────
+const Landing: React.FC = () => (
+  <PublicLayout>
+    {/* ─── Hero Section ───────────────────────────────── */}
+    <Box sx={{ pt: { xs: 10, md: 14 }, pb: { xs: 6, md: 10 }, textAlign: 'center', overflow: 'hidden' }}>
+      <Box sx={{ maxWidth: 780, mx: 'auto', px: 3 }}>
+        {/* Badges — staggered fade in */}
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, justifyContent: 'center', mb: 5 }}>
+          {['SYSCOHADA natif', 'Proph3t IA', 'Économisez 50 %+'].map((badge, i) => (
+            <Box
+              key={badge}
+              sx={{
+                display: 'inline-flex', alignItems: 'center', gap: 0.6,
+                bgcolor: 'rgba(201,168,76,0.08)', border: '1px solid rgba(201,168,76,0.18)',
+                borderRadius: '999px', px: 2, py: 0.6,
+                opacity: 0,
+                animation: `${fadeUp} 0.6s cubic-bezier(0.22,1,0.36,1) ${0.1 + i * 0.12}s forwards`,
+              }}
+            >
+              <AutoAwesome sx={{ fontSize: 13, color: GOLD }} />
+              <Box component="span" sx={{ fontSize: '0.78rem', color: GOLD, fontWeight: 500, fontFamily: BODY }}>{badge}</Box>
+            </Box>
+          ))}
+        </Box>
+
+        {/* Heading line 1 */}
+        <Box
+          component="h1"
+          sx={{
+            fontFamily: HEADING, fontWeight: 500,
+            fontSize: { xs: '2.6rem', sm: '3.2rem', md: '3.8rem' },
+            lineHeight: 1.2, color: TEXT_PRIMARY, m: 0, mb: 1,
+            opacity: 0,
+            animation: `${fadeUp} 0.8s cubic-bezier(0.22,1,0.36,1) 0.3s forwards`,
+          }}
+        >
+          Liasse fiscale SYSCOHADA
+        </Box>
+
+        {/* Heading line 2 — shimmer gold */}
+        <Box
+          component="h2"
+          sx={{
+            fontFamily: HEADING, fontWeight: 300, fontStyle: 'italic',
+            fontSize: { xs: '2.2rem', sm: '2.8rem', md: '3.2rem' },
+            lineHeight: 1.2, m: 0, mb: 4,
+            background: `linear-gradient(90deg, ${GOLD_MUTED} 0%, ${GOLD} 40%, ${GOLD_MUTED} 60%, ${GOLD} 100%)`,
+            backgroundSize: '200% auto',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            opacity: 0,
+            animation: `${fadeUp} 0.8s cubic-bezier(0.22,1,0.36,1) 0.45s forwards, ${shimmer} 4s linear 1.5s infinite`,
+          }}
+        >
+          automatisée et intelligente.
+        </Box>
+
+        {/* Subtitle */}
+        <Box
+          component="p"
+          sx={{
+            fontSize: '0.95rem', fontFamily: BODY, fontWeight: 400, color: TEXT_SECONDARY,
+            maxWidth: 560, mx: 'auto', lineHeight: 1.7, m: 0, mb: 4.5,
+            opacity: 0,
+            animation: `${fadeIn} 0.8s ease ${0.65}s forwards`,
+          }}
+        >
+          Votre balance entre. Votre liasse sort. Conforme. Un expert-comptable facture la liasse entre{' '}
+          <Box component="span" sx={{ color: TEXT_PRIMARY, fontWeight: 700 }}>500 000 et 2 000 000 FCFA</Box>.
+          {' '}Liass'Pilot vous fait économiser au minimum 50 %.
+        </Box>
+
+        {/* CTA Buttons */}
+        <Box
+          sx={{
+            display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 1.5, justifyContent: 'center', mb: 1,
+            opacity: 0,
+            animation: `${fadeUp} 0.7s cubic-bezier(0.22,1,0.36,1) 0.8s forwards`,
+          }}
+        >
+          <Box
+            component={RouterLink} to="/register"
+            sx={{
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 1,
+              bgcolor: GOLD, color: '#1a1200 !important', fontWeight: 500, fontFamily: BODY,
+              fontSize: '0.92rem', textDecoration: 'none', borderRadius: '8px', px: 3.5, py: 1.5,
+              transition: 'all 0.25s',
+              animation: `${pulse} 2.5s ease 2s 3`,
+              '&:hover': { bgcolor: '#d4b35a', transform: 'translateY(-2px)' },
+            }}
+          >
+            Essai gratuit 14 jours <ArrowForward sx={{ fontSize: 16 }} />
+          </Box>
+          <Box
+            component={RouterLink} to="/pricing"
+            sx={{
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 0.8,
+              border: '1px solid rgba(255,255,255,0.15)', bgcolor: 'transparent',
+              color: `${TEXT_PRIMARY} !important`, fontWeight: 400, fontFamily: BODY,
+              fontSize: '0.92rem', textDecoration: 'none', borderRadius: '8px', px: 3.5, py: 1.5,
+              transition: 'all 0.25s',
+              '&:hover': { borderColor: 'rgba(255,255,255,0.3)', bgcolor: 'rgba(255,255,255,0.03)', transform: 'translateY(-2px)' },
+            }}
+          >
+            Voir les tarifs
+          </Box>
+        </Box>
+        <Box sx={{ fontFamily: BODY, fontSize: '0.78rem', color: TEXT_SECONDARY, mb: 5, opacity: 0, animation: `${fadeIn} 0.6s ease 1s forwards` }}>
+          14 jours d'essai gratuit · Sans carte bancaire · Annulation à tout moment
+        </Box>
+
+        {/* Social proof */}
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1.2, opacity: 0, animation: `${fadeUp} 0.6s cubic-bezier(0.22,1,0.36,1) 1.1s forwards` }}>
+          <AvatarGroup max={4} sx={{ '& .MuiAvatar-root': { width: 30, height: 30, fontSize: '0.7rem', border: `2px solid ${DARK} !important`, bgcolor: `${GOLD} !important`, color: '#1a1200 !important', fontWeight: 700, fontFamily: BODY } }}>
+            <Avatar>AD</Avatar><Avatar>MC</Avatar><Avatar>IK</Avatar><Avatar>FN</Avatar>
+          </AvatarGroup>
+          <Box component="span" sx={{ fontSize: '0.82rem', color: TEXT_SECONDARY, fontFamily: BODY }}>
+            Rejoint par <Box component="span" sx={{ color: TEXT_PRIMARY, fontWeight: 700 }}>500+ entreprises</Box> en Afrique
+          </Box>
+        </Box>
+      </Box>
+    </Box>
+
+    {/* ─── Stats Banner — count-up on scroll ──────────── */}
+    <Box sx={{ borderTop: `1px solid ${BORDER}`, borderBottom: `1px solid ${BORDER}`, bgcolor: DARK_SURFACE, py: { xs: 5, md: 7 } }}>
+      <Reveal>
+        <Box sx={{ maxWidth: 1000, mx: 'auto', px: 3, display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: { xs: 5, sm: 0 }, justifyContent: 'space-around', alignItems: 'center' }}>
+          {[
+            { value: '1 005', label: 'COMPTES SYSCOHADA' },
+            { value: '129', label: 'CONTRÔLES PROPH3T' },
+            { value: '84', label: 'ONGLETS EXCEL' },
+            { value: '17', label: 'PAYS OHADA' },
+          ].map((stat, i) => (
+            <Box
+              key={stat.label}
+              sx={{
+                textAlign: 'center',
+                opacity: 0,
+                animation: `${countUp} 0.6s cubic-bezier(0.22,1,0.36,1) ${i * 0.15}s forwards`,
+              }}
+            >
+              <Box sx={{ fontFamily: HEADING, fontWeight: 700, fontStyle: 'italic', fontSize: { xs: '2.5rem', md: '3.2rem' }, color: GOLD, lineHeight: 1 }}>{stat.value}</Box>
+              <Box sx={{ fontSize: '0.7rem', fontWeight: 500, fontFamily: BODY, letterSpacing: '0.2em', color: TEXT_SECONDARY, mt: 1 }}>{stat.label}</Box>
+            </Box>
+          ))}
+        </Box>
+      </Reveal>
+    </Box>
+
+    {/* ─── Features list ──────────────────────────────── */}
+    <Box sx={{ py: { xs: 8, md: 12 } }}>
+      <Box sx={{ maxWidth: 900, mx: 'auto', px: 3 }}>
+        <Reveal>
+          <Box sx={{ textAlign: 'center', mb: 7 }}>
+            <Box component="h2" sx={{ fontFamily: HEADING, fontWeight: 600, fontSize: { xs: '2rem', md: '2.6rem' }, color: TEXT_PRIMARY, m: 0, mb: 1.5 }}>
+              Fonctionnalités
+            </Box>
+            <Box component="p" sx={{ fontSize: '1rem', fontFamily: BODY, color: TEXT_SECONDARY, m: 0 }}>
+              Votre balance entre. Votre liasse sort. Conforme.
+            </Box>
+          </Box>
+        </Reveal>
+
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
+            gap: 1.2,
+          }}
+        >
+          {allFeatures.map((f, i) => (
+            <Reveal key={f} delay={i * 0.06} direction="left">
+              <Box
+                sx={{
+                  display: 'flex', alignItems: 'center', gap: 1.2,
+                  px: 2.5, py: 1.5,
+                  borderRadius: '10px',
+                  border: `1px solid ${BORDER}`,
+                  bgcolor: DARK_SURFACE,
+                  transition: 'all 0.3s',
+                  '&:hover': {
+                    borderColor: 'rgba(201,168,76,0.25)',
+                    transform: 'translateX(6px)',
+                    bgcolor: 'rgba(201,168,76,0.04)',
+                  },
+                }}
+              >
+                <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: GOLD, flexShrink: 0, transition: 'transform 0.3s', '.revealed:hover &': { transform: 'scale(1.5)' } }} />
+                <Box sx={{ fontFamily: BODY, fontSize: '0.88rem', color: TEXT_SECONDARY, transition: 'color 0.3s' }}>{f}</Box>
+              </Box>
+            </Reveal>
+          ))}
+        </Box>
+
+        {/* Coming soon */}
+        <Reveal delay={0.2}>
+          <Box sx={{ mt: 4, textAlign: 'center' }}>
+            <Box sx={{ fontFamily: BODY, fontSize: '0.82rem', color: TEXT_SECONDARY, mb: 1.5 }}>Prochainement</Box>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, justifyContent: 'center' }}>
+              {[
+                'Multi-pays OHADA (17 pays)',
+                'Secteurs spécialisés (banque, assurance, microfinance, EBNL)',
+                'E-Invoicing (UBL 2.1, CII, PEPPOL)',
+                'XML télédéclaration (DSF, DAS, TVA, IS)',
+                'Audit trail & workflow de validation',
+                'Support email & prioritaire',
+              ].map((f) => (
+                <Box
+                  key={f}
+                  sx={{
+                    fontSize: '0.78rem', fontFamily: BODY, color: TEXT_SECONDARY,
+                    bgcolor: 'rgba(255,255,255,0.03)', border: `1px solid ${BORDER}`,
+                    borderRadius: '999px', px: 1.8, py: 0.4, opacity: 0.7,
+                    transition: 'all 0.3s',
+                    '&:hover': { opacity: 1, borderColor: 'rgba(201,168,76,0.2)' },
+                  }}
+                >
+                  {f}
+                </Box>
+              ))}
+            </Box>
+          </Box>
+        </Reveal>
+      </Box>
+    </Box>
+
+    {/* ─── Pricing preview ────────────────────────────── */}
+    <Box sx={{ bgcolor: DARK_SURFACE, borderTop: `1px solid ${BORDER}`, borderBottom: `1px solid ${BORDER}`, py: { xs: 8, md: 10 } }}>
+      <Box sx={{ maxWidth: 800, mx: 'auto', px: 3, textAlign: 'center' }}>
+        <Reveal>
+          <Box component="h2" sx={{ fontFamily: HEADING, fontWeight: 600, fontSize: { xs: '2rem', md: '2.4rem' }, color: TEXT_PRIMARY, m: 0, mb: 1.5 }}>
+            Choisissez votre plan
+          </Box>
+          <Box component="p" sx={{ fontFamily: BODY, color: TEXT_SECONDARY, fontSize: '0.95rem', m: 0, mb: 5 }}>
+            Toutes les fonctionnalités incluses. Choisissez la formule adaptée à votre taille.
+          </Box>
+        </Reveal>
+
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2.5, justifyContent: 'center' }}>
+          {/* Plan Entreprise */}
+          <Reveal delay={0.1} direction="scale">
+            <Box
+              sx={{
+                flex: 1, maxWidth: 380, p: 3.5, borderRadius: '14px',
+                border: `1px solid ${BORDER}`, bgcolor: '#111111', textAlign: 'left',
+                transition: 'all 0.35s',
+                '&:hover': { borderColor: 'rgba(255,255,255,0.15)', transform: 'translateY(-4px)', boxShadow: '0 8px 30px rgba(0,0,0,0.3)' },
+              }}
+            >
+              <Box sx={{ fontFamily: HEADING, fontWeight: 600, fontSize: '1.1rem', color: TEXT_PRIMARY, mb: 0.5 }}>Entreprise · 1 société</Box>
+              <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.8, mb: 0.5 }}>
+                <Box sx={{ fontFamily: HEADING, fontWeight: 700, fontSize: '2.5rem', color: GOLD, lineHeight: 1 }}>250 000</Box>
+                <Box sx={{ fontFamily: BODY, fontSize: '0.85rem', color: TEXT_SECONDARY }}>FCFA/an</Box>
+              </Box>
+              <Box
+                component={RouterLink} to="/register"
+                sx={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mt: 2.5,
+                  border: `1px solid ${BORDER}`, bgcolor: 'transparent',
+                  color: `${TEXT_PRIMARY} !important`, fontWeight: 500, fontFamily: BODY,
+                  fontSize: '0.9rem', textDecoration: 'none', borderRadius: '8px', px: 3, py: 1.3,
+                  transition: 'all 0.25s', '&:hover': { borderColor: 'rgba(255,255,255,0.3)', transform: 'translateY(-1px)' },
+                }}
+              >
+                Souscrire <ArrowForward sx={{ fontSize: 16 }} />
+              </Box>
+            </Box>
+          </Reveal>
+
+          {/* Plan Cabinet */}
+          <Reveal delay={0.25} direction="scale">
+            <Box
+              sx={{
+                flex: 1, maxWidth: 380, p: 3.5, borderRadius: '14px',
+                border: `2px solid ${GOLD}`, bgcolor: '#111111', textAlign: 'left', position: 'relative',
+                transition: 'all 0.35s',
+                '&:hover': { transform: 'translateY(-6px)', boxShadow: `0 8px 30px rgba(201,168,76,0.15)` },
+              }}
+            >
+              <Box sx={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', display: 'inline-flex', alignItems: 'center', gap: 0.5, bgcolor: GOLD, color: '#1a1200', fontFamily: BODY, fontSize: '0.72rem', fontWeight: 600, px: 1.8, py: 0.35, borderRadius: '999px' }}>
+                POPULAIRE
+              </Box>
+              <Box sx={{ fontFamily: HEADING, fontWeight: 600, fontSize: '1.1rem', color: TEXT_PRIMARY, mb: 0.5 }}>Cabinet · illimité</Box>
+              <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.8, mb: 0.5 }}>
+                <Box sx={{ fontFamily: HEADING, fontWeight: 700, fontSize: '2.5rem', color: GOLD, lineHeight: 1 }}>1 500 000</Box>
+                <Box sx={{ fontFamily: BODY, fontSize: '0.85rem', color: TEXT_SECONDARY }}>FCFA/an</Box>
+              </Box>
+              <Box
+                component={RouterLink} to="/register"
+                sx={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mt: 2.5,
+                  bgcolor: GOLD, color: '#1a1200 !important', fontWeight: 500, fontFamily: BODY,
+                  fontSize: '0.9rem', textDecoration: 'none', borderRadius: '8px', px: 3, py: 1.3,
+                  transition: 'all 0.25s', '&:hover': { bgcolor: '#d4b35a', transform: 'translateY(-1px)' },
+                }}
+              >
+                Souscrire <ArrowForward sx={{ fontSize: 16 }} />
+              </Box>
+            </Box>
+          </Reveal>
+        </Box>
+
+        <Reveal delay={0.1}>
+          <Box sx={{ fontFamily: BODY, fontSize: '0.78rem', color: TEXT_SECONDARY, mt: 3 }}>
+            14 jours d'essai gratuit · Sans carte bancaire · Annulation à tout moment
+          </Box>
+        </Reveal>
+      </Box>
+    </Box>
+
+    {/* ─── CTA Section ────────────────────────────────── */}
+    <Box sx={{ py: { xs: 8, md: 10 }, textAlign: 'center' }}>
+      <Reveal>
+        <Box sx={{ maxWidth: 520, mx: 'auto', px: 3 }}>
+          <Box component="h2" sx={{ fontFamily: HEADING, fontWeight: 600, fontSize: { xs: '1.8rem', md: '2.3rem' }, color: TEXT_PRIMARY, m: 0, mb: 1.5 }}>
+            Prêt à simplifier votre liasse fiscale ?
+          </Box>
+          <Box component="p" sx={{ color: TEXT_SECONDARY, fontFamily: BODY, fontSize: '0.92rem', m: 0, mb: 4 }}>
+            Essai gratuit 14 jours. Aucune carte bancaire requise.
+          </Box>
+          <Box
+            component={RouterLink} to="/register"
+            sx={{
+              display: 'inline-flex', alignItems: 'center', gap: 1,
+              bgcolor: GOLD, color: '#1a1200 !important', fontWeight: 500, fontFamily: BODY,
+              fontSize: '0.95rem', textDecoration: 'none', borderRadius: '8px', px: 4, py: 1.6,
+              transition: 'all 0.25s',
+              '&:hover': { bgcolor: '#d4b35a', transform: 'translateY(-2px)', boxShadow: '0 6px 20px rgba(201,168,76,0.25)' },
+            }}
+          >
+            Commencer gratuitement <ArrowForward sx={{ fontSize: 16 }} />
+          </Box>
+        </Box>
+      </Reveal>
+    </Box>
+  </PublicLayout>
+)
 
 export default Landing
