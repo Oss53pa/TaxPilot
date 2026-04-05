@@ -7,6 +7,7 @@ import { GOLD, TEXT_PRIMARY, TEXT_SECONDARY, BORDER, BRAND, BODY } from './theme
 const navLinks = [
   { label: 'Fonctionnalités', to: '/modules' },
   { label: 'Tarifs', to: '/pricing' },
+  { label: 'Démo', to: '/demo' },
   { label: 'Blog', to: '/blog' },
   { label: 'À propos', to: '/about' },
   { label: 'FAQ', to: '/faq' },
