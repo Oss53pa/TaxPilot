@@ -373,7 +373,7 @@ const Pricing: React.FC = () => {
                 Qu'est-ce qu'une liasse fiscale ?
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Une liasse fiscale est l'ensemble des états financiers (Bilan, Compte de Résultat, TAFIRE, etc.)
+                Une liasse fiscale est l'ensemble des états financiers (Bilan, Compte de Résultat, TFT, etc.)
                 que vous devez produire annuellement selon le référentiel SYSCOHADA.
               </Typography>
             </Grid>

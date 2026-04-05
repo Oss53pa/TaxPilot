@@ -11,8 +11,9 @@ import type { TypeLiasse } from '../types'
 import type { BilanActifRow, BilanPassifRow, CompteResultatRow, SIGRow } from './liasseDataService'
 import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
 import { createLiasseArchive, type LiasseArchiveRecord } from './archiveService'
-import type { StoredBalance } from './balanceStorageService'
+import { getLatestBalance, type StoredBalance } from './balanceStorageService'
 import type { SessionAudit, RapportPartie2 } from '@/types/audit.types'
+import { calculerPassageFiscal } from './passageFiscalService'
 
 // ============================================================
 // Libellés SYSCOHADA pour les références
@@ -49,11 +50,14 @@ const LIBELLES_PASSIF: Record<string, string> = {
 // EXCEL EXPORT — Format DGI
 // ============================================================
 
-export function exportLiasseExcel(
+export async function exportLiasseExcel(
   entreprise: { raison_sociale: string; numero_contribuable: string },
   exercice: string,
-  typeLiasse: TypeLiasse = 'SN'
+  typeLiasse: TypeLiasse = 'SN',
+  options?: { mode?: 'A' | 'B'; countryCode?: string }
 ) {
+  const mode = options?.mode ?? 'A'
+  const countryCode = options?.countryCode ?? 'CI'
   const wb = XLSX.utils.book_new()
 
   // 1. Bilan Actif
@@ -133,7 +137,8 @@ export function exportLiasseExcel(
   wsSig['!cols'] = [{ wch: 8 }, { wch: 50 }, { wch: 15 }, { wch: 15 }]
   XLSX.utils.book_append_sheet(wb, wsSig, 'SIG')
 
-  // 5. TFT
+  // 5. TFT (Mode A only — SYSCOHADA Révisé 2017 replaced TAFIRE with TFT)
+  if (mode === 'A') {
   const tft = liasseDataService.generateTFT()
   const tftRows = [
     ['TABLEAU DES FLUX DE TRÉSORERIE', ''],
@@ -163,69 +168,34 @@ export function exportLiasseExcel(
   const wsTft = XLSX.utils.aoa_to_sheet(tftRows)
   wsTft['!cols'] = [{ wch: 6 }, { wch: 45 }, { wch: 18 }]
   XLSX.utils.book_append_sheet(wb, wsTft, 'TFT')
+  } // end mode A check (TFT)
 
-  // 6. TAFIRE
-  const tafire = liasseDataService.generateTAFIRE()
-  const tafireRows = [
-    ['TAFIRE — TABLEAU FINANCIER DES RESSOURCES ET EMPLOIS', '', ''],
+  // 7. Passage Fiscal — populated from calculerPassageFiscal
+  const balanceStored = getLatestBalance()
+  const balanceEntries = balanceStored?.entries ?? []
+  const passageFiscal = await calculerPassageFiscal(balanceEntries, countryCode)
+  const passageFiscalRows: (string | number)[][] = [
+    ['TABLEAU DE PASSAGE — RÉSULTAT COMPTABLE AU RÉSULTAT FISCAL', '', ''],
     ['', '', ''],
-    ['Libellé', 'Exercice N', 'Exercice N-1'],
+    ['Code', 'Désignation', 'Montant (FCFA)'],
+    ['', 'Résultat comptable net', arrondiFCFA(passageFiscal.resultat_comptable)],
     ['', '', ''],
-    ['PARTIE I — ACTIVITÉ', '', ''],
-    ['Capacité d\'Autofinancement Globale (CAFG)', arrondiFCFA(tafire.CAFG), arrondiFCFA(tafire.CAFG_N1)],
-    ['(-) Dividendes distribués', arrondiFCFA(-tafire.dividendes), ''],
-    ['= Autofinancement', arrondiFCFA(tafire.autofinancement), ''],
+    ['', 'RÉINTÉGRATIONS', ''],
+    ...passageFiscal.reintegrations.map(r => [r.code, `${r.libelle} (${r.base_legale})`, arrondiFCFA(r.montant)]),
+    ['', 'Total réintégrations', arrondiFCFA(passageFiscal.total_reintegrations)],
     ['', '', ''],
-    ['PARTIE II — INVESTISSEMENT', '', ''],
-    ['Acquisitions d\'immobilisations', arrondiFCFA(tafire.acquisImmo), ''],
-    ['Cessions d\'immobilisations', arrondiFCFA(tafire.cessions), ''],
-    ['Variation immobilisations financières', arrondiFCFA(tafire.varImmoFin), ''],
+    ['', 'DÉDUCTIONS', ''],
+    ...passageFiscal.deductions.map(d => [d.code, `${d.libelle} (${d.base_legale})`, arrondiFCFA(d.montant)]),
+    ['', 'Total déductions', arrondiFCFA(passageFiscal.total_deductions)],
     ['', '', ''],
-    ['PARTIE III — FINANCEMENT', '', ''],
-    ['Augmentation de capital', arrondiFCFA(tafire.augCapital), ''],
-    ['Emprunts nouveaux', arrondiFCFA(tafire.empruntsNouveaux), ''],
-    ['Remboursement d\'emprunts', arrondiFCFA(-tafire.remboursements), ''],
+    ['', 'RÉSULTAT FISCAL', arrondiFCFA(passageFiscal.resultat_fiscal)],
     ['', '', ''],
-    ['VARIATION DU BFR', '', ''],
-    ['Variation des stocks', arrondiFCFA(tafire.varStocks), ''],
-    ['Variation des créances', arrondiFCFA(tafire.varCreances), ''],
-    ['Variation des dettes fournisseurs', arrondiFCFA(tafire.varFournisseurs), ''],
-    ['Variation du BFR', arrondiFCFA(tafire.varBFR), ''],
-    ['', '', ''],
-    ['SYNTHÈSE', '', ''],
-    ['Total des emplois', arrondiFCFA(tafire.totalEmplois), ''],
-    ['Total des ressources', arrondiFCFA(tafire.totalRessources), ''],
-    ['VARIATION DE TRÉSORERIE', arrondiFCFA(tafire.varTresorerie), ''],
-  ]
-  const wsTafire = XLSX.utils.aoa_to_sheet(tafireRows)
-  wsTafire['!cols'] = [{ wch: 50 }, { wch: 18 }, { wch: 18 }]
-  XLSX.utils.book_append_sheet(wb, wsTafire, 'TAFIRE')
-
-  // 7. Passage Fiscal
-  const resultatNet = sig.find((s: SIGRow) => s.ref === 'SIG9')?.montant ?? 0
-  const passageFiscalRows = [
-    ['TABLEAU DE PASSAGE — RÉSULTAT COMPTABLE AU RÉSULTAT FISCAL', ''],
-    ['', ''],
-    ['Désignation', 'Montant (FCFA)'],
-    ['Résultat comptable net', arrondiFCFA(resultatNet)],
-    ['', ''],
-    ['RÉINTÉGRATIONS', ''],
-    ['Charges non déductibles', ''],
-    ['Amortissements excédentaires', ''],
-    ['Provisions non déductibles', ''],
-    ['Total réintégrations', ''],
-    ['', ''],
-    ['DÉDUCTIONS', ''],
-    ['Produits non imposables', ''],
-    ['Dividendes reçus (régime mère-fille)', ''],
-    ['Total déductions', ''],
-    ['', ''],
-    ['RÉSULTAT FISCAL', arrondiFCFA(resultatNet)],
-    ['', ''],
-    ['Note : Les réintégrations et déductions sont à renseigner manuellement.', ''],
+    ['', 'IS brut (sur résultat fiscal)', arrondiFCFA(passageFiscal.is_brut)],
+    ['', 'Impôt minimum forfaitaire (IMF)', arrondiFCFA(passageFiscal.imf)],
+    ['', `IMPÔT DÛ (base: ${passageFiscal.base_is})`, arrondiFCFA(passageFiscal.is_du)],
   ]
   const wsPassage = XLSX.utils.aoa_to_sheet(passageFiscalRows)
-  wsPassage['!cols'] = [{ wch: 50 }, { wch: 18 }]
+  wsPassage['!cols'] = [{ wch: 8 }, { wch: 55 }, { wch: 18 }]
   XLSX.utils.book_append_sheet(wb, wsPassage, 'Passage Fiscal')
 
   // Generate file
@@ -361,7 +331,7 @@ export async function exportLiasseWithArchive(
   rapportP2?: RapportPartie2
 ): Promise<{ filename: string; archive: LiasseArchiveRecord }> {
   // Generate Excel export
-  const filename = exportLiasseExcel(entreprise, exercice, typeLiasse)
+  const filename = await exportLiasseExcel(entreprise, exercice, typeLiasse)
 
   // Collect liasse data for archive
   const liasseData: Record<string, unknown> = {
@@ -370,7 +340,7 @@ export async function exportLiasseWithArchive(
     compteResultat: liasseDataService.generateCompteResultat(typeLiasse),
     sig: liasseDataService.generateSIG(),
     tft: liasseDataService.generateTFT(),
-    tafire: liasseDataService.generateTAFIRE(),
+    // TAFIRE removed in SYSCOHADA Révisé (2017), replaced by TFT
     entreprise,
     exercice,
     typeLiasse,

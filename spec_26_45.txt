@@ -1,0 +1,742 @@
+
+### ONGLET 26 : NOTE 7 ###
+L1: A1=- 22 -
+L2: I2=NOTE 7
+SYSTEME NORMAL
+L3: A3=Dénomination sociale de l'entité : | C3=EMERGENCE PLAZA S.A.
+L4: A4=Adresse : | B4=COCODY CORNICHE - LA CANEBIERE - 03 779 CIDEX ABIDJAN 03 | I4=Sigle usuel : | J4=EPLSA
+L5: A5=N° d'identification fiscale : | C5=1544373 H | F5=Exercice clos le : | G5=45657 | I5=Durée (en mois) : | J5=12
+L6: A6=N° de télédéclarant (NTD):  | C6=5554997221814
+L7: A7=NOTE 7 : CLIENTS
+L8: A8=Libellés | E8=Année N | F8=Année N-1 | G8=Variation
+en % | H8=Créances
+à un an
+au plus | I8=Créances
+à plus d'un an et
+à deux ans
+au plus | J8=Créances
+à plus de deux
+ans
+L9: A9=Clients (hors réserves de propriété et Groupe) | E9=1011682564 | F9=834288669 | G9=0.2126289156157771[F:IF(F9,(E9-F9)/F9,IF(ISBLANK(F9),"",IF(E9,IF( E9 > 0,1,-1),"")))] | H9=1011682564 | I9=0 | J9=0
+L10: A10=Clients effets à recevoir 
+(hors réserves de propriété et groupe) | E10=0 | F10=0 | G10=[F:IF(F10,(E10-F10)/F10,IF(ISBLANK(F10),"",IF(E10,IF( E10 > 0,1,-1),"")))] | H10=0 | I10=0 | J10=0
+L11: A11=Clients avec réserves de propriété | E11=0 | F11=0 | G11=[F:IF(F11,(E11-F11)/F11,IF(ISBLANK(F11),"",IF(E11,IF( E11 > 0,1,-1),"")))] | H11=0 | I11=0 | J11=0
+L12: A12=Clients et effets à recevoir Groupe | E12=0 | F12=0 | G12=[F:IF(F12,(E12-F12)/F12,IF(ISBLANK(F12),"",IF(E12,IF( E12 > 0,1,-1),"")))] | H12=0 | I12=0 | J12=0
+L13: A13=Créances sur cession d'immobilisations | E13=0 | F13=0 | G13=[F:IF(F13,(E13-F13)/F13,IF(ISBLANK(F13),"",IF(E13,IF( E13 > 0,1,-1),"")))] | H13=0 | I13=0 | J13=0
+L14: A14=Clients effets escomptés et non échus | E14=0 | F14=0 | G14=[F:IF(F14,(E14-F14)/F14,IF(ISBLANK(F14),"",IF(E14,IF( E14 > 0,1,-1),"")))] | H14=0 | I14=0 | J14=0
+L15: A15=Créances litigieuses ou douteuses | E15=431023217 | F15=372863057 | G15=0.15598262930081594[F:IF(F15,(E15-F15)/F15,IF(ISBLANK(F15),"",IF(E15,IF( E15 > 0,1,-1),"")))] | H15=431023217 | I15=0 | J15=0
+L16: A16=Clients produits à recevoir | E16=28471954 | F16=44265919 | G16=-0.3567974043417013[F:IF(F16,(E16-F16)/F16,IF(ISBLANK(F16),"",IF(E16,IF( E16 > 0,1,-1),"")))] | H16=28471954 | I16=0 | J16=0
+L17: A17=TOTAL BRUT CLIENTS | E17=1471177735[F:SUM(E9:E16)] | F17=1251417645[F:SUM(F9:F16)] | G17=0.17560891112415153[F:IF(F17,(E17-F17)/F17,IF(ISBLANK(F17),"",IF(E17,IF( E17 > 0,1,-1),"")))] | H17=1471177735[F:SUM(H9:H16)] | I17=0[F:SUM(I9:I16)] | J17=0[F:SUM(J9:J16)]
+L18: A18=Dépréciations des comptes clients | E18=431023217 | F18=372863057 | G18=0.15598262930081594[F:IF(F18,(E18-F18)/F18,IF(ISBLANK(F18),"",IF(E18,IF( E18 > 0,1,-1),"")))]
+L19: A19=TOTAL NET DE DEPRECIATIONS | E19=1040154518[F:E17-E18] | F19=878554588[F:F17-F18] | G19=0.18393840543007897[F:IF(F19,(E19-F19)/F19,IF(ISBLANK(F19),"",IF(E19,IF( E19 > 0,1,-1),"")))]
+L20: A20=Clients, avances reçues hors groupe | E20=0 | F20=0 | G20=[F:IF(F20,(E20-F20)/F20,IF(ISBLANK(F20),"",IF(E20,IF( E20 > 0,1,-1),"")))] | H20=0 | I20=0 | J20=0
+L21: A21=Clients, avances reçues groupe | E21=0 | F21=0 | G21=[F:IF(F21,(E21-F21)/F21,IF(ISBLANK(F21),"",IF(E21,IF( E21 > 0,1,-1),"")))] | H21=0 | I21=0 | J21=0
+L22: A22=Autres clients créditeurs | E22=0 | F22=0 | G22=[F:IF(F22,(E22-F22)/F22,IF(ISBLANK(F22),"",IF(E22,IF( E22 > 0,1,-1),"")))] | H22=0 | I22=0 | J22=0
+L23: A23=TOTAL CLIENTS CREDITEURS | E23=0[F:SUM(E20:E22)] | F23=0[F:SUM(F20:F22)] | G23=[F:IF(F23,(E23-F23)/F23,IF(ISBLANK(F23),"",IF(E23,IF( E23 > 0,1,-1),"")))] | H23=0[F:SUM(H20:H22)] | I23=0[F:SUM(I20:I22)] | J23=0[F:SUM(J20:J22)]
+L24: A24=Commentaire :
+L25: A25=●   Commenter toutes variations significatives.
+L26: A26=●   Indiquer pour les créances du groupe, le nom de la société du groupe et le %
+L27: A27=●   Commenter les créances anciennes.
+L28: A28=●   Indiquer les événements et circonstances qui ont conduit à la dépréciation e
+L30: A30=Au 31 décembre, le poste clients brut s’élève à 1 471,18 millions FCFA, en hauss
+FUSIONS: A30:J30 A16:D16 A17:D17 A22:D22 A23:D23 A18:D18 A19:D19 A20:D20 A21:D21 A14:D14 A15:D15 A1:J1 I2:J2 C3:J3 B4:H4 C5:E5 G5:H5 C6:E6 A7:J7 A8:D8 A9:D9 A10:D10 A11:D11 A12:D12 A13:D13
+
+### ONGLET 27 : NOTE 8 ###
+L1: A1=- 23 -
+L2: I2=NOTE 8
+SYSTEME NORMAL
+L3: A3=Dénomination sociale de l'entité : | C3=EMERGENCE PLAZA S.A.
+L4: A4=Adresse : | B4=COCODY CORNICHE - LA CANEBIERE - 03 779 CIDEX ABIDJAN 03 | I4=Sigle usuel : | J4=EPLSA
+L5: A5=N° d'identification fiscale : | C5=1544373 H | F5=Exercice clos le : | G5=45657 | I5=Durée (en mois) : | J5=12
+L6: A6=N° de télédéclarant (NTD):  | C6=5554997221814
+L7: A7=NOTE 8 : AUTRES CREANCES
+L8: A8=Libellés | E8=Année N | F8=Année N-1 | G8=Variation
+en % | H8=Créances
+à un an
+au plus | I8=Créances
+à plus d'un an et
+à deux ans
+au plus | J8=Créances
+à plus de deux
+ans
+L9: A9=Personnel | E9=1517818 | F9=0 | G9=1[F:IF(F9,(E9-F9)/F9,IF(ISBLANK(F9),"",IF(E9,IF( E9 > 0,1,-1),"")))] | H9=1517818 | I9=0 | J9=0
+L10: A10=Organismes sociaux | E10=0 | F10=0 | G10=[F:IF(F10,(E10-F10)/F10,IF(ISBLANK(F10),"",IF(E10,IF( E10 > 0,1,-1),"")))] | H10=0 | I10=0 | J10=0
+L11: A11=Etat et Collectivités publiques | E11=8295059 | F11=3398397 | G11=1.4408740356114957[F:IF(F11,(E11-F11)/F11,IF(ISBLANK(F11),"",IF(E11,IF( E11 > 0,1,-1),"")))] | H11=8295059 | I11=0 | J11=0
+L12: A12=Organismes internationaux | E12=0 | F12=0 | G12=[F:IF(F12,(E12-F12)/F12,IF(ISBLANK(F12),"",IF(E12,IF( E12 > 0,1,-1),"")))] | H12=0 | I12=0 | J12=0
+L13: A13=Apporteurs, associés et groupe | E13=0 | F13=0 | G13=[F:IF(F13,(E13-F13)/F13,IF(ISBLANK(F13),"",IF(E13,IF( E13 > 0,1,-1),"")))] | H13=0 | I13=0 | J13=0
+L14: A14=Compte transitoire ajustement spécial lié à la révision du
+SYSCOHADA (Voir Note | E14=0 | F14=0 | G14=[F:IF(F14,(E14-F14)/F14,IF(ISBLANK(F14),"",IF(E14,IF( E14 > 0,1,-1),"")))] | H14=0 | I14=0 | J14=0
+L15: A15=Autres débiteurs divers | E15=670752572 | F15=705284676 | G15=-0.04896193717953401[F:IF(F15,(E15-F15)/F15,IF(ISBLANK(F15),"",IF(E15,IF( E15 > 0,1,-1),"")))] | H15=670752572 | I15=0 | J15=0
+L16: A16=Comptes permanents non bloqués des établissements et des succursales | E16=0 | F16=0 | G16=[F:IF(F16,(E16-F16)/F16,IF(ISBLANK(F16),"",IF(E16,IF( E16 > 0,1,-1),"")))] | H16=0 | I16=0 | J16=0
+L17: A17=Comptes de liaison charges et produits | E17=0 | F17=0 | G17=[F:IF(F17,(E17-F17)/F17,IF(ISBLANK(F17),"",IF(E17,IF( E17 > 0,1,-1),"")))] | H17=0 | I17=0 | J17=0
+L18: A18=Comptes de liaison des sociétés en participation | E18=0 | F18=0 | G18=[F:IF(F18,(E18-F18)/F18,IF(ISBLANK(F18),"",IF(E18,IF( E18 > 0,1,-1),"")))] | H18=0 | I18=0 | J18=0
+L19: A19=TOTAL BRUT AUTRES CREANCES | E19=680565449[F:SUM(E9:E18)] | F19=708683073[F:SUM(F9:F18)] | G19=-0.03967587920644466[F:IF(F19,(E19-F19)/F19,IF(ISBLANK(F19),"",IF(E19,IF( E19 > 0,1,-1),"")))] | H19=680565449[F:SUM(H9:H18)] | I19=0[F:SUM(I9:I18)] | J19=0[F:SUM(J9:J18)]
+L20: A20=Dépréciations des autres créances | E20=0 | F20=0 | G20=[F:IF(F20,(E20-F20)/F20,IF(ISBLANK(F20),"",IF(E20,IF( E20 > 0,1,-1),"")))]
+L21: A21=TOTAL NET DE DEPRECIATIONS | E21=680565449[F:E19-E20] | F21=708683073[F:F19-F20] | G21=-0.03967587920644466[F:IF(F21,(E21-F21)/F21,IF(ISBLANK(F21),"",IF(E21,IF( E21 > 0,1,-1),"")))]
+L22: A22=Commentaire :
+L23: A23=●   Justifier toute variation significative.
+L24: A24=●   Détailler les créances dont le montant est significatif.
+L25: A25=●   Justifier les créances anciennes.
+L26: A26=●   Indiquer les événements et circonstances qui ont conduit à la dépréciation e
+L27: A27=●   Compte transitoire ajustement spécial, indiquer le détail du compte et la du
+L29: A29=Au 31 décembre, le montant total des autres créances s’élève à 680,57 millions F
+FUSIONS: A29:J29 C6:E6 A17:D17 A12:D12 A13:D13 A14:D14 A15:D15 A16:D16 A19:D19 A20:D20 A21:D21 A18:D18 A7:J7 A8:D8 A9:D9 A10:D10 A11:D11 A1:J1 I2:J2 C3:J3 B4:H4 C5:E5 G5:H5
+
+### ONGLET 28 : NOTE 8A ###
+L1: A1=- 24 -
+L2: I2=NOTE 8A
+SYSTEME NORMAL
+L3: A3=Dénomination sociale de l'entité : | C3=EMERGENCE PLAZA S.A.
+L4: A4=Adresse : | B4=COCODY CORNICHE - LA CANEBIERE - 03 779 CIDEX ABIDJAN 03 | I4=Sigle usuel : | J4=EPLSA
+L5: A5=N° d'identification fiscale : | C5=1544373 H | F5=Exercice clos le : | G5=45657 | I5=Durée (en mois) : | J5=12
+L6: A6=N° de télédéclarant (NTD):  | C6=5554997221814
+L7: A7=NOTE 8A : TABLEAU D’ETALEMENT DES CHARGES IMMOBILISEES
+L8: A8=Libellés | E8=Frais d'établissement | G8=Charges à repartir
+sur plusieurs exercices | I8=Primes de remboursement
+des obligations
+L9: A9=Compte transitoire à solder: 4751 compte transitoire, ajustement lié à la révisi
+L10: A10=Montant global à étaler au 1er janvier 2018 | E10=0 | G10=0 | I10=0
+L11: A11=Durée d'étalement retenue | E11=0 | G11=0 | I11=0
+L12: A12=Exercice 2018 | E12=Comptes | F12=Montants | G12=Comptes | H12=Montants | I12=Comptes | J12=Montants
+L13: E13=60… | F13=0 | G13=60… | H13=0 | I13=6714 | J13=0
+L14: E14=61… | F14=0 | G14=61… | H14=0
+L15: E15=62… | F15=0 | G15=62… | H15=0
+L16: E16=63… | F16=0 | G16=63… | H16=0
+L17: E17=…. | F17=0 | G17=…. | H17=0
+L18: E18=0 | F18=0 | G18=0 | H18=0
+L19: E19=0 | F19=0 | G19=0 | H19=0
+L20: E20=0 | F20=0 | G20=0 | H20=0
+L21: E21=0 | F21=0 | G21=0 | H21=0
+L22: E22=0 | F22=0 | G22=0 | H22=0
+L23: A23=Total exercice 2018 | F23=0 | H23=0 | J23=0
+L24: A24=Total exercice 2019 | F24=0 | H24=0 | J24=0
+L25: A25=Total exercice 2020 | F25=0 | H25=0 | J25=0
+L26: A26=Total exercice 2021 | F26=0 | H26=0 | J26=0
+L27: A27=Total exercice 2022 | F27=0 | H27=0 | J27=0
+L28: A28=TOTAL GENERAL | F28=0[F:SUM(F23:F27)] | H28=0[F:SUM(H23:H27)] | J28=0[F:SUM(J23:J27)]
+FUSIONS: C6:E6 A9:J9 A24:D24 A25:D25 A26:D26 A12:D22 A27:D27 A28:D28 A23:D23 A7:J7 A8:D8 E8:F8 G8:H8 I8:J8 A10:D10 E10:F10 G10:H10 I10:J10 A11:D11 E11:F11 G11:H11 I11:J11 A1:J1 I2:J2 C3:J3 B4:H4 C5:E5 G5:H5
+
+### ONGLET 29 : NOTE 8B ###
+L1: A1=- 25 -
+L2: H2=NOTE 8B
+SYSTEME NORMAL
+L3: A3=Dénomination sociale de l'entité : | C3=EMERGENCE PLAZA S.A.
+L4: A4=Adresse : | B4=COCODY CORNICHE - LA CANEBIERE - 03 779 CIDEX ABIDJAN 03 | H4=Sigle usuel : | I4=EPLSA
+L5: A5=N° d'identification fiscale : | C5=1544373 H | E5=Exercice clos le : | F5=45657 | H5=Durée (en mois) : | I5=12
+L6: A6=N° de télédéclarant (NTD):  | C6=5554997221814
+L7: A7=NOTE 8B : TABLEAU D’ETALEMENT DE PROVISIONS POUR CHARGES A REPARTIR
+L8: A8=LIBELLES | E8=PROVISIONS POUR CHARGES A REPARTIR
+L9: A9=Compte transitoire à solder: 4751 compte transitoire
+ajustement spécial lié à l
+L10: A10=Montant global à étaler au 1er janvier 2018 | E10=0
+L11: A11=Durée d'étalement retenue | E11=0
+L12: E12=Comptes | H12=Montants
+L13: E13=791 Reprises de provisions et dépréciations d'exploitation | H13=0
+L14: A14=Total exercice 2018 | H14=0
+L15: A15=Total exercice 2019 | H15=0
+L16: A16=Total exercice 2020 | H16=0
+L17: A17=Total exercice 2021 | H17=0
+L18: A18=Total exercice 2022 | H18=0
+L19: A19=TOTAL GENERAL | H19=0[F:SUM(H14:I18)]
+FUSIONS: C6:D6 A7:I7 A1:I1 C3:H3 B4:G4 C5:D5 F5:G5 H2:I2 A8:D8 E8:I8 A9:I9 A10:D10 E10:I10 A11:D11 E11:I11 E12:G12 H12:I12 E13:G13 H13:I13 A14:D14 E14:G14 H14:I14 A15:D15 E15:G15 H15:I15 A16:D16 E16:G16 H16:I16 A17:D17 E17:G17 H17:I17 A18:D18 E18:G18 H18:I18 A19:D19 E19:G19 H19:I19
+
+### ONGLET 30 : NOTE 8C ###
+L1: A1=- 26 -
+L2: H2=NOTE 8C
+SYSTEME NORMAL
+L3: A3=Dénomination sociale de l'entité : | C3=EMERGENCE PLAZA S.A.
+L4: A4=Adresse : | B4=COCODY CORNICHE - LA CANEBIERE - 03 779 CIDEX ABIDJAN 03 | H4=Sigle usuel : | I4=EPLSA
+L5: A5=N° d'identification fiscale : | C5=1544373 H | E5=Exercice clos le : | F5=45657 | H5=Durée (en mois) : | I5=12
+L6: A6=N° de télédéclarant (NTD):  | C6=5554997221814
+L7: A7=NOTE 8C : TABLEAU D’ETALEMENT DE PROVISIONS POUR ENGAGEMENTS DE RETRAITE
+L8: A8=Libellés | E8=PROVISIONS POUR PENSIONS ET OBLIGATIONS SIMILAIRES
+L9: A9=Compte transitoire à solder: 4751 compte transitoire
+ajustement spécial lié à l
+L10: A10=Montant global à étaler au 1er janvier 2018 | E10=0
+L11: A11=Durée d'étalement retenue | E11=0
+L12: E12=Comptes | H12=Montants
+L13: E13=6911 Dotation aux provisions pour risques et charges | H13=0
+L14: A14=Total exercice 2018 | H14=0
+L15: A15=Total exercice 2019 | H15=0
+L16: A16=Total exercice 2020 | H16=0
+L17: A17=Total exercice 2021 | H17=0
+L18: A18=Total exercice 2022 | H18=0
+L19: A19=TOTAL GENERAL | H19=0[F:SUM(H14:I18)]
+FUSIONS: C6:D6 E13:G13 A1:I1 H2:I2 B4:G4 C5:D5 F5:G5 C3:I3 A8:D8 E8:I8 A9:I9 A10:D10 E10:I10 A7:I7 A11:D11 E11:I11 E12:G12 H12:I12 H13:I13 A14:D14 E14:G14 H14:I14 A15:D15 E15:G15 H15:I15 A16:D16 E16:G16 H16:I16 A19:D19 E19:G19 H19:I19 A17:D17 E17:G17 H17:I17 A18:D18 E18:G18 H18:I18
+
+### ONGLET 31 : NOTE 9 ###
+L1: A1=- 27 -
+L2: H2=NOTE 9
+SYSTEME NORMAL
+L3: A3=Dénomination sociale de l'entité : | C3=EMERGENCE PLAZA S.A.
+L4: A4=Adresse : | B4=COCODY CORNICHE - LA CANEBIERE - 03 779 CIDEX ABIDJAN 03 | H4=Sigle usuel : | I4=EPLSA
+L5: A5=N° d'identification fiscale : | C5=1544373 H | E5=Exercice clos le : | F5=45657 | H5=Durée (en mois) : | I5=12
+L6: A6=N° de télédéclarant (NTD):  | C6=5554997221814
+L7: A7=NOTE 9 : TITRES DE PLACEMENT
+L8: A8=Libellés | E8=Année N | G8=Année N-1 | I8=Variation
+en %
+L9: A9=Titres de trésor et bons de caisse à court terme | E9=0 | G9=0 | I9=[F:IF(G9,(E9-G9)/G9,IF(ISBLANK(G9),"",IF(E9,IF( E9 > 0,1,-1),"")))]
+L10: A10=Actions | E10=0 | G10=0 | I10=[F:IF(G10,(E10-G10)/G10,IF(ISBLANK(G10),"",IF(E10,IF( E10 > 0,1,-1),"")))]
+L11: A11=Obligations | E11=0 | G11=0 | I11=[F:IF(G11,(E11-G11)/G11,IF(ISBLANK(G11),"",IF(E11,IF( E11 > 0,1,-1),"")))]
+L12: A12=Bons de souscription | E12=0 | G12=0 | I12=[F:IF(G12,(E12-G12)/G12,IF(ISBLANK(G12),"",IF(E12,IF( E12 > 0,1,-1),"")))]
+L13: A13=Titres négociables hors régions | E13=0 | G13=0 | I13=[F:IF(G13,(E13-G13)/G13,IF(ISBLANK(G13),"",IF(E13,IF( E13 > 0,1,-1),"")))]
+L14: A14=Intérêts courus | E14=0 | G14=0 | I14=[F:IF(G14,(E14-G14)/G14,IF(ISBLANK(G14),"",IF(E14,IF( E14 > 0,1,-1),"")))]
+L15: A15=Autres valeurs assimilées | E15=0 | G15=0 | I15=[F:IF(G15,(E15-G15)/G15,IF(ISBLANK(G15),"",IF(E15,IF( E15 > 0,1,-1),"")))]
+L16: A16=TOTAL BRUT TITRES | E16=0[F:SUM(E9:F15)] | G16=0[F:SUM(G9:H15)] | I16=[F:IF(G16,(E16-G16)/G16,IF(ISBLANK(G16),"",IF(E16,IF( E16 > 0,1,-1),"")))]
+L17: A17=Dépréciations des titres | E17=0 | G17=0 | I17=[F:IF(G17,(E17-G17)/G17,IF(ISBLANK(G17),"",IF(E17,IF( E17 > 0,1,-1),"")))]
+L18: A18=TOTAL NET DE DEPRECIATIONS | E18=0[F:E16-E17] | G18=0[F:G16-G17] | I18=[F:IF(G18,(E18-G18)/G18,IF(ISBLANK(G18),"",IF(E18,IF( E18 > 0,1,-1),"")))]
+L19: A19=Commentaire:
+L20: A20=●   Justifier toute variation significative.
+L21: A21=●   Pour les titres cotés à une bourse de valeur : indiquer le nombre, le prix u
+L22: A22=●   Faire ressortir les actions ou parts propres et indiquer la date d'acquisiti
+L23: A23=●   Indiquer les événements et circonstances qui ont conduit à la dépréciation e
+FUSIONS: A25:I25 C6:D6 A15:D15 E15:F15 G15:H15 G18:H18 A18:D18 E18:F18 A16:D16 E16:F16 G16:H16 A17:D17 E17:F17 G17:H17 A13:D13 E13:F13 G13:H13 A14:D14 E14:F14 G14:H14 G10:H10 A11:D11 E11:F11 G11:H11 A12:D12 E12:F12 G12:H12 A10:D10 E10:F10 A1:I1 H2:I2 C3:I3 B4:G4 C5:D5 F5:G5 A7:I7 A8:D8 E8:F8 G8:H8 A9:D9 E9:F9 G9:H9
+
+### ONGLET 32 : NOTE 10 ###
+L1: A1=- 28 -
+L2: H2=NOTE 10
+SYSTEME NORMAL
+L3: A3=Dénomination sociale de l'entité : | C3=EMERGENCE PLAZA S.A.
+L4: A4=Adresse : | B4=COCODY CORNICHE - LA CANEBIERE - 03 779 CIDEX ABIDJAN 03 | H4=Sigle usuel : | I4=EPLSA
+L5: A5=N° de compte contribuable (NCC) : | C5=1544373 H | E5=Exercice clos le : | F5=45657 | H5=Durée (en mois) : | I5=12
+L6: A6=N° de télédéclarant (NTD):  | C6=5554997221814
+L7: A7=NOTE 10 : VALEURS A ENCAISSER
+L8: A8=Libellés | E8=Année N | G8=Année N-1 | I8=Variation
+en %
+L9: A9=Effets à encaisser | E9=0 | G9=0 | I9=[F:IF(G9,(E9-G9)/G9,IF(ISBLANK(G9),"",IF(E9,IF( E9 > 0,1,-1),"")))]
+L10: A10=Effets à l'encaissement | E10=0 | G10=0 | I10=[F:IF(G10,(E10-G10)/G10,IF(ISBLANK(G10),"",IF(E10,IF( E10 > 0,1,-1),"")))]
+L11: A11=Chèques à encaisser | E11=0 | G11=0 | I11=[F:IF(G11,(E11-G11)/G11,IF(ISBLANK(G11),"",IF(E11,IF( E11 > 0,1,-1),"")))]
+L12: A12=Chèques à l'encaissement | E12=0 | G12=0 | I12=[F:IF(G12,(E12-G12)/G12,IF(ISBLANK(G12),"",IF(E12,IF( E12 > 0,1,-1),"")))]
+L13: A13=Cartes de crédit à encaisser | E13=0 | G13=0 | I13=[F:IF(G13,(E13-G13)/G13,IF(ISBLANK(G13),"",IF(E13,IF( E13 > 0,1,-1),"")))]
+L14: A14=Autres valeurs à encaisser | E14=0 | G14=0 | I14=[F:IF(G14,(E14-G14)/G14,IF(ISBLANK(G14),"",IF(E14,IF( E14 > 0,1,-1),"")))]
+L15: A15=TOTAL BRUT VALEURS A ENCAISSER | E15=0[F:SUM(E9:F14)] | G15=0[F:SUM(G9:H14)] | I15=[F:IF(G15,(E15-G15)/G15,IF(ISBLANK(G15),"",IF(E15,IF( E15 > 0,1,-1),"")))]
+L16: A16=Dépréciations des valeurs à encaisser | E16=0 | G16=0 | I16=[F:IF(G16,(E16-G16)/G16,IF(ISBLANK(G16),"",IF(E16,IF( E16 > 0,1,-1),"")))]
+L17: A17=TOTAL NET DE DEPRECIATIONS | E17=0[F:E15-E16] | G17=0[F:G15-G16] | I17=[F:IF(G17,(E17-G17)/G17,IF(ISBLANK(G17),"",IF(E17,IF( E17 > 0,1,-1),"")))]
+L18: A18=Commentaire :
+L19: A19=●   Commenter toute variation significative ;
+L20: A20=●   Indiquer les événements et circonstances qui ont conduit à la dépréciation e
+FUSIONS: A22:I22 C6:D6 A15:D15 E15:F15 G15:H15 A17:D17 E17:F17 G17:H17 A16:D16 E16:F16 G16:H16 A13:D13 E13:F13 G13:H13 A14:D14 E14:F14 G14:H14 G10:H10 A11:D11 E11:F11 G11:H11 A12:D12 E12:F12 G12:H12 A10:D10 E10:F10 A1:I1 H2:I2 C3:I3 B4:G4 C5:D5 F5:G5 A7:I7 A8:D8 E8:F8 G8:H8 A9:D9 E9:F9 G9:H9
+
+### ONGLET 33 : NOTE 11 ###
+L1: A1=- 29 -
+L2: H2=NOTE 11
+SYSTEME NORMAL
+L3: A3=Dénomination sociale de l'entité : | C3=EMERGENCE PLAZA S.A.
+L4: A4=Adresse : | B4=COCODY CORNICHE - LA CANEBIERE - 03 779 CIDEX ABIDJAN 03 | H4=Sigle usuel : | I4=EPLSA
+L5: A5=N° de compte contribuable (NCC) : | C5=1544373 H | E5=Exercice clos le : | F5=45657 | H5=Durée (en mois) : | I5=12
+L6: A6=N° de télédéclarant (NTD):  | C6=5554997221814
+L7: A7=NOTE 11 : DISPONIBILITES
+L8: A8=Libellés | E8=Année N | G8=Année N-1 | I8=Variation
+en %
+L9: A9=Banques locales | E9=514842199 | G9=1302154658 | I9=-0.6046228488782167[F:IF(G9,(E9-G9)/G9,IF(ISBLANK(G9),"",IF(E9,IF( E9 > 0,1,-1),"")))]
+L10: A10=Banques autres états région | E10=0 | G10=0 | I10=[F:IF(G10,(E10-G10)/G10,IF(ISBLANK(G10),"",IF(E10,IF( E10 > 0,1,-1),"")))]
+L11: A11=Banques, dépôt à terme | E11=0 | G11=0 | I11=[F:IF(G11,(E11-G11)/G11,IF(ISBLANK(G11),"",IF(E11,IF( E11 > 0,1,-1),"")))]
+L12: A12=Autres Banques | E12=0 | G12=0 | I12=[F:IF(G12,(E12-G12)/G12,IF(ISBLANK(G12),"",IF(E12,IF( E12 > 0,1,-1),"")))]
+L13: A13=Banques intérêts courus | E13=0 | G13=0 | I13=[F:IF(G13,(E13-G13)/G13,IF(ISBLANK(G13),"",IF(E13,IF( E13 > 0,1,-1),"")))]
+L14: A14=Chèques postaux | E14=0 | G14=0 | I14=[F:IF(G14,(E14-G14)/G14,IF(ISBLANK(G14),"",IF(E14,IF( E14 > 0,1,-1),"")))]
+L15: A15=Autres établissement financiers | E15=0 | G15=0 | I15=[F:IF(G15,(E15-G15)/G15,IF(ISBLANK(G15),"",IF(E15,IF( E15 > 0,1,-1),"")))]
+L16: A16=Etablissement financiers intérêts courus | E16=0 | G16=0 | I16=[F:IF(G16,(E16-G16)/G16,IF(ISBLANK(G16),"",IF(E16,IF( E16 > 0,1,-1),"")))]
+L17: A17=Instruments de trésorerie | E17=0 | G17=0 | I17=[F:IF(G17,(E17-G17)/G17,IF(ISBLANK(G17),"",IF(E17,IF( E17 > 0,1,-1),"")))]
+L18: A18=Instruments de monnaie  électronique | E18=987306 | G18=231617 | I18=3.2626663845918045[F:IF(G18,(E18-G18)/G18,IF(ISBLANK(G18),"",IF(E18,IF( E18 > 0,1,-1),"")))]
+L19: A19=Caisse | E19=354221 | G19=399579 | I19=-0.11351447398386802[F:IF(G19,(E19-G19)/G19,IF(ISBLANK(G19),"",IF(E19,IF( E19 > 0,1,-1),"")))]
+L20: A20=Régies d'avances et virements accréditifs | E20=0 | G20=0 | I20=[F:IF(G20,(E20-G20)/G20,IF(ISBLANK(G20),"",IF(E20,IF( E20 > 0,1,-1),"")))]
+L21: A21=TOTAL BRUT DISPONIBILITES | E21=516183726[F:SUM(E9:F20)] | G21=1302785854[F:SUM(G9:H20)] | I21=-0.6037846708151315[F:IF(G21,(E21-G21)/G21,IF(ISBLANK(G21),"",IF(E21,IF( E21 > 0,1,-1),"")))]
+L22: A22=Dépréciations | E22=0 | G22=0 | I22=[F:IF(G22,(E22-G22)/G22,IF(ISBLANK(G22),"",IF(E22,IF( E22 > 0,1,-1),"")))]
+L23: A23=TOTAL NET DE DEPRECIATIONS | E23=516183726[F:E21-E22] | G23=1302785854[F:G21-G22] | I23=-0.6037846708151315[F:IF(G23,(E23-G23)/G23,IF(ISBLANK(G23),"",IF(E23,IF( E23 > 0,1,-1),"")))]
+L24: A24=Commentaire :
+L25: A25=●   Indiquer la date de rapprochement des comptes bancaires.
+L26: A26=●   Indiquer la date d'inventaire de la caisse et des instruments de monnaie éle
+L27: A27=●   Justifier toute variation significative.
+L28: A28=●   Détailler les instruments de monnaie électronique si le montant est signific
+L29: A29=●   Indiquer les événements et circonstances qui ont conduit à la dépréciation e
+L31: A31=NB : Banques et intérêts courus et Etablissement financiers intérêts courus figu
+L33: A33=Les disponibilités s’élèvent à 516 113 482 FCFA au 31/12/N contre 1 302 785 854 
+FUSIONS: A33:M33 C6:D6 A31:I31 A21:D21 E21:F21 G21:H21 A23:D23 E23:F23 G23:H23 A22:D22 E22:F22 G22:H22 A19:D19 E19:F19 G19:H19 A20:D20 E20:F20 G20:H20 A17:D17 E17:F17 G17:H17 A18:D18 E18:F18 G18:H18 A15:D15 E15:F15 G15:H15 A16:D16 E16:F16 G16:H16 A13:D13 E13:F13 G13:H13 A14:D14 E14:F14 G14:H14 G10:H10 A12:D12 E12:F12 G12:H12 A11:D11 E11:F11 G11:H11 A10:D10 E10:F10 A1:I1 H2:I2 C3:I3 B4:G4 C5:D5 F5:G5 A7:I7 A8:D8 E8:F8 G8:H8 A9:D9 E9:F9 G9:H9
+
+### ONGLET 34 : NOTE 12 ###
+L1: A1= - 30 -
+L2: H2=NOTE 12
+SYSTEME NORMAL
+L3: A3=Dénomination sociale de l'entité : | C3=EMERGENCE PLAZA S.A.
+L4: A4=Adresse : | B4=COCODY CORNICHE - LA CANEBIERE - 03 779 CIDEX ABIDJAN 03 | H4=Sigle usuel : | I4=EPLSA
+L5: A5=N° de compte contribuable (NCC) : | C5=1544373 H | F5=Exercice clos le : | G5=45657 | H5=Durée (en mois) : | I5=12
+L6: A6=N° de télédéclarant (NTD):  | C6=5554997221814
+L7: A7=NOTE 12 : ECARTS DE CONVERSION ET TRANSFERTS DE CHARGES
+L8: A8=ECARTS DE CONVERSION
+L9: A9=Libellés | E9=Devises | F9=Montant
+en devises | G9=Cours UML
+Année
+acquisition | H9=Cours UML
+31/12 | I9=Variation 
+en valeur
+
+L10: A10=Ecarts de conversion actif : 
+détailler les créances et dettes concernées
+L11: A11=0 | E11=0 | F11=0 | G11=0 | H11=0 | I11=0[F:F11*G11-F11*H11]
+L12: A12=0 | E12=0 | F12=0 | G12=0 | H12=0 | I12=0[F:F12*G12-F12*H12]
+L13: A13=0 | E13=0 | F13=0 | G13=0 | H13=0 | I13=0[F:F13*G13-F13*H13]
+L14: A14=0 | E14=0 | F14=0 | G14=0 | H14=0 | I14=0[F:F14*G14-F14*H14]
+L15: A15=0 | E15=0 | F15=0 | G15=0 | H15=0 | I15=0[F:F15*G15-F15*H15]
+L16: A16=0 | E16=0 | F16=0 | G16=0 | H16=0 | I16=0[F:F16*G16-F16*H16]
+L17: A17=Ecart de conversion passif : 
+détailler les créances et dettes concernées
+L18: A18=0 | E18=0 | F18=0 | G18=0 | H18=0 | I18=0[F:F18*G18-F18*H18]
+L19: A19=0 | E19=0 | F19=0 | G19=0 | H19=0 | I19=0[F:F19*G19-F19*H19]
+L20: A20=0 | E20=0 | F20=0 | G20=0 | H20=0 | I20=0[F:F20*G20-F20*H20]
+L21: A21=0 | E21=0 | F21=0 | G21=0 | H21=0 | I21=0[F:F21*G21-F21*H21]
+L22: A22=0 | E22=0 | F22=0 | G22=0 | H22=0 | I22=0[F:F22*G22-F22*H22]
+L23: A23=0 | E23=0 | F23=0 | G23=0 | H23=0 | I23=0[F:F23*G23-F23*H23]
+L24: I24=0[F:F24*G24-F24*H24]
+L25: A25=UML : Unités Monétaires légales
+Commentaire:  Faire un commentaire.
+L26: A26=TRANSFERTS DE CHARGES
+L27: A27=Libellés | G27=Année N | H27=Année N-1 | I27=Variation
+en %
+L28: A28=Transferts de charges d'exploitation : 
+détailler la nature des charges transfé
+L29: A29=0 | G29=0 | H29=0 | I29=[F:IFERROR((G29-H29)/H29,"")]
+L30: A30=0 | G30=0 | H30=0 | I30=[F:IFERROR((G30-H30)/H30,"")]
+L31: A31=0 | G31=0 | H31=0 | I31=[F:IFERROR((G31-H31)/H31,"")]
+L32: A32=0 | G32=0 | H32=0 | I32=[F:IFERROR((G32-H32)/H32,"")]
+L33: A33=0 | G33=0 | H33=0 | I33=[F:IFERROR((G33-H33)/H33,"")]
+L34: I34=[F:IFERROR((G34-H34)/H34,"")]
+L35: A35=Transferts de charges financières : 
+détailler la nature des charges transférée
+L36: A36=0 | G36=0 | H36=0 | I36=[F:IFERROR((G36-H36)/H36,"")]
+L37: A37=0 | G37=0 | H37=0 | I37=[F:IFERROR((G37-H37)/H37,"")]
+L38: A38=0 | G38=0 | H38=0 | I38=[F:IFERROR((G38-H38)/H38,"")]
+L39: A39=0 | G39=0 | H39=0 | I39=[F:IFERROR((G39-H39)/H39,"")]
+L40: A40=0 | G40=0 | H40=0 | I40=[F:IFERROR((G40-H40)/H40,"")]
+L41: I41=[F:IFERROR((G41-H41)/H41,"")]
+L42: I42=[F:IFERROR((G42-H42)/H42,"")]
+L43: A43=(1): Leurs comptes d'origine: autrement dit indiquerles numéros de comptes d'où 
+L44: A44=Commentaire:  Faire un commentaire.
+FUSIONS: A46:I46 A35:F35 A22:D22 A23:D23 A24:D24 A26:I26 A27:F27 A34:F34 A32:F32 A28:F28 A29:F29 A30:F30 A31:F31 A33:F33 A25:E25 A43:I43 A42:F42 A36:F36 A37:F37 A38:F38 A39:F39 A40:F40 A41:F41 A17:D17 A18:D18 A19:D19 A20:D20 A21:D21 A16:D16 A15:D15 A8:I8 A7:I7 A1:I1 H2:I2 B4:G4 C5:E5 A9:D9 A10:D10 A11:D11 A12:D12 A13:D13 A14:D14 C6:E6 C3:I3
+
+### ONGLET 35 : NOTE 13 ###
+L1: A1=- 31 -
+L2: K2=NOTE 13
+SYSTEME NORMAL
+L3: A3=Dénomination sociale de l'entité : | C3=EMERGENCE PLAZA S.A.
+L4: A4=Adresse : | B4=COCODY CORNICHE - LA CANEBIERE - 03 779 CIDEX ABIDJAN 03 | K4=Sigle usuel : | L4=EPLSA
+L5: A5=N° d'identification fiscale : | C5=1544373 H | I5=Exercice clos le : | J5=45657 | K5=Durée (en mois) : | L5=12
+L6: A6=N° de télédéclarant (NTD):  | C6=5554997221814
+L7: A7=NOTE 13 : CAPITAL
+L8: I8=Valeur nominale des actions ou parts : | L8=10000
+L9: A9=Nom et prénoms ou raison sociale | E9=N° de compte contribuable | F9=Nationalité | G9=Autres nationalités à préciser | H9=Pays de résidence | I9=Nature des
+actions ou parts
+(Ordinaires ou
+préférences) | J9=Nombre | K9=Montant total | L9=Cessions ou
+remboursements
+en cours
+d'exercice
+L10: A10=EMERGENCE PLAZA LTD | E10=0 | F10=ILE MAURICE | H10=ILE MAURICE | I10=NUMERAIRE | J10=241625 | K10=2416250000[F:L8*J10] | L10=0
+L11: A11=HC CAPITAL MANAGEMENT | E11=0 | F11=ILE MAURICE | H11=ILE MAURICE | I11=NUMERAIRE | J11=1 | K11=10000[F:L8*J11] | L11=0
+L12: A12=0 | E12=0 | F12=0 | H12=0 | I12=0 | J12=0 | K12=0[F:L8*J12] | L12=0
+L13: A13=0 | E13=0 | F13=0 | H13=0 | I13=0 | J13=0 | K13=0[F:L8*J13] | L13=0
+L14: A14=0 | E14=0 | F14=0 | H14=0 | I14=0 | J14=0 | K14=0[F:L8*J14] | L14=0
+L15: A15=0 | E15=0 | F15=0 | H15=0 | I15=0 | J15=0 | K15=0[F:L8*J15] | L15=0
+L16: A16=0 | E16=0 | F16=0 | H16=0 | I16=0 | J16=0 | K16=0[F:L8*J16] | L16=0
+L17: A17=0 | E17=0 | F17=0 | H17=0 | I17=0 | J17=0 | K17=0[F:L8*J17] | L17=0
+L18: A18=0 | E18=0 | F18=0 | H18=0 | I18=0 | J18=0 | K18=0[F:L8*J18] | L18=0
+L19: A19=0 | E19=0 | F19=0 | H19=0 | I19=0 | J19=0 | K19=0[F:L8*J19] | L19=0
+L20: A20=0 | E20=0 | F20=0 | H20=0 | I20=0 | J20=0 | K20=0[F:L8*J20] | L20=0
+L21: A21=0 | E21=0 | F21=0 | H21=0 | I21=0 | J21=0 | K21=0[F:L8*J21] | L21=0
+L22: A22=0 | E22=0 | F22=0 | H22=0 | I22=0 | J22=0 | K22=0[F:L8*J22] | L22=0
+L23: A23=0 | E23=0 | F23=0 | H23=0 | I23=0 | J23=0 | K23=0[F:L8*J23] | L23=0
+L24: A24=0 | E24=0 | F24=0 | H24=0 | I24=0 | J24=0 | K24=0[F:L8*J24] | L24=0
+L25: A25=Apporteurs, capital non appelé | K25=0
+L26: A26=TOTAL | K26=2416260000[F:SUM(K10:K25)]
+L27: A27=Commentaire :
+L28: A28=●   Indiquer si possible le montant du capital à la constitution. | I28=●  Pour les attributions gratuites d'actions indiquer : 
+L29: A29=●   Indiquer si possible les dates des AGE et le montant du capital augmenté en  | I29=- Date de délibération de l’AGE qui décide de l’attribution des actions 
+L30: A30=●   Indiquer si possible les dates des AGE et le montant du capital diminué en c | I30=- Pourcentage maximum du capital social à attribuer au personnel salarié 
+L31: A31=●   Indiquer les avantages accordés aux actions de préférence. | I31=- Pourcentage maximum du capital social à attribuer aux dirigeants 
+L32: A32=●   Apporteurs, capital non appelé : indiquer le délai restant pour appeler le c | I32=- Nombre d’actions à attribuer gratuitement 
+L33: I33=- Délai de conservation des actions par les bénéficiaires                       
+L34: I34=- Nombre de ses actions propres que la société détient
+FUSIONS: A36:L36 A22:D22 A24:D24 A13:D13 A1:L1 K2:L2 C3:L3 B4:J4 A7:L7 C6:H6 C5:H5 A26:I26 A14:D14 A15:D15 I8:K8 A9:D9 A10:D10 A11:D11 A12:D12 A25:D25 A23:D23 A16:D16 A17:D17 A18:D18 A19:D19 A20:D20 A21:D21
+
+### ONGLET 36 : NOTE 14 ###
+L1: A1=- 32 -
+L2: G2=NOTE 14
+SYSTEME NORMAL
+L3: A3=Dénomination sociale de l'entité : | C3=EMERGENCE PLAZA S.A.
+L4: A4=Adresse : | B4=COCODY CORNICHE - LA CANEBIERE - 03 779 CIDEX ABIDJAN 03 | G4=Sigle usuel : | H4=EPLSA
+L5: A5=N° d'identification fiscale : | C5=1544373 H | E5=Exercice clos le : | F5=45657 | G5=Durée (en mois) : | H5=12
+L6: A6=N° de télédéclarant (NTD):  | C6=5554997221814
+L7: A7=NOTE 14 : PRIMES ET RESERVES
+L8: A8=Libellés | F8=Année N | G8=Année N-1 | H8=Variation en
+valeur 
+L9: A9=Primes d'émission | F9=0 | G9=0 | H9=0[F:(F9-G9)]
+L10: A10=Prime d'apport | F10=0 | G10=0 | H10=0[F:(F10-G10)]
+L11: A11=Prime de fusion | F11=0 | G11=0 | H11=0[F:(F11-G11)]
+L12: A12=Prime de conversion | F12=0 | G12=0 | H12=0[F:(F12-G12)]
+L13: A13=Autres primes | F13=0 | G13=0 | H13=0[F:(F13-G13)]
+L14: A14=TOTAL PRIMES | F14=0[F:SUM(F9:F13)] | G14=0[F:SUM(G9:G13)] | H14=0[F:(F14-G14)]
+L15: A15=Réserves légales | F15=28426625.24 | G15=5228957 | H15=23197668.24[F:(F15-G15)]
+L16: A16=Réserves statutaires | F16=0 | G16=0 | H16=0[F:(F16-G16)]
+L17: A17=Réserves de plus-values nettes à long terme | F17=0 | G17=0 | H17=0[F:(F17-G17)]
+L18: A18=Réserves d’attribution gratuite d’actions au personnel salarié
+et aux dirigeant | F18=0 | G18=0 | H18=0[F:(F18-G18)]
+L19: A19=Autres réserves réglementées | F19=0 | G19=0 | H19=0[F:(F19-G19)]
+L20: A20=TOTAL RESERVES INDISPONIBLES | F20=28426625.24[F:SUM(F15:F19)] | G20=5228957[F:SUM(G15:G19)] | H20=23197668.24[F:(F20-G20)]
+L21: A21=Réserves libres | F21=0 | G21=0 | H21=0[F:(F21-G21)]
+L22: A22=Report à nouveau | F22=-923880299.0400001 | G22=-1132659311 | H22=208779011.95999992[F:(F22-G22)]
+L23: A23=Commentaire:
+L24: A24=●   Indiquer les dates de l'AGE qui a décidé des primes d'apport, d'émission de 
+L25: A25=●   Indiquer le détail des réserves libres.
+L26: A26=●   Indiquer le montant restant à doter et le taux de dotation de la réserve lég
+L27: A27=●   Indiquer la date de l'AGO qui justifie la variation des réserves et du repor
+L29: A29=Les primes restent inchangées à zéro sur les deux exercices. Les réserves légale
+FUSIONS: A29:H29 A12:E12 A7:H7 A8:E8 A9:E9 A10:E10 A11:E11 A22:E22 A14:E14 A15:E15 A1:H1 G2:H2 C3:H3 B4:F4 C5:D5 C6:E6 A21:E21 A16:E16 A17:E17 A18:E18 A19:E19 A20:E20 A13:E13
+
+### ONGLET 37 : NOTE 15A ###
+L1: A1=- 33 -
+L2: I2=NOTE 15A
+SYSTEME NORMAL
+L3: A3=Dénomination sociale de l'entité : | C3=EMERGENCE PLAZA S.A.
+L4: A4=Adresse : | B4=COCODY CORNICHE - LA CANEBIERE - 03 779 CIDEX ABIDJAN 03 | I4=Sigle usuel : | J4=EPLSA
+L5: A5=N° d'identification fiscale : | C5=1544373 H | F5=Exercice clos le : | G5=45657 | I5=Durée (en mois) : | J5=12
+L6: A6=N° de télédéclarant (NTD): | C6=5554997221814
+L7: A7=NOTE 15A : SUBVENTIONS D'INVESTISSEMENT ET PROVISIONS REGLEMENTEES
+L8: A8=Libellés | D8=NOTE | E8=Année N | F8=Année N-1 | G8=Variation
+en valeur
+ | H8=Variation
+en % | I8=Régime
+fiscal | J8=Echéances
+L9: A9=État | D9=0 | E9=0 | F9=0 | G9=0[F:(E9-F9)] | H9=[F:IF(F9,(E9-F9)/F9,IF(ISBLANK(F9),"",IF(E9,IF( E9 > 0,1,-1),"")))] | I9=0 | J9=0
+L10: A10=Régions | D10=0 | E10=0 | F10=0 | G10=0[F:(E10-F10)] | H10=[F:IF(F10,(E10-F10)/F10,IF(ISBLANK(F10),"",IF(E10,IF( E10 > 0,1,-1),"")))] | I10=0 | J10=0
+L11: A11=Départements | D11=0 | E11=0 | F11=0 | G11=0[F:(E11-F11)] | H11=[F:IF(F11,(E11-F11)/F11,IF(ISBLANK(F11),"",IF(E11,IF( E11 > 0,1,-1),"")))] | I11=0 | J11=0
+L12: A12=Communes et collectivités publiques décentralisées | D12=0 | E12=0 | F12=0 | G12=0[F:(E12-F12)] | H12=[F:IF(F12,(E12-F12)/F12,IF(ISBLANK(F12),"",IF(E12,IF( E12 > 0,1,-1),"")))] | I12=0 | J12=0
+L13: A13=Entités publiques ou mixtes | D13=0 | E13=0 | F13=0 | G13=0[F:(E13-F13)] | H13=[F:IF(F13,(E13-F13)/F13,IF(ISBLANK(F13),"",IF(E13,IF( E13 > 0,1,-1),"")))] | I13=0 | J13=0
+L14: A14=Entités et organismes privés | D14=0 | E14=0 | F14=0 | G14=0[F:(E14-F14)] | H14=[F:IF(F14,(E14-F14)/F14,IF(ISBLANK(F14),"",IF(E14,IF( E14 > 0,1,-1),"")))] | I14=0 | J14=0
+L15: A15=Organismes internationaux | D15=0 | E15=0 | F15=0 | G15=0[F:(E15-F15)] | H15=[F:IF(F15,(E15-F15)/F15,IF(ISBLANK(F15),"",IF(E15,IF( E15 > 0,1,-1),"")))] | I15=0 | J15=0
+L16: A16=Autres | D16=0 | E16=0 | F16=0 | G16=0[F:(E16-F16)] | H16=[F:IF(F16,(E16-F16)/F16,IF(ISBLANK(F16),"",IF(E16,IF( E16 > 0,1,-1),"")))] | I16=0 | J16=0
+L17: A17=TOTAL SUBVENTIONS | E17=0[F:SUM(E9:E16)] | F17=0[F:SUM(F9:F16)] | G17=0[F:(E17-F17)] | H17=[F:IF(F17,(E17-F17)/F17,IF(ISBLANK(F17),"",IF(E17,IF( E17 > 0,1,-1),"")))]
+L18: A18=Amortissements dérogatoires | D18=0 | E18=0 | F18=0 | G18=0[F:(E18-F18)] | H18=[F:IF(F18,(E18-F18)/F18,IF(ISBLANK(F18),"",IF(E18,IF( E18 > 0,1,-1),"")))] | I18=0 | J18=0
+L19: A19=Plus-value de cession à réinvestir | D19=0 | E19=0 | F19=0 | G19=0[F:(E19-F19)] | H19=[F:IF(F19,(E19-F19)/F19,IF(ISBLANK(F19),"",IF(E19,IF( E19 > 0,1,-1),"")))] | I19=0 | J19=0
+L20: A20=Provisions spéciales de réévaluation | D20=3E | E20=0 | F20=0 | G20=0[F:(E20-F20)] | H20=[F:IF(F20,(E20-F20)/F20,IF(ISBLANK(F20),"",IF(E20,IF( E20 > 0,1,-1),"")))] | I20=0 | J20=0
+L21: A21=Provisions réglementées relatives aux immobilisations | D21=0 | E21=0 | F21=0 | G21=0[F:(E21-F21)] | H21=[F:IF(F21,(E21-F21)/F21,IF(ISBLANK(F21),"",IF(E21,IF( E21 > 0,1,-1),"")))] | I21=0 | J21=0
+L22: A22=Provisions réglementés relatives aux stocks | D22=0 | E22=0 | F22=0 | G22=0[F:(E22-F22)] | H22=[F:IF(F22,(E22-F22)/F22,IF(ISBLANK(F22),"",IF(E22,IF( E22 > 0,1,-1),"")))] | I22=0 | J22=0
+L23: A23=Provisions pour investissement | D23=0 | E23=0 | F23=0 | G23=0[F:(E23-F23)] | H23=[F:IF(F23,(E23-F23)/F23,IF(ISBLANK(F23),"",IF(E23,IF( E23 > 0,1,-1),"")))] | I23=0 | J23=0
+L24: A24=Autres provisions et fonds réglementées | D24=0 | E24=0 | F24=0 | G24=0[F:(E24-F24)] | H24=[F:IF(F24,(E24-F24)/F24,IF(ISBLANK(F24),"",IF(E24,IF( E24 > 0,1,-1),"")))] | I24=0 | J24=0
+L25: A25=TOTAL PROVISIONS REGLEMENTEES | E25=0[F:SUM(E18:E24)] | F25=0[F:SUM(F18:F24)] | G25=0[F:(E25-F25)] | H25=[F:IF(F25,(E25-F25)/F25,IF(ISBLANK(F25),"",IF(E25,IF( E25 > 0,1,-1),"")))]
+L26: A26=TOTAL SUBVENTIONS ET PROVISIONS REGLEMENTEES | E26=0[F:E17+E25] | F26=0[F:F17+F25] | G26=0[F:(E26-F26)] | H26=[F:IF(F26,(E26-F26)/F26,IF(ISBLANK(F26),"",IF(E26,IF( E26 > 0,1,-1),"")))]
+L27: A27=Commentaire:
+L28: A28=●   Indiquer pour la subvention la date d’octroi, la nature, les obligations éve
+L29: A29=●   Pour les provisions réglementées, indiquer le texte de référence, les obliga
+L30: A30=●  Commenter toute variation significative.
+FUSIONS: A32:J32 C6:E6 A16:C16 A17:C17 A24:C24 A25:C25 A7:J7 A8:C8 A9:C9 A10:C10 A11:C11 A12:C12 A13:C13 A14:C14 A15:C15 A26:C26 A23:C23 A1:J1 I2:J2 C3:J3 B4:H4 C5:E5 G5:H5 A18:C18 A19:C19 A20:C20 A21:C21 A22:C22
+
+### ONGLET 38 : NOTE 15B ###
+L1: A1=- 34 -
+L2: J2=NOTE 15B
+SYSTEME NORMAL
+L3: A3=Dénomination sociale de l'entité : | C3=EMERGENCE PLAZA S.A.
+L4: A4=Adresse : | B4=COCODY CORNICHE - LA CANEBIERE - 03 779 CIDEX ABIDJAN 03 | J4=Sigle usuel : | K4=EPLSA
+L5: A5=N° d'identification fiscale : | C5=1544373 H | G5=Exercice clos le : | H5=45657 | J5=Durée (en mois) : | K5=12
+L6: A6=N° de télédéclarant (NTD): | C6=5554997221814
+L7: A7=NOTE 15B : AUTRES  FONDS  PROPRES (1)
+L8: A8=Libellés | F8=NOTE | G8=Année N | H8=Année N-1 | I8=Variation
+en valeur
+ | J8=Variation
+en % | K8=Echéances
+L9: A9=Titres participatifs | F9=0 | G9=0 | H9=0 | I9=0[F:(G9-H9)] | J9=[F:IF(H9,(G9-H9)/H9,IF(ISBLANK(H9),"",IF(G9,IF( G9 > 0,1,-1),"")))] | K9=0
+L10: A10=Avances conditionnées | F10=0 | G10=0 | H10=0 | I10=0[F:(G10-H10)] | J10=[F:IF(H10,(G10-H10)/H10,IF(ISBLANK(H10),"",IF(G10,IF( G10 > 0,1,-1),"")))] | K10=0
+L11: A11=Titres subordonnés à durée indéterminée (T.S.D.I.) | F11=0 | G11=0 | H11=0 | I11=0[F:(G11-H11)] | J11=[F:IF(H11,(G11-H11)/H11,IF(ISBLANK(H11),"",IF(G11,IF( G11 > 0,1,-1),"")))] | K11=0
+L12: A12=Obligations remboursables en actions (O.R.A.) | F12=0 | G12=0 | H12=0 | I12=0[F:(G12-H12)] | J12=[F:IF(H12,(G12-H12)/H12,IF(ISBLANK(H12),"",IF(G12,IF( G12 > 0,1,-1),"")))] | K12=0
+L13: A13= Autres avances et dettes assorties de conditions particulières | F13=0 | G13=0 | H13=0 | I13=0[F:(G13-H13)] | J13=[F:IF(H13,(G13-H13)/H13,IF(ISBLANK(H13),"",IF(G13,IF( G13 > 0,1,-1),"")))] | K13=0
+L14: A14=TOTAL AUTRES FONDS PROPRES | G14=0[F:SUM(G9:G13)] | H14=0[F:SUM(H9:H13)] | I14=0[F:(G14-H14)] | J14=[F:IF(H14,(G14-H14)/H14,IF(ISBLANK(H14),"",IF(G14,IF( G14 > 0,1,-1),"")))]
+L16: A16=(1) Le  cas  échéant,  une  rubrique  "Autres  fonds  propres"  (montant des émi
+L17: A17=Commentaire:
+L18: A18=●   Justifier l'inscription de ces dettes dans une rubrique spécifique du passif
+L19: A19=●   Justifier le caractère significatif du montant total de cette rubrique
+L20: A20=●   Commenter toute variation significative
+FUSIONS: A1:K1 J2:K2 C3:K3 B4:I4 C5:F5 H5:I5 A10:E10 A11:E11 A12:E12 A22:K22 C6:F6 A13:E13 A14:E14 A16:K16 A7:K7 A8:E8 A9:E9
+
+### ONGLET 39 : NOTE 16A ###
+L1: A1=- 35 -
+L2: J2=NOTE 16A
+SYSTEME NORMAL
+L3: A3=Dénomination sociale de l'entité : | C3=EMERGENCE PLAZA S.A.
+L4: A4=Adresse : | B4=COCODY CORNICHE - LA CANEBIERE - 03 779 CIDEX ABIDJAN 03 | J4=Sigle usuel : | K4=EPLSA
+L5: A5=N° d'identification fiscale : | C5=1544373 H | G5=Exercice clos le : | I5=45657 | J5=Durée (en mois) : | K5=12
+L6: A6=N° de télédéclarant (NTD): | C6=5554997221814
+L7: A7=NOTE 16A : DETTES FINANCIERES ET RESSOURCES ASSIMILES
+L8: A8=Libellés | E8=Année N | F8=Année N-1 | G8=Variation
+en valeur
+ | H8=Variation
+en % | I8=Dettes à un an
+au plus | J8=Dettes à plus d'un
+an et à deux ans
+au plus | K8=Dettes à plus
+de deux ans
+L9: A9=Emprunts obligataires | E9=0 | F9=9167000000 | G9=-9167000000[F:(E9-F9)] | H9=-1[F:IF(F9,(E9-F9)/F9,IF(ISBLANK(F9),"",IF(E9,IF( E9 > 0,1,-1),"")))] | I9=0 | J9=0 | K9=0
+L10: A10=Emprunts et dettes auprès des établissements de crédit | E10=0 | F10=0 | G10=0[F:(E10-F10)] | H10=[F:IF(F10,(E10-F10)/F10,IF(ISBLANK(F10),"",IF(E10,IF( E10 > 0,1,-1),"")))] | I10=0 | J10=0 | K10=0
+L11: A11=Avances reçues de l'Etat | E11=0 | F11=0 | G11=0[F:(E11-F11)] | H11=[F:IF(F11,(E11-F11)/F11,IF(ISBLANK(F11),"",IF(E11,IF( E11 > 0,1,-1),"")))] | I11=0 | J11=0 | K11=0
+L12: A12=Avances reçues et comptes courants bloqués | E12=0 | F12=0 | G12=0[F:(E12-F12)] | H12=[F:IF(F12,(E12-F12)/F12,IF(ISBLANK(F12),"",IF(E12,IF( E12 > 0,1,-1),"")))] | I12=0 | J12=0 | K12=0
+L13: A13=Dépôts et cautionnements reçus | E13=403423930 | F13=401728048 | G13=1695882[F:(E13-F13)] | H13=0.004221467752732067[F:IF(F13,(E13-F13)/F13,IF(ISBLANK(F13),"",IF(E13,IF( E13 > 0,1,-1),"")))] | I13=0 | J13=0 | K13=403423930
+L14: A14=Intérêts courus | E14=0 | F14=173287671 | G14=-173287671[F:(E14-F14)] | H14=-1[F:IF(F14,(E14-F14)/F14,IF(ISBLANK(F14),"",IF(E14,IF( E14 > 0,1,-1),"")))] | I14=0 | J14=0 | K14=0
+L15: A15=Avances et dettes assorties de conditions particulières | E15=0 | F15=0 | G15=0[F:(E15-F15)] | H15=[F:IF(F15,(E15-F15)/F15,IF(ISBLANK(F15),"",IF(E15,IF( E15 > 0,1,-1),"")))] | I15=0 | J15=0 | K15=0
+L16: A16=Autres emprunts et dettes | E16=0 | F16=0 | G16=0[F:(E16-F16)] | H16=[F:IF(F16,(E16-F16)/F16,IF(ISBLANK(F16),"",IF(E16,IF( E16 > 0,1,-1),"")))] | I16=0 | J16=0 | K16=0
+L17: A17=Dettes liées à des participations et sociétés en participation | E17=0 | F17=0 | G17=0[F:(E17-F17)] | H17=[F:IF(F17,(E17-F17)/F17,IF(ISBLANK(F17),"",IF(E17,IF( E17 > 0,1,-1),"")))] | I17=0 | J17=0 | K17=0
+L18: A18=Comptes permanents bloqués des établissements et succursales | E18=0 | F18=0 | G18=0[F:(E18-F18)] | H18=[F:IF(F18,(E18-F18)/F18,IF(ISBLANK(F18),"",IF(E18,IF( E18 > 0,1,-1),"")))] | I18=0 | J18=0 | K18=0
+L19: A19=TOTAL EMPRUNTS ET DETTES FINANCIERES | E19=403423930[F:SUM(E9:E18)] | F19=9742015719[F:SUM(F9:F18)] | G19=-9338591789[F:(E19-F19)] | H19=-0.9585892753988072[F:IF(F19,(E19-F19)/F19,IF(ISBLANK(F19),"",IF(E19,IF( E19 > 0,1,-1),"")))] | I19=0[F:SUM(I9:I18)] | J19=0[F:SUM(J9:J18)] | K19=403423930[F:SUM(K9:K18)]
+L20: A20=Crédit bail immobilier | E20=0 | F20=0 | G20=0[F:(E20-F20)] | H20=[F:IF(F20,(E20-F20)/F20,IF(ISBLANK(F20),"",IF(E20,IF( E20 > 0,1,-1),"")))] | I20=0 | J20=0 | K20=0
+L21: A21=Crédit bail mobilier | E21=16476322 | F21=27822487 | G21=-11346165[F:(E21-F21)] | H21=-0.4078055638951327[F:IF(F21,(E21-F21)/F21,IF(ISBLANK(F21),"",IF(E21,IF( E21 > 0,1,-1),"")))] | I21=0 | J21=0 | K21=16476322
+L22: A22=Location vente | E22=0 | F22=0 | G22=0[F:(E22-F22)] | H22=[F:IF(F22,(E22-F22)/F22,IF(ISBLANK(F22),"",IF(E22,IF( E22 > 0,1,-1),"")))] | I22=0 | J22=0 | K22=0
+L23: A23=Intérêts courus | E23=0 | F23=-178259 | G23=178259[F:(E23-F23)] | H23=-1[F:IF(F23,(E23-F23)/F23,IF(ISBLANK(F23),"",IF(E23,IF( E23 > 0,1,-1),"")))] | I23=0 | J23=0 | K23=0
+L24: A24=Autres dettes de location acquisition | E24=0 | F24=0 | G24=0[F:(E24-F24)] | H24=[F:IF(F24,(E24-F24)/F24,IF(ISBLANK(F24),"",IF(E24,IF( E24 > 0,1,-1),"")))] | I24=0 | J24=0 | K24=0
+L25: A25=TOTAL DETTES DE LOCATION ACQUISITION | E25=16476322[F:SUM(E20:E24)] | F25=27644228[F:SUM(F20:F24)] | G25=-11167906[F:(E25-F25)] | H25=-0.40398690099068785[F:IF(F25,(E25-F25)/F25,IF(ISBLANK(F25),"",IF(E25,IF( E25 > 0,1,-1),"")))] | I25=0[F:SUM(I20:I24)] | J25=0[F:SUM(J20:J24)] | K25=16476322[F:SUM(K20:K24)]
+L26: A26=Provisions pour litiges | E26=0 | F26=0 | G26=0[F:(E26-F26)] | H26=[F:IF(F26,(E26-F26)/F26,IF(ISBLANK(F26),"",IF(E26,IF( E26 > 0,1,-1),"")))]
+L27: A27=Provisions pour garantie donnés aux clients | E27=0 | F27=0 | G27=0[F:(E27-F27)] | H27=[F:IF(F27,(E27-F27)/F27,IF(ISBLANK(F27),"",IF(E27,IF( E27 > 0,1,-1),"")))]
+L28: A28=Provisions pour pertes sur marchés à achèvement futur | E28=0 | F28=0 | G28=0[F:(E28-F28)] | H28=[F:IF(F28,(E28-F28)/F28,IF(ISBLANK(F28),"",IF(E28,IF( E28 > 0,1,-1),"")))]
+L29: A29=Provisions pour pertes de change | E29=0 | F29=0 | G29=0[F:(E29-F29)] | H29=[F:IF(F29,(E29-F29)/F29,IF(ISBLANK(F29),"",IF(E29,IF( E29 > 0,1,-1),"")))]
+L30: A30=Provisions pour impôts | E30=0 | F30=0 | G30=0[F:(E30-F30)] | H30=[F:IF(F30,(E30-F30)/F30,IF(ISBLANK(F30),"",IF(E30,IF( E30 > 0,1,-1),"")))]
+L31: A31=Provisions pour pensions et obligations assimilées - engagements de retraite | E31=12934660 | F31=14809835 | G31=-1875175[F:(E31-F31)] | H31=-0.12661687317920828[F:IF(F31,(E31-F31)/F31,IF(ISBLANK(F31),"",IF(E31,IF( E31 > 0,1,-1),"")))]
+L32: A32=Actif du régime de retraite (1) | E32=0 | F32=0 | G32=0[F:(E32-F32)] | H32=[F:IF(F32,(E32-F32)/F32,IF(ISBLANK(F32),"",IF(E32,IF( E32 > 0,1,-1),"")))]
+L33: A33=Provisions pour restructuration | E33=0 | F33=0 | G33=0[F:(E33-F33)] | H33=[F:IF(F33,(E33-F33)/F33,IF(ISBLANK(F33),"",IF(E33,IF( E33 > 0,1,-1),"")))]
+L34: A34=Provisions pour amendes et pénalités | E34=0 | F34=0 | G34=0[F:(E34-F34)] | H34=[F:IF(F34,(E34-F34)/F34,IF(ISBLANK(F34),"",IF(E34,IF( E34 > 0,1,-1),"")))]
+L35: A35=Provisions pour propre assureur | E35=0 | F35=0 | G35=0[F:(E35-F35)] | H35=[F:IF(F35,(E35-F35)/F35,IF(ISBLANK(F35),"",IF(E35,IF( E35 > 0,1,-1),"")))]
+L36: A36=Provisions pour démantèlement et remise en état | E36=0 | F36=0 | G36=0[F:(E36-F36)] | H36=[F:IF(F36,(E36-F36)/F36,IF(ISBLANK(F36),"",IF(E36,IF( E36 > 0,1,-1),"")))]
+L37: A37=Provisions de droits à réduction ou avantage en nature | E37=0 | F37=0 | G37=0[F:(E37-F37)] | H37=[F:IF(F37,(E37-F37)/F37,IF(ISBLANK(F37),"",IF(E37,IF( E37 > 0,1,-1),"")))]
+L38: A38=Autres provisions | E38=0 | F38=0 | G38=0[F:(E38-F38)] | H38=[F:IF(F38,(E38-F38)/F38,IF(ISBLANK(F38),"",IF(E38,IF( E38 > 0,1,-1),"")))]
+L39: A39=TOTAL PROVISIONS POUR RISQUES ET CHARGES | E39=12934660[F:SUM(E26:E38)] | F39=14809835[F:SUM(F26:F38)] | G39=-1875175[F:(E39-F39)] | H39=-0.12661687317920828[F:IF(F39,(E39-F39)/F39,IF(ISBLANK(F39),"",IF(E39,IF( E39 > 0,1,-1),"")))]
+L40: A40=(1): Le solde de ce compte est débiteur
+L41: A41=Commentaire:
+L42: A42=Pour chaque emprunt et dette de location acquisition: mentionner la date d'octro
+L43: A43=●   Indiquer les événements et circonstances qui ont conduit à la provision et à
+L44: A44=●   Pour les pensions et obligations de retraite, indiquer :
+L45: A45=    - la méthode d'évaluation retenue
+L46: A46=     - le nom de la compagnie d'assurance ou du fonds de pension, le descriptif 
+L48: A48=Les dettes financières enregistrent une forte baisse sur l’exercice, principalem
+FUSIONS: A48:K48 A45:F45 A46:J46 A20:D20 A40:K40 A27:D27 A28:D28 A29:D29 A30:D30 A31:D31 A32:D32 A33:D33 A34:D34 A35:D35 A36:D36 A37:D37 A38:D38 A21:D21 A22:D22 A23:D23 A39:D39 A25:D25 A26:D26 A24:D24 A15:D15 A16:D16 A17:D17 A18:D18 A19:D19 A13:D13 A14:D14 A12:D12 A1:K1 J2:K2 C3:K3 B4:I4 C5:F5 A7:K7 A8:D8 A9:D9 A10:D10 A11:D11 C6:F6 G5:H5
+
+### ONGLET 40 : NOTE 16B ###
+L1: A1=- 36 -
+L2: H2=NOTE 16B
+SYSTEME NORMAL
+L3: A3=Dénomination sociale de l'entité : | C3=EMERGENCE PLAZA S.A.
+L4: A4=Adresse : | B4=COCODY CORNICHE - LA CANEBIERE - 03 779 CIDEX ABIDJAN 03 | H4=Sigle usuel : | I4=EPLSA
+L5: A5=N° d'identification fiscale : | C5=1544373 H | F5=Exercice clos le : | G5=45657 | H5=Durée (en mois) : | I5=12
+L6: A6=N° de télédéclarant (NTD): | C6=5554997221814
+L7: A7=NOTE 16B : ENGAGEMENTS DE RETRAITE ET AVANTAGES ASSIMILES : (METHODE ACTUARIELLE
+L8: A8=HYPOTHESES ACTUARIELLES
+L9: A9=Libellés | H9=Année N | I9=Année N-1
+L10: A10=Taux d'augmentation des salaires | H10=0 | I10=0
+L11: A11=Taux d'actualisation | H11=0 | I11=0
+L12: A12=Taux d'inflation | H12=0 | I12=0
+L13: A13=Probabilité d'être présent dans l'entité à la date de départ à la retraite (expé | H13=0 | I13=0
+L14: A14=Probabilité d'être en vie à l'âge de départ à la retraite (table de mortalité) | H14=0 | I14=0
+L15: A15=Taux de rendement effectif des actifs du régime | H15=0 | I15=0
+L16: A16=Commentaire :
+L17: A17=●   Commenter les variations d'hypothèses actuarielles utilisées pour le calcul 
+L19: A19=VARIATION DE LA VALEUR DE L'ENGAGEMENT DE RETRAITE 
+AU COURS DE L'EXERCICE
+L20: A20=Libellés | H20=Année N | I20=Année N-1
+L21: A21=Obligation au titre des engagements de retraite à l'ouverture | H21=0 | I21=0
+L22: A22=Coût des services rendus au cours de l'exercice | H22=0 | I22=0
+L23: A23=Coût financier | H23=0 | I23=0
+L24: A24=Pertes actuarielles / (gain) | H24=0 | I24=0
+L25: A25=Prestations payées au cours de l'exercice | H25=0 | I25=0
+L26: A26=Coût des services passés | H26=0 | I26=0
+L27: A27=Obligation au titre des engagements de retraite à la clôture | H27=0 | I27=0
+L28: A28=Commentaire :
+L29: A29=●   Indiquer le montant de la charge par nature comptabilisée au cours de exerci
+L31: A31=ANALYSE DE SENSIBILITE DES HYPOTHESES ACTUARIELLES
+L32: A32=Libellés | F32=Année N | H32=Année N-1
+L33: F33=Augmentation | G33=Diminution | H33=Augmentation | I33=Diminution
+L34: A34=Taux d'actualisation (variation de ...%) | F34=0 | G34=0 | H34=0 | I34=0
+L35: A35=Taux de progression des salaires (variation de ...%) | F35=0 | G35=0 | H35=0 | I35=0
+L36: A36=Taux de départ du personnel (variation de ...%) | F36=0 | G36=0 | H36=0 | I36=0
+L37: A37=Commentaire :
+L38: A38=●   Indiquer l’impact des variations obtenues sur le montant des engagements de 
+FUSIONS: A40:I40 A12:G12 C6:E6 A36:E36 A32:E32 F32:G32 A19:I19 A20:G20 A21:G21 A22:G22 A23:G23 H32:I32 A33:E33 A34:E34 A35:E35 A24:G24 A7:I7 A8:I8 A9:G9 A10:G10 A11:G11 A1:I1 H2:I2 C3:I3 B4:G4 C5:E5 A31:I31 A14:G14 A15:G15 A27:G27 A13:G13 A26:G26 A25:G25
+
+### ONGLET 41 : NOTE 16B BIS ###
+L1: A1=- 37 -
+L2: H2=NOTE 16B BIS
+SYSTEME NORMAL
+L3: A3=Dénomination sociale de l'entité : | C3=EMERGENCE PLAZA S.A.
+L4: A4=Adresse : | B4=COCODY CORNICHE - LA CANEBIERE - 03 779 CIDEX ABIDJAN 03 | H4=Sigle usuel : | I4=EPLSA
+L5: A5=N° d'identification fiscale : | C5=1544373 H | F5=Exercice clos le : | G5=45657 | H5=Durée (en mois) : | I5=12
+L6: A6=N° de télédéclarant (NTD): | C6=5554997221814
+L7: A7=NOTE 16B BIS : ENGAGEMENTS DE RETRAITE ET AVANTAGES ASSIMILES : (METHODE ACTUARI
+L8: A8=ACTIF/PASSIF NET COMPTABILISE AU TITRE DES REGIMES FINANCES
+L9: A9=Libellés | H9=Année N | I9=Année N-1
+L10: A10=Valeur actuelle de l'obligation résultant de régimes financés | H10=0 | I10=0
+L11: A11=Valeur actuelle des actifs affectés aux plans de retraite | H11=0 | I11=0
+L12: A12=Excédent / Déficit de régime | H12=0 | I12=0
+L13: A13=Commentaire :
+L14: A14=●   Indiquer le montant comptabilisé au passif (ou actif) à la clôture de l'exer
+L16: A16=VALEUR ACTUELLE DES ACTIFS DU REGIME
+L17: A17=Libellés | F17=Année N | H17=Année N-1
+L18: F18=Rendement
+attendu | G18=Juste valeur
+des actifs | H18=Rendement 
+attendu | I18=Juste valeur
+des actifs
+L19: A19=Actions | F19=0 | G19=0 | H19=0 | I19=0
+L20: A20=Obligations | F20=0 | G20=0 | H20=0 | I20=0
+L21: A21=Autres | F21=0 | G21=0 | H21=0 | I21=0
+L22: A22=Total | F22=0[F:SUM(F19:F21)] | G22=0[F:SUM(G19:G21)] | H22=0[F:SUM(H19:H21)] | I22=0[F:SUM(I19:I21)]
+L23: A23=Commentaire :
+L24: A24=●   Expliquer comment les taux de rendement par catégorie d’actifs et global ont
+L25: A25=●   Indiquer le montant des rendements réels des actifs affectés aux plans en N 
+FUSIONS: A27:I27 A12:G12 C6:D6 F17:G17 H17:I17 A18:E18 A7:I7 A8:I8 A9:G9 A10:G10 A11:G11 A21:E21 A22:E22 A17:E17 A20:E20 A16:I16 A19:E19 A1:I1 H2:I2 C3:I3 B4:G4 C5:E5
+
+### ONGLET 42 : NOTE 16C ###
+L1: A1=- 38 -
+L2: G2=NOTE 16C
+SYSTEME NORMAL
+L3: A3=Dénomination sociale de l'entité : | C3=EMERGENCE PLAZA S.A.
+L4: A4=Adresse : | B4=COCODY CORNICHE - LA CANEBIERE - 03 779 CIDEX ABIDJAN 03 | G4=Sigle usuel : | H4=EPLSA
+L5: A5=N° d'identification fiscale : | C5=1544373 H | E5=Exercice clos le : | F5=45657 | G5=Durée (en mois) : | H5=12
+L6: A6=N° de télédéclarant (NTD):  | C6=5554997221814
+L7: A7=NOTE 16C : ACTIFS ET PASSIFS EVENTUELS
+L8: A8=Libellés | G8=Année N | H8=Année N-1
+L9: A9=Actif éventuel | G9=0[F:SUM(G11:G18)] | H9=0[F:SUM(H11:H18)]
+L10: A10=Litiges | G10=0 | H10=0
+L11: A11=0 | G11=0 | H11=0
+L12: A12=0 | G12=0 | H12=0
+L13: A13=0 | G13=0 | H13=0
+L14: A14=0 | G14=0 | H14=0
+L15: A15=0 | G15=0 | H15=0
+L16: A16=0 | G16=0 | H16=0
+L19: A19=Passif éventuel | G19=0[F:SUM(G21:G28)] | H19=0[F:SUM(H21:H28)]
+L20: A20=Litiges | G20=0 | H20=0
+L21: A21=0 | G21=0 | H21=0
+L22: A22=0 | G22=0 | H22=0
+L23: A23=0 | G23=0 | H23=0
+L24: A24=0 | G24=0 | H24=0
+L25: A25=0 | G25=0 | H25=0
+L26: A26=0 | G26=0 | H26=0
+L29: A29=Commentaire :
+L30: A30=●   Décrire les principales caractéristiques des actifs / passifs éventuels, l’h
+FUSIONS: A32:H32 C6:E6 A30:H30 A28:F28 A20:F20 A21:F21 A22:F22 A23:F23 A24:F24 A25:F25 A16:F16 A17:F17 A18:F18 A26:F26 A27:F27 A7:H7 A19:F19 A1:H1 G2:H2 C3:H3 B4:F4 C5:D5 A13:F13 A14:F14 A15:F15 A8:F8 A9:F9 A10:F10 A11:F11 A12:F12
+
+### ONGLET 43 : NOTE 17 ###
+L1: A1=- 39 -
+L2: J2=NOTE 17
+SYSTEME NORMAL
+L3: A3=Dénomination sociale de l'entité : | C3=EMERGENCE PLAZA S.A.
+L4: A4=Adresse : | B4=COCODY CORNICHE - LA CANEBIERE - 03 779 CIDEX ABIDJAN 03 | J4=Sigle usuel : | K4=EPLSA
+L5: A5=N° d'identification fiscale : | C5=1544373 H | F5=Exercice clos le : | G5=45657 | J5=Durée (en mois) : | K5=12
+L6: A6=N° de télédéclarant (NTD):  | C6=5554997221814
+L7: A7=NOTE 17 : FOURNISSEURS D'EXPLOITATION
+L8: A8=Libellés | F8=Année N | G8=Année N-1 | H8=Variation
+en % | I8=Dettes à un
+an au plus | J8=Dettes à plus
+d'un an et à
+deux ans
+au plus | K8=Dettes à plus
+de deux ans
+L9: A9=Fournisseurs dettes en compte (hors groupe) | F9=287044838 | G9=307010437 | H9=-0.0650323135431386[F:IF(G9,(F9-G9)/G9,IF(ISBLANK(G9),"",IF(F9,IF( F9 > 0,1,-1),"")))] | I9=287044838 | J9=0 | K9=0
+L10: A10=Fournisseurs, sous-traitants | F10=0 | G10=0 | I10=0 | J10=0 | K10=0
+L11: A11=Fournisseurs, réserve de propriété | F11=0 | G11=0 | I11=0 | J11=0 | K11=0
+L12: A12=Fournisseurs, retenue de garantie | F12=0 | G12=0 | I12=0 | J12=0 | K12=0
+L13: A13=Fournisseurs effets à payer (hors groupe) | F13=0 | G13=0 | H13=[F:IF(G13,(F13-G13)/G13,IF(ISBLANK(G13),"",IF(F13,IF( F13 > 0,1,-1),"")))] | I13=0 | J13=0 | K13=0
+L14: A14=Fournisseurs, dettes et effets à payer groupe | F14=0 | G14=0 | H14=[F:IF(G14,(F14-G14)/G14,IF(ISBLANK(G14),"",IF(F14,IF( F14 > 0,1,-1),"")))] | I14=0 | J14=0 | K14=0
+L15: A15=Fournisseurs, acquisitions courantes d'immobilisations | F15=0 | G15=0 | I15=0 | J15=0 | K15=0
+L16: A16=Fournisseurs factures non parvenues (hors groupe) | F16=59439161 | G16=68444155 | H16=-0.13156702716250934[F:IF(G16,(F16-G16)/G16,IF(ISBLANK(G16),"",IF(F16,IF( F16 > 0,1,-1),"")))] | I16=59439161 | J16=0 | K16=0
+L17: A17=Fournisseurs factures non parvenues groupe | F17=0 | G17=0 | H17=[F:IF(G17,(F17-G17)/G17,IF(ISBLANK(G17),"",IF(F17,IF( F17 > 0,1,-1),"")))] | I17=0 | J17=0 | K17=0
+L18: A18=TOTAL FOURNISSEURS | F18=346483999[F:SUM(F9:F17)] | G18=375454592[F:SUM(G9:G17)] | H18=-0.07716137614851705[F:IF(G18,(F18-G18)/G18,IF(ISBLANK(G18),"",IF(F18,IF( F18 > 0,1,-1),"")))] | I18=346483999[F:SUM(I9:I17)] | J18=0[F:SUM(J9:J17)] | K18=0[F:SUM(K9:K17)]
+L19: A19=Fournisseurs, avances et acomptes (hors groupe) | F19=0 | G19=12500000 | H19=-1[F:IF(G19,(F19-G19)/G19,IF(ISBLANK(G19),"",IF(F19,IF( F19 > 0,1,-1),"")))] | I19=0 | J19=0 | K19=0
+L20: A20=Fournisseurs, avances et acomptes groupe | F20=0 | G20=0 | H20=[F:IF(G20,(F20-G20)/G20,IF(ISBLANK(G20),"",IF(F20,IF( F20 > 0,1,-1),"")))] | I20=0 | J20=0 | K20=0
+L21: A21=Autres fournisseurs débiteurs | F21=0 | G21=0 | H21=[F:IF(G21,(F21-G21)/G21,IF(ISBLANK(G21),"",IF(F21,IF( F21 > 0,1,-1),"")))] | I21=0 | J21=0 | K21=0
+L22: A22=TOTAL FOURNISSEURS DEBITEURS | F22=0[F:SUM(F19:F21)] | G22=12500000[F:SUM(G19:G21)] | H22=-1[F:IF(G22,(F22-G22)/G22,IF(ISBLANK(G22),"",IF(F22,IF( F22 > 0,1,-1),"")))] | I22=0[F:SUM(I19:I21)] | J22=0[F:SUM(J19:J21)] | K22=0[F:SUM(K19:K21)]
+L23: A23=Commentaire:
+L24: A24=●   Commenter toutes variations significatives.
+L25: A25=●   Indiquer pour les dettes du groupe le nom de la société du groupe et le % de
+L26: A26=●   Commenter les dettes anciennes.
+L28: A28=Les dettes fournisseurs s’élèvent à 346 483 999 FCFA au 31/12/N, en baisse de 7,
+FUSIONS: A28:K28 A20:E20 A21:E21 A16:E16 A22:E22 A17:E17 A18:E18 A1:K1 J2:K2 C3:K3 B4:I4 C5:E5 G5:I5 C6:E6 A19:E19 A7:K7 A8:E8 A9:E9 A13:E13 A14:E14 A10:E10 A11:E11 A12:E12 A15:E15
+
+### ONGLET 44 : NOTE 18 ###
+L1: A1=- 40 -
+L2: J2=NOTE 18
+SYSTEME NORMAL
+L3: A3=Dénomination sociale de l'entité : | C3=EMERGENCE PLAZA S.A.
+L4: A4=Adresse : | B4=COCODY CORNICHE - LA CANEBIERE - 03 779 CIDEX ABIDJAN 03 | J4=Sigle usuel : | K4=EPLSA
+L5: A5=N° d'identification fiscale : | C5=1544373 H | G5=Exercice clos le : | H5=45657 | J5=Durée (en mois) : | K5=12
+L6: A6=N° de télédéclarant (NTD): | C6=5554997221814
+L7: A7=NOTE 18 : DETTES FISCALES ET SOCIALES
+L8: A8=Libellés | E8=Année N | F8=Année N-1 | G8=Variation en
+valeur  | H8=Variation
+en % | I8=Dettes à un an
+au plus | J8=Dettes à plus
+d'un an et à
+deux ans au plus | K8=Dettes à plus
+de deux ans
+L9: A9=Personnel rémunérations dues | E9=0 | F9=4831617 | G9=-4831617[F:(E9-F9)] | H9=-1[F:IF(F9,(E9-F9)/F9,IF(ISBLANK(F9),"",IF(E9,IF( E9 > 0,1,-1),"")))] | I9=0 | J9=0 | K9=0
+L10: A10=   Personnel, congés à payer | E10=0 | F10=0 | G10=0[F:(E10-F10)] | I10=0 | J10=0 | K10=0
+L11: A11=   Charges sociales sur congés à payer | E11=392804 | F11=824934 | G11=-432130[F:(E11-F11)] | I11=392804 | J11=0 | K11=0
+L12: A12=Autres personnel | E12=9540447 | F12=21055587 | G12=-11515140[F:(E12-F12)] | H12=-0.5468923758810429[F:IF(F12,(E12-F12)/F12,IF(ISBLANK(F12),"",IF(E12,IF( E12 > 0,1,-1),"")))] | I12=9540447 | J12=0 | K12=0
+L13: A13=Caisse de sécurité sociale | E13=3450834 | F13=5398713 | G13=-1947879[F:(E13-F13)] | H13=-0.360804325030799[F:IF(F13,(E13-F13)/F13,IF(ISBLANK(F13),"",IF(E13,IF( E13 > 0,1,-1),"")))] | I13=3450834 | J13=0 | K13=0
+L14: A14=Caisse de retraite | E14=0 | F14=0 | G14=0[F:(E14-F14)] | H14=[F:IF(F14,(E14-F14)/F14,IF(ISBLANK(F14),"",IF(E14,IF( E14 > 0,1,-1),"")))] | I14=0 | J14=0 | K14=0
+L15: A15=Mutuelle de santé | E15=0 | F15=0 | G15=0[F:(E15-F15)] | I15=0 | J15=0 | K15=0
+L16: A16=Assurance Retraite | E16=0 | F16=0 | G16=0[F:(E16-F16)] | I16=0 | J16=0 | K16=0
+L17: A17=Autres charges sociales à payer | E17=0 | F17=0 | G17=0[F:(E17-F17)] | I17=0 | J17=0 | K17=0
+L18: A18=Autres cotisations et organismes sociaux | E18=0 | F18=0 | G18=0[F:(E18-F18)] | H18=[F:IF(F18,(E18-F18)/F18,IF(ISBLANK(F18),"",IF(E18,IF( E18 > 0,1,-1),"")))] | I18=0 | J18=0 | K18=0
+L19: A19=TOTAL DETTES SOCIALES | E19=13384085[F:SUM(E9:E18)] | F19=32110851[F:SUM(F9:F18)] | G19=-18726766[F:SUM(G9:G18)] | H19=-0.5831912084796507[F:IF(F19,(E19-F19)/F19,IF(ISBLANK(F19),"",IF(E19,IF( E19 > 0,1,-1),"")))] | I19=13384085[F:SUM(I9:I18)] | J19=0[F:SUM(J9:J18)] | K19=0[F:SUM(K9:K18)]
+L20: A20=Etat, impôts sur les bénéfices | E20=13753537 | F20=10833003 | G20=2920534[F:(E20-F20)] | H20=0.26959597444955935[F:IF(F20,(E20-F20)/F20,IF(ISBLANK(F20),"",IF(E20,IF( E20 > 0,1,-1),"")))] | I20=13753537 | J20=0 | K20=0
+L21: A21=Etat, impôts et taxes | E21=1387434 | F21=2507217 | G21=-1119783[F:(E21-F21)] | H21=-0.44662388616541765[F:IF(F21,(E21-F21)/F21,IF(ISBLANK(F21),"",IF(E21,IF( E21 > 0,1,-1),"")))] | I21=1387434 | J21=0 | K21=0
+L22: A22=Etat, TVA | E22=35961545.2 | F22=34317343 | G22=1644202.200000003[F:(E22-F22)] | H22=0.04791169875826351[F:IF(F22,(E22-F22)/F22,IF(ISBLANK(F22),"",IF(E22,IF( E22 > 0,1,-1),"")))] | I22=35961545.2 | J22=0 | K22=0
+L23: A23=Etat, impôts retenus à la source | E23=6335386 | F23=11479967 | G23=-5144581[F:(E23-F23)] | H23=-0.4481355216439211[F:IF(F23,(E23-F23)/F23,IF(ISBLANK(F23),"",IF(E23,IF( E23 > 0,1,-1),"")))] | I23=6335386 | J23=0 | K23=0
+L24: A24=Autres dettes Etat | E24=101793 | F24=216661 | G24=-114868[F:(E24-F24)] | H24=-0.5301738660857284[F:IF(F24,(E24-F24)/F24,IF(ISBLANK(F24),"",IF(E24,IF( E24 > 0,1,-1),"")))] | I24=101793 | J24=0 | K24=0
+L25: A25=TOTAL DETTES FISCALES | E25=57539695.2[F:SUM(E20:E24)] | F25=59354191[F:SUM(F20:F24)] | G25=-1814495.799999997[F:SUM(G20:G24)] | H25=-0.030570643276057744[F:IF(F25,(E25-F25)/F25,IF(ISBLANK(F25),"",IF(E25,IF( E25 > 0,1,-1),"")))] | I25=57539695.2[F:SUM(I20:I24)] | J25=0[F:SUM(J20:J24)] | K25=0[F:SUM(K20:K24)]
+L26: A26=TOTAL DETTES SOCIALES ET FISCALES | E26=70923780.2[F:E19+E25] | F26=91465042[F:F19+F25] | G26=-20541261.799999997[F:G19+G25] | H26=-0.22458046649123056[F:IF(F26,(E26-F26)/F26,IF(ISBLANK(F26),"",IF(E26,IF( E26 > 0,1,-1),"")))] | I26=70923780.2[F:I19+I25] | J26=0[F:J19+J25] | K26=0[F:K19+K25]
+L27: A27=Commentaire:
+L28: A28=●   Commenter toute variation significative.
+L29: A29=●   Commenter les dettes anciennes
+L31: A31=Les dettes fiscales et sociales s’élèvent à 70 923 780 FCFA au 31/12/N, en baiss
+FUSIONS: A31:K31 A25:D25 A26:D26 A20:D20 A21:D21 A22:D22 A23:D23 A24:D24 C6:F6 A13:D13 A7:K7 A8:D8 A9:D9 A12:D12 A10:D10 A11:D11 A1:K1 J2:K2 C3:K3 B4:I4 C5:F5 H5:I5 A17:D17 A15:D15 A16:D16 A19:D19 A14:D14 A18:D18
+
+### ONGLET 45 : NOTE 19 ###
+L1: A1=- 41 -
+L2: J2=NOTE 19
+SYSTEME NORMAL
+L3: A3=Dénomination sociale de l'entité : | C3=EMERGENCE PLAZA S.A.
+L4: A4=Adresse : | B4=COCODY CORNICHE - LA CANEBIERE - 03 779 CIDEX ABIDJAN 03 | J4=Sigle usuel : | K4=EPLSA
+L5: A5=N° d'identification fiscale : | C5=1544373 H | G5=Exercice clos le : | I5=45657 | J5=Durée (en mois) : | K5=12
+L6: A6=N° de télédéclarant (NTD):  | C6=5554997221814
+L7: A7=NOTE 19 : AUTRES DETTES ET PROVISIONS POUR RISQUES ET CHARGES A COURT TERME
+L8: A8=Libellés | E8=Année N | F8=Année N-1 | G8=Variation en
+valeur | H8=Variation
+en % | I8=Dettes à un an
+au plus | J8=Dettes à plus
+d'un an et à deux
+ans au plus | K8=Dettes à plus
+de deux ans
+L9: A9=Organismes internationaux | E9=0 | F9=0 | G9=0[F:(E9-F9)] | H9=[F:IF(F9,(E9-F9)/F9,IF(ISBLANK(F9),"",IF(E9,IF( E9 > 0,1,-1),"")))] | I9=0 | J9=0 | K9=0
+L10: A10=Apporteurs, opérations sur le capital | E10=457949 | F10=457949 | G10=0[F:(E10-F10)] | H10=0[F:IF(F10,(E10-F10)/F10,IF(ISBLANK(F10),"",IF(E10,IF( E10 > 0,1,-1),"")))] | I10=457949 | J10=0 | K10=0
+L11: A11=Associés, compte courant | E11=9189601887 | F11=531853353 | G11=8657748534[F:(E11-F11)] | H11=16.278450601401023[F:IF(F11,(E11-F11)/F11,IF(ISBLANK(F11),"",IF(E11,IF( E11 > 0,1,-1),"")))] | I11=9189601887 | J11=0 | K11=0
+L12: A12=Associés dividendes à payer | E12=0 | F12=0 | G12=0[F:(E12-F12)] | H12=[F:IF(F12,(E12-F12)/F12,IF(ISBLANK(F12),"",IF(E12,IF( E12 > 0,1,-1),"")))] | I12=0 | J12=0 | K12=0
+L13: A13=Groupe, comptes courants | E13=0 | F13=0 | G13=0[F:(E13-F13)] | H13=[F:IF(F13,(E13-F13)/F13,IF(ISBLANK(F13),"",IF(E13,IF( E13 > 0,1,-1),"")))] | I13=0 | J13=0 | K13=0
+L14: A14=Autres dettes associés | E14=0 | F14=0 | G14=0[F:(E14-F14)] | H14=[F:IF(F14,(E14-F14)/F14,IF(ISBLANK(F14),"",IF(E14,IF( E14 > 0,1,-1),"")))] | I14=0 | J14=0 | K14=0
+L15: A15=TOTAL DETTES ASSOCIES | E15=9190059836[F:SUM(E9:E14)] | F15=532311302[F:SUM(F9:F14)] | G15=8657748534[F:SUM(G9:G14)] | H15=16.26444620182045[F:IF(F15,(E15-F15)/F15,IF(ISBLANK(F15),"",IF(E15,IF( E15 > 0,1,-1),"")))] | I15=9190059836[F:SUM(I9:I14)] | J15=0[F:SUM(J9:J14)] | K15=0[F:SUM(K9:K14)]
+L16: A16=Créditeurs divers | E16=1885715 | F16=6879925 | G16=-4994210[F:(E16-F16)] | H16=-0.7259105295479239[F:IF(F16,(E16-F16)/F16,IF(ISBLANK(F16),"",IF(E16,IF( E16 > 0,1,-1),"")))] | I16=1885715 | J16=0 | K16=0
+L17: A17=Obligataires | E17=0 | F17=0 | G17=0[F:(E17-F17)] | H17=[F:IF(F17,(E17-F17)/F17,IF(ISBLANK(F17),"",IF(E17,IF( E17 > 0,1,-1),"")))] | I17=0 | J17=0 | K17=0
+L18: A18=Rémunérations d'administrateurs | E18=0 | F18=0 | G18=0[F:(E18-F18)] | H18=[F:IF(F18,(E18-F18)/F18,IF(ISBLANK(F18),"",IF(E18,IF( E18 > 0,1,-1),"")))] | I18=0 | J18=0 | K18=0
+L19: A19=Compte d'affacturage et de titrisation | E19=0 | F19=0 | G19=0[F:(E19-F19)] | H19=[F:IF(F19,(E19-F19)/F19,IF(ISBLANK(F19),"",IF(E19,IF( E19 > 0,1,-1),"")))] | I19=0 | J19=0 | K19=0
+L20: A20=Versements restant à effectuer sur titres de placement
+non libérés | E20=0 | F20=0 | G20=0[F:(E20-F20)] | H20=[F:IF(F20,(E20-F20)/F20,IF(ISBLANK(F20),"",IF(E20,IF( E20 > 0,1,-1),"")))] | I20=0 | J20=0 | K20=0
+L21: A21=Compte transitoire ajustement spécial lié à la révision du
+SYSCOHADA (Voir Note | E21=0 | F21=0 | G21=0[F:(E21-F21)] | H21=[F:IF(F21,(E21-F21)/F21,IF(ISBLANK(F21),"",IF(E21,IF( E21 > 0,1,-1),"")))] | I21=0 | J21=0 | K21=0
+L22: A22=Autres créditeurs divers | E22=551553921 | F22=343477214 | G22=208076707[F:(E22-F22)] | H22=0.6057947908008826[F:IF(F22,(E22-F22)/F22,IF(ISBLANK(F22),"",IF(E22,IF( E22 > 0,1,-1),"")))] | I22=551553921 | J22=0 | K22=0
+L23: A23=TOTAL  CREDITEURS DIVERS | E23=553439636[F:SUM(E16:E22)] | F23=350357139[F:SUM(F16:F22)] | G23=203082497[F:SUM(G16:G22)] | H23=0.5796442383895594[F:IF(F23,(E23-F23)/F23,IF(ISBLANK(F23),"",IF(E23,IF( E23 > 0,1,-1),"")))] | I23=553439636[F:SUM(I16:I22)] | J23=0[F:SUM(J16:J22)] | K23=0[F:SUM(K16:K22)]
+L24: A24=Comptes permanents non bloqués des établissements et
+des succursales | E24=0 | F24=0 | G24=0[F:(E24-F24)] | H24=[F:IF(F24,(E24-F24)/F24,IF(ISBLANK(F24),"",IF(E24,IF( E24 > 0,1,-1),"")))] | I24=0 | J24=0 | K24=0
+L25: A25=Comptes de liaison charges et produits | E25=0 | F25=0 | G25=0[F:(E25-F25)] | H25=[F:IF(F25,(E25-F25)/F25,IF(ISBLANK(F25),"",IF(E25,IF( E25 > 0,1,-1),"")))] | I25=0 | J25=0 | K25=0
+L26: A26=Comptes de liaison des sociétés en participation | E26=0 | F26=0 | G26=0[F:(E26-F26)] | H26=[F:IF(F26,(E26-F26)/F26,IF(ISBLANK(F26),"",IF(E26,IF( E26 > 0,1,-1),"")))] | I26=0 | J26=0 | K26=0
+L27: A27=TOTAL  COMPTES DE LIAISON | E27=0[F:SUM(E24:E26)] | F27=0[F:SUM(F24:F26)] | G27=0[F:SUM(G24:G26)] | H27=[F:IF(F27,(E27-F27)/F27,IF(ISBLANK(F27),"",IF(E27,IF( E27 > 0,1,-1),"")))] | I27=0[F:SUM(I24:I26)] | J27=0[F:SUM(J24:J26)] | K27=0[F:SUM(K24:K26)]
+L28: A28=TOTAL  AUTRES DETTES | E28=9743499472[F:E15+E23+E27] | F28=882668441[F:F15+F23+F27] | G28=8860831031[F:G15+G23+G27] | H28=10.038685671101273[F:IF(F28,(E28-F28)/F28,IF(ISBLANK(F28),"",IF(E28,IF( E28 > 0,1,-1),"")))] | I28=9743499472[F:I15+I23+I27] | J28=0[F:J15+J23+J27] | K28=0[F:K15+K23+K27]
+L29: A29=Provisions pour risques et charges à court terme (voir note 28) | E29=0 | F29=0 | G29=0[F:(E29-F29)] | H29=[F:IF(F29,(E29-F29)/F29,IF(ISBLANK(F29),"",IF(E29,IF( E29 > 0,1,-1),"")))] | I29=0 | J29=0 | K29=0
+L30: A30=Commentaire:
+L31: A31=●   Commenter toute variation significative.
+L32: A32=●   Indiquer le taux de rémunération si compte courant rémunéré.
+L33: A33=●   Commenter les dettes anciennes.
+L34: A34=●   Compte transitoire ajustement spécial, indiquer le détail du compte et la du
+L36: A36=Les autres dettes s’élèvent à 9 743 499 472 FCFA au 31/12/N, en forte hausse par
+FUSIONS: A36:K36 A22:D22 A20:D20 A21:D21 A15:D15 A16:D16 A17:D17 A18:D18 A19:D19 A28:D28 A29:D29 A23:D23 A24:D24 A27:D27 A25:D25 A26:D26 A12:D12 A13:D13 A14:D14 A1:K1 J2:K2 C3:K3 B4:I4 C5:F5 C6:F6 A11:D11 A7:K7 A8:D8 A9:D9 A10:D10 G5:H5

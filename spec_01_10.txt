@@ -1,0 +1,581 @@
+
+### ONGLET 1 : COUVERTURE ###
+L6: F6=   MINISTERE EN CHARGE DES FINANCES
+L8: F8=DIRECTION GENERALE DES IMPOTS
+L11: G11=CENTRE DE DEPÔT DE :
+L13: G13=CME - DJIBI
+L31: E31=LIASSE SYSTEME NORMAL
+L34: F34=EXERCICE CLOS LE
+L35: F35=45657
+L38: E38=DENOMINATION SOCIALE : | G38=EMERGENCE PLAZA S.A.
+L39: E39=(ou nom et prénoms de l'exploitant)
+L41: E41=SIGLE USUEL : | G41=EPLSA
+L43: E43=ADRESSE COMPLETE : | G43=COCODY CORNICHE - LA CANEBIERE
+L45: E45=N° COMPTE CONTRIBUABLE (NCC) : | H45=1544373 H
+L46: E46=N° DE TELEDECLARANT (NTD): | H46=5554997221814
+FUSIONS: E31:J31 C15:D15 C16:D16 C17:D17 C18:D18 E26:J29 F34:I34 F35:I35 C3:D3 C4:D4 F4:I4 C5:D5 C6:D6 C7:D7 C8:D8 F8:I8 C9:D9 C10:D10 C11:D11 C12:D12 C13:D13 C14:D14 
+
+### ONGLET 2 : GARDE ###
+L2: B2=REPUBLIQUE DE CÔTE D'IVOIRE
+L3: B3=MINISTERE EN CHARGE DES FINANCES
+L4: B4=DIRECTION GENERALE DES IMPÔTS
+L8: C8=CENTRE DE DEPOT DE
+L9: D9=CME - DJIBI
+L12: C12=ETATS FINANCIERS NORMALISES
+SYSTEME COMPTABLE OHADA (SYSCOHADA)
+L16: E16=EXERCICE CLOS LE
+L17: E17=45657
+L20: D20=DESIGNATION DE L'ENTITE
+L22: B22=DENOMINATION SOCIALE : | D22=EMERGENCE PLAZA S.A.
+L23: B23=(ou nom et prénoms de l'exploitant)
+L26: B26=SIGLE USUEL : | C26=EPLSA
+L28: B28=ADRESSE COMPLETE : | C28=COCODY CORNICHE - LA CANEBIERE
+L30: B30=N° COMPTE CONTRIBUABLE (NCC) : | D30=1544373 H
+L31: B31=N° DE TELEDECLARANT (NTD): | D31=5554997221814
+L32: B32=SYSTEME NORMAL
+L33: B33=Documents déposés | H33=Réservé à la Direction Générale des Impôts
+L35: B35=Fiche d'identification et renseignements divers | F35=X | H35=Date de dépôt
+L36: B36=Bilan | F36=X
+L37: B37=Compte de résultat | F37=X
+L38: B38=Tableau des flux de trésorerie | F38=X
+L39: B39=Notes annexes | F39=X | H39=Nom de l'agent de la DGI ayant réceptionné le dépôt
+L40: B40=Etats supplémentaires DGI | F40=X
+L44: B44=Nombre de pages déposées par exemplaire : | H44=Signature de l'agent et cachet du service
+L45: B45=Nombre d'exemplaires déposés :
+FUSIONS: H44:K44 H35:K35 B2:K2 B3:K3 B4:K4 C8:J8 D9:I9 C12:J14 E16:H16 E17:H17 D20:I20 B33:F33 H33:K33 D22:K22 C26:K26 D30:K30 C28:K28 B24:K24 H36:K38 H40:K43 H39:K39 D31:K31 B32:K32 
+
+### ONGLET 3 : RECEVABILITE ###
+L1: A1=- 1 -
+L5: B5=CONDITIONS DE RECEVABILITE
+L9: B9=Entités utilisant des imprimés
+L12: B12=• N'utiliser que des imprimés normalisés.
+L14: B14=• Remplir chaque page de façon parfaitement lisible sans décalage de lignes.
+L16: B16=• Ne créer aucune rubrique.
+L18: B18=• Eviter toute surcharge et donner les explications sur une feuille séparée.
+L20: B20=• N'utiliser que les codes indiqués dans les tables.
+L22: B22=• N'utiliser que des imprimés en noir et blanc.
+L25: B25=Entités produisant les états financiers à l'aide de l'outil informatique
+L28: B28=• Reproduire à l'identique la contexture des imprimés normalisés.
+L30: B30=• Fournir une liasse comprenant à la fois : la fiche d'identification et renseig
+L32: B32=• Ne créer aucune rubrique.
+L34: B34=• N'utiliser que les codes indiqués dans les tables.
+L36: B36=• N'utiliser que des imprimés en noir et blanc.
+L39: B39=Etats financiers
+L41: B41=• Les rubriques et les postes du Bilan, du Compte de résultat et du Tableau des 
+L43: B43=• Les Notes annexes non chiffrées doivent être supprimées.  Cependant elles devr
+L44: B44=être indiquées dans la Fiche Récapitulative des Notes Annexes (Fiche R4)
+L46: B46=• Les états financiers devront être accompagnés d'une attestation de visa ou d'u
+L47: B47=attestation d'exécution de la mission de commissariat aux comptes.
+FUSIONS: A1:B1 
+
+### ONGLET 4 : NOTE36 (TABLE DES CODES) ###
+L1: A1=- 2 -
+L2: H2=NOTE 36
+SYSTEME NORMAL
+L3: A3=Dénomination sociale de l'entité : | C3=EMERGENCE PLAZA S.A.
+L4: A4=Adresse : | B4=COCODY CORNICHE - LA CANEBIERE - 03 779 CIDEX ABIDJAN 03 | H4=Sigle usuel: | I4=EPLSA
+L5: A5=N° de compte contribuable (NCC) : | C5=1544373 H | E5=Exercice clos le : | G5=45657 | H5=Durée (en mois) : | I5=12
+L6: A6=N° de télédéclarant (NTD):  | C6=5554997221814
+L7: A7=NOTE 36 : TABLE DES CODES
+L9: A9=1- Code forme juridique (1) | F9=3- Code pays du siège social
+L11: A11= Société Anonyme (SA) à participation publique | D11=0 | E11=0
+L12: F12= Pays UEMOA (2)
+L13: A13= Société Anonyme (SA) | D13=0 | E13=1
+L14: F14= Pays CEMAC (3)
+L15: A15=Société par Actions Simplifiée (SAS) | D15=0 | E15=2
+L16: F16= Autres pays OHADA (4)
+L17: A17= Société à Responsabilité Limitée (SARL) | D17=0 | E17=3 | F17= Afrique du Sud | I17=2 | J17=0
+L18: F18= Autres pays africains | I18=2 | J18=1
+L19: A19= Société en Commandite Simple (SCS) | D19=0 | E19=4
+L20: F20= Suisse | I20=2 | J20=2
+L21: A21= Société en Nom Collectif (SNC) | D21=0 | E21=5
+L22: F22= France | I22=2 | J22=3
+L23: A23= Société en Participation (SP) | D23=0 | E23=6
+L24: F24= Autres pays de l'Union Européenne | I24=3 | J24=9
+L25: A25= Groupement d'Intérêt Economique (GIE) | D25=0 | E25=7
+L26: F26= U.S.A. | I26=4 | J26=0
+L27: A27= Association | D27=0 | E27=8
+L28: F28= Canada | I28=4 | J28=1
+L29: A29= Autre forme juridique (à préciser) | D29=0 | E29=9 | F29= Brésil | I29=4 | J29=3
+L30: F30= Autres pays américains | I30=4 | J30=9
+L31: A31= 2 - Code régime fiscal
+L32: F32= Chine | I32=5 | J32=0
+L33: A33= Réel normal | E33=1 | F33= Inde | I33=5 | J33=2
+L34: F34= Liban | I34=5 | J34=3
+L35: A35= Réel simplifié | E35=2 | F35= Autres pays asiatiques | I35=5 | J35=9
+L36: F36= Russie | I36=6 | J36=0
+L37: A37= Synthétique | E37=3
+L38: F38= Autres pays | I38=9 | J38=9
+L39: A39= Forfait | E39=4
+L40: F40= (Zone monétaire = Zone franc CFA)
+L42: A42=(1) Remplacer le premier 0 par 1 si l'entreprise bénéficie d'un agrément priorit
+L43: A43=(2) Bénin = 01 ; Burkina = 02 ; Côte d'Ivoire = 03 ; Guinée Bissau = 04 ; Mali =
+L44: A44=(3) Cameroun = 09 ; Centrafrique = 10 ; Congo = 11 ; Gabon = 12 ; Guinée Equator
+L45: A45=(4) Comores = 15 ; Guinée Conakry = 16 
+FUSIONS: A7:J7 A9:E9 F9:J9 I4:J4 I5:J5 C6:E6 A1:J1 H2:J2 C3:J3 B4:G4 A5:B5 C5:D5 E5:F5 
+
+### ONGLET 5 : NOTE36 Suite (Nomenclature) ###
+L1: A1=- 3 -
+L2: H2=NOTE 36 (suite)
+SYSTEME NORMAL
+L3: A3=Dénomination sociale de l'entité : | C3=EMERGENCE PLAZA S.A.
+L4: A4=Adresse : | B4=COCODY CORNICHE - LA CANEBIERE - 03 779 CIDEX ABIDJAN 03 | H4=Sigle usuel: | I4=EPLSA
+L5: A5=N° de compte contribuable (NCC) : | C5=1544373 H | E5=Exercice clos le : | G5=45657 | H5=Durée (en mois) : | I5=12
+L6: A6=N° de télédéclarant (NTD):  | C6=5554997221814
+L7: A7=NOTE 36 SUITE : CLASSIFICATION IVOIRIENNE DES ACTIVITES ET DES PRODUITS (CIAP)
+
+L8: A8=Sélectionner la ou les codes activités selon le découpage de votre chiffre d'aff
+L9: A9=Toutes les pages de la nomenclature CIAP ci-dessous ne sont pas à joindre à la l
+L10: A10=NOMENCLATURE CIAP
+L11: A11=Code Activité | B11=Activités | E11=Code Activité | F11=Activités
+L12: A12=A0101 | B12=AGRICULTURE VIVRIERE | E12=F4300 | F12=ACTIVITÉS SPECIALISEES DE CONSTRUCTION
+L13: A13=A010101 | B13=Culture de céréales | E13=F430001 | F13=Démolition et préparation des sites
+L14: A14=A010102 | B14=Culture de tubercules  | E14=F430002 | F14=Travaux d'installation
+L15: A15=A010103 | B15=Culture de fruits  | E15=F430003 | F15=Travaux de finition
+L16: A16=A010104 | B16=Culture de légumes et plantes à épices et aromatiques | E16=F430004 | F16=Autres travaux spécialisés de construction
+L17: A17=A0102 | B17=AGRICULTURE DESTINEE A L'INDUSTRIE OU A L'EXPORTATION | E17=G4501 | F17=COMMERCE DE VÉHICULES AUTOMOBILES
+L18: A18=A010201 | B18=Culture du  cacao | E18=G450100 | F18=Commerce de véhicules automobiles
+L19: A19=A010202 | B19=Culture du café | E19=G4502 | F19=ENTRETIEN ET REPARATION DE VEHICULES AUTOMOBILES
+L20: A20=A010203 | B20=Hévéaculture | E20=G450200 | F20=Entretien et réparation de véhicules automobiles
+L21: A21=A010204 | B21=Culture du coton | E21=G4503 | F21=COMMERCE DE PIECES DETACHEES ET D'ACCESSOIRES AUTOMOBILES
+L22: A22=A010205 | B22=Culture de la banane douce , de l'ananas et la mangue | E22=G450300 | F22=Commerce de pièces détachées et d'accessoires automobiles
+L23: A23=A010206 | B23=Culture de l'anacarde | E23=G4504 | F23=COMMERCE ET RÉPARATION DE MOTOCYCLES
+L24: A24=A010207 | B24=Culture de la canne a sucre | E24=G450400 | F24=Commerce et réparation de motocycles
+L25: A25=A010208 | B25=Culture de graines et fruits oléagineux | E25=G4601 | F25=ACTIVITES DES INTERMEDIAIRES DU COMMERCE DE GROS
+L26: A26=A010209 | B26=Horticulture et Reproduction des plantes | E26=G460100 | F26=Activités des Intermédiaires du commerce de gros
+L27: A27=A010210 | B27=Culture d'autres produits destinés à l'industrie ou à l'exportation | E27=G4602 | F27=COMMERCE DE GROS DE PRODUITS AGRICOLES BRUTS, D'ANIMAUX VIVANTS, PRODUITS ALIMEN
+L28: A28=A0103 | B28=ELEVAGE ET CHASSE | E28=G460201 | F28=Commerce de gros de produits agricoles bruts et d'aliments pour animaux
+L29: A29=A010301 | B29=Elevage | E29=G460202 | F29=Commerce de gros d'animaux vivants, de peaux et cuirs
+L30: A30=A010302 | B30=Chasse | E30=G460203 | F30=Commerce de gros de produits alimentaires, boissons et tabacs manufacturés
+L31: A31=A0104 | B31=ACTIVITES ANNEXES A L'AGRICULTURE, L'ELEVAGE ET LA CHASSE | E31=G4603 | F31=COMMERCE DE GROS DE BIENS DE CONSOMMATION NON ALIMENTAIRES
+L32: A32=A010401 | B32=Activités de soutien à l'agriculture | E32=G460301 | F32=Commerce de gros de textiles, habillement et chaussures
+L33: A33=A010402 | B33=Activités de soutien à l'élevage | E33=G460302 | F33=Commerce de gros de produits pharmaceutiques et médicaux
+L34: A34=A010403 | B34=Activités de soutien à la chasse | E34=G460303 | F34=Commerce de gros de biens de consommation non alimentaires divers
+L35: A35=A0201 | B35=SYLVICULTURE ET EXPLOITATION FORESTIERE  | E35=G4604 | F35=COMMERCE DE GROS DE PRODUITS INTERMEDIAIRES NON AGRICOLES
+L36: A36=A020101 | B36=Sylviculture | E36=G460401 | F36=Commerce de gros de carburants et combustibles
+L37: A37=A020102 | B37=Exploitation Forestière | E37=G460402 | F37=Commerce de gros de bois
+L38: A38=A020103 | B38= Production de charbon de bois | E38=G460403 | F38=Commerce de gros de matériaux de construction, quincaillerie et fournitures pour
+L39: A39=A020200 | B39=Cueillettes, récolte de produits forestiers non ligneux | E39=G460404 | F39=Commerce de gros d’autres produits intermédiaires non agricoles
+L40: A40=A0203 | B40=ACTIVITES DE SOUTIEN A LA SYLVICULTURE ET A L'EXPLOITATION FORESTIERE | E40=G4605 | F40=COMMERCE DE GROS DE MACHINES, D'EQUIPEMENTS ET FOURNITURES
+L41: A41=A020300 | B41= Activités de soutien à la sylviculture et à l'exploitation forestière | E41=G460501 | F41=Commerce de gros de machines, d'équipements et fournitures
+L42: A42=A0301 | B42=PECHE  | E42=G460502 | F42=Commerce de gros d'autres équipements industriels et fournitures diverses
+L43: A43=A030101 | B43=Pêche maritime | E43=G4606 | F43=COMMERCE DE GROS NON SPÉCIALISÉ
+L44: A44=A030102 | B44=Pêche en eau douce | E44=G460600 | F44=Commerce de gros non spécialisé
+L45: A45=A0302 | B45=AQUACULTURE, PISCICULTURE | E45=G4701 | F45=COMMERCE DE DETAIL EN MAGASIN NON SPECIALISE
+L46: A46=A030201 | B46=Pisciculture  | E46=G470100 | F46=Commerce de détail en magasin non spécialisé
+L47: A47=A030202 | B47=Aquaculture  | E47=G4702 | F47=COMMERCE DE DETAIL EN MAGASIN SPECIALISE
+L48: A48=B0500 | B48=EXTRACTION DE CHARBON ET DE LIGNITE | E48=G470201 | F48=Commerce de détail en magasin spécialisé de produits alimentaires, boissons et t
+L49: A49=B050000 | B49=Extraction de charbon et de lignite | E49=G470202 | F49=Commerce de détail en magasin spécialisé de produits pharmaceutiques et médicaux
+L50: A50=B06 | B50=EXTRACTION D'HYDROCARBURES | E50=G470203 | F50=Commerce de détail en magasin spécialisé de textiles, habillement, chaussures et
+L51: A51=B0600 | B51=EXTRACTION D'HYDROCARBURES | E51=G470204 | F51=Commerce de détail en magasin spécialisé d'articles et appareils d'équipement do
+L52: A52=B060001 | B52=Extraction de pétrole brut | E52=G470205 | F52=Commerce de détail en magasin spécialisé de quincaillerie, peintures, verre, tap
+L53: A53=B060002 | B53=Extraction de gaz naturel | E53=G470206 | F53=Commerce de détail en magasin spécialisé de livres, journaux et articles de spor
+L54: A54=B07 | B54=EXTRACTION DE MINERAIS MÉTALLIQUES | E54=G470207 | F54=Commerce de détail en magasin spécialisé d'équipements informatiques et de matér
+L55: A55=B0701 | B55=EXTRACTION DE MINERAIS DE FER | E55=G470208 | F55=Commerce de détail en magasin spécialisé de carburants automobiles
+L56: A56=B070100 | B56=Extraction de minerais de fer | E56=G470209 | F56=Commerce de détail en magasin spécialisé d'autres produits n.c.a.
+L57: A57=B0702 | B57=EXTRACTION DE MINERAIS DE METAUX NON FERREUX | E57=G4703 | F57=COMMERCE DE DÉTAIL HORS MAGASIN
+L58: A58=B070201 | B58=Extraction de minerais de métaux précieux | E58=G470301 | F58=Commerce de détail sur éventaires et marchés de viandes et poissons
+L59: A59=B070202 | B59=Extraction d'autres minerais de métaux non ferreux | E59=G470302 | F59=Commerce de détail sur éventaires et marchés de fruits et légumes frais
+L60: A60=B0801 | B60=EXTRACTION DE PIERRES, DE SABLES ET D'ARGILES | E60=G470303 | F60=Commerce de détail sur éventaires et marchés de céréales, tubercules et d'autres
+L61: A61=B080100 | B61=Extraction de pierres, de sables et d'argiles | E61=G470304 | F61=Commerce de détail sur éventaires et marchés de textiles, habillement, chaussure
+L62: A62=B0802 | B62=ACTIVITES EXTRACTIVES N.C.A. | E62=G470305 | F62=Commerce de détail sur éventaires et marchés d'articles non alimentaires divers
+L63: A63=B080201 | B63=Extraction de phosphates et de sels de potassium, naturels | E63=G470306 | F63=Autres commerces de détail hors magasin
+L64: A64=B080202 | B64=Extractions de minéraux pour l'industrie chimique | E64=H4901 | F64=TRANSPORTS FERROVIAIRES
+L65: A65=B080203 | B65=Extraction ou production de sel et de natron | E65=H490100 | F65=Transports ferroviaires
+L66: A66=B080204 | B66=Extraction de pierres précieuses et semi-précieuses | E66=H4902 | F66=TRANSPORTS ROUTIERS
+L67: A67=B080205 | B67=Autres extractions | E67=H490201 | F67=Transports routiers de passagers
+L68: A68=B0901 | B68=ACTIVITES DE SOUTIEN A L’EXTRACTION D’HYDROCARBURES | E68=H490202 | F68=Transports routiers de marchandises
+L69: A69=B090100 | B69=Activités de soutien à l’extraction d’hydrocarbures | E69=H4903 | F69=TRANSPORTS PAR CONDUITES
+L70: A70=B0902 | B70=ACTIVITES DE SOUTIEN AUX AUTRES INDUSTRIES EXTRACTIVES | E70=H490300 | F70=Transports par conduites
+L71: A71=B090200 | B71=Activités de soutien aux autres industries extractives | E71=H50 | F71=TRANSPORT PAR EAU
+L72: A72=C1001 | B72=ABATTAGE, TRANSFORMATION ET CONSERVATION DE LA VIANDE ET PREPARATION DE PRODUITS | E72=H5001 | F72=TRANSPORTS MARITIMES ET CÔTIERS
+L73: A73=C100101 | B73=Abattage, Transformation et conservation de la viande  | E73=H500100 | F73=Transports maritimes et côtiers
+L74: A74=C100102 | B74=Préparation de produits à base de viande | E74=H5002 | F74=TRANSPORTS FLUVIAUX
+L75: A75=C1002 | B75=TRANSFORMATION ET CONSERVATION DE POISSONS, CRUSTACES ET MOLLUSQUES | E75=H500200 | F75=Transports fluviaux
+L76: A76=C100201 | B76=Congélation de poissons, crustacés et mollusques | E76=H51 | F76=TRANSPORTS AÉRIENS
+L77: A77=C100202 | B77=Séchage, salage ou fumage du poisson | E77=H5100 | F77=TRANSPORTS AÉRIENS
+L78: A78=C100203 | B78=Autres transformation et conservation des poissons, crustacés et mollusques | E78=H510001 | F78=Transports aériens de passagers
+L79: A79=C1003 | B79=TRANSFORMATION ET CONSERVATION DE FRUITS ET LEGUMES | E79=H510002 | F79=Transports aériens de fret et transports spatiaux
+L80: A80=C100300 | B80=Transformation et conservation de fruits et légumes | E80=H5201 | F80=ENTREPOSAGE
+L81: A81=C1004 | B81=FABRICATION DE CORPS GRAS D'ORIGINE ANIMALE ET VEGETALE | E81=H520100 | F81=Entreposage
+L82: A82=C100400 | B82=Fabrication de corps gras d'origine animale et végétale | E82=H5202 | F82=ACTIVITÉS AUXILIAIRES DES TRANSPORTS
+L83: A83=C1005 | B83=TRAVAIL DES GRAINS ; FABRICATION DE PRODUITS AMYLACES | E83=H520201 | F83=Manutention
+L84: A84=C100501 | B84=Travail des grains | E84=H520202 | F84=Exploitation d'infrastructures de transport
+L85: A85=C100502 | B85=Transformation du manioc et fabrication de produits amylacés | E85=H520203 | F85=Organisation du transport de fret
+L86: A86=C1006 | B86=FABRICATION DE PRODUITS ALIMENTAIRES A BASE DE CEREALES N.C.A. | E86=H5300 | F86=ACTIVITES DE POSTE ET DE COURRIER
+L87: A87=C100601 | B87=Fabrication de pain et de pâtisseries fraîches | E87=H530001 | F87=Activités de service postal universel
+L88: A88=C100602 | B88=Biscuiterie et pâtisserie de conservation | E88=H530002 | F88=Autres activités de courrier et de distribution
+L89: A89=C100603 | B89=Fabrication de pâtes alimentaires, de semoules et de produits farineux similaire | E89=I5500 | F89=HEBERGEMENT
+L90: A90=C1007 | B90=TRANSFORMATION DU CACAO ET DU CAFÉ  | E90=I550000 | F90=Hébergement
+L91: A91=C100701 | B91=Transformation du cacao | E91=I5601 | F91=RESTAURATION
+L92: A92=C100702 | B92=Transformation du café  | E92=I560100 | F92=Restauration
+L93: A93=C1008 | B93=FABRICATION D’AUTRES PRODUITS ALIMENTAIRES | E93=I5602 | F93=ACTIVITÉS DES DÉBITS DE BOISSONS
+L94: A94=C100801 | B94=Fabrication de produits laitiers et de glaces | E94=I560200 | F94=Activités des débits de boissons
+L95: A95=C100802 | B95=Fabrication de sucre et de confiserie | E95=J5801 | F95=ÉDITION DE LIVRES ET PERIODIQUES ET AUTRES ACTIVITES D'EDITION
+L96: A96=C100803 | B96=Fabrication de thé  | E96=J580100 | F96=Édition de livres et périodiques
+L97: A97=C100804 | B97=Fabrication de condiments et assaisonnements | E97=J5802 | F97=ÉDITION DE LOGICIELS
+L98: A98=C100805 | B98=Fabrication d’aliments pour animaux | E98=J580200 | F98=Édition de logiciels
+L99: A99=C100806 | B99=Fabrication de denrées diverses n.c.a. | E99=J5901 | F99= PRODUCTION VIDÉO : CINÉMA ET TÉLÉVISION
+L100: A100=C1101 | B100=FABRICATION DE BOISSONS ALCOOLISÉES | E100=J590100 | F100=Production vidéo : cinéma et télévision
+L101: A101=C110101 | B101=Fabrication de malt et de  bière  | E101=J5902 | F101=PRODUCTION AUDIO ET ÉDITION MUSICALE
+L102: A102=C110102 | B102=Fabrication d'autres boissons alcoolisées | E102=J590200 | F102=Production audio et édition musicale
+L103: A103=C1102 | B103=FABRICATION DE BOISSONS NON ALCOOLISES ET D'EAUX MINERALES | E103=J6000 | F103=PROGRAMMATION TÉLÉVISUELLE ; RADIODIFFUSION
+L104: A104=C110200 | B104=Fabrication de boissons non alcoolises et d'eaux minérales | E104=J600001 | F104=Édition et diffusion de programmes radio
+L105: A105=C1200 | B105=FABRICATION DE PRODUITS A BASE DE TABAC | E105=J600002 | F105=Programmation télévisuelle; Télédiffusion
+L106: A106=C120000 | B106=Fabrication de produits à base de tabac | E106=J6100 | F106=TÉLÉCOMMUNICATIONS
+L107: A107=C1301 | B107=FILATURE, TISSAGE ET ENNOBLISSEMENT DE TEXTILE | E107=J610000 | F107=Télécommunications
+L108: A108=C130101 | B108=Filature de textile | E108=J6200 | F108=ACTIVITÉS INFORMATIQUES : CONSEIL, PROGRAMMATION
+L109: A109=C130102 | B109=Tissage de textile | E109=J620001 | F109=Programmation informatique
+L110: A110=C130103 | B110=Ennoblissement de textile | E110=J620002 | F110=Conseil et autres activités informatiques
+L111: A111=C1302 | B111=FABRICATION D'AUTRES ARTICLES TEXTILES | E111=J6300 | F111=ACTIVITÉS DE FOURNITURE D'INFORMATION
+L112: A112=C130201 | B112=Fabrication de tapis et moquettes | E112=J630001 | F112=Traitement de données, hébergement et activités connexes ; Création de portails 
+L113: A113=C130202 | B113=Fabrication d'étoffes à mailles et d'articles textiles non vestimentaires | E113=J630002 | F113=Autres activités liées à l'information
+L114: A114=C1401 | B114=FABRICATION DE VETEMENTS | E114=K6401 | F114=INTERMÉDIATION MONÉTAIRE
+L115: A115=C140100 | B115=Fabrication de vêtements | E115=K640101 | F115=Activités de banque centrale
+L116: A116=C1402 | B116=SERVICE DE COUTURE  SUR MESURE | E116=K640102 | F116=Autres intermédiations monétaires (Banques commerciales)
+L117: A117=C140200 | B117=Service de couture sur mesure | E117=K6402 | F117=ACTIVITES DES FONDS DE PLACEMENTS, HOLDINGS ET SIMILAIRES
+L118: A118=C1501 | B118=TRAVAIL DU CUIR; FABRICATION D'ARTICLES DE VOYAGE | E118=K640200 | F118=Activités des fonds de placements, holdings et similaires
+L119: A119=C150101 | B119=Apprêt, tannage des cuirs et fourrures | E119=K6403 | F119=ACTIVITES DE CREDITS ET AUTRES INTERMEDIATIONS NON MONETAIRES
+L120: A120=C150102 | B120=Fabrication d'articles de voyage, de maroquinerie et de sellerie | E120=K640301 | F120=Activités de micro finance
+L121: A121=C1502 | B121=FABRICATION DE CHAUSSURES ET ARTICLES CHAUSSANTS | E121=K640302 | F121=Autres activités de crédits et autres intermédiations non monétaires
+L122: A122=C150200 | B122=Fabrication de chaussures et articles chaussants | E122=K6500 | F122=ASSURANCE
+L123: A123=C1601 | B123=TRAVAIL DU BOIS | E123=K650001 | F123=Assurance vie et caisses de retraite
+L124: A124=C160100 | B124=Sciage, Rabotage | E124=K650002 | F124=Assurance dommage et réassurance
+L125: A125=C1602 | B125=FABRICATION D'ARTICLES EN BOIS, LIEGE, VANNERIE ET SPARTERIE | E125=K66 | F125=ACTIVITÉS D'AUXILIAIRES FINANCIERS ET D'ASSURANCE
+L126: A126=C160201 | B126=Fabrication de feuilles de placage, de contreplaques et de panneaux | E126=K6600 | F126=ACTIVITÉS D'AUXILIAIRES FINANCIERS ET D'ASSURANCE
+L127: A127=C160202 | B127=Fabrication d'ouvrages de charpente,  de menuiseries et d'emballages en bois | E127=K660001 | F127=Gestion de Fonds pour tiers
+L128: A128=C160203 | B128=Fabrication d'articles divers en bois ou liège, vannerie et sparterie | E128=K660002 | F128= Activités de transfert  de fonds et d’auxiliaires financiers
+L129: A129=C17 | B129=FABRICATION DE PAPIER, CARTONS ET D’ARTICLES EN PAPIER OU EN CARTON | E129=K660003 | F129=Activités d'auxiliaires d'assurance
+L130: A130=C1700 | B130=FABRICATION DE PAPIER, CARTONS ET D’ARTICLES EN PAPIER OU EN CARTON | E130=L6801 | F130=LOCATION IMMOBILIERE ET ACTIVITES SUR BIENS PROPRES
+L131: A131=C170001 | B131=Fabrication de pâte a papier, de papier et de carton | E131=L680100 | F131=Location immobilière et activités sur biens propres
+L132: A132=C170002 | B132=Fabrication de carton ondulé et emballages en papier ou en carton | E132=L6802 | F132=ACTIVITÉS DES AGENCES IMMOBILIÈRES
+L133: A133=C170003 | B133=Fabrication d'articles en papier ou en carton | E133=L680200 | F133=Activités des agences immobilières
+L134: A134=C1801 | B134=IMPRIMERIE ET ACTIVITES CONNEXES | E134=M6901 | F134=ACTIVITÉS JURIDIQUES
+L135: A135=C180100 | B135=Imprimerie et activités connexes | E135=M690100 | F135=Activités juridiques
+L136: A136=C1802 | B136=REPRODUCTION D'ENREGISTREMENTS | E136=M6902 | F136=ACTIVITÉS COMPTABLES
+L137: A137=C180200 | B137=Reproduction d'enregistrement | E137=M690200 | F137=Activités comptables
+L138: A138=C1901 | B138=RAFFINAGE DU PETROLE | E138=M7000 | F138=ACTIVITÉS DES SIEGES SOCIAUX; CONSEIL EN GESTION
+L139: A139=C190100 | B139=Raffinage du pétrole  | E139=M700001 | F139=Activités des sièges sociaux
+L140: A140=C1902 | B140=COKEFACTION | E140=M700002 | F140=Conseil de gestion
+L141: A141=C190200 | B141=Cokéfaction | E141=M7100 | F141=ACTIVITÉS D'ARCHITECTURE, D'INGENIERIE ET TECHNIQUES
+L142: A142=C2001 | B142=FABRICATION DE PRODUITS CHIMIQUES DE BASE  | E142=M710001 | F142=Activités d’architecture et d'ingénierie
+L143: A143=C200101 | B143=Fabrication de produits azotés et d'engrais | E143=M710002 | F143=Activités de contrôle et analyses techniques
+L144: A144=C200102 | B144=Fabrication d'autres produits chimiques  de base | E144=M7201 | F144= RECHERCHE-DEVELOPPEMENT EN SCIENCES PHYSIQUES ET NATURELLES
+L145: A145=C2002 | B145=FABRICATION DE PRODUITS CHIMIQUES FONCTIONNELS | E145=M720100 | F145=Recherche-développement en sciences physiques et naturelles
+L146: A146=C200201 | B146=Fabrication de savons, détergents et produits d'entretien | E146=M7202 | F146=RECHERCHE-DEVELOPPEMENT EN SCIENCES HUMAINES ET SOCIALES
+L147: A147=C200202 | B147=Fabrication de parfums et de produits de toilette | E147=M720200 | F147=Recherche-développement en sciences humaines et sociales
+L148: A148=C200203 | B148=Fabrication de produits agrochimiques | E148=M7300 | F148=PUBLICITE ET ETUDES DE MARCHES
+L149: A149=C200204 | B149=Fabrication de peintures et vernis, adjuvants et encres d'imprimerie | E149=M730001 | F149=Publicité
+L150: A150=C200205 | B150=Fabrication de fibres artificielles ou synthétiques | E150=M730002 | F150=Études de marché et sondages
+L151: A151=C200206 | B151=Fabrication d'autres produits chimiques | E151=M74 | F151=AUTRES ACTIVITÉS PROFESSIONNELLES DE SERVICES SPECIALISES
+L152: A152=C2100 | B152=FABRICATION DE PRODUITS PHARMACEUTIQUES | E152=M7400 | F152=AUTRES ACTIVITES SPECIALISEES SCIENTIFIQUES ET TECHNIQUES
+L153: A153=C210001 | B153=Industrie pharmaceutique | E153=M740001 | F153=Activités spécialisées de design
+L154: A154=C210002 | B154=Fabrication de médicaments traditionnels | E154=M740002 | F154=Activités photographiques
+L155: A155=C2201 | B155=TRAVAIL DU CAOUTCHOUC | E155=M740003 | F155=Autres activités spécialisées, scientifiques et techniques n.c.a.
+L156: A156=C220101 | B156=Fabrication et rechapage de pneumatiques | E156=M75 | F156=ACTIVITÉS VETERINAIRES
+L157: A157=C220102 | B157=Fabrication d'autres articles en caoutchouc | E157=M7500 | F157=ACTIVITÉS VETERINAIRES
+L158: A158=C2202 | B158=TRAVAIL DU PLASTIQUE | E158=M750000 | F158=Activités vétérinaires
+L159: A159=C220200 | B159=Fabrication d'articles en plastique | E159=N7700 | F159=LOCATION ET LOCATION-BAIL
+L160: A160=C2301 | B160=FABRICATION DE VERRE ET D'ARTICLES EN VERRE | E160=N770001 | F160=Location de véhicules automobiles
+L161: A161=C230100 | B161=Fabrication de verre et d'articles en verre | E161=N770002 | F161=Location de machines et d'équipements n.c.a.
+L162: A162=C2302 | B162=FABRICATION DE PRODUITS CÉRAMIQUES  | E162=N770003 | F162=Location d'articles personnels et domestiques n.c.a.
+L163: A163=C230201 | B163=Fabrication de carreaux en céramique | E163=N770004 | F163=Gestion des droits de propriété industrielle
+L164: A164=C230202 | B164=Fabrication de tuiles et briques | E164=N7800 | F164=ACTIVITES LIEES AUX RESSOURCES HUMAINES
+L165: A165=C230203 | B165=Fabrication d'autres produits céramiques | E165=N780000 | F165=Activités liées aux ressources humaines
+L166: A166=C2303 | B166=FABRICATION DE CIMENTS ET AUTRES PRODUITS MINERAUX | E166=N7900 | F166=ACTIVITÉS DES AGENCES DE RESERVATION ET VOYAGISTES
+L167: A167=C230301 | B167=Fabrication de ciment, chaux et plâtre  | E167=N790000 | F167=Activités des agences de réservation et voyagistes
+L168: A168=C230302 | B168=Fabrication de matériaux et d'ouvrages en ciment, en béton ou en plâtre ;  Trava | E168=N8000 | F168=ENQUETES ET SECURITE
+L169: A169=C230303 | B169=Fabrication de produits minéraux non métalliques n.c.a.  | E169=N800000 | F169=Enquêtes et sécurité
+L170: A170=C2401 | B170=SIDERURGIE ET PREMIERE TRANSFORMATION DE L'ACIER | E170=N8100 | F170=SOUTIEN AUX BATIMENTS ; AMENAGEMENT PAYSAGER
+L171: A171=C240100 | B171=Sidérurgie et première transformation de l'acier | E171=N810001 | F171=Activités combinées de soutien aux bâtiments
+L172: A172=C2402 | B172=METALLURGIE ET PREMIERE TRANSFORMATION DES METAUX NON FERREUX | E172=N810002 | F172=Activités de nettoyage
+L173: A173=C240200 | B173=Métallurgie et première transformation des métaux non ferreux | E173=N810003 | F173=Aménagement paysager
+L174: A174=C2403 | B174=FONDERIE | E174=N8200 | F174=ACTIVITES DE SOUTIEN AUX ENTREPRISES ; ACTIVITES DE BUREAU
+L175: A175=C240300 | B175=Fonderie | E175=N820001 | F175=Activités de bureau, routage et centres d'appels
+L176: A176=C2501 | B176=FABRICATION DE STRUCTURES METALLIQUES, CITERNES ET OUVRAGES CHAUDRONNES | E176=N820002 | F176=Organisation de foires, salons et congrès
+L177: A177=C250100 | B177=Fabrication de structures métalliques, citernes et ouvrages chaudronnés | E177=N820003 | F177=Activités de soutien aux entreprises n.c.a.
+L178: A178=C2502 | B178=FABRICATION D'AUTRES OUVRAGES EN METAUX; TRAVAIL DES METAUX | E178=O8401 | F178=ACTIVITES D'ADMINISTRATION GENERALE, ECONOMIQUE ET SOCIALE
+L179: A179=C250200 | B179=Fabrication d'autres ouvrages en métaux; travail des métaux | E179=O840100 | F179=Activités d'administration générale, économique et sociale
+L180: A180=C2601 | B180=FABRICATION DE COMPOSANTS ELECTRONIQUE, D'ORDINATEURS ET DE PERIPHERIQUES | E180=O8402 | F180=ACTIVITÉS DE PRÉROGATIVE PUBLIQUE
+L181: A181=C260101 | B181=Fabrication de composants, cartes électroniques et supports magnétiques | E181=O840200 | F181=Activités de prérogative publique
+L182: A182=C260102 | B182=Fabrication d'ordinateurs et d'équipements périphériques | E182=O8403 | F182=ACTIVITÉS DE SÉCURITÉ SOCIALE OBLIGATOIRE
+L183: A183=C2602 | B183=FABRICATION D'EQUIPEMENTS DE COMMUNICATION ET DE PRODUITS ELECTRONIQUES GRAND PU | E183=O840300 | F183=Activités de sécurité sociale obligatoire
+L184: A184=C260201 | B184=Fabrication d'équipements de communication | E184=P8501 | F184=ENSEIGNEMENT PRÉ-PRIMAIRE ET PRIMAIRE
+L185: A185=C260202 | B185=Fabrication de produits électroniques grand public | E185=P850100 | F185=Enseignement pré-primaire et primaire
+L186: A186=C2603 | B186=FABRICATION D'EQUIPEMENTS D'IMAGERIE MEDICALE, DE PRECISION, D'OPTIQUE ET D'HORL | E186=P8502 | F186=ENSEIGNEMENT SECONDAIRE
+L187: A187=C260300 | B187=Fabrication d'équipements d'imagerie médicale, de précision, d'optique et d'horl | E187=P850201 | F187=Enseignement secondaire général
+L188: A188=C2701 | B188=FABRICATION DE MACHINES ET MATERIELS ELECTROTECHNIQUES | E188=P850202 | F188=Enseignement secondaire technique ou professionnel
+L189: A189=C270100 | B189=Fabrication de machines et matériels électrotechniques | E189=P8503 | F189=ENSEIGNEMENT SUPERIEUR ET POST-SECONDAIRE NON SUPERIEUR
+L190: A190=C2702 | B190=FABRICATION D'APPAREILS DOMESTIQUES | E190=P850301 | F190=Enseignement supérieur 
+L191: A191=C270200 | B191=Fabrication d'appareils domestiques | E191=P850302 | F191=Enseignement post-secondaire non supérieur
+L192: A192=C2703 | B192=FABRICATION D’AUTRES MATERIELS ELECTRIQUES | E192=P8504 | F192=AUTRES ACTIVITÉS D'ENSEIGNEMENT
+L193: A193=C270300 | B193=Fabrication d’autres matériels électriques | E193=P850400 | F193=Autres activités d'enseignement
+L194: A194=C2801 | B194=FABRICATION DE MACHINES D'USAGE GÉNÉRAL | E194=Q8601 | F194=ACTIVITÉS HOSPITALIÈRES
+L195: A195=C280100 | B195=Fabrication de machines d'usage général | E195=Q860100 | F195=Activités hospitalières
+L196: A196=C2802 | B196=FABRICATION DE MACHINES D'USAGE SPÉCIFIQUE | E196=Q8602 | F196=ACTIVITE DES MEDECINS ET DES DENTISTES
+L197: A197=C280200 | B197=Fabrication de machines d'usage spécifique | E197=Q860200 | F197=Activité des médecins et des dentistes
+L198: A198=C2900 | B198=CONSTRUCTION DE VÉHICULES AUTOMOBILES | E198=Q8603 | F198=ACTIVITÉS PARAMÉDICALES ET DE SOUTIEN
+L199: A199=C290000 | B199=Construction de véhicules automobiles | E199=Q860301 | F199=Activités des tradipraticiens
+L200: A200=C3001 | B200=CONSTRUCTION NAVALE, AÉRONAUTIQUE ET FERROVIAIRE | E200=Q860302 | F200=Autres activités pour la santé humaine
+L201: A201=C300101 | B201=construction navale | E201=Q8700 | F201=ACTIVITES D'HEBERGEMENT MEDICO-SOCIAL ET SOCIAL
+L202: A202=C300102 | B202=Construction aéronautique | E202=Q870000 | F202=Activités d'Hébergement médico-social et social
+L203: A203=C300103 | B203=Construction ferroviaire | E203=Q8800 | F203=ACTION SOCIALE SANS HEBERGEMENT
+L204: A204=C300104 | B204=Construction de véhicules militaires de combat | E204=Q880000 | F204=Action sociale sans hébergement
+L205: A205=C3002 | B205=FABRICATION D'AUTRES EQUIPEMENTS DE TRANSPORT | E205=R9000 | F205=ACTIVITES CREATIVES, ARTISTIQUES ET DE SPECTACLE
+L206: A206=C300200 | B206=Fabrication d'autres équipements de transport | E206=R900000 | F206=Activités créatives, artistiques et de spectacle
+L207: A207=C3100 | B207=FABRICATION DE MEUBLES ET MATELAS | E207=R9100 | F207=CONSERVATION ET VALORISATION DU PATRIMOINE
+L208: A208=C310001 | B208=Fabrication de matelas et sommiers | E208=R910000 | F208=Conservation et valorisation du patrimoine
+L209: A209=C310002 | B209=Fabrication de meubles  | E209=R9200 | F209=ORGANISATION DE JEUX DE HASARD ET D'ARGENT
+L210: A210=C3200 | B210=AUTRES INDUSTRIES | E210=R920000 | F210=Organisation de jeux de hasard et d'argent
+L211: A211=C320001 | B211=Fabrication de bijoux | E211=R9301 | F211=ACTIVITÉS LIÉES AU SPORT
+L212: A212=C320002 | B212=Fabrication d'instruments de musique | E212=R930100 | F212=Activités liées au sport
+L213: A213=C320003 | B213=Activités manufacturières n.c.a | E213=R9302 | F213=ACTIVITÉS RÉCRÉATIVES ET DE LOISIRS
+L214: A214=C3301 | B214=REPARATION DE MACHINES ET D'EQUIPEMENTS PROFESSIONNELS | E214=R930200 | F214=Activités récréatives et de loisirs
+L215: A215=C330100 | B215=Réparation de machines et d'équipements professionnels | E215=S9401 | F215=ACTIVITES DES ORGANISATIONS ECONOMIQUES, PATRONALES ET PROFESSIONNELLES
+L216: A216=C3302 | B216=INSTALLATION DE MACHINES ET D'EQUIPEMENTS PROFESSIONNELS | E216=S940100 | F216=Activités des organisations économiques, patronales et professionnelles
+L217: A217=C330200 | B217=Installation de machines et d'équipements professionnels | E217=S9402 | F217=ACTIVITÉS DES SYNDICATS DES TRAVAILLEURS
+L218: A218=D3501 | B218=PRODUCTION, TRANSPORT ET DISTRIBUTION D'ÉLECTRICITÉ | E218=S940200 | F218=Activités des syndicats des travailleurs
+L219: A219=D350100 | B219=Production, transport et distribution d'électricité | E219=S9403 | F219=ACTIVITÉS DES AUTRES ORGANISATIONS ASSOCIATIVES
+L220: A220=D3502 | B220=PRODUCTION ET DISTRIBUTION DE COMBUSTIBLES GAZEUX ET DE GLACE | E220=S940301 | F220=Activités des organisations religieuses
+L221: A221=D350200 | B221=Production et distribution de combustibles gazeux et de glace | E221=S940302 | F221=Activités des organisations politiques
+L222: A222=E3600 | B222=CAPTAGE, TRAITEMENT ET DISTRIBUTION D'EAU | E222=S940303 | F222=Activités des autres organisations associatives
+L223: A223=E360000 | B223=Captage, traitement et distribution d'eau | E223=S9501 | F223=REPARATION D'ORDINATEURS ET D'EQUIPEMENTS DE COMMUNICATION
+L224: A224=E3700 | B224=COLLECTE ET TRAITEMENT DES EAUX USEES | E224=S950101 | F224=Réparation d'ordinateurs et d'équipements périphériques
+L225: A225=E370000 | B225=Collecte et traitement des eaux usées | E225=S950102 | F225=Réparation d'équipements de communication
+L226: A226=E3800 | B226=COLLECTE, TRAITEMENT ET ELIMINATION DES DECHETS ; RECUPERATION | E226=S9502 | F226=REPARATION DE BIENS PERSONNELS ET DOMESTIQUES
+L227: A227=E380001 | B227=Collecte, traitement et élimination des déchets | E227=S950200 | F227=Réparation de biens personnels et domestiques
+L228: A228=E380002 | B228=Récupération | E228=S9600 | F228=FOURNITURE D'AUTRES SERVICES PERSONNELS
+L229: A229=E3900 | B229=DEPOLLUTION ET GESTION DES DECHETS | E229=S960001 | F229=Lavage et nettoyage de textiles
+L230: A230=E390000 | B230=Dépollution et gestion des déchets | E230=S960002 | F230=Coiffure et soins de beauté
+L231: A231=F4101 | B231=PROMOTION IMMOBILIÈRE | E231=S960003 | F231=Services funéraires
+L232: A232=F410100 | B232=Promotion immobilière | E232=S960004 | F232=Autres services personnels n.c.a
+L233: A233=F4102 | B233=CONSTRUCTION DE BÂTIMENTS COMPLETS | E233=T9700 | F233= ACTIVITÉS DES MÉNAGES EN TANT QU’EMPLOYEURS DE PERSONNEL DOMESTIQUE
+L234: A234=F410200 | B234=Construction de bâtiments complets | E234=T970000 | F234=Activités des ménages en tant qu'employeurs de personnel domestique
+L235: A235=F4200 | B235= GENIE CIVIL | E235=T9800 | F235=ACTIVITÉS INDIFFERENCIEES AUTOPRODUITES DES MÉNAGES
+L236: A236=F420001 | B236=Construction de routes et de voies ferrées | E236=T980001 | F236=Activités indifférenciées des ménages en tant que producteurs de biens pour usag
+L237: A237=F420002 | B237=Construction de réseaux et de lignes | E237=T980002 | F237=Activités indifférenciées des ménages en tant que producteurs de services pour u
+L238: A238=F420003 | B238=Construction d’autres ouvrages de génie civil | E238=U9900 | F238=ACTIVITÉS DES ORGANISATIONS EXTRATERRITORIALES
+L239: E239=U990000 | F239=Activités des organisations extraterritoriales
+FUSIONS: A1:J1 H2:J2 C3:J3 B4:G4 I4:J4 A5:B5 C5:D5 I5:J5 A7:J7 B14:D14 B15:D15 B16:D16 B17:D17 B18:D18 A8:J8 A10:J10 B11:D11 B12:D12 B13:D13 F12:J12 F13:J13 B24:D24 B25:D25 B26:D26 B27:D27 B28:D28 B19:D19 B20:D20 B21:D21 B22:D22 B23:D23 B34:D34 B35:D35 B36:D36 B37:D37 B38:D38 B29:D29 B30:D30 B31:D31 B32:D32 B33:D33 B44:D44 B45:D45 B46:D46 B47:D47 B48:D48 B39:D39 B40:D40 B41:D41 B42:D42 B43:D43 B54:D54 B55:D55 B56:D56 B57:D57 B58:D58 B49:D49 B50:D50 B51:D51 B52:D52 B53:D53 B64:D64 B65:D65 B66:D66 B67:D67 B68:D68 B59:D59 B60:D60 B61:D61 B62:D62 B63:D63 B74:D74 B75:D75 B76:D76 B77:D77 B78:D78 B69:D69 B70:D70 B71:D71 B72:D72 B73:D73 B84:D84 B85:D85 B86:D86 B87:D87 B88:D88 B79:D79 B80:D80 B81:D81 B82:D82 B83:D83 B94:D94 B95:D95 B96:D96 B97:D97 B98:D98 B89:D89 B90:D90 B91:D91 B92:D92 B93:D93 B104:D104 B105:D105 B106:D106 B107:D107 B108:D108 B99:D99 B100:D100 B101:D101 B102:D102 B103:D103 B114:D114 B115:D115 B116:D116 B117:D117 B118:D118 B109:D109 B110:D110 B111:D111 B112:D112 B113:D113 B124:D124 B125:D125 B126:D126 B127:D127 B128:D128 B119:D119 B120:D120 B121:D121 B122:D122 B123:D123 B134:D134 B135:D135 B136:D136 B137:D137 B138:D138 B129:D129 B130:D130 B131:D131 B132:D132 B133:D133 B144:D144 B145:D145 B146:D146 B147:D147 B148:D148 B139:D139 B140:D140 B141:D141 B142:D142 B143:D143 B154:D154 B155:D155 B156:D156 B157:D157 B158:D158 B149:D149 B150:D150 B151:D151 B152:D152 B153:D153 B164:D164 B165:D165 B166:D166 B167:D167 B168:D168 B159:D159 B160:D160 B161:D161 B162:D162 B163:D163 B174:D174 B175:D175 B176:D176 B177:D177 B178:D178 B169:D169 B170:D170 B171:D171 B172:D172 B173:D173 B184:D184 B185:D185 B186:D186 B187:D187 B188:D188 B179:D179 B180:D180 B181:D181 B182:D182 B183:D183 B194:D194 B195:D195 B196:D196 B197:D197 B198:D198 B189:D189 B190:D190 B191:D191 B192:D192 B193:D193 B204:D204 B205:D205 B206:D206 B207:D207 B208:D208 B199:D199 B200:D200 B201:D201 B202:D202 B203:D203 B238:D238 B229:D229 B230:D230 B231:D231 B232:D232 B233:D233 B224:D224 B225:D225 B226:D226 B227:D227 B228:D228 F33:J33 F14:J14 F15:J15 F16:J16 F17:J17 B234:D234 B235:D235 B236:D236 B237:D237 B219:D219 B220:D220 B221:D221 B222:D222 B223:D223 B214:D214 B215:D215 B216:D216 B217:D217 B218:D218 B209:D209 B210:D210 B211:D211 B212:D212 B213:D213 F39:J39 F40:J40 F41:J41 F42:J42 F43:J43 F34:J34 F35:J35 F36:J36 F37:J37 F38:J38 F49:J49 F50:J50 F51:J51 F52:J52 F53:J53 F44:J44 F45:J45 F46:J46 F47:J47 F48:J48 F59:J59 F60:J60 F61:J61 F62:J62 F63:J63 F54:J54 F55:J55 F56:J56 F57:J57 F58:J58 F69:J69 F70:J70 F71:J71 F72:J72 F73:J73 F64:J64 F65:J65 F66:J66 F67:J67 F68:J68 F79:J79 F80:J80 F81:J81 F82:J82 F83:J83 F74:J74 F75:J75 F76:J76 F77:J77 F78:J78 F89:J89 F90:J90 F91:J91 F92:J92 F93:J93 F84:J84 F85:J85 F86:J86 F87:J87 F88:J88 F99:J99 F100:J100 F101:J101 F102:J102 F103:J103 F94:J94 F95:J95 F96:J96 F97:J97 F98:J98 F109:J109 F110:J110 F111:J111 F112:J112 F113:J113 F104:J104 F105:J105 F106:J106 F107:J107 F108:J108 F119:J119 F120:J120 F121:J121 F122:J122 F123:J123 F114:J114 F115:J115 F116:J116 F117:J117 F118:J118 F129:J129 F130:J130 F131:J131 F132:J132 F133:J133 F124:J124 F125:J125 F126:J126 F127:J127 F128:J128 F139:J139 F140:J140 F141:J141 F142:J142 F143:J143 F134:J134 F135:J135 F136:J136 F137:J137 F138:J138 F149:J149 F150:J150 F151:J151 F152:J152 F153:J153 F144:J144 F145:J145 F146:J146 F147:J147 F148:J148 F159:J159 F160:J160 F161:J161 F162:J162 F163:J163 F154:J154 F155:J155 F156:J156 F157:J157 F158:J158 F169:J169 F170:J170 F171:J171 F172:J172 F173:J173 F164:J164 F165:J165 F166:J166 F167:J167 F168:J168 F179:J179 F180:J180 F181:J181 F182:J182 F183:J183 F174:J174 F175:J175 F176:J176 F177:J177 F178:J178 F189:J189 F190:J190 F191:J191 F192:J192 F193:J193 F184:J184 F185:J185 F186:J186 F187:J187 F188:J188 F199:J199 F200:J200 F201:J201 F202:J202 F203:J203 F194:J194 F195:J195 F196:J196 F197:J197 F198:J198 F209:J209 F210:J210 F211:J211 F212:J212 F213:J213 F204:J204 F205:J205 F206:J206 F207:J207 F208:J208 F219:J219 F220:J220 F221:J221 F222:J222 F223:J223 F214:J214 F215:J215 F216:J216 F217:J217 F218:J218 F229:J229 F230:J230 F231:J231 F232:J232 F233:J233 F224:J224 F225:J225 F226:J226 F227:J227 F228:J228 F239:J239 F11:J11 C6:G6 A9:J9 F18:J18 F19:J19 F20:J20 F21:J21 F22:J22 F23:J23 F24:J24 F25:J25 F26:J26 F27:J27 F28:J28 F29:J29 F30:J30 F31:J31 F32:J32 F234:J234 F235:J235 F236:J236 F237:J237 F238:J238 
+
+### ONGLET 6 : FICHE R1 ###
+L1: A1=- 4 -
+L2: R2=FICHE R1
+L3: A3=Dénomination sociale de l'entité : | E3=EMERGENCE PLAZA S.A.
+L4: A4=Adresse : | D4=COCODY CORNICHE - LA CANEBIERE - 03 779 CIDEX ABIDJAN 03 | P4=Sigle usuel : | S4=EPLSA
+L5: A5=N° de compte contribuable (NCC) : | E5=1544373 H | H5=Exercice clos le : | J5=45657 | Q5=Durée (en mois) : | U5=12
+L6: A6=N° de télédéclarant (NTD) : | E6=5554997221814
+L7: A7=FICHE  R1 : FICHE D'IDENTIFICATION ET RENSEIGNEMENTS DIVERS 1
+L8: A8=ZA | C8=EXERCICE COMPTABLE : | M8=DU: | N8=45292 | R8=AU: | S8=45657
+L10: A10=ZB | C10=DATE D'ARRETE EFFECTIF DES COMPTES : | H10=45657 | T10=ZD
+L12: A12=ZC | C12=EXERCICE PRECEDENT CLOS LE : | H12=45291 | K12=DUREE EXERCICE PRECEDENT EN MOIS : | U12=12
+L14: A14=ZE | C14=10 | D14=CI-ABJ-03-2020-M-15612 | J14=ZF | K14=0
+L15: C15=Greffe | D15=N°Registre du Commerce | K15=N° Répertoire des entités
+L17: A17=ZG | C17=291333 | E17=ZH | F17=60017390F | P17=ZI | Q17=L680100
+L18: C18=N° de caisse sociale | F18=N° Code Importateur | Q18=Code activité principale
+L20: A20=ZJ | C20=EMERGENCE PLAZA S.A. | Q20=EPLSA
+L21: C21=Désignation de l'entité | Q21=Sigle
+L23: A23=ZK | C23=27 22 40 27 91 | E23=csanankoua@hc-properties.com | K23=03 | N23=BP 779 CIDEX | Q23=03
+L24: C24=N° de téléphone | E24=Adresse e-mail | K24=Code | N24=Boîte Postale | Q24=Ville
+L26: A26=ZL | C26=COCODY CORNICHE - LA CANEBIERE
+L27: C27=Adresse géographique complète (Immeuble, rue, quartier, ville, pays)
+L28: P28=ZN
+L29: A29=ZM | C29=ACTIVITE IMMOBILIERE - LOCATION MEUBLEE ET NON MEUBLEE | P29=1
+L30: C30=Désignation précise de l'activité principale exercée par l'entité | P30=% Capacité production utile
+L32: A32=ZO | C32=SANANKOUA CHEICK ABOU - 18 BP 3477 ABJ 18 - 0758943725 - csanankoua@hc-propertie
+L33: C33=Nom, adresse, téléphone, adresse e-mail et qualité de la personne à contacter en
+L35: A35=ZP | C35=ATOKOUNA OSSOUNDA PAMELA - 779 CIDEX ABJ 03 - 0767316167 - patokouna@cosmos-yopo
+L36: C36=Nom, adresse, téléphone et e-mail du salarié de l'entité ou 
+L37: C37=du professionnel comptable inscrit à l'Ordre des Experts-comptables ayant établi
+L39: A39=ZQ | C39=0
+L40: C40=Nom, adresse, téléphone, e-mail et numéro d'inscription à l'Ordre des Experts-co
+L41: C41=de l'Expert comptable ayant délivré l'attestation de visa 
+L43: A43=ZR | C43=ERNST & YOUNG - 01 BP 2715 ABIDJAN 01 - eyci@ci.ey.com - 2720306050
+L44: C44=Nom, adresse, téléphone, e-mail et numéro d'inscription à l'Ordre des Experts-co
+L45: C45=de l'Expert comptablble ayant délivré l'attestation d'exécution de la mission du
+L46: P46=X | T46=X
+L47: A47=ZS | O47=Non | T47=Oui
+L48: N48=Etats financiers approuvés par l'Assemblée
+Générale (cocher la case)
+L49: J49=ZW
+L50: A50=ZT | C50=SANANKOUA CHEICK ABOU | J50=Domiciliations bancaires
+L51: C51=Nom du signataire des états financiers | J51=Banque | Q51=Numéro de compte
+L52: J52=NSIA OPERATION | Q52=22788902001-08
+L53: A53=ZU | C53=P.D.G. | J53=NSIA DOMICILIATION | Q53=22788902002-05
+L54: C54=Qualité du signataire des états financiers | J54=NSIA RESERVE | Q54=22788902003-02
+L55: J55=NSIA CHARGES | Q55=22788902004-96
+L56: A56=ZV | C56=- | J56=NSIA DROIT D'ENTREE | Q56=22788902005-93
+L57: C57=Date de signature | J57=NSIA DEPOT DE GARANTIE | Q57=22788902006-90
+L58: J58=NSIA MAINTENANCE FUTUR | Q58=22788902007-87
+L59: J59=NSIA SEQUESTRE | Q59=22788902008-84
+L60: J60=B.B.G. | Q60=13006500002-82
+L63: C63=Signature
+FUSIONS: E5:G5 E3:V3 S4:V4 D4:O4 Q21:V21 C18:D18 T10:T11 C21:P21 C20:P20 Q20:V20 D14:E14 K14:T14 K15:T15 C35:V35 C36:V36 K24:M24 E23:J23 E6:G6 P29:V29 C29:O29 C30:O30 C32:V32 C33:V33 Q59:V59 Q60:V60 J60:P60 J61:P61 Q61:V61 Q62:V62 J51:P51 J52:P52 J53:P53 J54:P54 J55:P55 J56:P56 J57:P57 J58:P58 J59:P59 Q51:V51 Q58:V58 Q57:V57 Q54:V54 Q55:V55 J62:P62 C41:V41 J50:V50 Q52:V52 Q56:V56 U5:V5 A7:V7 J5:P5 D15:E15 C17:D17 U12:V12 Q53:V53 E24:J24 C24:D24 C27:V27 C26:V26 P30:V30 C38:V38 C45:V45 O47:Q47 R2:V2 C63:H63 H10:I10 H12:I12 F17:I17 F18:I18 C50:H50 C51:H51 C53:H53 C54:H54 C56:H56 C57:H57 C39:V39 A1:V1 N48:V48 C43:V43 N8:Q8 S8:V8 Q17:V17 Q18:V18 C40:V40 C37:V37 Q24:V24 C23:D23 Q23:V23 N23:P23 N24:P24 K23:M23 C44:V44 
+
+### ONGLET 7 : FICHE R2 ###
+L1: A1=- 5 -
+L2: AG2=FICHE R2
+L3: A3=Dénomination sociale de l'entité : | I3=EMERGENCE PLAZA S.A.
+L4: A4=Adresse : | E4=COCODY CORNICHE - LA CANEBIERE - 03 779 CIDEX ABIDJAN 03 | AC4=Sigle usuel : | AI4=EPLSA
+L5: A5=N° de compte contribuable (NCC) : | I5=1544373 H | Q5=Exercice clos le : | W5=45657 | AC5=Durée (en mois) : | AI5=12
+L6: A6=N° de télédéclarant (NTD) : | I6=5554997221814
+L7: A7=FICHE  R2 : FICHE D'IDENTIFICATION ET RENSEIGNEMENTS DIVERS 2
+L8: V8=Contrôle de l'Entité (cocher la case)
+L9: A9=ZX | D9=Forme juridique (1) : | Q9=0 | R9=1 | V9=ZZ5 | X9= Entité sous contrôle public | AK9=0
+L11: A11=ZY | D11=Régime fiscal (1) : | Q11=1 | V11=ZZ6 | X11= Entité sous contrôle privé national | AK11=0
+L13: A13=ZZ1 | D13=Pays du siège social (1) : | Q13=0 | R13=3 | V13=ZZ7 | X13= Entité sous contrôle privé étranger | AK13=X
+L15: A15=ZZ2 | D15=Nombre d'établissements dans le pays : | Q15=0 | R15=1
+L17: A17=ZZ3 | D17=Nombre d'établissements hors du pays pour  | Q17=0 | R17=0
+L18: D18=lesquels une comptabilité distincte est tenue :
+L20: A20=ZZ4 | D20=Première année d'exercice dans le pays : | Q20=2 | R20=0 | S20=1 | T20=6
+L23: A23=ACTIVITE DE L'ENTITE
+L25: A25=Désignation de l'activité (2) | P25=Code nomenclature
+d'activité (1) | Y25=Chiffre d'affaires HT 
+(CA HT) ou Valeur ajoutée (VA) (3) (4) | AI25=% activité
+dans le CA HT ou la VA
+L29: B29=ACTIVITE IMMOBILIERE DE LOCATION MEUBLEE ET NON MEUBLEE | Q29=L | R29=6 | S29=8 | T29=0 | U29=1 | V29=0 | W29=0 | Z29=2649448123 | AI29=1
+L32: B32=0 | Q32=0 | R32=0 | S32=0 | T32=0 | U32=0 | V32=0 | W32=0 | Z32=0 | AI32=0
+L35: B35=0 | Q35=0 | R35=0 | S35=0 | T35=0 | U35=0 | V35=0 | W35=0 | Z35=0 | AI35=0 | AJ35=0
+L38: B38=0 | Q38=0 | R38=0 | S38=0 | T38=0 | U38=0 | V38=0 | W38=0 | Z38=0 | AI38=0 | AJ38=0
+L41: B41=0 | Q41=0 | R41=0 | S41=0 | T41=0 | U41=0 | V41=0 | W41=0 | Z41=0 | AI41=0 | AJ41=0
+L44: B44=0 | Q44=0 | R44=0 | S44=0 | T44=0 | U44=0 | V44=0 | W44=0 | Z44=0 | AI44=0 | AJ44=0
+L47: B47=0 | Q47=0 | R47=0 | S47=0 | T47=0 | U47=0 | V47=0 | W47=0 | Z47=0 | AI47=0 | AJ47=0
+L50: B50=0 | Q50=0 | R50=0 | S50=0 | T50=0 | U50=0 | V50=0 | W50=0 | Z50=0 | AI50=0 | AJ50=0
+L52: A52=Divers  (4) | Z52=0 | AI52=0
+L54: P54= TOTAL   | Z54=2649448123[F:Z29+Z32+Z35+Z38+Z41+Z44+Z47+Z50+Z52] | AI54=1[F:AI29+AI32+AI35+AI38+AI41+AI44+AI47+AI50+AI52]
+L57: A57=(1) Note 36 Suite (Nomenclature)
+L58: A58=(2) Lister de manière précise les activités dans l'ordre décroissant du C.A.HT o
+L59: A59=(3) Rayer la mention inutile - En Côte d'Ivoire, pour les besoins de l'INS, on p
+L60: A60=(4) Indiquer dans la note annexe n°21 "Chiffre d'affaires et autres produits", l
+FUSIONS: AG2:AL2 A1:AL1 I6:P6 E4:AA4 I3:AL3 W5:AB5 I5:P5 Q5:V5 AI5:AL5 AI4:AL4 A13:B13 A7:AL7 AI44:AK44 AI47:AK47 B29:O29 V8:AL8 A23:AL23 V9:W9 V11:W11 V13:W13 A9:B9 A25:O27 A15:B15 A17:B17 A20:B20 A11:B11 Y25:AG27 AI25:AL27 AI29:AK29 AI54:AK55 P25:X27 P52:X53 Z52:AF52 AI50:AK50 AI52:AK52 AI32:AK32 AI35:AK35 AI38:AK38 Z29:AF29 AI41:AK41 B44:O44 Z44:AF44 B47:O47 Z47:AF47 P54:X55 Z54:AF55 B41:O41 Z41:AF41 B32:O32 Z32:AF32 B35:O35 Z35:AF35 B38:O38 Z38:AF38 A57:AL57 A58:AL58 A59:AL59 A60:AL60 B50:O50 Z50:AF50 
+
+### ONGLET 8 : FICHE R3 ###
+L1: A1=- 6 -
+L2: I2=FICHE R3
+L3: A3=Dénomination sociale de l'entité : | C3=EMERGENCE PLAZA S.A.
+L4: A4=Adresse : | B4=COCODY CORNICHE - LA CANEBIERE - 03 779 CIDEX ABIDJAN 03 | H4=Sigle usuel : | J4=EPLSA
+L5: A5=N° de compte contribuable (NCC) : | C5=1544373 H | E5=Exercice clos le : | F5=45657 | H5=Durée (en mois) : | J5=12
+L6: A6=N° de télédéclarant (NTD) : | C6=5554997221814
+L7: A7=FICHE  R3 : FICHE D'IDENTIFICATION ET RENSEIGNEMENTS DIVERS 3
+L8: A8=DIRIGEANTS (1)
+L10: A10=Nom et Prénoms | C10=Nationalité | D10=Autres
+nationalités
+(à préciser) (2) | E10=Qualité | F10=N°
+d'identification
+fiscale | H10=Adresse (BP, ville, pays, adresse géographique et adresse email)
+L11: A11=SANANKOUA CHEICK ABOU | E11=P.D.G. | F11=1544373 H | H11=18 BP 3477 ABJ 18, Abidjan, Côte d'Ivoire, Cocody Corniche, csanankoua@hc-proper
+L12: E12=0 | F12=0 | H12=0
+L13: E13=0 | F13=0 | H13=0
+L14: E14=0 | F14=0 | H14=0
+L15: E15=0 | F15=0 | H15=0
+L16: E16=0 | F16=0 | H16=0
+L17: E17=0 | F17=0 | H17=0
+L18: E18=0 | F18=0 | H18=0
+L19: E19=0 | F19=0 | H19=0
+L20: E20=0 | F20=0 | H20=0
+L22: A22=(1) Dirigeants = Président Directeur Général, Directeur Général, Administrateur 
+L23: A23=(2) En cas de double nationalité
+L24: A24=MEMBRES DU CONSEIL D'ADMINISTRATION
+L26: A26=Nom et Prénoms | C26=Structure représentée | E26=Qualité | G26=Adresse (BP, ville, pays, adresse
+géographique et adresse email)
+L27: A27=SANANKOUA CHEICK ABOU | E27=P.D.G. | G27=18 BP 3477 ABJ 18, Abidjan, Côte d'Ivoire, Cocody Corniche, csanankoua@hc-proper
+L28: A28=ABOU CHALBAK MOHAMED FARAJ | E28=ADMINISTRATEUR | G28=LONDRES
+L29: A29=NAJA AHMED | E29=ADMINISTRATEUR | G29=LONDRES
+L30: A30=GASPARD PIERRE | E30=ADMINISTRATEUR | G30=LONDRES
+L31: E31=0 | G31=0
+L32: E32=0 | G32=0
+L33: E33=0 | G33=0
+L34: E34=0 | G34=0
+L35: E35=0 | G35=0
+L36: E36=0 | G36=0
+FUSIONS: A21:B21 A30:B30 A31:B31 E29:F29 E30:F30 E31:F31 E26:F26 A27:B27 A28:B28 C26:D26 A24:J24 G26:J26 E33:F33 E34:F34 E35:F35 C33:D33 C34:D34 C35:D35 G32:J32 H11:J11 C32:D32 A18:B18 A19:B19 A20:B20 H16:J16 F15:G15 F16:G16 H12:J12 H13:J13 H14:J14 A16:B16 A17:B17 A26:B26 A29:B29 I2:J2 A1:J1 H4:I4 C3:J3 B4:G4 C6:D6 C5:D5 H5:I5 F5:G5 F11:G11 A8:J8 A7:J7 A10:B10 H10:J10 F10:G10 H19:J19 H20:J20 F18:G18 F19:G19 F17:G17 H17:J17 H18:J18 E36:F36 E27:F27 E28:F28 F20:G20 F21:G21 G36:J36 G27:J27 G28:J28 G29:J29 G30:J30 G31:J31 G33:J33 G34:J34 G35:J35 H21:J21 E32:F32 C36:D36 C27:D27 C28:D28 C29:D29 C30:D30 C31:D31 A32:B32 A33:B33 A34:B34 A35:B35 A36:B36 H15:J15 A11:B11 A12:B12 A13:B13 A14:B14 A15:B15 F12:G12 F13:G13 F14:G14 
+
+### ONGLET 9 : BILAN ###
+L1: A1=- 7 -
+L2: L2=BILAN SYSTEME NORMAL
+PAGE 1/1
+L3: A3=Dénomination sociale de l'entité : | C3=EMERGENCE PLAZA S.A.
+L4: A4=Adresse : | C4=COCODY CORNICHE - LA CANEBIERE - 03 779 CIDEX ABIDJAN 03 | L4=Sigle usuel : | N4=EPLSA
+L5: A5=N° de compte contribuable (NCC) : | C5=1544373 H | I5=Exercice clos le : | K5=45657 | L5=Durée (en mois) : | N5=12
+L6: A6=N° de télédéclarant (NTD):  | C6=5554997221814
+L7: A7=BILAN
+L8: A8=REF | B8=ACTIF | E8=NOTE | F8=EXERCICE au 31/12/ N | I8=EXERCICE AU 31/12/N-1 | J8=REF | K8=PASSIF | L8=NOTE | M8=EXERCICE AU 31/12/N | N8=EXERCICE AU  31/12/N-1
+L10: F10=BRUT | G10=AMORT et 
+DEPREC. | H10=NET | I10=NET | M10=NET | N10=NET
+L11: A11=AD | B11=IMMOBILISATIONS  INCORPORELLES | E11=3 | F11=89756682[F:SUM(F12:F15)] | G11=87327974.53999999[F:SUM(G12:G15)] | H11=2428707.4600000083[F:SUM(H12:H15)] | I11=5027313[F:SUM(I12:I15)] | J11=CA | K11=Capital | L11=13 | M11=2416260000 | N11=2416260000
+L12: A12=AE | B12=Frais de développement et de prospection | F12=0 | G12=0 | H12=0 | I12=0 | J12=CB | K12=Apporteurs capital non appelé (-) | L12=13 | M12=0 | N12=0
+L13: A13=AF | B13=Brevets, licences, logiciels et droits similaires | F13=89756682 | G13=87327974.53999999 | H13=2428707.4600000083 | I13=5027313 | J13=CD | K13=Primes liées au capital social | L13=14 | M13=0 | N13=0
+L14: A14=AG | B14=Fonds commercial et droit au bail | F14=0 | G14=0 | H14=0 | I14=0 | J14=CE | K14=Ecarts de réévaluation | L14=3e | M14=0 | N14=0
+L15: A15=AH | B15=Autres  immobilisations incorporelles | F15=0 | G15=0 | H15=0 | I15=0 | J15=CF | K15=Réserves indisponibles | L15=14 | M15=28426625.24 | N15=5228957
+L16: A16=AI | B16=IMMOBILISATIONS  CORPORELLES | E16=3 | F16=13513610404[F:SUM(F17:F21)] | G16=4041214079.7200003[F:SUM(G17:G21)] | H16=9472396324.279999[F:SUM(H17:H21)] | I16=9766435901[F:SUM(I17:I21)] | J16=CG | K16=Réserves libres | L16=14 | M16=0 | N16=0
+L17: A17=AJ | B17=Terrains (1)
+dont Placement Net : | C17=0 | D17=0 | F17=3587320 | G17=677429 | H17=2909891 | I17=2965196 | J17=CH | K17=Report à nouveau (+ ou -) | L17=14 | M17=-923880299.0400001 | N17=-1132659311
+L18: A18=AK | B18=Bâtiments(1)
+dont Placement Net : | C18=0 | D18=0 | F18=1774168450 | G18=310589762.22 | H18=1463578687.78 | I18=1427514122 | J18=CJ | K18=Résultat net de l'exercice (bénéfice + ou perte -) | M18=-406875567.6600001 | N18=231976680
+L19: A19=AL | B19=Aménagements,  agencements  et installations | F19=10414973385 | G19=3120761554.8 | H19=7294211830.2 | I19=7558374587 | J19=CL | K19=Subventions  d'investissement | L19=15 | M19=0 | N19=0
+L20: A20=AM | B20=Matériel, mobilier et actifs biologiques | F20=1237184888 | G20=542511899 | H20=694672989 | I20=758233248 | J20=CM | K20=Provisions  réglementées | L20=15 | M20=0 | N20=0
+L21: A21=AN | B21=Matériel de transport | F21=83696361 | G21=66673434.7 | H21=17022926.299999997 | I21=19348748 | J21=CP | K21=TOTAL  CAPITAUX PROPRES ET  RESSOURCES ASSIMILEES | M21=1113930758.5399997[F:SUM(M11:M20)] | N21=1520806326[F:SUM(N11:N20)]
+L22: A22=AP | B22=AVANCES ET ACOMPTES VERSES SUR IMMOBILISATIONS | E22=3 | F22=0 | G22=0 | H22=0 | I22=0 | J22=DA | K22=Emprunts et dettes financières diverses | L22=16 | M22=403423930 | N22=9742015719
+L23: A23=AQ | B23=IMMOBILISATIONS  FINANCIERES | E23=4 | F23=22298562[F:SUM(F24:F25)] | G23=0[F:SUM(G24:G25)] | H23=22298562[F:SUM(H24:H25)] | I23=22298562[F:SUM(I24:I25)] | J23=DB | K23=Dettes de location-acquisition | L23=16 | M23=16476322 | N23=27644228
+L24: A24=AR | B24=Titres de participation | F24=0 | G24=0 | H24=0 | I24=0 | J24=DC | K24=Provisions pour risques et charges | L24=16 | M24=12934660 | N24=14809835
+L25: A25=AS | B25=Autres  immobilisations financières | F25=22298562 | G25=0 | H25=22298562 | I25=22298562 | J25=DD | K25=TOTAL  DETTES FINANCIERES ET  RESSOURCES ASSIMILEES | M25=432834912[F:SUM(M22:M24)] | N25=9784469782[F:SUM(N22:N24)]
+L26: A26=AZ | B26=TOTAL  ACTIF IMMOBILISE | F26=13625665648[F:F11+F16+F22+F23] | G26=4128542054.26[F:G11+G16+G22+G23] | H26=9497123593.739998[F:H11+H16+H22+H23] | I26=9793761776[F:I11+I16+I22+I23] | J26=DF | K26=TOTAL  RESSOURCES STABLES | M26=1546765670.5399997[F:M21+M25] | N26=11305276108[F:N21+N25]
+L27: A27=BA | B27=ACTIF  CIRCULANT HAO | E27=5 | F27=0 | G27=0 | H27=0 | I27=0 | J27=DH | K27=Dettes circulantes HAO | L27=5 | M27=19985514 | N27=39813614
+L28: A28=BB | B28=STOCKS ET ENCOURS | E28=6 | F28=0 | G28=0 | H28=0 | I28=0 | J28=DI | K28=Clients, avances reçues | L28=7 | M28=0 | N28=0
+L29: A29=BG | B29=CREANCES ET  EMPLOIS ASSIMILES | F29=2151743184[F:F30+F31+F32] | G29=431023217[F:G30+G31+G32] | H29=1720719967[F:H30+H31+H32] | I29=1599737661[F:I30+I31+I32] | J29=DJ | K29=Fournisseurs d'exploitation | L29=17 | M29=346483999 | N29=375454592
+L30: A30=BH | B30=Fournisseurs avances versées | E30=17 | F30=0 | G30=0 | H30=0 | I30=12500000 | J30=DK | K30=Dettes fiscales et sociales | L30=18 | M30=70923780.2 | N30=91465042
+L31: A31=BI | B31=Clients | E31=7 | F31=1471177735 | G31=431023217 | H31=1040154518 | I31=878554588 | J31=DM | K31=Autres dettes | L31=19 | M31=9743499472 | N31=882668441
+L32: A32=BJ | B32=Autres  créances | E32=8 | F32=680565449 | G32=0 | H32=680565449 | I32=708683073 | J32=DN | K32=Provisions pour risques et charges à court terme | L32=19 | M32=0 | N32=0
+L33: A33=BK | B33=TOTAL  ACTIF CIRCULANT | F33=2151743184[F:F27+F28+F29] | G33=431023217[F:G27+G28+G29] | H33=1720719967[F:H27+H28+H29] | I33=1599737661[F:I27+I28+I29] | J33=DP | K33=TOTAL  PASSIF CIRCULANT | M33=10180892765.2[F:SUM(M27:M32)] | N33=1389401689[F:SUM(N27:N32)]
+L34: A34=BQ | B34=Titres de placement | E34=9 | F34=0 | G34=0 | H34=0 | I34=0
+L35: A35=BR | B35=Valeurs à encaisser | E35=10 | F35=0 | G35=0 | H35=0 | I35=0 | J35=DQ | K35=Banques,  crédits d'escompte | L35=20 | M35=0 | N35=0
+L36: A36=BS | B36=Banques, chèques postaux, caisse et assimilés | E36=11 | F36=516183726 | G36=0 | H36=516183726 | I36=1302785854 | J36=DR | K36=Banques, établissements financiers
+et crédits de trésorerie | L36=20 | M36=6368851 | N36=1607494
+L37: A37=BT | B37=TOTAL   TRESORERIE-ACTIF | F37=516183726[F:SUM(F34:F36)] | G37=0[F:SUM(G34:G36)] | H37=516183726[F:SUM(H34:H36)] | I37=1302785854[F:SUM(I34:I36)] | J37=DT | K37=TOTAL   TRESORERIE-PASSIF | M37=6368851[F:SUM(M35:M36)] | N37=1607494[F:SUM(N35:N36)]
+L38: A38=BU | B38=Ecart de conversion-Actif | E38=12 | F38=0 | G38=0 | H38=0 | I38=0 | J38=DV | K38=Ecart de conversion-Passif | L38=12 | M38=0 | N38=0
+L39: A39=BZ | B39=TOTAL GENERAL | F39=16293592558[F:F26+F33+F37+F38] | G39=4559565271.26[F:G26+G33+G37+G38] | H39=11734027286.739998[F:H26+H33+H37+H38] | I39=12696285291[F:I26+I33+I37+I38] | J39=DZ | K39=TOTAL GENERAL | M39=11734027286.74[F:M26+M33+M37+M38] | N39=12696285291[F:N26+N33+N37+N38]
+FUSIONS: A1:N1 L2:N2 M8:M9 N8:N9 A7:N7 A4:B4 A5:B5 I5:J5 L5:M5 B8:D10 I8:I9 J8:J10 L4:M4 C4:K4 C5:H5 C6:H6 B12:D12 L8:L10 B15:D15 B16:D16 K8:K10 B11:D11 B37:D37 B21:D21 B33:D33 B25:D25 B27:D27 B28:D28 B29:D29 B30:D30 B26:D26 B23:D23 B24:D24 C3:N3 B39:D39 A8:A10 E8:E10 F8:H9 B31:D31 B32:D32 B38:D38 B19:D19 B22:D22 B20:D20 B13:D13 B14:D14 B34:D34 B35:D35 B36:D36 
+
+### ONGLET 10 : ACTIF ###
+L1: A1=- 0 -
+L2: H2=BILAN SYSTEME NORMAL
+PAGE 1/2
+L3: A3=Dénomination sociale de l'entité : | C3=EMERGENCE PLAZA S.A.[F:BILAN!C3]
+L4: A4=Adresse : | C4=COCODY CORNICHE - LA CANEBIERE - 03 779 CIDEX ABIDJAN 03 | H4=Sigle usuel : | I4=EPLSA
+L5: A5=N° de compte contribuable (NCC) : | C5=1544373 H | F5=Exercice clos le : | G5=45657 | H5=Durée (en mois) : | I5=12
+L6: A6=N° de télédéclarant (NTD):  | C6=5554997221814
+L7: A7=BILAN
+L8: A8=REF | B8=ACTIF | E8=NOTE | F8=EXERCICE au 31/12/ N | I8=EXERCICE AU 31/12/N-1
+L10: F10=BRUT | G10=AMORT et DEPREC. | H10=NET | I10=NET
+L11: A11=AD | B11=IMMOBILISATIONS INCORPORELLES | E11=3[F:BILAN!E11] | F11=89756682[F:SUM(F12:F15)] | G11=87327974.53999999[F:SUM(G12:G15)] | H11=2428707.4600000083[F:SUM(H12:H15)] | I11=5027313[F:SUM(I12:I15)]
+L12: A12=AE | B12=Frais de développement et de prospection | E12=0[F:BILAN!E12] | F12=0[F:BILAN!F12] | G12=0[F:BILAN!G12] | H12=0[F:F12-G12] | I12=0[F:BILAN!I12]
+L13: A13=AF | B13=Brevets, licences, logiciels, et  droits similaires | E13=0[F:BILAN!E13] | F13=89756682[F:BILAN!F13] | G13=87327974.53999999[F:BILAN!G13] | H13=2428707.4600000083[F:F13-G13] | I13=5027313[F:BILAN!I13]
+L14: A14=AG | B14=Fonds commercial et droit au bail | E14=0[F:BILAN!E14] | F14=0[F:BILAN!F14] | G14=0[F:BILAN!G14] | H14=0[F:F14-G14] | I14=0[F:BILAN!I14]
+L15: A15=AH | B15=Autres immobilisations incorporelles | E15=0[F:BILAN!E15] | F15=0[F:BILAN!F15] | G15=0[F:BILAN!G15] | H15=0[F:F15-G15] | I15=0[F:BILAN!I15]
+L16: A16=AI | B16=IMMOBILISATIONS CORPORELLES | E16=3[F:BILAN!E16] | F16=13513610404[F:SUM(F17:F21)] | G16=4041214079.7200003[F:SUM(G17:G21)] | H16=9472396324.279999[F:SUM(H17:H21)] | I16=9766435901[F:SUM(I17:I21)]
+L17: A17=AJ | B17=Terrains (1)
+dont Placement Net: | C17=0[F:BILAN!C17] | D17=0[F:BILAN!D17] | F17=3587320[F:BILAN!F17] | G17=677429[F:BILAN!G17] | H17=2909891[F:F17-G17] | I17=2965196[F:BILAN!I17]
+L18: A18=AK | B18=Bâtiments (1)
+dont Placement Net: | C18=0[F:BILAN!C18] | D18=0[F:BILAN!D18] | F18=1774168450[F:BILAN!F18] | G18=310589762.22[F:BILAN!G18] | H18=1463578687.78[F:F18-G18] | I18=1427514122[F:BILAN!I18]
+L19: A19=AL | B19=Aménagements, agencements et installations | E19=0[F:BILAN!E19] | F19=10414973385[F:BILAN!F19] | G19=3120761554.8[F:BILAN!G19] | H19=7294211830.2[F:F19-G19] | I19=7558374587[F:BILAN!I19]
+L20: A20=AM | B20=Matériel, mobilier et actifs biologiques | E20=0[F:BILAN!E20] | F20=1237184888[F:BILAN!F20] | G20=542511899[F:BILAN!G20] | H20=694672989[F:F20-G20] | I20=758233248[F:BILAN!I20]
+L21: A21=AN | B21=Matériel de transport | E21=0[F:BILAN!E21] | F21=83696361[F:BILAN!F21] | G21=66673434.7[F:BILAN!G21] | H21=17022926.299999997[F:F21-G21] | I21=19348748[F:BILAN!I21]
+L22: A22=AP | B22=AVANCES ET ACOMPTES VERSES SUR IMMOBILISATIONS | F22=0[F:BILAN!F22] | G22=0[F:BILAN!G22] | H22=0[F:F22-G22] | I22=0[F:BILAN!I22]
+L23: A23=AQ | B23=IMMOBILISATIONS FINANCIERES | E23=4[F:BILAN!E23] | F23=22298562[F:SUM(F24:F25)] | G23=0[F:SUM(G24:G25)] | H23=22298562[F:SUM(H24:H25)] | I23=22298562[F:SUM(I24:I25)]
+L24: A24=AR | B24=Titres de participation | E24=0[F:BILAN!E24] | F24=0[F:BILAN!F24] | G24=0[F:BILAN!G24] | H24=0[F:F24-G24] | I24=0[F:BILAN!I24]
+L25: A25=AS | B25=Autres immobilisations financières | E25=0[F:BILAN!E25] | F25=22298562[F:BILAN!F25] | G25=0[F:BILAN!G25] | H25=22298562[F:F25-G25] | I25=22298562[F:BILAN!I25]
+L26: A26=AZ | B26=TOTAL ACTIF IMMOBILISE | F26=13625665648[F:F11+F16+F22+F23] | G26=4128542054.26[F:G11+G16+G22+G23] | H26=9497123593.739998[F:H11+H16+H22+H23] | I26=9793761776[F:I11+I16+I22+I23]
+L27: A27=BA | B27=ACTIF CIRCULANT HAO | E27=5[F:BILAN!E27] | F27=0[F:BILAN!F27] | G27=0[F:BILAN!G27] | H27=0[F:F27-G27] | I27=0[F:BILAN!I27]
+L28: A28=BB | B28=STOCKS ET ENCOURS | E28=6[F:BILAN!E28] | F28=0[F:BILAN!F28] | G28=0[F:BILAN!G28] | H28=0[F:F28-G28] | I28=0[F:BILAN!I28]
+L29: A29=BG | B29=CREANCES ET EMPLOIS ASSIMILES | E29=0[F:BILAN!E29] | F29=2151743184[F:SUM(F30:F32)] | G29=431023217[F:SUM(G30:G32)] | H29=1720719967[F:SUM(H30:H32)] | I29=1599737661[F:SUM(I30:I32)]
+L30: A30=BH | B30=Fournisseurs avances versées | E30=17[F:BILAN!E30] | F30=0[F:BILAN!F30] | G30=0[F:BILAN!G30] | H30=0[F:F30-G30] | I30=12500000[F:BILAN!I30]
+L31: A31=BI | B31=Clients | E31=7[F:BILAN!E31] | F31=1471177735[F:BILAN!F31] | G31=431023217[F:BILAN!G31] | H31=1040154518[F:F31-G31] | I31=878554588[F:BILAN!I31]
+L32: A32=BJ | B32=Autres créances | E32=8[F:BILAN!E32] | F32=680565449[F:BILAN!F32] | G32=0[F:BILAN!G32] | H32=680565449[F:F32-G32] | I32=708683073[F:BILAN!I32]
+L33: A33=BK | B33=TOTAL ACTIF CIRCULANT | E33=0[F:BILAN!E33] | F33=2151743184[F:SUM(F27:F29)] | G33=431023217[F:SUM(G27:G29)] | H33=1720719967[F:SUM(H27:H29)] | I33=1599737661[F:SUM(I27:I29)]
+L34: A34=BQ | B34=Titres de placement | E34=9[F:BILAN!E34] | F34=0[F:BILAN!F34] | G34=0[F:BILAN!G34] | H34=0[F:F34-G34] | I34=0[F:BILAN!I34]
+L35: A35=BR | B35=Valeurs à encaisser | E35=10[F:BILAN!E35] | F35=0[F:BILAN!F35] | G35=0[F:BILAN!G35] | H35=0[F:F35-G35] | I35=0[F:BILAN!I35]
+L36: A36=BS | B36=Banques, chèques postaux, caisse et assimilés | E36=11[F:BILAN!E36] | F36=516183726[F:BILAN!F36] | G36=0[F:BILAN!G36] | H36=516183726[F:F36-G36] | I36=1302785854[F:BILAN!I36]
+L37: A37=BT | B37=TOTAL TRESORERIE-ACTIF | E37=0[F:BILAN!E37] | F37=516183726[F:SUM(F34:F36)] | G37=0[F:SUM(G34:G36)] | H37=516183726[F:SUM(H34:H36)] | I37=1302785854[F:SUM(I34:I36)]
+L38: A38=BU | B38=Ecart de conversion-Actif | E38=12[F:BILAN!E38] | F38=0[F:BILAN!F38] | G38=0[F:BILAN!G38] | H38=0[F:F38-G38] | I38=0[F:BILAN!I38]
+L39: A39=BZ | B39=TOTAL GENERAL | E39=0[F:BILAN!E39] | F39=16293592558[F:F26+F33+F37+F38] | G39=4559565271.26[F:G26+G33+G37+G38] | H39=11734027286.739998[F:H26+H33+H37+H38] | I39=12696285291[F:I26+I33+I37+I38]
+FUSIONS: C5:E5 A1:I1 H2:I2 A4:B4 C4:G4 C6:E6 C3:I3 B28:D28 B29:D29 B16:D16 A7:I7 A8:A10 B8:D10 E8:E10 F8:H9 I8:I9 B11:D11 B12:D12 B13:D13 B14:D14 B15:D15 B37:D37 B38:D38 B39:D39 B31:D31 B32:D32 B33:D33 B34:D34 B35:D35 B36:D36 B30:D30 B19:D19 B20:D20 B21:D21 B22:D22 B25:D25 B26:D26 B27:D27 B23:D23 B24:D24 

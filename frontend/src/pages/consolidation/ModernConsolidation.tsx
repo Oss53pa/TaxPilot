@@ -1022,7 +1022,7 @@ const ModernConsolidation: React.FC = () => {
                           {index === 1 && 'Conversion des comptes en devise étrangère selon méthode réglementaire'}
                           {index === 2 && 'Élimination automatique des transactions entre sociétés du groupe'}
                           {index === 3 && 'Calcul du goodwill, ajustements de juste valeur et intérêts minoritaires'}
-                          {index === 4 && 'Production du bilan, compte de résultat et TAFIRE consolidés'}
+                          {index === 4 && 'Production du bilan, compte de résultat et TFT consolidés'}
                         </Typography>
                         {index === consolidationSteps.length - 1 ? (
                           <Stack spacing={2}>

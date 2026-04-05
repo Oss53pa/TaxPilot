@@ -154,7 +154,7 @@ const Landing: React.FC = () => {
                         États Financiers Complets
                       </Typography>
                       <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                        Bilan, Compte de Résultat, TAFIRE, Notes Annexes
+                        Bilan, Compte de Résultat, TFT, Notes Annexes
                       </Typography>
                     </Box>
                   </Box>

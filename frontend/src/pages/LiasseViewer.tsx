@@ -46,7 +46,7 @@ const LiasseViewer: React.FC = () => {
     { label: 'Bilan - Actif', code: 'BILAN_ACTIF', couleur: 'primary' },
     { label: 'Bilan - Passif', code: 'BILAN_PASSIF', couleur: 'primary' },
     { label: 'Compte de Résultat', code: 'COMPTE_RESULTAT', couleur: 'secondary' },
-    { label: 'TAFIRE', code: 'TAFIRE', couleur: 'success' },
+    { label: 'TFT', code: 'TFT', couleur: 'success' },
     { label: 'Variation Capitaux', code: 'VARIATION_CAPITAUX', couleur: 'info' },
     { label: 'Notes Annexes', code: 'NOTES_ANNEXES', couleur: 'warning' },
   ]

@@ -51,7 +51,6 @@ import {
   ExpandLess as CollapseIcon,
   AccountBalance as BalanceIcon,
   TrendingUp as TrendingIcon,
-  TableChart as TableIcon,
   Timeline as TimelineIcon,
   Notes as NotesIcon,
   Assignment as AssignmentIcon,
@@ -127,14 +126,7 @@ const ModernLiasse: React.FC = () => {
       status: 'complete',
       category: 'financials'
     },
-    {
-      id: 'tafire',
-      title: 'TAFIRE',
-      icon: <TableIcon />,
-      completion: 75,
-      status: 'partial',
-      category: 'financials'
-    },
+    // TAFIRE removed in SYSCOHADA Révisé (2017) — replaced by TFT (Flux de Trésorerie below)
     {
       id: 'flux-tresorerie',
       title: 'Flux de Trésorerie',

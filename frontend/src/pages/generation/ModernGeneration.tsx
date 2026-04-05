@@ -35,6 +35,11 @@ import {
 import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
 import { getWorkflowState, updateWorkflowState } from '@/services/workflowStateService'
 import type { WorkflowState } from '@/services/workflowStateService'
+import { validateBeforeGenerate } from '@/services/preGenerationValidator'
+import PreGenerationDialog from '@/components/Generation/PreGenerationDialog'
+import type { PreGenerationValidation } from '@/types/audit'
+import type { AuditResult as PreGenAuditResult } from '@/types/audit'
+import { getAllSessions } from '@/services/audit/auditStorage'
 
 const REGIMES = [
   { value: 'REEL_NORMAL', label: 'Systeme Normal', description: 'CA >= 60M FCFA - Liasse complete 84 pages' },
@@ -48,6 +53,9 @@ const ModernGeneration: React.FC = () => {
   const [activeStep, setActiveStep] = useState(0)
   const [workflowState, setWorkflowState] = useState<WorkflowState | null>(null)
   const [selectedRegime, setSelectedRegime] = useState('REEL_NORMAL')
+  const [preGenDialogOpen, setPreGenDialogOpen] = useState(false)
+  const [preGenValidation, setPreGenValidation] = useState<PreGenerationValidation | null>(null)
+  const [isGenerating, setIsGenerating] = useState(false)
 
   useEffect(() => {
     const ws = getWorkflowState()
@@ -73,13 +81,66 @@ const ModernGeneration: React.FC = () => {
     }
   }, [])
 
+  /**
+   * Collect audit results from the latest audit session and convert
+   * them to the AuditResult shape expected by validateBeforeGenerate.
+   */
+  const getAuditResultsForValidation = (): PreGenAuditResult[] => {
+    try {
+      const sessions = getAllSessions()
+      if (sessions.length === 0) return []
+      // Pick the most recent completed session
+      const latest = sessions
+        .filter(s => s.statut === 'TERMINEE')
+        .sort((a, b) => (b.dateFin ?? '').localeCompare(a.dateFin ?? ''))
+        [0]
+      if (!latest) return []
+      return latest.resultats.map(r => ({
+        controlId: r.ref,
+        status: r.statut === 'OK' ? 'PASS' as const
+          : r.statut === 'NON_APPLICABLE' ? 'SKIP' as const
+          : 'FAIL' as const,
+        severity: r.severite as any,
+        message: r.message,
+        details: r.details?.description,
+        suggestion: undefined,
+      }))
+    } catch {
+      return []
+    }
+  }
+
   const handleConfirmGeneration = () => {
+    // Run pre-generation validation
+    const auditResults = getAuditResultsForValidation()
+    const validation = validateBeforeGenerate(auditResults)
+    setPreGenValidation(validation)
+
+    if (auditResults.length === 0) {
+      // No audit results available — allow generation with a warning
+      proceedWithGeneration()
+      return
+    }
+
+    if (validation.canGenerate && validation.warnings.length === 0) {
+      // All clear — proceed directly
+      proceedWithGeneration()
+    } else {
+      // Show dialog for blocking errors or warnings
+      setPreGenDialogOpen(true)
+    }
+  }
+
+  const proceedWithGeneration = () => {
+    setIsGenerating(true)
+    setPreGenDialogOpen(false)
     const updated = updateWorkflowState({
       generationDone: true,
       generationDate: new Date().toISOString(),
       generationRegime: selectedRegime,
     })
     setWorkflowState(updated)
+    setIsGenerating(false)
     setActiveStep(2)
   }
 
@@ -276,6 +337,15 @@ const ModernGeneration: React.FC = () => {
           </Card>
         </Grid>
       </Grid>
+
+      {/* Pre-generation validation dialog */}
+      <PreGenerationDialog
+        open={preGenDialogOpen}
+        onClose={() => setPreGenDialogOpen(false)}
+        onConfirm={proceedWithGeneration}
+        validation={preGenValidation}
+        isGenerating={isGenerating}
+      />
     </Box>
   )
 }

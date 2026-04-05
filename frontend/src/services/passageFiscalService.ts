@@ -76,7 +76,11 @@ function formatRate(rate: number): string {
  * @param entries Balance entries
  * @param countryCode ISO country code (e.g. 'CI', 'SN', 'BF')
  */
-export async function calculerPassageFiscal(entries: BalanceEntry[], countryCode: string = 'CI'): Promise<TableauPassageResult> {
+export async function calculerPassageFiscal(
+  entries: BalanceEntry[],
+  countryCode: string = 'CI',
+  options?: { deficitsAnterieurs?: number }
+): Promise<TableauPassageResult> {
   const config = await getFiscalConfig(countryCode)
 
   // Résultat comptable = Produits (classe 7) - Charges (classe 6) + HAO net (classe 8)
@@ -160,8 +164,8 @@ export async function calculerPassageFiscal(entries: BalanceEntry[], countryCode
   }
 
   // R06 — Amortissements excédentaires VP (brut > plafond)
-  // CI-specific: vehicle amortization cap 14M FCFA. No multi-country config field yet.
-  const AMORT_VEHICULE_PLAFOND = 14_000_000
+  // Multi-country: uses config.vehicleAmortCap if available, defaults to 14M FCFA (CI)
+  const AMORT_VEHICULE_PLAFOND = (config as any).vehicleAmortCap ?? 14_000_000
   const brut_vp = soldeDebit(entries, ['245'])
   if (brut_vp > AMORT_VEHICULE_PLAFOND) {
     const dotation_vp = soldeDebit(entries, ['6845', '68145', '2845'])
@@ -213,7 +217,23 @@ export async function calculerPassageFiscal(entries: BalanceEntry[], countryCode
   // === CALCULS FINAUX ===
   const total_reintegrations = arrondiFCFA(reintegrations.reduce((s, r) => s + r.montant, 0))
   const total_deductions = arrondiFCFA(deductions.reduce((s, d) => s + d.montant, 0))
-  const resultat_fiscal = arrondiFCFA(resultat_comptable + total_reintegrations - total_deductions)
+  let resultat_fiscal = arrondiFCFA(resultat_comptable + total_reintegrations - total_deductions)
+
+  // Loss carryforward: subtract prior-year deficits from positive resultat fiscal
+  const deficitsAnterieurs = options?.deficitsAnterieurs ?? 0
+  if (deficitsAnterieurs > 0 && resultat_fiscal > 0) {
+    const deductionDeficit = Math.min(deficitsAnterieurs, resultat_fiscal)
+    resultat_fiscal = arrondiFCFA(resultat_fiscal - deductionDeficit)
+    if (deductionDeficit > 0) {
+      deductions.push({
+        code: 'D02',
+        libelle: `Report deficitaire anterieur (max ${config.lossCarryforwardYears ?? 5} ans)`,
+        montant: deductionDeficit,
+        compte_source: 'N/A',
+        base_legale: 'CGI Art. 4',
+      })
+    }
+  }
 
   // IS computation using config rates
   const isRate = config.isRate

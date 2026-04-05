@@ -64,7 +64,7 @@ const REGIMES: RegimeInfo[] = [
     code: 'REEL_NORMAL',
     label: 'Reel normal',
     seuilMax: Infinity,
-    obligations: ['Declaration annuelle IS + TVA', 'Liasse SN (87 pages)', 'TVA mensuelle', 'Bilan + CdR + Notes 1-39 + TFT + TAFIRE', '4 acomptes IS trimestriels'],
+    obligations: ['Declaration annuelle IS + TVA', 'Liasse SN (87 pages)', 'TVA mensuelle', 'Bilan + CdR + Notes 1-39 + TFT', '4 acomptes IS trimestriels'],
   },
 ]
 

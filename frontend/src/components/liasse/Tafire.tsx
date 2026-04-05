@@ -1,9 +1,12 @@
 /**
- * Composant TAFIRE - Tableau Financier des Ressources et Emplois SYSCOHADA
+ * @deprecated TAFIRE has been replaced by TFT in SYSCOHADA Révisé (2017).
+ * This component is kept for legacy reference only.
+ * Use TableauFluxTresorerieSYSCOHADA.tsx for the current TFT standard.
  */
 
-import { useState, useEffect, type FC, type ReactElement } from 'react'
+import { useState, useEffect, useMemo, type FC, type ReactElement } from 'react'
 import { useBalanceData } from '@/hooks/useBalanceData'
+import { liasseDataService } from '@/services/liasseDataService'
 import {
   Table,
   TableBody,
@@ -47,7 +50,24 @@ interface TafireItem {
 const Tafire: FC<TafireProps> = ({ modeEdition = false }) => {
   const bal = useBalanceData()
 
-  // Structure complète du TAFIRE
+  // Compute TAFIRE from liasseDataService (movement-based, real CAFG)
+  const tafire = useMemo(() => {
+    if (!bal.usingImported) return null
+    liasseDataService.loadBalance(bal.entries)
+    return liasseDataService.generateTAFIRE()
+  }, [bal.entries, bal.usingImported])
+
+  // Movement helpers: variation = N minus N-1 (positive = increase)
+  const varD = (prefixes: string[]) => {
+    if (!bal.hasN1) return bal.d(prefixes)
+    return bal.d(prefixes) - bal.dN1(prefixes)
+  }
+  const varC = (prefixes: string[]) => {
+    if (!bal.hasN1) return bal.c(prefixes)
+    return bal.c(prefixes) - bal.cN1(prefixes)
+  }
+
+  // Structure complète du TAFIRE — movement-based values
   const [emploisData, setEmploisData] = useState<TafireItem[]>([
     // EN-TÊTE EMPLOIS
     {
@@ -58,7 +78,7 @@ const Tafire: FC<TafireProps> = ({ modeEdition = false }) => {
       isHeader: true,
       level: 0,
     },
-    
+
     // EMPLOIS ÉCONOMIQUES
     {
       code: 'EMP_ECO',
@@ -71,21 +91,21 @@ const Tafire: FC<TafireProps> = ({ modeEdition = false }) => {
     {
       code: 'E01',
       libelle: 'Acquisitions d\'immobilisations corporelles',
-      exerciceN: bal.d(['23', '24', '25']),
+      exerciceN: 0,
       exerciceN1: 0,
       level: 2,
     },
     {
       code: 'E02',
       libelle: 'Acquisitions d\'immobilisations incorporelles',
-      exerciceN: bal.d(['20', '21']),
+      exerciceN: 0,
       exerciceN1: 0,
       level: 2,
     },
     {
       code: 'E03',
       libelle: 'Acquisitions d\'immobilisations financières',
-      exerciceN: bal.d(['26', '27']),
+      exerciceN: 0,
       exerciceN1: 0,
       level: 2,
     },
@@ -111,7 +131,7 @@ const Tafire: FC<TafireProps> = ({ modeEdition = false }) => {
       isTotal: true,
       level: 1,
     },
-    
+
     // EMPLOIS FINANCIERS
     {
       code: 'EMP_FIN',
@@ -124,21 +144,21 @@ const Tafire: FC<TafireProps> = ({ modeEdition = false }) => {
     {
       code: 'E06',
       libelle: 'Charges financières',
-      exerciceN: bal.d(['67']),
+      exerciceN: 0,
       exerciceN1: 0,
       level: 2,
     },
     {
       code: 'E07',
       libelle: 'Remboursements d\'emprunts et dettes financières',
-      exerciceN: bal.d(['16', '17']),
+      exerciceN: 0,
       exerciceN1: 0,
       level: 2,
     },
     {
       code: 'E08',
       libelle: 'Distributions mise en paiement',
-      exerciceN: bal.d(['129']),
+      exerciceN: 0,
       exerciceN1: 0,
       level: 2,
     },
@@ -150,7 +170,7 @@ const Tafire: FC<TafireProps> = ({ modeEdition = false }) => {
       isTotal: true,
       level: 1,
     },
-    
+
     // TOTAL GÉNÉRAL EMPLOIS
     {
       code: 'E_TOT_GEN',
@@ -172,7 +192,7 @@ const Tafire: FC<TafireProps> = ({ modeEdition = false }) => {
       isHeader: true,
       level: 0,
     },
-    
+
     // RESSOURCES INTERNES
     {
       code: 'RES_INT',
@@ -192,14 +212,14 @@ const Tafire: FC<TafireProps> = ({ modeEdition = false }) => {
     {
       code: 'R02',
       libelle: 'Cessions et réductions d\'immobilisations',
-      exerciceN: bal.c(['81', '82']),
+      exerciceN: 0,
       exerciceN1: 0,
       level: 2,
     },
     {
       code: 'R03',
       libelle: 'Cessions d\'immobilisations financières',
-      exerciceN: bal.c(['826', '827']),
+      exerciceN: 0,
       exerciceN1: 0,
       level: 2,
     },
@@ -211,7 +231,7 @@ const Tafire: FC<TafireProps> = ({ modeEdition = false }) => {
       isTotal: true,
       level: 1,
     },
-    
+
     // RESSOURCES EXTERNES
     {
       code: 'RES_EXT',
@@ -231,14 +251,14 @@ const Tafire: FC<TafireProps> = ({ modeEdition = false }) => {
     {
       code: 'R05',
       libelle: 'Subventions d\'investissement reçues',
-      exerciceN: bal.c(['14']),
+      exerciceN: 0,
       exerciceN1: 0,
       level: 2,
     },
     {
       code: 'R06',
       libelle: 'Emprunts nouveaux',
-      exerciceN: bal.c(['16']),
+      exerciceN: 0,
       exerciceN1: 0,
       level: 2,
     },
@@ -257,7 +277,7 @@ const Tafire: FC<TafireProps> = ({ modeEdition = false }) => {
       isTotal: true,
       level: 1,
     },
-    
+
     // TOTAL GÉNÉRAL RESSOURCES
     {
       code: 'R_TOT_GEN',
@@ -268,6 +288,41 @@ const Tafire: FC<TafireProps> = ({ modeEdition = false }) => {
       level: 0,
     },
   ])
+
+  // Populate TAFIRE data from liasseDataService when balance is loaded
+  useEffect(() => {
+    if (!tafire) return
+
+    // Emplois: use movement-based values from generateTAFIRE()
+    setEmploisData(prev => prev.map(item => {
+      switch (item.code) {
+        case 'E01': return { ...item, exerciceN: tafire.acquisImmo, exerciceN1: 0 }
+        case 'E02': return { ...item, exerciceN: Math.max(0, varD(['20', '21'])), exerciceN1: 0 }
+        case 'E03': return { ...item, exerciceN: tafire.varImmoFin, exerciceN1: 0 }
+        case 'E04': return { ...item, exerciceN: Math.max(0, tafire.varBFR), exerciceN1: 0 }
+        case 'E05': return { ...item, exerciceN: 0, exerciceN1: 0 }
+        case 'E06': return { ...item, exerciceN: bal.d(['67']), exerciceN1: 0 }
+        case 'E07': return { ...item, exerciceN: tafire.remboursements, exerciceN1: 0 }
+        case 'E08': return { ...item, exerciceN: tafire.dividendes, exerciceN1: 0 }
+        default: return item
+      }
+    }))
+
+    // Ressources: CAFG from generateTAFIRE(), movement-based for others
+    setRessourcesData(prev => prev.map(item => {
+      switch (item.code) {
+        case 'R01': return { ...item, exerciceN: tafire.CAFG, exerciceN1: tafire.CAFG_N1 }
+        case 'R02': return { ...item, exerciceN: tafire.cessions, exerciceN1: 0 }
+        case 'R03': return { ...item, exerciceN: bal.c(['826', '827']), exerciceN1: 0 }
+        case 'R04': return { ...item, exerciceN: tafire.augCapital, exerciceN1: 0 }
+        case 'R05': return { ...item, exerciceN: Math.max(0, varC(['14'])), exerciceN1: 0 }
+        case 'R06': return { ...item, exerciceN: tafire.empruntsNouveaux, exerciceN1: 0 }
+        case 'R07': return { ...item, exerciceN: 0, exerciceN1: 0 }
+        default: return item
+      }
+    }))
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tafire])
 
   const updateEmplois = (code: string, field: 'exerciceN' | 'exerciceN1', value: number) => {
     if (!modeEdition) return

@@ -554,12 +554,12 @@ const TableauFluxTresorerieSYSCOHADA: FC<TFTProps> = ({ onNoteClick }) => {
 
       {/* Alertes */}
       {!hasN1Data && (
-        <Alert severity="warning" sx={{ mb: 2 }} icon={<WarningIcon />}>
+        <Alert severity="error" sx={{ mb: 2 }} icon={<WarningIcon />}>
           <Typography variant="body2">
-            <strong>Données N-1 requises pour le calcul du TFT.</strong>{' '}
-            Les lignes FF (variation BFR), FH (acquisitions), FJ (immo financières), FL (capital),
-            FM/FN (emprunts) et FR (trésorerie début) nécessitent la balance N-1.
-            En son absence, ces postes sont à 0.
+            <strong>Génération bloquée : données N-1 absentes.</strong>{' '}
+            Le TFT nécessite les variations entre N et N-1 pour les lignes FF (BFR), FH (acquisitions),
+            FJ (immo financières), FL (capital), FM/FN (emprunts) et FR (trésorerie début).
+            Importez la balance N-1 pour générer le tableau de flux de trésorerie.
           </Typography>
         </Alert>
       )}
@@ -579,23 +579,35 @@ const TableauFluxTresorerieSYSCOHADA: FC<TFTProps> = ({ onNoteClick }) => {
         </Typography>
       </Alert>
 
-      {/* Tableau */}
-      <TableContainer sx={{ mb: 3 }}>
-        <Table size="small" sx={{ minWidth: 700 }}>
-          <TableHead>
-            <TableRow sx={{ bgcolor: 'grey.100' }}>
-              <TableCell sx={{ fontWeight: 600, fontSize: '0.875rem' }}>Réf</TableCell>
-              <TableCell sx={{ fontWeight: 600, fontSize: '0.875rem' }}>LIBELLÉ</TableCell>
-              <TableCell align="center" sx={{ fontWeight: 600, fontSize: '0.875rem' }}>Note</TableCell>
-              <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.875rem' }}>Exercice N</TableCell>
-              <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.875rem' }}>Exercice N-1</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {TFT_STRUCTURE.map(renderRow)}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      {/* Tableau — blocked if N-1 data is missing (TFT requires variations) */}
+      {hasN1Data ? (
+        <TableContainer sx={{ mb: 3 }}>
+          <Table size="small" sx={{ minWidth: 700 }}>
+            <TableHead>
+              <TableRow sx={{ bgcolor: 'grey.100' }}>
+                <TableCell sx={{ fontWeight: 600, fontSize: '0.875rem' }}>Réf</TableCell>
+                <TableCell sx={{ fontWeight: 600, fontSize: '0.875rem' }}>LIBELLÉ</TableCell>
+                <TableCell align="center" sx={{ fontWeight: 600, fontSize: '0.875rem' }}>Note</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.875rem' }}>Exercice N</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.875rem' }}>Exercice N-1</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {TFT_STRUCTURE.map(renderRow)}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      ) : (
+        <Box sx={{ py: 6, textAlign: 'center', color: 'text.secondary' }}>
+          <CashIcon sx={{ fontSize: 48, mb: 2, opacity: 0.3 }} />
+          <Typography variant="h6" sx={{ mb: 1 }}>
+            Aucune donnée N-1 disponible
+          </Typography>
+          <Typography variant="body2">
+            Le Tableau de Flux de Trésorerie ne peut être généré sans la balance de l'exercice précédent.
+          </Typography>
+        </Box>
+      )}
 
       {/* Zone de commentaires */}
       <Box sx={{

@@ -72,6 +72,228 @@ function cRow6(e: BalanceEntry[], label: string, pfx: string[]): string[] {
   return [label, fmt(n), fmt(n1), fmtVar(n, n1), fmt(n), '']
 }
 
+// ═══ Note 5: Stocks (31x-38x, provisions 39x) ═══
+// Colonnes: ['Nature', 'Montant N', 'Montant N-1', 'Variation', 'Variation %']
+function generateNote5(entries: BalanceEntry[]): NoteData {
+  const prov = sumCredit(entries, ['39']), provN1 = sumCreditN1(entries, ['39'])
+  const totalBrut = sumDebit(entries, ['31', '32', '33', '34', '35', '36', '37', '38'])
+  const totalBrutN1 = sumDebitN1(entries, ['31', '32', '33', '34', '35', '36', '37', '38'])
+  const totalNet = totalBrut - prov, totalNetN1 = totalBrutN1 - provN1
+  return {
+    titre: 'Stocks et en-cours',
+    tableau: {
+      titre: 'Detail des stocks',
+      colonnes: ['Nature', 'Montant N', 'Montant N-1', 'Variation', 'Variation %'],
+      lignes: [
+        dRow(entries, 'Marchandises', ['31']),
+        dRow(entries, 'Matieres premieres et fournitures', ['32']),
+        dRow(entries, 'Autres approvisionnements', ['33']),
+        dRow(entries, 'En-cours de production de biens', ['34']),
+        dRow(entries, 'En-cours de production de services', ['35']),
+        dRow(entries, 'Produits finis', ['36']),
+        dRow(entries, 'Produits intermediaires et residuels', ['37']),
+        dRow(entries, 'Stocks en cours de route, en consignation', ['38']),
+        ['Provisions pour depreciation des stocks', fmt(-prov), fmt(-provN1), fmtVar(-prov, -provN1), ''],
+        ['TOTAL NET', fmt(totalNet), fmt(totalNetN1), fmtVar(totalNet, totalNetN1), fmtVarPct(totalNet, totalNetN1)],
+      ]
+    }
+  }
+}
+
+// ═══ Note 10: Valeurs a encaisser (511-518) ═══
+function generateNote10(entries: BalanceEntry[]): NoteData {
+  const total = sumDebit(entries, ['511', '512', '513', '514', '515', '516', '517', '518'])
+  const totalN1 = sumDebitN1(entries, ['511', '512', '513', '514', '515', '516', '517', '518'])
+  return {
+    titre: 'Valeurs a encaisser',
+    tableau: {
+      titre: 'Effets a l\'encaissement et cheques a encaisser',
+      colonnes: ['Nature', 'Montant N', 'Montant N-1', 'Variation', 'Variation %'],
+      lignes: [
+        dRow(entries, 'Cheques a encaisser', ['511']),
+        dRow(entries, 'Effets a l\'encaissement', ['512', '513']),
+        dRow(entries, 'Effets a l\'escompte', ['514', '515']),
+        dRow(entries, 'Autres valeurs a l\'encaissement', ['516', '517', '518']),
+        ['TOTAL', fmt(total), fmt(totalN1), fmtVar(total, totalN1), fmtVarPct(total, totalN1)],
+      ]
+    }
+  }
+}
+
+// ═══ Note 12: Etat et collectivites publiques (441-447, debit side) ═══
+function generateNote12(entries: BalanceEntry[]): NoteData {
+  const total = sumDebit(entries, ['441', '442', '443', '444', '445', '446', '447'])
+  const totalN1 = sumDebitN1(entries, ['441', '442', '443', '444', '445', '446', '447'])
+  return {
+    titre: 'Etat et collectivites publiques',
+    tableau: {
+      titre: 'Creances sur l\'Etat et collectivites',
+      colonnes: ['Nature', 'Montant N', 'Montant N-1', 'Variation', 'Variation %'],
+      lignes: [
+        dRow(entries, 'Etat, impots sur les benefices', ['441']),
+        dRow(entries, 'Etat, autres impots et taxes', ['442']),
+        dRow(entries, 'Etat, TVA a recuperer', ['443', '4441']),
+        dRow(entries, 'Etat, TVA due', ['444']),
+        dRow(entries, 'Etat, taxes sur le chiffre d\'affaires', ['445']),
+        dRow(entries, 'Collectivites publiques', ['446', '447']),
+        ['TOTAL', fmt(total), fmt(totalN1), fmtVar(total, totalN1), fmtVarPct(total, totalN1)],
+      ]
+    }
+  }
+}
+
+// ═══ Note 15A: Emprunts et dettes financieres detail (161-168) ═══
+function generateNote15A(entries: BalanceEntry[]): NoteData {
+  const total = sumCredit(entries, ['161', '162', '163', '164', '165', '166', '167', '168'])
+  const totalN1 = sumCreditN1(entries, ['161', '162', '163', '164', '165', '166', '167', '168'])
+  return {
+    titre: 'Emprunts et dettes financieres',
+    tableau: {
+      titre: 'Detail des emprunts et dettes financieres par echeance',
+      colonnes: ['Nature', 'Montant N', 'Montant N-1', 'Variation', 'Echeance < 1 an', 'Echeance > 1 an'],
+      lignes: [
+        cRow6(entries, 'Emprunts obligataires', ['161']),
+        cRow6(entries, 'Emprunts aupres des etablissements de credit', ['162']),
+        cRow6(entries, 'Avances recues de l\'Etat', ['163']),
+        cRow6(entries, 'Dettes de location-acquisition', ['164', '165']),
+        cRow6(entries, 'Comptes courants d\'associes', ['166']),
+        cRow6(entries, 'Autres emprunts et dettes financieres', ['167', '168']),
+        ['TOTAL', fmt(total), fmt(totalN1), fmtVar(total, totalN1), fmt(total), ''],
+      ]
+    }
+  }
+}
+
+// ═══ Note 23: Transports (61x) ═══
+function generateNote23(entries: BalanceEntry[]): NoteData {
+  const total = sumDebit(entries, ['611', '612', '613', '614', '618'])
+  const totalN1 = sumDebitN1(entries, ['611', '612', '613', '614', '618'])
+  return {
+    titre: 'Transports',
+    tableau: {
+      titre: 'Charges de transport',
+      colonnes: ['Nature', 'Montant N', 'Montant N-1', 'Variation', 'Variation %'],
+      lignes: [
+        dRow(entries, 'Transports sur achats', ['611']),
+        dRow(entries, 'Transports sur ventes', ['612']),
+        dRow(entries, 'Transports du personnel', ['613']),
+        dRow(entries, 'Autres frais de transport', ['614', '618']),
+        ['TOTAL', fmt(total), fmt(totalN1), fmtVar(total, totalN1), fmtVarPct(total, totalN1)],
+      ]
+    }
+  }
+}
+
+// ═══ Note 24: Services exterieurs (62x, 63x) ═══
+function generateNote24(entries: BalanceEntry[]): NoteData {
+  const total = sumDebit(entries, ['621', '622', '623', '624', '625', '626', '627', '628', '631', '632', '633', '634', '635', '636', '637', '638'])
+  const totalN1 = sumDebitN1(entries, ['621', '622', '623', '624', '625', '626', '627', '628', '631', '632', '633', '634', '635', '636', '637', '638'])
+  return {
+    titre: 'Services exterieurs',
+    tableau: {
+      titre: 'Services exterieurs',
+      colonnes: ['Nature', 'Montant N', 'Montant N-1', 'Variation', 'Variation %'],
+      lignes: [
+        dRow(entries, 'Sous-traitance generale', ['621']),
+        dRow(entries, 'Locations et charges locatives', ['622']),
+        dRow(entries, 'Entretien, reparations et maintenance', ['624']),
+        dRow(entries, 'Primes d\'assurance', ['625']),
+        dRow(entries, 'Etudes, recherches et documentation', ['631', '632']),
+        dRow(entries, 'Publicite et relations publiques', ['627']),
+        dRow(entries, 'Frais de telecommunications', ['628']),
+        dRow(entries, 'Honoraires', ['6324', '633']),
+        ['TOTAL', fmt(total), fmt(totalN1), fmtVar(total, totalN1), fmtVarPct(total, totalN1)],
+      ]
+    }
+  }
+}
+
+// ═══ Note 25: Impots et taxes (64x) ═══
+function generateNote25(entries: BalanceEntry[]): NoteData {
+  const total = sumDebit(entries, ['641', '642', '643', '644', '645', '646', '647', '648', '649'])
+  const totalN1 = sumDebitN1(entries, ['641', '642', '643', '644', '645', '646', '647', '648', '649'])
+  return {
+    titre: 'Impots et taxes',
+    tableau: {
+      titre: 'Impots et taxes',
+      colonnes: ['Nature', 'Montant N', 'Montant N-1', 'Variation', 'Variation %'],
+      lignes: [
+        dRow(entries, 'Impots et taxes directs', ['641', '642']),
+        dRow(entries, 'Impots et taxes indirects', ['643', '644']),
+        dRow(entries, 'Droits d\'enregistrement', ['645', '646']),
+        dRow(entries, 'Autres impots et taxes', ['647', '648', '649']),
+        ['TOTAL', fmt(total), fmt(totalN1), fmtVar(total, totalN1), fmtVarPct(total, totalN1)],
+      ]
+    }
+  }
+}
+
+// ═══ Note 26: Autres charges (65x) ═══
+function generateNote26(entries: BalanceEntry[]): NoteData {
+  const total = sumDebit(entries, ['651', '652', '653', '654', '655', '656', '657', '658', '659'])
+  const totalN1 = sumDebitN1(entries, ['651', '652', '653', '654', '655', '656', '657', '658', '659'])
+  return {
+    titre: 'Autres charges',
+    tableau: {
+      titre: 'Autres charges d\'exploitation',
+      colonnes: ['Nature', 'Montant N', 'Montant N-1', 'Variation', 'Variation %'],
+      lignes: [
+        dRow(entries, 'Charges diverses d\'exploitation', ['651', '652']),
+        dRow(entries, 'Pertes sur creances clients', ['654']),
+        dRow(entries, 'Charges provisionnees d\'exploitation', ['659']),
+        dRow(entries, 'Autres charges', ['653', '655', '656', '657', '658']),
+        ['TOTAL', fmt(total), fmt(totalN1), fmtVar(total, totalN1), fmtVarPct(total, totalN1)],
+      ]
+    }
+  }
+}
+
+// ═══ Note 27A: Charges de personnel (66x) ═══
+function generateNote27A(entries: BalanceEntry[]): NoteData {
+  const total = sumDebit(entries, ['661', '662', '663', '664', '665', '666', '667', '668'])
+  const totalN1 = sumDebitN1(entries, ['661', '662', '663', '664', '665', '666', '667', '668'])
+  return {
+    titre: 'Charges de personnel',
+    tableau: {
+      titre: 'Charges de personnel',
+      colonnes: ['Nature', 'Montant N', 'Montant N-1', 'Variation %'],
+      lignes: [
+        (() => { const n = sumDebit(entries, ['661']), n1 = sumDebitN1(entries, ['661']); return ['Salaires et appointements', fmt(n), fmt(n1), fmtVarPct(n, n1)] })(),
+        (() => { const n = sumDebit(entries, ['6611']), n1 = sumDebitN1(entries, ['6611']); return ['Primes et gratifications', fmt(n), fmt(n1), fmtVarPct(n, n1)] })(),
+        (() => { const n = sumDebit(entries, ['6612']), n1 = sumDebitN1(entries, ['6612']); return ['Conges payes', fmt(n), fmt(n1), fmtVarPct(n, n1)] })(),
+        (() => { const n = sumDebit(entries, ['664']), n1 = sumDebitN1(entries, ['664']); return ['Charges sociales CNPS', fmt(n), fmt(n1), fmtVarPct(n, n1)] })(),
+        (() => { const n = sumDebit(entries, ['663', '665']), n1 = sumDebitN1(entries, ['663', '665']); return ['Autres charges sociales', fmt(n), fmt(n1), fmtVarPct(n, n1)] })(),
+        (() => { const n = sumDebit(entries, ['6381']), n1 = sumDebitN1(entries, ['6381']); return ['Charges de formation professionnelle', fmt(n), fmt(n1), fmtVarPct(n, n1)] })(),
+        (() => { const n = sumDebit(entries, ['6382']), n1 = sumDebitN1(entries, ['6382']); return ['Medecine du travail', fmt(n), fmt(n1), fmtVarPct(n, n1)] })(),
+        (() => { const n = sumDebit(entries, ['668']), n1 = sumDebitN1(entries, ['668']); return ['Avantages en nature', fmt(n), fmt(n1), fmtVarPct(n, n1)] })(),
+        ['TOTAL', fmt(total), fmt(totalN1), fmtVarPct(total, totalN1)],
+      ]
+    }
+  }
+}
+
+// ═══ Note 30: Autres charges et produits HAO (81x-88x) ═══
+function generateNote30(entries: BalanceEntry[]): NoteData {
+  const produitsHAO = sumCredit(entries, ['82', '84', '86', '88'])
+  const produitsHAON1 = sumCreditN1(entries, ['82', '84', '86', '88'])
+  const chargesHAO = sumDebit(entries, ['81', '83', '85', '87'])
+  const chargesHAON1 = sumDebitN1(entries, ['81', '83', '85', '87'])
+  const resultatHAO = produitsHAO - chargesHAO
+  const resultatHAON1 = produitsHAON1 - chargesHAON1
+  return {
+    titre: 'Autres charges et produits HAO',
+    tableau: {
+      titre: 'Charges et produits hors activites ordinaires',
+      colonnes: ['Nature', 'Montant N', 'Montant N-1', 'Variation', 'Variation %'],
+      lignes: [
+        cRow(entries, 'Produits HAO', ['82', '84', '86', '88']),
+        dRow(entries, 'Charges HAO', ['81', '83', '85', '87']),
+        ['RESULTAT HAO', fmt(resultatHAO), fmt(resultatHAON1), fmtVar(resultatHAO, resultatHAON1), fmtVarPct(resultatHAO, resultatHAON1)],
+      ]
+    }
+  }
+}
+
 // ═══ Note 4: Immobilisations financieres (26x, 27x) ═══
 // Colonnes: ['Nature', 'Montant N', 'Montant N-1', 'Variation', 'Variation %']
 function generateNote4(entries: BalanceEntry[]): NoteData {
@@ -483,24 +705,34 @@ function generateNote37(entries: BalanceEntry[]): NoteData {
  * Genere les donnees d'annexe depuis la balance importee.
  * Les numeros de notes correspondent aux onglets Excel SYSCOHADA de reference.
  */
-export function generateAnnexeData(entries: BalanceEntry[]): Record<number, NoteData> {
+export function generateAnnexeData(entries: BalanceEntry[]): Record<number | string, NoteData> {
   if (!entries || entries.length === 0) return {}
   return {
     4: generateNote4(entries),
+    5: generateNote5(entries),
     7: generateNote7(entries),
     8: generateNote8(entries),
     9: generateNote9(entries),
+    10: generateNote10(entries),
     11: generateNote11(entries),
+    12: generateNote12(entries),
     13: generateNote13(entries),
     14: generateNote14(entries),
+    '15A': generateNote15A(entries),
     17: generateNote17(entries),
     18: generateNote18(entries),
     19: generateNote19(entries),
     20: generateNote20(entries),
     21: generateNote21(entries),
     22: generateNote22(entries),
+    23: generateNote23(entries),
+    24: generateNote24(entries),
+    25: generateNote25(entries),
+    26: generateNote26(entries),
+    '27A': generateNote27A(entries),
     28: generateNote28(entries),
     29: generateNote29(entries),
+    30: generateNote30(entries),
     31: generateNote31(entries),
     37: generateNote37(entries),
   }

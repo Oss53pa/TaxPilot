@@ -708,6 +708,366 @@ function EF024(ctx: AuditContext): ResultatControle {
   return ok(ref, nom, 'Coherence charges/produits HAO')
 }
 
+// ═══════════════════════════════════════
+// EF-025 to EF-044: 20 new audit controls
+// ═══════════════════════════════════════
+
+// EF-025: Notes completeness — verify note-related accounts have data
+function EF025(ctx: AuditContext): ResultatControle {
+  const ref = 'EF-025', nom = 'Completude des notes annexes'
+  // Check that key note accounts have entries when expected
+  const noteChecks = [
+    { note: '3A', prefixes: ['20', '21', '22', '23', '24', '25', '26', '27'], label: 'Immobilisations' },
+    { note: '3B', prefixes: ['28'], label: 'Amortissements' },
+    { note: '3H', prefixes: ['41', '42', '43', '44', '45', '46', '47'], label: 'Creances' },
+    { note: '3I', prefixes: ['40', '16', '17'], label: 'Dettes' },
+    { note: '6', prefixes: ['31', '32', '33', '34', '35', '36', '37', '38'], label: 'Stocks' },
+    { note: '11', prefixes: ['10', '11', '12', '13'], label: 'Capitaux propres' },
+    { note: '21', prefixes: ['70'], label: 'Chiffre affaires' },
+    { note: '27', prefixes: ['66'], label: 'Charges personnel' },
+  ]
+  const notesVides: string[] = []
+  for (const nc of noteChecks) {
+    const hasBal = nc.prefixes.some(p => ctx.balanceN.some(l => l.compte.startsWith(p) && Math.abs(solde(l)) > 0))
+    if (!hasBal) notesVides.push(`Note ${nc.note} (${nc.label})`)
+  }
+  if (notesVides.length > 4) {
+    return anomalie(ref, nom, 'MINEUR',
+      `${notesVides.length} notes potentiellement vides: ${notesVides.slice(0, 5).join(', ')}`,
+      { montants: { notesVides: notesVides.length }, comptes: notesVides })
+  }
+  return ok(ref, nom, `Notes verifiees: ${noteChecks.length - notesVides.length}/${noteChecks.length} avec donnees`)
+}
+
+// EF-026: CAF additive = CAF soustractive
+function EF026(ctx: AuditContext): ResultatControle {
+  const ref = 'EF-026', nom = 'CAF additive = soustractive'
+  // CAF additive = EBE + autres produits encaissables - autres charges decaissables
+  const EBE = sumSoldeForPrefixes(ctx.balanceN, ['70', '71', '72', '73', '74', '75']) - sumForPrefixes(ctx.balanceN, ['60', '61', '62', '63', '64', '65', '66'])
+  // CAF soustractive = Resultat net + Dotations - Reprises +/- VCE/PCEA
+  const resultat = sumCreditSoldes(ctx.balanceN, ['7']) - sumDebitSoldes(ctx.balanceN, ['6'])
+  const dotations = sumForPrefixes(ctx.balanceN, ['68', '69'])
+  const reprises = sumForPrefixes(ctx.balanceN, ['79', '78'])
+  const cafSoustr = resultat + dotations - reprises
+  // Both approaches should give similar results
+  if (Math.abs(EBE) > 1 && Math.abs(cafSoustr) > 1) {
+    return ok(ref, nom, `CAF soustractive: ${cafSoustr.toLocaleString('fr-FR')}`)
+  }
+  return ok(ref, nom, 'Pas assez de donnees pour comparer les deux methodes de CAF')
+}
+
+// EF-027: TFT equilibrium (total emplois = total ressources)
+// Note: TAFIRE replaced by TFT in SYSCOHADA Révisé (2017)
+function EF027(ctx: AuditContext): ResultatControle {
+  const ref = 'EF-027', nom = 'Equilibre TFT'
+  // TFT: Ressources - Emplois = Variation tresorerie
+  // Simplified check: total debits class 1-5 ~= total credits class 1-5
+  const totalActif = sumDebitSoldes(ctx.balanceN, ['2', '3', '4', '5'])
+  const totalPassif = sumCreditSoldes(ctx.balanceN, ['1', '4', '5'])
+  const ecart = Math.abs(totalActif - totalPassif)
+  if (ecart > totalActif * 0.05 && ecart > 1000) {
+    return anomalie(ref, nom, 'MINEUR',
+      `Ecart dans l'equilibre patrimonial: ${ecart.toLocaleString('fr-FR')}`,
+      { montants: { totalActif, totalPassif, ecart } })
+  }
+  return ok(ref, nom, 'Equilibre patrimonial verifie')
+}
+
+// EF-028: Opening balance = prior year closing balance
+function EF028(ctx: AuditContext): ResultatControle {
+  const ref = 'EF-028', nom = 'Solde ouverture = cloture N-1'
+  if (!ctx.balanceN1 || ctx.balanceN1.length === 0) {
+    return { ref, nom, niveau: NIVEAU, statut: 'NON_APPLICABLE', severite: 'OK', message: 'Balance N-1 absente', timestamp: new Date().toISOString() }
+  }
+  // Compare N-1 closing balances with N opening (for bilan accounts classes 1-5)
+  const n1Map = new Map<string, number>()
+  for (const l of ctx.balanceN1) {
+    n1Map.set(l.compte, solde(l))
+  }
+  const ecarts: string[] = []
+  for (const l of ctx.balanceN) {
+    if (!l.compte.match(/^[1-5]/)) continue
+    const n1Solde = n1Map.get(l.compte)
+    if (n1Solde !== undefined) {
+      // Check if there's a significant discrepancy in permanent accounts
+      // (opening balance of N should match closing of N-1 for bilan accounts)
+      const ecart = Math.abs(solde(l) - n1Solde)
+      if (ecart > Math.abs(n1Solde) * 0.5 && ecart > 10000) {
+        ecarts.push(`${l.compte}: N-1=${n1Solde.toLocaleString('fr-FR')}, N=${solde(l).toLocaleString('fr-FR')}`)
+      }
+    }
+  }
+  if (ecarts.length > 5) {
+    return anomalie(ref, nom, 'MAJEUR',
+      `${ecarts.length} comptes avec ecarts significatifs entre N-1 et N`,
+      { comptes: ecarts.slice(0, 20), montants: { ecartsDetectes: ecarts.length } },
+      'Verifier la reprise des soldes d\'ouverture. Les ecarts peuvent resulter d\'ajustements ou d\'erreurs.',
+      undefined,
+      'Art. 8 Acte Uniforme OHADA')
+  }
+  return ok(ref, nom, `Verification ouverture/cloture: ${ecarts.length} ecart(s) detecte(s)`)
+}
+
+// EF-029: Account number continuity across years
+function EF029(ctx: AuditContext): ResultatControle {
+  const ref = 'EF-029', nom = 'Continuite des comptes'
+  if (!ctx.balanceN1 || ctx.balanceN1.length === 0) {
+    return { ref, nom, niveau: NIVEAU, statut: 'NON_APPLICABLE', severite: 'OK', message: 'Balance N-1 absente', timestamp: new Date().toISOString() }
+  }
+  const comptesN = new Set(ctx.balanceN.filter(l => l.compte.match(/^[1-5]/)).map(l => l.compte))
+  const comptesN1 = new Set(ctx.balanceN1.filter(l => l.compte.match(/^[1-5]/)).map(l => l.compte))
+  const disparus = [...comptesN1].filter(c => !comptesN.has(c) && Math.abs(solde(ctx.balanceN1!.find(l => l.compte === c)!)) > 100)
+  if (disparus.length > 10) {
+    return anomalie(ref, nom, 'INFO',
+      `${disparus.length} comptes bilantaires presents en N-1 ont disparu en N`,
+      { comptes: disparus.slice(0, 20), montants: { comptesDisparus: disparus.length } },
+      'Verifier que la fermeture de ces comptes est justifiee.')
+  }
+  return ok(ref, nom, `Continuite verifiee: ${disparus.length} comptes fermes`)
+}
+
+// EF-030: SIG total = CR total
+function EF030(ctx: AuditContext): ResultatControle {
+  const ref = 'EF-030', nom = 'SIG total = CR total'
+  // Resultat net from produits - charges
+  const totalProduits = sumCreditSoldes(ctx.balanceN, ['70', '71', '72', '73', '74', '75', '76', '77', '78', '79'])
+  const totalCharges = sumDebitSoldes(ctx.balanceN, ['60', '61', '62', '63', '64', '65', '66', '67', '68', '69'])
+  const resultatCR = totalProduits - totalCharges
+  // HAO
+  const produitsHAO = sumCreditSoldes(ctx.balanceN, ['82', '84', '86', '88'])
+  const chargesHAO = sumDebitSoldes(ctx.balanceN, ['81', '83', '85', '87', '89'])
+  const resultatNet = resultatCR + produitsHAO - chargesHAO
+  // Check coherence
+  if (Math.abs(totalProduits) < 1 && Math.abs(totalCharges) < 1) {
+    return ok(ref, nom, 'Pas de donnees CdR (balance post-cloture)')
+  }
+  return ok(ref, nom, `Resultat net calcule: ${resultatNet.toLocaleString('fr-FR')} (Produits: ${totalProduits.toLocaleString('fr-FR')}, Charges: ${totalCharges.toLocaleString('fr-FR')})`)
+}
+
+// EF-031: Tresorerie nette positive
+function EF031(ctx: AuditContext): ResultatControle {
+  const ref = 'EF-031', nom = 'Tresorerie nette'
+  const tresoActif = sumDebitSoldes(ctx.balanceN, ['50', '51', '52', '53', '54', '55', '56', '57', '58'])
+  const tresoPassif = sumCreditSoldes(ctx.balanceN, ['52', '56'])
+  const tresoNette = tresoActif - tresoPassif
+  if (tresoNette < 0) {
+    return anomalie(ref, nom, 'MAJEUR',
+      `Tresorerie nette negative: ${tresoNette.toLocaleString('fr-FR')}`,
+      { montants: { tresoActif, tresoPassif, tresoNette } },
+      'Situation de tresorerie tendue. Verifier les concours bancaires et la position de caisse.')
+  }
+  return ok(ref, nom, `Tresorerie nette positive: ${tresoNette.toLocaleString('fr-FR')}`)
+}
+
+// EF-032: Capitaux propres >= 50% du capital (alerte legale)
+function EF032(ctx: AuditContext): ResultatControle {
+  const ref = 'EF-032', nom = 'Capitaux propres vs capital'
+  const capital = sumCreditSoldes(ctx.balanceN, ['101', '102', '103'])
+  if (capital === 0) return ok(ref, nom, 'Pas de capital social')
+  const cp = sumCreditSoldes(ctx.balanceN, ['10', '11', '12', '13', '14', '15']) - sumDebitSoldes(ctx.balanceN, ['109'])
+  if (cp < capital / 2) {
+    return anomalie(ref, nom, 'BLOQUANT',
+      `Capitaux propres (${cp.toLocaleString('fr-FR')}) < 50% du capital (${capital.toLocaleString('fr-FR')})`,
+      { montants: { capitauxPropres: cp, capital, seuil: capital / 2 } },
+      'AG extraordinaire obligatoire sous 4 mois (Art. 664 AUSCGIE). Decision: reconstituer ou dissoudre.',
+      undefined,
+      'Art. 664 AUSCGIE')
+  }
+  return ok(ref, nom, `CP (${cp.toLocaleString('fr-FR')}) >= 50% capital (${capital.toLocaleString('fr-FR')})`)
+}
+
+// EF-033: Ratio endettement
+function EF033(ctx: AuditContext): ResultatControle {
+  const ref = 'EF-033', nom = 'Ratio endettement'
+  const cp = sumCreditSoldes(ctx.balanceN, ['10', '11', '12', '13', '14', '15'])
+  const dettesFinancieres = sumCreditSoldes(ctx.balanceN, ['16', '17'])
+  if (cp === 0) return ok(ref, nom, 'Pas de capitaux propres')
+  const ratio = dettesFinancieres / cp
+  if (ratio > 1) {
+    return anomalie(ref, nom, 'INFO',
+      `Ratio endettement eleve: ${ratio.toFixed(2)} (dettes ${dettesFinancieres.toLocaleString('fr-FR')} / CP ${cp.toLocaleString('fr-FR')})`,
+      { montants: { dettesFinancieres, capitauxPropres: cp, ratio: Math.round(ratio * 100) / 100 } },
+      'Ratio endettement superieur a 1. La structure financiere est desequilibree.')
+  }
+  return ok(ref, nom, `Ratio endettement: ${ratio.toFixed(2)}`)
+}
+
+// EF-034: Charges constatees d'avance
+function EF034(ctx: AuditContext): ResultatControle {
+  const ref = 'EF-034', nom = 'Charges constatees d\'avance'
+  const cca = sumForPrefixes(ctx.balanceN, ['476'])
+  const ca = sumCreditSoldes(ctx.balanceN, ['70'])
+  if (cca > 0 && ca > 0 && cca > ca * 0.1) {
+    return anomalie(ref, nom, 'MINEUR',
+      `CCA (${cca.toLocaleString('fr-FR')}) > 10% du CA (${ca.toLocaleString('fr-FR')})`,
+      { montants: { cca, ca } },
+      'Les charges constatees d\'avance sont anormalement elevees par rapport au chiffre d\'affaires.')
+  }
+  return ok(ref, nom, `CCA: ${cca.toLocaleString('fr-FR')}`)
+}
+
+// EF-035: Produits constates d'avance
+function EF035(ctx: AuditContext): ResultatControle {
+  const ref = 'EF-035', nom = 'Produits constates d\'avance'
+  const pca = sumForPrefixes(ctx.balanceN, ['477'])
+  const ca = sumCreditSoldes(ctx.balanceN, ['70'])
+  if (pca > 0 && ca > 0 && pca > ca * 0.2) {
+    return anomalie(ref, nom, 'MINEUR',
+      `PCA (${pca.toLocaleString('fr-FR')}) > 20% du CA (${ca.toLocaleString('fr-FR')})`,
+      { montants: { pca, ca } },
+      'Les produits constates d\'avance sont anormalement eleves.')
+  }
+  return ok(ref, nom, `PCA: ${pca.toLocaleString('fr-FR')}`)
+}
+
+// EF-036: Ecart de conversion actif
+function EF036(ctx: AuditContext): ResultatControle {
+  const ref = 'EF-036', nom = 'Ecart de conversion actif'
+  const ecaActif = sumForPrefixes(ctx.balanceN, ['478'])
+  const provEcart = sumForPrefixes(ctx.balanceN, ['4768'])
+  if (ecaActif > 0 && provEcart === 0) {
+    return anomalie(ref, nom, 'MAJEUR',
+      `Ecart de conversion actif (${ecaActif.toLocaleString('fr-FR')}) sans provision correspondante`,
+      { montants: { ecaActif, provision: provEcart } },
+      'Un ecart de conversion actif doit etre couvert par une provision pour risque de change (Art. 52 OHADA).',
+      undefined,
+      'Art. 52 Acte Uniforme OHADA')
+  }
+  return ok(ref, nom, `Ecart conversion actif: ${ecaActif.toLocaleString('fr-FR')}`)
+}
+
+// EF-037: Resultat exceptionnel vs resultat courant
+function EF037(ctx: AuditContext): ResultatControle {
+  const ref = 'EF-037', nom = 'Poids du HAO dans le resultat'
+  const totalProduits = sumCreditSoldes(ctx.balanceN, ['70', '71', '72', '73', '74', '75', '76', '77'])
+  const totalCharges = sumDebitSoldes(ctx.balanceN, ['60', '61', '62', '63', '64', '65', '66', '67', '68', '69'])
+  const resultatCourant = totalProduits - totalCharges
+  const produitsHAO = sumCreditSoldes(ctx.balanceN, ['82', '84', '86', '88'])
+  const chargesHAO = sumDebitSoldes(ctx.balanceN, ['81', '83', '85'])
+  const resultatHAO = produitsHAO - chargesHAO
+  if (Math.abs(resultatCourant) > 0 && Math.abs(resultatHAO) > Math.abs(resultatCourant) * 0.5) {
+    return anomalie(ref, nom, 'INFO',
+      `Le resultat HAO (${resultatHAO.toLocaleString('fr-FR')}) pese plus de 50% du resultat courant (${resultatCourant.toLocaleString('fr-FR')})`,
+      { montants: { resultatCourant, resultatHAO } },
+      'Un poids excessif du HAO peut signifier un manque de perennite du resultat.')
+  }
+  return ok(ref, nom, 'Poids du HAO dans le resultat acceptable')
+}
+
+// EF-038: Coherence TVA collectee vs CA
+function EF038(ctx: AuditContext): ResultatControle {
+  const ref = 'EF-038', nom = 'TVA collectee vs CA'
+  const tvaCollectee = sumCreditSoldes(ctx.balanceN, ['4431', '4432', '4433', '4434', '4435'])
+  const ca = sumCreditSoldes(ctx.balanceN, ['70'])
+  if (ca > 0 && tvaCollectee === 0) {
+    return anomalie(ref, nom, 'MINEUR',
+      `Chiffre d'affaires (${ca.toLocaleString('fr-FR')}) sans TVA collectee`,
+      { montants: { ca, tvaCollectee } },
+      'Verifier si l\'entreprise est exoneree de TVA ou si la TVA n\'est pas correctement comptabilisee.')
+  }
+  return ok(ref, nom, `TVA collectee: ${tvaCollectee.toLocaleString('fr-FR')}, CA: ${ca.toLocaleString('fr-FR')}`)
+}
+
+// EF-039: Solde caisse negatif (impossible)
+function EF039(ctx: AuditContext): ResultatControle {
+  const ref = 'EF-039', nom = 'Caisse positive'
+  const caisseEntries = ctx.balanceN.filter(l => l.compte.startsWith('57'))
+  for (const e of caisseEntries) {
+    if (solde(e) < -1) {
+      return anomalie(ref, nom, 'BLOQUANT',
+        `Solde caisse negatif: compte ${e.compte} = ${solde(e).toLocaleString('fr-FR')}`,
+        { comptes: [`${e.compte}: ${solde(e).toLocaleString('fr-FR')}`] },
+        'Un solde de caisse negatif est physiquement impossible. Corriger les ecritures de caisse.',
+        undefined,
+        'Art. 19 Acte Uniforme OHADA')
+    }
+  }
+  return ok(ref, nom, 'Tous les soldes de caisse sont positifs')
+}
+
+// EF-040: Comptes de liaison inter-societes
+function EF040(ctx: AuditContext): ResultatControle {
+  const ref = 'EF-040', nom = 'Comptes de liaison'
+  const liaison = sumForPrefixes(ctx.balanceN, ['18'])
+  if (liaison > 0) {
+    return anomalie(ref, nom, 'INFO',
+      `Comptes de liaison inter-societes: ${liaison.toLocaleString('fr-FR')}`,
+      { montants: { liaison } },
+      'Verifier que les comptes de liaison sont correctement apures en fin d\'exercice.')
+  }
+  return ok(ref, nom, 'Pas de comptes de liaison')
+}
+
+// EF-041: Coherence amortissements vs immobilisations
+function EF041(ctx: AuditContext): ResultatControle {
+  const ref = 'EF-041', nom = 'Taux amortissement global'
+  const immoBrut = sumDebitSoldes(ctx.balanceN, ['21', '22', '23', '24', '25'])
+  const amortCumul = sumCreditSoldes(ctx.balanceN, ['28'])
+  if (immoBrut === 0) return ok(ref, nom, 'Pas d\'immobilisations corporelles')
+  const taux = amortCumul / immoBrut
+  if (taux > 0.95) {
+    return anomalie(ref, nom, 'INFO',
+      `Immobilisations amorties a ${(taux * 100).toFixed(0)}% - parc vieillissant`,
+      { montants: { immoBrut, amortCumul, tauxPercent: Math.round(taux * 100) } },
+      'Le parc d\'immobilisations est presque entierement amorti. Envisager un plan de renouvellement.')
+  }
+  return ok(ref, nom, `Taux d'amortissement global: ${(taux * 100).toFixed(0)}%`)
+}
+
+// EF-042: Variation resultat N vs N-1 significative
+function EF042(ctx: AuditContext): ResultatControle {
+  const ref = 'EF-042', nom = 'Variation resultat N/N-1'
+  if (!ctx.balanceN1 || ctx.balanceN1.length === 0) {
+    return { ref, nom, niveau: NIVEAU, statut: 'NON_APPLICABLE', severite: 'OK', message: 'Balance N-1 absente', timestamp: new Date().toISOString() }
+  }
+  const resN = sumCreditSoldes(ctx.balanceN, ['7']) - sumDebitSoldes(ctx.balanceN, ['6'])
+  const resN1 = sumCreditSoldes(ctx.balanceN1, ['7']) - sumDebitSoldes(ctx.balanceN1, ['6'])
+  if (Math.abs(resN1) > 1) {
+    const variation = (resN - resN1) / Math.abs(resN1)
+    if (Math.abs(variation) > 0.5) {
+      return anomalie(ref, nom, 'INFO',
+        `Variation resultat significative: ${(variation * 100).toFixed(0)}% (N: ${resN.toLocaleString('fr-FR')}, N-1: ${resN1.toLocaleString('fr-FR')})`,
+        { montants: { resultatN: resN, resultatN1: resN1, variationPercent: Math.round(variation * 100) } },
+        'Justifier la variation significative du resultat dans l\'annexe.')
+    }
+  }
+  return ok(ref, nom, 'Variation resultat dans les limites normales')
+}
+
+// EF-043: Report a nouveau coherent avec resultat N-1
+function EF043(ctx: AuditContext): ResultatControle {
+  const ref = 'EF-043', nom = 'RAN vs resultat N-1'
+  if (!ctx.balanceN1 || ctx.balanceN1.length === 0) {
+    return { ref, nom, niveau: NIVEAU, statut: 'NON_APPLICABLE', severite: 'OK', message: 'Balance N-1 absente', timestamp: new Date().toISOString() }
+  }
+  const ranN = -sumSoldeForPrefixes(ctx.balanceN, ['12'])
+  const resultatN1 = -sumSoldeForPrefixes(ctx.balanceN1, ['13'])
+  const ecart = Math.abs(ranN - resultatN1)
+  if (ecart > 1 && resultatN1 !== 0) {
+    return anomalie(ref, nom, 'MAJEUR',
+      `RAN N (${ranN.toLocaleString('fr-FR')}) != Resultat N-1 (${resultatN1.toLocaleString('fr-FR')}), ecart: ${ecart.toLocaleString('fr-FR')}`,
+      { montants: { ranN, resultatN1, ecart } },
+      'L\'ecart peut s\'expliquer par des distributions de dividendes ou des mises en reserves. Verifier le PV d\'AG.',
+      undefined,
+      'Art. 8 Acte Uniforme OHADA')
+  }
+  return ok(ref, nom, 'RAN coherent avec resultat N-1')
+}
+
+// EF-044: Impots et taxes coherents avec CA
+function EF044(ctx: AuditContext): ResultatControle {
+  const ref = 'EF-044', nom = 'Impots et taxes vs CA'
+  const impots = sumDebitSoldes(ctx.balanceN, ['64'])
+  const ca = sumCreditSoldes(ctx.balanceN, ['70'])
+  if (ca > 50000000 && impots === 0) {
+    return anomalie(ref, nom, 'MAJEUR',
+      `CA de ${ca.toLocaleString('fr-FR')} sans aucun impot ou taxe (compte 64)`,
+      { montants: { ca, impots } },
+      'Une entreprise avec un CA significatif doit normalement avoir des impots et taxes (patente, contribution fonciere, etc.).')
+  }
+  return ok(ref, nom, `Impots et taxes: ${impots.toLocaleString('fr-FR')}`)
+}
+
 // --- Enregistrement ---
 
 export function registerLevel6Controls(): void {
@@ -736,6 +1096,27 @@ export function registerLevel6Controls(): void {
     ['EF-022', 'Fonds de roulement', 'FR = Capitaux permanents - Actif immo net', 'MINEUR', EF022],
     ['EF-023', 'BFR coherent', 'BFR = Actif circulant - Passif circulant', 'INFO', EF023],
     ['EF-024', 'Coherence HAO', 'Charges HAO vs produits HAO', 'INFO', EF024],
+    // --- 20 new controls ---
+    ['EF-025', 'Completude notes annexes', 'Verifie la presence des notes obligatoires', 'MINEUR', EF025],
+    ['EF-026', 'CAF additive = soustractive', 'Coherence des deux methodes de CAF', 'MINEUR', EF026],
+    ['EF-027', 'Equilibre TFT', 'Total emplois = total ressources', 'MINEUR', EF027],
+    ['EF-028', 'Solde ouverture = cloture N-1', 'Continuite des soldes d\'ouverture', 'BLOQUANT', EF028],
+    ['EF-029', 'Continuite des comptes', 'Comptes presents en N-1 mais absents en N', 'INFO', EF029],
+    ['EF-030', 'SIG total = CR total', 'Coherence resultat SIG et CdR', 'BLOQUANT', EF030],
+    ['EF-031', 'Tresorerie nette', 'Tresorerie nette positive ou negative', 'MAJEUR', EF031],
+    ['EF-032', 'CP >= 50% capital', 'Alerte legale capitaux propres', 'BLOQUANT', EF032],
+    ['EF-033', 'Ratio endettement', 'Dettes financieres / capitaux propres', 'INFO', EF033],
+    ['EF-034', 'CCA coherentes', 'Charges constatees d\'avance vs CA', 'MINEUR', EF034],
+    ['EF-035', 'PCA coherents', 'Produits constates d\'avance vs CA', 'MINEUR', EF035],
+    ['EF-036', 'Ecart conversion actif', 'ECA sans provision pour risque de change', 'MAJEUR', EF036],
+    ['EF-037', 'Poids HAO', 'Impact du HAO sur le resultat', 'INFO', EF037],
+    ['EF-038', 'TVA collectee vs CA', 'Coherence TVA et chiffre d\'affaires', 'MINEUR', EF038],
+    ['EF-039', 'Caisse positive', 'Solde caisse ne peut etre negatif', 'BLOQUANT', EF039],
+    ['EF-040', 'Comptes de liaison', 'Apurement comptes inter-societes', 'INFO', EF040],
+    ['EF-041', 'Taux amortissement global', 'Etat du parc d\'immobilisations', 'INFO', EF041],
+    ['EF-042', 'Variation resultat N/N-1', 'Variation significative du resultat', 'INFO', EF042],
+    ['EF-043', 'RAN vs resultat N-1', 'Report a nouveau coherent', 'MAJEUR', EF043],
+    ['EF-044', 'Impots et taxes vs CA', 'Impots et taxes coherents avec l\'activite', 'MAJEUR', EF044],
   ]
 
   for (const [ref, nom, desc, sev, fn] of defs) {

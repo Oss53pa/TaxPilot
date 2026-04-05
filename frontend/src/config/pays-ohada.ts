@@ -96,7 +96,7 @@ export const PAYS_OHADA: Record<string, PaysOHADA> = {
     },
     comptabilite: {
       plan_comptable: 'SYSCOHADA_REVISE',
-      notes_annexes_obligatoires: ['Note 1', 'Note 2', 'Note 3', 'TAFIRE'],
+      notes_annexes_obligatoires: ['Note 1', 'Note 2', 'Note 3', 'TFT'],
     },
   },
 

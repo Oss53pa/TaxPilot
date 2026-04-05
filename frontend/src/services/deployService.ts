@@ -37,7 +37,7 @@ export async function deployToLiasse(
     liasseDataService.generateCompteResultat(typeLiasse)
     liasseDataService.generateSIG()
     liasseDataService.generateTFT()
-    liasseDataService.generateTAFIRE()
+    // generateTAFIRE() removed — TAFIRE replaced by TFT in SYSCOHADA Révisé (2017)
   } catch (err) {
     throw new Error(`Erreur lors de la generation des etats financiers: ${err instanceof Error ? err.message : String(err)}`)
   }

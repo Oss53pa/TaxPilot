@@ -1,95 +1,62 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { Box, Typography } from '@mui/material'
 import LiasseHeader from '../LiasseHeader'
 import LiasseTable from '../LiasseTable'
-import type { PageProps, BalanceEntry } from '../../types'
-import { getBalanceSolde } from '../../services/liasse-calculs'
+import type { PageProps } from '../../types'
 import type { Column, Row } from '../LiasseTable'
-import { COMPTE_RESULTAT_MAPPING as CR } from '@/constants/syscohada-mappings'
+import { liasseDataService } from '@/services/liasseDataService'
 
 const v = (n: number) => n || null
 
 /**
- * SYSCOHADA Révisé 2017 — Convention de signe pour le Compte de Résultat :
+ * SYSCOHADA Révisé 2017 — Compte de Résultat
  *
- * getBalanceSolde() retourne (solde_debit - solde_credit).
- * - Produits (T*) : solde naturellement créditeur → getBalanceSolde négatif → on négate pour afficher positif
- * - Charges (R*) : solde naturellement débiteur → getBalanceSolde positif → on négate pour afficher négatif
- * - Variations (stocks) : le signe résultant indique augmentation (-) ou diminution (+)
+ * Delegates to liasseDataService.generateCompteResultat() as single source of truth.
+ * The component only builds display rows with sub-totals; it does not compute line values.
  *
- * Mathématiquement, les trois cas appliquent -getBalanceSolde(). C'est correct :
- * Total = Σ(produits) + Σ(charges) = positifs + négatifs → résultat net.
+ * Convention: produits are positive, charges are negative (so addition gives net result).
  */
-const montantCR = (bal: BalanceEntry[], comptes: string[]): number =>
-  -getBalanceSolde(bal, comptes)
+function buildResultatRows(field: 'montant' | 'montant_n1') {
+  const { charges, produits } = liasseDataService.generateCompteResultat()
 
-function computeResultat(bal: BalanceEntry[]) {
-  // --- Activité commerciale ---
-  const TA = montantCR(bal, [...CR.TA.comptes])
-  const RA = montantCR(bal, [...CR.RA.comptes])
-  const RB = montantCR(bal, [...CR.RB.comptes])
+  const c = (ref: string) => {
+    const row = charges.find(r => r.ref === ref)
+    return row ? -(row[field] ?? 0) : 0  // negate: charges displayed as negative
+  }
+  const p = (ref: string) => {
+    const row = produits.find(r => r.ref === ref)
+    return row ? (row[field] ?? 0) : 0   // produits displayed as positive
+  }
+
+  const TA = p('TA'), RA = c('RA'), RB = c('RB')
   const XA = TA + RA + RB
 
-  // --- Chiffre d'affaires ---
-  const TB = montantCR(bal, [...CR.TB.comptes])
-  const TC = montantCR(bal, [...CR.TC.comptes])
-  const TD = montantCR(bal, [...CR.TD.comptes])
+  const TB = p('TB'), TC = p('TC'), TD = p('TD')
   const XB = TA + TB + TC + TD
 
-  // --- Valeur ajoutée ---
-  const TE = montantCR(bal, [...CR.TE.comptes])
-  const TF = montantCR(bal, [...CR.TF.comptes])
-  const TG = montantCR(bal, [...CR.TG.comptes])
-  const TH = montantCR(bal, [...CR.TH.comptes])
-  // SYSCOHADA Révisé 2017 — Classe 78/79 :
-  // 781 = Transferts de charges d'exploitation → poste TI uniquement
-  // 791 = Reprises de provisions d'exploitation → poste TJ uniquement
-  // 797 = Reprises de provisions financières → poste TL uniquement (ne pas dupliquer)
-  // 798 = Reprises d'amortissements → poste TJ
-  // 799 = Reprises de dépréciations → poste TJ
-  const TI = montantCR(bal, [...CR.TI.comptes])
-  const RC = montantCR(bal, [...CR.RC.comptes])
-  const RD = montantCR(bal, [...CR.RD.comptes])
-  const RE = montantCR(bal, [...CR.RE.comptes])
-  const RF = montantCR(bal, [...CR.RF.comptes])
-  const RG = montantCR(bal, [...CR.RG.comptes])
-  const RH = montantCR(bal, [...CR.RH.comptes])
-  const RI = montantCR(bal, [...CR.RI.comptes])
-  const RJ = montantCR(bal, [...CR.RJ.comptes])
-  const XC = XB + RA + RB + TE + TF + TG + TH + TI + RC + RD + RE + RF + RG + RH + RI + RJ
+  const TE = p('TE'), TF = p('TF'), TG = p('TG'), TH = p('TH'), TI = p('TI')
+  const RC = c('RC'), RD = c('RD'), RE = c('RE'), RF = c('RF')
+  const RG = c('RG'), RH = c('RH'), RI = c('RI'), RJ = c('RJ')
+  const XC = XA + TB + TC + TD + TE + TF + TG + TH + TI + RC + RD + RE + RF + RG + RH + RI + RJ
 
-  // --- Excédent brut d'exploitation ---
-  const RK = montantCR(bal, [...CR.RK.comptes])
+  const RK = c('RK')
   const XD = XC + RK
 
-  // --- Résultat d'exploitation ---
-  const TJ = montantCR(bal, [...CR.TJ.comptes])
-  const RL = montantCR(bal, [...CR.RL.comptes])
+  const TJ = p('TJ'), RL = c('RL')
   const XE = XD + TJ + RL
 
-  // --- Résultat financier ---
-  const TK = montantCR(bal, [...CR.TK.comptes])
-  const TL = montantCR(bal, [...CR.TL.comptes])
-  const TM = montantCR(bal, [...CR.TM.comptes])
-  const RM = montantCR(bal, [...CR.RM.comptes])
-  const RN = montantCR(bal, [...CR.RN.comptes])
+  const TK = p('TK'), TL = p('TL'), TM = p('TM')
+  const RM = c('RM'), RN = c('RN')
   const XF = TK + TL + TM + RM + RN
 
-  // --- Résultat des activités ordinaires ---
   const XG = XE + XF
 
-  // --- Résultat HAO ---
-  const TN = montantCR(bal, [...CR.TN.comptes])
-  const TO = montantCR(bal, [...CR.TO.comptes])
-  const RO = montantCR(bal, [...CR.RO.comptes])
-  // SYSCOHADA: 87 est exclusif à RQ (Participation travailleurs), pas dans RP
-  const RP = montantCR(bal, [...CR.RP.comptes])
+  const TN = p('TN'), TO = p('TO')
+  const RO = c('RQ'), RP = c('RR')  // SYSCOHADA mapping: RQ->81 (VCE), RR->83/85 (autres HAO)
   const XH = TN + TO + RO + RP
 
-  // --- Résultat net ---
-  const RQ = montantCR(bal, [...CR.RQ.comptes])
-  const RS = montantCR(bal, [...CR.RS.comptes])
-  const XI = XG + XH + RQ + RS
+  const RS = c('RS')
+  const XI = XG + XH + RS
 
   return [
     { ref: '', label: 'ACTIVITE D\'EXPLOITATION', note: '', net: 0, isSub: true },
@@ -114,7 +81,7 @@ function computeResultat(bal: BalanceEntry[]) {
     { ref: 'RH', label: 'Services extérieurs', note: '24', net: RH },
     { ref: 'RI', label: 'Impôts et taxes', note: '25', net: RI },
     { ref: 'RJ', label: 'Autres charges', note: '26', net: RJ },
-    { ref: 'XC', label: 'VALEUR AJOUTEE (XB +RA+RB) + (somme TE à RJ)', note: '', net: XC, isTotal: true },
+    { ref: 'XC', label: 'VALEUR AJOUTEE (XA+somme TB à TI+somme RC à RJ)', note: '', net: XC, isTotal: true },
     { ref: 'RK', label: 'Charges de personnel', note: '27', net: RK },
     { ref: 'XD', label: 'EXCEDENT BRUT D\'EXPLOITATION (XC+RK)', note: '', net: XD, isTotal: true },
     { ref: 'TJ', label: 'Reprises d\'amortissements, provisions et dépréciations', note: '28', net: TJ },
@@ -135,15 +102,18 @@ function computeResultat(bal: BalanceEntry[]) {
     { ref: 'RP', label: 'Autres Charges HAO', note: '30', net: RP },
     { ref: 'XH', label: 'RESULTAT HORS ACTIVITES ORDINAIRES (somme TN à RP)', note: '', net: XH, isTotal: true },
     { ref: '', label: 'DETERMINATION DU RESULTAT NET', note: '', net: 0, isSub: true },
-    { ref: 'RQ', label: 'Participation des travailleurs', note: '30', net: RQ },
+    { ref: 'RQ', label: 'Participation des travailleurs', note: '30', net: 0 },
     { ref: 'RS', label: 'Impôts sur le résultat', note: '37', net: RS },
     { ref: 'XI', label: 'RESULTAT NET (XG+XH+RQ+RS)', note: '', net: XI, isTotal: true },
   ]
 }
 
-const Resultat: React.FC<PageProps> = ({ entreprise, balance, balanceN1, onNoteClick }) => {
-  const lines = computeResultat(balance)
-  const linesN1 = balanceN1 && balanceN1.length > 0 ? computeResultat(balanceN1) : null
+const Resultat: React.FC<PageProps> = ({ entreprise, onNoteClick }) => {
+  const lines = useMemo(() => buildResultatRows('montant'), [])
+  const linesN1 = useMemo(() => {
+    if (!liasseDataService.hasN1) return null
+    return buildResultatRows('montant_n1')
+  }, [])
 
   const columns: Column[] = [
     { key: 'ref', label: 'REF', width: 52, align: 'center' },
@@ -153,7 +123,7 @@ const Resultat: React.FC<PageProps> = ({ entreprise, balance, balanceN1, onNoteC
     { key: 'net_n1', label: 'NET', width: 130, align: 'right', subLabel: 'Exercice N-1' },
   ]
 
-  // Build a ref->index map for N-1 lookup (skip section headers)
+  // Build a ref->value map for N-1 lookup (skip section headers)
   const n1Map: Record<string, number> = {}
   if (linesN1) {
     for (const r of linesN1) {

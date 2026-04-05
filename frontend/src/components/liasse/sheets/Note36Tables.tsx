@@ -210,7 +210,7 @@ const Note36Tables: React.FC<Note36TablesProps> = ({ initialTab = 0 }) => {
   // Codes et abréviations
   const codesAbreviations = [
     { code: 'HAO', libelle: 'Hors Activités Ordinaires', description: 'Éléments exceptionnels non récurrents' },
-    { code: 'TAFIRE', libelle: 'Tableau Financier des Ressources et Emplois', description: 'État de flux de trésorerie' },
+    { code: 'TFT', libelle: 'Tableau des Flux de Trésorerie', description: 'État de flux de trésorerie (remplace le TAFIRE depuis SYSCOHADA Révisé 2017)' },
     { code: 'CAF', libelle: 'Capacité d\'Autofinancement', description: 'Ressource interne générée par l\'activité' },
     { code: 'BFE', libelle: 'Besoin en Fonds d\'Exploitation', description: 'Besoin de financement du cycle d\'exploitation' },
     { code: 'EBE', libelle: 'Excédent Brut d\'Exploitation', description: 'Performance opérationnelle' },

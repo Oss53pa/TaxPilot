@@ -203,37 +203,8 @@ function generateSIGHTML(): string {
     </div>`
 }
 
-function generateTAFIREHTML(): string {
-  const tafire = liasseDataService.generateTAFIRE()
-
-  return `
-    <div class="page-break">
-      <h2>TAFIRE — TABLEAU FINANCIER DES RESSOURCES ET EMPLOIS</h2>
-      <table>
-        <tr><th>Libelle</th><th class="num">Exercice N</th><th class="num">Exercice N-1</th></tr>
-        <tr class="section"><td colspan="3">PARTIE I — ACTIVITE</td></tr>
-        <tr><td>Capacite d'Autofinancement Globale (CAFG)</td><td class="num">${fmt(tafire.CAFG)}</td><td class="num">${fmt(tafire.CAFG_N1)}</td></tr>
-        <tr><td>(-) Dividendes distribues</td><td class="num">${fmt(-tafire.dividendes)}</td><td></td></tr>
-        <tr class="sig"><td>= Autofinancement</td><td class="num">${fmt(tafire.autofinancement)}</td><td></td></tr>
-        <tr class="section"><td colspan="3">PARTIE II — INVESTISSEMENT</td></tr>
-        <tr><td>Acquisitions d'immobilisations</td><td class="num">${fmt(tafire.acquisImmo)}</td><td></td></tr>
-        <tr><td>Cessions d'immobilisations</td><td class="num">${fmt(tafire.cessions)}</td><td></td></tr>
-        <tr class="section"><td colspan="3">PARTIE III — FINANCEMENT</td></tr>
-        <tr><td>Augmentation de capital</td><td class="num">${fmt(tafire.augCapital)}</td><td></td></tr>
-        <tr><td>Emprunts nouveaux</td><td class="num">${fmt(tafire.empruntsNouveaux)}</td><td></td></tr>
-        <tr><td>Remboursement d'emprunts</td><td class="num">${fmt(-tafire.remboursements)}</td><td></td></tr>
-        <tr class="section"><td colspan="3">VARIATION DU BFR</td></tr>
-        <tr><td>Variation des stocks</td><td class="num">${fmt(tafire.varStocks)}</td><td></td></tr>
-        <tr><td>Variation des creances</td><td class="num">${fmt(tafire.varCreances)}</td><td></td></tr>
-        <tr><td>Variation des dettes fournisseurs</td><td class="num">${fmt(tafire.varFournisseurs)}</td><td></td></tr>
-        <tr class="sig"><td>Variation du BFR</td><td class="num">${fmt(tafire.varBFR)}</td><td></td></tr>
-        <tr class="section"><td colspan="3">SYNTHESE</td></tr>
-        <tr class="sig"><td>Total des emplois</td><td class="num">${fmt(tafire.totalEmplois)}</td><td></td></tr>
-        <tr class="sig"><td>Total des ressources</td><td class="num">${fmt(tafire.totalRessources)}</td><td></td></tr>
-        <tr class="grandtotal"><td>VARIATION DE TRESORERIE</td><td class="num">${fmt(tafire.varTresorerie)}</td><td></td></tr>
-      </table>
-    </div>`
-}
+// generateTAFIREHTML removed — TAFIRE replaced by TFT in SYSCOHADA Révisé (2017)
+// See Tafire.tsx component for legacy reference.
 
 function generateTFTHTML(): string {
   const tft = liasseDataService.generateTFT()
@@ -365,7 +336,7 @@ export function printLiasse(
       bodyContent += generateBilanPassifHTML('SN')
       bodyContent += generateCompteResultatHTML('SN')
       bodyContent += generateSIGHTML()
-      bodyContent += generateTAFIREHTML()
+      // TAFIRE removed in SYSCOHADA Révisé (2017) — replaced by TFT
       bodyContent += generateTFTHTML()
       bodyContent += generatePassageFiscalHTML()
       break

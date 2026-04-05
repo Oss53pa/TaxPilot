@@ -722,8 +722,8 @@ const NotesRestantes: React.FC<NoteRestanteProps> = ({
   const usingImported = !!getLatestBalance()?.entries?.length
 
   // Utiliser les données calculées si disponibles, sinon fallback hardcodé
-  const noteData = (typeof numeroNote === 'number' ? computedNotes[numeroNote] as NoteData : undefined) || NOTES_DATA[numeroNote]
-  const isComputed = typeof numeroNote === 'number' && !!computedNotes[numeroNote]
+  const noteData = (computedNotes[numeroNote] as NoteData | undefined) || NOTES_DATA[numeroNote]
+  const isComputed = !!computedNotes[numeroNote]
 
   const { isEditMode, toggleEditMode, handleCellChange, getCellValue, hasChanges, handleSave } = useEditableTable()
 

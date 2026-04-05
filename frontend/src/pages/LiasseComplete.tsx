@@ -27,7 +27,6 @@ import {
   Assignment,
   AccountBalance,
   TrendingUp,
-  TableChart,
   Description,
   Notes,
   AttachMoney,
@@ -50,7 +49,7 @@ import {
 import BilanActif from '../components/liasse/BilanActif'
 import BilanPassif from '../components/liasse/BilanPassif'
 import CompteResultat from '../components/liasse/CompteResultat'
-import Tafire from '../components/liasse/Tafire'
+// import Tafire from '../components/liasse/Tafire' // @deprecated — TAFIRE replaced by TFT in SYSCOHADA Révisé (2017)
 import FluxTresorerie from '../components/liasse/FluxTresorerie'
 import VariationCapitaux from '../components/liasse/VariationCapitaux'
 import NotesAnnexes from '../components/liasse/NotesAnnexes'
@@ -110,16 +109,7 @@ const LiasseComplete: React.FC = () => {
       completude: 88,
       category: 'États financiers',
     },
-    {
-      id: 'tafire',
-      label: 'TAFIRE',
-      icon: <TableChart />,
-      component: Tafire,
-      description: 'Tableau Financier des Ressources et Emplois',
-      status: 'complete',
-      completude: 95,
-      category: 'États financiers',
-    },
+    // TAFIRE removed in SYSCOHADA Révisé (2017) — replaced by TFT (Flux de Trésorerie below)
     {
       id: 'flux-tresorerie',
       label: 'Flux de Trésorerie',

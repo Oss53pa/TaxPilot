@@ -111,7 +111,25 @@ export interface LiasseData {
  * - Passif & Produits: solde normal = CRÉDITEUR (solde_credit - solde_debit > 0)
  * - Amort/Provisions (28x, 29x, 39x, 49x, 59x): solde normal = CRÉDITEUR
  * - Comptes réciproques (42x, 48x, 52x): ventilés selon sens du solde
+ *
+ * COMPTES À DOUBLE NATURE (réciproques):
+ * Les préfixes listés dans DUAL_NATURE_PREFIXES apparaissent SIMULTANÉMENT dans
+ * actif et passif. Lors du calcul :
+ *   - côté Actif  → on ne retient que les soldes débiteurs (calculateActifBrut)
+ *   - côté Passif → on ne retient que les soldes créditeurs (calculatePassifReciprocal)
+ * Aucun double-comptage n'est possible car chaque écriture est uni-directionnelle.
  */
+
+/**
+ * Préfixes de comptes à double nature.
+ * Chaque entrée mappe un préfixe de compte vers ses rubriques Actif / Passif.
+ */
+export const DUAL_NATURE_PREFIXES: Record<string, { actifRef: string; passifRef: string }> = {
+  '42': { actifRef: 'BK', passifRef: 'DL' },
+  '48': { actifRef: 'BA', passifRef: 'DH' },
+  '52': { actifRef: 'BS', passifRef: 'DQ' },
+}
+
 export const SYSCOHADA_MAPPING = {
   // ──────────────── ACTIF IMMOBILISÉ ────────────────
   actif: {
@@ -140,25 +158,25 @@ export const SYSCOHADA_MAPPING = {
     AT: { comptes: ['26'], amortComptes: ['296'] },
     AU: { comptes: ['271', '272', '273', '274', '275', '276', '277'], amortComptes: ['297'] },
 
-    // ACTIF CIRCULANT
-    BA: { comptes: ['485', '486', '487', '488'], amortComptes: ['498'] },
+    // ACTIF CIRCULANT (48x = compte réciproque, soldes débiteurs uniquement)
+    BA: { comptes: ['48'], amortComptes: ['498'] },
 
     // Stocks
     BC: { comptes: ['31'], amortComptes: ['391'] },
     BD: { comptes: ['32'], amortComptes: ['392'] },
     BE: { comptes: ['33'], amortComptes: ['393'] },
     BF: { comptes: ['34', '35'], amortComptes: ['394', '395'] },
-    BG: { comptes: ['36', '37', '38'], amortComptes: ['396', '397', '398'] },
+    BG: { comptes: ['36', '37', '38'], amortComptes: ['396', '397', '398', '399'] },
 
     // Créances
     BI: { comptes: ['409'], amortComptes: ['490'] },
     BJ: { comptes: ['411', '412', '413', '414', '415', '416', '418'], amortComptes: ['491'] },
-    BK: { comptes: ['43', '44', '45', '46', '47'], amortComptes: ['492', '493', '494', '495', '496', '497'] },
+    BK: { comptes: ['42', '43', '44', '45', '46', '47'], amortComptes: ['492', '493', '494', '495', '496', '497'] },
 
     // TRÉSORERIE ACTIF
     BQ: { comptes: ['50'], amortComptes: ['590'] },
     BR: { comptes: ['51'], amortComptes: ['591'] },
-    BS: { comptes: ['52', '53', '54', '55', '56', '57', '58'], amortComptes: ['592', '593', '594'] },
+    BS: { comptes: ['52', '53', '54', '55', '56', '57', '58'], amortComptes: ['592', '593', '594', '595', '596', '597', '598', '599'] },
 
     // Écart de conversion actif
     BU: { comptes: ['478'], amortComptes: [] }
@@ -187,11 +205,11 @@ export const SYSCOHADA_MAPPING = {
     DF: { comptes: ['19'] },
 
     // Passif circulant
-    DH: { comptes: ['481', '482', '483', '484'] },
+    DH: { comptes: ['48'] },
     DI: { comptes: ['419'] },
     DJ: { comptes: ['401', '402', '403', '404', '405', '408'] },
     DK: { comptes: ['431', '432', '433', '434', '435', '436', '437', '438', '439', '441', '442', '443', '444', '445', '446', '447', '448', '449'] },
-    DL: { comptes: ['421', '422', '423', '424', '425', '426', '427', '428'] },
+    DL: { comptes: ['42'] },
     DM: { comptes: ['499'] },
 
     // Trésorerie passif
@@ -531,6 +549,36 @@ export class LiasseDataService {
       })
     })
     return total
+  }
+
+  // ────────── Comptes à double nature ──────────
+
+  /**
+   * Ventile les comptes à double nature (42x, 48x, 52x) selon le sens du solde.
+   * Retourne deux tableaux :
+   *   - actifSide  : entrées avec solde débiteur (solde_debit > solde_credit)
+   *   - passifSide : entrées avec solde créditeur (solde_credit > solde_debit)
+   *
+   * Chaque entrée est le tuple [numéro de compte, solde signé].
+   */
+  splitDualNatureAccounts(
+    prefixes: string[],
+    cache: Map<string, number> = this.mappingCache,
+  ): { actifSide: Array<[string, number]>; passifSide: Array<[string, number]> } {
+    const actifSide: Array<[string, number]> = []
+    const passifSide: Array<[string, number]> = []
+
+    cache.forEach((value, key) => {
+      const matches = prefixes.some(p => key === p || key.startsWith(p))
+      if (!matches) return
+      if (value > 0) {
+        actifSide.push([key, value])
+      } else if (value < 0) {
+        passifSide.push([key, value])
+      }
+    })
+
+    return { actifSide, passifSide }
   }
 
   // ────────── Génération Bilan Actif ──────────
@@ -1107,7 +1155,11 @@ export class LiasseDataService {
   }
 
   // ────────── Génération TAFIRE (Tableau Financier des Ressources et Emplois) ──────────
-
+  /**
+   * @deprecated TAFIRE has been replaced by TFT in SYSCOHADA Révisé (2017).
+   * Kept for legacy compatibility only. Use generateTFT() instead.
+   * The CAFG calculation is shared with generateTFT() (ref FE).
+   */
   generateTAFIRE(): TAFIREResult {
     const tft = this.generateTFT()
     const sig = this.generateSIG()

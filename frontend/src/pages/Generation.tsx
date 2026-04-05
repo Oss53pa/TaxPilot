@@ -53,7 +53,7 @@ const Generation: React.FC = () => {
     { nom: 'Bilan - Actif', complete: 95, obligatoire: true },
     { nom: 'Bilan - Passif', complete: 95, obligatoire: true },
     { nom: 'Compte de Résultat', complete: 88, obligatoire: true },
-    { nom: 'TAFIRE', complete: 72, obligatoire: true },
+    { nom: 'TFT', complete: 72, obligatoire: true },
     { nom: 'Notes Annexes', complete: 45, obligatoire: false },
     { nom: 'Variation Capitaux', complete: 89, obligatoire: false },
   ]

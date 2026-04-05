@@ -1,6 +1,7 @@
 /**
  * Orchestrateur d'audit
  * Pont entre l'UI et le moteur d'execution
+ * Persists results to Supabase when available.
  */
 
 import {
@@ -10,6 +11,8 @@ import {
   RapportCorrection,
 } from '@/types/audit.types'
 import { BalanceEntry, SYSCOHADA_MAPPING } from '@/services/liasseDataService'
+import { supabase, isSupabaseEnabled } from '@/lib/supabase'
+import { logger } from '@/utils/logger'
 import { PLAN_SYSCOHADA_REVISE } from '@/data/SYSCOHADARevisePlan'
 import { controlRegistry } from './controlRegistry'
 import { executePhase1, executePhase3, computeResume, generateCorrectionReport } from './auditEngine'
@@ -56,6 +59,32 @@ function generateSessionId(): string {
   return `AUDIT-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`
 }
 
+/**
+ * Persist audit results to Supabase audit_results table
+ */
+async function persistAuditResults(
+  session: SessionAudit,
+  dossierId?: string
+): Promise<void> {
+  if (!isSupabaseEnabled || !supabase || !dossierId) return
+  try {
+    const { error } = await supabase.from('audit_results').insert({
+      dossier_id: dossierId,
+      exercice: parseInt(session.exercice) || new Date().getFullYear(),
+      results: session.resultats,
+      total_controls: session.resume.totalControles,
+      passed: session.resume.parSeverite.OK,
+      failed: session.resume.totalControles - session.resume.parSeverite.OK,
+      blocking: session.resume.bloquantsRestants,
+    })
+    if (error) {
+      logger.error('Failed to persist audit results:', error)
+    }
+  } catch (err) {
+    logger.error('Error persisting audit results:', err)
+  }
+}
+
 class AuditOrchestrator {
   /**
    * Phase 1 : Audit de la balance (niveaux 0-5, 8)
@@ -65,7 +94,8 @@ class AuditOrchestrator {
     balanceN1?: BalanceEntry[],
     exercice?: string,
     callbacks?: Partial<AuditProgressCallback>,
-    typeLiasse?: import('@/types').TypeLiasse
+    typeLiasse?: import('@/types').TypeLiasse,
+    dossierId?: string
   ): Promise<SessionAudit> {
     ensureControlsRegistered()
 
@@ -131,6 +161,7 @@ class AuditOrchestrator {
     }
 
     saveSession(session)
+    await persistAuditResults(session, dossierId)
     callbacks?.onComplete?.(session.resume)
 
     return session
@@ -142,7 +173,8 @@ class AuditOrchestrator {
   async startPhase3Audit(
     balanceN: BalanceEntry[],
     existingSession?: SessionAudit,
-    callbacks?: Partial<AuditProgressCallback>
+    callbacks?: Partial<AuditProgressCallback>,
+    dossierId?: string
   ): Promise<SessionAudit> {
     ensureControlsRegistered()
 
@@ -181,6 +213,7 @@ class AuditOrchestrator {
     }
 
     saveSession(session)
+    await persistAuditResults(session, dossierId)
     callbacks?.onComplete?.(session.resume)
     return session
   }
@@ -248,7 +281,9 @@ class AuditOrchestrator {
     try {
       const data = localStorage.getItem('fiscasync_audit_demo_balance')
       if (data) return JSON.parse(data)
-    } catch {}
+    } catch (err) {
+      logger.error('Failed to load demo balance:', err)
+    }
     return []
   }
 }

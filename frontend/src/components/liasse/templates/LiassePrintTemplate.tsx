@@ -174,7 +174,7 @@ const Sidebar: React.FC<SidebarProps> = ({ regime, currentPageIndex, onPageSelec
                   }}
                 >
                   <Typography sx={{
-                    fontSize: '9px',
+                    fontSize: '10px',
                     fontWeight: 600,
                     minWidth: 18,
                     color: isActive ? alpha(P.white, 0.7) : P.primary400,
@@ -327,11 +327,12 @@ const LiassePrintTemplate: React.FC<LiassePrintTemplateProps> = ({ regime, entre
     setPrintDialogOpen(true)
   }, [])
 
-  const handleExcel = useCallback(() => {
-    exportLiasseExcel(
+  const handleExcel = useCallback(async () => {
+    await exportLiasseExcel(
       { raison_sociale: entreprise.raison_sociale, numero_contribuable: entreprise.numero_contribuable },
       exercice,
       regime === 'normal' ? 'SN' : 'SMT',
+      { mode: regime === 'normal' ? 'A' : 'B' },
     )
   }, [regime, entreprise, exercice])
 

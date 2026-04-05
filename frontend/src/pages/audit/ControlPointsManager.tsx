@@ -583,7 +583,7 @@ const ControlPointsManager: React.FC = () => {
         est_active: true
       },
       
-      // 5. TAFIRE (Tableau Financier)
+      // 5. TFT (Tableau des Flux de Trésorerie — remplace le TAFIRE depuis SYSCOHADA Révisé 2017)
       {
         id: 45,
         code: 'II.5.1.1',
@@ -618,7 +618,7 @@ const ControlPointsManager: React.FC = () => {
         id: 48,
         code: 'II.5.3.1',
         nom: 'Réconciliation Trésorerie',
-        description: 'ΔTAFIRE = ΔBILAN (Cohérence flux)',
+        description: 'ΔTFT = ΔBILAN (Cohérence flux)',
         type_regle: 'Liasse',
         algorithme: 'RECONCILIATION_TRESORERIE',
         niveau_severite: 'Critique',
@@ -1062,7 +1062,7 @@ const ControlPointsManager: React.FC = () => {
         }
       },
       
-      // ALGORITHMES TAFIRE
+      // ALGORITHMES TFT (ex-TAFIRE)
       {
         code: 'CAF_SOUSTRACTIVE',
         nom: 'CAF Méthode Soustractive',
@@ -1077,10 +1077,10 @@ const ControlPointsManager: React.FC = () => {
       {
         code: 'RECONCILIATION_TRESORERIE',
         nom: 'Réconciliation Trésorerie',
-        description: 'ΔTAFIRE = ΔBILAN (Flux = Variation)',
+        description: 'ΔTFT = ΔBILAN (Flux = Variation)',
         parametres_disponibles: ['tolerance_reconciliation'],
         type: 'DETECTION',
-        detailDescription: `ALGORITHME II.5.3.1:\nΔ_tresorerie_TAFIRE = Flux_exploitation + Flux_investissement + Flux_financement\nΔ_tresorerie_bilan = Tresorerie_N - Tresorerie_N-1\n\nSI ABS(Δ_TAFIRE - Δ_bilan) > 100 ALORS\n  ERREUR CRITIQUE: TAFIRE non équilibré\n\nCONTRÔLE: Cohérence flux/variation`,
+        detailDescription: `ALGORITHME II.5.3.1:\nΔ_tresorerie_TFT = Flux_exploitation + Flux_investissement + Flux_financement\nΔ_tresorerie_bilan = Tresorerie_N - Tresorerie_N-1\n\nSI ABS(Δ_TFT - Δ_bilan) > 100 ALORS\n  ERREUR CRITIQUE: TFT non équilibré\n\nCONTRÔLE: Cohérence flux/variation`,
         parametres: {
           tolerance_reconciliation: { type: 'number', default: 100, description: 'Tolérance réconciliation FCFA' }
         }
@@ -1559,7 +1559,7 @@ const ControlPointsManager: React.FC = () => {
           🔍 Contrôles Exhaustifs OHADA/IFRS - Liste Complète Implémentée
         </Typography>
         <Typography variant="body2" sx={{ color: 'text.primary' }}>
-          ✅ Balance: Équilibre, Sens comptes, Cohérence • ✅ Liasse: Mapping, Cascade, TAFIRE • ✅ IA: Benford, Doublons, Outliers • ✅ IFRS: IAS 36
+          ✅ Balance: Équilibre, Sens comptes, Cohérence • ✅ Liasse: Mapping, Cascade, TFT • ✅ IA: Benford, Doublons, Outliers • ✅ IFRS: IAS 36
         </Typography>
       </Paper>
 
