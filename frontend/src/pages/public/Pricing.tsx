@@ -64,7 +64,7 @@ const Pricing: React.FC = () => (
           </Box>
 
           <Box
-            component={RouterLink} to="/register"
+            component="a" href="https://atlas-studio.org/portal?app=taxpilot&plan=Entreprise"
             sx={{
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1,
               border: `1px solid ${BORDER}`, bgcolor: 'transparent',
@@ -109,7 +109,7 @@ const Pricing: React.FC = () => (
           </Box>
 
           <Box
-            component={RouterLink} to="/register"
+            component="a" href="https://atlas-studio.org/portal?app=taxpilot&plan=Cabinet"
             sx={{
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1,
               bgcolor: GOLD, color: '#1a1200 !important', fontWeight: 500, fontFamily: BODY,
