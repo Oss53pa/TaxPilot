@@ -122,7 +122,7 @@ const PublicNav: React.FC = () => {
             '&:hover': { bgcolor: '#d4b35a !important' },
           }}
         >
-          Essai gratuit 14 jours
+          Souscrire
         </Box>
       </Box>
     </Box>

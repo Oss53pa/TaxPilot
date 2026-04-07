@@ -577,7 +577,7 @@ const Demo: React.FC = () => {
           Convaincu ?
         </Box>
         <Box component="p" sx={{ fontFamily: BODY, color: TEXT_SECONDARY, fontSize: '0.92rem', m: 0, mb: 4 }}>
-          Essayez Liass'Pilot gratuitement — 14 jours, sans carte bancaire.
+          Souscrivez a Liass'Pilot. Sans engagement.
         </Box>
         <Box sx={{ display: 'flex', gap: 1.5, justifyContent: 'center', flexWrap: 'wrap' }}>
           <Box

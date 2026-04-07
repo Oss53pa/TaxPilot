@@ -111,7 +111,7 @@ const About: React.FC = () => (
         Plus de 500 entreprises nous font déjà confiance en Afrique.
       </Box>
       <Box
-        component={RouterLink} to="/register"
+        component="a" href="https://atlas-studio.org/portal?app=taxpilot"
         sx={{
           display: 'inline-flex', alignItems: 'center', gap: 1,
           bgcolor: `${GOLD} !important`, color: '#1a1200 !important', fontWeight: 500, fontFamily: BODY,
@@ -119,7 +119,7 @@ const About: React.FC = () => (
           transition: 'all 0.25s', '&:hover': { bgcolor: '#d4b35a !important', transform: 'translateY(-2px)' },
         }}
       >
-        Essai gratuit 14 jours <ArrowForward sx={{ fontSize: 16 }} />
+        Souscrire maintenant <ArrowForward sx={{ fontSize: 16 }} />
       </Box>
     </Box>
   </PublicLayout>

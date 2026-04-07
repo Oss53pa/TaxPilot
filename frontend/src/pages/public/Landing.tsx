@@ -185,7 +185,7 @@ const Landing: React.FC = () => (
               '&:hover': { bgcolor: '#d4b35a', transform: 'translateY(-2px)' },
             }}
           >
-            Essai gratuit 14 jours <ArrowForward sx={{ fontSize: 16 }} />
+            Souscrire maintenant <ArrowForward sx={{ fontSize: 16 }} />
           </Box>
           <Box
             component={RouterLink} to="/demo"
@@ -202,7 +202,7 @@ const Landing: React.FC = () => (
           </Box>
         </Box>
         <Box sx={{ fontFamily: BODY, fontSize: '0.78rem', color: TEXT_SECONDARY, mb: 5, opacity: 0, animation: `${fadeIn} 0.6s ease 1s forwards` }}>
-          14 jours d'essai gratuit · Sans carte bancaire · Annulation à tout moment
+          Sans engagement · Annulation à tout moment
         </Box>
 
         {/* Social proof */}
@@ -497,7 +497,7 @@ const Landing: React.FC = () => (
 
         <Reveal delay={0.1}>
           <Box sx={{ fontFamily: BODY, fontSize: '0.78rem', color: TEXT_SECONDARY, mt: 3 }}>
-            14 jours d'essai gratuit · Sans carte bancaire · Annulation à tout moment
+            Sans engagement · Annulation à tout moment
           </Box>
         </Reveal>
       </Box>
@@ -511,7 +511,7 @@ const Landing: React.FC = () => (
             Prêt à simplifier votre liasse fiscale ?
           </Box>
           <Box component="p" sx={{ color: TEXT_SECONDARY, fontFamily: BODY, fontSize: '0.92rem', m: 0, mb: 4 }}>
-            Essai gratuit 14 jours. Aucune carte bancaire requise.
+            Souscrivez maintenant. Sans engagement.
           </Box>
           <Box
             component="a" href="https://atlas-studio.org/portal?app=taxpilot"

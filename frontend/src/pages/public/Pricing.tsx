@@ -132,7 +132,7 @@ const Pricing: React.FC = () => (
       </Box>
 
       <Box sx={{ fontFamily: BODY, fontSize: '0.78rem', color: TEXT_SECONDARY, textAlign: 'center', mt: 3 }}>
-        14 jours d'essai gratuit · Sans carte bancaire · Annulation à tout moment
+        Sans engagement · Annulation à tout moment
       </Box>
     </Box>
 

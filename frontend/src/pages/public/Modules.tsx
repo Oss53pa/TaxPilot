@@ -233,7 +233,7 @@ const Modules: React.FC = () => (
         Essayez Liass'Pilot gratuitement
       </Box>
       <Box sx={{ fontFamily: BODY, color: `${TEXT_SECONDARY} !important`, fontSize: '0.95rem', mb: 4 }}>
-        14 jours d'essai gratuit. Sans carte bancaire.
+        Souscrivez maintenant. Sans engagement.
       </Box>
       <Box sx={{ display: 'flex', gap: 1.5, justifyContent: 'center', flexWrap: 'wrap' }}>
         <Box

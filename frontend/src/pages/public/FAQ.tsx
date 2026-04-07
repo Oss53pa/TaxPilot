@@ -31,7 +31,7 @@ const sections = [
       { q: "Combien ça coûte ?", a: "Entreprise (1 société) : 250 000 FCFA/an. Cabinet (illimité) : 1 500 000 FCFA/an. Toutes les fonctionnalités sont incluses." },
       { q: "Puis-je changer de plan ?", a: "Oui, passage d'Entreprise à Cabinet à tout moment, au prorata." },
       { q: "Moyens de paiement ?", a: "Carte bancaire (Visa, Mastercard), Mobile Money (Orange, MTN, Moov), virement bancaire, Western Union." },
-      { q: "Essai gratuit ?", a: "14 jours gratuits, sans carte bancaire, annulation à tout moment." },
+      { q: "Essai gratuit ?", a: "Sans engagement, annulation à tout moment." },
     ],
   },
   {
@@ -372,7 +372,7 @@ const FAQ: React.FC = () => {
               '&:hover': { borderColor: 'rgba(255,255,255,0.3)', transform: 'translateY(-2px)' },
             }}
           >
-            Essai gratuit
+            Souscrire
           </Box>
         </Box>
       </Box>
