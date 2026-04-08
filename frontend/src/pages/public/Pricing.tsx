@@ -3,6 +3,7 @@ import { Link as RouterLink } from 'react-router-dom'
 import { Box } from '@mui/material'
 import { CheckCircle, ArrowForward } from '@mui/icons-material'
 import PublicLayout from './PublicLayout'
+import { useLandingContent } from '../../hooks/useLandingContent'
 import { DARK_SURFACE, GOLD, TEXT_PRIMARY, TEXT_SECONDARY, BORDER, HEADING, BODY } from './theme'
 
 const features = [
@@ -30,7 +31,13 @@ const features = [
   'Support email & prioritaire',
 ]
 
-const Pricing: React.FC = () => (
+const Pricing: React.FC = () => {
+  const { content: remoteContent } = useLandingContent('taxpilot');
+  const remotePricing = remoteContent?.pricing;
+  const entreprisePrice = remotePricing?.plans?.[0]?.price ?? 250000;
+  const cabinetPrice = remotePricing?.plans?.[1]?.price ?? 1500000;
+
+  return (
   <PublicLayout>
     {/* Header */}
     <Box sx={{ pt: { xs: 8, md: 12 }, pb: { xs: 2, md: 4 }, textAlign: 'center' }}>
@@ -59,7 +66,7 @@ const Pricing: React.FC = () => (
             Entreprise · 1 société
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.8, mb: 3 }}>
-            <Box sx={{ fontFamily: HEADING, fontWeight: 700, fontSize: '2.8rem', color: GOLD, lineHeight: 1 }}>250 000</Box>
+            <Box sx={{ fontFamily: HEADING, fontWeight: 700, fontSize: '2.8rem', color: GOLD, lineHeight: 1 }}>{entreprisePrice.toLocaleString('fr-FR')}</Box>
             <Box sx={{ fontFamily: BODY, fontSize: '0.9rem', color: TEXT_SECONDARY }}>FCFA/an</Box>
           </Box>
 
@@ -104,7 +111,7 @@ const Pricing: React.FC = () => (
             Cabinet · illimité
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.8, mb: 3 }}>
-            <Box sx={{ fontFamily: HEADING, fontWeight: 700, fontSize: '2.8rem', color: GOLD, lineHeight: 1 }}>1 500 000</Box>
+            <Box sx={{ fontFamily: HEADING, fontWeight: 700, fontSize: '2.8rem', color: GOLD, lineHeight: 1 }}>{cabinetPrice.toLocaleString('fr-FR')}</Box>
             <Box sx={{ fontFamily: BODY, fontSize: '0.9rem', color: TEXT_SECONDARY }}>FCFA/an</Box>
           </Box>
 
@@ -172,11 +179,11 @@ const Pricing: React.FC = () => (
         <Box sx={{ display: 'flex', borderTop: `1px solid ${BORDER}`, bgcolor: 'rgba(201,168,76,0.04)' }}>
           <Box sx={{ flex: 2, px: 3, py: 1.5, fontFamily: BODY, fontSize: '0.85rem', fontWeight: 600, color: TEXT_PRIMARY }}>Prix</Box>
           <Box sx={{ flex: 1, px: 2, py: 1.5, textAlign: 'center' }}>
-            <Box sx={{ fontFamily: HEADING, fontWeight: 700, fontSize: '1.1rem', color: GOLD }}>250 000</Box>
+            <Box sx={{ fontFamily: HEADING, fontWeight: 700, fontSize: '1.1rem', color: GOLD }}>{entreprisePrice.toLocaleString('fr-FR')}</Box>
             <Box sx={{ fontFamily: BODY, fontSize: '0.7rem', color: TEXT_SECONDARY }}>FCFA/an</Box>
           </Box>
           <Box sx={{ flex: 1, px: 2, py: 1.5, textAlign: 'center' }}>
-            <Box sx={{ fontFamily: HEADING, fontWeight: 700, fontSize: '1.1rem', color: GOLD }}>1 500 000</Box>
+            <Box sx={{ fontFamily: HEADING, fontWeight: 700, fontSize: '1.1rem', color: GOLD }}>{cabinetPrice.toLocaleString('fr-FR')}</Box>
             <Box sx={{ fontFamily: BODY, fontSize: '0.7rem', color: TEXT_SECONDARY }}>FCFA/an</Box>
           </Box>
         </Box>
@@ -204,6 +211,7 @@ const Pricing: React.FC = () => (
       </Box>
     </Box>
   </PublicLayout>
-)
+  )
+}
 
 export default Pricing

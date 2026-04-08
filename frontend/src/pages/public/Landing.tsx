@@ -3,6 +3,7 @@ import { Link as RouterLink } from 'react-router-dom'
 import { Box, Avatar, AvatarGroup, keyframes } from '@mui/material'
 import { AutoAwesome, ArrowForward } from '@mui/icons-material'
 import PublicLayout from './PublicLayout'
+import { useLandingContent } from '../../hooks/useLandingContent'
 import { DARK, DARK_SURFACE, GOLD, GOLD_MUTED, TEXT_PRIMARY, TEXT_SECONDARY, BORDER, HEADING, BODY } from './theme'
 
 // ─── Keyframe animations ─────────────────────────────────────
@@ -95,7 +96,20 @@ const allFeatures = [
 ]
 
 // ─── Component ───────────────────────────────────────────────
-const Landing: React.FC = () => (
+const Landing: React.FC = () => {
+  const { content: remoteContent } = useLandingContent('taxpilot');
+  const remoteStats = remoteContent?.stats;
+  const stats = remoteStats?.items ?? [
+    { value: '1 005', label: 'COMPTES SYSCOHADA' },
+    { value: '129', label: 'CONTRÔLES PROPH3T' },
+    { value: '84', label: 'ONGLETS EXCEL' },
+    { value: '17', label: 'PAYS OHADA' },
+  ];
+  const remotePricing = remoteContent?.pricing;
+  const entreprisePrice = remotePricing?.plans?.[0]?.price ?? 250000;
+  const cabinetPrice = remotePricing?.plans?.[1]?.price ?? 1500000;
+
+  return (
   <PublicLayout>
     {/* ─── Hero Section ───────────────────────────────── */}
     <Box sx={{ pt: { xs: 10, md: 14 }, pb: { xs: 6, md: 10 }, textAlign: 'center', overflow: 'hidden' }}>
@@ -221,12 +235,7 @@ const Landing: React.FC = () => (
     <Box sx={{ borderTop: `1px solid ${BORDER}`, borderBottom: `1px solid ${BORDER}`, bgcolor: DARK_SURFACE, py: { xs: 5, md: 7 } }}>
       <Reveal>
         <Box sx={{ maxWidth: 1000, mx: 'auto', px: 3, display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: { xs: 5, sm: 0 }, justifyContent: 'space-around', alignItems: 'center' }}>
-          {[
-            { value: '1 005', label: 'COMPTES SYSCOHADA' },
-            { value: '129', label: 'CONTRÔLES PROPH3T' },
-            { value: '84', label: 'ONGLETS EXCEL' },
-            { value: '17', label: 'PAYS OHADA' },
-          ].map((stat, i) => (
+          {stats.map((stat, i) => (
             <Box
               key={stat.label}
               sx={{
@@ -444,7 +453,7 @@ const Landing: React.FC = () => (
             >
               <Box sx={{ fontFamily: HEADING, fontWeight: 600, fontSize: '1.1rem', color: TEXT_PRIMARY, mb: 0.5 }}>Entreprise · 1 société</Box>
               <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.8, mb: 0.5 }}>
-                <Box sx={{ fontFamily: HEADING, fontWeight: 700, fontSize: '2.5rem', color: GOLD, lineHeight: 1 }}>250 000</Box>
+                <Box sx={{ fontFamily: HEADING, fontWeight: 700, fontSize: '2.5rem', color: GOLD, lineHeight: 1 }}>{entreprisePrice.toLocaleString('fr-FR')}</Box>
                 <Box sx={{ fontFamily: BODY, fontSize: '0.85rem', color: TEXT_SECONDARY }}>FCFA/an</Box>
               </Box>
               <Box
@@ -477,7 +486,7 @@ const Landing: React.FC = () => (
               </Box>
               <Box sx={{ fontFamily: HEADING, fontWeight: 600, fontSize: '1.1rem', color: TEXT_PRIMARY, mb: 0.5 }}>Cabinet · illimité</Box>
               <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.8, mb: 0.5 }}>
-                <Box sx={{ fontFamily: HEADING, fontWeight: 700, fontSize: '2.5rem', color: GOLD, lineHeight: 1 }}>1 500 000</Box>
+                <Box sx={{ fontFamily: HEADING, fontWeight: 700, fontSize: '2.5rem', color: GOLD, lineHeight: 1 }}>{cabinetPrice.toLocaleString('fr-FR')}</Box>
                 <Box sx={{ fontFamily: BODY, fontSize: '0.85rem', color: TEXT_SECONDARY }}>FCFA/an</Box>
               </Box>
               <Box
@@ -529,6 +538,7 @@ const Landing: React.FC = () => (
       </Reveal>
     </Box>
   </PublicLayout>
-)
+  )
+}
 
 export default Landing
