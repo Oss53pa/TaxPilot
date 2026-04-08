@@ -2,11 +2,11 @@ import React from 'react'
 import { Alert, AlertTitle, Button, LinearProgress, Typography } from '@mui/material'
 import { Warning as WarningIcon, Block as BlockIcon } from '@mui/icons-material'
 import { useQuota } from '@/hooks/useQuota'
-import { useNavigate } from 'react-router-dom'
+
+const ATLAS_STUDIO_PRICING = 'https://atlasstudio.app/pricing'
 
 const QuotaWarning: React.FC = () => {
   const quota = useQuota()
-  const navigate = useNavigate()
 
   if (quota.warningLevel === 'none' || quota.isUnlimited) return null
 
@@ -37,7 +37,7 @@ const QuotaWarning: React.FC = () => {
       <Button
         size="small"
         variant="outlined"
-        onClick={() => navigate('/settings/subscription')}
+        onClick={() => window.open(ATLAS_STUDIO_PRICING, '_blank')}
         sx={{ mt: 1 }}
       >
         Mettre à niveau
