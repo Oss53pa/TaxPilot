@@ -2,7 +2,7 @@ import React from 'react'
 import { Link as RouterLink } from 'react-router-dom'
 import { Box } from '@mui/material'
 import {
-  CloudUpload, Calculate, Description, Assessment, Verified,
+  CloudUpload, Calculate, Description, Assessment,
   Security, TrendingUp, AccountBalance, Gavel,
   SmartToy, Download, ArrowForward, CheckCircle,
 } from '@mui/icons-material'

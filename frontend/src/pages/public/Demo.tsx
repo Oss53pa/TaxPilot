@@ -2,13 +2,13 @@ import React, { useState } from 'react'
 import { Link as RouterLink } from 'react-router-dom'
 import { Box } from '@mui/material'
 import {
-  ArrowForward, ArrowBack, CloudUpload, Description, Assessment,
+  ArrowForward, ArrowBack, CloudUpload, Description,
   CheckCircle, TrendingUp, TrendingDown, Warning, BarChart,
-  PlayArrow, Visibility, FolderOpen, Print, Download, Send,
+  FolderOpen, Print, Download, Send,
   ZoomIn, ZoomOut, Search, FilterList,
 } from '@mui/icons-material'
 import PublicLayout from './PublicLayout'
-import { DARK, DARK_SURFACE, GOLD, GOLD_MUTED, TEXT_PRIMARY, TEXT_SECONDARY, BORDER, HEADING, BODY, BRAND } from './theme'
+import { DARK_SURFACE, GOLD, GOLD_MUTED, TEXT_PRIMARY, TEXT_SECONDARY, BORDER, HEADING, BODY, BRAND } from './theme'
 
 // ─── Mock data ───────────────────────────────────────────────
 const MOCK_BALANCE = [

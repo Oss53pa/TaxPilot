@@ -70,6 +70,7 @@ const Landing = React.lazy(() => import('@/pages/public/Landing'))
 const Modules = React.lazy(() => import('@/pages/public/Modules'))
 const Pricing = React.lazy(() => import('@/pages/public/Pricing'))
 const Demo = React.lazy(() => import('@/pages/public/Demo'))
+const DemoPage = React.lazy(() => import('@/pages/DemoPage'))
 const FAQ = React.lazy(() => import('@/pages/public/FAQ'))
 const Contact = React.lazy(() => import('@/pages/public/Contact'))
 const Blog = React.lazy(() => import('@/pages/public/Blog'))
@@ -156,7 +157,8 @@ function App() {
           <Route path="/landing" element={<Landing />} />
           <Route path="/modules" element={<Modules />} />
           <Route path="/pricing" element={<Pricing />} />
-          <Route path="/demo" element={<Demo />} />
+          <Route path="/demo" element={<DemoPage />} />
+          <Route path="/demo-legacy" element={<Demo />} />
           <Route path="/faq" element={<FAQ />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/blog" element={<Blog />} />

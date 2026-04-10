@@ -1,9 +1,8 @@
 import React from 'react'
-import { Link as RouterLink } from 'react-router-dom'
 import { Box } from '@mui/material'
 import { ArrowForward } from '@mui/icons-material'
 import PublicLayout from './PublicLayout'
-import { DARK, DARK_SURFACE, GOLD, TEXT_PRIMARY, TEXT_SECONDARY, BORDER, HEADING, BODY } from './theme'
+import { DARK_SURFACE, GOLD, TEXT_PRIMARY, TEXT_SECONDARY, BORDER, HEADING, BODY } from './theme'
 
 const posts = [
   {

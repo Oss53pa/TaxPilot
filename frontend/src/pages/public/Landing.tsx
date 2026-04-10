@@ -99,7 +99,7 @@ const allFeatures = [
 const Landing: React.FC = () => {
   const { content: remoteContent } = useLandingContent('taxpilot');
   const remoteStats = remoteContent?.stats;
-  const stats = remoteStats?.items ?? [
+  const stats: { value: string; label: string }[] = remoteStats?.items ?? [
     { value: '1 005', label: 'COMPTES SYSCOHADA' },
     { value: '129', label: 'CONTRÔLES PROPH3T' },
     { value: '84', label: 'ONGLETS EXCEL' },
@@ -235,7 +235,7 @@ const Landing: React.FC = () => {
     <Box sx={{ borderTop: `1px solid ${BORDER}`, borderBottom: `1px solid ${BORDER}`, bgcolor: DARK_SURFACE, py: { xs: 5, md: 7 } }}>
       <Reveal>
         <Box sx={{ maxWidth: 1000, mx: 'auto', px: 3, display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: { xs: 5, sm: 0 }, justifyContent: 'space-around', alignItems: 'center' }}>
-          {stats.map((stat, i) => (
+          {stats.map((stat: { value: string; label: string }, i: number) => (
             <Box
               key={stat.label}
               sx={{

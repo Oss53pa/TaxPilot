@@ -83,8 +83,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const isCabinet = userMode === 'cabinet'
   const activeDossier = isCabinet ? getActiveDossier() : null
 
+  // Demo mode: auto-collapse sidebar when ?demo=1 in URL or sessionStorage flag
+  const isDemoMode = React.useMemo(() => {
+    if (typeof window === 'undefined') return false
+    const params = new URLSearchParams(window.location.search)
+    return params.get('demo') === '1' || sessionStorage.getItem('liasspilot-demo-mode') === '1'
+  }, [])
+
   const [mobileOpen, setMobileOpen] = useState(false)
-  const [collapsed, setCollapsed] = useState(false)
+  const [collapsed, setCollapsed] = useState(isDemoMode)
   const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null)
   const [helpOpen, setHelpOpen] = useState(false)
 
