@@ -104,8 +104,8 @@ const PublicNav: React.FC = () => {
           Se connecter
         </Box>
         <Box
-          component={RouterLink}
-          to="/register"
+          component="a"
+          href="https://atlas-studio.org/portal?app=taxpilot"
           sx={{
             display: 'inline-block',
             bgcolor: `${GOLD} !important`,

@@ -352,8 +352,8 @@ const FAQ: React.FC = () => {
             Nous contacter <ArrowForward sx={{ fontSize: 16 }} />
           </Box>
           <Box
-            component={RouterLink}
-            to="/register"
+            component="a"
+            href="https://atlas-studio.org/portal?app=taxpilot"
             sx={{
               display: 'inline-flex',
               alignItems: 'center',

@@ -237,7 +237,7 @@ const Modules: React.FC = () => (
       </Box>
       <Box sx={{ display: 'flex', gap: 1.5, justifyContent: 'center', flexWrap: 'wrap' }}>
         <Box
-          component={RouterLink} to="/register"
+          component="a" href="https://atlas-studio.org/portal?app=taxpilot"
           sx={{
             display: 'inline-flex', alignItems: 'center', gap: 1,
             bgcolor: `${GOLD} !important`, color: '#1a1200 !important', fontWeight: 500, fontFamily: BODY,
