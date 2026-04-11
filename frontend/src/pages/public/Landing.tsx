@@ -329,99 +329,132 @@ const Landing: React.FC = () => {
       </Box>
     </Box>
 
-    {/* ─── Demo / Visite guidée ─────────────────────────── */}
-    <Box sx={{ bgcolor: DARK_SURFACE, borderTop: `1px solid ${BORDER}`, borderBottom: `1px solid ${BORDER}`, py: { xs: 8, md: 12 } }}>
-      <Box sx={{ maxWidth: 1000, mx: 'auto', px: 3 }}>
+    {/* ─── Comment ça marche — version compacte, 5 étapes en ligne ── */}
+    <Box sx={{ bgcolor: DARK_SURFACE, borderTop: `1px solid ${BORDER}`, borderBottom: `1px solid ${BORDER}`, py: { xs: 7, md: 9 } }}>
+      <Box sx={{ maxWidth: 1100, mx: 'auto', px: 3 }}>
         <Reveal>
-          <Box sx={{ textAlign: 'center', mb: 7 }}>
-            <Box component="h2" sx={{ fontFamily: HEADING, fontWeight: 600, fontSize: { xs: '2rem', md: '2.6rem' }, color: TEXT_PRIMARY, m: 0, mb: 1.5 }}>
+          <Box sx={{ textAlign: 'center', mb: 5 }}>
+            <Box component="h2" sx={{ fontFamily: HEADING, fontWeight: 600, fontSize: { xs: '1.8rem', md: '2.2rem' }, color: TEXT_PRIMARY, m: 0, mb: 1 }}>
               Comment ça marche
             </Box>
-            <Box component="p" sx={{ fontSize: '1rem', fontFamily: BODY, color: TEXT_SECONDARY, m: 0 }}>
-              5 étapes pour produire votre liasse fiscale conforme.
+            <Box component="p" sx={{ fontSize: '0.95rem', fontFamily: BODY, color: TEXT_SECONDARY, m: 0 }}>
+              5 étapes. Zéro friction.
             </Box>
           </Box>
         </Reveal>
 
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 4, md: 5 } }}>
-          {[
-            { step: '01', title: 'Importez votre balance', desc: 'Glissez votre fichier Excel ou CSV. Les 1 005 comptes SYSCOHADA sont mappés automatiquement.', img: '/screenshots/import.png' },
-            { step: '02', title: 'Vérifiez la balance', desc: 'Visualisez votre balance avec comparatif N/N-1, mouvements et soldes. Filtrez par classe.', img: '/screenshots/balance.png' },
-            { step: '03', title: 'Lancez les contrôles', desc: '129 contrôles Proph3t vérifient la cohérence de votre liasse. Score de conformité instantané.', img: '/screenshots/audit.png' },
-            { step: '04', title: 'Consultez la liasse', desc: '84 onglets calculés automatiquement : Bilan, Compte de Résultat, TAFIRE, 18 Notes Annexes.', img: '/screenshots/liasse.png' },
-            { step: '05', title: 'Exportez', desc: 'Excel 84 onglets, template DGI, PDF. Votre liasse est prête pour le dépôt.', img: '/screenshots/generation.png' },
-          ].map((item, i) => (
-            <Reveal key={item.step} delay={0.1}>
+        <Reveal delay={0.1}>
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(5, 1fr)' },
+              gap: { xs: 2, md: 1.5 },
+              position: 'relative',
+            }}
+          >
+            {/* Ligne de liaison en arrière-plan (desktop uniquement) */}
+            <Box
+              sx={{
+                display: { xs: 'none', md: 'block' },
+                position: 'absolute',
+                top: 28,
+                left: '10%',
+                right: '10%',
+                height: '1px',
+                background: `linear-gradient(90deg, transparent 0%, ${GOLD}40 20%, ${GOLD}40 80%, transparent 100%)`,
+                zIndex: 0,
+              }}
+            />
+
+            {[
+              { step: '01', title: 'Importer', desc: 'Excel / CSV / API' },
+              { step: '02', title: 'Vérifier', desc: 'Balance N / N-1' },
+              { step: '03', title: 'Contrôler', desc: '129 audits Proph3t' },
+              { step: '04', title: 'Générer', desc: '80+ feuillets SYSCOHADA' },
+              { step: '05', title: 'Exporter', desc: 'Excel DGI / PDF' },
+            ].map((item) => (
               <Box
+                key={item.step}
                 sx={{
+                  position: 'relative',
+                  zIndex: 1,
                   display: 'flex',
-                  flexDirection: { xs: 'column', md: i % 2 === 0 ? 'row' : 'row-reverse' },
-                  gap: { xs: 3, md: 5 },
+                  flexDirection: 'column',
                   alignItems: 'center',
+                  textAlign: 'center',
+                  px: 1,
                 }}
               >
-                {/* Text */}
-                <Box sx={{ flex: 1 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
-                    <Box
-                      sx={{
-                        width: 40, height: 40, borderRadius: '50%',
-                        bgcolor: 'rgba(201,168,76,0.1)', border: `1px solid rgba(201,168,76,0.2)`,
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontFamily: HEADING, fontWeight: 700, fontSize: '1rem', color: GOLD,
-                      }}
-                    >
-                      {item.step}
-                    </Box>
-                    <Box component="h3" sx={{ fontFamily: HEADING, fontWeight: 600, fontSize: { xs: '1.3rem', md: '1.6rem' }, color: TEXT_PRIMARY, m: 0 }}>
-                      {item.title}
-                    </Box>
-                  </Box>
-                  <Box sx={{ fontFamily: BODY, fontSize: '0.95rem', color: TEXT_SECONDARY, lineHeight: 1.75, ml: 7 }}>
-                    {item.desc}
-                  </Box>
+                <Box
+                  sx={{
+                    width: 56,
+                    height: 56,
+                    borderRadius: '50%',
+                    bgcolor: DARK,
+                    border: `1px solid ${GOLD}40`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontFamily: HEADING,
+                    fontWeight: 700,
+                    fontSize: '1rem',
+                    color: GOLD,
+                    mb: 1.8,
+                    transition: 'all 0.25s',
+                    '&:hover': {
+                      borderColor: GOLD,
+                      boxShadow: `0 0 0 4px ${GOLD}15`,
+                    },
+                  }}
+                >
+                  {item.step}
                 </Box>
-
-                {/* Screenshot */}
-                <Box sx={{ flex: 1.2, width: '100%' }}>
-                  <Box
-                    sx={{
-                      borderRadius: '12px',
-                      overflow: 'hidden',
-                      border: `1px solid rgba(255,255,255,0.1)`,
-                      boxShadow: '0 8px 40px rgba(0,0,0,0.4)',
-                      transition: 'transform 0.3s',
-                      '&:hover': { transform: 'scale(1.02)' },
-                    }}
-                  >
-                    <Box
-                      component="img"
-                      src={item.img}
-                      alt={item.title}
-                      sx={{ display: 'block', width: '100%', height: 'auto' }}
-                    />
-                  </Box>
+                <Box
+                  component="h3"
+                  sx={{
+                    fontFamily: HEADING,
+                    fontWeight: 600,
+                    fontSize: '1rem',
+                    color: TEXT_PRIMARY,
+                    m: 0,
+                    mb: 0.5,
+                  }}
+                >
+                  {item.title}
+                </Box>
+                <Box
+                  sx={{
+                    fontFamily: BODY,
+                    fontSize: '0.78rem',
+                    color: TEXT_SECONDARY,
+                    lineHeight: 1.5,
+                  }}
+                >
+                  {item.desc}
                 </Box>
               </Box>
-            </Reveal>
-          ))}
-        </Box>
+            ))}
+          </Box>
+        </Reveal>
 
-        {/* Link to full demo */}
-        <Reveal delay={0.1}>
-          <Box sx={{ textAlign: 'center', mt: 6 }}>
+        <Reveal delay={0.15}>
+          <Box sx={{ textAlign: 'center', mt: 5 }}>
             <Box
-              component={RouterLink} to="/demo"
+              component={RouterLink}
+              to="/demo"
               sx={{
-                display: 'inline-flex', alignItems: 'center', gap: 1,
-                border: '1px solid rgba(255,255,255,0.15)', bgcolor: 'transparent',
-                color: `${TEXT_PRIMARY} !important`, fontWeight: 500, fontFamily: BODY,
-                fontSize: '0.95rem', textDecoration: 'none', borderRadius: '8px', px: 4, py: 1.6,
-                transition: 'all 0.25s',
-                '&:hover': { borderColor: `${GOLD}`, color: `${GOLD} !important`, transform: 'translateY(-2px)' },
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 1,
+                color: `${TEXT_SECONDARY} !important`,
+                fontFamily: BODY,
+                fontSize: '0.85rem',
+                textDecoration: 'none',
+                transition: 'color 0.2s',
+                '&:hover': { color: `${GOLD} !important` },
               }}
             >
-              Visite guidée interactive <ArrowForward sx={{ fontSize: 16 }} />
+              Voir la démo interactive <ArrowForward sx={{ fontSize: 14 }} />
             </Box>
           </Box>
         </Reveal>
