@@ -5,28 +5,37 @@ import { useQuery, useMutation } from '@tanstack/react-query'
 import {
   checkAtlasFinanceAvailable,
   importFromAtlasFinance,
+  type AtlasFinanceImportResult,
 } from '@/services/atlasFinanceImportService'
 
+/**
+ * Detect if Atlas Finance data is available for the current user.
+ * Returns the list of societes + fiscal years they can import from.
+ */
 export function useAtlasFinanceAvailable() {
   return useQuery({
     queryKey: ['atlas-finance-available'],
     queryFn: checkAtlasFinanceAvailable,
     staleTime: 60 * 1000,
+    retry: false,
   })
 }
 
+/**
+ * Import a balance from Atlas Finance for a specific societe + fiscal year.
+ */
 export function useImportFromAtlasFinance() {
-  return useMutation({
-    mutationFn: ({
-      dossierId,
-      fiscalYear,
-      annee,
-      entityId,
-    }: {
+  return useMutation<
+    AtlasFinanceImportResult,
+    Error,
+    {
       dossierId: string
-      fiscalYear: number
+      societeId: string
+      fiscalYearId: string
       annee?: 'N' | 'N-1'
-      entityId?: string
-    }) => importFromAtlasFinance(dossierId, fiscalYear, annee, entityId),
+    }
+  >({
+    mutationFn: ({ dossierId, societeId, fiscalYearId, annee }) =>
+      importFromAtlasFinance(dossierId, societeId, fiscalYearId, annee),
   })
 }
