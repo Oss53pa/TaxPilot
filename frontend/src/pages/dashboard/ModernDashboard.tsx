@@ -37,6 +37,7 @@ import NotificationCenter from '@/components/notifications/NotificationCenter'
 import OnboardingTour from '@/components/onboarding/OnboardingTour'
 import { useModeStore } from '@/store/modeStore'
 import { useDossierStore } from '@/store/dossierStore'
+import { FeatureGate } from '@/components/gating'
 
 /** Format number in compact FCFA (e.g. 1.2 Mrd, 340 M, 12 k) */
 function fmtCompact(n: number): { value: string; unit: string } {
@@ -345,6 +346,7 @@ const ModernDashboard: React.FC = () => {
 
         {/* ── Mode Cabinet : Hero Portfolio KPIs ── */}
         {isCabinet && (
+          <FeatureGate feature="tableau_de_bord_portefeuille">
           <Stack
             direction={{ xs: 'column', sm: 'row' }}
             spacing={{ xs: 2, sm: 6 }}
@@ -414,6 +416,7 @@ const ModernDashboard: React.FC = () => {
               </Typography>
             </Box>
           </Stack>
+          </FeatureGate>
         )}
 
         {/* ── Thin separator ── */}

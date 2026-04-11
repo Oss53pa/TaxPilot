@@ -26,7 +26,9 @@ import {
   DialogContent,
   DialogActions,
   Alert,
+  Tooltip,
 } from '@mui/material'
+import { useTenantPlan } from '@/hooks/useTenantPlan'
 import {
   Add,
   MoreVert,
@@ -125,6 +127,15 @@ const UserManagement: React.FC = () => {
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null)
   const [selectedMenuUser, setSelectedMenuUser] = useState<UtilisateurEntreprise | null>(null)
 
+  // Plan gating : max_users defines the ceiling on active invitations.
+  const { plan } = useTenantPlan()
+  const activeUsersCount = users.filter(u => u.est_actif).length
+  const userLimitReached =
+    plan.max_users !== null && activeUsersCount >= plan.max_users
+  const inviteTooltip = userLimitReached
+    ? `Votre plan ${plan.displayName} autorise jusqu'a ${plan.max_users} collaborateurs actifs. Passez en plan Cabinet pour une equipe illimitee.`
+    : ''
+
   const getRoleConfig = (role: string) => {
     return roles.find(r => r.value === role) || { value: role, label: role, color: 'default' }
   }
@@ -186,16 +197,21 @@ const UserManagement: React.FC = () => {
           </Typography>
         </Box>
         
-        <Button
-          variant="contained"
-          startIcon={<Add />}
-          onClick={() => {
-            setSelectedUser(null)
-            setDialogOpen(true)
-          }}
-        >
-          Inviter Utilisateur
-        </Button>
+        <Tooltip title={inviteTooltip}>
+          <span>
+            <Button
+              variant="contained"
+              startIcon={<Add />}
+              disabled={userLimitReached}
+              onClick={() => {
+                setSelectedUser(null)
+                setDialogOpen(true)
+              }}
+            >
+              Inviter Utilisateur
+            </Button>
+          </span>
+        </Tooltip>
       </Box>
 
       {/* Statistiques rapides */}

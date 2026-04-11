@@ -64,6 +64,7 @@ import {
   generateId,
   STORAGE_KEYS,
 } from './exportTypes'
+import { FeatureGate, UpgradeBanner } from '@/components/gating'
 
 const FORMAT_ICONS: Record<string, React.ReactNode> = {
   pdf: <PdfIcon />,
@@ -670,10 +671,15 @@ const ExportCenter: React.FC<Props> = ({ profiles }) => {
           </Card>
 
           <Stack direction="row" spacing={2}>
-            <Button variant="contained" startIcon={<RunIcon />} onClick={handleRunBatch} disabled={batchRunning || batchFormats.size === 0}
-              sx={{ backgroundColor: P.primary900, '&:hover': { backgroundColor: P.primary800 } }}>
-              {batchRunning ? 'Export en cours...' : 'Lancer l\'export en lot'}
-            </Button>
+            <FeatureGate
+              feature="export_groupe_multi_clients"
+              fallback={<UpgradeBanner feature="export_groupe_multi_clients" compact />}
+            >
+              <Button variant="contained" startIcon={<RunIcon />} onClick={handleRunBatch} disabled={batchRunning || batchFormats.size === 0}
+                sx={{ backgroundColor: P.primary900, '&:hover': { backgroundColor: P.primary800 } }}>
+                {batchRunning ? 'Export en cours...' : 'Lancer l\'export en lot'}
+              </Button>
+            </FeatureGate>
             {batchItems.every(i => i.status === 'completed') && (
               <Button variant="outlined" startIcon={<ZipIcon />}>
                 Telecharger tout (ZIP)

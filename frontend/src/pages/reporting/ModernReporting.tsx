@@ -52,6 +52,7 @@ import { useBalanceData } from '@/hooks/useBalanceData'
 import { getLatestBalance, getLatestBalanceN1 } from '@/services/balanceStorageService'
 import { getWorkflowState } from '@/services/workflowStateService'
 import type { WorkflowState } from '@/services/workflowStateService'
+import { FeatureGate, UpgradeBanner } from '@/components/gating'
 
 interface RatioFinancier {
   code: string
@@ -758,6 +759,48 @@ const ModernReporting = () => {
         <Typography variant="h5" sx={{ mb: 3, fontWeight: 600 }}>
           Generation de Rapports d'Analyse Financiere
         </Typography>
+
+        {/* RAPPORT SYNTHETIQUE CABINET (plan Cabinet) */}
+        <FeatureGate
+          feature="rapport_synthetique_cabinet"
+          fallback={
+            <Box sx={{ mb: 4 }}>
+              <UpgradeBanner feature="rapport_synthetique_cabinet" />
+            </Box>
+          }
+        >
+          <Card
+            sx={{
+              mb: 4,
+              border: '1.5px solid #EF9F27',
+              backgroundColor: 'rgba(239, 159, 39, 0.04)',
+            }}
+          >
+            <CardContent sx={{ p: 3 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+                <Box>
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    Rapport synthetique cabinet
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Rapport consolide de l'activite de votre cabinet (portefeuille, KPIs, alertes), exportable en PDF.
+                  </Typography>
+                </Box>
+                <Chip label="Cabinet" size="small" sx={{ backgroundColor: '#EF9F27', color: '#000', fontWeight: 700 }} />
+              </Box>
+              <Button
+                variant="contained"
+                size="small"
+                startIcon={<Assessment />}
+                onClick={() => genererRapport('rapport_synthetique_cabinet')}
+                disabled={isGenerating}
+                sx={{ mt: 1 }}
+              >
+                {isGenerating && selectedTemplate === 'rapport_synthetique_cabinet' ? 'Generation...' : 'Generer'}
+              </Button>
+            </CardContent>
+          </Card>
+        </FeatureGate>
 
         {/* TEMPLATES DE RAPPORTS DISPONIBLES */}
         <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>

@@ -27,6 +27,7 @@ import {
   Divider,
   Tooltip,
   Chip,
+  Badge,
 } from '@mui/material'
 import {
   Menu as MenuIcon,
@@ -64,6 +65,7 @@ import { Proph3tFloatingBall } from '../prophet'
 import { HelpOutline as HelpOutlineIcon, Tour as TourIcon } from '@mui/icons-material'
 import GuidedTour from '../onboarding/GuidedTour'
 import { useGuidedTour } from '@/hooks/useGuidedTour'
+import { useTenantPlan } from '@/hooks/useTenantPlan'
 
 const DRAWER_WIDTH = 270
 const DRAWER_WIDTH_COLLAPSED = 68
@@ -99,6 +101,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   // Guided tour: auto-launches on first visit, can be restarted manually
   const tour = useGuidedTour()
+
+  // Plan / feature gating
+  const { hasFeature } = useTenantPlan()
+  const hasSupport = hasFeature('support_dedie')
+  const canMultiSocietes = hasFeature('multi_societes_illimite')
 
   const drawerWidth = collapsed ? DRAWER_WIDTH_COLLAPSED : DRAWER_WIDTH
 
@@ -298,21 +305,33 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               {nomCabinet || 'Mon Cabinet'}
             </Typography>
           </Box>
-          <Box
-            onClick={() => navigate('/dossiers')}
-            sx={{
-              display: 'flex', alignItems: 'center', gap: 1,
-              px: 2, py: 1, borderRadius: 2,
-              bgcolor: P.primary800, cursor: 'pointer',
-              '&:hover': { bgcolor: P.primary700 },
-              transition: 'background-color 0.15s',
-            }}
+          <Tooltip
+            title={!canMultiSocietes ? 'Passez en plan Cabinet pour gerer un portefeuille illimite' : ''}
+            placement="right"
           >
-            <AddIcon sx={{ fontSize: 18, color: P.white }} />
-            <Typography sx={{ fontSize: '0.8rem', fontWeight: 600, color: P.white }}>
-              Nouveau dossier
-            </Typography>
-          </Box>
+            <Box
+              onClick={() => {
+                if (!canMultiSocietes) {
+                  navigate('/settings/billing')
+                  return
+                }
+                navigate('/dossiers')
+              }}
+              sx={{
+                display: 'flex', alignItems: 'center', gap: 1,
+                px: 2, py: 1, borderRadius: 2,
+                bgcolor: P.primary800, cursor: 'pointer',
+                opacity: canMultiSocietes ? 1 : 0.55,
+                '&:hover': { bgcolor: P.primary700 },
+                transition: 'background-color 0.15s',
+              }}
+            >
+              <AddIcon sx={{ fontSize: 18, color: P.white }} />
+              <Typography sx={{ fontSize: '0.8rem', fontWeight: 600, color: P.white }}>
+                Nouveau dossier
+              </Typography>
+            </Box>
+          </Tooltip>
         </Box>
       )}
 
@@ -463,9 +482,20 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             </IconButton>
           </Tooltip>
 
-          <Tooltip title="Aide & FAQ">
+          <Tooltip title={hasSupport ? 'Support prioritaire 24h' : 'Aide & FAQ'}>
             <IconButton onClick={() => setHelpOpen(true)} color="inherit">
-              <HelpOutlineIcon />
+              <Badge
+                variant="dot"
+                invisible={!hasSupport}
+                sx={{
+                  '& .MuiBadge-badge': {
+                    backgroundColor: '#EF9F27',
+                    boxShadow: '0 0 0 2px #fff',
+                  },
+                }}
+              >
+                <HelpOutlineIcon />
+              </Badge>
             </IconButton>
           </Tooltip>
 

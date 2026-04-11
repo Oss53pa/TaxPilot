@@ -13,6 +13,7 @@ import { saveImportedBalance, saveImportRecord, hasExistingBalance, getBalancesF
 import { getOrCreateExercice, markExerciceHasBalance } from '@/services/exerciceStorageService'
 import { runComparison, type ComparisonReport } from '@/services/comparisonService'
 import ComparisonResultModal from '@/components/comparison/ComparisonResultModal'
+import { FeatureGate } from '@/components/gating'
 import { useNavigate } from 'react-router-dom'
 import type { ExerciceConfig } from '@/types/audit.types'
 import { liasseDataService } from '@/services/liasseDataService'
@@ -1678,11 +1679,13 @@ const ModernImportBalance: React.FC = () => {
           </Card>
         </Grid>
       </Grid>
-      <ComparisonResultModal
-        open={showComparisonModal}
-        onClose={() => setShowComparisonModal(false)}
-        report={comparisonReport}
-      />
+      <FeatureGate feature="comparaison_inter_societes">
+        <ComparisonResultModal
+          open={showComparisonModal}
+          onClose={() => setShowComparisonModal(false)}
+          report={comparisonReport}
+        />
+      </FeatureGate>
     </Box>
   )
 }

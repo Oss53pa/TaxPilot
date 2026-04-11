@@ -41,10 +41,16 @@ import ResetSettings from '@/components/Parametrage/ResetSettings'
 import BrandingPage from '@/pages/parametres/BrandingPage'
 import FiscalConfigPage from '@/pages/parametrage/FiscalConfigPage'
 import { TabPanel } from '@/components/shared/TabPanel'
+import { FeatureGate, UpgradeBanner } from '@/components/gating'
+import { useTenantPlan } from '@/hooks/useTenantPlan'
+import { Lock as LockIcon } from '@mui/icons-material'
 
 const Parametrage: React.FC = () => {
   const navigate = useNavigate()
   const location = useLocation()
+  const { hasFeature } = useTenantPlan()
+  const hasBranding = hasFeature('branding_cabinet')
+  const hasTeamMgmt = hasFeature('gestion_equipe_cabinet')
   
   // Déterminer l'onglet actif basé sur l'URL
   const getActiveTab = () => {
@@ -130,7 +136,12 @@ const Parametrage: React.FC = () => {
               aria-controls="parametrage-tabpanel-0"
             />
             <Tab
-              label="Utilisateurs"
+              label={
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  Utilisateurs
+                  {!hasTeamMgmt && <LockIcon sx={{ fontSize: 13, color: '#EF9F27' }} />}
+                </Box>
+              }
               icon={<People />}
               iconPosition="start"
               id="parametrage-tab-1"
@@ -172,7 +183,12 @@ const Parametrage: React.FC = () => {
               aria-controls="parametrage-tabpanel-6"
             />
             <Tab
-              label="Page de garde"
+              label={
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  Page de garde
+                  {!hasBranding && <LockIcon sx={{ fontSize: 13, color: '#EF9F27' }} />}
+                </Box>
+              }
               icon={<Description />}
               iconPosition="start"
               id="parametrage-tab-7"
@@ -223,7 +239,19 @@ const Parametrage: React.FC = () => {
         </TabPanel>
         
         <TabPanel value={activeTab} index={1}>
-          <UserManagement />
+          <FeatureGate
+            feature="gestion_equipe_cabinet"
+            fallback={
+              <Box sx={{ p: 3 }}>
+                <Alert severity="info" sx={{ mb: 2 }}>
+                  Votre plan Entreprise autorise jusqu'a 5 collaborateurs. Passez en plan Cabinet pour gerer une equipe illimitee.
+                </Alert>
+                <UserManagement />
+              </Box>
+            }
+          >
+            <UserManagement />
+          </FeatureGate>
         </TabPanel>
         
         <TabPanel value={activeTab} index={2}>
@@ -247,7 +275,12 @@ const Parametrage: React.FC = () => {
         </TabPanel>
 
         <TabPanel value={activeTab} index={7}>
-          <BrandingPage />
+          <FeatureGate
+            feature="branding_cabinet"
+            fallback={<UpgradeBanner feature="branding_cabinet" />}
+          >
+            <BrandingPage />
+          </FeatureGate>
         </TabPanel>
 
         <TabPanel value={activeTab} index={8}>

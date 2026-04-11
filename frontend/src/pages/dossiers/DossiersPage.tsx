@@ -35,6 +35,7 @@ import {
   CloudDone,
 } from '@mui/icons-material'
 import { useDossierStore, type Dossier } from '@/store/dossierStore'
+import { useTenantPlan } from '@/hooks/useTenantPlan'
 // useModeStore available if needed for cabinet-specific features
 
 const REGIME_LABELS: Record<Dossier['regime'], string> = {
@@ -60,6 +61,10 @@ const INITIAL_FORM = {
 export default function DossiersPage() {
   const navigate = useNavigate()
   const { dossiers, activeDossierId, addDossier, setActiveDossier, duplicateDossier, deleteDossier } = useDossierStore()
+  const { plan } = useTenantPlan()
+  const dossierLimitReached =
+    plan.max_companies !== null && dossiers.length >= plan.max_companies
+  const upgradeTooltip = 'Passez en plan Cabinet pour gerer un portefeuille illimite'
   // New dossier dialog
   const [newOpen, setNewOpen] = useState(false)
   const [form, setForm] = useState({ ...INITIAL_FORM })
@@ -142,20 +147,25 @@ export default function DossiersPage() {
         <Typography variant="h6" sx={{ color: '#616161' }}>
           Aucun dossier. Créez votre premier dossier client.
         </Typography>
-        <Button
-          variant="contained"
-          size="large"
-          startIcon={<Add />}
-          onClick={() => setNewOpen(true)}
-          sx={{
-            bgcolor: '#212121',
-            '&:hover': { bgcolor: '#424242' },
-            px: 4,
-            py: 1.5,
-          }}
-        >
-          Nouveau dossier
-        </Button>
+        <Tooltip title={dossierLimitReached ? upgradeTooltip : ''}>
+          <span>
+            <Button
+              variant="contained"
+              size="large"
+              startIcon={<Add />}
+              onClick={() => setNewOpen(true)}
+              disabled={dossierLimitReached}
+              sx={{
+                bgcolor: '#212121',
+                '&:hover': { bgcolor: '#424242' },
+                px: 4,
+                py: 1.5,
+              }}
+            >
+              Nouveau dossier
+            </Button>
+          </span>
+        </Tooltip>
 
         {/* New dossier dialog (shared) */}
         {renderNewDossierDialog()}
@@ -236,17 +246,22 @@ export default function DossiersPage() {
         <Typography variant="h5" sx={{ fontWeight: 700, color: '#212121' }}>
           Portefeuille Clients
         </Typography>
-        <Button
-          variant="contained"
-          startIcon={<Add />}
-          onClick={() => setNewOpen(true)}
-          sx={{
-            bgcolor: '#212121',
-            '&:hover': { bgcolor: '#424242' },
-          }}
-        >
-          Nouveau dossier
-        </Button>
+        <Tooltip title={dossierLimitReached ? upgradeTooltip : ''}>
+          <span>
+            <Button
+              variant="contained"
+              startIcon={<Add />}
+              onClick={() => setNewOpen(true)}
+              disabled={dossierLimitReached}
+              sx={{
+                bgcolor: '#212121',
+                '&:hover': { bgcolor: '#424242' },
+              }}
+            >
+              Nouveau dossier
+            </Button>
+          </span>
+        </Tooltip>
       </Box>
 
       {/* Table */}
