@@ -43,6 +43,8 @@ const SupportPage = React.lazy(() => import('@/pages/support/SupportPage'))
 const FAQPage = React.lazy(() => import('@/pages/support/FAQPage'))
 const FormationPage = React.lazy(() => import('@/pages/formation/FormationPage'))
 const DocumentationPage = React.lazy(() => import('@/pages/documentation/DocumentationPage'))
+const ApiKeysPage = React.lazy(() => import('@/pages/parametrage/ApiKeysPage'))
+const ApiDocsPage = React.lazy(() => import('@/pages/documentation/ApiDocsPage'))
 const ModernVeilleReglementaire = React.lazy(() => import('@/pages/veille/ModernVeilleReglementaire'))
 const ModernCollaboration = React.lazy(() => import('@/pages/collaboration/ModernCollaboration'))
 const ModernIntegrations = React.lazy(() => import('@/pages/integrations/ModernIntegrations'))
@@ -239,6 +241,10 @@ function App() {
           <Route path="/faq" element={<S><FAQPage /></S>} />
           <Route path="/formation" element={<S><FormationPage /></S>} />
           <Route path="/documentation" element={<S><DocumentationPage /></S>} />
+
+          {/* Public API: management UI requires auth, but the docs page is public */}
+          <Route path="/parametrage/api-keys" element={<S><ApiKeysPage /></S>} />
+          <Route path="/api-docs" element={<ApiDocsPage />} />
 
           {/* Debug routes removed for production */}
 

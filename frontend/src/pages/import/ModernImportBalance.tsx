@@ -78,6 +78,7 @@ import {
 } from '@mui/icons-material'
 import { useDropzone } from 'react-dropzone'
 import { useSnackbar } from 'notistack'
+import AtlasFinanceImportBanner from '@/components/Balance/AtlasFinanceImportBanner'
 
 // EX-IMPORT-001: Support multi-formats et API
 type ImportFormat = 'excel' | 'csv' | 'xml' | 'json' | 'api'
@@ -639,6 +640,9 @@ const ModernImportBalance: React.FC = () => {
 
   return (
     <Box sx={{ p: 3, backgroundColor: 'background.default', minHeight: '100vh' }}>
+      {/* Atlas Finance plug-and-play import banner */}
+      <AtlasFinanceImportBanner />
+
       {/* Header */}
       <Box sx={{ mb: 4 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
