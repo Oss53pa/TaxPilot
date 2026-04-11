@@ -40,6 +40,7 @@ const ModernConsolidation = React.lazy(() => import('@/pages/consolidation/Moder
 const ModernReporting = React.lazy(() => import('@/pages/reporting/ModernReporting'))
 const ArchivesPage = React.lazy(() => import('@/pages/archives/ArchivesPage'))
 const SupportPage = React.lazy(() => import('@/pages/support/SupportPage'))
+const FAQPage = React.lazy(() => import('@/pages/support/FAQPage'))
 const FormationPage = React.lazy(() => import('@/pages/formation/FormationPage'))
 const DocumentationPage = React.lazy(() => import('@/pages/documentation/DocumentationPage'))
 const ModernVeilleReglementaire = React.lazy(() => import('@/pages/veille/ModernVeilleReglementaire'))
@@ -235,6 +236,7 @@ function App() {
 
           {/* Support & Formation */}
           <Route path="/support" element={<S><SupportPage /></S>} />
+          <Route path="/faq" element={<S><FAQPage /></S>} />
           <Route path="/formation" element={<S><FormationPage /></S>} />
           <Route path="/documentation" element={<S><DocumentationPage /></S>} />
 

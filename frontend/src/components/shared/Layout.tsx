@@ -61,7 +61,9 @@ import NotificationCenter from '../notifications/NotificationCenter'
 import ExerciceSelector from '../exercice/ExerciceSelector'
 import UsageAssistant from '../assistant/UsageAssistant'
 import { Proph3tFloatingBall } from '../prophet'
-import { HelpOutline as HelpOutlineIcon } from '@mui/icons-material'
+import { HelpOutline as HelpOutlineIcon, Tour as TourIcon } from '@mui/icons-material'
+import GuidedTour from '../onboarding/GuidedTour'
+import { useGuidedTour } from '@/hooks/useGuidedTour'
 
 const DRAWER_WIDTH = 270
 const DRAWER_WIDTH_COLLAPSED = 68
@@ -94,6 +96,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [collapsed, setCollapsed] = useState(isDemoMode)
   const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null)
   const [helpOpen, setHelpOpen] = useState(false)
+
+  // Guided tour: auto-launches on first visit, can be restarted manually
+  const tour = useGuidedTour()
 
   const drawerWidth = collapsed ? DRAWER_WIDTH_COLLAPSED : DRAWER_WIDTH
 
@@ -452,7 +457,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
           <NotificationCenter />
 
-          <Tooltip title="Guide d'utilisation">
+          <Tooltip title="Visite guid\u00e9e">
+            <IconButton onClick={tour.restart} color="inherit" data-tour="help">
+              <TourIcon />
+            </IconButton>
+          </Tooltip>
+
+          <Tooltip title="Aide & FAQ">
             <IconButton onClick={() => setHelpOpen(true)} color="inherit">
               <HelpOutlineIcon />
             </IconButton>
@@ -503,6 +514,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       {/* Sidebar */}
       <Box
         component="nav"
+        data-tour="sidebar"
         sx={{ width: { md: drawerWidth }, flexShrink: { md: 0 }, transition: 'width 0.25s ease' }}
       >
         <Drawer
@@ -565,6 +577,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </Box>
 
       <UsageAssistant open={helpOpen} onClose={() => setHelpOpen(false)} />
+
+      <GuidedTour open={tour.isOpen} onClose={tour.close} />
       <Proph3tFloatingBall />
     </Box>
   )
