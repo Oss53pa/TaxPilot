@@ -1,7 +1,7 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Link as RouterLink, useLocation } from 'react-router-dom'
-import { Box } from '@mui/material'
-import { DarkMode } from '@mui/icons-material'
+import { Box, IconButton, Drawer } from '@mui/material'
+import { DarkMode, Menu as MenuIcon, Close as CloseIcon } from '@mui/icons-material'
 import { GOLD, TEXT_PRIMARY, TEXT_SECONDARY, BORDER, BRAND, BODY } from './theme'
 
 const navLinks = [
@@ -16,6 +16,7 @@ const navLinks = [
 
 const PublicNav: React.FC = () => {
   const location = useLocation()
+  const [drawerOpen, setDrawerOpen] = useState(false)
 
   return (
     <Box
@@ -41,7 +42,7 @@ const PublicNav: React.FC = () => {
           to="/landing"
           sx={{
             fontFamily: BRAND,
-            fontSize: '1.5rem',
+            fontSize: { xs: '1.2rem', md: '1.5rem' },
             color: `${TEXT_PRIMARY} !important`,
             lineHeight: 1,
             textDecoration: 'none',
@@ -49,7 +50,7 @@ const PublicNav: React.FC = () => {
         >
           Atlas Studio
         </Box>
-        <Box component="span" sx={{ color: `${TEXT_SECONDARY} !important`, fontSize: '0.95rem', mx: 0.5, fontFamily: BODY }}>/</Box>
+        <Box component="span" sx={{ color: `${TEXT_SECONDARY} !important`, fontSize: '0.95rem', mx: 0.5, fontFamily: BODY, display: { xs: 'none', sm: 'inline' } }}>/</Box>
         <Box
           component={RouterLink}
           to="/landing"
@@ -58,13 +59,14 @@ const PublicNav: React.FC = () => {
             fontSize: '1.05rem',
             color: `${GOLD} !important`,
             textDecoration: 'none',
+            display: { xs: 'none', sm: 'inline' },
           }}
         >
           Liass'Pilot
         </Box>
       </Box>
 
-      {/* Center: nav links */}
+      {/* Center: nav links (desktop) */}
       <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 2.5 }}>
         {navLinks.map((link) => (
           <Box
@@ -86,8 +88,8 @@ const PublicNav: React.FC = () => {
         ))}
       </Box>
 
-      {/* Right: actions */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2.5 }}>
+      {/* Right: actions (desktop) */}
+      <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 2.5 }}>
         <DarkMode sx={{ color: `${TEXT_SECONDARY} !important`, fontSize: 18, cursor: 'pointer', opacity: 0.7 }} />
         <Box
           component={RouterLink}
@@ -125,6 +127,101 @@ const PublicNav: React.FC = () => {
           Souscrire
         </Box>
       </Box>
+
+      {/* Mobile hamburger */}
+      <IconButton
+        onClick={() => setDrawerOpen(true)}
+        sx={{ display: { xs: 'inline-flex', md: 'none' }, color: TEXT_PRIMARY }}
+        aria-label="Ouvrir le menu"
+      >
+        <MenuIcon />
+      </IconButton>
+
+      {/* Mobile drawer */}
+      <Drawer
+        anchor="right"
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        PaperProps={{
+          sx: {
+            bgcolor: '#0F0F0F',
+            color: TEXT_PRIMARY,
+            width: 280,
+            borderLeft: `1px solid ${BORDER}`,
+          },
+        }}
+      >
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 2.5, py: 2, borderBottom: `1px solid ${BORDER}` }}>
+          <Box sx={{ fontFamily: BRAND, fontSize: '1.1rem', color: GOLD }}>Liass'Pilot</Box>
+          <IconButton onClick={() => setDrawerOpen(false)} sx={{ color: TEXT_SECONDARY }} aria-label="Fermer">
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </Box>
+
+        <Box sx={{ display: 'flex', flexDirection: 'column', py: 1 }}>
+          {navLinks.map((link) => (
+            <Box
+              key={link.label}
+              component={RouterLink}
+              to={link.to}
+              onClick={() => setDrawerOpen(false)}
+              sx={{
+                color: location.pathname === link.to ? `${GOLD} !important` : `${TEXT_PRIMARY} !important`,
+                textDecoration: 'none',
+                fontSize: '0.95rem',
+                fontFamily: BODY,
+                fontWeight: location.pathname === link.to ? 600 : 400,
+                px: 2.5,
+                py: 1.5,
+                borderLeft: location.pathname === link.to ? `3px solid ${GOLD}` : '3px solid transparent',
+                '&:hover': { bgcolor: 'rgba(255,255,255,0.04)' },
+              }}
+            >
+              {link.label}
+            </Box>
+          ))}
+        </Box>
+
+        <Box sx={{ mt: 'auto', borderTop: `1px solid ${BORDER}`, p: 2.5, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+          <Box
+            component={RouterLink}
+            to="/login"
+            onClick={() => setDrawerOpen(false)}
+            sx={{
+              color: `${TEXT_SECONDARY} !important`,
+              textDecoration: 'none',
+              fontSize: '0.9rem',
+              fontFamily: BODY,
+              textAlign: 'center',
+              py: 1,
+              border: `1px solid ${BORDER}`,
+              borderRadius: '6px',
+            }}
+          >
+            Se connecter
+          </Box>
+          <Box
+            component="a"
+            href="https://atlas-studio.org/portal?app=taxpilot"
+            onClick={() => setDrawerOpen(false)}
+            sx={{
+              display: 'block',
+              bgcolor: `${GOLD} !important`,
+              color: '#1a1200 !important',
+              fontWeight: 600,
+              fontFamily: BODY,
+              fontSize: '0.88rem',
+              textDecoration: 'none',
+              borderRadius: '6px',
+              py: 1.1,
+              textAlign: 'center',
+              '&:hover': { bgcolor: '#d4b35a !important' },
+            }}
+          >
+            Souscrire
+          </Box>
+        </Box>
+      </Drawer>
     </Box>
   )
 }
