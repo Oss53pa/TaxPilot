@@ -347,7 +347,7 @@ const Landing: React.FC = () => {
           <Box
             sx={{
               display: 'grid',
-              gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(5, 1fr)' },
+              gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)', md: 'repeat(5, 1fr)' },
               gap: { xs: 2, md: 1.5 },
               position: 'relative',
             }}
@@ -361,7 +361,7 @@ const Landing: React.FC = () => {
                 left: '10%',
                 right: '10%',
                 height: '1px',
-                background: `linear-gradient(90deg, transparent 0%, ${GOLD}40 20%, ${GOLD}40 80%, transparent 100%)`,
+                background: `linear-gradient(90deg, transparent 0%, rgba(201,168,76,0.25) 20%, rgba(201,168,76,0.25) 80%, transparent 100%)`,
                 zIndex: 0,
               }}
             />
@@ -391,7 +391,7 @@ const Landing: React.FC = () => {
                     height: 56,
                     borderRadius: '50%',
                     bgcolor: DARK,
-                    border: `1px solid ${GOLD}40`,
+                    border: '1px solid rgba(201,168,76,0.25)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -403,7 +403,7 @@ const Landing: React.FC = () => {
                     transition: 'all 0.25s',
                     '&:hover': {
                       borderColor: GOLD,
-                      boxShadow: `0 0 0 4px ${GOLD}15`,
+                      boxShadow: '0 0 0 4px rgba(201,168,76,0.08)',
                     },
                   }}
                 >
