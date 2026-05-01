@@ -38,7 +38,10 @@ const LiassePage: React.FC<LiassePageProps> = ({ children, orientation = 'portra
         bgcolor: theme.palette.background.paper,
         border: 'none',
         borderRadius: 0,
-        p: 0,
+        // Padding écran : reproduit visuellement les marges A4 (~1cm desktop, plus restreint mobile).
+        // Print : forcé à 0 plus bas — le moteur d'impression applique ses propres marges physiques.
+        px: { xs: 2, sm: 3, md: 5 },
+        py: { xs: 2, sm: 3, md: 4 },
         position: 'relative',
         overflowX: 'visible',
         overflowY: 'visible',
