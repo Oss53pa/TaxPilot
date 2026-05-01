@@ -10,6 +10,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import type { EntrepriseData, BalanceEntry, RegimeImposition } from '@/modules/liasse-fiscale/types'
 import { scopeKey } from '@/services/dossierScopeService'
+import { liasseDataService } from '@/services/liasseDataService'
 
 // ── EMPTY_ENTREPRISE ──
 
@@ -231,6 +232,15 @@ export function useLiasseFiscaleData(): LiasseFiscaleData {
     setEntreprise(ent)
     setBalance(bal)
     setBalanceN1(balN1)
+    // Sync the singleton liasseDataService — required by pages that read via the
+    // singleton (e.g., 12_Resultat utilise generateCompteResultat()). Sans ça les
+    // calculs retournent 0 → page Compte de Résultat affiche colonnes vides.
+    if (bal.length > 0) {
+      liasseDataService.loadBalance(bal)
+    }
+    if (balN1.length > 0) {
+      liasseDataService.loadBalanceN1(balN1)
+    }
     // Only auto-detect regime on initial load, not on focus refresh
     // (user may have manually selected a different regime)
     if (!initialLoadDone.current) {
