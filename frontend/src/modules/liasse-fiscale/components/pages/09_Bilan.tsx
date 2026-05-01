@@ -98,6 +98,28 @@ const PASSIF_LINES: PassifDetail[] = [
 
 // ── Compute functions ──
 
+/**
+ * Calcule le total débit/crédit des classes 1-5 en excluant le compte 13
+ * (capturé par CJ via les classes 6/7/8). C'est la "cible" mathématique
+ * pour BZ et DZ_excludingCJ.
+ *
+ * Garantie : avec balance équilibrée (Σ soldes = 0) et CJ = -solde(13,6,7,8),
+ * on a totalDebit15 = totalCredit15 + CJ → bilan parfaitement équilibré.
+ */
+function computeClass15Totals(bal: BalanceEntry[]): { totalDebit: number; totalCredit: number } {
+  let totalDebit = 0
+  let totalCredit = 0
+  for (const entry of bal) {
+    const compte = entry.compte.replace(/\s/g, '')
+    if (!/^[1-5]/.test(compte)) continue
+    if (compte.startsWith('13')) continue  // handled by CJ via classes 6/7/8
+    const solde = entry.solde_debit - entry.solde_credit
+    if (solde > 0) totalDebit += solde
+    else if (solde < 0) totalCredit += -solde
+  }
+  return { totalDebit, totalCredit }
+}
+
 function computeActif(bal: BalanceEntry[]) {
   const vals = new Map<string, { brut: number; amort: number; net: number }>()
 
@@ -121,6 +143,23 @@ function computeActif(bal: BalanceEntry[]) {
   vals.set('AZ', sumRefs(['AD', 'AI', 'AP', 'AQ']))
   vals.set('BK', sumRefs(['BA', 'BB', 'BG']))
   vals.set('BT', sumRefs(['BQ', 'BR', 'BS']))
+
+  // ── Catch-all (orphans débit class 1-5) ──
+  // Tout compte de classe 1-5 avec solde débiteur non capturé par un poste
+  // explicite est routé vers BJ "Autres créances". Garantit qu'aucun débit
+  // n'est perdu → BZ = totalDébit class 1-5 (excluant compte 13).
+  const { totalDebit: targetDebitTotal } = computeClass15Totals(bal)
+  const explicitActifTotal = (vals.get('AZ')?.net || 0) + (vals.get('BK')?.net || 0)
+                           + (vals.get('BT')?.net || 0) + (vals.get('BU')?.net || 0)
+  const orphanDebit = targetDebitTotal - explicitActifTotal
+  if (Math.abs(orphanDebit) > 1) {  // ignorer arrondis < 1 FCFA
+    const bj = vals.get('BJ') || { brut: 0, amort: 0, net: 0 }
+    vals.set('BJ', { brut: bj.brut + orphanDebit, amort: bj.amort, net: bj.net + orphanDebit })
+    // Recompute aggregates
+    vals.set('BG', sumRefs(['BH', 'BI', 'BJ']))
+    vals.set('BK', sumRefs(['BA', 'BB', 'BG']))
+  }
+
   vals.set('BZ', sumRefs(['AZ', 'BK', 'BT', 'BU']))
 
   return ACTIF_LINES.map(r => {
@@ -155,6 +194,22 @@ function computePassif(bal: BalanceEntry[]) {
   vals.set('DF', sumRefs(['CP', 'DD']))
   vals.set('DP', sumRefs(['DH', 'DI', 'DJ', 'DK', 'DM', 'DN']))
   vals.set('DT', sumRefs(['DQ', 'DR']))
+
+  // ── Catch-all (orphans crédit class 1-5) ──
+  // Tout compte de classe 1-5 avec solde créditeur non capturé par un poste
+  // explicite est routé vers DM "Autres dettes". Garantit qu'aucun crédit
+  // n'est perdu → DZ = totalCrédit class 1-5 (excluant 13) + CJ.
+  const { totalCredit: targetCreditTotal } = computeClass15Totals(bal)
+  const cjValue = vals.get('CJ') || 0
+  const explicitPassifTotalNoCJ = (vals.get('DF') || 0) - cjValue + (vals.get('DP') || 0)
+                                + (vals.get('DT') || 0) + (vals.get('DV') || 0)
+  const orphanCredit = targetCreditTotal - explicitPassifTotalNoCJ
+  if (Math.abs(orphanCredit) > 1) {
+    vals.set('DM', (vals.get('DM') || 0) + orphanCredit)
+    // Recompute aggregates
+    vals.set('DP', sumRefs(['DH', 'DI', 'DJ', 'DK', 'DM', 'DN']))
+  }
+
   vals.set('DZ', sumRefs(['DF', 'DP', 'DT', 'DV']))
 
   return PASSIF_LINES.map(r => ({
