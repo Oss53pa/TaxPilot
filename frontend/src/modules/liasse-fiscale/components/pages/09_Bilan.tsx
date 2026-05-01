@@ -32,6 +32,8 @@ const ACTIF_LINES: ActifDetail[] = [
   { ref: 'AQ', label: 'IMMOBILISATIONS FINANCIERES', comptes: [...BILAN_ACTIF.AR.comptes, ...BILAN_ACTIF.AS.comptes], amort: [...BILAN_ACTIF.AR.amort, ...BILAN_ACTIF.AS.amort], note: '4' },
   { ref: 'AR', label: 'Titres de participation', comptes: [...BILAN_ACTIF.AR.comptes], amort: [...BILAN_ACTIF.AR.amort], indent: 1 },
   { ref: 'AS', label: 'Autres immobilisations financières', comptes: [...BILAN_ACTIF.AS.comptes], amort: [...BILAN_ACTIF.AS.amort], indent: 1 },
+  // Spacer pour aligner AZ avec DF (TOTAL RESSOURCES STABLES) côté passif
+  { ref: '', label: '', comptes: [], amort: [] },
   { ref: 'AZ', label: 'TOTAL ACTIF IMMOBILISE', comptes: [], amort: [], isTotal: true },
   { ref: '', label: 'ACTIF CIRCULANT', comptes: [], amort: [], isSub: true },
   { ref: 'BA', label: 'ACTIF CIRCULANT HAO', comptes: [...BILAN_ACTIF.BA.comptes], amort: [...BILAN_ACTIF.BA.amort], note: '5' },
@@ -87,6 +89,8 @@ const PASSIF_LINES: PassifDetail[] = [
   { ref: '', label: 'TRESORERIE - PASSIF', comptes: [], isSub: true },
   { ref: 'DQ', label: 'Banques, crédits d\'escompte', comptes: [...BILAN_PASSIF.DQ.comptes], note: '20' },
   { ref: 'DR', label: 'Banques, établissements financiers et crédits de trésorerie', comptes: [...BILAN_PASSIF.DR.comptes], note: '20' },
+  // Spacer pour aligner DT avec BT (TOTAL TRESORERIE-ACTIF) côté actif
+  { ref: '', label: '', comptes: [] },
   { ref: 'DT', label: 'TOTAL TRESORERIE-PASSIF', comptes: [], isTotal: true },
   { ref: 'DV', label: 'Ecart de conversion-Passif', comptes: [...BILAN_PASSIF.DV.comptes], note: '12' },
   { ref: 'DZ', label: 'TOTAL GENERAL', comptes: [], isTotal: true },
@@ -99,6 +103,7 @@ function computeActif(bal: BalanceEntry[]) {
 
   for (const r of ACTIF_LINES) {
     if (r.isSub || r.isTotal || r.comptes.length === 0) continue
+    if (r.ref === '') continue  // spacer row
     const brut = getActifBrut(bal, r.comptes)
     const amort = r.amort.length > 0 ? getAmortProv(bal, r.amort) : 0
     vals.set(r.ref, { brut, amort, net: brut - amort })
@@ -129,12 +134,21 @@ function computePassif(bal: BalanceEntry[]) {
 
   for (const r of PASSIF_LINES) {
     if (r.isSub || r.isTotal) continue
+    if (r.ref === '') { vals.set(r.ref, 0); continue }  // spacer row
     let montant: number
     if (r.special === 'debit') montant = Math.abs(getBalanceSolde(bal, r.comptes))
     else if (r.special === 'signed') montant = -getBalanceSolde(bal, r.comptes)
     else montant = getPassif(bal, r.comptes)
     vals.set(r.ref, montant)
   }
+
+  // ── Résultat net (CJ) : robust contre balance non-clôturée ──
+  // Si la balance est clôturée, classes 6/7/8 = 0 et compte 13 = résultat → CJ déjà OK.
+  // Si non-clôturée, compte 13 = 0 et classes 6/7/8 ont des soldes → on ajoute le P&L calculé.
+  // Formule unifiée : CJ = -solde(13) + -solde(6,7,8) = -solde(13,6,7,8)
+  // Cette formule donne le bon résultat dans TOUS les cas (clôturé, non-clôturé, partiellement).
+  const cjFromAll = -getBalanceSolde(bal, ['13', '6', '7', '8'])
+  vals.set('CJ', cjFromAll)
 
   const sumRefs = (refs: string[]) => refs.reduce((s, ref) => s + (vals.get(ref) || 0), 0)
 

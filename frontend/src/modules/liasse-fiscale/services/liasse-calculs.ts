@@ -148,13 +148,14 @@ export interface AnomalieComptable {
  *   - 44x : État, impôts — actif (TVA récupérable, crédit IS) OU passif (TVA collectée, IS à payer)
  *   - 46x : Associés et groupe — actif (avances aux associés) OU passif (comptes courants créditeurs)
  *   - 47x : Débiteurs et créditeurs divers — par définition mixte
- *   - 5x  : Trésorerie — actif (avoir) OU passif (découvert autorisé)
+ *   - 52x : Banques — actif (avoir bancaire) OU passif (découvert autorisé)
+ *   - 56x : Banques EFT, crédits trésorerie — mixte selon usage
  *
  * SYSCOHADA recommande de reclasser le sens lors de la production des états
  * financiers (TVA récup en actif BJ, TVA à décaisser en passif DK), mais le
  * solde brut sur le compte d'origine n'est PAS une anomalie.
  */
-const MIXED_PREFIXES: readonly string[] = ['43', '44', '46', '47']
+const MIXED_PREFIXES: readonly string[] = ['43', '44', '46', '47', '52', '53', '54', '55', '56']
 
 /** True si le compte appartient à un préfixe mixed (ne doit pas être flagué). */
 function isMixedAccount(compte: string): boolean {
