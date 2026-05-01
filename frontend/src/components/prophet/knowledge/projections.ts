@@ -17,6 +17,21 @@
 
 import type { Agregats } from './predictiveAnalysis'
 
+/**
+ * Labels canoniques des agrégats projetés. Référencés par l'engine pour extraire
+ * les valeurs depuis les indicateurs de la PredictionCard. Ne PAS modifier sans
+ * mettre à jour `Proph3tEngine.ts:findValue` et les tests Phase 3.
+ */
+export const FORECAST_LABELS = {
+  CA: "Chiffre d'affaires",
+  RESULTAT: 'Résultat net',
+  TRESORERIE: 'Trésorerie',
+  CHARGES_PERSONNEL: 'Charges de personnel',
+  CHARGES_FINANCIERES: 'Charges financières',
+  CAPITAUX_PROPRES: 'Capitaux propres',
+  DETTES: 'Dettes financières',
+} as const
+
 /** Marge heuristique appliquée au taux de croissance pour calculer les scénarios. */
 const VOLATILITY_HEURISTIC = 0.10 // ±10 points autour du taux observé
 
@@ -149,15 +164,15 @@ export function projectAggregates(
   const warnings: string[] = []
   const aggregates: AggregateProjection[] = []
 
-  // Sélection des agrégats clés à projeter
+  // Sélection des agrégats clés à projeter (labels = constants FORECAST_LABELS)
   const targets: Array<{ label: string; getN: (a: Agregats) => number }> = [
-    { label: "Chiffre d'affaires", getN: (a) => a.ca },
-    { label: 'Résultat net', getN: (a) => a.resultat },
-    { label: 'Trésorerie', getN: (a) => a.tresorerie },
-    { label: 'Charges de personnel', getN: (a) => a.chargesPersonnel },
-    { label: 'Charges financières', getN: (a) => a.chargesFinancieres },
-    { label: 'Capitaux propres', getN: (a) => a.capitauxPropres },
-    { label: 'Dettes financières', getN: (a) => a.dettesTotal },
+    { label: FORECAST_LABELS.CA, getN: (a) => a.ca },
+    { label: FORECAST_LABELS.RESULTAT, getN: (a) => a.resultat },
+    { label: FORECAST_LABELS.TRESORERIE, getN: (a) => a.tresorerie },
+    { label: FORECAST_LABELS.CHARGES_PERSONNEL, getN: (a) => a.chargesPersonnel },
+    { label: FORECAST_LABELS.CHARGES_FINANCIERES, getN: (a) => a.chargesFinancieres },
+    { label: FORECAST_LABELS.CAPITAUX_PROPRES, getN: (a) => a.capitauxPropres },
+    { label: FORECAST_LABELS.DETTES, getN: (a) => a.dettesTotal },
   ]
 
   for (const t of targets) {
@@ -212,11 +227,11 @@ export function formatProjectionForCard(
       const growthPct = sc.growthRate * 100
       const trend = growthPct > 1 ? '↑' : growthPct < -1 ? '↓' : '→'
       const status: 'excellent' | 'bon' | 'acceptable' | 'critique' =
-        agg.label === 'Résultat net'
+        agg.label === FORECAST_LABELS.RESULTAT
           ? v > 0 ? (growthPct > 5 ? 'excellent' : 'bon') : 'critique'
-          : agg.label === "Chiffre d'affaires"
+          : agg.label === FORECAST_LABELS.CA
             ? growthPct > 5 ? 'bon' : growthPct > 0 ? 'acceptable' : 'critique'
-            : agg.label === 'Trésorerie'
+            : agg.label === FORECAST_LABELS.TRESORERIE
               ? v > 0 ? (growthPct > 0 ? 'bon' : 'acceptable') : 'critique'
               : 'acceptable'
       out.push({

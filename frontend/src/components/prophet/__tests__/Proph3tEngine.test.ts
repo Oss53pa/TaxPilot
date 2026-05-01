@@ -56,6 +56,7 @@ import {
   addHypothesis,
   appendToHistory,
   clearMemory,
+  clearConversationalMemory,
   parseWhatIf,
   handleWhatIf,
   tickHypothesesTtl,
@@ -1483,7 +1484,7 @@ describe('Test 23 — Phase 8 : Mémoire conversationnelle', () => {
     expect(ctx.history![9].text).toBe('message 14')
   })
 
-  it('clearMemory doit effacer mémoire mais garder balance/entreprise', () => {
+  it('clearConversationalMemory doit effacer mémoire mais garder balance/entreprise', () => {
     let ctx: ConversationContext = {
       ...CTX_EMPTY,
       balanceData: { balanceN: BALANCE_COMPLETE },
@@ -1493,13 +1494,24 @@ describe('Test 23 — Phase 8 : Mémoire conversationnelle', () => {
     ctx = addHypothesis(ctx, 'foo', 1, 'desc')
     ctx = appendToHistory(ctx, 'user', 'msg')
 
-    const cleared = clearMemory(ctx)
+    const cleared = clearConversationalMemory(ctx)
     expect(cleared.lastComputation).toBeUndefined()
     expect(cleared.userHypotheses).toBeUndefined()
     expect(cleared.history).toBeUndefined()
     // Mais balance et entreprise restent
     expect(cleared.balanceData).toBeDefined()
     expect(cleared.entreprise).toBeDefined()
+  })
+
+  it('clearMemory (alias deprecated) doit avoir le meme comportement', () => {
+    // Phase 10.1 — alias retro-compat
+    let ctx: ConversationContext = { ...CTX_EMPTY, balanceData: { balanceN: BALANCE_COMPLETE } }
+    ctx = rememberComputation(ctx, 'PREDICTION_IS', 'test')
+    const cleared = clearMemory(ctx)
+    expect(cleared.lastComputation).toBeUndefined()
+    expect(cleared.balanceData).toBeDefined()
+    // Identité fonctionnelle
+    expect(clearMemory).toBe(clearConversationalMemory)
   })
 
   it('detectIntent doit reconnaître "rappelle-moi" comme MEMORY_RECALL', () => {
@@ -1515,6 +1527,15 @@ describe('Test 23 — Phase 8 : Mémoire conversationnelle', () => {
     expect(detectIntent('imagine 50M de charges en plus', CTX_EMPTY).intent).toBe('WHAT_IF')
     expect(detectIntent('considere un deficit de 30M', CTX_EMPTY).intent).toBe('WHAT_IF')
     expect(detectIntent('supposons que le resultat est de 100M', CTX_EMPTY).intent).toBe('WHAT_IF')
+  })
+
+  it('WHAT_IF doit prevaloir sur FISCAL_* meme avec mots-cles fiscaux', () => {
+    // Phase 10.2 — WHAT_IF score 95 > FISCAL_TAX_RATE 85 / FISCAL_GENERAL 60
+    expect(detectIntent('et si TVA = 50M', CTX_EMPTY).intent).toBe('WHAT_IF')
+    expect(detectIntent('imagine un IS de 100M', CTX_EMPTY).intent).toBe('WHAT_IF')
+    expect(detectIntent('considere une CNPS doublee', CTX_EMPTY).intent).toBe('WHAT_IF')
+    // Inverse : sans mot WHAT_IF, FISCAL_* reprend le dessus
+    expect(detectIntent('taux TVA', CTX_EMPTY).intent).toBe('FISCAL_TAX_RATE')
   })
 
   it('parseWhatIf doit extraire CA depuis "et si CA = 300M"', () => {

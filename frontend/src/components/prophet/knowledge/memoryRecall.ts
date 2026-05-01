@@ -239,13 +239,23 @@ export function appendToHistory(
 }
 
 /**
- * Vide complètement la mémoire (pour le bouton "Effacer mémoire" ou nouveau dossier).
+ * Vide la mémoire conversationnelle (Phase 8 fields uniquement).
+ *
+ * Préserve les autres états du contexte (`balanceData`, `entreprise`, `regime`,
+ * `lastAccountNumber`, etc.) qui sont des navigation/preferences et pas de la
+ * mémoire conversationnelle. Pour vider l'intégralité du contexte, utiliser
+ * un nouveau `ConversationContext` vide.
  */
-export function clearMemory(context: ConversationContext): ConversationContext {
+export function clearConversationalMemory(context: ConversationContext): ConversationContext {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { lastComputation, lastForecast, userHypotheses, history, ...rest } = context
   return rest
 }
+
+/**
+ * @deprecated Use `clearConversationalMemory` instead. Will be removed in v2.
+ */
+export const clearMemory = clearConversationalMemory
 
 // ─── What-If handler (Phase 8.B) ──────────────────────────────────────
 

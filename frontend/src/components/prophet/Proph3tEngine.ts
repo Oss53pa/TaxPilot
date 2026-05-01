@@ -4,6 +4,7 @@ import { getFonctionnement } from '@/data/syscohada/fonctionnement'
 import { searchOperations, loadChapitre, CHAPITRES_SOMMAIRE } from '@/data/syscohada/operations'
 import { LIASSE_SHEETS } from '@/config/liasseFiscaleSheets'
 import { controlRegistry } from '@/services/audit'
+import { FORECAST_LABELS } from './knowledge/projections'
 import type {
   Proph3tResponse,
   ConversationContext,
@@ -633,10 +634,10 @@ export async function processQuery(
       Object.assign(newContext, rememberForecast(newContext, {
         timestamp: Date.now(),
         periods: 2,
-        ca_n1: findValue("Chiffre d'affaires N+1"),
-        ca_n2: findValue("Chiffre d'affaires N+2"),
-        resultat_n1: findValue('Résultat net N+1'),
-        resultat_n2: findValue('Résultat net N+2'),
+        ca_n1: findValue(`${FORECAST_LABELS.CA} N+1`),
+        ca_n2: findValue(`${FORECAST_LABELS.CA} N+2`),
+        resultat_n1: findValue(`${FORECAST_LABELS.RESULTAT} N+1`),
+        resultat_n2: findValue(`${FORECAST_LABELS.RESULTAT} N+2`),
         confidence: 'low',
       }))
     }

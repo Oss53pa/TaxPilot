@@ -37,7 +37,7 @@ export {
 } from './predictiveAnalysis'
 export type { Agregats } from './predictiveAnalysis'
 
-export { projectAggregates, formatProjectionForCard } from './projections'
+export { projectAggregates, formatProjectionForCard, FORECAST_LABELS } from './projections'
 export type { ProjectionResult, AggregateProjection, ProjectionScenario, ProjectionConfidence } from './projections'
 
 export {
@@ -65,7 +65,8 @@ export {
   addHypothesis,
   tickHypothesesTtl,
   appendToHistory,
-  clearMemory,
+  clearConversationalMemory,
+  clearMemory, // deprecated alias
   parseWhatIf,
   handleWhatIf,
 } from './memoryRecall'
