@@ -66,6 +66,9 @@ function buildTauxFromPays(pays: PaysOHADA): typeof TAUX_FISCAUX_CI {
   // Start with CI defaults (full structure including salary brackets, CNPS, etc.)
   const base = JSON.parse(JSON.stringify(TAUX_FISCAUX_CI))
 
+  // Override metadata to reflect the active country (TODO: per-country _meta in PAYS_OHADA)
+  base._meta.pays = pays.code
+
   // Override the main rates with the active country's rates
   base.IS.taux_normal = pays.fiscalite.IS.taux_normal
   if (pays.fiscalite.IS.taux_pme !== undefined) {

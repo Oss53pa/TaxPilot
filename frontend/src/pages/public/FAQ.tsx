@@ -20,16 +20,16 @@ const sections = [
     title: 'Fonctionnalités',
     items: [
       { q: "Quels formats d'import ?", a: "Excel (.xlsx, .xls), CSV et FEC. Le mapping des 1 005 comptes SYSCOHADA est automatique." },
-      { q: "Comment marchent les contrôles ?", a: "129 contrôles Proph3t vérifient l'équilibre du bilan, la concordance des postes, la cohérence inter-feuillets et le respect des règles SYSCOHADA. Score de conformité en temps réel." },
-      { q: "Puis-je gérer plusieurs sociétés ?", a: "Oui. Le plan Cabinet permet un nombre illimité de dossiers avec gestion des rôles et permissions par collaborateur." },
+      { q: "Comment marchent les contrôles ?", a: "169 contrôles Proph3t vérifient l'équilibre du bilan, la concordance des postes, la cohérence inter-feuillets et le respect des règles SYSCOHADA. Score de conformité en temps réel." },
+      { q: "Puis-je gérer plusieurs sociétés ?", a: "Oui. Le plan Cabinet · 10 dossiers couvre jusqu'à 10 clients ; le plan Cabinet · illimité supprime la limite et ajoute API, SLA et white-label. Gestion des rôles et permissions par collaborateur incluse dès le plan Cabinet." },
       { q: "Quels formats d'export ?", a: "Excel 84 onglets (Mode A), Excel template DGI (Mode B), PDF A3/A4/A5. Prochainement : XML télédéclaration." },
     ],
   },
   {
     title: 'Tarifs',
     items: [
-      { q: "Combien ça coûte ?", a: "Entreprise (1 société) : 250 000 FCFA/an. Cabinet (illimité) : 1 500 000 FCFA/an. Toutes les fonctionnalités sont incluses." },
-      { q: "Puis-je changer de plan ?", a: "Oui, passage d'Entreprise à Cabinet à tout moment, au prorata." },
+      { q: "Combien ça coûte ?", a: "Entreprise (1 société) : 450 000 FCFA/an. Cabinet · 10 dossiers : 1 500 000 FCFA/an. Cabinet · illimité (API + SLA 99.9% + white-label) : 3 000 000 FCFA/an. Tarifs annuels HT, sans engagement." },
+      { q: "Puis-je changer de plan ?", a: "Oui, passage entre les 3 plans (Entreprise, Cabinet 10 dossiers, Cabinet illimité) à tout moment, au prorata." },
       { q: "Moyens de paiement ?", a: "Carte bancaire (Visa, Mastercard), Mobile Money (Orange, MTN, Moov), virement bancaire, Western Union." },
       { q: "Essai gratuit ?", a: "Sans engagement, annulation à tout moment." },
     ],
@@ -45,8 +45,8 @@ const sections = [
   {
     title: 'Support',
     items: [
-      { q: "Comment contacter le support ?", a: "Par email pour tous les plans. Support prioritaire pour le plan Cabinet. Réponse sous 24h." },
-      { q: "Proposez-vous des formations ?", a: "Webinaires, documentation complète, tutoriels vidéo. Formation personnalisée sur demande pour le plan Cabinet." },
+      { q: "Comment contacter le support ?", a: "Email pour tous les plans (réponse < 48h). Support prioritaire 24h pour les plans Cabinet · 10 dossiers et Cabinet · illimité. Account manager dédié pour Cabinet · illimité." },
+      { q: "Proposez-vous des formations ?", a: "Webinaires, documentation complète, tutoriels vidéo. Formation personnalisée sur demande pour les plans Cabinet." },
     ],
   },
 ]

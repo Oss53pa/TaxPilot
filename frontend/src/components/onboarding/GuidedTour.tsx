@@ -57,7 +57,7 @@ const TOUR_STEPS: TourStep[] = [
     placement: 'bottom',
     route: '/audit',
     title: 'Audit & Contr\u00f4les',
-    content: '129 contr\u00f4les automatis\u00e9s v\u00e9rifient la coh\u00e9rence de votre balance. R\u00e9solvez les erreurs bloquantes avant de g\u00e9n\u00e9rer la liasse.',
+    content: '169 contr\u00f4les automatis\u00e9s v\u00e9rifient la coh\u00e9rence de votre balance. R\u00e9solvez les erreurs bloquantes avant de g\u00e9n\u00e9rer la liasse.',
   },
   {
     id: 'liasse',

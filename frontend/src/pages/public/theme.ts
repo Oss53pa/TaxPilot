@@ -3,6 +3,7 @@
 export const DARK = '#111111'
 export const DARK_SURFACE = '#181818'
 export const GOLD = '#c9a84c'
+export const GOLD_RGB = '201, 168, 76'
 export const GOLD_MUTED = '#b5a06a'
 export const TEXT_PRIMARY = '#ede8df'
 export const TEXT_SECONDARY = '#c0b9ae'

@@ -37,7 +37,7 @@ const CGU: React.FC = () => (
       </Section>
 
       <Section title="Article 3 — Inscription et compte">
-        <P>L'inscription est gratuite et ouvre droit au plan Starter (2 liasses/an). L'utilisateur garantit l'exactitude des informations fournies.</P>
+        <P>L'inscription est gratuite. L'acces aux fonctionnalites payantes requiert la souscription a un plan annuel (Entreprise · 1 societe, Cabinet · 10 dossiers ou Cabinet · illimite). L'utilisateur garantit l'exactitude des informations fournies.</P>
         <P>Chaque utilisateur est responsable de la confidentialite de ses identifiants de connexion. Toute activite effectuee depuis son compte est reputee effectuee par lui.</P>
         <P>Liass'Pilot se reserve le droit de suspendre ou supprimer tout compte en cas de violation des presentes CGU.</P>
       </Section>
@@ -46,17 +46,17 @@ const CGU: React.FC = () => (
         <P>La plateforme propose les services suivants :</P>
         <P>- Import de balances comptables (Excel, CSV, XML)</P>
         <P>- Generation automatique de liasses fiscales (SYSCOHADA SN, SMT, SA, sectoriels)</P>
-        <P>- Audit et controle de coherence (129 regles de validation)</P>
+        <P>- Audit et controle de coherence (169 regles de validation)</P>
         <P>- Export en formats Excel, PDF et XML (teledeclaration)</P>
         <P>- Gestion multi-dossiers pour les cabinets comptables</P>
         <P>- Collaboration multi-utilisateurs</P>
       </Section>
 
       <Section title="Article 5 — Plans et tarification">
-        <P><strong>Starter</strong> (gratuit) : 2 liasses/an, SMT uniquement, 1 utilisateur.</P>
-        <P><strong>Business</strong> (49 000 XOF/mois ou 490 000 XOF/an) : 12 liasses/an, tous types, 5 utilisateurs.</P>
-        <P><strong>Enterprise</strong> (149 000 XOF/mois ou 1 490 000 XOF/an) : illimite, consolidation, API, SLA 99.9%.</P>
-        <P>Les prix sont exprimes en Francs CFA (XOF) et sont susceptibles de modification avec un preavis de 30 jours.</P>
+        <P><strong>Entreprise · 1 societe</strong> (450 000 XOF/an) : acces complet pour une societe, toutes les fonctionnalites de base incluses.</P>
+        <P><strong>Cabinet · 10 dossiers</strong> (1 500 000 XOF/an) : jusqu'a 10 dossiers clients, gestion d'equipe, e-Invoicing, support prioritaire.</P>
+        <P><strong>Cabinet · illimite</strong> (3 000 000 XOF/an) : dossiers illimites, API REST, SLA 99.9%, white-label disponible, account manager dedie.</P>
+        <P>Les prix sont annuels, exprimes en Francs CFA (XOF), HT, et sont susceptibles de modification avec un preavis de 30 jours.</P>
       </Section>
 
       <Section title="Article 6 — Paiement">
@@ -95,7 +95,7 @@ const CGU: React.FC = () => (
 
       <Section title="Article 12 — Disponibilite du service">
         <P>Liass'Pilot s'efforce d'assurer la disponibilite de la plateforme 24h/24 et 7j/7.</P>
-        <P>Des interruptions pour maintenance peuvent survenir. Les utilisateurs Enterprise beneficient d'un SLA de 99.9%.</P>
+        <P>Des interruptions pour maintenance peuvent survenir. Les utilisateurs du plan Cabinet · illimite beneficient d'un SLA contractuel de 99.9%.</P>
         <P>Liass'Pilot ne saurait etre tenu responsable des interruptions dues a des cas de force majeure.</P>
       </Section>
 

@@ -2,7 +2,7 @@
  * Composant de validation de la balance
  *
  * P0-2 : Remplace la simulation mock (setTimeout + score 85)
- * par l'exécution réelle des 129 contrôles d'audit.
+ * par l'exécution réelle des 169 contrôles d'audit.
  */
 
 import React, { useState, useCallback } from 'react'

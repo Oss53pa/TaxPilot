@@ -4,7 +4,7 @@ import { Box, Avatar, AvatarGroup, keyframes } from '@mui/material'
 import { AutoAwesome, ArrowForward } from '@mui/icons-material'
 import PublicLayout from './PublicLayout'
 import { useLandingContent } from '../../hooks/useLandingContent'
-import { DARK, DARK_SURFACE, GOLD, GOLD_MUTED, TEXT_PRIMARY, TEXT_SECONDARY, BORDER, HEADING, BODY } from './theme'
+import { DARK, DARK_SURFACE, GOLD, GOLD_RGB, GOLD_MUTED, TEXT_PRIMARY, TEXT_SECONDARY, BORDER, HEADING, BODY } from './theme'
 
 // ─── Keyframe animations ─────────────────────────────────────
 const fadeUp = keyframes`
@@ -83,7 +83,7 @@ const allFeatures = [
   'Compte de résultat & 9 SIG',
   'TAFIRE / TFT (CAFG, FR, BFR, TN)',
   '18 notes annexes calculées',
-  '129 contrôles de cohérence Proph3t',
+  '169 contrôles de cohérence Proph3t',
   'Passage fiscal automatique CI',
   '7 réintégrations fiscales auto (CGI)',
   'Calcul IS & IMF',
@@ -101,13 +101,14 @@ const Landing: React.FC = () => {
   const remoteStats = remoteContent?.stats;
   const stats: { value: string; label: string }[] = remoteStats?.items ?? [
     { value: '1 005', label: 'COMPTES SYSCOHADA' },
-    { value: '129', label: 'CONTRÔLES PROPH3T' },
+    { value: '169', label: 'CONTRÔLES PROPH3T' },
     { value: '84', label: 'ONGLETS EXCEL' },
     { value: '17', label: 'PAYS OHADA' },
   ];
   const remotePricing = remoteContent?.pricing;
-  const entreprisePrice = remotePricing?.plans?.[0]?.price ?? 250000;
-  const cabinetPrice = remotePricing?.plans?.[1]?.price ?? 1500000;
+  const entreprisePrice = remotePricing?.plans?.[0]?.price ?? 450000;
+  const cabinet10Price = remotePricing?.plans?.[1]?.price ?? 1500000;
+  const cabinetIllPrice = remotePricing?.plans?.[2]?.price ?? 3000000;
 
   return (
   <PublicLayout>
@@ -347,7 +348,7 @@ const Landing: React.FC = () => {
           <Box
             sx={{
               display: 'grid',
-              gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)', md: 'repeat(5, 1fr)' },
+              gridTemplateColumns: { xs: '1fr', sm: 'repeat(5, 1fr)', md: 'repeat(5, 1fr)' },
               gap: { xs: 2, md: 1.5 },
               position: 'relative',
             }}
@@ -361,7 +362,7 @@ const Landing: React.FC = () => {
                 left: '10%',
                 right: '10%',
                 height: '1px',
-                background: `linear-gradient(90deg, transparent 0%, rgba(201,168,76,0.25) 20%, rgba(201,168,76,0.25) 80%, transparent 100%)`,
+                background: `linear-gradient(90deg, transparent 0%, rgba(${GOLD_RGB}, 0.25) 20%, rgba(${GOLD_RGB}, 0.25) 80%, transparent 100%)`,
                 zIndex: 0,
               }}
             />
@@ -369,7 +370,7 @@ const Landing: React.FC = () => {
             {[
               { step: '01', title: 'Importer', desc: 'Excel / CSV / API' },
               { step: '02', title: 'Vérifier', desc: 'Balance N / N-1' },
-              { step: '03', title: 'Contrôler', desc: '129 audits Proph3t' },
+              { step: '03', title: 'Contrôler', desc: '169 audits Proph3t' },
               { step: '04', title: 'Générer', desc: '80+ feuillets SYSCOHADA' },
               { step: '05', title: 'Exporter', desc: 'Excel DGI / PDF' },
             ].map((item) => (
@@ -391,7 +392,7 @@ const Landing: React.FC = () => {
                     height: 56,
                     borderRadius: '50%',
                     bgcolor: DARK,
-                    border: '1px solid rgba(201,168,76,0.25)',
+                    border: `1px solid rgba(${GOLD_RGB}, 0.25)`,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -403,7 +404,7 @@ const Landing: React.FC = () => {
                     transition: 'all 0.25s',
                     '&:hover': {
                       borderColor: GOLD,
-                      boxShadow: '0 0 0 4px rgba(201,168,76,0.08)',
+                      boxShadow: `0 0 0 4px rgba(${GOLD_RGB}, 0.08)`,
                     },
                   }}
                 >
@@ -473,12 +474,12 @@ const Landing: React.FC = () => {
           </Box>
         </Reveal>
 
-        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2.5, justifyContent: 'center' }}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' }, gap: 2.5, justifyItems: 'center' }}>
           {/* Plan Entreprise */}
           <Reveal delay={0.1} direction="scale">
             <Box
               sx={{
-                flex: 1, maxWidth: 380, p: 3.5, borderRadius: '14px',
+                width: '100%', maxWidth: 360, p: 3.5, borderRadius: '14px',
                 border: `1px solid ${BORDER}`, bgcolor: '#111111', textAlign: 'left',
                 transition: 'all 0.35s',
                 '&:hover': { borderColor: 'rgba(255,255,255,0.15)', transform: 'translateY(-4px)', boxShadow: '0 8px 30px rgba(0,0,0,0.3)' },
@@ -486,11 +487,11 @@ const Landing: React.FC = () => {
             >
               <Box sx={{ fontFamily: HEADING, fontWeight: 600, fontSize: '1.1rem', color: TEXT_PRIMARY, mb: 0.5 }}>Entreprise · 1 société</Box>
               <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.8, mb: 0.5 }}>
-                <Box sx={{ fontFamily: HEADING, fontWeight: 700, fontSize: '2.5rem', color: GOLD, lineHeight: 1 }}>{entreprisePrice.toLocaleString('fr-FR')}</Box>
+                <Box sx={{ fontFamily: HEADING, fontWeight: 700, fontSize: '2.4rem', color: GOLD, lineHeight: 1 }}>{entreprisePrice.toLocaleString('fr-FR')}</Box>
                 <Box sx={{ fontFamily: BODY, fontSize: '0.85rem', color: TEXT_SECONDARY }}>FCFA/an</Box>
               </Box>
               <Box
-                component="a" href="https://atlas-studio.org/portal?app=taxpilot"
+                component="a" href="https://atlas-studio.org/portal?app=taxpilot&plan=Entreprise"
                 sx={{
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mt: 2.5,
                   border: `1px solid ${BORDER}`, bgcolor: 'transparent',
@@ -504,11 +505,11 @@ const Landing: React.FC = () => {
             </Box>
           </Reveal>
 
-          {/* Plan Cabinet */}
-          <Reveal delay={0.25} direction="scale">
+          {/* Plan Cabinet · 10 dossiers (POPULAIRE) */}
+          <Reveal delay={0.2} direction="scale">
             <Box
               sx={{
-                flex: 1, maxWidth: 380, p: 3.5, borderRadius: '14px',
+                width: '100%', maxWidth: 360, p: 3.5, borderRadius: '14px',
                 border: `2px solid ${GOLD}`, bgcolor: '#111111', textAlign: 'left', position: 'relative',
                 transition: 'all 0.35s',
                 '&:hover': { transform: 'translateY(-6px)', boxShadow: `0 8px 30px rgba(201,168,76,0.15)` },
@@ -517,18 +518,48 @@ const Landing: React.FC = () => {
               <Box sx={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', display: 'inline-flex', alignItems: 'center', gap: 0.5, bgcolor: GOLD, color: '#1a1200', fontFamily: BODY, fontSize: '0.72rem', fontWeight: 600, px: 1.8, py: 0.35, borderRadius: '999px' }}>
                 POPULAIRE
               </Box>
-              <Box sx={{ fontFamily: HEADING, fontWeight: 600, fontSize: '1.1rem', color: TEXT_PRIMARY, mb: 0.5 }}>Cabinet · illimité</Box>
+              <Box sx={{ fontFamily: HEADING, fontWeight: 600, fontSize: '1.1rem', color: TEXT_PRIMARY, mb: 0.5 }}>Cabinet · 10 dossiers</Box>
               <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.8, mb: 0.5 }}>
-                <Box sx={{ fontFamily: HEADING, fontWeight: 700, fontSize: '2.5rem', color: GOLD, lineHeight: 1 }}>{cabinetPrice.toLocaleString('fr-FR')}</Box>
+                <Box sx={{ fontFamily: HEADING, fontWeight: 700, fontSize: '2.4rem', color: GOLD, lineHeight: 1 }}>{cabinet10Price.toLocaleString('fr-FR')}</Box>
                 <Box sx={{ fontFamily: BODY, fontSize: '0.85rem', color: TEXT_SECONDARY }}>FCFA/an</Box>
               </Box>
               <Box
-                component="a" href="https://atlas-studio.org/portal?app=taxpilot"
+                component="a" href="https://atlas-studio.org/portal?app=taxpilot&plan=Cabinet10"
                 sx={{
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mt: 2.5,
                   bgcolor: GOLD, color: '#1a1200 !important', fontWeight: 500, fontFamily: BODY,
                   fontSize: '0.9rem', textDecoration: 'none', borderRadius: '8px', px: 3, py: 1.3,
                   transition: 'all 0.25s', '&:hover': { bgcolor: '#d4b35a', transform: 'translateY(-1px)' },
+                }}
+              >
+                Souscrire <ArrowForward sx={{ fontSize: 16 }} />
+              </Box>
+            </Box>
+          </Reveal>
+
+          {/* Plan Cabinet · illimité */}
+          <Reveal delay={0.3} direction="scale">
+            <Box
+              sx={{
+                width: '100%', maxWidth: 360, p: 3.5, borderRadius: '14px',
+                border: `1px solid ${BORDER}`, bgcolor: '#111111', textAlign: 'left',
+                transition: 'all 0.35s',
+                '&:hover': { borderColor: 'rgba(255,255,255,0.15)', transform: 'translateY(-4px)', boxShadow: '0 8px 30px rgba(0,0,0,0.3)' },
+              }}
+            >
+              <Box sx={{ fontFamily: HEADING, fontWeight: 600, fontSize: '1.1rem', color: TEXT_PRIMARY, mb: 0.5 }}>Cabinet · illimité</Box>
+              <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.8, mb: 0.5 }}>
+                <Box sx={{ fontFamily: HEADING, fontWeight: 700, fontSize: '2.4rem', color: GOLD, lineHeight: 1 }}>{cabinetIllPrice.toLocaleString('fr-FR')}</Box>
+                <Box sx={{ fontFamily: BODY, fontSize: '0.85rem', color: TEXT_SECONDARY }}>FCFA/an</Box>
+              </Box>
+              <Box
+                component="a" href="https://atlas-studio.org/portal?app=taxpilot&plan=CabinetIllimite"
+                sx={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mt: 2.5,
+                  border: `1px solid ${BORDER}`, bgcolor: 'transparent',
+                  color: `${TEXT_PRIMARY} !important`, fontWeight: 500, fontFamily: BODY,
+                  fontSize: '0.9rem', textDecoration: 'none', borderRadius: '8px', px: 3, py: 1.3,
+                  transition: 'all 0.25s', '&:hover': { borderColor: 'rgba(255,255,255,0.3)', transform: 'translateY(-1px)' },
                 }}
               >
                 Souscrire <ArrowForward sx={{ fontSize: 16 }} />

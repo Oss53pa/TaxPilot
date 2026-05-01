@@ -35,6 +35,7 @@ export type Intent =
   | 'PREDICTION_TVA'
   | 'PREDICTION_RATIOS'
   | 'PREDICTION_TREND'
+  | 'PREDICTION_FORECAST'
   | 'PREDICTION_ANOMALY'
   | 'PREDICTION_COHERENCE'
   | 'PREDICTION_GENERAL'
@@ -43,6 +44,9 @@ export type Intent =
   | 'PREDICTION_BFR'
   // Conditional reasoning
   | 'CONDITIONAL_DIAGNOSTIC'
+  // Memory (Phase 8)
+  | 'MEMORY_RECALL'
+  | 'WHAT_IF'
   | 'UNKNOWN'
 
 // ── Parsed query ─────────────────────────────────────────────────────
@@ -198,9 +202,65 @@ export interface ConversationContext {
     capital?: number
     effectifs?: number
     secteur_activite?: string
+    /** Phase 6 — Régimes fiscaux spéciaux (opt-in déclaratifs) */
+    /** Zone franche industrielle déclarée (IS exonéré, IMF maintenu) */
+    zoneFranche?: boolean
+    /** PME éligible au taux IS réduit 20% (CGI Art. 33 bis) */
+    pmeEligible?: boolean
+    /** Entité à but non lucratif (association/fondation) — IS 0% sur activités non-lucratives */
+    ebnl?: boolean
+    /** Coopérative agréée — IS 0% sur opérations entre membres */
+    cooperative?: boolean
+    /** Capital majoritairement détenu par des personnes physiques (critère PME) */
+    capitalPhysiquesMajoritaire?: boolean
   }
   /** ID de la page liasse actuellement affichée (ex: 'note-15', 'bilan', 'actif') */
   currentLiassePage?: string
   /** True si une balance a été importée et chargée */
   balanceLoaded?: boolean
+
+  // ─── Phase 8 : Mémoire conversationnelle multi-tours ───
+  /**
+   * Dernier calcul effectué — permet le rappel ("rappelle-moi mon IS")
+   * et les questions de suivi ("et la TVA ?")
+   */
+  lastComputation?: {
+    intent: Intent
+    timestamp: number
+    summary: string  // résumé textuel court (max 200 chars)
+    /** Données structurées pour réutilisation (typage volontairement large) */
+    data?: {
+      ca?: number
+      resultat_fiscal?: number
+      is_du?: number
+      tva_a_decaisser?: number
+      score_audit?: number
+      anomalies_count?: number
+      [key: string]: number | string | boolean | undefined
+    }
+  }
+  /** Dernière projection N+1/N+2 (Phase 3) pour comparaison ultérieure */
+  lastForecast?: {
+    timestamp: number
+    periods: number
+    ca_n1?: number
+    ca_n2?: number
+    resultat_n1?: number
+    resultat_n2?: number
+    confidence: string
+  }
+  /** Hypothèses déclarées par l'utilisateur (persistées sur N tours) */
+  userHypotheses?: Record<string, {
+    value: number | string | boolean
+    description: string
+    /** Nombre de tours restant avant expiration auto (défaut: persistant) */
+    ttl?: number
+  }>
+  /** Historique court des derniers échanges (max 10) — pour "qu'est-ce que j'ai demandé ?" */
+  history?: {
+    role: 'user' | 'assistant'
+    intent?: Intent
+    text: string
+    timestamp: number
+  }[]
 }

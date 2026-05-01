@@ -1,5 +1,5 @@
 /**
- * Démo interactive : Audit automatisé de la liasse fiscale (129 contrôles)
+ * Démo interactive : Audit automatisé de la liasse fiscale (169 contrôles)
  * Simule l'exécution en temps réel des contrôles N1/N2/N3 avec résultats.
  */
 import React, { useState, useEffect, useRef } from 'react'
@@ -128,7 +128,7 @@ const InteractiveAuditDemo: React.FC<{ onClose: () => void }> = ({ onClose }) =>
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-start gap-2">
         <Sparkles className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
         <div className="text-sm text-blue-800">
-          <strong>Démo interactive</strong> — 129 contrôles automatisés (N1 bloquants, N2 majeurs, N3 vigilance)
+          <strong>Démo interactive</strong> — 169 contrôles automatisés (N1 bloquants, N2 majeurs, N3 vigilance)
           balayent votre liasse en quelques secondes. Cet extrait en présente 20.
         </div>
       </div>
@@ -141,7 +141,7 @@ const InteractiveAuditDemo: React.FC<{ onClose: () => void }> = ({ onClose }) =>
           </div>
           <div>
             <p className="text-[10px] uppercase tracking-widest text-white/50">Audit automatisé SYSCOHADA</p>
-            <h4 className="text-base font-bold">Liasse SARL AKWABA · 129 contrôles</h4>
+            <h4 className="text-base font-bold">Liasse SARL AKWABA · 169 contrôles</h4>
             <p className="text-xs text-white/60 mt-0.5">Niveaux N1 / N2 / N3 · Durée moyenne : 8 s</p>
           </div>
         </div>

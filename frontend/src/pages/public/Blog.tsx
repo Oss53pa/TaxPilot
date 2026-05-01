@@ -36,8 +36,8 @@ const posts = [
   {
     date: '5 février 2025',
     category: 'Produit',
-    title: '129 contrôles Proph3t : comment ça marche ?',
-    excerpt: "Notre moteur d'IA Proph3t exécute 129 contrôles de cohérence sur votre liasse fiscale. Découvrez les 9 niveaux d'audit et le scoring de conformité.",
+    title: '169 contrôles Proph3t : comment ça marche ?',
+    excerpt: "Notre moteur d'IA Proph3t exécute 169 contrôles de cohérence sur votre liasse fiscale. Découvrez les 9 niveaux d'audit et le scoring de conformité.",
     readTime: '6 min',
   },
   {

@@ -13,6 +13,18 @@ import { getTauxFiscaux } from '@/store/tauxFiscauxStore'
 export { getTauxFiscaux }
 
 export const TAUX_FISCAUX_CI = {
+  // === MÉTADONNÉES DE VERSION ===
+  // Met à jour ces champs à chaque Loi de Finances pour tracer la version applicable.
+  _meta: {
+    pays: 'CI' as const,
+    version: '2025',                                    // Exercice fiscal de référence
+    dateEffet: '2025-01-01' as const,                   // Date d'entrée en vigueur
+    referenceLegale: 'Loi de Finances 2025 (Annexe fiscale)' as const,
+    sourceCgi: 'Code Général des Impôts CI — édition 2025' as const,
+    prochaineRevisionEstimee: '2026-01-01' as const,    // Date présumée de prochaine LF
+    derniereRevue: '2025-01-15' as const,               // Date de la dernière relecture interne
+  },
+
   // === IMPÔT SUR LES BÉNÉFICES (BIC/IS) ===
   IS: {
     taux_normal: 0.25,           // 25% — CGI Art. 33
@@ -125,6 +137,43 @@ export const TAUX_FISCAUX_CI = {
     taux_acompte: 0.25,          // 25% de l'IS N-1 par acompte
   },
 } as const
+
+// === HELPER : Métadonnées de version applicables ===
+export interface TauxMeta {
+  pays: string
+  version: string
+  dateEffet: string
+  referenceLegale: string
+  sourceCgi: string
+  prochaineRevisionEstimee: string
+  derniereRevue: string
+  /** True si la date de prochaine révision estimée est passée (taux potentiellement obsolètes) */
+  estObsolete: boolean
+  /** Nombre de jours avant la prochaine révision (négatif si dépassée) */
+  joursAvantRevision: number
+}
+
+/**
+ * Retourne les métadonnées de version applicables aux taux courants
+ * (en tenant compte du pays actif via getTauxFiscaux()).
+ */
+export function getTauxMeta(now: Date = new Date()): TauxMeta {
+  const meta = getTauxFiscaux()._meta
+  const prochaine = new Date(meta.prochaineRevisionEstimee)
+  const ms = prochaine.getTime() - now.getTime()
+  const joursAvantRevision = Math.round(ms / 86_400_000)
+  return {
+    pays: meta.pays,
+    version: meta.version,
+    dateEffet: meta.dateEffet,
+    referenceLegale: meta.referenceLegale,
+    sourceCgi: meta.sourceCgi,
+    prochaineRevisionEstimee: meta.prochaineRevisionEstimee,
+    derniereRevue: meta.derniereRevue,
+    estObsolete: joursAvantRevision < 0,
+    joursAvantRevision,
+  }
+}
 
 // === HELPER : Arrondi FCFA (0 décimales) ===
 export function arrondiFCFA(montant: number): number {

@@ -1,6 +1,25 @@
 /**
- * NLP — Détection d'intention multi-pattern pondérée
- * Remplace le detectIntent() inline de Proph3tEngine.ts
+ * NLP — Détection d'intention multi-pattern pondérée.
+ *
+ * **Algorithme** : pour chaque domaine (SYSCOHADA / Fiscal / Liasse / Audit /
+ * Prédiction / Mémoire), une série de regex score chaque intent candidat
+ * (0-100). L'intent gagnant est celui avec le score le plus élevé.
+ *
+ * **Score de référence** :
+ *   - 100 : match exact (ex: "aide" → HELP)
+ *   - 88-95 : match précis avec mot-clé fort (ex: "et si X = Y" → WHAT_IF)
+ *   - 80-87 : match standard (ex: "ratios" → PREDICTION_RATIOS)
+ *   - 60 : fallback de domaine (ex: "fiscal" sans précision → FISCAL_GENERAL)
+ *
+ * **Boosters** :
+ *   - +5 si entité extraite (numéro de compte, ref audit, montant)
+ *   - +12 si suivi contextuel court ("et la TVA ?" après PREDICTION_IS)
+ *   - +8 si négation ou marqueur temporel pertinent
+ *
+ * **Multi-intent** : si "et" / "puis" / "aussi" présent ET 2+ intents scorent
+ * ≥70, retourne `{ intent: primary, secondaryIntents: [secondary, ...] }`
+ *
+ * Voir [README.md](../README.md) pour la liste complète des 38 intents.
  */
 
 import type { ParsedQuery, Intent, ConversationContext } from '../types'
@@ -112,6 +131,18 @@ function scoreIntents(
     add('HELP', 100)
   }
 
+  // ── Memory recall (Phase 8) ──
+  if (/\b(rappelle|rappeler|rappel|memoire|historique|dernier\s*calcul|qu\s*est\s*ce\s*qu\s*on\s*a|ce\s*qu\s*on\s*a\s*calcule|recap|recapitulati|on\s*en\s*etait|ou\s*en\s*est)\b/.test(normalized)) {
+    add('MEMORY_RECALL', 92)
+  }
+
+  // ── What-If (Phase 8) ──
+  // Doit être au top-level (pas dans le bloc prediction) pour fire sur "et si CA = 300M"
+  // Score 95 pour battre les FISCAL_* déclenchés par les mots clé fiscal présents dans la phrase
+  if (/\b(et\s*si|si\s*on|imagine|considere|considerons|admettons|hypothese|que\s*se\s*passe[\s-]*t[\s-]*il|si\s*je|dans\s*l\s*hypothese|supposons)\b/.test(normalized)) {
+    add('WHAT_IF', 95)
+  }
+
   // ── Stats ──
   if (/\b(combien|statistique|statistiques|stats|nombre total|resume plan)\b/.test(normalized)) {
     add('STATS', 80)
@@ -195,7 +226,7 @@ function scoreIntents(
   const hasPrediction = hasCanonical(canonTokens, 'prevision') || hasCanonical(canonTokens, 'ratio') ||
     /\b(analyser|analyse|prediction|prevision|situation|sante|diagnostic|prospectif)\b/.test(normalized)
 
-  if (hasPrediction || /\b(ratio|indicateur|tendance|anomalie|sig|soldes?\s*intermediaires?|ebe|marge\s*commerciale|cafg|seuil\s*(?:de\s+)?rentabilite|point\s*mort|break\s*even|breakeven|bfr|besoin\s*(?:en\s+)?fonds?\s*(?:de\s+)?roulement|dso|dpo|dsi|cycle\s*(?:de\s+)?cash|cycle\s*(?:de\s+)?tresorerie|fonds?\s*(?:de\s+)?roulement)\b/.test(normalized)) {
+  if (hasPrediction || /\b(ratio|indicateur|tendance|anomalie|sig|soldes?\s*intermediaires?|ebe|marge\s*commerciale|cafg|seuil\s*(?:de\s+)?rentabilite|point\s*mort|break\s*even|breakeven|bfr|besoin\s*(?:en\s+)?fonds?\s*(?:de\s+)?roulement|dso|dpo|dsi|cycle\s*(?:de\s+)?cash|cycle\s*(?:de\s+)?tresorerie|fonds?\s*(?:de\s+)?roulement|projection|forecast|previsionnel|extrapolation|projeter|projete|annee\s*prochaine|prochain\s*exercice|n\s*\+\s*\d|horizon|prospective|scenario|optimiste|pessimiste)\b/.test(normalized)) {
     if (/\b(is|impot|benefice|resultat\s*fiscal)\b/.test(normalized) && hasPrediction) {
       add('PREDICTION_IS', 80)
     }
@@ -207,6 +238,12 @@ function scoreIntents(
     }
     if (/\b(tendance|evolution|comparaison|compare|progression)\b/.test(normalized)) {
       add('PREDICTION_TREND', 80)
+    }
+    // Forecast multi-exercice (N+1, N+2)
+    if (/\b(projection|forecast|prevision|previsionnel|extrapolation|projeter|projete)\b/.test(normalized) ||
+        /\b(annee\s*prochaine|prochain\s*exercice|exercice\s*prochain|futur|n\s*\+\s*\d|horizon|prospective)\b/.test(normalized) ||
+        /\b(scenario|scenarios|optimiste|pessimiste|meilleur\s*cas|pire\s*cas)\b/.test(normalized)) {
+      add('PREDICTION_FORECAST', 90)
     }
     if (/\b(anomalie|alerte|risque|probleme|irregularite)\b/.test(normalized)) {
       add('PREDICTION_ANOMALY', 80)
@@ -297,6 +334,9 @@ function scoreIntents(
       }
       if (ctx.lastIntent.startsWith('PREDICTION_') && /\b(coherence)\b/.test(normalized)) {
         add('PREDICTION_COHERENCE', 92)
+      }
+      if (ctx.lastIntent.startsWith('PREDICTION_') && /\b(projection|forecast|prevision|n\s*\+\s*\d|futur|prochain)\b/.test(normalized)) {
+        add('PREDICTION_FORECAST', 92)
       }
       // "et l'audit?" after any analysis
       if (ctx.lastIntent.startsWith('PREDICTION_') && /\b(audit)\b/.test(normalized)) {

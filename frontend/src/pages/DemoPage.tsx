@@ -50,10 +50,10 @@ const TOUR_SECTIONS: TourSection[] = [
   {
     id: 'audit',
     title: 'Audit de Balance',
-    desc: '129 contrôles automatisés en un clic. Niveaux N1 (bloquants), N2 (majeurs), N3 (vigilance). Cohérences croisées, équilibres, ratios UEMOA.',
+    desc: '169 contrôles automatisés en un clic. Niveaux N1 (bloquants), N2 (majeurs), N3 (vigilance). Cohérences croisées, équilibres, ratios UEMOA.',
     icon: Shield,
     route: '/audit',
-    features: ['129 contrôles', 'Niveaux N1/N2/N3', 'Cohérences croisées', 'Ratios UEMOA'],
+    features: ['169 contrôles', 'Niveaux N1/N2/N3', 'Cohérences croisées', 'Ratios UEMOA'],
     color: 'from-red-500/20 to-red-600/10',
     demoId: 'audit',
   },
@@ -134,9 +134,9 @@ const INTERACTIVE_DEMOS: InteractiveDemoMeta[] = [
   {
     id: 'audit',
     icon: Shield,
-    title: 'Audit automatisé (129 contrôles)',
+    title: 'Audit automatisé (169 contrôles)',
     desc: 'Regardez le moteur exécuter les contrôles N1/N2/N3 sur votre liasse en quelques secondes.',
-    tags: ['129 contrôles', 'N1/N2/N3', 'IA PROPH3T'],
+    tags: ['169 contrôles', 'N1/N2/N3', 'IA PROPH3T'],
     duration: '2 min',
   },
 ]
@@ -848,7 +848,7 @@ const DemoPage: React.FC = () => {
                   <h3 className="text-sm font-bold" style={{ color: W }}>
                     {activeView === 'demo-import' && 'Import d\'une balance SYSCOHADA'}
                     {activeView === 'demo-liasse' && 'Bilan SYSCOHADA interactif'}
-                    {activeView === 'demo-audit' && 'Audit automatisé (129 contrôles)'}
+                    {activeView === 'demo-audit' && 'Audit automatisé (169 contrôles)'}
                   </h3>
                   <p className="text-[10px]" style={{ color: W40 }}>
                     Mode démo — données simulées SARL AKWABA

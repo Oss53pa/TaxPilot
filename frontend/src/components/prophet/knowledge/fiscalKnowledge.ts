@@ -2,7 +2,7 @@
  * Knowledge — Fiscalité Côte d'Ivoire
  */
 
-import { getTauxFiscaux, calculerIS, calculerTVA, calculerPatente, arrondiFCFA } from '@/config/taux-fiscaux-ci'
+import { getTauxFiscaux, getTauxMeta, calculerIS, calculerTVA, calculerPatente, arrondiFCFA } from '@/config/taux-fiscaux-ci'
 import type { Proph3tResponse, FiscalInfoCard } from '../types'
 
 function fmt(n: number): string {
@@ -12,6 +12,15 @@ function fmt(n: number): string {
 function pct(n: number): string {
   const val = n * 100
   return `${val % 1 === 0 ? val.toFixed(0) : val.toFixed(1)}%`
+}
+
+/** Markdown footer disclosing the version + reference of the rates used. */
+function metaFooterMd(): string {
+  const m = getTauxMeta()
+  const obs = m.estObsolete
+    ? `\n\n> ⚠️ **Taux potentiellement obsoletes** — la prochaine revision etait estimee au **${m.prochaineRevisionEstimee}** (depassee de ${Math.abs(m.joursAvantRevision)} jours). Verifiez la derniere Loi de Finances.`
+    : ''
+  return `\n\n_Source : ${m.referenceLegale} — applicable depuis le ${m.dateEffet} (pays : ${m.pays}). Prochaine revision estimee : ${m.prochaineRevisionEstimee}._${obs}`
 }
 
 // ── Tax Rates ────────────────────────────────────────────────────────
@@ -34,7 +43,7 @@ export function handleFiscalTaxRate(keywords: string[], category?: string): Prop
       ],
     }
     return {
-      text: `**Taux de l'Impot sur les Societes (IS) - Cote d'Ivoire**\n\nLe taux normal de l'IS est de **${pct(taux.IS.taux_normal)}** (CGI Art. 33). Les PME eligibles beneficient d'un taux reduit de **${pct(taux.IS.taux_pme)}**.\n\nL'Impot Minimum Forfaitaire (IMF) est de **${pct(taux.IMF.taux)}** du CA, avec un minimum de **${fmt(taux.IMF.minimum)} FCFA** et un plafond de **${fmt(taux.IMF.maximum)} FCFA**.`,
+      text: `**Taux de l'Impot sur les Societes (IS) - Cote d'Ivoire**\n\nLe taux normal de l'IS est de **${pct(taux.IS.taux_normal)}** (CGI Art. 33). Les PME eligibles beneficient d'un taux reduit de **${pct(taux.IS.taux_pme)}**.\n\nL'Impot Minimum Forfaitaire (IMF) est de **${pct(taux.IMF.taux)}** du CA, avec un minimum de **${fmt(taux.IMF.minimum)} FCFA** et un plafond de **${fmt(taux.IMF.maximum)} FCFA**.${metaFooterMd()}`,
       content: [card],
       suggestions: ['Calculer IS', 'Taux TVA', 'Calendrier fiscal'],
     }
@@ -52,7 +61,7 @@ export function handleFiscalTaxRate(keywords: string[], category?: string): Prop
       ],
     }
     return {
-      text: `**Taux de TVA - Cote d'Ivoire**\n\nLe taux normal de TVA est de **${pct(taux.TVA.taux_normal)}** (CGI Art. 356). Un taux reduit de **${pct(taux.TVA.taux_reduit)}** s'applique aux produits de premiere necessite.`,
+      text: `**Taux de TVA - Cote d'Ivoire**\n\nLe taux normal de TVA est de **${pct(taux.TVA.taux_normal)}** (CGI Art. 356). Un taux reduit de **${pct(taux.TVA.taux_reduit)}** s'applique aux produits de premiere necessite.${metaFooterMd()}`,
       content: [card],
       suggestions: ['Calculer TVA', 'Taux IS', 'Calendrier fiscal'],
     }
@@ -166,7 +175,7 @@ export function handleFiscalTaxRate(keywords: string[], category?: string): Prop
     ],
   }
   return {
-    text: `**Principaux taux fiscaux - Cote d'Ivoire**\n\nVoici un apercu des taux les plus courants. Precisez votre question pour plus de details (IS, TVA, CNPS, retenues, salaires, patente, enregistrement).`,
+    text: `**Principaux taux fiscaux - Cote d'Ivoire**\n\nVoici un apercu des taux les plus courants. Precisez votre question pour plus de details (IS, TVA, CNPS, retenues, salaires, patente, enregistrement).${metaFooterMd()}`,
     content: [card],
     suggestions: ['Taux IS', 'Taux TVA', 'Taux CNPS', 'Retenues a la source'],
   }
@@ -289,7 +298,7 @@ export function handleFiscalDeductibility(_keywords: string[]): Proph3tResponse 
     ],
   }
   return {
-    text: `**Plafonds de deductibilite fiscale - Cote d'Ivoire**\n\nCertaines charges sont deductibles dans la limite de plafonds fixes par le CGI :\n\n- **Cadeaux** : ${pct(taux.DEDUCTIBILITE.plafond_cadeaux)} du CA\n- **Dons** : ${pct(taux.DEDUCTIBILITE.plafond_dons)} du CA\n- **Amortissement vehicules** : plafond de ${fmt(taux.DEDUCTIBILITE.amort_vehicule_plafond)} FCFA\n- **Interets compte courant** : taux max de ${pct(taux.DEDUCTIBILITE.plafond_interets_cc)}\n- **Missions** : ${fmt(taux.DEDUCTIBILITE.plafond_missions)} FCFA/jour`,
+    text: `**Plafonds de deductibilite fiscale - Cote d'Ivoire**\n\nCertaines charges sont deductibles dans la limite de plafonds fixes par le CGI :\n\n- **Cadeaux** : ${pct(taux.DEDUCTIBILITE.plafond_cadeaux)} du CA\n- **Dons** : ${pct(taux.DEDUCTIBILITE.plafond_dons)} du CA\n- **Amortissement vehicules** : plafond de ${fmt(taux.DEDUCTIBILITE.amort_vehicule_plafond)} FCFA\n- **Interets compte courant** : taux max de ${pct(taux.DEDUCTIBILITE.plafond_interets_cc)}\n- **Missions** : ${fmt(taux.DEDUCTIBILITE.plafond_missions)} FCFA/jour${metaFooterMd()}`,
     content: [card],
     suggestions: ['Taux IS', 'Calculer IS', 'Calendrier fiscal'],
   }

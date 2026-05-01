@@ -60,7 +60,7 @@ const tourSteps: TourStep[] = [
   { id: 'dashboard', title: 'Tableau de bord', subtitle: 'Vue d\'ensemble', desc: 'Suivez l\'avancement de votre liasse en temps réel : KPIs, workflow, échéances fiscales.' },
   { id: 'import', title: 'Import Balance', subtitle: 'Étape 1 — Importez vos données', desc: 'Glissez-déposez votre fichier Excel ou CSV. Liass\'Pilot détecte automatiquement les colonnes et mappe les 1 005 comptes SYSCOHADA.' },
   { id: 'balance', title: 'Balance Comptable', subtitle: 'Étape 2 — Vérifiez votre balance', desc: 'Visualisez votre balance générale avec comparatif N/N-1, mouvements et soldes. Filtrez par classe, recherchez par compte.' },
-  { id: 'audit', title: 'Audit & Contrôles', subtitle: 'Étape 3 — 129 contrôles Proph3t', desc: '129 contrôles de cohérence automatiques. Score de conformité, anomalies classées par sévérité, rapport d\'audit complet.' },
+  { id: 'audit', title: 'Audit & Contrôles', subtitle: 'Étape 3 — 169 contrôles Proph3t', desc: '169 contrôles de cohérence automatiques. Score de conformité, anomalies classées par sévérité, rapport d\'audit complet.' },
   { id: 'liasse', title: 'Liasse Fiscale', subtitle: 'Étape 4 — Votre liasse est prête', desc: '84 onglets calculés automatiquement. Bilan, Compte de Résultat, TAFIRE, 18 Notes Annexes. Export Excel conforme DGI.' },
   { id: 'export', title: 'Export & Télédéclaration', subtitle: 'Étape 5 — Exportez et déclarez', desc: 'Export Excel 84 onglets, template DGI, PDF. Prochainement : XML télédéclaration DSF, DAS, TVA, IS.' },
 ]
@@ -106,7 +106,7 @@ const DashboardScreen = () => (
     <Box sx={{ display: 'flex', gap: 1, mb: 2.5 }}>
       <StatCard label="Chiffre d'Affaires" value="168 M" sub="FCFA" icon={<TrendingUp sx={{ fontSize: 12, color: '#22c55e' }} />} />
       <StatCard label="Résultat Net" value="23.5 M" sub="+18% vs N-1" color="#22c55e" icon={<TrendingUp sx={{ fontSize: 12, color: '#22c55e' }} />} />
-      <StatCard label="Score Conformité" value="96%" sub="129/129 contrôles" icon={<CheckCircle sx={{ fontSize: 12, color: '#22c55e' }} />} />
+      <StatCard label="Score Conformité" value="96%" sub="169/169 contrôles" icon={<CheckCircle sx={{ fontSize: 12, color: '#22c55e' }} />} />
       <StatCard label="Avancement" value="3/5" sub="Étapes complétées" icon={<BarChart sx={{ fontSize: 12, color: GOLD }} />} />
     </Box>
     {/* Workflow */}
@@ -254,7 +254,7 @@ const AuditScreen = () => (
     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
       <Box>
         <Box sx={{ fontFamily: HEADING, fontWeight: 600, fontSize: '0.95rem', color: TEXT_PRIMARY }}>Audit & Contrôles Proph3t</Box>
-        <Box sx={{ fontFamily: BODY, fontSize: '0.68rem', color: TEXT_SECONDARY }}>129 contrôles de cohérence — SYSCOHADA Révisé</Box>
+        <Box sx={{ fontFamily: BODY, fontSize: '0.68rem', color: TEXT_SECONDARY }}>169 contrôles de cohérence — SYSCOHADA Révisé</Box>
       </Box>
       <Box sx={{ px: 1.5, py: 0.5, borderRadius: '6px', bgcolor: GOLD, fontFamily: BODY, fontSize: '0.68rem', fontWeight: 600, color: '#1a1200' }}>
         Lancer l'audit
@@ -289,7 +289,7 @@ const AuditScreen = () => (
       <Box sx={{ height: 6, borderRadius: 3, bgcolor: 'rgba(255,255,255,0.05)', overflow: 'hidden' }}>
         <Box sx={{ width: '96%', height: '100%', borderRadius: 3, background: 'linear-gradient(90deg, #22c55e, #16a34a)' }} />
       </Box>
-      <Box sx={{ fontFamily: BODY, fontSize: '0.6rem', color: TEXT_SECONDARY, mt: 0.3 }}>129 contrôles exécutés | 122 OK / 7 anomalies</Box>
+      <Box sx={{ fontFamily: BODY, fontSize: '0.6rem', color: TEXT_SECONDARY, mt: 0.3 }}>169 contrôles exécutés | 162 OK / 7 anomalies</Box>
     </Box>
     {/* Controls list */}
     <Box sx={{ borderRadius: '8px', border: `1px solid ${BORDER}`, overflow: 'hidden' }}>

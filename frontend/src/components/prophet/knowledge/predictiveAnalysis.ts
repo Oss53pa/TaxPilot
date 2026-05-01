@@ -8,6 +8,8 @@ import { generateAnnexeData } from '@/services/annexeDataService'
 import type { Balance } from '@/types'
 import type { Proph3tResponse, PredictionCard, FiscalInfoCard } from '../types'
 import type { BalanceEntry } from '@/services/liasseDataService'
+import { projectAggregates, formatProjectionForCard } from './projections'
+import type { ProjectionScenario } from './projections'
 
 function fmt(n: number): string {
   return Math.round(n).toLocaleString('fr-FR')
@@ -38,6 +40,30 @@ export interface Agregats {
   provisions: number       // POSITIVE (Math.abs applied) — class 15
 }
 
+/**
+ * Calcule les agrégats financiers principaux à partir d'une balance comptable.
+ *
+ * **Conventions de signe (OHADA)** :
+ *   - `capitauxPropres`, `capitalSocial`, `reserves` : positifs pour une société normale
+ *     (négation de la convention crédit-balance interne).
+ *   - `resultat` : positif si bénéfice, négatif si perte.
+ *   - `dettesTotal`, `provisions` : positifs (Math.abs appliqué).
+ *
+ * **Sources comptables** :
+ *   - CA : comptes 70 à 75 (côté crédit)
+ *   - Charges personnel : compte 66 (côté débit)
+ *   - Trésorerie : classe 5
+ *   - Résultat = Σ Produits (cl.7 + HAO produits 82/84/86/88) − Σ Charges (cl.6 + HAO charges + IS 81/83/85/87/89)
+ *
+ * @param balance Tableau de lignes de balance (compte, solde, débit, crédit)
+ * @returns Objet `Agregats` typé avec ~20 indicateurs prêts à l'emploi
+ *
+ * @example
+ * ```ts
+ * const ag = calculerAgregats(balance)
+ * console.log(`CA: ${ag.ca}, Résultat: ${ag.resultat}`)
+ * ```
+ */
 export function calculerAgregats(balance: Balance[]): Agregats {
   let capitauxPropres = 0, capitalSocial = 0, reserves = 0
   let immoBrutes = 0, amortissements = 0
@@ -156,6 +182,30 @@ function toPassageFiscalEntries(balance: Balance[]) {
 
 // ── Prediction IS (via Passage Fiscal) ───────────────────────────────
 
+/**
+ * Calcule l'estimation IS (Impôt sur les Sociétés) avec passage fiscal complet
+ * et formate la réponse pour Proph3t (PredictionCard + FiscalInfoCard).
+ *
+ * **Pipeline** :
+ *   1. `calculerAgregats(balance)` → CA, résultat comptable, charges
+ *   2. `calculerPassageFiscal(entries)` → réintégrations CGI Art. 18 (R01-R07) + déductions
+ *   3. Application des warnings Phase 4 (comptes mixtes : 6234, 658, 627)
+ *   4. Calcul IS final : `max(résultat_fiscal × 25%, IMF)`
+ *
+ * **Phase 4** : si l'utilisateur a fourni des `reclassementsParCompte`, ils
+ * remplacent les calculs auto pour les comptes concernés.
+ *
+ * @param balance Balance comptable de l'exercice courant
+ * @returns `Proph3tResponse` avec 2 cards (synthèse + détail tableau passage)
+ *          + texte mentionnant warnings + audit trail (auto/user/override)
+ *
+ * @example
+ * ```ts
+ * const resp = await handlePredictionIS(balanceN)
+ * // resp.text contient "Estimation IS avec Passage Fiscal..."
+ * // resp.content[0] = PredictionCard avec is_du, base IS/IMF, score
+ * ```
+ */
 export async function handlePredictionIS(balance: Balance[]): Promise<Proph3tResponse> {
   if (!balance || balance.length === 0) return noBalanceResponse()
 
@@ -246,8 +296,28 @@ export async function handlePredictionIS(balance: Balance[]): Promise<Proph3tRes
     },
   }
 
+  // Warnings & audit trail (Phase 4)
+  let textBody = `**Estimation IS avec Passage Fiscal** — analyse complete a partir de votre balance`
+  if (passage.audit?.estPurementAutomatique) {
+    textBody += `\n\n_Calcul 100% automatique (${passage.reintegrations.length} reintegration${passage.reintegrations.length > 1 ? 's' : ''}, ${passage.deductions.length} deduction${passage.deductions.length > 1 ? 's' : ''}). Aucune saisie manuelle. Pour affiner la classification deductible / non-deductible des comptes mixtes, utilisez les overrides utilisateur._`
+  } else {
+    textBody += `\n\n_Calcul mixte : ${passage.audit?.nbAuto ?? 0} auto, ${passage.audit?.nbUser ?? 0} user, ${passage.audit?.nbOverride ?? 0} override._`
+  }
+
+  if (passage.warnings && passage.warnings.length > 0) {
+    const w = passage.warnings
+    textBody += `\n\n⚠️ **${w.length} avertissement${w.length > 1 ? 's' : ''}** sur la classification fiscale :`
+    for (const warn of w.slice(0, 5)) {
+      const icon = warn.severite === 'critique' ? '🔴' : warn.severite === 'attention' ? '🟠' : 'ℹ️'
+      textBody += `\n- ${icon} **${warn.code}** — ${warn.message}`
+    }
+    if (w.length > 5) {
+      textBody += `\n- ... et ${w.length - 5} autre${w.length - 5 > 1 ? 's' : ''} avertissement${w.length - 5 > 1 ? 's' : ''}.`
+    }
+  }
+
   return {
-    text: `**Estimation IS avec Passage Fiscal** — analyse complete a partir de votre balance`,
+    text: textBody,
     content: [summaryCard, detailCard],
     suggestions: ['Prediction TVA', 'Mes ratios', 'Detection anomalies', 'Charges non deductibles'],
   }
@@ -312,6 +382,11 @@ function buildISRecommendations(passage: TableauPassageResult): string[] {
   if (recs.length === 0) {
     recs.push('Provisionner les acomptes IS trimestriels (15 mars, 15 juin, 15 sept, 15 dec)')
     recs.push('Verifier les provisions pour s\'assurer de leur deductibilite')
+  }
+
+  // Phase 4 : si warnings sur comptes mixtes, suggerer les overrides
+  if (passage.warnings && passage.warnings.length > 0) {
+    recs.unshift(`Affiner la classification : ${passage.warnings.length} compte(s) mixte(s) detecte(s) — la saisie manuelle (reclassementsParCompte) ameliore la precision de l'estimation IS.`)
   }
 
   return recs.slice(0, 5)
@@ -599,6 +674,136 @@ function buildRatiosRecommendations(
   if (recs.length === 0) recs.push('Bonne sante financiere globale — maintenir la gestion actuelle')
 
   return recs.slice(0, 6)
+}
+
+// ── Prediction Forecast (N+1 / N+2) ──────────────────────────────────
+
+export function handlePredictionForecast(
+  balanceN: Balance[],
+  balanceN1?: Balance[],
+  periods = 2,
+): Proph3tResponse {
+  if (!balanceN || balanceN.length === 0) return noBalanceResponse()
+
+  const aggN = calculerAgregats(balanceN)
+  const aggN1 = balanceN1 && balanceN1.length > 0 ? calculerAgregats(balanceN1) : undefined
+  const projection = projectAggregates(aggN, aggN1, periods)
+
+  // Carte principale : scénario probable
+  const probableIndicators = formatProjectionForCard(projection, 'probable')
+  const yearsRange = Array.from({ length: periods }, (_, i) => `N+${i + 1}`).join('/')
+
+  const probableCard: PredictionCard = {
+    type: 'prediction',
+    title: `Projection probable ${yearsRange}`,
+    indicators: probableIndicators,
+    narrative: buildForecastNarrative(projection),
+    recommendations: buildForecastRecommendations(projection),
+  }
+
+  // Carte secondaire : scénarios alternatifs (synthèse CA + Résultat)
+  const altIndicators: { label: string; value: string; status: Status }[] = []
+  const ca = projection.aggregates.find((a) => a.label === "Chiffre d'affaires")
+  const resultat = projection.aggregates.find((a) => a.label === 'Résultat net')
+
+  function pushScenario(label: string, scen: ProjectionScenario['label'], status: Status) {
+    if (ca) {
+      const s = ca.scenarios.find((x) => x.label === scen)
+      if (s) altIndicators.push({
+        label: `${label} CA N+${periods}`,
+        value: `${s.values[periods - 1].toLocaleString('fr-FR')} (${s.growthRate >= 0 ? '+' : ''}${(s.growthRate * 100).toFixed(1)}%/an)`,
+        status,
+      })
+    }
+    if (resultat) {
+      const s = resultat.scenarios.find((x) => x.label === scen)
+      if (s) altIndicators.push({
+        label: `${label} Résultat N+${periods}`,
+        value: `${s.values[periods - 1].toLocaleString('fr-FR')}`,
+        status: s.values[periods - 1] > 0 ? status : 'critique',
+      })
+    }
+  }
+  pushScenario('Pessimiste', 'pessimiste', 'critique')
+  pushScenario('Optimiste', 'optimiste', 'bon')
+
+  const altCard: PredictionCard = {
+    type: 'prediction',
+    title: `Scénarios alternatifs (horizon N+${periods})`,
+    indicators: altIndicators,
+    narrative: `Fourchette d'incertitude : taux de croissance observé ±10 points. Le scénario pessimiste suppose une dégradation de 10 pts/an, l'optimiste une amélioration symétrique. Avec uniquement 2 points de données, ces fourchettes sont indicatives.`,
+  }
+
+  // Texte principal
+  const confidenceLabel = projection.confidence === 'low' ? 'faible' : projection.confidence === 'medium' ? 'moyenne' : 'élevée'
+  const warningsBlock = projection.warnings.length > 0
+    ? `\n\n⚠️ **Avertissements** :\n${projection.warnings.map((w) => `- ${w}`).join('\n')}`
+    : ''
+
+  const text = `**Projection ${yearsRange}** — Confidence : ${confidenceLabel}\n\n${projection.methodology}${warningsBlock}\n\n_Ces projections sont des extrapolations à partir de l'historique disponible. Elles ne constituent pas un engagement ni une prévision garantie._`
+
+  return {
+    text,
+    content: [probableCard, altCard],
+    suggestions: ['Mes ratios', 'SIG', 'Estimation IS', 'Tendances N/N-1'],
+  }
+}
+
+function buildForecastNarrative(p: ReturnType<typeof projectAggregates>): string {
+  const ca = p.aggregates.find((a) => a.label === "Chiffre d'affaires")
+  const resultat = p.aggregates.find((a) => a.label === 'Résultat net')
+  if (!ca || !resultat) return 'Projection construite à partir des agrégats financiers principaux.'
+
+  const caGrowth = ca.growthYoY
+  const resGrowth = resultat.growthYoY
+
+  if (caGrowth === undefined) {
+    return 'Sans balance N-1, la projection extrapole les valeurs N à l\'identique. Importez la balance de l\'exercice précédent pour activer un calcul de croissance YoY.'
+  }
+
+  const caTrend = caGrowth > 0.05 ? 'en croissance' : caGrowth > 0 ? 'stable' : caGrowth > -0.05 ? 'en légère baisse' : 'en contraction'
+  const caPct = `${caGrowth >= 0 ? '+' : ''}${(caGrowth * 100).toFixed(1)}%`
+
+  let resPart = ''
+  if (resGrowth !== undefined) {
+    if (resultat.valueN < 0 && resultat.valueN1 !== undefined && resultat.valueN1 < 0 && Math.abs(resultat.valueN) < Math.abs(resultat.valueN1)) {
+      resPart = ' Le déficit se réduit, signe d\'une amélioration.'
+    } else if (resultat.valueN > 0 && resultat.valueN1 !== undefined && resultat.valueN1 > 0) {
+      const resPct = `${resGrowth >= 0 ? '+' : ''}${(resGrowth * 100).toFixed(1)}%`
+      resPart = ` Le résultat évolue de ${resPct}.`
+    } else if (resultat.valueN < 0) {
+      resPart = ' Attention : le résultat est déficitaire, la projection extrapole une dégradation continue si rien ne change.'
+    }
+  }
+
+  return `Le chiffre d'affaires est ${caTrend} (${caPct} YoY).${resPart} La projection prolonge cette tendance sur ${p.periods} années.`
+}
+
+function buildForecastRecommendations(p: ReturnType<typeof projectAggregates>): string[] {
+  const recs: string[] = []
+  const ca = p.aggregates.find((a) => a.label === "Chiffre d'affaires")
+  const resultat = p.aggregates.find((a) => a.label === 'Résultat net')
+  const treso = p.aggregates.find((a) => a.label === 'Trésorerie')
+
+  if (ca && ca.growthYoY !== undefined && ca.growthYoY < 0) {
+    recs.push('Chiffre d\'affaires en baisse : analyser les pertes clients et le mix produits avant que la projection ne se concrétise.')
+  }
+  if (resultat && resultat.valueN < 0) {
+    recs.push('Résultat déficitaire : le scénario probable extrapole une perte aggravée. Identifier les charges compressibles ou les leviers de prix.')
+  }
+  if (treso && treso.scenarios) {
+    const probable = treso.scenarios.find((s) => s.label === 'probable')
+    if (probable && probable.values[probable.values.length - 1] < 0) {
+      recs.push('Trésorerie projetée négative à l\'horizon : prévoir un besoin de financement (découvert autorisé, levée de fonds ou cession).')
+    }
+  }
+  if (p.confidence === 'low') {
+    recs.push('Précision limitée à 2 points : importer la balance N-2 pour passer en confidence "medium" (régression linéaire + std-dev).')
+  }
+  if (recs.length === 0) {
+    recs.push('Tendance saine observée. Confronter la projection à votre plan d\'affaires interne et ajuster si stratégie de croissance différente.')
+  }
+  return recs.slice(0, 5)
 }
 
 // ── Prediction Trend ─────────────────────────────────────────────────

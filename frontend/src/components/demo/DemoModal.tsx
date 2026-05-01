@@ -51,9 +51,9 @@ const INTERACTIVE_DEMOS: InteractiveDemo[] = [
   {
     id: 'interactive-audit',
     icon: Shield,
-    title: 'Audit automatisé (129 contrôles)',
+    title: 'Audit automatisé (169 contrôles)',
     desc: 'Regardez le moteur exécuter les contrôles N1/N2/N3 sur votre liasse : équilibres, cohérences croisées, ratios UEMOA.',
-    tags: ['129 contrôles', 'N1/N2/N3', 'IA PROPH3T'],
+    tags: ['169 contrôles', 'N1/N2/N3', 'IA PROPH3T'],
   },
 ]
 
@@ -94,7 +94,7 @@ const TUTORIALS: Tutorial[] = [
   },
   {
     title: 'Exécuter l\'audit en 1 clic',
-    desc: '129 contrôles automatisés N1/N2/N3 en quelques secondes.',
+    desc: '169 contrôles automatisés N1/N2/N3 en quelques secondes.',
     duration: '2 min',
     difficulty: 'Facile',
     steps: [

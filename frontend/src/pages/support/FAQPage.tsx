@@ -96,8 +96,8 @@ const FAQ_ITEMS: FAQItem[] = [
   {
     id: 'A01',
     category: 'audit',
-    question: 'Que sont les 129 contr\u00f4les PROPH3T ?',
-    answer: 'Ce sont 129 r\u00e8gles automatiques qui v\u00e9rifient la coh\u00e9rence comptable et fiscale de votre balance, r\u00e9parties en 9 niveaux : Structurel (S), Fondamental (F), Conformit\u00e9 OHADA (C), Sens des comptes (SNS), Inter-comptes (IA), Year-over-Year, \u00c9tats financiers (EF), Fiscal (FI) et Archive (AR).',
+    question: 'Que sont les 169 contr\u00f4les PROPH3T ?',
+    answer: 'Ce sont 169 r\u00e8gles automatiques qui v\u00e9rifient la coh\u00e9rence comptable et fiscale de votre balance, r\u00e9parties en 9 niveaux : Structurel (S), Fondamental (F), Conformit\u00e9 OHADA (C), Sens des comptes (SNS), Inter-comptes (IA), Year-over-Year, \u00c9tats financiers (EF), Fiscal (FI) et Archive (AR).',
   },
   {
     id: 'A02',

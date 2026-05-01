@@ -14,16 +14,22 @@ import {
   registerLevel6Controls,
   registerLevel7Controls,
   registerLevel8Controls,
+  registerComparisonControls,
 } from '@/services/audit'
 import { PLAN_SYSCOHADA_REVISE } from '@/data/SYSCOHADARevisePlan'
 import { SYSCOHADA_MAPPING } from '@/services/liasseDataService'
 import type { AuditContext, NiveauControle, ResultatControle } from '@/types/audit.types'
 import type { Balance } from '@/types'
 import type { Proph3tResponse, AuditControlCard, PredictionCard, FiscalInfoCard } from '../types'
+import { inferRemediations, formatRemediationsAsMarkdown } from './auditRemediation'
 
 // ── Ensure controls are registered ──────────────────────────────────
 
 let registered = false
+
+export function ensureAuditControlsRegistered() {
+  ensureRegistered()
+}
 
 function ensureRegistered() {
   if (registered) return
@@ -36,6 +42,7 @@ function ensureRegistered() {
   registerLevel6Controls()
   registerLevel7Controls()
   registerLevel8Controls()
+  registerComparisonControls()
   registered = true
 }
 
@@ -173,6 +180,25 @@ function fmt(n: number): string {
   return n.toLocaleString('fr-FR')
 }
 
+/**
+ * Exécute l'audit complet (169 contrôles sur 9 niveaux) sur la balance fournie.
+ *
+ * **Pipeline** :
+ *   1. `ensureRegistered()` — enregistre les contrôles si pas déjà fait
+ *   2. Pour chaque niveau 0..8 : exécute tous les contrôles actifs
+ *   3. Capture les exceptions (ERREUR_EXEC) sans interrompre l'audit
+ *   4. `computeResume()` calcule le score global (0-100) + ventilation par sévérité
+ *   5. **Phase 7** : `inferRemediations()` génère des actions concrètes par anomalie
+ *
+ * **Output** : 3 cards
+ *   - PredictionCard : score + ventilation (BLOQUANT / MAJEUR / MINEUR / INFO)
+ *   - FiscalInfoCard : top 15 anomalies avec sévérité + message
+ *   - FiscalInfoCard : top 12 actions de remédiation avec icônes confidence/sévérité
+ *
+ * @param balanceN  Balance de l'exercice courant (obligatoire)
+ * @param balanceN1 Balance N-1 (optionnel — active 8 contrôles comparatifs supplémentaires)
+ * @returns `Proph3tResponse` avec score, anomalies triées et remédiations actionnables
+ */
 export function handleAuditExecute(balanceN: Balance[], balanceN1?: Balance[]): Proph3tResponse {
   ensureRegistered()
 
@@ -253,6 +279,25 @@ export function handleAuditExecute(balanceN: Balance[], balanceN1?: Balance[]): 
     })),
   }
 
+  // ── Phase 7 : Remediation actionnable ──
+  const remediations = inferRemediations(anomalies)
+  const remediationItems = remediations.slice(0, 12).map((r) => {
+    const ecartLabel = r.ecartFCFA !== undefined ? ` [écart ${fmt(Math.abs(r.ecartFCFA))} FCFA]` : ''
+    const compteLabel = r.compte ? ` (compte ${r.compte})` : ''
+    const confIcon = r.confidence === 'high' ? '🎯' : r.confidence === 'medium' ? '📌' : '💭'
+    return {
+      label: `${confIcon} ${r.refControle}${compteLabel}${ecartLabel}`,
+      value: r.description + (r.baseLegale ? ` — ${r.baseLegale}` : ''),
+    }
+  })
+  const remediationCard: FiscalInfoCard | null = remediations.length > 0
+    ? {
+        type: 'fiscal_info',
+        category: `Actions de remediation (${remediations.length})`,
+        items: remediationItems,
+      }
+    : null
+
   // ── Niveau par niveau ──
   const niveauLines = levels.map(n => {
     const nResults = allResults.filter(r => r.niveau === n)
@@ -262,11 +307,19 @@ export function handleAuditExecute(balanceN: Balance[], balanceN1?: Balance[]): 
     return `- Niv. ${n} (${LEVEL_LABELS[n]}) : ${nOk}/${nResults.length} OK ${tag}`
   }).join('\n')
 
-  const text = `**Audit complet execute** — **${allResults.length}** controles sur **${balanceN.length}** lignes\n\n**Score : ${scoreGlobal}/100**\n\n${niveauLines}\n\n${anomalies.length === 0 ? 'Aucune anomalie detectee. Balance conforme !' : `**${anomalies.length} anomalie${anomalies.length > 1 ? 's' : ''}** detectee${anomalies.length > 1 ? 's' : ''} (${parSeverite.BLOQUANT} bloquant${parSeverite.BLOQUANT > 1 ? 's' : ''}, ${parSeverite.MAJEUR} majeur${parSeverite.MAJEUR > 1 ? 's' : ''}, ${parSeverite.MINEUR} mineur${parSeverite.MINEUR > 1 ? 's' : ''}).`}`
+  const remediationsBlock = remediations.length > 0
+    ? `\n\n${formatRemediationsAsMarkdown(remediations, 5)}`
+    : ''
+
+  const text = `**Audit complet execute** — **${allResults.length}** controles sur **${balanceN.length}** lignes\n\n**Score : ${scoreGlobal}/100**\n\n${niveauLines}\n\n${anomalies.length === 0 ? 'Aucune anomalie detectee. Balance conforme !' : `**${anomalies.length} anomalie${anomalies.length > 1 ? 's' : ''}** detectee${anomalies.length > 1 ? 's' : ''} (${parSeverite.BLOQUANT} bloquant${parSeverite.BLOQUANT > 1 ? 's' : ''}, ${parSeverite.MAJEUR} majeur${parSeverite.MAJEUR > 1 ? 's' : ''}, ${parSeverite.MINEUR} mineur${parSeverite.MINEUR > 1 ? 's' : ''}).`}${remediationsBlock}`
+
+  const cards: (PredictionCard | FiscalInfoCard)[] = [summaryCard]
+  if (anomalies.length > 0) cards.push(detailCard)
+  if (remediationCard) cards.push(remediationCard)
 
   return {
     text,
-    content: [summaryCard, ...(anomalies.length > 0 ? [detailCard] : [])],
+    content: cards,
     suggestions: anomalies.length > 0
       ? [
           anomalies[0] ? `Controle ${anomalies[0].ref}` : 'Audit',

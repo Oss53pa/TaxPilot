@@ -53,7 +53,7 @@ export const MODULES_FORMATION: ModuleFormation[] = [
   },
   {
     id: 'F08', titre: 'Utiliser PROPH3T pour auditer une liasse',
-    description: '129 contrôles automatiques, interpréter les alertes, corriger les anomalies.',
+    description: '169 contrôles automatiques, interpréter les alertes, corriger les anomalies.',
     duree: '10 min', type: 'video', niveau: 'intermediaire',
     tags: ['PROPH3T', 'audit', 'contrôles'],
   },

@@ -2,7 +2,7 @@
  * Service de validation de la balance — connecté aux vrais contrôles audit
  *
  * Remplace l'ancienne simulation (setTimeout + score hardcodé 85)
- * par l'exécution réelle des 129 contrôles du registry.
+ * par l'exécution réelle des 169 contrôles du registry.
  *
  * Utilise les niveaux 0-2 (structurel, équilibre, conformité OHADA)
  * pour la validation rapide à l'import.

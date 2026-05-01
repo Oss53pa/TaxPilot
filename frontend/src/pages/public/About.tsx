@@ -7,8 +7,8 @@ import { DARK_SURFACE, GOLD, TEXT_PRIMARY, TEXT_SECONDARY, BORDER, HEADING, BODY
 const values = [
   { title: 'Conformité', desc: "SYSCOHADA Révisé est notre ADN. Chaque calcul, chaque feuillet, chaque contrôle respecte le référentiel à la lettre." },
   { title: 'Simplicité', desc: "Votre balance entre, votre liasse sort. Pas de formation nécessaire. L'interface est pensée pour les comptables, pas les développeurs." },
-  { title: 'Accessibilité', desc: "Des tarifs adaptés au marché africain. Un expert-comptable facture entre 500K et 2M FCFA. Nous, à partir de 250K FCFA/an." },
-  { title: 'Fiabilité', desc: "129 contrôles Proph3t, archivage SHA-256, sauvegardes quotidiennes. Vos données fiscales méritent le plus haut niveau de sécurité." },
+  { title: 'Accessibilité', desc: "Des tarifs adaptés au marché africain. Un expert-comptable facture entre 500K et 2M FCFA pour une seule liasse. Nous, à partir de 450K FCFA/an pour une société entière." },
+  { title: 'Fiabilité', desc: "169 contrôles Proph3t, archivage SHA-256, sauvegardes quotidiennes. Vos données fiscales méritent le plus haut niveau de sécurité." },
 ]
 
 const About: React.FC = () => (
@@ -47,7 +47,7 @@ const About: React.FC = () => (
               Dans l'espace OHADA, produire une liasse fiscale conforme reste un processus coûteux et complexe. Les experts-comptables facturent entre 500 000 et 2 000 000 FCFA par liasse. Les PME et cabinets comptables méritent un outil moderne, abordable et fiable.
             </Box>
             <Box sx={{ fontFamily: BODY, fontSize: '0.95rem', color: `${TEXT_SECONDARY} !important`, lineHeight: 1.8, mt: 2 }}>
-              Liass'Pilot automatise l'intégralité du processus : de l'import de la balance comptable à l'export de la liasse fiscale complète, en passant par 129 contrôles de cohérence alimentés par notre IA Proph3t.
+              Liass'Pilot automatise l'intégralité du processus : de l'import de la balance comptable à l'export de la liasse fiscale complète, en passant par 169 contrôles de cohérence alimentés par notre IA Proph3t.
             </Box>
           </Box>
         </Box>
@@ -90,7 +90,7 @@ const About: React.FC = () => (
         {[
           { value: '17', label: 'Pays OHADA couverts' },
           { value: '1 005', label: 'Comptes SYSCOHADA' },
-          { value: '129', label: 'Contrôles Proph3t' },
+          { value: '169', label: 'Contrôles Proph3t' },
           { value: '84', label: 'Onglets Excel générés' },
         ].map((s) => (
           <Box key={s.label}>

@@ -17,7 +17,7 @@ const coreFeatures = [
   { icon: <Calculate />, label: 'Compte de résultat & 9 SIG' },
   { icon: <TrendingUp />, label: 'TAFIRE / TFT (CAFG, FR, BFR, TN)' },
   { icon: <Description />, label: '18 notes annexes calculées' },
-  { icon: <Assessment />, label: '129 contrôles de cohérence Proph3t' },
+  { icon: <Assessment />, label: '169 contrôles de cohérence Proph3t' },
   { icon: <Gavel />, label: 'Passage fiscal automatique CI' },
   { icon: <Gavel />, label: '7 réintégrations fiscales auto (CGI)' },
   { icon: <Calculate />, label: 'Calcul IS & IMF' },
@@ -58,9 +58,9 @@ const sections = [
     screenshot: '/screenshots/liasse.png',
   },
   {
-    title: '129 contrôles Proph3t',
+    title: '169 contrôles Proph3t',
     subtitle: 'IA de conformité SYSCOHADA',
-    desc: "Avant d'exporter, Proph3t vérifie 129 points de cohérence : équilibre du bilan, concordance inter-feuillets, règles SYSCOHADA. Score de conformité instantané.",
+    desc: "Avant d'exporter, Proph3t vérifie 169 points de cohérence : équilibre du bilan, concordance inter-feuillets, règles SYSCOHADA. Score de conformité instantané.",
     points: [
       'Équilibre Total Actif = Total Passif',
       'Concordance Résultat Net entre feuillets',

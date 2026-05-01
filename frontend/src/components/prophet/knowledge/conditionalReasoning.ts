@@ -8,6 +8,14 @@ import { getTauxFiscaux, calculerIS } from '@/config/taux-fiscaux-ci'
 import { calculerPassageFiscal } from '@/services/passageFiscalService'
 import type { Balance } from '@/types'
 import type { Proph3tResponse, PredictionCard, FiscalInfoCard } from '../types'
+import {
+  detectRegimeSpecifique,
+  detectOpportunitesRegimeSpecifique,
+  calculerISAvecRegime,
+  detectTvaSpecificites,
+  type EntrepriseContext,
+  type RegimeContext,
+} from './regimesSpeciaux'
 
 // ── Helpers ──────────────────────────────────────────────────────────
 
@@ -174,13 +182,7 @@ function scanDeductibility(balance: Balance[], ca: number): DeductibilityIssue[]
 export async function handleConditionalDiagnostic(
   balanceN: Balance[],
   regime?: string,
-  entreprise?: {
-    nom?: string
-    regime_imposition?: string
-    capital?: number
-    effectifs?: number
-    secteur_activite?: string
-  },
+  entreprise?: EntrepriseContext,
 ): Promise<Proph3tResponse> {
   // ── 1. Calculer les agregats ──
   const ca = sumCreditByPrefix(balanceN, ['701', '702', '703', '704', '705', '706', '707'])
@@ -208,7 +210,24 @@ export async function handleConditionalDiagnostic(
     solde_credit: Math.max(0, -b.solde),
   }))
   const passageFiscal = await calculerPassageFiscal(entries)
+
+  // Phase 6 — Détection régime spécifique + calcul IS adapté
+  const regimeSpecifique = detectRegimeSpecifique(entreprise, ca)
+  const taux = getTauxFiscaux()
+  const isAvecRegime = calculerISAvecRegime(
+    passageFiscal.resultat_fiscal,
+    ca,
+    regimeSpecifique,
+    taux.IMF.minimum,
+    taux.IMF.maximum,
+    taux.IMF.taux,
+  )
+  // Garder isResult (legacy) pour la rétrocompat dans les autres parties du handler
   const isResult = calculerIS(passageFiscal.resultat_fiscal, ca)
+
+  // Phase 6 — Opportunités non-déclarées + spécificités TVA
+  const opportunites = detectOpportunitesRegimeSpecifique(entreprise, ca)
+  const tvaSpec = detectTvaSpecificites(balanceN, ca)
 
   // ── 4. Scan deductibilite ──
   const deductIssues = scanDeductibility(balanceN, ca)
@@ -220,6 +239,21 @@ export async function handleConditionalDiagnostic(
   // Regime mismatch
   if (regimeMismatch) {
     alerts.push(`⚠ Regime declare (${regimeDeclare.label}) incompatible avec le CA de ${fmt(ca)} FCFA → le regime ${regimeDetecte.label} s'impose (CGI Art. 34)`)
+  }
+
+  // Phase 6 — Régime spécifique appliqué
+  if (regimeSpecifique.type !== 'NORMAL') {
+    alerts.push(`✓ Regime ${regimeSpecifique.type} applique : ${regimeSpecifique.description} Economie estimee : ${fmt(isAvecRegime.economieParRapportNormal)} FCFA vs regime normal.`)
+  }
+
+  // Phase 6 — Opportunités non-déclarées
+  for (const opp of opportunites) {
+    alerts.push(`💡 ${opp.code} : ${opp.message}`)
+  }
+
+  // Phase 6 — TVA spécificités
+  for (const w of tvaSpec.warnings) {
+    alerts.push(`TVA : ${w}`)
   }
 
   // Proximity to regime threshold
@@ -267,15 +301,16 @@ export async function handleConditionalDiagnostic(
     indicators: [
       { label: 'CA detecte', value: `${fmt(ca)} FCFA`, status: 'bon' },
       { label: 'Regime adapte', value: regimeDetecte.label, status: regimeMismatch ? 'critique' : 'excellent' },
+      { label: 'Regime fiscal special', value: regimeSpecifique.type === 'NORMAL' ? 'Aucun' : `${regimeSpecifique.type} (taux IS ${(regimeSpecifique.tauxIS * 100).toFixed(0)}%)`, status: regimeSpecifique.type !== 'NORMAL' ? 'excellent' : 'bon' },
       { label: 'Resultat comptable', value: `${fmt(resultatComptable)} FCFA`, status: resultatComptable >= 0 ? 'bon' : 'acceptable' },
       { label: 'Resultat fiscal', value: `${fmt(passageFiscal.resultat_fiscal)} FCFA`, status: passageFiscal.resultat_fiscal >= 0 ? 'bon' : 'acceptable' },
-      { label: 'IS du', value: `${fmt(isResult.is_du)} FCFA (${isResult.base})`, status: isResult.base === 'IMF' ? 'acceptable' : 'bon' },
-      { label: 'Reintegrations', value: passageFiscal.reintegrations.length > 0 ? `${passageFiscal.reintegrations.length} postes` : 'Aucune', status: passageFiscal.reintegrations.length > 0 ? 'acceptable' : 'excellent' },
+      { label: 'IS du (regime applique)', value: `${fmt(isAvecRegime.is_du)} FCFA (${isAvecRegime.base})`, status: isAvecRegime.base === 'IMF' ? 'acceptable' : isAvecRegime.base === 'EXONERE' ? 'excellent' : 'bon' },
+      { label: 'Economie vs normal', value: `${fmt(isAvecRegime.economieParRapportNormal)} FCFA`, status: isAvecRegime.economieParRapportNormal > 0 ? 'excellent' : 'bon' },
       { label: 'Problemes deductibilite', value: deductIssues.length > 0 ? `${deductIssues.length} detecte(s)` : 'Aucun', status: deductIssues.length > 0 ? 'acceptable' : 'excellent' },
       { label: 'Alertes', value: `${alerts.length}`, status: statusGlobal },
     ],
-    narrative: buildDiagnosticNarrative(ca, regimeDetecte, regimeDeclare, isResult, passageFiscal.resultat_fiscal, deductIssues, alerts),
-    recommendations: buildDiagnosticRecommendations(regimeDetecte, regimeMismatch, isResult, deductIssues, alerts, tvaADecaisser),
+    narrative: buildDiagnosticNarrative(ca, regimeDetecte, regimeDeclare, isAvecRegime, passageFiscal.resultat_fiscal, deductIssues, alerts, regimeSpecifique),
+    recommendations: buildDiagnosticRecommendations(regimeDetecte, regimeMismatch, isAvecRegime, deductIssues, alerts, tvaADecaisser, regimeSpecifique, opportunites),
   }
 
   // FiscalInfoCard : detail deductibilite + obligations regime
@@ -285,6 +320,31 @@ export async function handleConditionalDiagnostic(
   detailItems.push({ label: '── REGIME ──', value: regimeDetecte.label })
   for (const obl of regimeDetecte.obligations) {
     detailItems.push({ label: 'Obligation', value: obl })
+  }
+
+  // Phase 6 — Régime spécifique
+  if (regimeSpecifique.type !== 'NORMAL') {
+    detailItems.push({ label: '── REGIME SPECIAL ──', value: regimeSpecifique.type })
+    detailItems.push({ label: 'Base legale', value: regimeSpecifique.baseLegale })
+    detailItems.push({ label: 'Taux IS applique', value: `${(regimeSpecifique.tauxIS * 100).toFixed(0)}%` })
+    detailItems.push({ label: 'IMF maintenu', value: regimeSpecifique.imfApplicable ? 'Oui' : 'Non' })
+    for (const cond of regimeSpecifique.conditions) {
+      detailItems.push({ label: 'Condition', value: cond })
+    }
+  }
+
+  // Phase 6 — TVA spécifiques
+  if (tvaSpec.ventesExport > 0 || tvaSpec.servicesEtranger > 0 || tvaSpec.franchiseTvaEligible) {
+    detailItems.push({ label: '── TVA SPECIFIQUES ──', value: '' })
+    if (tvaSpec.franchiseTvaEligible) {
+      detailItems.push({ label: 'Franchise TVA eligible', value: `Oui (CA < ${fmt(tvaSpec.seuilFranchiseTva)})` })
+    }
+    if (tvaSpec.ventesExport > 0) {
+      detailItems.push({ label: 'Ventes export (exo TVA)', value: `${fmt(tvaSpec.ventesExport)} FCFA — CGI Art. 357` })
+    }
+    if (tvaSpec.servicesEtranger > 0) {
+      detailItems.push({ label: 'Services etranger (exo TVA)', value: `${fmt(tvaSpec.servicesEtranger)} FCFA — CGI Art. 357` })
+    }
   }
 
   // TVA
@@ -318,7 +378,11 @@ export async function handleConditionalDiagnostic(
     ? `\n\n**${alerts.length} alerte${alerts.length > 1 ? 's' : ''} :**\n${alerts.map(a => `- ${a}`).join('\n')}`
     : '\n\nAucune alerte — situation fiscale conforme.'
 
-  const text = `**Diagnostic fiscal conditionnel**\n\nCA : **${fmt(ca)} FCFA** → Regime : **${regimeDetecte.label}**${regimeMismatch ? ` *(declare: ${regimeDeclare.label})*` : ''}\nResultat fiscal : **${fmt(passageFiscal.resultat_fiscal)} FCFA** → IS du : **${fmt(isResult.is_du)} FCFA** (base ${isResult.base})${alertsText}`
+  const regimeSpecialLine = regimeSpecifique.type !== 'NORMAL'
+    ? `\nRegime special : **${regimeSpecifique.type}** (${regimeSpecifique.baseLegale}) — taux IS ${(regimeSpecifique.tauxIS * 100).toFixed(0)}%`
+    : ''
+
+  const text = `**Diagnostic fiscal conditionnel**\n\nCA : **${fmt(ca)} FCFA** → Regime : **${regimeDetecte.label}**${regimeMismatch ? ` *(declare: ${regimeDeclare.label})*` : ''}${regimeSpecialLine}\nResultat fiscal : **${fmt(passageFiscal.resultat_fiscal)} FCFA** → IS du : **${fmt(isAvecRegime.is_du)} FCFA** (base ${isAvecRegime.base})${alertsText}`
 
   return {
     text,
@@ -336,10 +400,11 @@ function buildDiagnosticNarrative(
   ca: number,
   regimeDetecte: RegimeInfo,
   regimeDeclare: RegimeInfo,
-  isResult: { is_brut: number; imf: number; is_du: number; base: string },
+  isResult: { is_brut: number; imf: number; is_du: number; base: string; economieParRapportNormal?: number },
   resultatFiscal: number,
   issues: DeductibilityIssue[],
   alerts: string[],
+  regimeSpecifique?: RegimeContext,
 ): string {
   const parts: string[] = []
 
@@ -355,6 +420,12 @@ function buildDiagnosticNarrative(
     parts.push(`L'entreprise est soumise a l'IMF (${fmt(isResult.imf)} FCFA) car l'IS brut (${fmt(isResult.is_brut)} FCFA) est inferieur.`)
   } else if (resultatFiscal < 0) {
     parts.push(`L'entreprise est en deficit fiscal. L'IMF de ${fmt(isResult.imf)} FCFA reste du.`)
+  }
+
+  // Phase 6 — Régime spécifique
+  if (regimeSpecifique && regimeSpecifique.type !== 'NORMAL') {
+    const economie = isResult.economieParRapportNormal ?? 0
+    parts.push(`Regime ${regimeSpecifique.type} applique (taux IS ${(regimeSpecifique.tauxIS * 100).toFixed(0)}% au lieu de 25%) → economie estimee : ${fmt(economie)} FCFA.`)
   }
 
   // Deductibilite
@@ -376,6 +447,8 @@ function buildDiagnosticRecommendations(
   issues: DeductibilityIssue[],
   alerts: string[],
   tvaADecaisser: number,
+  regimeSpecifique?: RegimeContext,
+  opportunites?: { code: string; message: string; suggestion: string }[],
 ): string[] {
   const recs: string[] = []
 
@@ -401,6 +474,18 @@ function buildDiagnosticRecommendations(
 
   if (regimeDetecte.code === 'REEL_NORMAL') {
     recs.push('Preparer la liasse SN complete (87 feuillets) avec notes annexes 1 a 39')
+  }
+
+  // Phase 6 — Opportunités régime spécial non-déclarées
+  if (opportunites && opportunites.length > 0) {
+    for (const opp of opportunites.slice(0, 2)) {
+      recs.unshift(`💡 ${opp.code} : ${opp.suggestion}`)
+    }
+  }
+
+  // Phase 6 — Conditions du régime spécifique en cours
+  if (regimeSpecifique && regimeSpecifique.type !== 'NORMAL' && regimeSpecifique.conditions.length > 0) {
+    recs.push(`Regime ${regimeSpecifique.type} : verifier que les conditions sont respectees (${regimeSpecifique.conditions[0]}).`)
   }
 
   if (alerts.length === 0 && recs.length === 0) {

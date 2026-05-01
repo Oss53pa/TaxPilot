@@ -1,7 +1,9 @@
 import syscohadaReferenceService from '@/services/syscohadaReferenceService'
-import { getSYSCOHADAAccountsByClass, SYSCOHADA_REVISE_CLASSES } from '@/data/syscohada/plan'
+import { getSYSCOHADAAccountsByClass, SYSCOHADA_REVISE_CLASSES, PLAN_SYSCOHADA_REVISE } from '@/data/syscohada/plan'
 import { getFonctionnement } from '@/data/syscohada/fonctionnement'
 import { searchOperations, loadChapitre, CHAPITRES_SOMMAIRE } from '@/data/syscohada/operations'
+import { LIASSE_SHEETS } from '@/config/liasseFiscaleSheets'
+import { controlRegistry } from '@/services/audit'
 import type {
   Proph3tResponse,
   ConversationContext,
@@ -27,6 +29,7 @@ import {
   handlePredictionTVA,
   handlePredictionRatios,
   handlePredictionTrend,
+  handlePredictionForecast,
   handlePredictionAnomaly,
   handleCoherenceCheck,
   handlePredictionGeneral,
@@ -34,6 +37,12 @@ import {
   handlePredictionBreakeven,
   handlePredictionBFR,
   handleConditionalDiagnostic,
+  ensureAuditControlsRegistered,
+  handleMemoryRecall,
+  handleWhatIf,
+  rememberComputation,
+  rememberForecast,
+  appendToHistory,
 } from './knowledge'
 
 // ── Keyword → chapter mapping (still used by OPERATION_SEARCH) ───────
@@ -68,8 +77,14 @@ const KEYWORD_CHAPITRE_MAP: Record<string, number> = {
 function greetingResponse(context?: ConversationContext): Proph3tResponse {
   const hasBalance = !!context?.balanceData?.balanceN && context.balanceData.balanceN.length > 0
 
+  ensureAuditControlsRegistered()
+  const comptesCount = PLAN_SYSCOHADA_REVISE.length.toLocaleString('fr-FR')
+  const chapitresCount = CHAPITRES_SOMMAIRE.length
+  const feuilletsCount = LIASSE_SHEETS.length
+  const auditCount = controlRegistry.activeCount
+
   return {
-    text: "Bonjour ! Je suis **Proph3t**, votre assistant expert.\n\nJe maitrise **5 domaines** :\n\n- **SYSCOHADA** — 1 005 comptes, fonctionnement debit/credit, 41 chapitres d'operations\n- **Fiscalite CI** — Taux, calculs IS/TVA/Patente, deductibilite, calendrier\n- **Liasse Fiscale** — 75+ feuillets, notes annexes, regimes d'imposition\n- **Audit** — 108 controles sur 9 niveaux\n- **Analyse Predictive** — SIG, BFR, seuil rentabilite, ratios, estimation IS/TVA\n\nComment puis-je vous aider ?",
+    text: `Bonjour ! Je suis **Proph3t**, votre assistant expert.\n\nJe maitrise **5 domaines** :\n\n- **SYSCOHADA** — ${comptesCount} comptes, fonctionnement debit/credit, ${chapitresCount} chapitres d'operations\n- **Fiscalite CI** — Taux, calculs IS/TVA/Patente, deductibilite, calendrier\n- **Liasse Fiscale** — ${feuilletsCount} feuillets, notes annexes, regimes d'imposition\n- **Audit** — ${auditCount} controles sur 9 niveaux\n- **Analyse Predictive** — SIG, BFR, seuil rentabilite, ratios, estimation IS/TVA\n\nComment puis-je vous aider ?`,
     suggestions: hasBalance
       ? ['Analyse generale', 'SIG', 'BFR', 'Mes ratios', 'Estimation IS']
       : ['Chercher un compte', 'Taux fiscaux CI', 'Liasse fiscale', 'Controles audit'],
@@ -524,6 +539,11 @@ export async function processQuery(
         response = handlePredictionTrend(context.balanceData.balanceN, context.balanceData.balanceN1)
         break
 
+      case 'PREDICTION_FORECAST':
+        if (!context.balanceData?.balanceN) { response = noBalanceResponse(); break }
+        response = handlePredictionForecast(context.balanceData.balanceN, context.balanceData.balanceN1)
+        break
+
       case 'PREDICTION_ANOMALY':
         if (!context.balanceData?.balanceN) { response = noBalanceResponse(); break }
         response = handlePredictionAnomaly(context.balanceData.balanceN)
@@ -559,6 +579,18 @@ export async function processQuery(
         response = await handleConditionalDiagnostic(context.balanceData.balanceN, context.regime, context.entreprise)
         break
 
+      case 'MEMORY_RECALL':
+        response = handleMemoryRecall(context)
+        break
+
+      case 'WHAT_IF': {
+        const whatIfResult = handleWhatIf(input, context)
+        response = whatIfResult.response
+        // newContext sera mergé après le switch (cf. Object.assign plus bas)
+        Object.assign(newContext, whatIfResult.newContext)
+        break
+      }
+
       default:
         response = await unknownResponse(input)
     }
@@ -573,6 +605,51 @@ export async function processQuery(
 
   // ── Track last intent for contextual follow-ups ──
   newContext.lastIntent = query.intent
+
+  // ── Phase 8 : memoire conversationnelle ──
+  // 1. Append user message + Proph3t response to short history
+  Object.assign(newContext, appendToHistory(newContext, 'user', input, query.intent))
+  Object.assign(newContext, appendToHistory(newContext, 'assistant', response.text.slice(0, 200), query.intent))
+
+  // 2. Persistance des resultats clefs des handlers PREDICTION_* / AUDIT_EXECUTE
+  if (query.intent === 'PREDICTION_IS' && context.balanceData?.balanceN) {
+    // Extract a short summary from the response text
+    const summary = response.text.split('\n').find((l) => l.includes('IS') || l.includes('estimation')) ?? 'Estimation IS calculée'
+    Object.assign(newContext, rememberComputation(newContext, 'PREDICTION_IS', summary))
+  } else if (query.intent === 'PREDICTION_FORECAST' && context.balanceData?.balanceN) {
+    const summary = 'Projection N+1/N+2 effectuée'
+    Object.assign(newContext, rememberComputation(newContext, 'PREDICTION_FORECAST', summary))
+    // Forecast spécifique : extraire les valeurs depuis la première card
+    const firstCard = response.content?.[0]
+    if (firstCard && firstCard.type === 'prediction') {
+      const indicators = firstCard.indicators
+      const findValue = (label: string): number | undefined => {
+        const ind = indicators.find((i) => i.label.includes(label))
+        if (!ind) return undefined
+        const m = String(ind.value).match(/-?[\d\s]+/)
+        if (!m) return undefined
+        return parseInt(m[0].replace(/\s/g, ''), 10)
+      }
+      Object.assign(newContext, rememberForecast(newContext, {
+        timestamp: Date.now(),
+        periods: 2,
+        ca_n1: findValue("Chiffre d'affaires N+1"),
+        ca_n2: findValue("Chiffre d'affaires N+2"),
+        resultat_n1: findValue('Résultat net N+1'),
+        resultat_n2: findValue('Résultat net N+2'),
+        confidence: 'low',
+      }))
+    }
+  } else if (query.intent === 'AUDIT_EXECUTE' && context.balanceData?.balanceN) {
+    const summary = response.text.split('\n').find((l) => l.includes('Score') || l.includes('audit')) ?? 'Audit complet exécuté'
+    // Extract score from text "Score : 85/100"
+    const scoreMatch = response.text.match(/Score\s*:\s*(\d+)\/100/)
+    const anomMatch = response.text.match(/(\d+)\s*anomalie/)
+    Object.assign(newContext, rememberComputation(newContext, 'AUDIT_EXECUTE', summary, {
+      score_audit: scoreMatch ? parseInt(scoreMatch[1], 10) : undefined,
+      anomalies_count: anomMatch ? parseInt(anomMatch[1], 10) : undefined,
+    }))
+  }
 
   // ── Multi-intent: process secondary intents and merge ──
   if (query.secondaryIntents && query.secondaryIntents.length > 0) {
@@ -617,6 +694,9 @@ async function processSecondaryIntents(
         break
       case 'PREDICTION_TREND':
         if (balance) resp = handlePredictionTrend(balance, balanceN1)
+        break
+      case 'PREDICTION_FORECAST':
+        if (balance) resp = handlePredictionForecast(balance, balanceN1)
         break
       case 'PREDICTION_ANOMALY':
         if (balance) resp = handlePredictionAnomaly(balance)
