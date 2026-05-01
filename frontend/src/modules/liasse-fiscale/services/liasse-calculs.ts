@@ -138,7 +138,37 @@ export interface AnomalieComptable {
   montant: number
 }
 
-/** Détecte les comptes d'actif avec solde créditeur anormal */
+/**
+ * Préfixes "mixed" — comptes pouvant avoir naturellement un solde débiteur
+ * OU créditeur selon leur sous-compte spécifique. À NE PAS flagger comme
+ * anomalies sur la base du préfixe seul.
+ *
+ * Exemples :
+ *   - 43x : CNPS/IPS — actif (avances versées) OU passif (cotisations dues)
+ *   - 44x : État, impôts — actif (TVA récupérable, crédit IS) OU passif (TVA collectée, IS à payer)
+ *   - 46x : Associés et groupe — actif (avances aux associés) OU passif (comptes courants créditeurs)
+ *   - 47x : Débiteurs et créditeurs divers — par définition mixte
+ *   - 5x  : Trésorerie — actif (avoir) OU passif (découvert autorisé)
+ *
+ * SYSCOHADA recommande de reclasser le sens lors de la production des états
+ * financiers (TVA récup en actif BJ, TVA à décaisser en passif DK), mais le
+ * solde brut sur le compte d'origine n'est PAS une anomalie.
+ */
+const MIXED_PREFIXES: readonly string[] = ['43', '44', '46', '47']
+
+/** True si le compte appartient à un préfixe mixed (ne doit pas être flagué). */
+function isMixedAccount(compte: string): boolean {
+  return MIXED_PREFIXES.some((p) => compte.startsWith(p))
+}
+
+/**
+ * Détecte les comptes d'actif avec solde créditeur anormal.
+ *
+ * Filtre les comptes "mixed" (43x, 44x, 46x, 47x) qui peuvent légitimement
+ * avoir un solde créditeur (TVA collectée, IS dû, comptes courants associés
+ * créditeurs, etc.). Pour ces comptes, le sens du solde indique simplement
+ * leur destination dans la liasse (actif ou passif), pas une erreur.
+ */
 export const detecterAnomaliesActif = (
   balance: BalanceEntry[],
   prefixes: readonly string[]
@@ -146,6 +176,7 @@ export const detecterAnomaliesActif = (
   const anomalies: AnomalieComptable[] = []
   for (const entry of balance) {
     const compte = entry.compte.replace(/\s/g, '')
+    if (isMixedAccount(compte)) continue
     for (const prefix of prefixes) {
       if (compte === prefix || compte.startsWith(prefix)) {
         const solde = entry.solde_debit - entry.solde_credit
@@ -164,7 +195,11 @@ export const detecterAnomaliesActif = (
   return anomalies
 }
 
-/** Détecte les comptes de passif avec solde débiteur anormal */
+/**
+ * Détecte les comptes de passif avec solde débiteur anormal.
+ *
+ * Même logique : filtre les préfixes mixed (43x, 44x, 46x, 47x).
+ */
 export const detecterAnomaliesPassif = (
   balance: BalanceEntry[],
   prefixes: readonly string[]
@@ -172,6 +207,7 @@ export const detecterAnomaliesPassif = (
   const anomalies: AnomalieComptable[] = []
   for (const entry of balance) {
     const compte = entry.compte.replace(/\s/g, '')
+    if (isMixedAccount(compte)) continue
     for (const prefix of prefixes) {
       if (compte === prefix || compte.startsWith(prefix)) {
         const solde = entry.solde_debit - entry.solde_credit

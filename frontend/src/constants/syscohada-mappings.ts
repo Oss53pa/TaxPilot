@@ -91,7 +91,12 @@ export const BILAN_PASSIF = {
   DI: { comptes: ['419'], libelle: 'Clients, avances reçues' },
   DJ: { comptes: ['401', '402', '403', '404', '405', '408'], libelle: 'Fournisseurs d\'exploitation' },
   DK: { comptes: ['43', '44'], libelle: 'Dettes fiscales et sociales' },
-  DM: { comptes: ['421', '422', '423', '424', '425', '426', '427', '428'], libelle: 'Autres dettes' },
+  // DM "Autres dettes" : classe 42 (personnel rémunérations dues) + 46x (associés créditeurs)
+  // + 47x (créditeurs divers) — tous classés ici quand solde créditeur (filtre fait par getPassif).
+  // Symétriquement, BILAN_ACTIF.BJ contient 46/47 pour capter leur version débitrice.
+  // Sans 46/47 ici, les comptes courants associés créditeurs et 477 (produits constatés
+  // d'avance) disparaissent du bilan → déséquilibre Total Actif / Total Passif.
+  DM: { comptes: ['421', '422', '423', '424', '425', '426', '427', '428', '46', '47'], libelle: 'Autres dettes' },
   DN: { comptes: ['499'], libelle: 'Provisions pour risques et charges à court terme' },
   // Trésorerie passif
   DQ: { comptes: ['565'], libelle: 'Banques, crédits d\'escompte' },
