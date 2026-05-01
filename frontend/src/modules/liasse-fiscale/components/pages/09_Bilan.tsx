@@ -99,25 +99,45 @@ const PASSIF_LINES: PassifDetail[] = [
 // ── Compute functions ──
 
 /**
- * Calcule le total débit/crédit des classes 1-5 en excluant le compte 13
- * (capturé par CJ via les classes 6/7/8). C'est la "cible" mathématique
- * pour BZ et DZ_excludingCJ.
+ * Calcule les cibles mathématiques NET pour BZ et DZ (excluant CJ),
+ * en respectant la nature comptable de chaque préfixe :
  *
- * Garantie : avec balance équilibrée (Σ soldes = 0) et CJ = -solde(13,6,7,8),
- * on a totalDebit15 = totalCredit15 + CJ → bilan parfaitement équilibré.
+ *   - 28x, 29x, 39x, 49x, 59x : amortissements/provisions sur actif
+ *     → crédit balance RÉDUIT l'actif (anti-actif), pas additionné au passif
+ *   - 1x (sauf 19) : capitaux + dettes financières → naturellement passif
+ *     → débit balance (ex: compte 109) RÉDUIT le passif (anti-passif)
+ *   - 19 (Provisions risques charges) : passif → crédit balance contribue à DZ
+ *   - 2x, 3x, 4x, 5x (non amort/prov) : sens variable, dépend du solde
+ *     → débit → actif, crédit → passif
+ *
+ * Garantie mathématique : avec balance équilibrée et CJ = -solde(13,6,7,8),
+ * on a netActifTarget = netPassifTarget + CJ → bilan parfaitement équilibré.
  */
-function computeClass15Totals(bal: BalanceEntry[]): { totalDebit: number; totalCredit: number } {
-  let totalDebit = 0
-  let totalCredit = 0
+function computeBilanTargets(bal: BalanceEntry[]): { netActifTarget: number; netPassifTarget: number } {
+  let netActif = 0
+  let netPassif = 0
   for (const entry of bal) {
     const compte = entry.compte.replace(/\s/g, '')
     if (!/^[1-5]/.test(compte)) continue
-    if (compte.startsWith('13')) continue  // handled by CJ via classes 6/7/8
+    if (compte.startsWith('13')) continue  // handled by CJ via -solde(13,6,7,8)
+
     const solde = entry.solde_debit - entry.solde_credit
-    if (solde > 0) totalDebit += solde
-    else if (solde < 0) totalCredit += -solde
+    const isAmortProvActif = /^(28|29|39|49|59)/.test(compte)
+    const isClass1NotProv = compte.startsWith('1') && !compte.startsWith('19')
+
+    if (isAmortProvActif) {
+      // Amort/prov sur actif : crédit réduit actif (anti-actif). Pas dans passif.
+      netActif += solde  // signed : négatif si crédit (typique), positif si débit (anormal)
+    } else if (isClass1NotProv) {
+      // Class 1 (sauf 19, sauf 13) : naturellement passif. Débit (109) réduit passif.
+      netPassif += -solde  // crédit→positif, débit→négatif (anti-passif)
+    } else {
+      // Class 19 + 2-5 (hors amort/prov) : routage selon sens du solde
+      if (solde > 0) netActif += solde
+      else if (solde < 0) netPassif += -solde
+    }
   }
-  return { totalDebit, totalCredit }
+  return { netActifTarget: netActif, netPassifTarget: netPassif }
 }
 
 function computeActif(bal: BalanceEntry[]) {
@@ -144,18 +164,16 @@ function computeActif(bal: BalanceEntry[]) {
   vals.set('BK', sumRefs(['BA', 'BB', 'BG']))
   vals.set('BT', sumRefs(['BQ', 'BR', 'BS']))
 
-  // ── Catch-all (orphans débit class 1-5) ──
-  // Tout compte de classe 1-5 avec solde débiteur non capturé par un poste
-  // explicite est routé vers BJ "Autres créances". Garantit qu'aucun débit
-  // n'est perdu → BZ = totalDébit class 1-5 (excluant compte 13).
-  const { totalDebit: targetDebitTotal } = computeClass15Totals(bal)
+  // ── Catch-all NET actif ──
+  // Cible : netActifTarget calculé à partir de la nature comptable des préfixes
+  // (cf. computeBilanTargets). Tout reliquat = orphan routé vers BJ.
+  const { netActifTarget } = computeBilanTargets(bal)
   const explicitActifTotal = (vals.get('AZ')?.net || 0) + (vals.get('BK')?.net || 0)
                            + (vals.get('BT')?.net || 0) + (vals.get('BU')?.net || 0)
-  const orphanDebit = targetDebitTotal - explicitActifTotal
-  if (Math.abs(orphanDebit) > 1) {  // ignorer arrondis < 1 FCFA
+  const orphanDebit = netActifTarget - explicitActifTotal
+  if (Math.abs(orphanDebit) > 1) {
     const bj = vals.get('BJ') || { brut: 0, amort: 0, net: 0 }
     vals.set('BJ', { brut: bj.brut + orphanDebit, amort: bj.amort, net: bj.net + orphanDebit })
-    // Recompute aggregates
     vals.set('BG', sumRefs(['BH', 'BI', 'BJ']))
     vals.set('BK', sumRefs(['BA', 'BB', 'BG']))
   }
@@ -195,18 +213,16 @@ function computePassif(bal: BalanceEntry[]) {
   vals.set('DP', sumRefs(['DH', 'DI', 'DJ', 'DK', 'DM', 'DN']))
   vals.set('DT', sumRefs(['DQ', 'DR']))
 
-  // ── Catch-all (orphans crédit class 1-5) ──
-  // Tout compte de classe 1-5 avec solde créditeur non capturé par un poste
-  // explicite est routé vers DM "Autres dettes". Garantit qu'aucun crédit
-  // n'est perdu → DZ = totalCrédit class 1-5 (excluant 13) + CJ.
-  const { totalCredit: targetCreditTotal } = computeClass15Totals(bal)
+  // ── Catch-all NET passif (excluant CJ) ──
+  // Cible : netPassifTarget calculé à partir de la nature comptable des préfixes.
+  // Tout reliquat = orphan routé vers DM. CJ est ajouté séparément via CP/DF.
+  const { netPassifTarget } = computeBilanTargets(bal)
   const cjValue = vals.get('CJ') || 0
   const explicitPassifTotalNoCJ = (vals.get('DF') || 0) - cjValue + (vals.get('DP') || 0)
                                 + (vals.get('DT') || 0) + (vals.get('DV') || 0)
-  const orphanCredit = targetCreditTotal - explicitPassifTotalNoCJ
+  const orphanCredit = netPassifTarget - explicitPassifTotalNoCJ
   if (Math.abs(orphanCredit) > 1) {
     vals.set('DM', (vals.get('DM') || 0) + orphanCredit)
-    // Recompute aggregates
     vals.set('DP', sumRefs(['DH', 'DI', 'DJ', 'DK', 'DM', 'DN']))
   }
 
