@@ -217,9 +217,13 @@ const LiasseTable: React.FC<LiasseTableProps> = ({ columns, rows, title, compact
                       align="center"
                       sx={{
                         fontWeight: 700,
-                        fontSize: 12,
+                        fontSize: compact ? 9 : 12,
                         color: theme.palette.primary.dark,
-                        py: 1,
+                        // Hauteur figée pour aligner les colonnes ACTIF/PASSIF côte à côte
+                        // (sinon différence de section headers crée une dérive verticale).
+                        height: compact ? 22 : 28,
+                        py: 0,
+                        lineHeight: 1,
                       }}
                     >
                       {columns.map(c => row.cells[c.key]).find(v => v != null && v !== '') || ''}

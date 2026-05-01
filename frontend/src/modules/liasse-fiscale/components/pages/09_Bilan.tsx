@@ -143,12 +143,12 @@ function computePassif(bal: BalanceEntry[]) {
   }
 
   // ── Résultat net (CJ) : robust contre balance non-clôturée ──
-  // Si la balance est clôturée, classes 6/7/8 = 0 et compte 13 = résultat → CJ déjà OK.
-  // Si non-clôturée, compte 13 = 0 et classes 6/7/8 ont des soldes → on ajoute le P&L calculé.
-  // Formule unifiée : CJ = -solde(13) + -solde(6,7,8) = -solde(13,6,7,8)
-  // Cette formule donne le bon résultat dans TOUS les cas (clôturé, non-clôturé, partiellement).
-  const cjFromAll = -getBalanceSolde(bal, ['13', '6', '7', '8'])
-  vals.set('CJ', cjFromAll)
+  // Règle : si compte 13 ≠ 0, on lui fait confiance comme résultat final (book clôturé).
+  //         Sinon (compte 13 = 0), on calcule le P&L depuis classes 6/7/8.
+  // Évite le double-comptage quand classes 6/7/8 ont des résidus post-clôture.
+  const solde13 = -getBalanceSolde(bal, ['13'])
+  const soldePL = -getBalanceSolde(bal, ['6', '7', '8'])
+  vals.set('CJ', solde13 !== 0 ? solde13 : soldePL)
 
   const sumRefs = (refs: string[]) => refs.reduce((s, ref) => s + (vals.get(ref) || 0), 0)
 
