@@ -1,11 +1,19 @@
 /**
- * Thème Liass'Pilot - Palette Grayscale professionnelle monochrome
+ * Thème Liass'Pilot — Premium UI tokens
+ *
+ * Design philosophy :
+ *  - Grayscale base (neutre professionnel)
+ *  - Accent gold raffiné (cohérence avec landing publique)
+ *  - Inter pour body (lisibilité dense), Inter pour headings (consistant)
+ *  - 4-layer shadow system pour hiérarchie visuelle
+ *  - Border-radius unifié 8/12/16
+ *  - Micro-interactions 180ms ease-out
  */
 
 import { createTheme } from '@mui/material/styles'
 
 export const fiscasyncPalette = {
-  // Grayscale
+  // Grayscale — base neutre
   primary50:  '#fafafa',  // Fond de page
   primary100: '#f5f5f5',  // Fond de cartes
   primary200: '#e5e5e5',  // Bordures
@@ -18,13 +26,23 @@ export const fiscasyncPalette = {
   primary900: '#171717',  // Texte principal
   primary950: '#0a0a0a',  // États actifs
 
-  // Statuts
-  success: '#22c55e',
-  warning: '#f59e0b',
-  error:   '#ef4444',
-  info:    '#3b82f6',
+  // Accent Gold — cohérence avec landing publique
+  goldLight:  '#e6c879',
+  gold:       '#c9a84c',
+  goldDark:   '#a08838',
+  goldMuted:  '#b5a06a',
 
-  // Sévérité
+  // Statuts (refinés avec teintes douces de fond)
+  success:    '#10b981',
+  successBg:  '#ecfdf5',
+  warning:    '#f59e0b',
+  warningBg:  '#fffbeb',
+  error:      '#ef4444',
+  errorBg:    '#fef2f2',
+  info:       '#3b82f6',
+  infoBg:     '#eff6ff',
+
+  // Sévérité audit
   low:      '#6b7280',
   medium:   '#f59e0b',
   high:     '#ef4444',
@@ -33,6 +51,33 @@ export const fiscasyncPalette = {
   // Aliases
   white: '#ffffff',
 }
+
+// ── Premium 4-layer shadow system ──
+export const shadows = {
+  /** Hover subtil sur une carte au repos */
+  xs: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+  /** Card par défaut */
+  sm: '0 1px 3px 0 rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.04)',
+  /** Card hover, popover */
+  md: '0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.04)',
+  /** Modal, drawer */
+  lg: '0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.05)',
+  /** Highlights premium (focus ring, accent emphasis) */
+  goldGlow: '0 0 0 3px rgba(201, 168, 76, 0.18)',
+  focusRing: '0 0 0 3px rgba(23, 23, 23, 0.08)',
+}
+
+// ── Transitions premium ──
+export const transitions = {
+  fast:   '120ms cubic-bezier(0.4, 0, 0.2, 1)',
+  base:   '180ms cubic-bezier(0.4, 0, 0.2, 1)',
+  slow:   '300ms cubic-bezier(0.4, 0, 0.2, 1)',
+}
+
+// ── Police premium ──
+const FONT_PRIMARY = '"Inter", "Exo 2", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+const FONT_DISPLAY = '"Inter", "Exo 2", -apple-system, BlinkMacSystemFont, sans-serif'
+const FONT_MONO    = '"JetBrains Mono", "SF Mono", Consolas, monospace'
 
 export const fiscasyncTheme = createTheme({
   palette: {
@@ -81,26 +126,39 @@ export const fiscasyncTheme = createTheme({
   },
 
   typography: {
-    fontFamily: [
-      '"Exo 2"',
-      '-apple-system',
-      'BlinkMacSystemFont',
-      '"Segoe UI"',
-      'Roboto',
-      '"Helvetica Neue"',
-      'Arial',
-      'sans-serif',
-    ].join(','),
-
-    h1: { fontSize: '2.5rem', fontWeight: 700, color: fiscasyncPalette.primary900 },
-    h2: { fontSize: '2rem',   fontWeight: 700, color: fiscasyncPalette.primary900 },
-    h3: { fontSize: '1.5rem', fontWeight: 600, color: fiscasyncPalette.primary900 },
-    h4: { fontSize: '1.25rem', fontWeight: 600, color: fiscasyncPalette.primary900 },
-    h5: { fontSize: '1.125rem', fontWeight: 600, color: fiscasyncPalette.primary900 },
-    h6: { fontSize: '1rem',    fontWeight: 600, color: fiscasyncPalette.primary900 },
-    body1: { color: fiscasyncPalette.primary900 },
-    body2: { color: fiscasyncPalette.primary500 },
-    caption: { color: fiscasyncPalette.primary500 },
+    fontFamily: FONT_PRIMARY,
+    // Hiérarchie premium : tracking serré sur les titres, line-height généreux sur le body
+    h1: {
+      fontFamily: FONT_DISPLAY, fontSize: '2.5rem', fontWeight: 700,
+      letterSpacing: '-0.025em', lineHeight: 1.1, color: fiscasyncPalette.primary900,
+    },
+    h2: {
+      fontFamily: FONT_DISPLAY, fontSize: '2rem', fontWeight: 700,
+      letterSpacing: '-0.022em', lineHeight: 1.15, color: fiscasyncPalette.primary900,
+    },
+    h3: {
+      fontFamily: FONT_DISPLAY, fontSize: '1.5rem', fontWeight: 600,
+      letterSpacing: '-0.018em', lineHeight: 1.25, color: fiscasyncPalette.primary900,
+    },
+    h4: {
+      fontFamily: FONT_DISPLAY, fontSize: '1.25rem', fontWeight: 600,
+      letterSpacing: '-0.014em', lineHeight: 1.3, color: fiscasyncPalette.primary900,
+    },
+    h5: {
+      fontFamily: FONT_DISPLAY, fontSize: '1.075rem', fontWeight: 600,
+      letterSpacing: '-0.01em', lineHeight: 1.35, color: fiscasyncPalette.primary900,
+    },
+    h6: {
+      fontFamily: FONT_DISPLAY, fontSize: '0.95rem', fontWeight: 600,
+      letterSpacing: '-0.005em', lineHeight: 1.4, color: fiscasyncPalette.primary900,
+    },
+    subtitle1: { fontWeight: 500, lineHeight: 1.5, color: fiscasyncPalette.primary900 },
+    subtitle2: { fontWeight: 500, lineHeight: 1.5, color: fiscasyncPalette.primary600, fontSize: '0.875rem' },
+    body1: { lineHeight: 1.6, color: fiscasyncPalette.primary900 },
+    body2: { lineHeight: 1.6, color: fiscasyncPalette.primary500, fontSize: '0.875rem' },
+    button: { textTransform: 'none' as const, fontWeight: 500, letterSpacing: '0.01em' },
+    caption: { color: fiscasyncPalette.primary500, fontSize: '0.78rem', letterSpacing: '0.01em' },
+    overline: { textTransform: 'uppercase' as const, letterSpacing: '0.08em', fontWeight: 600, fontSize: '0.7rem' },
   },
 
   components: {
@@ -179,16 +237,18 @@ export const fiscasyncTheme = createTheme({
       },
     },
 
-    // ── Cards ──
+    // ── Cards (premium 4-layer shadow + lift on hover) ──
     MuiCard: {
       styleOverrides: {
         root: {
           backgroundColor: fiscasyncPalette.white,
-          borderRadius: '16px',
-          boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+          borderRadius: '14px',
+          boxShadow: shadows.sm,
           border: `1px solid ${fiscasyncPalette.primary200}`,
+          transition: `box-shadow ${transitions.base}, transform ${transitions.base}, border-color ${transitions.base}`,
           '&:hover': {
-            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+            boxShadow: shadows.md,
+            borderColor: fiscasyncPalette.primary300,
           },
         },
       },
@@ -199,40 +259,50 @@ export const fiscasyncTheme = createTheme({
         root: {
           backgroundColor: fiscasyncPalette.white,
           borderRadius: '12px',
+          backgroundImage: 'none', // évite le filtre MUI sur dark mode
         },
-        elevation1: {
-          boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
-        },
+        elevation1: { boxShadow: shadows.xs },
+        elevation2: { boxShadow: shadows.sm },
+        elevation3: { boxShadow: shadows.md },
+        elevation4: { boxShadow: shadows.lg },
       },
     },
 
-    // ── Buttons ──
+    // ── Buttons (premium : transitions, focus ring, lift) ──
     MuiButton: {
+      defaultProps: {
+        disableElevation: true,
+      },
       styleOverrides: {
         root: {
-          borderRadius: '12px',
+          borderRadius: '10px',
           textTransform: 'none' as const,
-          fontWeight: 600,
+          fontWeight: 500,
+          letterSpacing: '0.01em',
+          transition: `background-color ${transitions.base}, color ${transitions.base}, box-shadow ${transitions.base}, transform ${transitions.fast}, border-color ${transitions.base}`,
+          '&:active': { transform: 'translateY(0.5px)' },
+          '&:focus-visible': { boxShadow: shadows.focusRing },
         },
+        sizeSmall: { padding: '5px 12px', fontSize: '0.82rem' },
+        sizeMedium: { padding: '7px 16px', fontSize: '0.875rem' },
+        sizeLarge: { padding: '10px 22px', fontSize: '0.95rem' },
         containedPrimary: {
           backgroundColor: fiscasyncPalette.primary900,
           color: `${fiscasyncPalette.white} !important`,
-          boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+          boxShadow: shadows.xs,
           '&:hover': {
             backgroundColor: fiscasyncPalette.primary800,
             color: `${fiscasyncPalette.white} !important`,
-            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+            boxShadow: shadows.sm,
           },
         },
         containedSecondary: {
           color: `${fiscasyncPalette.white} !important`,
-          '&:hover': {
-            color: `${fiscasyncPalette.white} !important`,
-          },
+          '&:hover': { color: `${fiscasyncPalette.white} !important` },
         },
         outlined: {
           borderColor: fiscasyncPalette.primary200,
-          color: fiscasyncPalette.primary600,
+          color: fiscasyncPalette.primary700,
           '&:hover': {
             backgroundColor: fiscasyncPalette.primary50,
             borderColor: fiscasyncPalette.primary400,
@@ -240,9 +310,10 @@ export const fiscasyncTheme = createTheme({
           },
         },
         text: {
-          color: fiscasyncPalette.primary500,
+          color: fiscasyncPalette.primary600,
           '&:hover': {
             backgroundColor: fiscasyncPalette.primary100,
+            color: fiscasyncPalette.primary900,
           },
         },
       },
@@ -271,23 +342,32 @@ export const fiscasyncTheme = createTheme({
       },
     },
 
-    // ── TextField ──
+    // ── TextField (premium : focus ring + transitions douces) ──
     MuiTextField: {
       styleOverrides: {
         root: {
           '& .MuiOutlinedInput-root': {
-            borderRadius: '12px',
+            borderRadius: '10px',
             backgroundColor: fiscasyncPalette.white,
+            transition: `border-color ${transitions.base}, box-shadow ${transitions.base}`,
+            '& .MuiOutlinedInput-notchedOutline': {
+              borderColor: fiscasyncPalette.primary200,
+              transition: `border-color ${transitions.base}`,
+            },
             '&:hover .MuiOutlinedInput-notchedOutline': {
               borderColor: fiscasyncPalette.primary400,
             },
-            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-              borderColor: fiscasyncPalette.primary900,
-              boxShadow: '0 0 0 3px rgba(23,23,23,0.1)',
+            '&.Mui-focused': {
+              boxShadow: shadows.focusRing,
+              '& .MuiOutlinedInput-notchedOutline': {
+                borderColor: fiscasyncPalette.primary900,
+                borderWidth: '1px',
+              },
             },
           },
           '& .MuiInputLabel-root': {
             color: fiscasyncPalette.primary500,
+            fontSize: '0.92rem',
             '&.Mui-focused': { color: fiscasyncPalette.primary900 },
           },
         },
@@ -349,12 +429,16 @@ export const fiscasyncTheme = createTheme({
       },
     },
 
-    // ── Chips ──
+    // ── Chips (premium : taille raffinée, hover doux) ──
     MuiChip: {
       styleOverrides: {
         root: {
-          borderRadius: '16px',
+          borderRadius: '8px',
           fontWeight: 500,
+          fontSize: '0.78rem',
+          letterSpacing: '0.005em',
+          transition: `background-color ${transitions.base}, border-color ${transitions.base}, color ${transitions.base}`,
+          height: 24,
         },
         filled: {
           backgroundColor: fiscasyncPalette.primary200,
@@ -414,6 +498,117 @@ export const fiscasyncTheme = createTheme({
           backgroundColor: fiscasyncPalette.primary900,
           color: fiscasyncPalette.white,
           '& .MuiTypography-h6': { color: fiscasyncPalette.white },
+        },
+      },
+    },
+
+    // ── IconButton (premium hover ring) ──
+    MuiIconButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: '8px',
+          transition: `background-color ${transitions.base}, color ${transitions.base}`,
+          '&:focus-visible': { boxShadow: shadows.focusRing },
+        },
+      },
+    },
+
+    // ── Tooltip (premium typo) ──
+    MuiTooltip: {
+      styleOverrides: {
+        tooltip: {
+          backgroundColor: fiscasyncPalette.primary900,
+          color: fiscasyncPalette.white,
+          fontSize: '0.75rem',
+          fontWeight: 500,
+          padding: '6px 10px',
+          borderRadius: '6px',
+          boxShadow: shadows.md,
+        },
+        arrow: { color: fiscasyncPalette.primary900 },
+      },
+    },
+
+    // ── Switch (premium track) ──
+    MuiSwitch: {
+      styleOverrides: {
+        track: {
+          borderRadius: 11,
+          opacity: 1,
+          backgroundColor: fiscasyncPalette.primary300,
+        },
+        thumb: { boxShadow: shadows.sm },
+      },
+    },
+
+    // ── LinearProgress (premium thin) ──
+    MuiLinearProgress: {
+      styleOverrides: {
+        root: {
+          height: 4,
+          borderRadius: 2,
+          backgroundColor: fiscasyncPalette.primary100,
+        },
+        bar: { borderRadius: 2 },
+      },
+    },
+
+    // ── Tabs (premium underline) ──
+    MuiTabs: {
+      styleOverrides: {
+        indicator: {
+          height: 2,
+          borderTopLeftRadius: 2,
+          borderTopRightRadius: 2,
+          backgroundColor: fiscasyncPalette.primary900,
+        },
+      },
+    },
+    MuiTab: {
+      styleOverrides: {
+        root: {
+          textTransform: 'none' as const,
+          fontWeight: 500,
+          fontSize: '0.875rem',
+          letterSpacing: '0.005em',
+          minHeight: 42,
+          color: fiscasyncPalette.primary500,
+          transition: `color ${transitions.base}`,
+          '&.Mui-selected': { color: fiscasyncPalette.primary900, fontWeight: 600 },
+          '&:hover:not(.Mui-selected)': { color: fiscasyncPalette.primary700 },
+        },
+      },
+    },
+
+    // ── Dialog (premium spacing) ──
+    MuiDialog: {
+      styleOverrides: {
+        paper: {
+          borderRadius: '16px',
+          boxShadow: shadows.lg,
+        },
+      },
+    },
+
+    // ── Menu (premium dropdown) ──
+    MuiMenu: {
+      styleOverrides: {
+        paper: {
+          borderRadius: '10px',
+          boxShadow: shadows.md,
+          border: `1px solid ${fiscasyncPalette.primary200}`,
+          marginTop: 4,
+        },
+      },
+    },
+    MuiMenuItem: {
+      styleOverrides: {
+        root: {
+          borderRadius: 6,
+          margin: '0 4px',
+          fontSize: '0.875rem',
+          minHeight: 36,
+          transition: `background-color ${transitions.fast}`,
         },
       },
     },
