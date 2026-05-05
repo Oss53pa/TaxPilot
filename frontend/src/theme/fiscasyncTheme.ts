@@ -74,9 +74,9 @@ export const transitions = {
   slow:   '300ms cubic-bezier(0.4, 0, 0.2, 1)',
 }
 
-// ── Police premium ──
-const FONT_PRIMARY = '"Inter", "Exo 2", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-const FONT_DISPLAY = '"Inter", "Exo 2", -apple-system, BlinkMacSystemFont, sans-serif'
+// ── Police premium (Dosis : humanist sans-serif élégant, légèrement étendu) ──
+const FONT_PRIMARY = '"Dosis", "Inter", "Exo 2", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+const FONT_DISPLAY = '"Dosis", "Inter", "Exo 2", -apple-system, BlinkMacSystemFont, sans-serif'
 const FONT_MONO    = '"JetBrains Mono", "SF Mono", Consolas, monospace'
 
 export const fiscasyncTheme = createTheme({
@@ -127,38 +127,40 @@ export const fiscasyncTheme = createTheme({
 
   typography: {
     fontFamily: FONT_PRIMARY,
-    // Hiérarchie premium : tracking serré sur les titres, line-height généreux sur le body
+    // Hiérarchie premium adaptée à Dosis (humanist, métrique légèrement étendue)
+    // → letter-spacing 0 ou très léger, weights 500/600/700 pour bonne lisibilité
     h1: {
       fontFamily: FONT_DISPLAY, fontSize: '2.5rem', fontWeight: 700,
-      letterSpacing: '-0.025em', lineHeight: 1.1, color: fiscasyncPalette.primary900,
+      letterSpacing: '-0.01em', lineHeight: 1.15, color: fiscasyncPalette.primary900,
     },
     h2: {
       fontFamily: FONT_DISPLAY, fontSize: '2rem', fontWeight: 700,
-      letterSpacing: '-0.022em', lineHeight: 1.15, color: fiscasyncPalette.primary900,
+      letterSpacing: '-0.008em', lineHeight: 1.2, color: fiscasyncPalette.primary900,
     },
     h3: {
       fontFamily: FONT_DISPLAY, fontSize: '1.5rem', fontWeight: 600,
-      letterSpacing: '-0.018em', lineHeight: 1.25, color: fiscasyncPalette.primary900,
+      letterSpacing: '-0.005em', lineHeight: 1.3, color: fiscasyncPalette.primary900,
     },
     h4: {
       fontFamily: FONT_DISPLAY, fontSize: '1.25rem', fontWeight: 600,
-      letterSpacing: '-0.014em', lineHeight: 1.3, color: fiscasyncPalette.primary900,
+      letterSpacing: 0, lineHeight: 1.35, color: fiscasyncPalette.primary900,
     },
     h5: {
       fontFamily: FONT_DISPLAY, fontSize: '1.075rem', fontWeight: 600,
-      letterSpacing: '-0.01em', lineHeight: 1.35, color: fiscasyncPalette.primary900,
+      letterSpacing: 0, lineHeight: 1.4, color: fiscasyncPalette.primary900,
     },
     h6: {
       fontFamily: FONT_DISPLAY, fontSize: '0.95rem', fontWeight: 600,
-      letterSpacing: '-0.005em', lineHeight: 1.4, color: fiscasyncPalette.primary900,
+      letterSpacing: '0.005em', lineHeight: 1.45, color: fiscasyncPalette.primary900,
     },
     subtitle1: { fontWeight: 500, lineHeight: 1.5, color: fiscasyncPalette.primary900 },
     subtitle2: { fontWeight: 500, lineHeight: 1.5, color: fiscasyncPalette.primary600, fontSize: '0.875rem' },
-    body1: { lineHeight: 1.6, color: fiscasyncPalette.primary900 },
-    body2: { lineHeight: 1.6, color: fiscasyncPalette.primary500, fontSize: '0.875rem' },
-    button: { textTransform: 'none' as const, fontWeight: 500, letterSpacing: '0.01em' },
-    caption: { color: fiscasyncPalette.primary500, fontSize: '0.78rem', letterSpacing: '0.01em' },
-    overline: { textTransform: 'uppercase' as const, letterSpacing: '0.08em', fontWeight: 600, fontSize: '0.7rem' },
+    // Dosis 400 peut sembler léger : on monte le poids body à 400 mais avec leading généreux
+    body1: { fontWeight: 400, lineHeight: 1.65, color: fiscasyncPalette.primary900, letterSpacing: '0.005em' },
+    body2: { fontWeight: 400, lineHeight: 1.65, color: fiscasyncPalette.primary500, fontSize: '0.875rem', letterSpacing: '0.005em' },
+    button: { textTransform: 'none' as const, fontWeight: 500, letterSpacing: '0.015em' },
+    caption: { color: fiscasyncPalette.primary500, fontSize: '0.78rem', letterSpacing: '0.015em' },
+    overline: { textTransform: 'uppercase' as const, letterSpacing: '0.1em', fontWeight: 600, fontSize: '0.7rem' },
   },
 
   components: {
