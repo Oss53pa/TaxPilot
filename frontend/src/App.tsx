@@ -53,6 +53,7 @@ const OrganizationWrapper = React.lazy(() => import('@/pages/organization/Organi
 const OrganizationMembersPage = React.lazy(() => import('@/pages/organization/OrganizationMembersPage'))
 const SubscriptionPage = React.lazy(() => import('@/pages/organization/SubscriptionPage'))
 const InvitationsPage = React.lazy(() => import('@/pages/organization/InvitationsPage'))
+const TeamSettingsPage = React.lazy(() => import('@/pages/settings/TeamSettingsPage'))
 
 // Legal pages
 const MentionsLegales = React.lazy(() => import('@/pages/legal/MentionsLegales'))
@@ -198,6 +199,7 @@ function App() {
           <Route path="/veille" element={<S><ModernVeilleReglementaire /></S>} />
           <Route path="/collaboration" element={<S><ModernCollaboration /></S>} />
           <Route path="/integrations" element={<S><ModernIntegrations /></S>} />
+          <Route path="/settings/team" element={<S><TeamSettingsPage /></S>} />
           <Route path="/security" element={<S><ModernSecurity /></S>} />
           <Route path="/organization/:slug/members" element={<S><OrganizationWrapper>{(slug) => <OrganizationMembersPage organizationSlug={slug} />}</OrganizationWrapper></S>} />
           <Route path="/organization/:slug/subscription" element={<S><OrganizationWrapper>{(slug) => <SubscriptionPage organizationSlug={slug} />}</OrganizationWrapper></S>} />
