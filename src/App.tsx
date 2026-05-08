@@ -77,6 +77,7 @@ const InvitationsPage = React.lazy(() => import('@/pages/organization/Invitation
 const Landing = React.lazy(() => import('@/pages/public/Landing'))
 const Pricing = React.lazy(() => import('@/pages/public/Pricing'))
 const Signup = React.lazy(() => import('@/pages/public/Signup'))
+const AtlasStudioRedirect = React.lazy(() => import('@/pages/AtlasStudioRedirect'))
 
 // Authentification
 import Login from './pages/auth/Login'
@@ -105,6 +106,11 @@ function App() {
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />
+            {/* Format unifié Atlas Studio Suite — auth centralisée */}
+            <Route path="/forgot-password" element={<AtlasStudioRedirect destination="forgot-password" />} />
+            <Route path="/reset-password" element={<AtlasStudioRedirect destination="reset-password" />} />
+            {/* Alias rétro-compat */}
+            <Route path="/register" element={<Navigate to="/signup" replace />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Suspense>
