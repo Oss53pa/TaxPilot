@@ -1,0 +1,226 @@
+/**
+ * premium-globals.css — Couche visuelle premium au niveau document
+ *
+ * Apporte les détails subtils qui font la différence entre une UI "MUI standard"
+ * et une UI "ultra-premium type Cockpit/Linear/Stripe" :
+ *  - Antialiasing optimisé (text rendering)
+ *  - Smooth scrolling natif
+ *  - Scrollbars custom slim & élégants
+ *  - Selection color refinée (or champagne sur dark, neutre sur light)
+ *  - Focus visible global (pour accessibilité ET premium feel)
+ *  - tabular-nums sur les chiffres financiers (alignement parfait des chiffres)
+ *  - Désactivation tap highlight Android
+ *  - Optimisations rendering
+ */
+
+/* ─── Reset & body refinement ─────────────────────────────────────────── */
+
+html {
+  /* Smooth scrolling natif sur ancres */
+  scroll-behavior: smooth;
+  /* Antialiasing optimisé pour Mac et Windows */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  /* Désactive tap highlight bleu Android */
+  -webkit-tap-highlight-color: transparent;
+  /* Améliore le rendering kerning + ligatures */
+  font-feature-settings: 'kern', 'liga', 'calt';
+  /* Évite l'horizontal scroll par défaut */
+  overflow-x: hidden;
+}
+
+/* ─── Tabular nums sur tous les chiffres financiers ────────────────────
+   Sans cet ajustement, les chiffres "1 000 000" et "9 999 999" n'occupent
+   pas la même largeur → mauvais alignement dans les tableaux financiers. */
+
+table,
+.tabular-nums,
+[data-tabular-nums="true"],
+.MuiTableCell-root,
+.MuiChip-label {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1, 'kern' 1;
+}
+
+/* Inputs numériques + boutons avec montants */
+input[type="number"],
+.MuiInputBase-input[type="text"][inputmode="numeric"] {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── Selection color premium ─────────────────────────────────────────── */
+
+::selection {
+  background-color: rgba(201, 168, 76, 0.25); /* Gold champagne 25% */
+  color: inherit;
+}
+
+::-moz-selection {
+  background-color: rgba(201, 168, 76, 0.25);
+  color: inherit;
+}
+
+/* ─── Scrollbars custom (Webkit + Firefox) ────────────────────────────── */
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #d1d6dc transparent;
+}
+
+/* Webkit (Chrome, Safari, Edge) — scrollbars premium "slim" */
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #d1d6dc;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  transition: background-color 180ms ease-out;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: #9ba1a9;
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Scrollbars dans les sidebars / drawers sombres */
+.MuiDrawer-paper *::-webkit-scrollbar-thumb,
+[data-theme="dark"] *::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+.MuiDrawer-paper *::-webkit-scrollbar-thumb:hover,
+[data-theme="dark"] *::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.22);
+}
+
+/* ─── Focus visible global (accessibilité + premium) ─────────────────── */
+
+*:focus {
+  outline: none;
+}
+
+*:focus-visible {
+  outline: 2px solid rgba(201, 168, 76, 0.6);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* MUI components ont leurs propres focus rings — on évite double anneau */
+.MuiButtonBase-root:focus-visible,
+.MuiOutlinedInput-root.Mui-focused,
+.MuiIconButton-root:focus-visible {
+  outline: none;
+}
+
+/* ─── Premium card hover glow (utilitaire) ───────────────────────────── */
+
+.premium-glow-on-hover {
+  transition: box-shadow 240ms cubic-bezier(0.4, 0, 0.2, 1),
+              transform 240ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.premium-glow-on-hover:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 0 0 1px rgba(201, 168, 76, 0.15),
+    0 8px 24px -4px rgba(0, 0, 0, 0.08),
+    0 4px 8px -4px rgba(0, 0, 0, 0.04);
+}
+
+/* ─── Glass surface (utilitaire pour overlays premium) ──────────────── */
+
+.premium-glass {
+  background-color: rgba(255, 255, 255, 0.72);
+  backdrop-filter: saturate(160%) blur(12px);
+  -webkit-backdrop-filter: saturate(160%) blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.premium-glass-dark {
+  background-color: rgba(17, 24, 39, 0.72);
+  backdrop-filter: saturate(160%) blur(12px);
+  -webkit-backdrop-filter: saturate(160%) blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* ─── Subtle noise texture (optionnel — utilitaire pour cards premium) ─
+   À activer via class .premium-noise. Crée un grain subtil qui donne du
+   "tissu" aux surfaces, comme sur Linear/Vercel. */
+
+.premium-noise {
+  position: relative;
+}
+.premium-noise::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");
+  opacity: 0.025;
+  border-radius: inherit;
+  mix-blend-mode: overlay;
+}
+
+/* ─── Animations premium réutilisables ─────────────────────────────── */
+
+@keyframes premium-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes premium-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.premium-fade-in {
+  animation: premium-fade-in 280ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.premium-skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(232, 235, 238, 0.5) 0%,
+    rgba(232, 235, 238, 0.8) 50%,
+    rgba(232, 235, 238, 0.5) 100%
+  );
+  background-size: 200% 100%;
+  animation: premium-shimmer 1.6s linear infinite;
+}
+
+/* ─── Reduce motion respect (accessibilité) ────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ─── Print refinement ─────────────────────────────────────────────── */
+
+@media print {
+  ::-webkit-scrollbar { display: none; }
+  body { background: white !important; }
+  .MuiDrawer-root,
+  .MuiAppBar-root,
+  [data-no-print] { display: none !important; }
+}

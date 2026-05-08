@@ -38,6 +38,7 @@ const StyledMaterialDesignContent = styled(MaterialDesignContent)(() => ({
   },
 }))
 import './styles/contrast-fix.css'
+import './styles/premium-globals.css'
 
 // Initialize Sentry (only in production)
 const sentryDsn = import.meta.env.VITE_SENTRY_DSN
