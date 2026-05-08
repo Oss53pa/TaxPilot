@@ -1,55 +1,71 @@
 /**
- * Thème Liass'Pilot — Premium UI tokens
+ * Thème Liass'Pilot — Premium UI tokens "Nordic Slate"
  *
  * Design philosophy :
- *  - Grayscale base (neutre professionnel)
- *  - Accent gold raffiné (cohérence avec landing publique)
- *  - Inter pour body (lisibilité dense), Inter pour headings (consistant)
+ *  - Neutres warm-stone (Tailwind's "stone" scale) — non bleus, organiques
+ *  - Accent teal #0f766e (deep teal) — moderne, fintech, distinct du gold
+ *  - Police Dosis (humanist sans-serif élégant)
  *  - 4-layer shadow system pour hiérarchie visuelle
  *  - Border-radius unifié 8/12/16
  *  - Micro-interactions 180ms ease-out
+ *
+ * Inspiration : Linear · Vercel · Notion · Stripe
  */
 
 import { createTheme } from '@mui/material/styles'
 
 export const fiscasyncPalette = {
-  // Grayscale — base neutre
-  primary50:  '#fafafa',  // Fond de page
-  primary100: '#f5f5f5',  // Fond de cartes
-  primary200: '#e5e5e5',  // Bordures
-  primary300: '#d4d4d4',  // Bordures subtiles
-  primary400: '#a3a3a3',  // Placeholder
-  primary500: '#737373',  // Texte secondaire
-  primary600: '#525252',  // Labels
-  primary700: '#404040',  // Boutons ghost
-  primary800: '#262626',  // Hover boutons
-  primary900: '#171717',  // Texte principal
-  primary950: '#0a0a0a',  // États actifs
+  // Neutres "stone" warm — légère teinte chaude (~3-5° vers cream)
+  primary50:  '#fafaf9',  // Fond de page secondary, cards alternées
+  primary100: '#f5f5f4',  // Fond de cartes hover, surfaces lifted
+  primary200: '#e7e5e4',  // Bordures par défaut
+  primary300: '#d6d3d1',  // Bordures actives, dividers visibles
+  primary400: '#a8a29e',  // Placeholder, icons inactifs
+  primary500: '#78716c',  // Texte secondaire
+  primary600: '#57534e',  // Labels, sub-headings
+  primary700: '#44403c',  // Boutons ghost, navigation inactive
+  primary800: '#292524',  // Hover boutons sombres
+  primary900: '#1c1917',  // Texte principal (charcoal warm)
+  primary950: '#0c0a09',  // États actifs (charcoal deep)
 
-  // Accent Gold — cohérence avec landing publique
-  goldLight:  '#e6c879',
-  gold:       '#c9a84c',
-  goldDark:   '#a08838',
-  goldMuted:  '#b5a06a',
+  // Accent "Teal" — deep teal moderne
+  tealLight:  '#5eead4',  // Hover glow, accent doux
+  teal:       '#0f766e',  // Accent primaire
+  tealDark:   '#115e59',  // Pressed, deep accent
+  tealBg:     '#f0fdfa',  // Background tint accent (très doux)
+  tealBgStrong: '#ccfbf1',  // Background tint plus saturé (chips, badges)
+  tealBorder: '#99f6e4',  // Bordure accent (cards highlighted)
 
-  // Statuts (refinés avec teintes douces de fond)
-  success:    '#10b981',
-  successBg:  '#ecfdf5',
-  warning:    '#f59e0b',
-  warningBg:  '#fffbeb',
-  error:      '#ef4444',
-  errorBg:    '#fef2f2',
-  info:       '#3b82f6',
-  infoBg:     '#eff6ff',
+  // Aliases legacy "gold" pour ne pas casser le code existant
+  // qui référence goldX → maintenant teal
+  goldLight:  '#5eead4',
+  gold:       '#0f766e',
+  goldDark:   '#115e59',
+  goldMuted:  '#14b8a6',
 
-  // Sévérité audit
-  low:      '#6b7280',
-  medium:   '#f59e0b',
-  high:     '#ef4444',
+  // Statuts (palette refinée, plus saturée)
+  success:     '#15803d',
+  successBg:   '#dcfce7',
+  successText: '#14532d',
+  warning:     '#b45309',
+  warningBg:   '#fef3c7',
+  warningText: '#78350f',
+  error:       '#b91c1c',
+  errorBg:     '#fee2e2',
+  errorText:   '#7f1d1d',
+  info:        '#0369a1',  // Sky deep (cohérence avec teal accent)
+  infoBg:      '#e0f2fe',
+  infoText:    '#0c4a6e',
+
+  // Sévérité audit (légèrement adaptée au warm theme)
+  low:      '#78716c',
+  medium:   '#b45309',
+  high:     '#b91c1c',
   critical: '#7f1d1d',
 
   // Aliases
   white: '#ffffff',
+  black: '#000000',
 }
 
 // ── Premium 4-layer shadow system ──
@@ -62,9 +78,12 @@ export const shadows = {
   md: '0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.04)',
   /** Modal, drawer */
   lg: '0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.05)',
-  /** Highlights premium (focus ring, accent emphasis) */
-  goldGlow: '0 0 0 3px rgba(201, 168, 76, 0.18)',
-  focusRing: '0 0 0 3px rgba(23, 23, 23, 0.08)',
+  /** Highlights premium — accent teal */
+  tealGlow: '0 0 0 3px rgba(15, 118, 110, 0.15)',
+  /** Focus ring neutre */
+  focusRing: '0 0 0 3px rgba(28, 25, 23, 0.08)',
+  /** Backwards compat */
+  goldGlow: '0 0 0 3px rgba(15, 118, 110, 0.15)',
 }
 
 // ── Transitions premium ──
@@ -89,9 +108,9 @@ export const fiscasyncTheme = createTheme({
       contrastText: fiscasyncPalette.white,
     },
     secondary: {
-      main: fiscasyncPalette.primary500,
-      light: fiscasyncPalette.primary300,
-      dark: fiscasyncPalette.primary700,
+      main: fiscasyncPalette.teal,        // Teal accent (Nordic Slate)
+      light: fiscasyncPalette.tealLight,
+      dark: fiscasyncPalette.tealDark,
       contrastText: fiscasyncPalette.white,
     },
     background: {
@@ -360,9 +379,9 @@ export const fiscasyncTheme = createTheme({
               borderColor: fiscasyncPalette.primary400,
             },
             '&.Mui-focused': {
-              boxShadow: shadows.focusRing,
+              boxShadow: shadows.tealGlow,  // Focus ring teal (Nordic Slate accent)
               '& .MuiOutlinedInput-notchedOutline': {
-                borderColor: fiscasyncPalette.primary900,
+                borderColor: fiscasyncPalette.teal,
                 borderWidth: '1px',
               },
             },
@@ -382,23 +401,23 @@ export const fiscasyncTheme = createTheme({
       styleOverrides: {
         root: {
           '&.MuiAlert-standardSuccess': {
-            backgroundColor: '#f0fdf4',
-            color: '#166534',
+            backgroundColor: fiscasyncPalette.successBg,
+            color: fiscasyncPalette.successText,
             '& .MuiAlert-icon': { color: fiscasyncPalette.success },
           },
           '&.MuiAlert-standardWarning': {
-            backgroundColor: '#fffbeb',
-            color: '#92400e',
+            backgroundColor: fiscasyncPalette.warningBg,
+            color: fiscasyncPalette.warningText,
             '& .MuiAlert-icon': { color: fiscasyncPalette.warning },
           },
           '&.MuiAlert-standardError': {
-            backgroundColor: '#fef2f2',
-            color: '#991b1b',
+            backgroundColor: fiscasyncPalette.errorBg,
+            color: fiscasyncPalette.errorText,
             '& .MuiAlert-icon': { color: fiscasyncPalette.error },
           },
           '&.MuiAlert-standardInfo': {
-            backgroundColor: '#eff6ff',
-            color: '#1e40af',
+            backgroundColor: fiscasyncPalette.infoBg,
+            color: fiscasyncPalette.infoText,
             '& .MuiAlert-icon': { color: fiscasyncPalette.info },
           },
           '&.MuiAlert-filledSuccess': {
