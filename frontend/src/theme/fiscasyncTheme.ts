@@ -12,51 +12,35 @@
 
 import { createTheme } from '@mui/material/styles'
 
-/**
- * Palette signature "Obsidian Platinum"
- *
- * Design philosophy :
- *  - Neutres "obsidian" : très contrastés, légèrement teintés bleu froid
- *    pour un rendu plus sophistiqué que le grayscale pur
- *  - Accent "or champagne" raffiné (#c9a84c base, dérivés warm)
- *  - Statuts modernes (vert émeraude, ambre, rose pour error, bleu indigo)
- *  - Inspiration : Linear, Stripe, Vercel — mais réchauffé pour le contexte
- *    financier OHADA (l'or rappelle le sérieux institutionnel)
- */
 export const fiscasyncPalette = {
-  // Neutres "Obsidian" — légère teinte bleue froide (~3-5° vers cyan)
-  primary50:  '#fafbfc',  // Fond de page (légèrement bleuté, plus moderne que blanc pur)
-  primary100: '#f5f6f8',  // Fond de cartes secondaires, hover ghost
-  primary200: '#e8ebee',  // Bordures par défaut (raffinées)
-  primary300: '#d1d6dc',  // Bordures actives, dividers visibles
-  primary400: '#9ba1a9',  // Placeholder, icons inactifs
-  primary500: '#6b7280',  // Texte secondaire
-  primary600: '#4b5563',  // Labels, sub-headings
-  primary700: '#374151',  // Boutons ghost, navigation inactive
-  primary800: '#1f2937',  // Hover boutons sombres
-  primary900: '#111827',  // Texte principal (Obsidian deep)
-  primary950: '#030712',  // États actifs, sidebar
+  // Grayscale — base neutre
+  primary50:  '#fafafa',  // Fond de page
+  primary100: '#f5f5f5',  // Fond de cartes
+  primary200: '#e5e5e5',  // Bordures
+  primary300: '#d4d4d4',  // Bordures subtiles
+  primary400: '#a3a3a3',  // Placeholder
+  primary500: '#737373',  // Texte secondaire
+  primary600: '#525252',  // Labels
+  primary700: '#404040',  // Boutons ghost
+  primary800: '#262626',  // Hover boutons
+  primary900: '#171717',  // Texte principal
+  primary950: '#0a0a0a',  // États actifs
 
-  // Accent "Or champagne" — refiné chaud, statique entre yellow-gold et amber
-  goldLight:  '#e6c879',  // Hover glow, accent doux
-  gold:       '#c9a84c',  // Accent primaire (cohérence landing)
-  goldDark:   '#a08838',  // Pressed, deep accent
-  goldMuted:  '#b5a06a',  // Texte accent secondaire
-  goldBg:     '#fdf8eb',  // Background tint accent
+  // Accent Gold — cohérence avec landing publique
+  goldLight:  '#e6c879',
+  gold:       '#c9a84c',
+  goldDark:   '#a08838',
+  goldMuted:  '#b5a06a',
 
-  // Statuts modernes — palette "tinted background" pour des chips/alerts élégants
+  // Statuts (refinés avec teintes douces de fond)
   success:    '#10b981',
-  successBg:  '#d1fae5',
-  successText: '#047857',
+  successBg:  '#ecfdf5',
   warning:    '#f59e0b',
-  warningBg:  '#fef3c7',
-  warningText: '#92400e',
+  warningBg:  '#fffbeb',
   error:      '#ef4444',
-  errorBg:    '#fee2e2',
-  errorText:  '#991b1b',
-  info:       '#6366f1',  // Indigo plutôt que bleu pur (plus moderne)
-  infoBg:     '#e0e7ff',
-  infoText:   '#3730a3',
+  errorBg:    '#fef2f2',
+  info:       '#3b82f6',
+  infoBg:     '#eff6ff',
 
   // Sévérité audit
   low:      '#6b7280',
@@ -66,7 +50,6 @@ export const fiscasyncPalette = {
 
   // Aliases
   white: '#ffffff',
-  black: '#000000',
 }
 
 // ── Premium 4-layer shadow system ──
