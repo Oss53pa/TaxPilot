@@ -1,3 +1,9 @@
+/* Tailwind utilities — preflight désactivé via tailwind.config.js
+   pour ne pas casser les resets de MUI CssBaseline.
+   On utilise uniquement components + utilities (pas base). */
+@tailwind components;
+@tailwind utilities;
+
 /* Reset et styles de base */
 * {
   margin: 0;
