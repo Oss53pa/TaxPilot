@@ -119,7 +119,7 @@ const Pricing: React.FC = () => {
               border: `1px solid ${BORDER}`, bgcolor: 'transparent',
               color: `${TEXT_PRIMARY} !important`, fontWeight: 500, fontFamily: BODY,
               fontSize: '0.92rem', textDecoration: 'none', borderRadius: '8px', px: 3, py: 1.4, mb: 3,
-              transition: 'all 0.2s', '&:hover': { borderColor: 'rgba(255,255,255,0.3)', bgcolor: 'rgba(255,255,255,0.03)' },
+              transition: 'all 0.2s', '&:hover': { borderColor: 'rgba(0,0,0,0.3)', bgcolor: 'rgba(0,0,0,0.03)' },
             }}
           >
             Souscrire <ArrowForward sx={{ fontSize: 16 }} />
@@ -145,7 +145,7 @@ const Pricing: React.FC = () => {
             transform: { md: 'scale(1.03)' }, zIndex: 1,
           }}
         >
-          <Box sx={{ position: 'absolute', top: -13, left: '50%', transform: 'translateX(-50%)', display: 'inline-flex', alignItems: 'center', gap: 0.5, bgcolor: GOLD, color: '#1a1200', fontFamily: BODY, fontSize: '0.73rem', fontWeight: 600, px: 2, py: 0.4, borderRadius: '999px' }}>
+          <Box sx={{ position: 'absolute', top: -13, left: '50%', transform: 'translateX(-50%)', display: 'inline-flex', alignItems: 'center', gap: 0.5, bgcolor: GOLD, color: '#ffffff', fontFamily: BODY, fontSize: '0.73rem', fontWeight: 600, px: 2, py: 0.4, borderRadius: '999px' }}>
             POPULAIRE
           </Box>
 
@@ -164,9 +164,9 @@ const Pricing: React.FC = () => {
             component="a" href="https://atlas-studio.org/portal?app=taxpilot&plan=Cabinet10"
             sx={{
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1,
-              bgcolor: GOLD, color: '#1a1200 !important', fontWeight: 500, fontFamily: BODY,
+              bgcolor: GOLD, color: '#ffffff !important', fontWeight: 500, fontFamily: BODY,
               fontSize: '0.92rem', textDecoration: 'none', borderRadius: '8px', px: 3, py: 1.4, mb: 3,
-              transition: 'background 0.2s', '&:hover': { bgcolor: '#d4b35a' },
+              transition: 'background 0.2s', '&:hover': { bgcolor: '#115e59' },
             }}
           >
             Souscrire <ArrowForward sx={{ fontSize: 16 }} />
@@ -208,7 +208,7 @@ const Pricing: React.FC = () => {
               border: `1px solid ${BORDER}`, bgcolor: 'transparent',
               color: `${TEXT_PRIMARY} !important`, fontWeight: 500, fontFamily: BODY,
               fontSize: '0.92rem', textDecoration: 'none', borderRadius: '8px', px: 3, py: 1.4, mb: 3,
-              transition: 'all 0.2s', '&:hover': { borderColor: 'rgba(255,255,255,0.3)', bgcolor: 'rgba(255,255,255,0.03)' },
+              transition: 'all 0.2s', '&:hover': { borderColor: 'rgba(0,0,0,0.3)', bgcolor: 'rgba(0,0,0,0.03)' },
             }}
           >
             Souscrire <ArrowForward sx={{ fontSize: 16 }} />
@@ -245,7 +245,7 @@ const Pricing: React.FC = () => {
         }}
       >
         {/* Header row */}
-        <Box sx={{ display: 'flex', borderBottom: `1px solid ${BORDER}`, bgcolor: 'rgba(201,168,76,0.04)' }}>
+        <Box sx={{ display: 'flex', borderBottom: `1px solid ${BORDER}`, bgcolor: 'rgba(15,118,110,0.04)' }}>
           <Box sx={{ flex: 2.2, px: 3, py: 1.5, fontFamily: BODY, fontSize: '0.82rem', fontWeight: 600, color: TEXT_PRIMARY }}>Fonctionnalité</Box>
           <Box sx={{ flex: 1, px: 2, py: 1.5, fontFamily: BODY, fontSize: '0.82rem', fontWeight: 600, color: TEXT_PRIMARY, textAlign: 'center' }}>Entreprise</Box>
           <Box sx={{ flex: 1, px: 2, py: 1.5, fontFamily: BODY, fontSize: '0.82rem', fontWeight: 600, color: GOLD, textAlign: 'center' }}>Cabinet 10</Box>
@@ -267,7 +267,7 @@ const Pricing: React.FC = () => {
           </Box>
         ))}
         {/* Price row */}
-        <Box sx={{ display: 'flex', borderTop: `1px solid ${BORDER}`, bgcolor: 'rgba(201,168,76,0.04)' }}>
+        <Box sx={{ display: 'flex', borderTop: `1px solid ${BORDER}`, bgcolor: 'rgba(15,118,110,0.04)' }}>
           <Box sx={{ flex: 2.2, px: 3, py: 1.5, fontFamily: BODY, fontSize: '0.85rem', fontWeight: 600, color: TEXT_PRIMARY }}>Prix</Box>
           <Box sx={{ flex: 1, px: 2, py: 1.5, textAlign: 'center' }}>
             <Box sx={{ fontFamily: HEADING, fontWeight: 700, fontSize: '1.05rem', color: GOLD }}>{entreprisePrice.toLocaleString('fr-FR')}</Box>
@@ -297,9 +297,9 @@ const Pricing: React.FC = () => {
         component={RouterLink} to="/contact"
         sx={{
           display: 'inline-flex', alignItems: 'center', gap: 1,
-          bgcolor: GOLD, color: '#1a1200 !important', fontWeight: 500, fontFamily: BODY,
+          bgcolor: GOLD, color: '#ffffff !important', fontWeight: 500, fontFamily: BODY,
           fontSize: '0.95rem', textDecoration: 'none', borderRadius: '8px', px: 4, py: 1.6,
-          transition: 'background 0.2s', '&:hover': { bgcolor: '#d4b35a' },
+          transition: 'background 0.2s', '&:hover': { bgcolor: '#115e59' },
         }}
       >
         Contactez-nous <ArrowForward sx={{ fontSize: 16 }} />

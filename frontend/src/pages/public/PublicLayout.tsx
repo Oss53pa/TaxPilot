@@ -20,7 +20,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         color: `${TEXT_PRIMARY} !important`,
         fontFamily: BODY,
         '& *:not(style)': {
-          borderColor: 'rgba(255,255,255,0.07)',
+          borderColor: 'rgba(0,0,0,0.07)',
         },
       }}
     >

@@ -28,7 +28,7 @@ const shimmer = keyframes`
   100% { background-position: 200% center; }
 `
 const pulse = keyframes`
-  0%, 100% { box-shadow: 0 0 0 0 rgba(201,168,76,0.3); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(15,118,110,0.3); }
   50%      { box-shadow: 0 0 0 8px rgba(201,168,76,0); }
 `
 const countUp = keyframes`
@@ -122,7 +122,7 @@ const Landing: React.FC = () => {
               key={badge}
               sx={{
                 display: 'inline-flex', alignItems: 'center', gap: 0.6,
-                bgcolor: 'rgba(201,168,76,0.08)', border: '1px solid rgba(201,168,76,0.18)',
+                bgcolor: 'rgba(15,118,110,0.08)', border: '1px solid rgba(15,118,110,0.18)',
                 borderRadius: '999px', px: 2, py: 0.6,
                 opacity: 0,
                 animation: `${fadeUp} 0.6s cubic-bezier(0.22,1,0.36,1) ${0.1 + i * 0.12}s forwards`,
@@ -193,11 +193,11 @@ const Landing: React.FC = () => {
             component="a" href="https://atlas-studio.org/portal?app=taxpilot"
             sx={{
               display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 1,
-              bgcolor: GOLD, color: '#1a1200 !important', fontWeight: 500, fontFamily: BODY,
+              bgcolor: GOLD, color: '#ffffff !important', fontWeight: 500, fontFamily: BODY,
               fontSize: '0.92rem', textDecoration: 'none', borderRadius: '8px', px: 3.5, py: 1.5,
               transition: 'all 0.25s',
               animation: `${pulse} 2.5s ease 2s 3`,
-              '&:hover': { bgcolor: '#d4b35a', transform: 'translateY(-2px)' },
+              '&:hover': { bgcolor: '#115e59', transform: 'translateY(-2px)' },
             }}
           >
             Souscrire maintenant <ArrowForward sx={{ fontSize: 16 }} />
@@ -206,11 +206,11 @@ const Landing: React.FC = () => {
             component={RouterLink} to="/demo"
             sx={{
               display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 0.8,
-              border: '1px solid rgba(255,255,255,0.15)', bgcolor: 'transparent',
+              border: '1px solid rgba(0,0,0,0.15)', bgcolor: 'transparent',
               color: `${TEXT_PRIMARY} !important`, fontWeight: 400, fontFamily: BODY,
               fontSize: '0.92rem', textDecoration: 'none', borderRadius: '8px', px: 3.5, py: 1.5,
               transition: 'all 0.25s',
-              '&:hover': { borderColor: 'rgba(255,255,255,0.3)', bgcolor: 'rgba(255,255,255,0.03)', transform: 'translateY(-2px)' },
+              '&:hover': { borderColor: 'rgba(0,0,0,0.3)', bgcolor: 'rgba(0,0,0,0.03)', transform: 'translateY(-2px)' },
             }}
           >
             Voir la démo
@@ -222,7 +222,7 @@ const Landing: React.FC = () => {
 
         {/* Social proof */}
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1.2, opacity: 0, animation: `${fadeUp} 0.6s cubic-bezier(0.22,1,0.36,1) 1.1s forwards` }}>
-          <AvatarGroup max={4} sx={{ '& .MuiAvatar-root': { width: 30, height: 30, fontSize: '0.7rem', border: `2px solid ${DARK} !important`, bgcolor: `${GOLD} !important`, color: '#1a1200 !important', fontWeight: 700, fontFamily: BODY } }}>
+          <AvatarGroup max={4} sx={{ '& .MuiAvatar-root': { width: 30, height: 30, fontSize: '0.7rem', border: `2px solid ${DARK} !important`, bgcolor: `${GOLD} !important`, color: '#ffffff !important', fontWeight: 700, fontFamily: BODY } }}>
             <Avatar>AD</Avatar><Avatar>MC</Avatar><Avatar>IK</Avatar><Avatar>FN</Avatar>
           </AvatarGroup>
           <Box component="span" sx={{ fontSize: '0.82rem', color: TEXT_SECONDARY, fontFamily: BODY }}>
@@ -285,9 +285,9 @@ const Landing: React.FC = () => {
                   bgcolor: DARK_SURFACE,
                   transition: 'all 0.3s',
                   '&:hover': {
-                    borderColor: 'rgba(201,168,76,0.25)',
+                    borderColor: 'rgba(15,118,110,0.25)',
                     transform: 'translateX(6px)',
-                    bgcolor: 'rgba(201,168,76,0.04)',
+                    bgcolor: 'rgba(15,118,110,0.04)',
                   },
                 }}
               >
@@ -315,10 +315,10 @@ const Landing: React.FC = () => {
                   key={f}
                   sx={{
                     fontSize: '0.78rem', fontFamily: BODY, color: TEXT_SECONDARY,
-                    bgcolor: 'rgba(255,255,255,0.03)', border: `1px solid ${BORDER}`,
+                    bgcolor: 'rgba(0,0,0,0.03)', border: `1px solid ${BORDER}`,
                     borderRadius: '999px', px: 1.8, py: 0.4, opacity: 0.7,
                     transition: 'all 0.3s',
-                    '&:hover': { opacity: 1, borderColor: 'rgba(201,168,76,0.2)' },
+                    '&:hover': { opacity: 1, borderColor: 'rgba(15,118,110,0.2)' },
                   }}
                 >
                   {f}
@@ -482,7 +482,7 @@ const Landing: React.FC = () => {
                 width: '100%', maxWidth: 360, p: 3.5, borderRadius: '14px',
                 border: `1px solid ${BORDER}`, bgcolor: '#111111', textAlign: 'left',
                 transition: 'all 0.35s',
-                '&:hover': { borderColor: 'rgba(255,255,255,0.15)', transform: 'translateY(-4px)', boxShadow: '0 8px 30px rgba(0,0,0,0.3)' },
+                '&:hover': { borderColor: 'rgba(0,0,0,0.15)', transform: 'translateY(-4px)', boxShadow: '0 8px 30px rgba(0,0,0,0.3)' },
               }}
             >
               <Box sx={{ fontFamily: HEADING, fontWeight: 600, fontSize: '1.1rem', color: TEXT_PRIMARY, mb: 0.5 }}>Entreprise · 1 société</Box>
@@ -497,7 +497,7 @@ const Landing: React.FC = () => {
                   border: `1px solid ${BORDER}`, bgcolor: 'transparent',
                   color: `${TEXT_PRIMARY} !important`, fontWeight: 500, fontFamily: BODY,
                   fontSize: '0.9rem', textDecoration: 'none', borderRadius: '8px', px: 3, py: 1.3,
-                  transition: 'all 0.25s', '&:hover': { borderColor: 'rgba(255,255,255,0.3)', transform: 'translateY(-1px)' },
+                  transition: 'all 0.25s', '&:hover': { borderColor: 'rgba(0,0,0,0.3)', transform: 'translateY(-1px)' },
                 }}
               >
                 Souscrire <ArrowForward sx={{ fontSize: 16 }} />
@@ -512,10 +512,10 @@ const Landing: React.FC = () => {
                 width: '100%', maxWidth: 360, p: 3.5, borderRadius: '14px',
                 border: `2px solid ${GOLD}`, bgcolor: '#111111', textAlign: 'left', position: 'relative',
                 transition: 'all 0.35s',
-                '&:hover': { transform: 'translateY(-6px)', boxShadow: `0 8px 30px rgba(201,168,76,0.15)` },
+                '&:hover': { transform: 'translateY(-6px)', boxShadow: `0 8px 30px rgba(15,118,110,0.15)` },
               }}
             >
-              <Box sx={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', display: 'inline-flex', alignItems: 'center', gap: 0.5, bgcolor: GOLD, color: '#1a1200', fontFamily: BODY, fontSize: '0.72rem', fontWeight: 600, px: 1.8, py: 0.35, borderRadius: '999px' }}>
+              <Box sx={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', display: 'inline-flex', alignItems: 'center', gap: 0.5, bgcolor: GOLD, color: '#ffffff', fontFamily: BODY, fontSize: '0.72rem', fontWeight: 600, px: 1.8, py: 0.35, borderRadius: '999px' }}>
                 POPULAIRE
               </Box>
               <Box sx={{ fontFamily: HEADING, fontWeight: 600, fontSize: '1.1rem', color: TEXT_PRIMARY, mb: 0.5 }}>Cabinet · 10 dossiers</Box>
@@ -527,9 +527,9 @@ const Landing: React.FC = () => {
                 component="a" href="https://atlas-studio.org/portal?app=taxpilot&plan=Cabinet10"
                 sx={{
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mt: 2.5,
-                  bgcolor: GOLD, color: '#1a1200 !important', fontWeight: 500, fontFamily: BODY,
+                  bgcolor: GOLD, color: '#ffffff !important', fontWeight: 500, fontFamily: BODY,
                   fontSize: '0.9rem', textDecoration: 'none', borderRadius: '8px', px: 3, py: 1.3,
-                  transition: 'all 0.25s', '&:hover': { bgcolor: '#d4b35a', transform: 'translateY(-1px)' },
+                  transition: 'all 0.25s', '&:hover': { bgcolor: '#115e59', transform: 'translateY(-1px)' },
                 }}
               >
                 Souscrire <ArrowForward sx={{ fontSize: 16 }} />
@@ -544,7 +544,7 @@ const Landing: React.FC = () => {
                 width: '100%', maxWidth: 360, p: 3.5, borderRadius: '14px',
                 border: `1px solid ${BORDER}`, bgcolor: '#111111', textAlign: 'left',
                 transition: 'all 0.35s',
-                '&:hover': { borderColor: 'rgba(255,255,255,0.15)', transform: 'translateY(-4px)', boxShadow: '0 8px 30px rgba(0,0,0,0.3)' },
+                '&:hover': { borderColor: 'rgba(0,0,0,0.15)', transform: 'translateY(-4px)', boxShadow: '0 8px 30px rgba(0,0,0,0.3)' },
               }}
             >
               <Box sx={{ fontFamily: HEADING, fontWeight: 600, fontSize: '1.1rem', color: TEXT_PRIMARY, mb: 0.5 }}>Cabinet · illimité</Box>
@@ -559,7 +559,7 @@ const Landing: React.FC = () => {
                   border: `1px solid ${BORDER}`, bgcolor: 'transparent',
                   color: `${TEXT_PRIMARY} !important`, fontWeight: 500, fontFamily: BODY,
                   fontSize: '0.9rem', textDecoration: 'none', borderRadius: '8px', px: 3, py: 1.3,
-                  transition: 'all 0.25s', '&:hover': { borderColor: 'rgba(255,255,255,0.3)', transform: 'translateY(-1px)' },
+                  transition: 'all 0.25s', '&:hover': { borderColor: 'rgba(0,0,0,0.3)', transform: 'translateY(-1px)' },
                 }}
               >
                 Souscrire <ArrowForward sx={{ fontSize: 16 }} />
@@ -590,10 +590,10 @@ const Landing: React.FC = () => {
             component="a" href="https://atlas-studio.org/portal?app=taxpilot"
             sx={{
               display: 'inline-flex', alignItems: 'center', gap: 1,
-              bgcolor: GOLD, color: '#1a1200 !important', fontWeight: 500, fontFamily: BODY,
+              bgcolor: GOLD, color: '#ffffff !important', fontWeight: 500, fontFamily: BODY,
               fontSize: '0.95rem', textDecoration: 'none', borderRadius: '8px', px: 4, py: 1.6,
               transition: 'all 0.25s',
-              '&:hover': { bgcolor: '#d4b35a', transform: 'translateY(-2px)', boxShadow: '0 6px 20px rgba(201,168,76,0.25)' },
+              '&:hover': { bgcolor: '#115e59', transform: 'translateY(-2px)', boxShadow: '0 6px 20px rgba(15,118,110,0.25)' },
             }}
           >
             Commencer gratuitement <ArrowForward sx={{ fontSize: 16 }} />

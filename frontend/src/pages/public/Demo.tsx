@@ -77,7 +77,7 @@ const FakeWindowBar: React.FC<{ title: string }> = ({ title }) => (
 )
 
 const StatCard: React.FC<{ label: string; value: string; sub?: string; color?: string; icon?: React.ReactNode }> = ({ label, value, sub, color = GOLD, icon }) => (
-  <Box sx={{ flex: 1, p: 1.5, borderRadius: '8px', border: `1px solid ${BORDER}`, bgcolor: 'rgba(255,255,255,0.02)' }}>
+  <Box sx={{ flex: 1, p: 1.5, borderRadius: '8px', border: `1px solid ${BORDER}`, bgcolor: 'rgba(0,0,0,0.02)' }}>
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
       {icon}
       <Box sx={{ fontFamily: BODY, fontSize: '0.65rem', color: TEXT_SECONDARY, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</Box>
@@ -99,7 +99,7 @@ const DashboardScreen = () => (
       </Box>
       <Box sx={{ display: 'flex', gap: 1 }}>
         <Box sx={{ px: 1.5, py: 0.5, borderRadius: '6px', bgcolor: 'rgba(239,68,68,0.1)', fontFamily: BODY, fontSize: '0.7rem', color: '#ef4444', fontWeight: 600 }}>J-45</Box>
-        <Box sx={{ px: 1.5, py: 0.5, borderRadius: '6px', bgcolor: 'rgba(201,168,76,0.1)', fontFamily: BODY, fontSize: '0.7rem', color: GOLD }}>Système Normal</Box>
+        <Box sx={{ px: 1.5, py: 0.5, borderRadius: '6px', bgcolor: 'rgba(15,118,110,0.1)', fontFamily: BODY, fontSize: '0.7rem', color: GOLD }}>Système Normal</Box>
       </Box>
     </Box>
     {/* KPIs */}
@@ -116,8 +116,8 @@ const DashboardScreen = () => (
         {['Configuration', 'Import', 'Contrôle', 'Génération', 'Liasse'].map((step, i) => (
           <React.Fragment key={step}>
             <Box sx={{ flex: 1, textAlign: 'center' }}>
-              <Box sx={{ width: 22, height: 22, borderRadius: '50%', bgcolor: i < 3 ? '#22c55e' : i === 3 ? GOLD : 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', mx: 'auto', mb: 0.3 }}>
-                {i < 3 ? <CheckCircle sx={{ fontSize: 14, color: '#fff' }} /> : <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: i === 3 ? '#1a1200' : TEXT_SECONDARY }} />}
+              <Box sx={{ width: 22, height: 22, borderRadius: '50%', bgcolor: i < 3 ? '#22c55e' : i === 3 ? GOLD : 'rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', mx: 'auto', mb: 0.3 }}>
+                {i < 3 ? <CheckCircle sx={{ fontSize: 14, color: '#fff' }} /> : <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: i === 3 ? '#ffffff' : TEXT_SECONDARY }} />}
               </Box>
               <Box sx={{ fontFamily: BODY, fontSize: '0.6rem', color: i <= 3 ? TEXT_PRIMARY : TEXT_SECONDARY }}>{step}</Box>
             </Box>
@@ -151,25 +151,25 @@ const ImportScreen = () => (
     {/* Drag-drop zone */}
     <Box
       sx={{
-        border: `2px dashed rgba(201,168,76,0.3)`,
+        border: `2px dashed rgba(15,118,110,0.3)`,
         borderRadius: '12px',
         p: 3,
         textAlign: 'center',
         mb: 2,
-        bgcolor: 'rgba(201,168,76,0.03)',
+        bgcolor: 'rgba(15,118,110,0.03)',
         transition: 'border-color 0.3s',
       }}
     >
       <CloudUpload sx={{ fontSize: 36, color: GOLD, mb: 1 }} />
       <Box sx={{ fontFamily: BODY, fontSize: '0.82rem', color: TEXT_PRIMARY, mb: 0.5 }}>Glissez-déposez votre fichier ici</Box>
       <Box sx={{ fontFamily: BODY, fontSize: '0.68rem', color: TEXT_SECONDARY, mb: 1.5 }}>Excel (.xlsx, .xls), CSV, FEC</Box>
-      <Box sx={{ display: 'inline-block', px: 2, py: 0.6, borderRadius: '6px', bgcolor: GOLD, fontFamily: BODY, fontSize: '0.72rem', fontWeight: 600, color: '#1a1200' }}>
+      <Box sx={{ display: 'inline-block', px: 2, py: 0.6, borderRadius: '6px', bgcolor: GOLD, fontFamily: BODY, fontSize: '0.72rem', fontWeight: 600, color: '#ffffff' }}>
         Parcourir
       </Box>
     </Box>
     {/* File preview */}
-    <Box sx={{ borderRadius: '8px', border: `1px solid ${BORDER}`, bgcolor: 'rgba(255,255,255,0.02)', overflow: 'hidden' }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1.5, py: 0.8, borderBottom: `1px solid ${BORDER}`, bgcolor: 'rgba(201,168,76,0.04)' }}>
+    <Box sx={{ borderRadius: '8px', border: `1px solid ${BORDER}`, bgcolor: 'rgba(0,0,0,0.02)', overflow: 'hidden' }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1.5, py: 0.8, borderBottom: `1px solid ${BORDER}`, bgcolor: 'rgba(15,118,110,0.04)' }}>
         <Description sx={{ fontSize: 14, color: GOLD }} />
         <Box sx={{ fontFamily: BODY, fontSize: '0.7rem', color: TEXT_PRIMARY, fontWeight: 500 }}>balance_2025.xlsx</Box>
         <Box sx={{ fontFamily: BODY, fontSize: '0.62rem', color: '#22c55e', ml: 'auto' }}>245 comptes détectés</Box>
@@ -220,7 +220,7 @@ const BalanceScreen = () => (
     </Box>
     {/* Filters */}
     <Box sx={{ display: 'flex', gap: 0.8, mb: 1, alignItems: 'center' }}>
-      <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', gap: 0.5, px: 1, py: 0.5, borderRadius: '6px', border: `1px solid ${BORDER}`, bgcolor: 'rgba(255,255,255,0.02)' }}>
+      <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', gap: 0.5, px: 1, py: 0.5, borderRadius: '6px', border: `1px solid ${BORDER}`, bgcolor: 'rgba(0,0,0,0.02)' }}>
         <Search sx={{ fontSize: 14, color: TEXT_SECONDARY }} />
         <Box sx={{ fontFamily: BODY, fontSize: '0.65rem', color: TEXT_SECONDARY }}>Rechercher un compte…</Box>
       </Box>
@@ -231,17 +231,17 @@ const BalanceScreen = () => (
     </Box>
     {/* Table */}
     <Box sx={{ borderRadius: '8px', border: `1px solid ${BORDER}`, overflow: 'hidden' }}>
-      <Box sx={{ display: 'flex', bgcolor: 'rgba(201,168,76,0.04)', borderBottom: `1px solid ${BORDER}` }}>
+      <Box sx={{ display: 'flex', bgcolor: 'rgba(15,118,110,0.04)', borderBottom: `1px solid ${BORDER}` }}>
         {['Compte', 'Libellé', 'SD N-1', 'SC N-1', 'Mvt D', 'Mvt C', 'SD N', 'SC N'].map((h, i) => (
           <Box key={h} sx={{ flex: i === 1 ? 2.5 : 1, px: 0.8, py: 0.6, fontFamily: BODY, fontSize: '0.58rem', fontWeight: 600, color: TEXT_SECONDARY, textAlign: i > 1 ? 'right' : 'left', textTransform: 'uppercase' }}>{h}</Box>
         ))}
       </Box>
       {MOCK_BALANCE.map((row, idx) => (
-        <Box key={row.compte} sx={{ display: 'flex', borderBottom: idx < MOCK_BALANCE.length - 1 ? `1px solid ${BORDER}` : 'none', '&:hover': { bgcolor: 'rgba(201,168,76,0.03)' } }}>
+        <Box key={row.compte} sx={{ display: 'flex', borderBottom: idx < MOCK_BALANCE.length - 1 ? `1px solid ${BORDER}` : 'none', '&:hover': { bgcolor: 'rgba(15,118,110,0.03)' } }}>
           <Box sx={{ flex: 1, px: 0.8, py: 0.5, fontFamily: '"JetBrains Mono", monospace', fontSize: '0.6rem', color: GOLD }}>{row.compte}</Box>
           <Box sx={{ flex: 2.5, px: 0.8, py: 0.5, fontFamily: BODY, fontSize: '0.6rem', color: TEXT_PRIMARY }}>{row.libelle}</Box>
           {[row.sdN1, row.scN1, row.mvtD, row.mvtC, row.sdN, row.scN].map((v, i) => (
-            <Box key={i} sx={{ flex: 1, px: 0.8, py: 0.5, fontFamily: '"JetBrains Mono", monospace', fontSize: '0.58rem', color: v ? TEXT_SECONDARY : 'rgba(255,255,255,0.15)', textAlign: 'right' }}>{v || '—'}</Box>
+            <Box key={i} sx={{ flex: 1, px: 0.8, py: 0.5, fontFamily: '"JetBrains Mono", monospace', fontSize: '0.58rem', color: v ? TEXT_SECONDARY : 'rgba(0,0,0,0.15)', textAlign: 'right' }}>{v || '—'}</Box>
           ))}
         </Box>
       ))}
@@ -256,7 +256,7 @@ const AuditScreen = () => (
         <Box sx={{ fontFamily: HEADING, fontWeight: 600, fontSize: '0.95rem', color: TEXT_PRIMARY }}>Audit & Contrôles Proph3t</Box>
         <Box sx={{ fontFamily: BODY, fontSize: '0.68rem', color: TEXT_SECONDARY }}>169 contrôles de cohérence — SYSCOHADA Révisé</Box>
       </Box>
-      <Box sx={{ px: 1.5, py: 0.5, borderRadius: '6px', bgcolor: GOLD, fontFamily: BODY, fontSize: '0.68rem', fontWeight: 600, color: '#1a1200' }}>
+      <Box sx={{ px: 1.5, py: 0.5, borderRadius: '6px', bgcolor: GOLD, fontFamily: BODY, fontSize: '0.68rem', fontWeight: 600, color: '#ffffff' }}>
         Lancer l'audit
       </Box>
     </Box>
@@ -269,7 +269,7 @@ const AuditScreen = () => (
         { label: 'Info', value: '12', color: TEXT_SECONDARY },
         { label: 'Score', value: '96%', color: '#22c55e' },
       ].map((m) => (
-        <Box key={m.label} sx={{ flex: 1, p: 1.2, borderRadius: '8px', border: `1px solid ${BORDER}`, bgcolor: 'rgba(255,255,255,0.02)', textAlign: 'center' }}>
+        <Box key={m.label} sx={{ flex: 1, p: 1.2, borderRadius: '8px', border: `1px solid ${BORDER}`, bgcolor: 'rgba(0,0,0,0.02)', textAlign: 'center' }}>
           <Box sx={{ fontFamily: HEADING, fontWeight: 700, fontSize: '1.2rem', color: m.color, lineHeight: 1 }}>{m.value}</Box>
           <Box sx={{ fontFamily: BODY, fontSize: '0.6rem', color: TEXT_SECONDARY, mt: 0.3 }}>{m.label}</Box>
         </Box>
@@ -286,7 +286,7 @@ const AuditScreen = () => (
         <Box sx={{ fontFamily: BODY, fontSize: '0.65rem', color: TEXT_SECONDARY }}>Score de conformité</Box>
         <Box sx={{ fontFamily: HEADING, fontSize: '0.72rem', fontWeight: 700, color: '#22c55e' }}>96%</Box>
       </Box>
-      <Box sx={{ height: 6, borderRadius: 3, bgcolor: 'rgba(255,255,255,0.05)', overflow: 'hidden' }}>
+      <Box sx={{ height: 6, borderRadius: 3, bgcolor: 'rgba(0,0,0,0.05)', overflow: 'hidden' }}>
         <Box sx={{ width: '96%', height: '100%', borderRadius: 3, background: 'linear-gradient(90deg, #22c55e, #16a34a)' }} />
       </Box>
       <Box sx={{ fontFamily: BODY, fontSize: '0.6rem', color: TEXT_SECONDARY, mt: 0.3 }}>169 contrôles exécutés | 162 OK / 7 anomalies</Box>
@@ -301,7 +301,7 @@ const AuditScreen = () => (
           }
           <Box sx={{ fontFamily: '"JetBrains Mono", monospace', fontSize: '0.6rem', color: GOLD, minWidth: 36 }}>{c.id}</Box>
           <Box sx={{ flex: 1, fontFamily: BODY, fontSize: '0.65rem', color: TEXT_PRIMARY }}>{c.label}</Box>
-          <Box sx={{ fontFamily: BODY, fontSize: '0.58rem', color: TEXT_SECONDARY, px: 0.8, py: 0.2, borderRadius: '4px', bgcolor: 'rgba(255,255,255,0.04)' }}>{c.niveau}</Box>
+          <Box sx={{ fontFamily: BODY, fontSize: '0.58rem', color: TEXT_SECONDARY, px: 0.8, py: 0.2, borderRadius: '4px', bgcolor: 'rgba(0,0,0,0.04)' }}>{c.niveau}</Box>
         </Box>
       ))}
     </Box>
@@ -322,9 +322,9 @@ const LiasseScreen = () => {
             sx={{
               px: 1, py: 0.6, fontFamily: BODY, fontSize: '0.6rem',
               color: i === page ? GOLD : TEXT_SECONDARY,
-              bgcolor: i === page ? 'rgba(201,168,76,0.08)' : 'transparent',
+              bgcolor: i === page ? 'rgba(15,118,110,0.08)' : 'transparent',
               cursor: 'pointer', borderLeft: i === page ? `2px solid ${GOLD}` : '2px solid transparent',
-              '&:hover': { bgcolor: 'rgba(255,255,255,0.03)' },
+              '&:hover': { bgcolor: 'rgba(0,0,0,0.03)' },
             }}
           >
             {p}
@@ -395,9 +395,9 @@ const ExportScreen = () => (
           sx={{
             display: 'flex', gap: 1.5, p: 1.8,
             borderRadius: '10px', border: `1px solid ${BORDER}`,
-            bgcolor: 'rgba(255,255,255,0.02)',
+            bgcolor: 'rgba(0,0,0,0.02)',
             transition: 'border-color 0.2s',
-            '&:hover': { borderColor: 'rgba(201,168,76,0.2)' },
+            '&:hover': { borderColor: 'rgba(15,118,110,0.2)' },
           }}
         >
           <Box sx={{ mt: 0.2 }}>{opt.icon}</Box>
@@ -410,12 +410,12 @@ const ExportScreen = () => (
       ))}
     </Box>
     {/* Progress simulation */}
-    <Box sx={{ mt: 2.5, p: 1.5, borderRadius: '8px', border: `1px solid ${BORDER}`, bgcolor: 'rgba(201,168,76,0.04)' }}>
+    <Box sx={{ mt: 2.5, p: 1.5, borderRadius: '8px', border: `1px solid ${BORDER}`, bgcolor: 'rgba(15,118,110,0.04)' }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
         <Box sx={{ fontFamily: BODY, fontSize: '0.7rem', color: TEXT_PRIMARY }}>Export Excel Mode A en cours…</Box>
         <Box sx={{ fontFamily: BODY, fontSize: '0.7rem', fontWeight: 600, color: GOLD }}>67%</Box>
       </Box>
-      <Box sx={{ height: 4, borderRadius: 2, bgcolor: 'rgba(255,255,255,0.05)', overflow: 'hidden' }}>
+      <Box sx={{ height: 4, borderRadius: 2, bgcolor: 'rgba(0,0,0,0.05)', overflow: 'hidden' }}>
         <Box sx={{ width: '67%', height: '100%', borderRadius: 2, bgcolor: GOLD, transition: 'width 1s' }} />
       </Box>
       <Box sx={{ fontFamily: BODY, fontSize: '0.6rem', color: TEXT_SECONDARY, mt: 0.5 }}>56 / 84 onglets traités</Box>
@@ -466,12 +466,12 @@ const Demo: React.FC = () => {
                 fontFamily: BODY,
                 fontSize: '0.78rem',
                 fontWeight: i === step ? 600 : 400,
-                color: i === step ? '#1a1200' : TEXT_SECONDARY,
-                bgcolor: i === step ? GOLD : 'rgba(255,255,255,0.04)',
+                color: i === step ? '#ffffff' : TEXT_SECONDARY,
+                bgcolor: i === step ? GOLD : 'rgba(0,0,0,0.04)',
                 border: `1px solid ${i === step ? GOLD : BORDER}`,
                 cursor: 'pointer',
                 transition: 'all 0.2s',
-                '&:hover': i !== step ? { borderColor: 'rgba(255,255,255,0.15)' } : {},
+                '&:hover': i !== step ? { borderColor: 'rgba(0,0,0,0.15)' } : {},
               }}
             >
               {i + 1}. {s.title}
@@ -488,7 +488,7 @@ const Demo: React.FC = () => {
             <Box sx={{ position: 'sticky', top: 80 }}>
               {/* Step indicator */}
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                <Box sx={{ width: 32, height: 32, borderRadius: '50%', bgcolor: GOLD, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: HEADING, fontWeight: 700, fontSize: '0.85rem', color: '#1a1200' }}>
+                <Box sx={{ width: 32, height: 32, borderRadius: '50%', bgcolor: GOLD, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: HEADING, fontWeight: 700, fontSize: '0.85rem', color: '#ffffff' }}>
                   {step + 1}
                 </Box>
                 <Box sx={{ fontFamily: BODY, fontSize: '0.78rem', color: GOLD, fontWeight: 500 }}>{current.subtitle}</Box>
@@ -516,7 +516,7 @@ const Demo: React.FC = () => {
                     cursor: step > 0 ? 'pointer' : 'default',
                     opacity: step > 0 ? 1 : 0.3,
                     transition: 'all 0.2s',
-                    '&:hover': step > 0 ? { borderColor: 'rgba(255,255,255,0.2)' } : {},
+                    '&:hover': step > 0 ? { borderColor: 'rgba(0,0,0,0.2)' } : {},
                   }}
                 >
                   <ArrowBack sx={{ fontSize: 16 }} /> Précédent
@@ -530,12 +530,12 @@ const Demo: React.FC = () => {
                     bgcolor: step < tourSteps.length - 1 ? GOLD : 'transparent',
                     border: step < tourSteps.length - 1 ? 'none' : `1px solid ${BORDER}`,
                     fontFamily: BODY, fontSize: '0.82rem',
-                    color: step < tourSteps.length - 1 ? '#1a1200' : TEXT_SECONDARY,
+                    color: step < tourSteps.length - 1 ? '#ffffff' : TEXT_SECONDARY,
                     cursor: step < tourSteps.length - 1 ? 'pointer' : 'default',
                     opacity: step < tourSteps.length - 1 ? 1 : 0.3,
                     fontWeight: 500,
                     transition: 'all 0.2s',
-                    '&:hover': step < tourSteps.length - 1 ? { bgcolor: '#d4b35a' } : {},
+                    '&:hover': step < tourSteps.length - 1 ? { bgcolor: '#115e59' } : {},
                   }}
                 >
                   Suivant <ArrowForward sx={{ fontSize: 16 }} />
@@ -545,7 +545,7 @@ const Demo: React.FC = () => {
               {/* Progress */}
               <Box sx={{ mt: 3, display: 'flex', gap: 0.5 }}>
                 {tourSteps.map((_, i) => (
-                  <Box key={i} sx={{ flex: 1, height: 3, borderRadius: 2, bgcolor: i <= step ? GOLD : 'rgba(255,255,255,0.08)', transition: 'background 0.3s' }} />
+                  <Box key={i} sx={{ flex: 1, height: 3, borderRadius: 2, bgcolor: i <= step ? GOLD : 'rgba(0,0,0,0.08)', transition: 'background 0.3s' }} />
                 ))}
               </Box>
             </Box>
@@ -584,9 +584,9 @@ const Demo: React.FC = () => {
             component="a" href="https://atlas-studio.org/portal?app=taxpilot"
             sx={{
               display: 'inline-flex', alignItems: 'center', gap: 1,
-              bgcolor: GOLD, color: '#1a1200 !important', fontWeight: 500, fontFamily: BODY,
+              bgcolor: GOLD, color: '#ffffff !important', fontWeight: 500, fontFamily: BODY,
               fontSize: '0.95rem', textDecoration: 'none', borderRadius: '8px', px: 4, py: 1.6,
-              transition: 'background 0.2s', '&:hover': { bgcolor: '#d4b35a' },
+              transition: 'background 0.2s', '&:hover': { bgcolor: '#115e59' },
             }}
           >
             Commencer gratuitement <ArrowForward sx={{ fontSize: 16 }} />
@@ -595,10 +595,10 @@ const Demo: React.FC = () => {
             component={RouterLink} to="/contact"
             sx={{
               display: 'inline-flex', alignItems: 'center', gap: 1,
-              border: `1px solid rgba(255,255,255,0.15)`, bgcolor: 'transparent',
+              border: `1px solid rgba(0,0,0,0.15)`, bgcolor: 'transparent',
               color: `${TEXT_PRIMARY} !important`, fontWeight: 400, fontFamily: BODY,
               fontSize: '0.95rem', textDecoration: 'none', borderRadius: '8px', px: 4, py: 1.6,
-              transition: 'all 0.2s', '&:hover': { borderColor: 'rgba(255,255,255,0.3)' },
+              transition: 'all 0.2s', '&:hover': { borderColor: 'rgba(0,0,0,0.3)' },
             }}
           >
             Demander une démo privée

@@ -113,9 +113,9 @@ const About: React.FC = () => (
         component="a" href="https://atlas-studio.org/portal?app=taxpilot"
         sx={{
           display: 'inline-flex', alignItems: 'center', gap: 1,
-          bgcolor: `${GOLD} !important`, color: '#1a1200 !important', fontWeight: 500, fontFamily: BODY,
+          bgcolor: `${GOLD} !important`, color: '#ffffff !important', fontWeight: 500, fontFamily: BODY,
           fontSize: '0.95rem', textDecoration: 'none', borderRadius: '8px', px: 4, py: 1.6,
-          transition: 'all 0.25s', '&:hover': { bgcolor: '#d4b35a !important', transform: 'translateY(-2px)' },
+          transition: 'all 0.25s', '&:hover': { bgcolor: '#115e59 !important', transform: 'translateY(-2px)' },
         }}
       >
         Souscrire maintenant <ArrowForward sx={{ fontSize: 16 }} />

@@ -119,7 +119,7 @@ const Modules: React.FC = () => (
               border: `1px solid ${BORDER}`,
               bgcolor: `${DARK_SURFACE} !important`,
               transition: 'all 0.25s',
-              '&:hover': { borderColor: 'rgba(201,168,76,0.25)', transform: 'translateY(-2px)' },
+              '&:hover': { borderColor: 'rgba(15,118,110,0.25)', transform: 'translateY(-2px)' },
             }}
           >
             <Box sx={{ color: `${GOLD} !important`, mt: 0.2, flexShrink: 0, '& .MuiSvgIcon-root': { fontSize: 20 } }}>
@@ -179,7 +179,7 @@ const Modules: React.FC = () => (
                 sx={{
                   borderRadius: '12px',
                   overflow: 'hidden',
-                  border: `1px solid rgba(255,255,255,0.1)`,
+                  border: `1px solid rgba(0,0,0,0.1)`,
                   boxShadow: '0 8px 40px rgba(0,0,0,0.4)',
                   bgcolor: `${DARK} !important`,
                 }}
@@ -219,7 +219,7 @@ const Modules: React.FC = () => (
             'XML télédéclaration (DSF, DAS, TVA, IS)',
             'Audit trail & workflow de validation',
           ].map((f) => (
-            <Box key={f} sx={{ fontSize: '0.85rem', fontFamily: BODY, color: `${TEXT_SECONDARY} !important`, bgcolor: 'rgba(255,255,255,0.03)', border: `1px solid ${BORDER}`, borderRadius: '999px', px: 2, py: 0.6 }}>
+            <Box key={f} sx={{ fontSize: '0.85rem', fontFamily: BODY, color: `${TEXT_SECONDARY} !important`, bgcolor: 'rgba(0,0,0,0.03)', border: `1px solid ${BORDER}`, borderRadius: '999px', px: 2, py: 0.6 }}>
               {f}
             </Box>
           ))}
@@ -240,9 +240,9 @@ const Modules: React.FC = () => (
           component="a" href="https://atlas-studio.org/portal?app=taxpilot"
           sx={{
             display: 'inline-flex', alignItems: 'center', gap: 1,
-            bgcolor: `${GOLD} !important`, color: '#1a1200 !important', fontWeight: 500, fontFamily: BODY,
+            bgcolor: `${GOLD} !important`, color: '#ffffff !important', fontWeight: 500, fontFamily: BODY,
             fontSize: '0.95rem', textDecoration: 'none', borderRadius: '8px', px: 4, py: 1.6,
-            transition: 'all 0.25s', '&:hover': { bgcolor: '#d4b35a !important', transform: 'translateY(-2px)' },
+            transition: 'all 0.25s', '&:hover': { bgcolor: '#115e59 !important', transform: 'translateY(-2px)' },
           }}
         >
           Commencer gratuitement <ArrowForward sx={{ fontSize: 16 }} />
@@ -251,10 +251,10 @@ const Modules: React.FC = () => (
           component={RouterLink} to="/demo"
           sx={{
             display: 'inline-flex', alignItems: 'center', gap: 1,
-            border: '1px solid rgba(255,255,255,0.15)', bgcolor: 'transparent',
+            border: '1px solid rgba(0,0,0,0.15)', bgcolor: 'transparent',
             color: `${TEXT_PRIMARY} !important`, fontWeight: 400, fontFamily: BODY,
             fontSize: '0.95rem', textDecoration: 'none', borderRadius: '8px', px: 4, py: 1.6,
-            transition: 'all 0.25s', '&:hover': { borderColor: 'rgba(255,255,255,0.3)', transform: 'translateY(-2px)' },
+            transition: 'all 0.25s', '&:hover': { borderColor: 'rgba(0,0,0,0.3)', transform: 'translateY(-2px)' },
           }}
         >
           Voir la démo

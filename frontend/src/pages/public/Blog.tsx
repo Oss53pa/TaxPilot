@@ -78,7 +78,7 @@ const Blog: React.FC = () => (
               flexDirection: 'column',
               transition: 'all 0.25s',
               cursor: 'pointer',
-              '&:hover': { borderColor: 'rgba(201,168,76,0.25)', transform: 'translateY(-3px)' },
+              '&:hover': { borderColor: 'rgba(15,118,110,0.25)', transform: 'translateY(-3px)' },
             }}
           >
             {/* Meta */}
@@ -91,8 +91,8 @@ const Blog: React.FC = () => (
                 sx={{
                   fontFamily: BODY, fontSize: '0.72rem', fontWeight: 600,
                   color: `${GOLD} !important`,
-                  bgcolor: 'rgba(201,168,76,0.08)',
-                  border: '1px solid rgba(201,168,76,0.15)',
+                  bgcolor: 'rgba(15,118,110,0.08)',
+                  border: '1px solid rgba(15,118,110,0.15)',
                   borderRadius: '999px', px: 1.2, py: 0.2,
                 }}
               >
@@ -134,9 +134,9 @@ const Blog: React.FC = () => (
         component="a" href="https://atlas-studio.org/portal?app=taxpilot"
         sx={{
           display: 'inline-flex', alignItems: 'center', gap: 1,
-          bgcolor: `${GOLD} !important`, color: '#1a1200 !important', fontWeight: 500, fontFamily: BODY,
+          bgcolor: `${GOLD} !important`, color: '#ffffff !important', fontWeight: 500, fontFamily: BODY,
           fontSize: '0.95rem', textDecoration: 'none', borderRadius: '8px', px: 4, py: 1.6,
-          transition: 'all 0.25s', '&:hover': { bgcolor: '#d4b35a !important', transform: 'translateY(-2px)' },
+          transition: 'all 0.25s', '&:hover': { bgcolor: '#115e59 !important', transform: 'translateY(-2px)' },
         }}
       >
         S'inscrire <ArrowForward sx={{ fontSize: 16 }} />

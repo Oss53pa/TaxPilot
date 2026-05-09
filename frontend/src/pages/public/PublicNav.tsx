@@ -111,7 +111,7 @@ const PublicNav: React.FC = () => {
           sx={{
             display: 'inline-block',
             bgcolor: `${GOLD} !important`,
-            color: '#1a1200 !important',
+            color: '#ffffff !important',
             fontWeight: 600,
             fontFamily: BODY,
             fontSize: '0.82rem',
@@ -121,7 +121,7 @@ const PublicNav: React.FC = () => {
             py: 0.8,
             lineHeight: 1.5,
             transition: 'background 0.2s',
-            '&:hover': { bgcolor: '#d4b35a !important' },
+            '&:hover': { bgcolor: '#115e59 !important' },
           }}
         >
           Souscrire
@@ -174,7 +174,7 @@ const PublicNav: React.FC = () => {
                 px: 2.5,
                 py: 1.5,
                 borderLeft: location.pathname === link.to ? `3px solid ${GOLD}` : '3px solid transparent',
-                '&:hover': { bgcolor: 'rgba(255,255,255,0.04)' },
+                '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' },
               }}
             >
               {link.label}
@@ -207,7 +207,7 @@ const PublicNav: React.FC = () => {
             sx={{
               display: 'block',
               bgcolor: `${GOLD} !important`,
-              color: '#1a1200 !important',
+              color: '#ffffff !important',
               fontWeight: 600,
               fontFamily: BODY,
               fontSize: '0.88rem',
@@ -215,7 +215,7 @@ const PublicNav: React.FC = () => {
               borderRadius: '6px',
               py: 1.1,
               textAlign: 'center',
-              '&:hover': { bgcolor: '#d4b35a !important' },
+              '&:hover': { bgcolor: '#115e59 !important' },
             }}
           >
             Souscrire

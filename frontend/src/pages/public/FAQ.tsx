@@ -84,7 +84,7 @@ const Item: React.FC<{ q: string; a: string }> = ({ q, a }) => {
             height: 28,
             borderRadius: '50%',
             border: `1px solid ${open ? GOLD : BORDER}`,
-            bgcolor: open ? 'rgba(201,168,76,0.1)' : 'transparent',
+            bgcolor: open ? 'rgba(15,118,110,0.1)' : 'transparent',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -201,7 +201,7 @@ const FAQ: React.FC = () => {
                     fontFamily: BODY,
                     fontSize: '0.85rem',
                     fontWeight: i === activeIdx ? 600 : 400,
-                    color: i === activeIdx ? '#1a1200' : TEXT_SECONDARY,
+                    color: i === activeIdx ? '#ffffff' : TEXT_SECONDARY,
                     bgcolor: i === activeIdx ? GOLD : DARK_SURFACE,
                     cursor: 'pointer',
                     whiteSpace: 'nowrap',
@@ -233,11 +233,11 @@ const FAQ: React.FC = () => {
                     fontSize: '0.92rem',
                     fontWeight: i === activeIdx ? 600 : 400,
                     color: i === activeIdx ? GOLD : TEXT_SECONDARY,
-                    bgcolor: i === activeIdx ? 'rgba(201,168,76,0.06)' : 'transparent',
+                    bgcolor: i === activeIdx ? 'rgba(15,118,110,0.06)' : 'transparent',
                     borderLeft: i === activeIdx ? `3px solid ${GOLD}` : '3px solid transparent',
                     cursor: 'pointer',
                     transition: 'all 0.2s',
-                    '&:hover': i !== activeIdx ? { color: TEXT_PRIMARY, bgcolor: 'rgba(255,255,255,0.02)' } : {},
+                    '&:hover': i !== activeIdx ? { color: TEXT_PRIMARY, bgcolor: 'rgba(0,0,0,0.02)' } : {},
                   }}
                 >
                   {sec.title}
@@ -247,7 +247,7 @@ const FAQ: React.FC = () => {
                       ml: 1,
                       fontWeight: 400,
                       fontSize: '0.78rem',
-                      color: i === activeIdx ? 'rgba(201,168,76,0.6)' : 'rgba(255,255,255,0.2)',
+                      color: i === activeIdx ? 'rgba(15,118,110,0.6)' : 'rgba(0,0,0,0.2)',
                     }}
                   >
                     {sec.items.length}
@@ -337,7 +337,7 @@ const FAQ: React.FC = () => {
               alignItems: 'center',
               gap: 1,
               bgcolor: GOLD,
-              color: '#1a1200 !important',
+              color: '#ffffff !important',
               fontWeight: 500,
               fontFamily: BODY,
               fontSize: '0.95rem',
@@ -346,7 +346,7 @@ const FAQ: React.FC = () => {
               px: 4,
               py: 1.6,
               transition: 'all 0.25s',
-              '&:hover': { bgcolor: '#d4b35a', transform: 'translateY(-2px)' },
+              '&:hover': { bgcolor: '#115e59', transform: 'translateY(-2px)' },
             }}
           >
             Nous contacter <ArrowForward sx={{ fontSize: 16 }} />
@@ -358,7 +358,7 @@ const FAQ: React.FC = () => {
               display: 'inline-flex',
               alignItems: 'center',
               gap: 1,
-              border: '1px solid rgba(255,255,255,0.15)',
+              border: '1px solid rgba(0,0,0,0.15)',
               bgcolor: 'transparent',
               color: `${TEXT_PRIMARY} !important`,
               fontWeight: 400,
@@ -369,7 +369,7 @@ const FAQ: React.FC = () => {
               px: 4,
               py: 1.6,
               transition: 'all 0.25s',
-              '&:hover': { borderColor: 'rgba(255,255,255,0.3)', transform: 'translateY(-2px)' },
+              '&:hover': { borderColor: 'rgba(0,0,0,0.3)', transform: 'translateY(-2px)' },
             }}
           >
             Souscrire
