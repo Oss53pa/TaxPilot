@@ -3,9 +3,22 @@ export interface AtlasStudioClaims {
   email: string;
   fullName: string;
   appId: string;
+  /** Plan acheté côté Atlas Studio (ex: "entreprise", "cabinet_10", "cabinet_unlimited") */
   plan: string;
+  /** Type de profil dérivé du plan ("entreprise" | "cabinet") — optionnel, fallback dérivé de `plan` */
+  userType?: 'entreprise' | 'cabinet';
   iat: number;
   exp: number;
+}
+
+/**
+ * Dérive le user_type Liass'Pilot à partir du plan Atlas Studio.
+ * - Tout plan dont l'identifiant commence par "cabinet" → cabinet
+ * - Sinon → entreprise (default safe fallback)
+ */
+export function userTypeFromPlan(plan: string | undefined): 'entreprise' | 'cabinet' {
+  if (!plan) return 'entreprise';
+  return plan.toLowerCase().startsWith('cabinet') ? 'cabinet' : 'entreprise';
 }
 
 function base64UrlDecode(str: string): Uint8Array {

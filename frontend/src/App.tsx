@@ -145,13 +145,25 @@ function purgeSeedData() {
 }
 
 function App() {
-  const { initialize, isAuthenticated } = useAuthStore()
-  const { userMode, onboardingCompleted } = useModeStore()
+  const { initialize, isAuthenticated, user } = useAuthStore()
+  const { userMode: storedMode, onboardingCompleted, setUserMode } = useModeStore()
 
   React.useEffect(() => {
     initialize()
     purgeSeedData()
   }, [initialize])
+
+  // Source de vérité: profiles.user_type Supabase (défini à l'achat via Atlas Studio).
+  // Si présent, on hydrate le modeStore local pour rester rétro-compat avec les composants
+  // qui consomment encore useModeStore. Sinon (legacy/edge cases), on retombe sur le store local.
+  React.useEffect(() => {
+    if (user?.userType && user.userType !== storedMode) {
+      setUserMode(user.userType)
+    }
+  }, [user?.userType, storedMode, setUserMode])
+
+  // userMode effectif = Supabase d'abord, store local en fallback (auto-hydraté au login)
+  const userMode = user?.userType ?? storedMode
 
   return (
     <ErrorBoundary>

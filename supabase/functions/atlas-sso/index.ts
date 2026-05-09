@@ -4,7 +4,7 @@
  * Supabase user + profile. Returns a magic link token_hash.
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { verifyAtlasJWT } from "../_shared/jwt.ts";
+import { verifyAtlasJWT, userTypeFromPlan } from "../_shared/jwt.ts";
 import { getCorsHeaders, jsonResponse, errorResponse } from "../_shared/cors.ts";
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -24,6 +24,9 @@ Deno.serve(async (req) => {
 
     const claims = await verifyAtlasJWT(token, jwtSecret);
 
+    // user_type prioritaire: claim explicite du JWT, sinon dérivé du plan acheté côté Atlas Studio
+    const userType = claims.userType ?? userTypeFromPlan(claims.plan);
+
     const supabase = createClient(supabaseUrl, supabaseServiceKey, {
       auth: { autoRefreshToken: false, persistSession: false },
     });
@@ -42,7 +45,7 @@ Deno.serve(async (req) => {
           atlas_plan: claims.plan,
           first_name: claims.fullName.split(" ")[0],
           last_name: claims.fullName.split(" ").slice(1).join(" "),
-          user_type: "entreprise",
+          user_type: userType,
         },
       });
     } else {
@@ -57,7 +60,7 @@ Deno.serve(async (req) => {
           atlas_plan: claims.plan,
           first_name: claims.fullName.split(" ")[0],
           last_name: claims.fullName.split(" ").slice(1).join(" "),
-          user_type: "entreprise",
+          user_type: userType,
         },
       });
 
@@ -78,9 +81,18 @@ Deno.serve(async (req) => {
     if (!existingProfile) {
       await supabase.from("profiles").insert({
         id: userId,
-        user_type: "entreprise",
-        nom_entreprise: claims.fullName,
+        user_type: userType,
+        ...(userType === 'cabinet'
+          ? { nom_cabinet: claims.fullName }
+          : { nom_entreprise: claims.fullName }),
       });
+    } else {
+      // Profil existant: on synchronise user_type avec le plan courant Atlas Studio
+      // (cas: upgrade Entreprise -> Cabinet ou downgrade)
+      await supabase
+        .from('profiles')
+        .update({ user_type: userType })
+        .eq('id', userId);
     }
 
     // Generate magic link

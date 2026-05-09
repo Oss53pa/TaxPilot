@@ -290,7 +290,7 @@ const GuidedTour: React.FC<GuidedTourProps> = ({ open, onClose }) => {
       <Box style={tooltipStyle} onClick={(e) => e.stopPropagation()}>
         <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 1.5 }}>
           <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-            \u00c9TAPE {stepIndex + 1} / {TOUR_STEPS.length}
+            ÉTAPE {stepIndex + 1} / {TOUR_STEPS.length}
           </Typography>
           <IconButton size="small" onClick={handleSkip} sx={{ mt: -1, mr: -1 }}>
             <CloseIcon fontSize="small" />
