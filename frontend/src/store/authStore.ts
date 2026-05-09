@@ -35,14 +35,45 @@ interface AuthState {
 
 function mapSupabaseUser(user: SupabaseUser): AppUser {
   const meta = user.user_metadata || {}
+  // Source de vérité: meta.account_type (aligné sur profiles.account_type Supabase,
+  // posé par l'edge function atlas-sso à chaque SSO depuis Atlas Studio).
+  // Fallback meta.user_type pour rétrocompat avec d'anciens tokens.
+  const accountType = meta.account_type || meta.user_type
+  const userType: 'entreprise' | 'cabinet' =
+    accountType === 'cabinet' || accountType === 'entreprise' ? accountType : 'entreprise'
   return {
     id: user.id,
     email: user.email || '',
     firstName: meta.first_name || '',
     lastName: meta.last_name || '',
-    userType: meta.user_type || 'entreprise',
+    userType,
     avatarUrl: meta.avatar_url,
   }
+}
+
+/**
+ * Fallback: pour un user existant en BDD mais dont user_metadata ne contient pas
+ * account_type (ex: profil créé avant le déploiement de l'edge function corrigée),
+ * on lit profiles.account_type directement et on enrichit l'AppUser.
+ */
+async function hydrateAccountTypeFromProfile(
+  baseUser: AppUser,
+  client: NonNullable<typeof supabase>
+): Promise<AppUser> {
+  try {
+    const { data, error } = await client
+      .from('profiles')
+      .select('account_type')
+      .eq('id', baseUser.id)
+      .maybeSingle()
+    if (error || !data?.account_type) return baseUser
+    if (data.account_type === 'cabinet' || data.account_type === 'entreprise') {
+      return { ...baseUser, userType: data.account_type }
+    }
+  } catch {
+    // Silencieux: on garde le fallback 'entreprise' du mapper
+  }
+  return baseUser
 }
 
 export const useAuthStore = create<AuthState>()((set, get) => ({
@@ -67,13 +98,20 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       if (error) throw error
 
       if (session?.user) {
+        const baseUser = mapSupabaseUser(session.user)
         set({
-          user: mapSupabaseUser(session.user),
+          user: baseUser,
           session,
           isAuthenticated: true,
           isLoading: false,
           initialized: true,
         })
+        // Enrichissement async depuis profiles.account_type si user_metadata ne le porte pas
+        if (!session.user.user_metadata?.account_type && supabase) {
+          hydrateAccountTypeFromProfile(baseUser, supabase).then((enriched) => {
+            if (enriched.userType !== baseUser.userType) set({ user: enriched })
+          })
+        }
       } else {
         set({ isLoading: false, initialized: true, isAuthenticated: false })
       }
@@ -81,11 +119,17 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       // Listen for auth state changes (token refresh, sign out from other tab, etc.)
       supabase.auth.onAuthStateChange((_event, session) => {
         if (session?.user) {
+          const baseUser = mapSupabaseUser(session.user)
           set({
-            user: mapSupabaseUser(session.user),
+            user: baseUser,
             session,
             isAuthenticated: true,
           })
+          if (!session.user.user_metadata?.account_type && supabase) {
+            hydrateAccountTypeFromProfile(baseUser, supabase).then((enriched) => {
+              if (enriched.userType !== baseUser.userType) set({ user: enriched })
+            })
+          }
         } else {
           set({
             user: null,
