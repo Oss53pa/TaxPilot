@@ -64,7 +64,7 @@ const TOUR_SECTIONS: TourSection[] = [
     icon: Layers,
     route: '/liasse-fiscale',
     features: ['80+ pages', 'Bilan 3 colonnes', '22 annexes', 'Multi-exercices'],
-    color: 'from-[#c9a96e]/20 to-[#a88b4a]/10',
+    color: 'from-[#0f766e]/20 to-[#115e59]/10',
     demoId: 'liasse',
   },
   {
@@ -196,24 +196,25 @@ const DemoPage: React.FC = () => {
     setActiveView('live-preview')
   }
 
-  // Inline style constants — beats globals.css overrides
-  const W = '#ffffff'
-  const W50 = 'rgba(255,255,255,0.50)'
-  const W40 = 'rgba(255,255,255,0.40)'
-  const W30 = 'rgba(255,255,255,0.30)'
-  const W20 = 'rgba(255,255,255,0.20)'
-  const W15 = 'rgba(255,255,255,0.15)'
-  const W10 = 'rgba(255,255,255,0.10)'
-  const G = '#c9a96e'
-  const BK = '#0d0d0d'
-  const CHK = '#34d399'
+  // Inline style constants — Nordic Slate light theme
+  // Variables noms conservés (W = primary text) pour ne pas casser les references
+  const W = '#1c1917'      // Texte principal (charcoal warm) — était #ffffff
+  const W50 = 'rgba(28,25,23,0.55)'   // Texte secondaire foncé
+  const W40 = 'rgba(28,25,23,0.65)'   // Texte body
+  const W30 = 'rgba(28,25,23,0.75)'   // Texte emphasis
+  const W20 = 'rgba(0,0,0,0.20)'      // Borders strong
+  const W15 = 'rgba(0,0,0,0.12)'      // Borders default
+  const W10 = 'rgba(0,0,0,0.06)'      // Borders subtle
+  const G = '#0f766e'      // Accent TEAL (était #c9a96e gold)
+  const BK = '#ffffff'     // Background (était #0d0d0d dark)
+  const CHK = '#15803d'    // Check vert deep
 
   const CurrentIcon = currentSection.icon
 
   return (
-    <div className="landing-page min-h-screen bg-[#0d0d0d]" style={{ color: W }}>
+    <div className="landing-page min-h-screen bg-white" style={{ color: W }}>
       {/* ═══ NAV ═══ */}
-      <nav className="sticky top-0 bg-[#0d0d0d]/90 backdrop-blur-xl border-b border-white/[0.06] z-50">
+      <nav className="sticky top-0 bg-white/90 backdrop-blur-xl border-b border-black/[0.06] z-50">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
@@ -253,7 +254,7 @@ const DemoPage: React.FC = () => {
           </div>
           <a
             href={ATLAS_STUDIO.login}
-            className="px-5 py-2.5 bg-[#c9a96e] rounded-lg text-sm font-bold hover:bg-[#dbc396] transition-all flex items-center gap-2"
+            className="px-5 py-2.5 bg-[#0f766e] rounded-lg text-sm font-bold hover:bg-[#115e59] transition-all flex items-center gap-2"
             style={{ color: BK }}
           >
             Souscrire maintenant <ArrowRight className="w-4 h-4" />
@@ -267,11 +268,11 @@ const DemoPage: React.FC = () => {
           {/* Hero */}
           <section className="relative pt-20 pb-16 px-6 overflow-hidden">
             <div className="absolute inset-0 pointer-events-none">
-              <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-[#c9a96e]/[0.05] rounded-full blur-[120px]" />
+              <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-[#0f766e]/[0.05] rounded-full blur-[120px]" />
             </div>
             <div className="max-w-4xl mx-auto text-center relative">
               <div
-                className="inline-flex items-center gap-2 px-4 py-2 bg-[#c9a96e]/10 border border-[#c9a96e]/20 rounded-full text-xs font-semibold mb-8"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-[#0f766e]/10 border border-[#0f766e]/20 rounded-full text-xs font-semibold mb-8"
                 style={{ color: G }}
               >
                 <Eye className="w-3.5 h-3.5" /> Aucun compte requis — explorez librement
@@ -280,7 +281,7 @@ const DemoPage: React.FC = () => {
                 Découvrez {ATLAS_STUDIO.brand}
                 <br />
                 <span
-                  className="bg-gradient-to-r from-[#dbc396] via-[#e0cc9e] to-[#dbc396] bg-clip-text text-transparent"
+                  className="bg-gradient-to-r from-[#0f766e] via-[#115e59] to-[#0f766e] bg-clip-text text-transparent"
                   style={{ color: 'transparent' }}
                 >
                   en action.
@@ -298,15 +299,15 @@ const DemoPage: React.FC = () => {
                     setActiveView('tour')
                     setTourStep(0)
                   }}
-                  className="group relative p-7 bg-gradient-to-br from-[#c9a96e]/[0.08] to-transparent border border-[#c9a96e]/20 rounded-2xl text-left hover:border-[#c9a96e]/40 transition-all hover:-translate-y-1"
+                  className="group relative p-7 bg-gradient-to-br from-[#0f766e]/[0.08] to-transparent border border-[#0f766e]/20 rounded-2xl text-left hover:border-[#0f766e]/40 transition-all hover:-translate-y-1"
                 >
                   <div
-                    className="absolute top-3 right-3 px-2 py-0.5 bg-[#dbc396] text-[10px] font-bold rounded-full"
+                    className="absolute top-3 right-3 px-2 py-0.5 bg-[#115e59] text-[10px] font-bold rounded-full"
                     style={{ color: BK }}
                   >
                     Recommandé
                   </div>
-                  <div className="w-14 h-14 bg-[#c9a96e]/10 rounded-xl flex items-center justify-center mb-5">
+                  <div className="w-14 h-14 bg-[#0f766e]/10 rounded-xl flex items-center justify-center mb-5">
                     <MapPin className="w-7 h-7" style={{ color: G }} />
                   </div>
                   <h3 className="text-base font-bold mb-2" style={{ color: W }}>
@@ -322,9 +323,9 @@ const DemoPage: React.FC = () => {
 
                 <button
                   onClick={() => setActiveView('demo-import')}
-                  className="group p-7 bg-white/[0.03] border border-white/[0.06] rounded-2xl text-left hover:bg-white/[0.06] hover:border-white/[0.12] transition-all hover:-translate-y-1"
+                  className="group p-7 bg-black/[0.025] border border-black/[0.06] rounded-2xl text-left hover:bg-black/[0.04] hover:border-black/[0.12] transition-all hover:-translate-y-1"
                 >
-                  <div className="w-14 h-14 bg-white/[0.06] rounded-xl flex items-center justify-center mb-5 group-hover:bg-white/10 transition-colors">
+                  <div className="w-14 h-14 bg-black/[0.04] rounded-xl flex items-center justify-center mb-5 group-hover:bg-black/[0.06] transition-colors">
                     <MousePointerClick className="w-7 h-7" style={{ color: G }} />
                   </div>
                   <h3 className="text-base font-bold mb-2" style={{ color: W }}>
@@ -340,10 +341,10 @@ const DemoPage: React.FC = () => {
 
                 <a
                   href={`mailto:${ATLAS_STUDIO.supportEmail}?subject=Demande de démo live Liass'Pilot`}
-                  className="group p-7 bg-white/[0.03] border border-white/[0.06] rounded-2xl text-left hover:bg-white/[0.06] hover:border-white/[0.12] transition-all hover:-translate-y-1"
+                  className="group p-7 bg-black/[0.025] border border-black/[0.06] rounded-2xl text-left hover:bg-black/[0.04] hover:border-black/[0.12] transition-all hover:-translate-y-1"
                   style={{ color: W }}
                 >
-                  <div className="w-14 h-14 bg-white/[0.06] rounded-xl flex items-center justify-center mb-5 group-hover:bg-white/10 transition-colors">
+                  <div className="w-14 h-14 bg-black/[0.04] rounded-xl flex items-center justify-center mb-5 group-hover:bg-black/[0.06] transition-colors">
                     <Users className="w-7 h-7" style={{ color: G }} />
                   </div>
                   <h3 className="text-base font-bold mb-2" style={{ color: W }}>
@@ -364,7 +365,7 @@ const DemoPage: React.FC = () => {
           <section className="py-20 px-6">
             <div className="max-w-4xl mx-auto">
               <div className="flex items-center gap-3 mb-8">
-                <div className="w-10 h-10 bg-[#c9a96e]/10 rounded-xl flex items-center justify-center">
+                <div className="w-10 h-10 bg-[#0f766e]/10 rounded-xl flex items-center justify-center">
                   <MousePointerClick className="w-5 h-5" style={{ color: G }} />
                 </div>
                 <div>
@@ -383,9 +384,9 @@ const DemoPage: React.FC = () => {
                     <button
                       key={demo.id}
                       onClick={() => setActiveView(`demo-${demo.id}` as ActiveView)}
-                      className="group flex items-start gap-5 p-5 bg-white/[0.03] border border-white/[0.06] rounded-2xl hover:bg-white/[0.06] hover:border-white/[0.12] transition-all text-left"
+                      className="group flex items-start gap-5 p-5 bg-black/[0.025] border border-black/[0.06] rounded-2xl hover:bg-black/[0.04] hover:border-black/[0.12] transition-all text-left"
                     >
-                      <div className="w-14 h-14 bg-white/[0.04] rounded-xl flex items-center justify-center shrink-0 group-hover:bg-[#c9a96e]/10 transition-colors">
+                      <div className="w-14 h-14 bg-black/[0.03] rounded-xl flex items-center justify-center shrink-0 group-hover:bg-[#0f766e]/10 transition-colors">
                         <DemoIcon className="w-7 h-7" style={{ color: W40 }} />
                       </div>
                       <div className="flex-1 min-w-0">
@@ -400,7 +401,7 @@ const DemoPage: React.FC = () => {
                             {demo.tags.map((tag) => (
                               <span
                                 key={tag}
-                                className="px-2 py-0.5 bg-white/[0.04] text-[10px] font-medium rounded-full"
+                                className="px-2 py-0.5 bg-black/[0.03] text-[10px] font-medium rounded-full"
                                 style={{ color: W30 }}
                               >
                                 {tag}
@@ -421,10 +422,10 @@ const DemoPage: React.FC = () => {
           </section>
 
           {/* Tour preview grid */}
-          <section className="py-20 px-6 border-t border-white/[0.06]">
+          <section className="py-20 px-6 border-t border-black/[0.06]">
             <div className="max-w-5xl mx-auto">
               <div className="flex items-center gap-3 mb-8">
-                <div className="w-10 h-10 bg-[#c9a96e]/10 rounded-xl flex items-center justify-center">
+                <div className="w-10 h-10 bg-[#0f766e]/10 rounded-xl flex items-center justify-center">
                   <MapPin className="w-5 h-5" style={{ color: G }} />
                 </div>
                 <div>
@@ -446,9 +447,9 @@ const DemoPage: React.FC = () => {
                         setActiveView('tour')
                         setTourStep(i)
                       }}
-                      className="group p-5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-left hover:bg-white/[0.06] hover:border-white/[0.12] transition-all"
+                      className="group p-5 bg-black/[0.025] border border-black/[0.06] rounded-xl text-left hover:bg-black/[0.04] hover:border-black/[0.12] transition-all"
                     >
-                      <div className="w-10 h-10 bg-white/[0.04] rounded-lg flex items-center justify-center mb-3 group-hover:bg-[#c9a96e]/10 transition-colors">
+                      <div className="w-10 h-10 bg-black/[0.03] rounded-lg flex items-center justify-center mb-3 group-hover:bg-[#0f766e]/10 transition-colors">
                         <SectionIcon className="w-5 h-5" style={{ color: W30 }} />
                       </div>
                       <h4 className="text-xs font-bold mb-1" style={{ color: W }}>
@@ -471,7 +472,7 @@ const DemoPage: React.FC = () => {
                     setTourStep(0)
                     setTourAutoPlay(true)
                   }}
-                  className="group px-8 py-4 bg-[#c9a96e] rounded-xl text-sm font-bold hover:bg-[#dbc396] transition-all shadow-lg shadow-[#c9a96e]/20 inline-flex items-center gap-2"
+                  className="group px-8 py-4 bg-[#0f766e] rounded-xl text-sm font-bold hover:bg-[#115e59] transition-all shadow-lg shadow-[#0f766e]/20 inline-flex items-center gap-2"
                   style={{ color: BK }}
                 >
                   <Play className="w-4 h-4" /> Lancer la visite complète
@@ -484,7 +485,7 @@ const DemoPage: React.FC = () => {
           {/* CTA */}
           <section className="py-20 px-6 relative">
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
-              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-[#c9a96e]/[0.06] rounded-full blur-[80px]" />
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-[#0f766e]/[0.06] rounded-full blur-[80px]" />
             </div>
             <div className="max-w-3xl mx-auto text-center relative">
               <h2 className="text-3xl md:text-4xl font-bold mb-4" style={{ color: W }}>
@@ -496,14 +497,14 @@ const DemoPage: React.FC = () => {
               <div className="flex items-center justify-center gap-4 flex-wrap">
                 <a
                   href={ATLAS_STUDIO.login}
-                  className="group px-8 py-4 bg-[#c9a96e] rounded-xl text-sm font-bold hover:bg-[#dbc396] transition-all shadow-lg shadow-[#c9a96e]/20 inline-flex items-center gap-2"
+                  className="group px-8 py-4 bg-[#0f766e] rounded-xl text-sm font-bold hover:bg-[#115e59] transition-all shadow-lg shadow-[#0f766e]/20 inline-flex items-center gap-2"
                   style={{ color: BK }}
                 >
                   <Zap className="w-4 h-4" /> Créer mon compte
                 </a>
                 <button
                   onClick={() => navigate('/pricing')}
-                  className="px-8 py-4 bg-white/5 border border-white/10 rounded-xl text-sm font-semibold hover:bg-white/10 transition-all"
+                  className="px-8 py-4 bg-black/[0.03] border border-black/[0.1] rounded-xl text-sm font-semibold hover:bg-black/[0.06] transition-all"
                   style={{ color: 'rgba(255,255,255,0.8)' }}
                 >
                   Voir les tarifs
@@ -539,8 +540,8 @@ const DemoPage: React.FC = () => {
                   onClick={() => setTourAutoPlay(!tourAutoPlay)}
                   className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
                     tourAutoPlay
-                      ? 'bg-[#c9a96e]/20 border border-[#c9a96e]/30'
-                      : 'bg-white/5 border border-white/[0.06] hover:opacity-70'
+                      ? 'bg-[#0f766e]/20 border border-[#0f766e]/30'
+                      : 'bg-black/[0.03] border border-black/[0.06] hover:opacity-70'
                   }`}
                   style={{ color: tourAutoPlay ? G : W30 }}
                 >
@@ -556,19 +557,19 @@ const DemoPage: React.FC = () => {
                       onClick={() => setTourStep(i)}
                       className={`w-full flex items-center gap-3 p-3 rounded-xl text-left transition-all ${
                         i === tourStep
-                          ? 'bg-gradient-to-r from-[#c9a96e]/15 to-transparent border border-[#c9a96e]/20'
+                          ? 'bg-gradient-to-r from-[#0f766e]/15 to-transparent border border-[#0f766e]/20'
                           : i < tourStep
-                          ? 'bg-white/[0.02] border border-white/[0.04]'
-                          : 'border border-transparent hover:bg-white/[0.03]'
+                          ? 'bg-black/[0.02] border border-black/[0.06]'
+                          : 'border border-transparent hover:bg-black/[0.025]'
                       }`}
                     >
                       <div
                         className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
                           i === tourStep
-                            ? 'bg-[#c9a96e]/20'
+                            ? 'bg-[#0f766e]/20'
                             : i < tourStep
                             ? 'bg-emerald-500/10'
-                            : 'bg-white/[0.04]'
+                            : 'bg-black/[0.03]'
                         }`}
                       >
                         {i < tourStep ? (
@@ -592,16 +593,16 @@ const DemoPage: React.FC = () => {
               </div>
 
               {/* Progress */}
-              <div className="mt-6 pt-4 border-t border-white/[0.06]">
+              <div className="mt-6 pt-4 border-t border-black/[0.06]">
                 <div className="flex items-center justify-between text-xs mb-2">
                   <span style={{ color: W20 }}>Progression</span>
                   <span style={{ color: G }}>
                     {Math.round(((tourStep + 1) / TOUR_SECTIONS.length) * 100)}%
                   </span>
                 </div>
-                <div className="w-full h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
+                <div className="w-full h-1.5 bg-black/[0.04] rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-[#c9a96e] rounded-full transition-all duration-500"
+                    className="h-full bg-[#0f766e] rounded-full transition-all duration-500"
                     style={{ width: `${((tourStep + 1) / TOUR_SECTIONS.length) * 100}%` }}
                   />
                 </div>
@@ -612,11 +613,11 @@ const DemoPage: React.FC = () => {
             <div className="space-y-5">
               {/* Header card */}
               <div
-                className={`relative bg-gradient-to-br ${currentSection.color} border border-white/[0.08] rounded-2xl p-8 overflow-hidden`}
+                className={`relative bg-gradient-to-br ${currentSection.color} border border-black/[0.08] rounded-2xl p-8 overflow-hidden`}
               >
-                <div className="absolute top-0 right-0 w-48 h-48 bg-white/[0.02] rounded-full -translate-y-1/2 translate-x-1/4 blur-xl" />
+                <div className="absolute top-0 right-0 w-48 h-48 bg-black/[0.02] rounded-full -translate-y-1/2 translate-x-1/4 blur-xl" />
                 <div className="relative flex items-start gap-5">
-                  <div className="w-16 h-16 bg-white/[0.08] rounded-2xl flex items-center justify-center shrink-0">
+                  <div className="w-16 h-16 bg-black/[0.05] rounded-2xl flex items-center justify-center shrink-0">
                     <CurrentIcon className="w-8 h-8" style={{ color: G }} />
                   </div>
                   <div>
@@ -641,7 +642,7 @@ const DemoPage: React.FC = () => {
                 {currentSection.features.map((feat) => (
                   <div
                     key={feat}
-                    className="flex items-center gap-3 p-3.5 bg-white/[0.03] border border-white/[0.06] rounded-xl"
+                    className="flex items-center gap-3 p-3.5 bg-black/[0.025] border border-black/[0.06] rounded-xl"
                   >
                     <CheckCircle className="w-4 h-4 shrink-0" style={{ color: CHK }} />
                     <span className="text-sm" style={{ color: W50 }}>
@@ -652,7 +653,7 @@ const DemoPage: React.FC = () => {
               </div>
 
               {/* Preview / action area */}
-              <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-8 text-center">
+              <div className="bg-black/[0.02] border border-black/[0.06] rounded-2xl p-8 text-center">
                 <CurrentIcon
                   className="w-16 h-16 mx-auto mb-4"
                   style={{ color: 'rgba(255,255,255,0.06)' }}
@@ -666,7 +667,7 @@ const DemoPage: React.FC = () => {
                 <div className="flex items-center justify-center gap-3 flex-wrap">
                   <button
                     onClick={() => openLivePreview(currentSection.route)}
-                    className="px-5 py-2.5 bg-white/[0.06] border border-white/10 rounded-lg text-xs font-semibold hover:bg-white/10 transition-all inline-flex items-center gap-2"
+                    className="px-5 py-2.5 bg-black/[0.04] border border-black/[0.1] rounded-lg text-xs font-semibold hover:bg-black/[0.06] transition-all inline-flex items-center gap-2"
                     style={{ color: 'rgba(255,255,255,0.7)' }}
                   >
                     <Maximize2 className="w-3.5 h-3.5" /> Aperçu live
@@ -674,7 +675,7 @@ const DemoPage: React.FC = () => {
                   {currentSection.demoId && (
                     <button
                       onClick={() => setActiveView(`demo-${currentSection.demoId}` as ActiveView)}
-                      className="px-5 py-2.5 bg-[#c9a96e]/10 border border-[#c9a96e]/20 rounded-lg text-xs font-semibold hover:bg-[#c9a96e]/20 transition-all inline-flex items-center gap-2"
+                      className="px-5 py-2.5 bg-[#0f766e]/10 border border-[#0f766e]/20 rounded-lg text-xs font-semibold hover:bg-[#0f766e]/20 transition-all inline-flex items-center gap-2"
                       style={{ color: G }}
                     >
                       <MousePointerClick className="w-3.5 h-3.5" /> Démo interactive
@@ -688,7 +689,7 @@ const DemoPage: React.FC = () => {
                 <button
                   onClick={() => setTourStep(Math.max(0, tourStep - 1))}
                   disabled={tourStep === 0}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-white/5"
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-black/[0.03]"
                   style={{ color: tourStep === 0 ? W10 : W40 }}
                 >
                   <ArrowLeft className="w-4 h-4" /> Précédent
@@ -700,10 +701,10 @@ const DemoPage: React.FC = () => {
                       onClick={() => setTourStep(i)}
                       className={`h-1.5 rounded-full transition-all ${
                         i === tourStep
-                          ? 'w-6 bg-[#dbc396]'
+                          ? 'w-6 bg-[#115e59]'
                           : i < tourStep
                           ? 'w-1.5 bg-emerald-400/50'
-                          : 'w-1.5 bg-white/10'
+                          : 'w-1.5 bg-black/[0.06]'
                       }`}
                     />
                   ))}
@@ -711,7 +712,7 @@ const DemoPage: React.FC = () => {
                 {tourStep < TOUR_SECTIONS.length - 1 ? (
                   <button
                     onClick={() => setTourStep(tourStep + 1)}
-                    className="group flex items-center gap-2 px-5 py-2.5 bg-[#c9a96e] rounded-lg text-sm font-bold hover:bg-[#dbc396] transition-all"
+                    className="group flex items-center gap-2 px-5 py-2.5 bg-[#0f766e] rounded-lg text-sm font-bold hover:bg-[#115e59] transition-all"
                     style={{ color: BK }}
                   >
                     Suivant{' '}
@@ -748,22 +749,22 @@ const DemoPage: React.FC = () => {
                 Aperçu :
               </span>
               <span
-                className="text-xs font-mono bg-white/5 px-2 py-1 rounded"
+                className="text-xs font-mono bg-black/[0.03] px-2 py-1 rounded"
                 style={{ color: G }}
               >
                 {previewRoute}
               </span>
             </div>
           </div>
-          <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl overflow-hidden">
-            <div className="bg-white/[0.04] border-b border-white/[0.06] px-4 py-2.5 flex items-center gap-3">
+          <div className="bg-black/[0.02] border border-black/[0.06] rounded-2xl overflow-hidden">
+            <div className="bg-black/[0.03] border-b border-black/[0.06] px-4 py-2.5 flex items-center gap-3">
               <div className="flex gap-1.5">
                 <div className="w-3 h-3 rounded-full bg-red-400/40" />
                 <div className="w-3 h-3 rounded-full bg-yellow-400/40" />
                 <div className="w-3 h-3 rounded-full bg-green-400/40" />
               </div>
               <div
-                className="flex-1 bg-white/[0.04] rounded px-3 py-1 text-xs font-mono"
+                className="flex-1 bg-black/[0.03] rounded px-3 py-1 text-xs font-mono"
                 style={{ color: W30 }}
               >
                 liasspilot.app{previewRoute}
@@ -797,7 +798,7 @@ const DemoPage: React.FC = () => {
                   <button
                     key={s.id}
                     onClick={() => setPreviewRoute(s.route)}
-                    className="flex items-center gap-2 px-3 py-2 bg-white/[0.03] border border-white/[0.06] rounded-lg text-xs hover:border-white/[0.12] transition-all"
+                    className="flex items-center gap-2 px-3 py-2 bg-black/[0.025] border border-black/[0.06] rounded-lg text-xs hover:border-black/[0.12] transition-all"
                     style={{ color: W40 }}
                   >
                     <NavIcon className="w-3.5 h-3.5" style={{ color: G }} /> {s.title}
@@ -829,8 +830,8 @@ const DemoPage: React.FC = () => {
                   onClick={() => setActiveView(viewId)}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
                     activeView === viewId
-                      ? 'bg-[#c9a96e]/15 border border-[#c9a96e]/20'
-                      : 'bg-white/[0.03] border border-white/[0.06] hover:opacity-70'
+                      ? 'bg-[#0f766e]/15 border border-[#0f766e]/20'
+                      : 'bg-black/[0.025] border border-black/[0.06] hover:opacity-70'
                   }`}
                   style={{ color: activeView === viewId ? G : W30 }}
                 >
@@ -840,8 +841,8 @@ const DemoPage: React.FC = () => {
             })}
           </div>
 
-          <div className="bg-white rounded-2xl border border-white/[0.1] shadow-2xl shadow-black/50 overflow-hidden">
-            <div className="bg-[#141414] px-6 py-4 flex items-center justify-between" style={{ color: W }}>
+          <div className="bg-white rounded-2xl border border-black/[0.08] shadow-2xl shadow-black/10 overflow-hidden">
+            <div className="bg-[#f5f5f4] px-6 py-4 flex items-center justify-between border-b border-black/[0.06]" style={{ color: W }}>
               <div className="flex items-center gap-3">
                 <Monitor className="w-5 h-5" style={{ color: G }} />
                 <div>
@@ -875,7 +876,7 @@ const DemoPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="mt-8 bg-white/[0.03] border border-white/[0.06] rounded-2xl p-8 text-center">
+          <div className="mt-8 bg-black/[0.025] border border-black/[0.06] rounded-2xl p-8 text-center">
             <Sparkles
               className="w-8 h-8 mx-auto mb-3"
               style={{ color: 'rgba(201,169,110,0.5)' }}
@@ -885,7 +886,7 @@ const DemoPage: React.FC = () => {
             </p>
             <a
               href={ATLAS_STUDIO.login}
-              className="px-6 py-3 bg-[#c9a96e] rounded-lg text-sm font-bold hover:bg-[#dbc396] transition-all inline-flex items-center gap-2 shadow-lg shadow-[#c9a96e]/20"
+              className="px-6 py-3 bg-[#0f766e] rounded-lg text-sm font-bold hover:bg-[#115e59] transition-all inline-flex items-center gap-2 shadow-lg shadow-[#0f766e]/20"
               style={{ color: BK }}
             >
               <Zap className="w-4 h-4" /> Souscrire maintenant
@@ -895,7 +896,7 @@ const DemoPage: React.FC = () => {
       )}
 
       {/* Footer */}
-      <footer className="border-t border-white/[0.06] py-8 px-6 mt-auto">
+      <footer className="border-t border-black/[0.06] py-8 px-6 mt-auto">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <span
