@@ -656,73 +656,462 @@ export const fiscasyncDarkPalette = {
   info: '#3b82f6',
 }
 
+/**
+ * Factory dynamique : retourne le thème Nordic Slate complet (typo Dosis +
+ * tous les component overrides premium) en mode light ou dark.
+ *
+ * IMPORTANT : on réplique ici exactement la même hiérarchie typographique
+ * et la même couche de component-overrides que `fiscasyncTheme` (light) pour
+ * éviter une "regression visuelle partielle" (Dosis seulement sur certaines
+ * surfaces). En mode dark on réajuste uniquement les surfaces, pas la typo.
+ */
 export function createFiscaSyncTheme(mode: 'light' | 'dark') {
-  const palette = mode === 'dark' ? fiscasyncDarkPalette : fiscasyncPalette
+  const isDark = mode === 'dark'
+
+  // Palette unifiée — on garde les neutres warm-stone en light,
+  // une transposition cohérente en dark.
+  const c = {
+    bgDefault: isDark ? '#0c0a09' : fiscasyncPalette.primary50,
+    bgPaper:   isDark ? '#1c1917' : fiscasyncPalette.white,
+    textPrimary:   isDark ? '#fafaf9' : fiscasyncPalette.primary900,
+    textSecondary: isDark ? '#a8a29e' : fiscasyncPalette.primary500,
+    divider:   isDark ? '#292524' : fiscasyncPalette.primary200,
+    border:    isDark ? '#292524' : fiscasyncPalette.primary200,
+    borderHover: isDark ? '#44403c' : fiscasyncPalette.primary300,
+    surfaceAlt:  isDark ? '#1c1917' : fiscasyncPalette.primary50,
+    surfaceHover: isDark ? '#292524' : fiscasyncPalette.primary100,
+    drawerBg:    isDark ? '#0c0a09' : fiscasyncPalette.primary900,
+    drawerText:  isDark ? '#a8a29e' : fiscasyncPalette.primary200,
+    appBarBg:    isDark ? '#0c0a09' : fiscasyncPalette.primary900,
+    appBarText:  fiscasyncPalette.white,
+    primaryMain: isDark ? '#fafaf9' : fiscasyncPalette.primary900,
+    primaryDark: isDark ? '#e7e5e4' : fiscasyncPalette.primary950,
+    primaryContrast: isDark ? fiscasyncPalette.primary950 : fiscasyncPalette.white,
+    btnPrimaryHover: isDark ? '#e7e5e4' : fiscasyncPalette.primary800,
+  }
 
   return createTheme({
     palette: {
       mode,
-      primary: { main: mode === 'dark' ? '#e5e5e5' : '#171717' },
-      secondary: { main: mode === 'dark' ? '#999999' : '#737373' },
-      background: {
-        default: mode === 'dark' ? '#0a0a0a' : '#fafafa',
-        paper: mode === 'dark' ? '#171717' : '#ffffff',
+      primary: {
+        main: c.primaryMain,
+        light: fiscasyncPalette.primary500,
+        dark: c.primaryDark,
+        contrastText: c.primaryContrast,
       },
-      text: {
-        primary: mode === 'dark' ? '#f0f0f0' : '#171717',
-        secondary: mode === 'dark' ? '#999999' : '#737373',
+      secondary: {
+        main: fiscasyncPalette.teal,
+        light: fiscasyncPalette.tealLight,
+        dark: fiscasyncPalette.tealDark,
+        contrastText: fiscasyncPalette.white,
       },
-      error: { main: palette.error },
-      warning: { main: palette.warning },
-      success: { main: palette.success },
-      info: { main: palette.info },
-      divider: mode === 'dark' ? '#333333' : '#e5e5e5',
+      background: { default: c.bgDefault, paper: c.bgPaper },
+      text: { primary: c.textPrimary, secondary: c.textSecondary },
+      divider: c.divider,
+      success: { main: fiscasyncPalette.success },
+      warning: { main: fiscasyncPalette.warning },
+      error:   { main: fiscasyncPalette.error },
+      info:    { main: fiscasyncPalette.info },
+      grey: {
+        50:  fiscasyncPalette.primary50,
+        100: fiscasyncPalette.primary100,
+        200: fiscasyncPalette.primary200,
+        300: fiscasyncPalette.primary300,
+        400: fiscasyncPalette.primary400,
+        500: fiscasyncPalette.primary500,
+        600: fiscasyncPalette.primary600,
+        700: fiscasyncPalette.primary700,
+        800: fiscasyncPalette.primary800,
+        900: fiscasyncPalette.primary900,
+      },
     },
-    typography: {
-      fontFamily: '"Exo 2", "Poppins", "Inter", -apple-system, BlinkMacSystemFont, sans-serif',
-    },
+
     shape: { borderRadius: 12 },
+
+    typography: {
+      // Dosis partout — humanist sans-serif premium (Linear/Stripe-grade).
+      fontFamily: FONT_PRIMARY,
+      h1: { fontFamily: FONT_DISPLAY, fontSize: '2.5rem',   fontWeight: 700, letterSpacing: '-0.01em',  lineHeight: 1.15, color: c.textPrimary },
+      h2: { fontFamily: FONT_DISPLAY, fontSize: '2rem',     fontWeight: 700, letterSpacing: '-0.008em', lineHeight: 1.2,  color: c.textPrimary },
+      h3: { fontFamily: FONT_DISPLAY, fontSize: '1.5rem',   fontWeight: 600, letterSpacing: '-0.005em', lineHeight: 1.3,  color: c.textPrimary },
+      h4: { fontFamily: FONT_DISPLAY, fontSize: '1.25rem',  fontWeight: 600, letterSpacing: 0,          lineHeight: 1.35, color: c.textPrimary },
+      h5: { fontFamily: FONT_DISPLAY, fontSize: '1.075rem', fontWeight: 600, letterSpacing: 0,          lineHeight: 1.4,  color: c.textPrimary },
+      h6: { fontFamily: FONT_DISPLAY, fontSize: '0.95rem',  fontWeight: 600, letterSpacing: '0.005em',  lineHeight: 1.45, color: c.textPrimary },
+      subtitle1: { fontWeight: 500, lineHeight: 1.5, color: c.textPrimary },
+      subtitle2: { fontWeight: 500, lineHeight: 1.5, color: c.textSecondary, fontSize: '0.875rem' },
+      body1:  { fontWeight: 400, lineHeight: 1.65, color: c.textPrimary,   letterSpacing: '0.005em' },
+      body2:  { fontWeight: 400, lineHeight: 1.65, color: c.textSecondary, fontSize: '0.875rem', letterSpacing: '0.005em' },
+      button: { textTransform: 'none' as const, fontWeight: 500, letterSpacing: '0.015em' },
+      caption:  { color: c.textSecondary, fontSize: '0.78rem', letterSpacing: '0.015em' },
+      overline: { textTransform: 'uppercase' as const, letterSpacing: '0.1em', fontWeight: 600, fontSize: '0.7rem' },
+    },
+
     components: {
-      MuiPaper: {
+      // ── Global : applique Dosis sur tous les <body>/<html> via CssBaseline ──
+      MuiCssBaseline: {
         styleOverrides: {
-          root: {
-            backgroundImage: 'none',
-            backgroundColor: mode === 'dark' ? '#171717' : '#ffffff',
+          html: { fontFamily: FONT_PRIMARY },
+          body: {
+            fontFamily: FONT_PRIMARY,
+            backgroundColor: c.bgDefault,
+            color: c.textPrimary,
+            WebkitFontSmoothing: 'antialiased',
+            MozOsxFontSmoothing: 'grayscale',
+            textRendering: 'optimizeLegibility',
           },
         },
       },
-      MuiCard: {
+
+      MuiAppBar: {
         styleOverrides: {
           root: {
-            border: `1px solid ${mode === 'dark' ? '#333333' : '#e5e5e5'}`,
-            backgroundColor: mode === 'dark' ? '#171717' : '#ffffff',
+            backgroundColor: c.appBarBg,
+            color: c.appBarText,
+            boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
           },
         },
       },
-      MuiButton: {
+
+      MuiDrawer: {
         styleOverrides: {
-          containedPrimary: {
-            backgroundColor: mode === 'dark' ? '#e5e5e5' : '#171717',
-            color: mode === 'dark' ? '#0a0a0a' : '#ffffff',
+          paper: {
+            backgroundColor: c.drawerBg,
+            color: c.drawerText,
+            borderRight: 'none',
+          },
+        },
+      },
+
+      MuiDivider: {
+        styleOverrides: { root: { borderColor: c.divider, opacity: 0.6 } },
+      },
+
+      MuiListItemButton: {
+        styleOverrides: {
+          root: {
+            borderRadius: '12px',
+            margin: '2px 8px',
+            color: isDark ? '#a8a29e' : fiscasyncPalette.primary300,
+            minHeight: '44px',
             '&:hover': {
-              backgroundColor: mode === 'dark' ? '#cccccc' : '#333333',
+              backgroundColor: isDark ? '#292524' : fiscasyncPalette.primary800,
+              color: fiscasyncPalette.white,
+            },
+            '&.Mui-selected': {
+              backgroundColor: isDark ? '#44403c' : fiscasyncPalette.primary700,
+              color: fiscasyncPalette.white,
+              fontWeight: 600,
+              '&:hover': {
+                backgroundColor: isDark ? '#57534e' : fiscasyncPalette.primary600,
+              },
             },
           },
         },
       },
-      MuiDrawer: {
+
+      MuiListItemIcon: {
         styleOverrides: {
-          paper: {
-            backgroundColor: mode === 'dark' ? '#0a0a0a' : '#ffffff',
-            borderRight: `1px solid ${mode === 'dark' ? '#262626' : '#e5e5e5'}`,
+          root: {
+            color: fiscasyncPalette.primary400,
+            minWidth: '36px',
+            '& .MuiSvgIcon-root': { fontSize: '1.25rem' },
           },
         },
       },
-      MuiAppBar: {
+
+      MuiListItemText: {
+        styleOverrides: { primary: { fontSize: '0.875rem', fontWeight: 500 } },
+      },
+
+      MuiCard: {
         styleOverrides: {
           root: {
-            backgroundColor: mode === 'dark' ? '#0a0a0a' : '#ffffff',
-            color: mode === 'dark' ? '#f0f0f0' : '#171717',
+            backgroundColor: c.bgPaper,
+            borderRadius: '14px',
+            boxShadow: shadows.sm,
+            border: `1px solid ${c.border}`,
+            transition: `box-shadow ${transitions.base}, transform ${transitions.base}, border-color ${transitions.base}`,
+            '&:hover': { boxShadow: shadows.md, borderColor: c.borderHover },
+          },
+        },
+      },
+
+      MuiPaper: {
+        styleOverrides: {
+          root: { backgroundColor: c.bgPaper, borderRadius: '12px', backgroundImage: 'none' },
+          elevation1: { boxShadow: shadows.xs },
+          elevation2: { boxShadow: shadows.sm },
+          elevation3: { boxShadow: shadows.md },
+          elevation4: { boxShadow: shadows.lg },
+        },
+      },
+
+      MuiButton: {
+        defaultProps: { disableElevation: true },
+        styleOverrides: {
+          root: {
+            borderRadius: '10px',
+            textTransform: 'none' as const,
+            fontWeight: 500,
+            letterSpacing: '0.01em',
+            transition: `background-color ${transitions.base}, color ${transitions.base}, box-shadow ${transitions.base}, transform ${transitions.fast}, border-color ${transitions.base}`,
+            '&:active': { transform: 'translateY(0.5px)' },
+            '&:focus-visible': { boxShadow: shadows.focusRing },
+          },
+          sizeSmall:  { padding: '5px 12px', fontSize: '0.82rem' },
+          sizeMedium: { padding: '7px 16px', fontSize: '0.875rem' },
+          sizeLarge:  { padding: '10px 22px', fontSize: '0.95rem' },
+          containedPrimary: {
+            backgroundColor: c.primaryMain,
+            color: `${c.primaryContrast} !important`,
+            boxShadow: shadows.xs,
+            '&:hover': {
+              backgroundColor: c.btnPrimaryHover,
+              color: `${c.primaryContrast} !important`,
+              boxShadow: shadows.sm,
+            },
+          },
+          containedSecondary: {
+            color: `${fiscasyncPalette.white} !important`,
+            '&:hover': { color: `${fiscasyncPalette.white} !important` },
+          },
+          outlined: {
+            borderColor: c.border,
+            color: isDark ? '#d6d3d1' : fiscasyncPalette.primary700,
+            '&:hover': {
+              backgroundColor: c.surfaceHover,
+              borderColor: c.borderHover,
+              color: c.textPrimary,
+            },
+          },
+          text: {
+            color: c.textSecondary,
+            '&:hover': { backgroundColor: c.surfaceHover, color: c.textPrimary },
+          },
+        },
+      },
+
+      MuiTableHead: {
+        styleOverrides: { root: { '& .MuiTableCell-head': { fontWeight: 600 } } },
+      },
+
+      MuiTableBody: {
+        styleOverrides: {
+          root: {
+            '& .MuiTableRow-root:not(.total-row)': {
+              '&:nth-of-type(odd)':  { backgroundColor: c.surfaceAlt },
+              '&:nth-of-type(even)': { backgroundColor: c.bgPaper },
+              '&:hover':             { backgroundColor: c.surfaceHover },
+            },
+          },
+        },
+      },
+
+      MuiTextField: {
+        styleOverrides: {
+          root: {
+            '& .MuiOutlinedInput-root': {
+              borderRadius: '10px',
+              backgroundColor: c.bgPaper,
+              transition: `border-color ${transitions.base}, box-shadow ${transitions.base}`,
+              '& .MuiOutlinedInput-notchedOutline': {
+                borderColor: c.border,
+                transition: `border-color ${transitions.base}`,
+              },
+              '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: c.borderHover },
+              '&.Mui-focused': {
+                boxShadow: shadows.tealGlow,
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: fiscasyncPalette.teal,
+                  borderWidth: '1px',
+                },
+              },
+            },
+            '& .MuiInputLabel-root': {
+              color: c.textSecondary,
+              fontSize: '0.92rem',
+              '&.Mui-focused': { color: c.textPrimary },
+            },
+          },
+        },
+      },
+
+      MuiAlert: {
+        styleOverrides: {
+          root: {
+            '&.MuiAlert-standardSuccess': {
+              backgroundColor: fiscasyncPalette.successBg,
+              color: fiscasyncPalette.successText,
+              '& .MuiAlert-icon': { color: fiscasyncPalette.success },
+            },
+            '&.MuiAlert-standardWarning': {
+              backgroundColor: fiscasyncPalette.warningBg,
+              color: fiscasyncPalette.warningText,
+              '& .MuiAlert-icon': { color: fiscasyncPalette.warning },
+            },
+            '&.MuiAlert-standardError': {
+              backgroundColor: fiscasyncPalette.errorBg,
+              color: fiscasyncPalette.errorText,
+              '& .MuiAlert-icon': { color: fiscasyncPalette.error },
+            },
+            '&.MuiAlert-standardInfo': {
+              backgroundColor: fiscasyncPalette.infoBg,
+              color: fiscasyncPalette.infoText,
+              '& .MuiAlert-icon': { color: fiscasyncPalette.info },
+            },
+            '&.MuiAlert-filledSuccess': { backgroundColor: fiscasyncPalette.success, color: '#ffffff' },
+            '&.MuiAlert-filledWarning': { backgroundColor: fiscasyncPalette.warning, color: '#ffffff' },
+            '&.MuiAlert-filledError':   { backgroundColor: fiscasyncPalette.error,   color: '#ffffff' },
+            '&.MuiAlert-filledInfo':    { backgroundColor: fiscasyncPalette.info,    color: '#ffffff' },
+          },
+        },
+      },
+
+      MuiSnackbarContent: {
+        styleOverrides: {
+          root: {
+            backgroundColor: fiscasyncPalette.primary900,
+            color: fiscasyncPalette.white,
+          },
+        },
+      },
+
+      MuiChip: {
+        styleOverrides: {
+          root: {
+            borderRadius: '8px',
+            fontWeight: 500,
+            fontSize: '0.78rem',
+            letterSpacing: '0.005em',
+            transition: `background-color ${transitions.base}, border-color ${transitions.base}, color ${transitions.base}`,
+            height: 24,
+          },
+          filled: {
+            backgroundColor: c.surfaceAlt,
+            color: c.textPrimary,
+            '&.MuiChip-colorPrimary': { backgroundColor: fiscasyncPalette.primary900, color: fiscasyncPalette.white },
+            '&.MuiChip-colorSuccess': { backgroundColor: fiscasyncPalette.success,    color: fiscasyncPalette.white },
+            '&.MuiChip-colorWarning': { backgroundColor: fiscasyncPalette.warning,    color: fiscasyncPalette.white },
+            '&.MuiChip-colorError':   { backgroundColor: fiscasyncPalette.error,      color: fiscasyncPalette.white },
+            '&.MuiChip-colorInfo':    { backgroundColor: fiscasyncPalette.info,       color: fiscasyncPalette.white },
+          },
+          outlined: {
+            borderColor: c.borderHover,
+            color: c.textPrimary,
+            '&.MuiChip-colorPrimary': { borderColor: fiscasyncPalette.primary900, color: fiscasyncPalette.primary900 },
+            '&.MuiChip-colorSuccess': { borderColor: fiscasyncPalette.success,    color: fiscasyncPalette.success },
+            '&.MuiChip-colorWarning': { borderColor: fiscasyncPalette.warning,    color: '#92400e' },
+            '&.MuiChip-colorError':   { borderColor: fiscasyncPalette.error,      color: fiscasyncPalette.error },
+            '&.MuiChip-colorInfo':    { borderColor: fiscasyncPalette.info,       color: fiscasyncPalette.info },
+          },
+        },
+      },
+
+      MuiToolbar: {
+        styleOverrides: {
+          root: {
+            backgroundColor: c.appBarBg,
+            color: c.appBarText,
+            '& .MuiTypography-h6': { color: c.appBarText },
+          },
+        },
+      },
+
+      MuiIconButton: {
+        styleOverrides: {
+          root: {
+            borderRadius: '8px',
+            transition: `background-color ${transitions.base}, color ${transitions.base}`,
+            '&:focus-visible': { boxShadow: shadows.focusRing },
+          },
+        },
+      },
+
+      MuiTooltip: {
+        styleOverrides: {
+          tooltip: {
+            backgroundColor: fiscasyncPalette.primary900,
+            color: fiscasyncPalette.white,
+            fontSize: '0.75rem',
+            fontWeight: 500,
+            padding: '6px 10px',
+            borderRadius: '6px',
+            boxShadow: shadows.md,
+          },
+          arrow: { color: fiscasyncPalette.primary900 },
+        },
+      },
+
+      MuiSwitch: {
+        styleOverrides: {
+          track: {
+            borderRadius: 11,
+            opacity: 1,
+            backgroundColor: isDark ? '#44403c' : fiscasyncPalette.primary300,
+          },
+          thumb: { boxShadow: shadows.sm },
+        },
+      },
+
+      MuiLinearProgress: {
+        styleOverrides: {
+          root: {
+            height: 4,
+            borderRadius: 2,
+            backgroundColor: c.surfaceAlt,
+          },
+          bar: { borderRadius: 2 },
+        },
+      },
+
+      MuiTabs: {
+        styleOverrides: {
+          indicator: {
+            height: 2,
+            borderTopLeftRadius: 2,
+            borderTopRightRadius: 2,
+            backgroundColor: c.textPrimary,
+          },
+        },
+      },
+      MuiTab: {
+        styleOverrides: {
+          root: {
+            textTransform: 'none' as const,
+            fontWeight: 500,
+            fontSize: '0.875rem',
+            letterSpacing: '0.005em',
+            minHeight: 42,
+            color: c.textSecondary,
+            transition: `color ${transitions.base}`,
+            '&.Mui-selected': { color: c.textPrimary, fontWeight: 600 },
+            '&:hover:not(.Mui-selected)': { color: isDark ? '#d6d3d1' : fiscasyncPalette.primary700 },
+          },
+        },
+      },
+
+      MuiDialog: {
+        styleOverrides: { paper: { borderRadius: '16px', boxShadow: shadows.lg } },
+      },
+
+      MuiMenu: {
+        styleOverrides: {
+          paper: {
+            borderRadius: '10px',
+            boxShadow: shadows.md,
+            border: `1px solid ${c.border}`,
+            marginTop: 4,
+          },
+        },
+      },
+      MuiMenuItem: {
+        styleOverrides: {
+          root: {
+            borderRadius: 6,
+            margin: '0 4px',
+            fontSize: '0.875rem',
+            minHeight: 36,
+            transition: `background-color ${transitions.fast}`,
           },
         },
       },
