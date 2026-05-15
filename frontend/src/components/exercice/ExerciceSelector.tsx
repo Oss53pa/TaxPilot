@@ -123,8 +123,13 @@ const ExerciceSelector: React.FC<Props> = ({ collapsed = false }) => {
               sx={{
                 fontSize: '0.8rem',
                 color: P.white,
-                '&:hover': { bgcolor: P.primary800 },
-                '&.Mui-selected': { bgcolor: P.primary700 },
+                '&:hover': { bgcolor: 'rgba(15, 118, 110, 0.18)' },
+                // État sélectionné = teal Nordic Slate accent
+                '&.Mui-selected': {
+                  bgcolor: 'rgba(15, 118, 110, 0.28)',
+                  color: P.white,
+                  '&:hover': { bgcolor: 'rgba(15, 118, 110, 0.36)' },
+                },
               }}
             >
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>

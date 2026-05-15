@@ -287,9 +287,11 @@ export default function DossiersPage() {
                 <TableRow
                   key={dossier.id}
                   sx={{
-                    borderLeft: isActive ? '4px solid #212121' : '4px solid transparent',
-                    bgcolor: isActive ? '#fafafa' : 'transparent',
-                    '&:hover': { bgcolor: '#f5f5f5' },
+                    // Dossier actif = bord vertical + tint teal Nordic Slate
+                    borderLeft: isActive ? '4px solid #0f766e' : '4px solid transparent',
+                    bgcolor: isActive ? 'rgba(15, 118, 110, 0.06)' : 'transparent',
+                    transition: 'background-color 180ms cubic-bezier(0.4, 0, 0.2, 1), border-left-color 180ms cubic-bezier(0.4, 0, 0.2, 1)',
+                    '&:hover': { bgcolor: isActive ? 'rgba(15, 118, 110, 0.10)' : '#f5f5f4' },
                   }}
                 >
                   <TableCell>

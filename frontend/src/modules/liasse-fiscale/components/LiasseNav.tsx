@@ -191,12 +191,14 @@ const LiasseNav: React.FC<LiasseNavProps> = ({ currentPageId, onPageSelect, regi
                           pl: 3,
                           pr: 1,
                           minHeight: 32,
-                          borderLeft: isActive ? '3px solid #171717' : '3px solid transparent',
-                          bgcolor: isActive ? '#e5e5e5' : 'transparent',
-                          '&:hover': { bgcolor: '#e5e5e5' },
+                          // Page active = accent teal Nordic Slate
+                          borderLeft: isActive ? '3px solid #0f766e' : '3px solid transparent',
+                          bgcolor: isActive ? 'rgba(15, 118, 110, 0.10)' : 'transparent',
+                          transition: 'background-color 180ms cubic-bezier(0.4, 0, 0.2, 1), border-left-color 180ms cubic-bezier(0.4, 0, 0.2, 1)',
+                          '&:hover': { bgcolor: isActive ? 'rgba(15, 118, 110, 0.16)' : 'rgba(15, 118, 110, 0.06)' },
                           '&.Mui-selected': {
-                            bgcolor: '#e5e5e5',
-                            '&:hover': { bgcolor: '#d4d4d4' },
+                            bgcolor: 'rgba(15, 118, 110, 0.10)',
+                            '&:hover': { bgcolor: 'rgba(15, 118, 110, 0.16)' },
                           },
                         }}
                       >

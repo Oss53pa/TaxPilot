@@ -1233,6 +1233,34 @@ export function createFiscaSyncTheme(mode: 'light' | 'dark') {
           },
         },
       },
+
+      // ToggleButton / ToggleButtonGroup — segmented controls
+      // (vue Calendrier/Liste, filtres Formation, etc.)
+      MuiToggleButton: {
+        styleOverrides: {
+          root: {
+            textTransform: 'none' as const,
+            fontWeight: 500,
+            borderColor: c.border,
+            color: c.textSecondary,
+            transition: `background-color ${transitions.base}, color ${transitions.base}, border-color ${transitions.base}`,
+            '&:hover': {
+              backgroundColor: 'rgba(15, 118, 110, 0.06)',
+              color: c.textPrimary,
+            },
+            '&.Mui-selected': {
+              backgroundColor: 'rgba(15, 118, 110, 0.14)',
+              color: fiscasyncPalette.teal,
+              fontWeight: 600,
+              borderColor: fiscasyncPalette.teal,
+              '&:hover': {
+                backgroundColor: 'rgba(15, 118, 110, 0.20)',
+                color: fiscasyncPalette.tealDark,
+              },
+            },
+          },
+        },
+      },
     },
   })
 }

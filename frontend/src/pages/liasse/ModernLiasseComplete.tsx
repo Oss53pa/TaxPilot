@@ -589,12 +589,16 @@ const ModernLiasseComplete: React.FC = () => {
                           onClick={() => handleSheetSelect(sheet.id)}
                           sx={{
                             pl: 4,
+                            // Border = couleur de la catégorie (section couleur-codée) ; fond = teal tint
                             borderLeft: `3px solid ${isSelected ? category.color : 'transparent'}`,
                             backgroundColor: isSelected
-                              ? alpha(theme.palette.primary.main, 0.08)
+                              ? 'rgba(15, 118, 110, 0.14)'
                               : 'rgba(255, 255, 255, 0.05)',
+                            transition: 'background-color 180ms cubic-bezier(0.4, 0, 0.2, 1)',
                             '&:hover': {
-                              backgroundColor: alpha(theme.palette.primary.main, 0.04),
+                              backgroundColor: isSelected
+                                ? 'rgba(15, 118, 110, 0.20)'
+                                : 'rgba(15, 118, 110, 0.06)',
                             },
                           }}
                         >

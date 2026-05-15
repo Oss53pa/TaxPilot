@@ -151,9 +151,11 @@ const ArchivesPage: React.FC = () => {
                 <Card
                   sx={{
                     cursor: 'pointer',
-                    border: isActive ? '2px solid #171717' : '1px solid #e5e5e5',
+                    // Carte sélectionnée = bordure teal Nordic Slate
+                    border: isActive ? '2px solid #0f766e' : '1px solid #e7e5e4',
+                    boxShadow: isActive ? '0 0 0 3px rgba(15, 118, 110, 0.12)' : 'none',
                     transition: 'all 0.2s',
-                    '&:hover': { boxShadow: 3 },
+                    '&:hover': { boxShadow: isActive ? '0 0 0 3px rgba(15, 118, 110, 0.12), 0 4px 12px rgba(0,0,0,0.06)' : '0 4px 12px rgba(0,0,0,0.06)' },
                   }}
                   onClick={() => handleSelectExercice(ex.annee)}
                 >
@@ -182,7 +184,7 @@ const ArchivesPage: React.FC = () => {
                         <Chip label="Audite" size="small" sx={{ bgcolor: '#22c55e22', color: '#22c55e', fontSize: '0.65rem' }} />
                       )}
                       {isActive && (
-                        <Chip label="Actif" size="small" sx={{ bgcolor: '#17171722', color: '#171717', fontSize: '0.65rem', fontWeight: 600 }} />
+                        <Chip label="Actif" size="small" sx={{ bgcolor: 'rgba(15, 118, 110, 0.14)', color: '#0f766e', fontSize: '0.65rem', fontWeight: 600 }} />
                       )}
                     </Box>
                     <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
