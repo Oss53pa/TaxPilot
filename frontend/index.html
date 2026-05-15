@@ -11,16 +11,23 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     
-    <!-- Dosis (primary premium UI font) + Exo 2 + Grand Hotel + JetBrains Mono + Open Sans + Playfair Display + UnifrakturMaguntia + Inter fonts -->
+    <!--
+      Polices premium :
+      - Dosis (primary UI, Nordic Slate) — 6 fichiers consommateurs
+      - Grand Hotel (brand Liass'Pilot) — 7 fichiers
+      - JetBrains Mono (chiffres tabulaires, code snippets) — 7 fichiers
+      - Inter (fallback humanist) — 92 fichiers
+      Polices supprimées du préchargement :
+        - Exo 2 (fallback déclaratif suffisant via system stack)
+        - Open Sans (1 fichier orphelin)
+        - Playfair Display (0 fichier)
+        - UnifrakturMaguntia (0 fichier)
+        - Material Icons icon-font (icônes consommées en SVG via @mui/icons-material)
+      Économie ≈ 200 KB WOFF2 + 1 requête CSS sur le first paint.
+    -->
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Dosis:wght@200;300;400;500;600;700;800&family=Exo+2:wght@300;400;500;600;700;800&family=Grand+Hotel&family=JetBrains+Mono:wght@400;500;600&family=Open+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700&family=UnifrakturMaguntia&family=Inter:wght@300;400;500;600;700&display=swap"
-    />
-    
-    <!-- Material Icons -->
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      href="https://fonts.googleapis.com/css2?family=Dosis:wght@300;400;500;600;700;800&family=Grand+Hotel&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
     />
   </head>
   <body>

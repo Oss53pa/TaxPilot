@@ -91,26 +91,34 @@ const NotificationCenter: React.FC<{ sx?: Record<string, unknown> }> = ({ sx }) 
 
     simulateNotifications()
 
-    // Simulation WebSocket pour nouvelles notifications
-    const interval = setInterval(() => {
-      // Ajouter une notification aléatoire de temps en temps
-      if (Math.random() > 0.95) { // 5% chance toutes les 5s
-        const newNotif: Notification = {
-          id: Date.now().toString(),
-          type: Math.random() > 0.5 ? 'info' : 'success',
-          title: 'Nouvelle Activité',
-          message: 'Synchronisation balance automatique effectuée',
-          timestamp: new Date(),
-          isRead: false,
-          module: 'Système'
-        }
-        
-        setNotifications(prev => [newNotif, ...prev])
-        setUnreadCount(prev => prev + 1)
-      }
-    }, 5000)
+    // ⚠️ Le setInterval(5s) précédent générait des notifs aléatoires en boucle
+    // (Math.random() > 0.95) — re-render permanent du Layout + Dashboard
+    // toutes les 5s même quand l'onglet est en arrière-plan, pour un effet
+    // purement cosmétique. Supprimé : les vraies notifs viendront d'un
+    // WebSocket ou Supabase Realtime quand câblé. Pour le mode démo, on
+    // peut réactiver via un flag explicite (URL ?demo-notifs=1).
+    const params = typeof window !== 'undefined'
+      ? new URLSearchParams(window.location.search)
+      : new URLSearchParams()
+    const interval = params.get('demo-notifs') === '1'
+      ? setInterval(() => {
+          if (Math.random() > 0.95) {
+            const newNotif: Notification = {
+              id: Date.now().toString(),
+              type: Math.random() > 0.5 ? 'info' : 'success',
+              title: 'Nouvelle Activité',
+              message: 'Synchronisation balance automatique effectuée',
+              timestamp: new Date(),
+              isRead: false,
+              module: 'Système',
+            }
+            setNotifications(prev => [newNotif, ...prev])
+            setUnreadCount(prev => prev + 1)
+          }
+        }, 5000)
+      : (null as unknown as ReturnType<typeof setInterval>)
 
-    return () => clearInterval(interval)
+    return () => { if (interval) clearInterval(interval) }
   }, [])
 
   const handleOpen = (event: React.MouseEvent<HTMLElement>) => {
