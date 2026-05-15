@@ -50,6 +50,7 @@ import {
 } from '@mui/icons-material'
 import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
 import { exporterLiasse } from '@/modules/liasse-fiscale/services/liasse-export-excel'
+import { scopeKey } from '@/services/dossierScopeService'
 import {
   type ExportFormatId,
   type ExportProfile,
@@ -338,8 +339,8 @@ const ExportCenter: React.FC<Props> = ({ profiles }) => {
                 startIcon={<ExcelIcon />}
                 onClick={() => {
                   try {
-                    // Load balance and entreprise from localStorage
-                    const balRaw = localStorage.getItem('fiscasync_balance_latest')
+                    // Load balance and entreprise from localStorage — scopé par dossier.
+                    const balRaw = localStorage.getItem(scopeKey('fiscasync_balance_latest'))
                     const bal = balRaw ? JSON.parse(balRaw) : null
                     if (!bal?.entries?.length) {
                       alert('Aucune balance importee. Importez une balance avant d\'exporter.')
@@ -353,7 +354,8 @@ const ExportCenter: React.FC<Props> = ({ profiles }) => {
                       solde_debit: Number(e.solde_debit) || 0,
                       solde_credit: Number(e.solde_credit) || 0,
                     }))
-                    const entRaw = localStorage.getItem('fiscasync_entreprise_settings') || localStorage.getItem('fiscasync_db_entreprise_settings')
+                    const entRaw = localStorage.getItem(scopeKey('fiscasync_entreprise_settings'))
+                      || localStorage.getItem(scopeKey('fiscasync_db_entreprise_settings'))
                     const entParsed = entRaw ? JSON.parse(entRaw) : {}
                     const ent = Array.isArray(entParsed) ? entParsed[0] || {} : entParsed
                     const entreprise = {
@@ -394,11 +396,11 @@ const ExportCenter: React.FC<Props> = ({ profiles }) => {
 
                     // Update workflow state
                     try {
-                      const wsRaw = localStorage.getItem('fiscasync_workflow_state')
+                      const wsRaw = localStorage.getItem(scopeKey('fiscasync_workflow_state'))
                       const ws = wsRaw ? JSON.parse(wsRaw) : {}
                       ws.lastExportDate = new Date().toISOString()
                       ws.lastExportFormat = 'excel'
-                      localStorage.setItem('fiscasync_workflow_state', JSON.stringify(ws))
+                      localStorage.setItem(scopeKey('fiscasync_workflow_state'), JSON.stringify(ws))
                     } catch { /* ignore */ }
                   } catch (err: any) {
                     alert(`Erreur export: ${err?.message || err}`)

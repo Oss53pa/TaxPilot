@@ -84,6 +84,7 @@ import {
 } from '@/services/dgiFilingStorageService'
 import { generateXmlForDeclaration, downloadXml } from '@/services/dgiXmlGeneratorService'
 import { PrintButton } from '@/shared/print-engine'
+import { scopeKey } from '@/services/dossierScopeService'
 
 interface Declaration {
   id: string
@@ -133,13 +134,15 @@ const ModernTeledeclaration: React.FC = () => {
 
   const loadDeclarations = () => {
     try {
-      const raw = localStorage.getItem('fiscasync_workflow_state')
+      // Lectures scopées par dossier — sinon cabinet leak entre clients.
+      const raw = localStorage.getItem(scopeKey('fiscasync_workflow_state'))
       const ws = raw ? JSON.parse(raw) : {}
 
       // Read entreprise name
       let companyName = 'Mon entreprise'
       try {
-        const entRaw = localStorage.getItem('fiscasync_entreprise_settings') || localStorage.getItem('fiscasync_db_entreprise_settings')
+        const entRaw = localStorage.getItem(scopeKey('fiscasync_entreprise_settings'))
+          || localStorage.getItem(scopeKey('fiscasync_db_entreprise_settings'))
         if (entRaw) {
           const ent = JSON.parse(entRaw)
           const e = Array.isArray(ent) ? ent[0] : ent
@@ -224,7 +227,7 @@ const ModernTeledeclaration: React.FC = () => {
     let companyName = 'Mon entreprise'
     let nif = ''
     try {
-      const entRaw = localStorage.getItem('fiscasync_entreprise_settings')
+      const entRaw = localStorage.getItem(scopeKey('fiscasync_entreprise_settings'))
       if (entRaw) {
         const ent = JSON.parse(entRaw)
         companyName = ent?.raison_sociale || companyName

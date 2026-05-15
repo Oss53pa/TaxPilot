@@ -42,6 +42,7 @@ import {
 import { auditOrchestrator, reportGenerator } from '@/services/audit'
 import { PrintButton } from '@/shared/print-engine'
 import { getAllSessions } from '@/services/audit/auditStorage'
+import { scopeKey } from '@/services/dossierScopeService'
 import type { SessionAudit, Severite, NiveauControle, ResultatControle } from '@/types/audit.types'
 import { NIVEAUX_NOMS } from '@/types/audit.types'
 import { updateWorkflowState } from '@/services/workflowStateService'
@@ -66,7 +67,7 @@ interface BalanceData {
 function loadBalanceFromStorage(): BalanceData | null {
   // Try fiscasync_balance_latest first
   try {
-    const raw = localStorage.getItem('fiscasync_balance_latest')
+    const raw = localStorage.getItem(scopeKey('fiscasync_balance_latest'))
     if (raw) {
       const parsed = JSON.parse(raw)
       if (Array.isArray(parsed?.entries) && parsed.entries.length > 0) {
@@ -87,7 +88,7 @@ function loadBalanceFromStorage(): BalanceData | null {
 
   // Try fiscasync_balance_list
   try {
-    const raw = localStorage.getItem('fiscasync_balance_list')
+    const raw = localStorage.getItem(scopeKey('fiscasync_balance_list'))
     if (raw) {
       const list = JSON.parse(raw)
       if (Array.isArray(list) && list.length > 0 && Array.isArray(list[0]?.entries) && list[0].entries.length > 0) {
@@ -110,7 +111,7 @@ function loadBalanceFromStorage(): BalanceData | null {
 
 function loadBalanceN1FromStorage(): BalanceEntry[] | undefined {
   try {
-    const raw = localStorage.getItem('fiscasync_balance_latest_n1')
+    const raw = localStorage.getItem(scopeKey('fiscasync_balance_latest_n1'))
     if (raw) {
       const parsed = JSON.parse(raw)
       if (Array.isArray(parsed?.entries) && parsed.entries.length > 0) return parsed.entries

@@ -339,7 +339,8 @@ export function getReceipt(id: string): FilingReceipt | null {
 export async function generateDSF(_exercice: string): Promise<DSFData | null> {
   try {
     // Load balance from balanceStorageService
-    const balanceRaw = localStorage.getItem('fiscasync_balance_latest')
+    // Lecture scopée par dossier — sinon cabinet leak entre clients.
+    const balanceRaw = localStorage.getItem(scopeKey('fiscasync_balance_latest'))
     if (!balanceRaw) return null
     const balance = JSON.parse(balanceRaw)
     if (!balance?.entries?.length) return null

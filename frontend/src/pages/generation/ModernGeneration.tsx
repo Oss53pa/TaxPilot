@@ -40,6 +40,7 @@ import PreGenerationDialog from '@/components/Generation/PreGenerationDialog'
 import type { PreGenerationValidation } from '@/types/audit'
 import type { AuditResult as PreGenAuditResult } from '@/types/audit'
 import { getAllSessions } from '@/services/audit/auditStorage'
+import { scopeKey } from '@/services/dossierScopeService'
 
 const REGIMES = [
   { value: 'REEL_NORMAL', label: 'Systeme Normal', description: 'CA >= 60M FCFA - Liasse complete 84 pages' },
@@ -63,7 +64,10 @@ const ModernGeneration: React.FC = () => {
 
     // Auto-detect regime from entreprise settings
     try {
-      const raw = localStorage.getItem('fiscasync_entreprise_settings') || localStorage.getItem('fiscasync_db_entreprise_settings')
+      // Scope par dossier — auto-détection du régime ne doit pas hériter du
+      // dossier précédent en mode cabinet.
+      const raw = localStorage.getItem(scopeKey('fiscasync_entreprise_settings'))
+        || localStorage.getItem(scopeKey('fiscasync_db_entreprise_settings'))
       if (raw) {
         const parsed = JSON.parse(raw)
         const e = Array.isArray(parsed) ? parsed[0] : parsed

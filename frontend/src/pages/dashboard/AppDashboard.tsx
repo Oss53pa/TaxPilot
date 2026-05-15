@@ -48,6 +48,7 @@ import { getWorkflowState } from '@/services/workflowStateService'
 import type { WorkflowState } from '@/services/workflowStateService'
 import { getFilingStats, getAllReceipts } from '@/services/dgiFilingStorageService'
 import { getBankFeedStats } from '@/services/bankFeedStorageService'
+import { scopeKey } from '@/services/dossierScopeService'
 
 // ─── Palette tokens (derived from central theme) ─────────────────────
 const C = {
@@ -247,7 +248,9 @@ const AppDashboard: React.FC = () => {
 
     // Balance import
     try {
-      const balRaw = localStorage.getItem('fiscasync_balance_latest')
+      // Scope par dossier — sinon le timeline d'activité affiche l'historique
+      // du dossier précédent quand on switche client en mode cabinet.
+      const balRaw = localStorage.getItem(scopeKey('fiscasync_balance_latest'))
       if (balRaw) {
         const balData = JSON.parse(balRaw)
         const nbEntries = balData?.entries?.length || 0

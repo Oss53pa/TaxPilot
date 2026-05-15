@@ -6,6 +6,7 @@ import { logger } from '@/utils/logger'
 import React, { useEffect, useState } from 'react'
 import { useLiasseData } from '../DataProvider'
 import { balanceService, accountingService, entrepriseService } from '@/services'
+import { scopeKey } from '@/services/dossierScopeService'
 
 // Fonction pour convertir les données mockées en données backend
 export const convertMockToBackendData = (mockData: any[], backendData: any) => {
@@ -63,13 +64,14 @@ export function withBackendData<P extends object>(
             let localEntreprise = null
             // Priority: fiscasync_entreprise_settings (source of truth from Parametrage)
             try {
-              const settingsRaw = localStorage.getItem('fiscasync_entreprise_settings')
+              // Scope par dossier — sinon les notes annexes affichent l'entreprise précédente.
+              const settingsRaw = localStorage.getItem(scopeKey('fiscasync_entreprise_settings'))
               if (settingsRaw) localEntreprise = JSON.parse(settingsRaw)
             } catch { /* ignore */ }
             // Fallback: fiscasync_db_entreprises (seed/demo data)
             if (!localEntreprise) {
               try {
-                const raw = localStorage.getItem('fiscasync_db_entreprises')
+                const raw = localStorage.getItem(scopeKey('fiscasync_db_entreprises'))
                 const list = raw ? JSON.parse(raw) : []
                 if (list.length > 0) localEntreprise = list[0]
               } catch { /* ignore */ }

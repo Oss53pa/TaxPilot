@@ -88,14 +88,15 @@ export function getWorkflowState(exercice?: string): WorkflowState {
     }
   } catch { /* ignore */ }
 
-  // Auto-detect configuration and balance from existing localStorage keys
+  // Auto-detect configuration and balance from existing localStorage keys.
+  // Lectures scopées par dossier — sinon cabinet leak entre clients.
   const state = { ...DEFAULT_STATE }
   try {
-    const ent = localStorage.getItem('fiscasync_entreprise_settings')
+    const ent = localStorage.getItem(scopeKey('fiscasync_entreprise_settings'))
     if (ent) state.configurationDone = true
   } catch { /* ignore */ }
   try {
-    const bal = localStorage.getItem('fiscasync_balance_latest')
+    const bal = localStorage.getItem(scopeKey('fiscasync_balance_latest'))
     if (bal) {
       const parsed = JSON.parse(bal)
       if (Array.isArray(parsed?.entries) && parsed.entries.length > 0) {

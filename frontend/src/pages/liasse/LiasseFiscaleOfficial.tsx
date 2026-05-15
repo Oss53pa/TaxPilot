@@ -105,6 +105,7 @@ import {
 // Styles
 import '../../styles/liasse-fixes.css'
 import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
+import { scopeKey } from '@/services/dossierScopeService'
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -509,18 +510,20 @@ const LiasseFiscaleOfficial: React.FC = () => {
                   const newRegime = e.target.value as RegimeImposition
                   // Mettre à jour localStorage pour que les composants (via withBackendData) reflètent le changement
                   try {
-                    const settingsRaw = localStorage.getItem('fiscasync_entreprise_settings')
+                    // Scope par dossier — sinon le changement de régime d'un
+                    // client cabinet est écrit sur le dossier précédent.
+                    const settingsRaw = localStorage.getItem(scopeKey('fiscasync_entreprise_settings'))
                     if (settingsRaw) {
                       const settings = JSON.parse(settingsRaw)
                       settings.regime_imposition = newRegime
-                      localStorage.setItem('fiscasync_entreprise_settings', JSON.stringify(settings))
+                      localStorage.setItem(scopeKey('fiscasync_entreprise_settings'), JSON.stringify(settings))
                     }
-                    const dbRaw = localStorage.getItem('fiscasync_db_entreprises')
+                    const dbRaw = localStorage.getItem(scopeKey('fiscasync_db_entreprises'))
                     if (dbRaw) {
                       const list = JSON.parse(dbRaw)
                       if (list.length > 0) {
                         list[0].regime_imposition = newRegime
-                        localStorage.setItem('fiscasync_db_entreprises', JSON.stringify(list))
+                        localStorage.setItem(scopeKey('fiscasync_db_entreprises'), JSON.stringify(list))
                       }
                     }
                   } catch { /* ignore */ }
