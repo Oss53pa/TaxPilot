@@ -372,6 +372,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     if (isMobile) setMobileOpen(false)
                   }}
                   sx={{
+                    position: 'relative',
                     borderRadius: 3,
                     mx: isCollapsed ? 0.5 : 1,
                     my: 0.25,
@@ -379,19 +380,39 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     px: isCollapsed ? 1.5 : 2,
                     justifyContent: isCollapsed ? 'center' : 'flex-start',
                     color: P.primary300,
+                    transition: 'background-color 180ms cubic-bezier(0.4, 0, 0.2, 1), color 180ms cubic-bezier(0.4, 0, 0.2, 1)',
+                    // Bord vertical d'accent teal (révélé sur selected)
+                    '&::before': {
+                      content: '""',
+                      position: 'absolute',
+                      left: 0,
+                      top: 8,
+                      bottom: 8,
+                      width: 3,
+                      borderRadius: 2,
+                      backgroundColor: 'transparent',
+                      transition: 'background-color 180ms cubic-bezier(0.4, 0, 0.2, 1)',
+                    },
                     '&:hover': {
-                      backgroundColor: P.primary800,
+                      backgroundColor: 'rgba(15, 118, 110, 0.12)',
                       color: P.white,
-                      '& .MuiListItemIcon-root': { color: P.white },
+                      '& .MuiListItemIcon-root': { color: P.tealLight },
+                      '& .MuiListItemText-primary': { color: P.white },
                     },
+                    // ── État sélectionné = ACCENT TEAL Nordic Slate ──
                     '&.Mui-selected': {
-                      backgroundColor: P.primary700,
+                      backgroundColor: 'rgba(15, 118, 110, 0.20)',
                       color: P.white,
-                      '& .MuiListItemIcon-root': { color: P.white },
+                      '&::before': { backgroundColor: P.teal },
+                      '& .MuiListItemIcon-root': { color: P.tealLight },
                       '& .MuiListItemText-primary': { color: P.white, fontWeight: 600 },
-                      '&:hover': { backgroundColor: P.primary600 },
+                      '&:hover': { backgroundColor: 'rgba(15, 118, 110, 0.28)' },
                     },
-                    '& .MuiListItemIcon-root': { color: P.primary400, minWidth: isCollapsed ? 0 : 40 },
+                    '& .MuiListItemIcon-root': {
+                      color: P.primary400,
+                      minWidth: isCollapsed ? 0 : 40,
+                      transition: 'color 180ms cubic-bezier(0.4, 0, 0.2, 1)',
+                    },
                     '& .MuiListItemText-primary': { color: P.primary300 },
                   }}
                 >

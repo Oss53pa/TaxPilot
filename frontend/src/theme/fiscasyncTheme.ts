@@ -789,20 +789,37 @@ export function createFiscaSyncTheme(mode: 'light' | 'dark') {
       MuiListItemButton: {
         styleOverrides: {
           root: {
+            position: 'relative',
             borderRadius: '12px',
             margin: '2px 8px',
             color: isDark ? '#a8a29e' : fiscasyncPalette.primary300,
             minHeight: '44px',
-            '&:hover': {
-              backgroundColor: isDark ? '#292524' : fiscasyncPalette.primary800,
-              color: fiscasyncPalette.white,
+            // Bord vertical d'accent (teal) — caché par défaut, révélé sur selected.
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              left: 0,
+              top: 8,
+              bottom: 8,
+              width: 3,
+              borderRadius: 2,
+              backgroundColor: 'transparent',
+              transition: `background-color ${transitions.base}`,
             },
+            '&:hover': {
+              backgroundColor: 'rgba(15, 118, 110, 0.10)',
+              color: fiscasyncPalette.white,
+              '& .MuiListItemIcon-root': { color: fiscasyncPalette.tealLight },
+            },
+            // ── État actif/sélectionné = ACCENT TEAL (Nordic Slate) ──
             '&.Mui-selected': {
-              backgroundColor: isDark ? '#44403c' : fiscasyncPalette.primary700,
+              backgroundColor: 'rgba(15, 118, 110, 0.18)',
               color: fiscasyncPalette.white,
               fontWeight: 600,
+              '&::before': { backgroundColor: fiscasyncPalette.teal },
+              '& .MuiListItemIcon-root': { color: fiscasyncPalette.tealLight },
               '&:hover': {
-                backgroundColor: isDark ? '#57534e' : fiscasyncPalette.primary600,
+                backgroundColor: 'rgba(15, 118, 110, 0.26)',
               },
             },
           },
@@ -814,6 +831,7 @@ export function createFiscaSyncTheme(mode: 'light' | 'dark') {
           root: {
             color: fiscasyncPalette.primary400,
             minWidth: '36px',
+            transition: `color ${transitions.base}`,
             '& .MuiSvgIcon-root': { fontSize: '1.25rem' },
           },
         },
@@ -1050,27 +1068,41 @@ export function createFiscaSyncTheme(mode: 'light' | 'dark') {
             backgroundColor: isDark ? '#44403c' : fiscasyncPalette.primary300,
           },
           thumb: { boxShadow: shadows.sm },
+          // État coché = teal (Nordic Slate accent)
+          switchBase: {
+            '&.Mui-checked': {
+              color: fiscasyncPalette.teal,
+              '& + .MuiSwitch-track': {
+                backgroundColor: fiscasyncPalette.teal,
+                opacity: 1,
+              },
+            },
+          },
         },
       },
 
       MuiLinearProgress: {
         styleOverrides: {
           root: {
-            height: 4,
-            borderRadius: 2,
+            height: 6,
+            borderRadius: 3,
             backgroundColor: c.surfaceAlt,
           },
-          bar: { borderRadius: 2 },
+          // Barre de progression = teal par défaut
+          bar: { borderRadius: 3, backgroundColor: fiscasyncPalette.teal },
+          colorPrimary: { backgroundColor: c.surfaceAlt },
+          barColorPrimary: { backgroundColor: fiscasyncPalette.teal },
         },
       },
 
+      // Indicator des tabs = teal (matche le focus-ring du TextField)
       MuiTabs: {
         styleOverrides: {
           indicator: {
             height: 2,
             borderTopLeftRadius: 2,
             borderTopRightRadius: 2,
-            backgroundColor: c.textPrimary,
+            backgroundColor: fiscasyncPalette.teal,
           },
         },
       },
@@ -1084,7 +1116,7 @@ export function createFiscaSyncTheme(mode: 'light' | 'dark') {
             minHeight: 42,
             color: c.textSecondary,
             transition: `color ${transitions.base}`,
-            '&.Mui-selected': { color: c.textPrimary, fontWeight: 600 },
+            '&.Mui-selected': { color: fiscasyncPalette.teal, fontWeight: 600 },
             '&:hover:not(.Mui-selected)': { color: isDark ? '#d6d3d1' : fiscasyncPalette.primary700 },
           },
         },
@@ -1112,6 +1144,92 @@ export function createFiscaSyncTheme(mode: 'light' | 'dark') {
             fontSize: '0.875rem',
             minHeight: 36,
             transition: `background-color ${transitions.fast}`,
+            '&.Mui-selected': {
+              backgroundColor: 'rgba(15, 118, 110, 0.10)',
+              color: fiscasyncPalette.teal,
+              '&:hover': { backgroundColor: 'rgba(15, 118, 110, 0.16)' },
+            },
+          },
+        },
+      },
+
+      // Liens (TextLink, "Mot de passe oublié ?", "S'inscrire", footer links…)
+      MuiLink: {
+        defaultProps: { underline: 'hover' },
+        styleOverrides: {
+          root: {
+            color: fiscasyncPalette.teal,
+            fontWeight: 500,
+            transition: `color ${transitions.fast}`,
+            '&:hover': { color: fiscasyncPalette.tealDark },
+          },
+        },
+      },
+
+      // Checkbox / Radio cochés = teal
+      MuiCheckbox: {
+        styleOverrides: {
+          root: {
+            color: c.borderHover,
+            '&.Mui-checked': { color: fiscasyncPalette.teal },
+            '&.MuiCheckbox-indeterminate': { color: fiscasyncPalette.teal },
+          },
+        },
+      },
+      MuiRadio: {
+        styleOverrides: {
+          root: {
+            color: c.borderHover,
+            '&.Mui-checked': { color: fiscasyncPalette.teal },
+          },
+        },
+      },
+
+      // Badge — variantes "dot" + couleur primary = teal
+      MuiBadge: {
+        styleOverrides: {
+          colorPrimary: {
+            backgroundColor: fiscasyncPalette.teal,
+            color: fiscasyncPalette.white,
+          },
+        },
+      },
+
+      // Stepper actif/complété = teal
+      MuiStepIcon: {
+        styleOverrides: {
+          root: {
+            color: c.surfaceAlt,
+            '&.Mui-active':    { color: fiscasyncPalette.teal },
+            '&.Mui-completed': { color: fiscasyncPalette.teal },
+          },
+          text: { fill: c.textPrimary },
+        },
+      },
+      MuiStepLabel: {
+        styleOverrides: {
+          label: {
+            color: c.textSecondary,
+            '&.Mui-active':    { color: c.textPrimary, fontWeight: 600 },
+            '&.Mui-completed': { color: c.textPrimary, fontWeight: 500 },
+          },
+        },
+      },
+
+      // CircularProgress = teal par défaut (cohérence avec LinearProgress)
+      MuiCircularProgress: {
+        styleOverrides: {
+          colorPrimary: { color: fiscasyncPalette.teal },
+        },
+      },
+
+      // FAB primary = teal (call-to-action flottant)
+      MuiFab: {
+        styleOverrides: {
+          primary: {
+            backgroundColor: fiscasyncPalette.teal,
+            color: fiscasyncPalette.white,
+            '&:hover': { backgroundColor: fiscasyncPalette.tealDark },
           },
         },
       },
