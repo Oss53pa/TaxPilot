@@ -35,6 +35,8 @@ const SupplementImpotSociete: React.FC = () => {
     reintegrations: [], deductions: [],
     total_reintegrations: 0, total_deductions: 0,
     resultat_fiscal: 0, is_brut: 0, imf: 0, is_du: 0, base_is: 'IMF',
+    warnings: [],
+    audit: { nbAuto: 0, nbUser: 0, nbOverride: 0, estPurementAutomatique: true },
   }
   const [passage, setPassage] = useState<TableauPassageResult>(defaultPassage)
 

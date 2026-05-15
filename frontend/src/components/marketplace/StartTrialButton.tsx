@@ -33,6 +33,11 @@ export default function StartTrialButton({
     setLoading(true);
     setError(null);
     try {
+      if (!supabase) {
+        setError("Service indisponible (Supabase non configuré).");
+        setLoading(false);
+        return;
+      }
       const { data: sessionData } = await supabase.auth.getSession();
       if (!sessionData?.session) {
         // Rediriger vers login avec retour

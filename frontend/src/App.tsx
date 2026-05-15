@@ -221,7 +221,11 @@ function App() {
           <Route path="/settings/invitations" element={<S><AdminPlaceholder title="Invitations" description="Envoyez des invitations par email à vos collaborateurs pour rejoindre le cabinet." icon="invite" /></S>} />
 
           {/* Pages métier — nécessitent un dossier actif en mode cabinet */}
-          <Route path="/dashboard" element={<DS><AppDashboard /></DS>} />
+          {/* /dashboard = Cockpit Liass'Pilot (KPI cards + sparklines + insight PROPH3T).
+              AppDashboard ancien grayscale conservé sous /dashboard-legacy le temps
+              de valider la transition (retirable en v1.x). */}
+          <Route path="/dashboard" element={<DS><ModernDashboard /></DS>} />
+          <Route path="/dashboard-legacy" element={<DS><AppDashboard /></DS>} />
           <Route path="/parametrage/*" element={<DS><Parametrage /></DS>} />
           <Route path="/import-balance" element={<DS><ModernImportBalance /></DS>} />
           <Route path="/import-history" element={<DS><ImportHistoryPage /></DS>} />

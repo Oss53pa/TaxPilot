@@ -96,7 +96,9 @@ export const transitions = {
 // ── Police premium (Dosis : humanist sans-serif élégant, légèrement étendu) ──
 const FONT_PRIMARY = '"Dosis", "Inter", "Exo 2", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
 const FONT_DISPLAY = '"Dosis", "Inter", "Exo 2", -apple-system, BlinkMacSystemFont, sans-serif'
-const FONT_MONO    = '"JetBrains Mono", "SF Mono", Consolas, monospace'
+/** Police mono : exportée pour usage explicite dans les composants
+ * (chiffres tabulaires, snippets JSON). */
+export const FONT_MONO = '"JetBrains Mono", "SF Mono", Consolas, monospace'
 
 export const fiscasyncTheme = createTheme({
   palette: {

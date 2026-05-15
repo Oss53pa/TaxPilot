@@ -42,7 +42,6 @@ import { getWorkflowState } from '@/services/workflowStateService'
 import { getAllExercices } from '@/services/exerciceStorageService'
 import { getAllBalances } from '@/services/balanceStorageService'
 import NotificationCenter from '@/components/notifications/NotificationCenter'
-import OnboardingTour from '@/components/onboarding/OnboardingTour'
 import { useModeStore } from '@/store/modeStore'
 import { useDossierStore } from '@/store/dossierStore'
 // import { FeatureGate } from '@/components/gating'  // (réservé pour gating Cabinet ultérieur)
@@ -242,7 +241,8 @@ const ModernDashboard: React.FC = () => {
       background: P.primary50,
       position: 'relative',
     }}>
-      <OnboardingTour />
+      {/* Onboarding centralisé : GuidedTour est rendu via Layout.tsx — on évite
+          le double-modal en supprimant l'ancien <OnboardingTour /> ici. */}
 
       {/* ════ Top bar ════ */}
       <Box sx={{

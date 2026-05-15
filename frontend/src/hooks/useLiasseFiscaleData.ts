@@ -235,11 +235,15 @@ export function useLiasseFiscaleData(): LiasseFiscaleData {
     // Sync the singleton liasseDataService — required by pages that read via the
     // singleton (e.g., 12_Resultat utilise generateCompteResultat()). Sans ça les
     // calculs retournent 0 → page Compte de Résultat affiche colonnes vides.
+    //
+    // Adapter : le hook expose BalanceEntry (modules/liasse-fiscale/types) avec
+    // `libelle`, le service liasseDataService attend `intitule`. On mappe ici
+    // pour préserver les deux APIs (deux interfaces historiques co-existantes).
     if (bal.length > 0) {
-      liasseDataService.loadBalance(bal)
+      liasseDataService.loadBalance(bal.map(e => ({ ...e, intitule: e.libelle })))
     }
     if (balN1.length > 0) {
-      liasseDataService.loadBalanceN1(balN1)
+      liasseDataService.loadBalanceN1(balN1.map(e => ({ ...e, intitule: e.libelle })))
     }
     // Only auto-detect regime on initial load, not on focus refresh
     // (user may have manually selected a different regime)
