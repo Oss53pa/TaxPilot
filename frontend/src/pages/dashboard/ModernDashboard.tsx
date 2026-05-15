@@ -1,7 +1,8 @@
 /**
- * Liass'Pilot - Landing Page
- * Style minimaliste avec palette Grayscale monochrome
- * Adapté au mode Entreprise / Cabinet
+ * Liass'Pilot — In-App Dashboard (Nordic Slate premium)
+ * Style : warm-stone neutrals + teal accent (#0f766e), Dosis typography,
+ * 4-layer shadows, hover lift micro-interactions.
+ * Adapté au mode Entreprise / Cabinet.
  */
 
 import React, { useState, useEffect, useMemo } from 'react'
@@ -13,6 +14,7 @@ import {
   Stack,
   LinearProgress,
   Chip,
+  Paper,
 } from '@mui/material'
 import {
   Dashboard as DashboardIcon,
@@ -97,7 +99,7 @@ const ModernDashboard: React.FC = () => {
   const diffTime = endOfYear.getTime() - now.getTime()
   const daysUntilClose = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)))
 
-  const entrepriseNom = isCabinet ? (nomCabinet || 'Mon Cabinet') : (ent.nom || '\u2014')
+  const entrepriseNom = isCabinet ? (nomCabinet || 'Mon Cabinet') : (ent.nom || '—')
   const exercice = ent.exerciceDebut ? ent.exerciceDebut.substring(0, 4) : String(new Date().getFullYear())
 
   const navItemsEntreprise = [
@@ -146,31 +148,108 @@ const ModernDashboard: React.FC = () => {
   const resFmt = fmtCompact(financials.resultat)
   const resPositif = financials.resultat >= 0
 
+  // ── Visual tokens (Nordic Slate premium) ──
+  const closeUrgent = daysUntilClose <= 30
+  const closeSoon = daysUntilClose <= 90 && daysUntilClose > 30
+
+  // ── Reusable KPI Card renderer (premium card style) ──
+  type StatItem = {
+    value: string
+    label: string
+    sub?: string
+    progress?: number
+    accent?: 'neutral' | 'teal' | 'success' | 'warning'
+  }
+  const renderStatCard = (stat: StatItem) => {
+    const valueColor =
+      stat.accent === 'success' ? P.success :
+      stat.accent === 'warning' ? P.warning :
+      stat.accent === 'teal' ? P.teal :
+      P.primary900
+    return (
+      <Paper
+        key={stat.label}
+        elevation={0}
+        sx={{
+          p: 2,
+          bgcolor: P.white,
+          border: `1px solid ${P.primary200}`,
+          borderRadius: 2.5,
+          transition: 'border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease',
+          cursor: 'default',
+          '&:hover': {
+            borderColor: P.tealBorder,
+            boxShadow: '0 4px 12px rgba(15, 118, 110, 0.08)',
+            transform: 'translateY(-1px)',
+          },
+        }}
+      >
+        <Typography sx={{
+          fontSize: { xs: '1.4rem', md: '1.75rem' }, fontWeight: 700, color: valueColor,
+          lineHeight: 1.1, fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.01em',
+        }}>
+          {stat.value}
+        </Typography>
+        <Typography sx={{
+          color: P.primary600, fontWeight: 600, fontSize: '0.72rem',
+          textTransform: 'uppercase', letterSpacing: 1, mt: 0.5,
+        }}>
+          {stat.label}
+        </Typography>
+        {stat.progress !== undefined ? (
+          <LinearProgress
+            variant="determinate"
+            value={stat.progress}
+            sx={{
+              mt: 1, height: 4, borderRadius: 2, bgcolor: P.primary100,
+              '& .MuiLinearProgress-bar': {
+                borderRadius: 2,
+                bgcolor: stat.progress >= 100 ? P.success : P.teal,
+              },
+            }}
+          />
+        ) : (
+          <Typography sx={{ color: P.primary500, fontSize: '0.68rem', mt: 0.5 }}>
+            {stat.sub}
+          </Typography>
+        )}
+      </Paper>
+    )
+  }
+
   return (
     <Box sx={{
       display: 'flex',
       flexDirection: 'column',
       minHeight: '85vh',
-      bgcolor: 'background.paper',
+      width: '100%',
+      // Fond subtil warm-stone (au lieu du flat blanc) — donne de la profondeur.
+      background: `linear-gradient(180deg, ${P.white} 0%, ${P.primary50} 100%)`,
       position: 'relative',
     }}>
       <OnboardingTour />
 
-      {/* ── Header bar ── */}
+      {/* Header bar premium */}
       <Box sx={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         px: { xs: 2, md: 4 },
-        py: 1.5,
+        py: 2,
         borderBottom: `1px solid ${P.primary200}`,
+        bgcolor: 'rgba(255, 255, 255, 0.8)',
+        backdropFilter: 'blur(8px)',
       }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          {/* Accent rail teal a gauche du nom */}
+          <Box sx={{
+            width: 3, height: 36, bgcolor: P.teal, borderRadius: 2,
+          }} />
           <Box>
             <Stack direction="row" spacing={1} alignItems="center">
               <Typography
                 variant="subtitle1"
-                sx={{ fontWeight: 700, color: 'text.primary', letterSpacing: 0.5, lineHeight: 1.2 }}
+                sx={{ fontWeight: 700, color: P.primary900, letterSpacing: 0.3, lineHeight: 1.2 }}
               >
                 {entrepriseNom}
               </Typography>
@@ -178,13 +257,14 @@ const ModernDashboard: React.FC = () => {
                 label={isCabinet ? 'Cabinet' : 'Entreprise'}
                 size="small"
                 sx={{
-                  height: 20, fontSize: '0.65rem', fontWeight: 700,
-                  bgcolor: isCabinet ? P.primary900 : P.primary200,
-                  color: isCabinet ? P.white : P.primary700,
+                  height: 20, fontSize: '0.65rem', fontWeight: 700, letterSpacing: 0.4,
+                  bgcolor: isCabinet ? P.primary900 : 'rgba(15, 118, 110, 0.10)',
+                  color: isCabinet ? P.white : P.tealDark,
+                  border: isCabinet ? 'none' : `1px solid ${P.tealBorder}`,
                 }}
               />
             </Stack>
-            <Typography variant="caption" sx={{ color: 'text.disabled', letterSpacing: 0.3 }}>
+            <Typography variant="caption" sx={{ color: P.primary500, letterSpacing: 0.2 }}>
               {isCabinet ? `${cabinetStats.total} dossier(s) client(s)` : `Exercice ${exercice}`}
             </Typography>
           </Box>
@@ -197,8 +277,8 @@ const ModernDashboard: React.FC = () => {
             onClick={handleChangeMode}
             sx={{
               textTransform: 'none', fontWeight: 500, fontSize: '0.78rem',
-              color: P.primary500, borderRadius: 3,
-              '&:hover': { bgcolor: P.primary50 },
+              color: P.primary600, borderRadius: 2,
+              '&:hover': { bgcolor: 'rgba(15, 118, 110, 0.08)', color: P.tealDark },
             }}
           >
             Changer de mode
@@ -206,15 +286,29 @@ const ModernDashboard: React.FC = () => {
 
           <NotificationCenter sx={{ p: 0.5 }} />
 
-          <Typography variant="body2" sx={{ color: 'text.primary', fontWeight: 600, fontSize: '0.85rem' }}>
+          <Typography variant="body2" sx={{ color: P.primary900, fontWeight: 600, fontSize: '0.85rem' }}>
             {user?.firstName || user?.email || 'Admin'}
           </Typography>
 
-          <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.5 }}>
-            <Typography variant="caption" sx={{ color: 'text.disabled' }}>
-              Clôture:
+          {/* Compteur de cloture teinte selon urgence */}
+          <Box sx={{
+            display: 'flex', alignItems: 'baseline', gap: 0.6,
+            px: 1.5, py: 0.6,
+            bgcolor: closeUrgent ? 'rgba(185, 28, 28, 0.08)' : closeSoon ? 'rgba(180, 83, 9, 0.08)' : 'rgba(15, 118, 110, 0.08)',
+            border: `1px solid ${closeUrgent ? 'rgba(185, 28, 28, 0.20)' : closeSoon ? 'rgba(180, 83, 9, 0.20)' : P.tealBorder}`,
+            borderRadius: 2,
+          }}>
+            <Typography variant="caption" sx={{
+              color: closeUrgent ? P.errorText : closeSoon ? P.warningText : P.tealDark,
+              fontWeight: 500, fontSize: '0.7rem', letterSpacing: 0.3,
+            }}>
+              Clôture
             </Typography>
-            <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.primary', lineHeight: 1 }}>
+            <Typography sx={{
+              fontWeight: 700, fontSize: '0.95rem', lineHeight: 1,
+              color: closeUrgent ? P.error : closeSoon ? P.warning : P.teal,
+              fontVariantNumeric: 'tabular-nums',
+            }}>
               J-{daysUntilClose}
             </Typography>
           </Box>
@@ -225,9 +319,13 @@ const ModernDashboard: React.FC = () => {
             endIcon={<ArrowIcon />}
             onClick={() => navigate(isCabinet ? '/dossiers' : '/dashboard')}
             sx={{
-              bgcolor: 'text.primary', color: P.white, borderRadius: 3,
-              textTransform: 'none', fontWeight: 600, px: 2,
-              '&:hover': { bgcolor: 'grey.900' },
+              bgcolor: P.primary900, color: P.white, borderRadius: 2,
+              textTransform: 'none', fontWeight: 600, px: 2.2, py: 0.8,
+              boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+              '&:hover': {
+                bgcolor: P.primary800,
+                boxShadow: '0 4px 12px rgba(15, 118, 110, 0.18)',
+              },
             }}
           >
             {isCabinet ? 'Mes dossiers' : 'Accéder'}
@@ -235,7 +333,7 @@ const ModernDashboard: React.FC = () => {
         </Stack>
       </Box>
 
-      {/* ── Main content ── */}
+      {/* Main content */}
       <Box sx={{
         flex: 1,
         display: 'flex',
@@ -243,26 +341,46 @@ const ModernDashboard: React.FC = () => {
         alignItems: 'center',
         justifyContent: 'center',
         gap: 0,
-        px: 2,
-        py: { xs: 3, md: 0 },
+        px: { xs: 2, md: 4 },
+        py: { xs: 4, md: 5 },
       }}>
+        {/* Eyebrow tag teal */}
+        <Box sx={{
+          display: 'inline-flex', alignItems: 'center', gap: 0.8,
+          px: 1.5, py: 0.4, mb: 2.5,
+          bgcolor: P.tealBg,
+          border: `1px solid ${P.tealBorder}`,
+          borderRadius: 999,
+        }}>
+          <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: P.teal }} />
+          <Typography sx={{
+            fontSize: '0.7rem', fontWeight: 600, color: P.tealDark,
+            textTransform: 'uppercase', letterSpacing: 1.2,
+          }}>
+            {'SYSCOHADA · OHADA révisé 2017'}
+          </Typography>
+        </Box>
+
         {/* Brand */}
         <Typography
           sx={{
             fontFamily: "'Grand Hotel', cursive",
-            fontSize: { xs: '3rem', md: '4.2rem' },
+            fontSize: { xs: '3.2rem', md: '4.5rem' },
             fontWeight: 400,
-            color: 'text.primary',
-            lineHeight: 1.2,
-            mb: 0.5,
+            color: P.primary900,
+            lineHeight: 1.1,
+            mb: 1,
           }}
         >
-          Liass{'\u2019'}Pilot
+          Liass{'’'}Pilot
         </Typography>
 
         <Typography
           variant="body1"
-          sx={{ color: P.primary400, fontSize: '1rem', letterSpacing: 1, mb: 0.5 }}
+          sx={{
+            color: P.primary700, fontSize: { xs: '1rem', md: '1.1rem' },
+            fontWeight: 500, letterSpacing: 0.2, mb: 0.5, textAlign: 'center',
+          }}
         >
           {isCabinet
             ? 'Votre portefeuille de dossiers fiscaux SYSCOHADA, centralisé.'
@@ -272,7 +390,10 @@ const ModernDashboard: React.FC = () => {
 
         <Typography
           variant="body2"
-          sx={{ color: P.primary300, fontSize: '0.9rem', letterSpacing: 0.3, mb: { xs: 3, md: 4 } }}
+          sx={{
+            color: P.primary500, fontSize: '0.875rem', letterSpacing: 0.2,
+            mb: { xs: 3, md: 4 }, textAlign: 'center',
+          }}
         >
           {isCabinet
             ? 'Gérez vos clients. Produisez leurs liasses. En toute conformité.'
@@ -280,223 +401,201 @@ const ModernDashboard: React.FC = () => {
           }
         </Typography>
 
-        {/* ── Mode Entreprise : Hero Financial KPIs ── */}
+        {/* Mode Entreprise : Hero Financial KPIs (Premium cards CA + Resultat) */}
         {!isCabinet && financials.hasBal && (
-          <Stack
-            direction={{ xs: 'column', sm: 'row' }}
-            spacing={{ xs: 2, sm: 6 }}
-            sx={{ mb: 3 }}
-          >
+          <Box sx={{
+            display: 'grid',
+            gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, minmax(220px, 280px))' },
+            gap: 2,
+            mb: 4,
+          }}>
             {/* CA */}
-            <Box sx={{ textAlign: 'center' }}>
+            <Paper elevation={0} sx={{
+              p: 3, bgcolor: P.white, border: `1px solid ${P.primary200}`,
+              borderRadius: 3, position: 'relative', overflow: 'hidden',
+              transition: 'border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease',
+              '&:hover': {
+                borderColor: P.tealBorder,
+                boxShadow: '0 8px 24px rgba(15, 118, 110, 0.10)',
+                transform: 'translateY(-2px)',
+              },
+            }}>
+              {/* Accent rail teal en haut */}
+              <Box sx={{
+                position: 'absolute', top: 0, left: 0, right: 0, height: 3,
+                bgcolor: P.teal,
+              }} />
               <Typography variant="caption" sx={{
-                color: P.primary400, textTransform: 'uppercase', letterSpacing: 2, fontSize: '0.65rem',
+                color: P.primary500, textTransform: 'uppercase', letterSpacing: 1.4,
+                fontSize: '0.7rem', fontWeight: 600,
               }}>
-                Chiffre d{'\u2019'}affaires
+                {'Chiffre d’affaires'}
               </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 0.5 }}>
+              <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.6, mt: 0.5 }}>
                 <Typography sx={{
-                  fontSize: { xs: '2.4rem', md: '3rem' }, fontWeight: 200, color: 'text.primary', lineHeight: 1.1,
+                  fontSize: { xs: '2.4rem', md: '2.8rem' }, fontWeight: 700, color: P.primary900,
+                  lineHeight: 1, fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.02em',
                 }}>
                   {caFmt.value}
                 </Typography>
-                <Typography sx={{ fontSize: '1rem', fontWeight: 500, color: P.primary400 }}>
+                <Typography sx={{ fontSize: '1.1rem', fontWeight: 500, color: P.primary500 }}>
                   {caFmt.unit}
                 </Typography>
+                <Typography sx={{ fontSize: '0.78rem', color: P.primary400, ml: 0.5 }}>
+                  FCFA
+                </Typography>
               </Box>
-              <Typography variant="caption" sx={{ color: P.primary300, fontSize: '0.7rem' }}>
-                FCFA
+              <Typography sx={{ color: P.primary500, fontSize: '0.78rem', mt: 0.5 }}>
+                {'Exercice ' + exercice}
               </Typography>
-            </Box>
+            </Paper>
 
-            {/* Divider */}
-            <Box sx={{
-              width: '1px', alignSelf: 'stretch', bgcolor: P.primary200,
-              display: { xs: 'none', sm: 'block' },
-            }} />
-
-            {/* Résultat Net */}
-            <Box sx={{ textAlign: 'center' }}>
+            {/* Resultat Net */}
+            <Paper elevation={0} sx={{
+              p: 3, bgcolor: P.white, border: `1px solid ${P.primary200}`,
+              borderRadius: 3, position: 'relative', overflow: 'hidden',
+              transition: 'border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease',
+              '&:hover': {
+                borderColor: resPositif ? 'rgba(21, 128, 61, 0.4)' : 'rgba(185, 28, 28, 0.4)',
+                boxShadow: resPositif ? '0 8px 24px rgba(21, 128, 61, 0.10)' : '0 8px 24px rgba(185, 28, 28, 0.10)',
+                transform: 'translateY(-2px)',
+              },
+            }}>
+              <Box sx={{
+                position: 'absolute', top: 0, left: 0, right: 0, height: 3,
+                bgcolor: resPositif ? P.success : P.error,
+              }} />
               <Typography variant="caption" sx={{
-                color: P.primary400, textTransform: 'uppercase', letterSpacing: 2, fontSize: '0.65rem',
+                color: P.primary500, textTransform: 'uppercase', letterSpacing: 1.4,
+                fontSize: '0.7rem', fontWeight: 600,
               }}>
                 Résultat net
               </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 0.5 }}>
+              <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.6, mt: 0.5 }}>
                 <Typography sx={{
-                  fontSize: { xs: '2.4rem', md: '3rem' }, fontWeight: 200, lineHeight: 1.1,
+                  fontSize: { xs: '2.4rem', md: '2.8rem' }, fontWeight: 700,
                   color: resPositif ? P.success : P.error,
+                  lineHeight: 1, fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.02em',
                 }}>
                   {resPositif ? '+' : ''}{resFmt.value}
                 </Typography>
-                <Typography sx={{ fontSize: '1rem', fontWeight: 500, color: resPositif ? P.success : P.error, opacity: 0.7 }}>
+                <Typography sx={{
+                  fontSize: '1.1rem', fontWeight: 500,
+                  color: resPositif ? P.success : P.error, opacity: 0.7,
+                }}>
                   {resFmt.unit}
                 </Typography>
+                <Typography sx={{ fontSize: '0.78rem', color: P.primary400, ml: 0.5 }}>
+                  FCFA
+                </Typography>
                 {resPositif
-                  ? <TrendingUp sx={{ fontSize: 18, color: P.success, opacity: 0.6, ml: 0.5 }} />
-                  : <TrendingDown sx={{ fontSize: 18, color: P.error, opacity: 0.6, ml: 0.5 }} />
+                  ? <TrendingUp sx={{ fontSize: 18, color: P.success, opacity: 0.7, ml: 0.5 }} />
+                  : <TrendingDown sx={{ fontSize: 18, color: P.error, opacity: 0.7, ml: 0.5 }} />
                 }
               </Box>
-              <Typography variant="caption" sx={{ color: P.primary300, fontSize: '0.7rem' }}>
-                FCFA
+              <Typography sx={{ color: P.primary500, fontSize: '0.78rem', mt: 0.5 }}>
+                {resPositif ? 'Bénéfice' : 'Déficit'}
               </Typography>
-            </Box>
-          </Stack>
+            </Paper>
+          </Box>
         )}
 
-        {/* ── Mode Cabinet : Hero Portfolio KPIs ── */}
+        {/* Mode Cabinet : Hero Portfolio KPIs (Premium cards) */}
         {isCabinet && (
           <FeatureGate feature="tableau_de_bord_portefeuille">
-          <Stack
-            direction={{ xs: 'column', sm: 'row' }}
-            spacing={{ xs: 2, sm: 6 }}
-            sx={{ mb: 3 }}
-          >
-            <Box sx={{ textAlign: 'center' }}>
-              <Typography variant="caption" sx={{
-                color: P.primary400, textTransform: 'uppercase', letterSpacing: 2, fontSize: '0.65rem',
-              }}>
-                Dossiers clients
-              </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 0.5 }}>
-                <Typography sx={{
-                  fontSize: { xs: '2.4rem', md: '3rem' }, fontWeight: 200, color: 'text.primary', lineHeight: 1.1,
-                }}>
-                  {cabinetStats.total}
-                </Typography>
-              </Box>
-              <Typography variant="caption" sx={{ color: P.primary300, fontSize: '0.7rem' }}>
-                au total
-              </Typography>
-            </Box>
-
             <Box sx={{
-              width: '1px', alignSelf: 'stretch', bgcolor: P.primary200,
-              display: { xs: 'none', sm: 'block' },
-            }} />
-
-            <Box sx={{ textAlign: 'center' }}>
-              <Typography variant="caption" sx={{
-                color: P.primary400, textTransform: 'uppercase', letterSpacing: 2, fontSize: '0.65rem',
-              }}>
-                En cours
-              </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 0.5 }}>
-                <Typography sx={{
-                  fontSize: { xs: '2.4rem', md: '3rem' }, fontWeight: 200, color: P.warning, lineHeight: 1.1,
-                }}>
-                  {cabinetStats.enCours}
-                </Typography>
-              </Box>
-              <Typography variant="caption" sx={{ color: P.primary300, fontSize: '0.7rem' }}>
-                dossier(s)
-              </Typography>
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, minmax(160px, 220px))' },
+              gap: 2,
+              mb: 4,
+            }}>
+              {[
+                { label: 'Dossiers clients', value: String(cabinetStats.total), sub: 'au total', accent: 'neutral' as const },
+                { label: 'En cours', value: String(cabinetStats.enCours), sub: 'dossier(s)', accent: 'warning' as const },
+                { label: 'Terminés', value: String(cabinetStats.validees + cabinetStats.exportees), sub: 'liasse(s)', accent: 'success' as const },
+              ].map(stat => {
+                const railColor = stat.accent === 'success' ? P.success : stat.accent === 'warning' ? P.warning : P.teal
+                const valueColor = stat.accent === 'success' ? P.success : stat.accent === 'warning' ? P.warning : P.primary900
+                return (
+                  <Paper key={stat.label} elevation={0} sx={{
+                    p: 3, bgcolor: P.white, border: `1px solid ${P.primary200}`,
+                    borderRadius: 3, position: 'relative', overflow: 'hidden',
+                    transition: 'border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease',
+                    '&:hover': {
+                      borderColor: P.tealBorder,
+                      boxShadow: '0 8px 24px rgba(15, 118, 110, 0.10)',
+                      transform: 'translateY(-2px)',
+                    },
+                  }}>
+                    <Box sx={{
+                      position: 'absolute', top: 0, left: 0, right: 0, height: 3, bgcolor: railColor,
+                    }} />
+                    <Typography variant="caption" sx={{
+                      color: P.primary500, textTransform: 'uppercase', letterSpacing: 1.4,
+                      fontSize: '0.7rem', fontWeight: 600,
+                    }}>
+                      {stat.label}
+                    </Typography>
+                    <Typography sx={{
+                      fontSize: { xs: '2.4rem', md: '2.8rem' }, fontWeight: 700, color: valueColor,
+                      lineHeight: 1, mt: 0.5, fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.02em',
+                    }}>
+                      {stat.value}
+                    </Typography>
+                    <Typography sx={{ color: P.primary500, fontSize: '0.78rem', mt: 0.5 }}>
+                      {stat.sub}
+                    </Typography>
+                  </Paper>
+                )
+              })}
             </Box>
-
-            <Box sx={{
-              width: '1px', alignSelf: 'stretch', bgcolor: P.primary200,
-              display: { xs: 'none', sm: 'block' },
-            }} />
-
-            <Box sx={{ textAlign: 'center' }}>
-              <Typography variant="caption" sx={{
-                color: P.primary400, textTransform: 'uppercase', letterSpacing: 2, fontSize: '0.65rem',
-              }}>
-                Validées
-              </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 0.5 }}>
-                <Typography sx={{
-                  fontSize: { xs: '2.4rem', md: '3rem' }, fontWeight: 200, color: P.success, lineHeight: 1.1,
-                }}>
-                  {cabinetStats.validees + cabinetStats.exportees}
-                </Typography>
-              </Box>
-              <Typography variant="caption" sx={{ color: P.primary300, fontSize: '0.7rem' }}>
-                liasse(s)
-              </Typography>
-            </Box>
-          </Stack>
           </FeatureGate>
         )}
 
-        {/* ── Thin separator ── */}
-        <Box sx={{ width: 60, height: '1px', bgcolor: P.primary200, mb: 3 }} />
+        {/* Thin separator teal */}
+        <Box sx={{
+          width: 48, height: 2, bgcolor: P.teal, borderRadius: 1, mb: 4, opacity: 0.6,
+        }} />
 
-        {/* ── Operational KPIs — Entreprise ── */}
+        {/* Operational KPIs Entreprise (grid of premium cards) */}
         {!isCabinet && (
-          <Stack
-            direction={{ xs: 'column', sm: 'row' }}
-            spacing={0}
-            sx={{
-              gap: { xs: 2, sm: 0 },
-              bgcolor: P.primary50,
-              borderRadius: 3,
-              px: { xs: 2, sm: 1 },
-              py: 2,
-            }}
-          >
+          <Box sx={{
+            width: '100%', maxWidth: 1100,
+            display: 'grid',
+            gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(3, 1fr)', md: 'repeat(6, 1fr)' },
+            gap: { xs: 1.5, md: 2 },
+          }}>
             {[
-              { value: String(nbExercices), label: 'Exercices', sub: nbExercices > 0 ? 'enregistré(s)' : '\u2014' },
-              { value: String(nbBalances), label: 'Balances', sub: nbBalances > 0 ? 'importée(s)' : '\u2014' },
-              { value: String(stats.comptes), label: 'Comptes', sub: stats.comptes > 0 ? 'dans la balance' : '\u2014' },
-              { value: String(stats.declarations), label: 'Liasses', sub: stats.declarations > 0 ? 'générée(s)' : 'en attente' },
-              { value: `${stats.conformite}%`, label: 'Conformité', sub: ws.controleDone ? (ws.controleResult === 'passed' ? 'validé' : ws.controleBloquants > 0 ? `${ws.controleBloquants} bloquant(s)` : 'avertissements') : 'non contrôlé' },
-              { value: `${stats.avancement}%`, label: 'Avancement', progress: stats.avancement },
-            ].map((stat, i, arr) => (
-              <Box key={stat.label} sx={{
-                textAlign: 'center',
-                px: { xs: 2, sm: 3, md: 4 },
-                borderRight: i < arr.length - 1 ? { xs: 'none', sm: `1px solid ${P.primary200}` } : 'none',
-                minWidth: 90,
-              }}>
-                <Typography sx={{
-                  fontSize: { xs: '1.8rem', md: '2.2rem' }, fontWeight: 300, color: 'text.primary', lineHeight: 1.2,
-                }}>
-                  {stat.value}
-                </Typography>
-                <Typography variant="body2" sx={{ color: P.primary500, fontWeight: 600, fontSize: '0.78rem', mt: 0.3 }}>
-                  {stat.label}
-                </Typography>
-                {stat.progress !== undefined ? (
-                  <LinearProgress
-                    variant="determinate"
-                    value={stat.progress}
-                    sx={{
-                      mt: 0.8, height: 3, borderRadius: 2, bgcolor: P.primary200,
-                      '& .MuiLinearProgress-bar': {
-                        borderRadius: 2,
-                        bgcolor: stat.progress >= 100 ? P.success : P.primary700,
-                      },
-                    }}
-                  />
-                ) : (
-                  <Typography variant="caption" sx={{ color: P.primary400, fontSize: '0.68rem' }}>
-                    {stat.sub}
-                  </Typography>
-                )}
-              </Box>
-            ))}
-          </Stack>
+              { value: String(nbExercices), label: 'Exercices', sub: nbExercices > 0 ? 'enregistré(s)' : 'aucun', accent: 'neutral' as const },
+              { value: String(nbBalances), label: 'Balances', sub: nbBalances > 0 ? 'importée(s)' : 'aucune', accent: 'neutral' as const },
+              { value: String(stats.comptes), label: 'Comptes', sub: stats.comptes > 0 ? 'dans la balance' : 'aucun', accent: 'neutral' as const },
+              { value: String(stats.declarations), label: 'Liasses', sub: stats.declarations > 0 ? 'générée(s)' : 'en attente', accent: 'neutral' as const },
+              {
+                value: `${stats.conformite}%`,
+                label: 'Conformité',
+                sub: ws.controleDone
+                  ? (ws.controleResult === 'passed' ? 'validé' : ws.controleBloquants > 0 ? `${ws.controleBloquants} bloquant(s)` : 'avertissements')
+                  : 'non contrôlé',
+                accent: (ws.controleDone ? (ws.controleResult === 'passed' ? 'success' : 'warning') : 'neutral') as 'success' | 'warning' | 'neutral',
+              },
+              { value: `${stats.avancement}%`, label: 'Avancement', progress: stats.avancement, accent: 'teal' as const },
+            ].map(renderStatCard)}
+          </Box>
         )}
 
-        {/* ── Operational KPIs — Cabinet ── */}
+        {/* Operational KPIs Cabinet (grid of premium cards) */}
         {isCabinet && (
-          <Stack
-            direction={{ xs: 'column', sm: 'row' }}
-            spacing={0}
-            sx={{
-              gap: { xs: 2, sm: 0 },
-              bgcolor: P.primary50,
-              borderRadius: 3,
-              px: { xs: 2, sm: 1 },
-              py: 2,
-            }}
-          >
+          <Box sx={{
+            width: '100%', maxWidth: 1100,
+            display: 'grid',
+            gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(3, 1fr)', md: 'repeat(5, 1fr)' },
+            gap: { xs: 1.5, md: 2 },
+          }}>
             {[
-              { value: String(cabinetStats.total), label: 'Dossiers', sub: cabinetStats.total > 0 ? 'dans le portefeuille' : 'aucun dossier' },
-              { value: String(cabinetStats.enCours), label: 'En cours', sub: cabinetStats.enCours > 0 ? 'en production' : '\u2014' },
-              { value: String(cabinetStats.validees), label: 'Validées', sub: cabinetStats.validees > 0 ? 'prêtes à exporter' : '\u2014' },
-              { value: String(cabinetStats.exportees), label: 'Exportées', sub: cabinetStats.exportees > 0 ? 'envoyée(s) DGI' : '\u2014' },
+              { value: String(cabinetStats.total), label: 'Dossiers', sub: cabinetStats.total > 0 ? 'portefeuille' : 'aucun', accent: 'neutral' as const },
+              { value: String(cabinetStats.enCours), label: 'En cours', sub: cabinetStats.enCours > 0 ? 'en production' : 'aucun', accent: 'warning' as const },
+              { value: String(cabinetStats.validees), label: 'Validées', sub: cabinetStats.validees > 0 ? 'à exporter' : 'aucun', accent: 'teal' as const },
+              { value: String(cabinetStats.exportees), label: 'Exportées', sub: cabinetStats.exportees > 0 ? 'envoyée(s) DGI' : 'aucun', accent: 'success' as const },
               {
                 value: cabinetStats.total > 0
                   ? `${Math.round(((cabinetStats.validees + cabinetStats.exportees) / cabinetStats.total) * 100)}%`
@@ -505,59 +604,27 @@ const ModernDashboard: React.FC = () => {
                 progress: cabinetStats.total > 0
                   ? Math.round(((cabinetStats.validees + cabinetStats.exportees) / cabinetStats.total) * 100)
                   : 0,
+                accent: 'teal' as const,
               },
-            ].map((stat, i, arr) => (
-              <Box key={stat.label} sx={{
-                textAlign: 'center',
-                px: { xs: 2, sm: 3, md: 4 },
-                borderRight: i < arr.length - 1 ? { xs: 'none', sm: `1px solid ${P.primary200}` } : 'none',
-                minWidth: 90,
-              }}>
-                <Typography sx={{
-                  fontSize: { xs: '1.8rem', md: '2.2rem' }, fontWeight: 300, color: 'text.primary', lineHeight: 1.2,
-                }}>
-                  {stat.value}
-                </Typography>
-                <Typography variant="body2" sx={{ color: P.primary500, fontWeight: 600, fontSize: '0.78rem', mt: 0.3 }}>
-                  {stat.label}
-                </Typography>
-                {stat.progress !== undefined ? (
-                  <LinearProgress
-                    variant="determinate"
-                    value={stat.progress}
-                    sx={{
-                      mt: 0.8, height: 3, borderRadius: 2, bgcolor: P.primary200,
-                      '& .MuiLinearProgress-bar': {
-                        borderRadius: 2,
-                        bgcolor: stat.progress >= 100 ? P.success : P.primary700,
-                      },
-                    }}
-                  />
-                ) : (
-                  <Typography variant="caption" sx={{ color: P.primary400, fontSize: '0.68rem' }}>
-                    {stat.sub}
-                  </Typography>
-                )}
-              </Box>
-            ))}
-          </Stack>
+            ].map(renderStatCard)}
+          </Box>
         )}
       </Box>
 
-      {/* ── Bottom Navigation ── */}
+      {/* Bottom Navigation — pill cards with teal hover */}
       <Box sx={{
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        pb: 3,
+        pb: 4,
         gap: 1.5,
       }}>
         <Stack
           direction="row"
-          spacing={1.5}
+          spacing={1.2}
           flexWrap="wrap"
           justifyContent="center"
-          sx={{ gap: 1.5 }}
+          sx={{ gap: 1.2 }}
         >
           {navItems.map((item) => (
             <Button
@@ -566,9 +633,18 @@ const ModernDashboard: React.FC = () => {
               startIcon={item.icon}
               onClick={() => navigate(item.path)}
               sx={{
-                borderColor: P.primary200, color: P.primary600, borderRadius: 3,
-                textTransform: 'none', fontWeight: 500, px: 2.5, py: 0.8, fontSize: '0.85rem',
-                '&:hover': { borderColor: P.primary400, bgcolor: 'grey.50' },
+                borderColor: P.primary200, color: P.primary700, bgcolor: P.white,
+                borderRadius: 999,
+                textTransform: 'none', fontWeight: 600, px: 2.5, py: 0.9, fontSize: '0.85rem',
+                transition: 'all 180ms cubic-bezier(0.4, 0, 0.2, 1)',
+                '&:hover': {
+                  borderColor: P.teal,
+                  color: P.tealDark,
+                  bgcolor: P.tealBg,
+                  boxShadow: '0 4px 12px rgba(15, 118, 110, 0.10)',
+                  transform: 'translateY(-1px)',
+                  '& .MuiSvgIcon-root': { color: P.teal },
+                },
               }}
             >
               {item.label}
@@ -576,7 +652,7 @@ const ModernDashboard: React.FC = () => {
           ))}
         </Stack>
 
-        <Typography variant="caption" sx={{ color: P.primary300, mt: 1, fontSize: '0.7rem' }}>
+        <Typography sx={{ color: P.primary400, mt: 1, fontSize: '0.7rem', letterSpacing: 0.4 }}>
           Powered by Atlas Studio
         </Typography>
       </Box>
