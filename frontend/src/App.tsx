@@ -79,6 +79,7 @@ const FAQ = React.lazy(() => import('@/pages/public/FAQ'))
 const Contact = React.lazy(() => import('@/pages/public/Contact'))
 const Blog = React.lazy(() => import('@/pages/public/Blog'))
 const About = React.lazy(() => import('@/pages/public/About'))
+const NotFoundPage = React.lazy(() => import('@/pages/error/NotFoundPage'))
 
 import { useAuthStore } from './store/authStore'
 import { useModeStore } from './store/modeStore'
@@ -219,6 +220,12 @@ function App() {
           <Route path="/settings/members" element={<S><AdminPlaceholder title="Membres & Rôles" description="Gérez les collaborateurs de votre cabinet, attribuez des rôles (administrateur, collaborateur, observateur) et contrôlez les accès." icon="people" /></S>} />
           <Route path="/settings/subscription" element={<S><AdminPlaceholder title="Abonnement" description="Consultez votre plan actuel, suivez vos quotas (liasses, stockage) et gérez la facturation." icon="subscription" /></S>} />
           <Route path="/settings/invitations" element={<S><AdminPlaceholder title="Invitations" description="Envoyez des invitations par email à vos collaborateurs pour rejoindre le cabinet." icon="invite" /></S>} />
+          {/* Routes précédemment orphelines (navigate() en pointait, aucune <Route> ne les mappait) :
+              /profile, /settings, /settings/billing — désormais mappées sur placeholders
+              cohérents (Atlas Studio prendra le relais pour profile/billing). */}
+          <Route path="/profile" element={<S><AdminPlaceholder title="Mon profil" description="Gérez votre profil utilisateur, votre email de connexion et votre mot de passe depuis Atlas Studio." icon="people" /></S>} />
+          <Route path="/settings" element={<S><AdminPlaceholder title="Paramètres" description="Sélectionnez une section : Équipe, Membres, Abonnement, ou Invitations dans la barre latérale." icon="people" /></S>} />
+          <Route path="/settings/billing" element={<S><AdminPlaceholder title="Facturation" description="Consultez vos factures, votre méthode de paiement et téléchargez vos justificatifs depuis Atlas Studio." icon="subscription" /></S>} />
 
           {/* Pages métier — nécessitent un dossier actif en mode cabinet */}
           {/* /dashboard = Cockpit Liass'Pilot (KPI cards + sparklines + insight PROPH3T).
@@ -256,7 +263,10 @@ function App() {
 
           {/* Support & Formation */}
           <Route path="/support" element={<S><SupportPage /></S>} />
-          <Route path="/faq" element={<S><FAQPage /></S>} />
+          {/* /faq route publique (ligne ~179) gagne toujours sur cette route privée
+              (premier match React Router). Renommée en /support/faq pour la FAQPage
+              authentifiée afin de la rendre atteignable. */}
+          <Route path="/support/faq" element={<S><FAQPage /></S>} />
           <Route path="/formation" element={<S><FormationPage /></S>} />
           <Route path="/documentation" element={<S><DocumentationPage /></S>} />
 
@@ -271,7 +281,10 @@ function App() {
           <Route path="/cgu" element={<CGU />} />
           <Route path="/confidentialite" element={<PolitiqueConfidentialite />} />
 
-          <Route path="*" element={<Navigate to="/" replace />} />
+          {/* Catch-all : avant ce fix, toute URL inconnue redirigeait silencieusement
+              vers '/', ce qui masquait les routes orphelines et désorientait
+              les utilisateurs sur typo URL. On affiche une vraie 404 Nordic Slate. */}
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Suspense>
     </ErrorBoundary>

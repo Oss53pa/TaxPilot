@@ -130,6 +130,22 @@ export const DUAL_NATURE_PREFIXES: Record<string, { actifRef: string; passifRef:
   '52': { actifRef: 'BS', passifRef: 'DQ' },
 }
 
+/**
+ * ⚠️ DOUBLE SOURCE DE VÉRITÉ — Ce mapping coexiste avec
+ * `constants/syscohada-mappings.ts` (référence officielle OHADA 2017,
+ * exporté en `BILAN_ACTIF` / `BILAN_PASSIF` / `COMPTE_RESULTAT_MAPPING`).
+ *
+ * Ce SYSCOHADA_MAPPING utilise une numérotation des postes différente
+ * (plus granulaire sur les dettes financières, alignée sur l'export
+ * Excel historique). TODO(UNIFY-MAPPINGS) — fusionner avec la version
+ * canonique dans un commit dédié (couvert par tests diff).
+ *
+ * Les divergences corrigées dans ce commit :
+ *   - DL : ajout de 46 (comptes courants associés) et 47 (créditeurs
+ *     divers) qui étaient absents → soldes créditeurs disparaissaient
+ *     du passif, provoquant un déséquilibre Total Actif/Passif.
+ *   - Documentation et alignement avec la spec.
+ */
 export const SYSCOHADA_MAPPING = {
   // ──────────────── ACTIF IMMOBILISÉ ────────────────
   actif: {
@@ -209,7 +225,12 @@ export const SYSCOHADA_MAPPING = {
     DI: { comptes: ['419'] },
     DJ: { comptes: ['401', '402', '403', '404', '405', '408'] },
     DK: { comptes: ['431', '432', '433', '434', '435', '436', '437', '438', '439', '441', '442', '443', '444', '445', '446', '447', '448', '449'] },
-    DL: { comptes: ['42'] },
+    // DL "Autres dettes" — filtrée sur soldes créditeurs uniquement (reciprocalRefs).
+    // Inclut : 42 personnel rémunérations dues, 46 comptes courants associés,
+    // 47 créditeurs divers. Avant ce fix, 46/47 disparaissaient du passif quand
+    // créditeurs, provoquant un déséquilibre Total Actif ≠ Total Passif sur
+    // les bilans avec comptes courants associés non-nuls.
+    DL: { comptes: ['42', '46', '47'] },
     DM: { comptes: ['499'] },
 
     // Trésorerie passif
