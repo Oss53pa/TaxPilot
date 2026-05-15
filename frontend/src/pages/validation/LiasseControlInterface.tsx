@@ -676,7 +676,14 @@ const LiasseControlInterface: React.FC = () => {
   const getScoreColor = (score: number) => score >= 90 ? '#16a34a' : score >= 70 ? '#d97706' : '#dc2626'
 
   return (
-    <Box sx={{ maxWidth: selectedAnomaly ? 'none' : 1100, mx: 'auto', mr: selectedAnomaly ? `${SIDEBAR_WIDTH}px` : 'auto', transition: 'margin 0.3s ease' }}>
+    <Box sx={{
+      width: '100%',
+      maxWidth: '100%',
+      // Lorsqu'une anomalie est sélectionnée, on garde une marge à droite pour
+      // laisser place au panneau latéral. Sinon, contenu plein-cadre.
+      mr: selectedAnomaly ? `${SIDEBAR_WIDTH}px` : 0,
+      transition: 'margin 0.3s ease',
+    }}>
       <Typography variant="h5" gutterBottom fontWeight={700}>
         Rapport d'Audit de Liasse Fiscale
       </Typography>
