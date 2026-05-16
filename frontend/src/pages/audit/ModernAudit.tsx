@@ -229,7 +229,7 @@ const ModernAudit: React.FC = () => {
   )
 
   return (
-    <Box sx={{ p: 3, backgroundColor: 'background.default', minHeight: '100vh' }}>
+    <Box data-tour="audit" sx={{ p: 3, backgroundColor: 'background.default', minHeight: '100vh' }}>
       {/* Header */}
       <Box sx={{ mb: 4 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>

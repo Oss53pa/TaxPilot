@@ -640,7 +640,7 @@ const ModernImportBalance: React.FC = () => {
   )
 
   return (
-    <Box sx={{ p: 3, backgroundColor: 'background.default', minHeight: '100vh' }}>
+    <Box data-tour="import-balance" sx={{ p: 3, backgroundColor: 'background.default', minHeight: '100vh' }}>
       {/* Atlas Finance plug-and-play import banner */}
       <AtlasFinanceImportBanner />
 

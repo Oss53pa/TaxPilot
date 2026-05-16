@@ -149,7 +149,7 @@ export default function ExternalAuthPage() {
               </p>
               <p style={{ color: '#aaa', fontSize: 13, marginBottom: 24 }}>{errorMessage}</p>
               <a
-                href="https://atlas-studio.org/portal"
+                href="https://atlasstudio.app/portal"
                 style={{
                   display: 'inline-block',
                   background: '#C8A960',

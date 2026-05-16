@@ -125,6 +125,18 @@ export interface AuditContext {
   exercice?: string
   mappingSyscohada?: typeof import('@/services/liasseDataService').SYSCOHADA_MAPPING
   typeLiasse?: import('@/types').TypeLiasse
+  /**
+   * Code pays OHADA (CI/SN/BF/BJ/CM/CG/CD/GA/GW/GN/ML/NE/TD/TG/CF/KM).
+   * Optionnel pour rétrocompat — quand absent, les contrôles fiscaux level7
+   * tombent sur les taux Côte d'Ivoire (`getTauxFiscaux()` store CI).
+   */
+  countryCode?: string
+  /**
+   * Configuration fiscale pré-fetched depuis `getFiscalConfig(countryCode)`
+   * pour usage synchrone dans les contrôles audit (qui sont sync, pas async).
+   * Quand présente, level7-fiscal l'utilise en priorité ; sinon fallback CI.
+   */
+  fiscalConfig?: import('@/services/fiscalConfigService').FiscalConfig
 }
 
 // --- Session d'audit ---

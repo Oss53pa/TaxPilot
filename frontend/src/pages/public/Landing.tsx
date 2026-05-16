@@ -190,7 +190,7 @@ const Landing: React.FC = () => {
           }}
         >
           <Box
-            component="a" href="https://atlas-studio.org/portal?app=taxpilot"
+            component="a" href="https://atlasstudio.app/portal?app=liasspilot"
             sx={{
               display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 1,
               bgcolor: GOLD, color: '#ffffff !important', fontWeight: 500, fontFamily: BODY,
@@ -491,7 +491,7 @@ const Landing: React.FC = () => {
                 <Box sx={{ fontFamily: BODY, fontSize: '0.85rem', color: TEXT_SECONDARY }}>FCFA/an</Box>
               </Box>
               <Box
-                component="a" href="https://atlas-studio.org/portal?app=taxpilot&plan=Entreprise"
+                component="a" href="https://atlasstudio.app/portal?app=liasspilot&plan=Entreprise"
                 sx={{
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mt: 2.5,
                   border: `1px solid ${BORDER}`, bgcolor: 'transparent',
@@ -524,7 +524,7 @@ const Landing: React.FC = () => {
                 <Box sx={{ fontFamily: BODY, fontSize: '0.85rem', color: TEXT_SECONDARY }}>FCFA/an</Box>
               </Box>
               <Box
-                component="a" href="https://atlas-studio.org/portal?app=taxpilot&plan=Cabinet10"
+                component="a" href="https://atlasstudio.app/portal?app=liasspilot&plan=Cabinet10"
                 sx={{
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mt: 2.5,
                   bgcolor: GOLD, color: '#ffffff !important', fontWeight: 500, fontFamily: BODY,
@@ -553,7 +553,7 @@ const Landing: React.FC = () => {
                 <Box sx={{ fontFamily: BODY, fontSize: '0.85rem', color: TEXT_SECONDARY }}>FCFA/an</Box>
               </Box>
               <Box
-                component="a" href="https://atlas-studio.org/portal?app=taxpilot&plan=CabinetIllimite"
+                component="a" href="https://atlasstudio.app/portal?app=liasspilot&plan=CabinetIllimite"
                 sx={{
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mt: 2.5,
                   border: `1px solid ${BORDER}`, bgcolor: 'transparent',
@@ -587,7 +587,7 @@ const Landing: React.FC = () => {
             Souscrivez maintenant. Sans engagement.
           </Box>
           <Box
-            component="a" href="https://atlas-studio.org/portal?app=taxpilot"
+            component="a" href="https://atlasstudio.app/portal?app=liasspilot"
             sx={{
               display: 'inline-flex', alignItems: 'center', gap: 1,
               bgcolor: GOLD, color: '#ffffff !important', fontWeight: 500, fontFamily: BODY,

@@ -131,7 +131,7 @@ const Blog: React.FC = () => (
         Recevez nos articles sur la comptabilité SYSCOHADA et les mises à jour produit.
       </Box>
       <Box
-        component="a" href="https://atlas-studio.org/portal?app=taxpilot"
+        component="a" href="https://atlasstudio.app/portal?app=liasspilot"
         sx={{
           display: 'inline-flex', alignItems: 'center', gap: 1,
           bgcolor: `${GOLD} !important`, color: '#ffffff !important', fontWeight: 500, fontFamily: BODY,

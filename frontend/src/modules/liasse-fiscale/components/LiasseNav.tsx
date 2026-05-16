@@ -5,6 +5,7 @@ import { ExpandLess, ExpandMore, Description as DescriptionIcon, ChevronLeft } f
 import { getPagesForRegime } from '@/config/liasse-pages-config'
 import { PAGES } from '../config'
 import { SECTION_LABELS, REGIMES, getRegime, toConfigRegime, type SectionKey, type RegimeImposition } from '../types'
+import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
 
 interface LiasseNavProps {
   currentPageId: string
@@ -52,29 +53,32 @@ const LiasseNav: React.FC<LiasseNavProps> = ({ currentPageId, onPageSelect, regi
       width: 280,
       minWidth: 280,
       height: '100%',
-      borderRight: '1px solid #e5e5e5',
+      borderRight: `1px solid ${P.primary200}`,
       borderRadius: 2,
-      bgcolor: '#fafafa',
+      bgcolor: P.primary50,
       display: 'flex',
       flexDirection: 'column',
       overflow: 'hidden',
     }}>
-      {/* Structure Liasse header — fixed */}
-      <Box sx={{ p: 2, borderBottom: '1px solid #e5e5e5', bgcolor: '#171717', flexShrink: 0 }}>
+      {/* Structure Liasse header — Nordic Slate charcoal */}
+      <Box sx={{ p: 2, borderBottom: `1px solid ${P.primary800}`, bgcolor: P.primary900, flexShrink: 0 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
-          <DescriptionIcon sx={{ fontSize: 18, color: '#a3a3a3' }} />
-          <Typography sx={{ fontWeight: 700, fontSize: '0.85rem', color: '#fff', letterSpacing: 0.5, flexGrow: 1 }}>
+          <DescriptionIcon sx={{ fontSize: 18, color: P.tealLight }} />
+          <Typography sx={{ fontWeight: 700, fontSize: '0.85rem', color: P.white, letterSpacing: 0.3, flexGrow: 1 }}>
             Structure Liasse
           </Typography>
           {onCollapse && (
-            <IconButton size="small" onClick={onCollapse} sx={{ color: '#a3a3a3', '&:hover': { color: '#fff' }, p: 0.25 }}>
+            <IconButton size="small" onClick={onCollapse} sx={{ color: P.primary400, '&:hover': { color: P.tealLight }, p: 0.25 }}>
               <ChevronLeft sx={{ fontSize: 18 }} />
             </IconButton>
           )}
         </Box>
 
-        <Typography sx={{ fontSize: '0.65rem', color: '#a3a3a3', mb: 0.5, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-          Regime d'imposition
+        <Typography sx={{
+          fontSize: '0.65rem', color: P.primary400, mb: 0.5,
+          textTransform: 'uppercase', letterSpacing: 1, fontWeight: 600,
+        }}>
+          Régime d{'’'}imposition
         </Typography>
         <Select
           value={regime}
@@ -82,15 +86,15 @@ const LiasseNav: React.FC<LiasseNavProps> = ({ currentPageId, onPageSelect, regi
           size="small"
           fullWidth
           sx={{
-            bgcolor: '#262626',
-            color: '#fff',
+            bgcolor: P.primary800,
+            color: P.white,
             fontSize: '0.78rem',
             fontWeight: 600,
             mb: 1.5,
-            '.MuiOutlinedInput-notchedOutline': { borderColor: '#404040' },
-            '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#525252' },
-            '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#737373' },
-            '.MuiSelect-icon': { color: '#a3a3a3' },
+            '.MuiOutlinedInput-notchedOutline': { borderColor: P.primary700 },
+            '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: P.primary500 },
+            '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: P.teal },
+            '.MuiSelect-icon': { color: P.primary400 },
             '.MuiSelect-select': { py: 0.75 },
           }}
         >
@@ -106,8 +110,9 @@ const LiasseNav: React.FC<LiasseNavProps> = ({ currentPageId, onPageSelect, regi
             label={`${obligatoireCount} obligatoires`}
             size="small"
             sx={{
-              bgcolor: '#166534',
-              color: '#bbf7d0',
+              bgcolor: 'rgba(15, 118, 110, 0.18)',
+              color: P.tealLight,
+              border: `1px solid ${P.tealBorder}33`,
               fontSize: '0.68rem',
               fontWeight: 600,
               height: 22,
@@ -117,8 +122,9 @@ const LiasseNav: React.FC<LiasseNavProps> = ({ currentPageId, onPageSelect, regi
             label={`${facultatifCount} facultatifs`}
             size="small"
             sx={{
-              bgcolor: '#1e3a5f',
-              color: '#93c5fd',
+              bgcolor: P.primary800,
+              color: P.primary300,
+              border: `1px solid ${P.primary700}`,
               fontSize: '0.68rem',
               fontWeight: 600,
               height: 22,

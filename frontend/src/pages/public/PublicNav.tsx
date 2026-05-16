@@ -76,7 +76,7 @@ const PublicNav: React.FC = () => {
         ))}
         <Box
           component="a"
-          href="https://atlas-studio.org"
+          href="https://atlasstudio.app"
           target="_blank"
           rel="noopener noreferrer"
           sx={navLinkSx(false)}
@@ -141,7 +141,7 @@ const PublicNav: React.FC = () => {
         {/* Souscrire — CTA primaire (filled) */}
         <Box
           component="a"
-          href="https://atlas-studio.org/portal?app=taxpilot"
+          href="https://atlasstudio.app/portal?app=liasspilot"
           sx={{
             display: 'inline-flex',
             alignItems: 'center',
@@ -223,7 +223,7 @@ const PublicNav: React.FC = () => {
           ))}
           <Box
             component="a"
-            href="https://atlas-studio.org"
+            href="https://atlasstudio.app"
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => setDrawerOpen(false)}
@@ -264,7 +264,7 @@ const PublicNav: React.FC = () => {
           </Box>
           <Box
             component="a"
-            href="https://atlas-studio.org/portal?app=taxpilot"
+            href="https://atlasstudio.app/portal?app=liasspilot"
             onClick={() => setDrawerOpen(false)}
             sx={{
               display: 'block',

@@ -7,8 +7,40 @@ import { AuditContext, ResultatControle, NiveauControle } from '@/types/audit.ty
 import { BalanceEntry } from '@/services/liasseDataService'
 import { controlRegistry } from '../controlRegistry'
 import { getTauxFiscaux } from '@/config/taux-fiscaux-ci'
+import type { FiscalConfig } from '@/services/fiscalConfigService'
 
 const NIVEAU: NiveauControle = 7
+
+/**
+ * Retourne les taux fiscaux du dossier audité.
+ * Priorité 1 : `ctx.fiscalConfig` pré-fetched (multi-pays OHADA).
+ * Priorité 2 : `getTauxFiscaux()` store Côte d'Ivoire (fallback rétrocompat).
+ *
+ * Avant ce fix : tous les contrôles utilisaient `getTauxFiscaux()` en
+ * dur → un dossier Sénégal/Cameroun/Burkina générait des faux positifs
+ * systématiques sur FI-008 / FI-018 / FI-020 (IS comptabilisé comparé
+ * à un IMF calculé sur les taux ivoiriens).
+ */
+function resolveTaux(ctx: AuditContext): {
+  IS: { taux_normal: number }
+  IMF: { taux: number; minimum: number; maximum: number }
+  TVA: { taux_normal: number }
+} {
+  const cfg: FiscalConfig | undefined = ctx.fiscalConfig
+  if (cfg) {
+    return {
+      IS: { taux_normal: cfg.isRate ?? 0.25 },
+      IMF: {
+        taux: cfg.imfRate ?? 0.005,
+        minimum: cfg.imfMinimum ?? 0,
+        maximum: cfg.imfMaximum ?? Number.POSITIVE_INFINITY,
+      },
+      TVA: { taux_normal: cfg.vatStandardRate ?? 0.18 },
+    }
+  }
+  // Fallback CI — backward compat pour les audits sans countryCode.
+  return getTauxFiscaux() as ReturnType<typeof getTauxFiscaux>
+}
 
 function ok(ref: string, nom: string, msg: string): ResultatControle {
   return { ref, nom, niveau: NIVEAU, statut: 'OK', severite: 'OK', message: msg, timestamp: new Date().toISOString() }
@@ -177,7 +209,8 @@ function FI007(ctx: AuditContext): ResultatControle {
   const isComptabilise = absSum(find(ctx.balanceN, '89'))
 
   if (resultat > 0) {
-    const taux = getTauxFiscaux()
+    // Multi-pays OHADA via resolveTaux(ctx)
+    const taux = resolveTaux(ctx)
     const isEstime = resultat * taux.IS.taux_normal
     if (isComptabilise > 0) {
       const ecart = Math.abs(isEstime - isComptabilise)
@@ -215,7 +248,10 @@ function FI008(ctx: AuditContext): ResultatControle {
   const ca = absSum(find(ctx.balanceN, '70'))
   const isComptabilise = absSum(find(ctx.balanceN, '89'))
   if (ca > 0) {
-    const taux = getTauxFiscaux()
+    // Multi-pays OHADA : utilise ctx.fiscalConfig (taux IMF du pays du dossier)
+    // si disponible, sinon fallback CI. Élimine le faux positif systématique
+    // qui frappait Sénégal/Cameroun/Burkina/etc.
+    const taux = resolveTaux(ctx)
     const imf = Math.max(ca * taux.IMF.taux, taux.IMF.minimum)
     if (isComptabilise > 0 && isComptabilise < imf) {
       return anomalie(ref, nom, 'MINEUR',

@@ -176,8 +176,15 @@ export function getTauxMeta(now: Date = new Date()): TauxMeta {
 }
 
 // === HELPER : Arrondi FCFA (0 décimales) ===
+// Avant ce fix : `Math.round` (half-up biais systématique vers le haut).
+// Sur calculs IS chaînés (IS = round(round(a) + round(b) + ...)), accumulation
+// de biais de l'ordre de 0.5 FCFA × N opérations → écart final possible de
+// quelques milliers de FCFA sur la liasse déclarée à la DGI.
+// Après : banker's rounding (ROUND_HALF_EVEN) via decimal.js — élimine le biais.
+import { fiscalRound, fiscalApplyRate } from '@/utils/fiscal-math'
+
 export function arrondiFCFA(montant: number): number {
-  return Math.round(montant)
+  return fiscalRound(montant, 0)
 }
 
 // === HELPER : Calcul IS avec IMF ===
@@ -188,8 +195,10 @@ export function calculerIS(resultatFiscal: number, chiffreAffaires: number): {
   base: 'IS' | 'IMF'
 } {
   const taux = getTauxFiscaux()
-  const is_brut = Math.max(0, Math.round(resultatFiscal * taux.IS.taux_normal))
-  const imf_brut = Math.round(chiffreAffaires * taux.IMF.taux)
+  // Utilise fiscalApplyRate (decimal.js) pour éviter les erreurs binaires
+  // sur grandes valeurs FCFA, puis arrondi banker's rounding.
+  const is_brut = Math.max(0, fiscalRound(fiscalApplyRate(resultatFiscal, taux.IS.taux_normal), 0))
+  const imf_brut = fiscalRound(fiscalApplyRate(chiffreAffaires, taux.IMF.taux), 0)
   const imf = Math.max(taux.IMF.minimum, Math.min(imf_brut, taux.IMF.maximum))
   const is_du = Math.max(is_brut, imf)
   return { is_brut, imf, is_du, base: is_brut >= imf ? 'IS' : 'IMF' }

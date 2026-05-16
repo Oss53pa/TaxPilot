@@ -353,7 +353,7 @@ const FAQ: React.FC = () => {
           </Box>
           <Box
             component="a"
-            href="https://atlas-studio.org/portal?app=taxpilot"
+            href="https://atlasstudio.app/portal?app=liasspilot"
             sx={{
               display: 'inline-flex',
               alignItems: 'center',

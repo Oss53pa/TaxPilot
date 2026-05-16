@@ -235,12 +235,15 @@ const ModernDashboard: React.FC = () => {
   )
 
   return (
-    <Box sx={{
-      display: 'flex', flexDirection: 'column',
-      minHeight: '85vh', width: '100%',
-      background: P.primary50,
-      position: 'relative',
-    }}>
+    <Box
+      data-tour="dashboard"
+      sx={{
+        display: 'flex', flexDirection: 'column',
+        minHeight: '85vh', width: '100%',
+        background: P.primary50,
+        position: 'relative',
+      }}
+    >
       {/* Onboarding centralisé : GuidedTour est rendu via Layout.tsx — on évite
           le double-modal en supprimant l'ancien <OnboardingTour /> ici. */}
 
