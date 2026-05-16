@@ -326,7 +326,7 @@ const ModernImportBalance: React.FC = () => {
       }))
 
       setImportedData(accounts)
-      console.log('[Import Parse] Detection mapping:', JSON.stringify(result.detection.mapping))
+      logger.debug('[Import Parse] Detection mapping:', JSON.stringify(result.detection.mapping))
       if (result.warnings.length > 0) setWarningMessages(result.warnings)
       if (result.errors.length > 0) setErrorMessage(result.errors.join(' | '))
 
@@ -335,7 +335,7 @@ const ModernImportBalance: React.FC = () => {
 
       // Build N-1 comparison from unified entries
       const hasN1Data = accounts.some(a => (a.soldeDebitN1 || 0) !== 0 || (a.soldeCreditN1 || 0) !== 0)
-      console.log('[Import Parse] N entries:', result.entries.length, '| hasN1:', hasN1Data)
+      logger.debug('[Import Parse] N entries:', result.entries.length, '| hasN1:', hasN1Data)
       if (hasN1Data) {
         const n1Entries = accounts.map(a => ({
           compte: a.accountNumber,
@@ -1586,7 +1586,7 @@ const ModernImportBalance: React.FC = () => {
                               liasseDataService.loadBalance(entries)
 
                               const hasN1 = entries.some(e => (e.solde_debit_n1 || 0) !== 0 || (e.solde_credit_n1 || 0) !== 0)
-                              console.log('[Import] Saved', entries.length, 'unified entries, hasN1:', hasN1)
+                              logger.debug('[Import] Saved', entries.length, 'unified entries, hasN1:', hasN1)
 
                               // P0-1: Toast notification after successful import
                               enqueueSnackbar(`Balance importée avec succès (${entries.length} comptes chargés)`, { variant: 'success' })

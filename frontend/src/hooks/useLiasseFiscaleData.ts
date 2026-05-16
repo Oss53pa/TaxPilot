@@ -8,6 +8,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react'
+import { logger } from '@/utils/logger'
 import type { EntrepriseData, BalanceEntry, RegimeImposition } from '@/modules/liasse-fiscale/types'
 import { scopeKey } from '@/services/dossierScopeService'
 import { liasseDataService } from '@/services/liasseDataService'
@@ -52,11 +53,11 @@ export const loadEntreprise = (): EntrepriseData => {
       if (!e) continue
       // Skip entries with no meaningful data
       if (!e.raison_sociale && !e.denomination && !e.numero_contribuable) continue
-      console.log(`[Liasse] Entreprise loaded from "${key}"`, e.raison_sociale || e.denomination || '(sans nom)')
+      logger.debug(`[Liasse] Entreprise loaded from "${key}"`, e.raison_sociale || e.denomination || '(sans nom)')
       return mapToEntrepriseData(e)
     } catch { /* try next key */ }
   }
-  console.warn('[Liasse] Aucune donnee entreprise trouvee dans localStorage')
+  logger.warn('[Liasse] Aucune donnee entreprise trouvee dans localStorage')
   return EMPTY_ENTREPRISE
 }
 
@@ -132,7 +133,7 @@ export const loadBalanceN1 = (): BalanceEntry[] => {
     if (raw) {
       const stored = JSON.parse(raw)
       if (Array.isArray(stored?.entries) && stored.entries.length > 0) {
-        console.log(`[Liasse] Balance N-1 loaded from "fiscasync_balance_latest_n1": ${stored.entries.length} comptes`)
+        logger.debug(`[Liasse] Balance N-1 loaded from "fiscasync_balance_latest_n1": ${stored.entries.length} comptes`)
         return parseEntries(stored.entries)
       }
     }
@@ -143,7 +144,7 @@ export const loadBalanceN1 = (): BalanceEntry[] => {
     if (raw) {
       const stored = JSON.parse(raw)
       if (Array.isArray(stored?.entriesN1) && stored.entriesN1.length > 0) {
-        console.log(`[Liasse] Balance N-1 loaded from "fiscasync_balance_latest.entriesN1": ${stored.entriesN1.length} comptes`)
+        logger.debug(`[Liasse] Balance N-1 loaded from "fiscasync_balance_latest.entriesN1": ${stored.entriesN1.length} comptes`)
         return parseEntries(stored.entriesN1)
       }
     }
@@ -156,14 +157,14 @@ export const loadBalanceN1 = (): BalanceEntry[] => {
       if (Array.isArray(list) && list.length > 1) {
         const entries = list[1]?.entries
         if (Array.isArray(entries) && entries.length > 0) {
-          console.log(`[Liasse] Balance N-1 loaded from "fiscasync_balance_list[1]": ${entries.length} comptes`)
+          logger.debug(`[Liasse] Balance N-1 loaded from "fiscasync_balance_list[1]": ${entries.length} comptes`)
           return parseEntries(entries)
         }
       }
     }
   } catch { /* ignore */ }
 
-  console.warn('[Liasse] Aucune balance N-1 trouvee')
+  logger.warn('[Liasse] Aucune balance N-1 trouvee')
   return []
 }
 
@@ -173,7 +174,7 @@ export const loadBalance = (): BalanceEntry[] => {
     if (raw) {
       const stored = JSON.parse(raw)
       if (Array.isArray(stored?.entries) && stored.entries.length > 0) {
-        console.log(`[Liasse] Balance loaded from "fiscasync_balance_latest": ${stored.entries.length} comptes`)
+        logger.debug(`[Liasse] Balance loaded from "fiscasync_balance_latest": ${stored.entries.length} comptes`)
         return parseEntries(stored.entries)
       }
     }
@@ -186,14 +187,14 @@ export const loadBalance = (): BalanceEntry[] => {
       if (Array.isArray(list) && list.length > 0) {
         const entries = list[0]?.entries
         if (Array.isArray(entries) && entries.length > 0) {
-          console.log(`[Liasse] Balance loaded from "fiscasync_balance_list[0]": ${entries.length} comptes`)
+          logger.debug(`[Liasse] Balance loaded from "fiscasync_balance_list[0]": ${entries.length} comptes`)
           return parseEntries(entries)
         }
       }
     }
   } catch { /* try next */ }
 
-  console.warn('[Liasse] Aucune balance trouvee dans localStorage. Importez votre balance via le menu Import.')
+  logger.warn('[Liasse] Aucune balance trouvee dans localStorage. Importez votre balance via le menu Import.')
   return []
 }
 

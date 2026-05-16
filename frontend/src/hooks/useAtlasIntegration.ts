@@ -4,6 +4,7 @@
  * when the user has both Atlas F&A and Liass'Pilot subscriptions.
  */
 import { useState, useEffect, useCallback } from 'react';
+import { logger } from '@/utils/logger'
 import { supabase, isSupabaseEnabled } from '../lib/supabase';
 
 export interface AtlasBalanceExport {
@@ -68,7 +69,7 @@ export function useAtlasIntegration() {
         setAvailableBalances(exports as AtlasBalanceExport[]);
       }
     } catch (err) {
-      console.error('[Atlas Integration] Error:', err);
+      logger.error('[Atlas Integration] Error:', err);
     }
     setLoading(false);
   }, []);

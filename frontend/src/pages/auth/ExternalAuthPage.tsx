@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { logger } from '@/utils/logger'
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuthStore } from '../../store/authStore';
@@ -85,7 +86,7 @@ export default function ExternalAuthPage() {
       navigate('/dashboard', { replace: true });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Erreur inconnue';
-      console.error('External auth error:', message);
+      logger.error('External auth error:', message);
       setStatus('error');
       setErrorMessage(message);
     }

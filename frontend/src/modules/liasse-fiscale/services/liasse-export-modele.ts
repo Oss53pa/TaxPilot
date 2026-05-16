@@ -6,6 +6,7 @@
  */
 
 import * as XLSX from 'xlsx'
+import { logger } from '@/utils/logger'
 import { CELL_MAP, TEMPLATE_PATH, CONTROLES } from '@/config/liasseModelReference'
 import { getActifBrut, getAmortProv, getPassif, getBalanceSolde, detecterAnomaliesActif, detecterAnomaliesPassif } from './liasse-calculs'
 import { ALL_ACTIF_PREFIXES, ALL_PASSIF_PREFIXES, BILAN_ACTIF, BILAN_PASSIF, COMPTE_RESULTAT_MAPPING as CR, TFT_COMPTES } from '@/constants/syscohada-mappings'
@@ -606,9 +607,9 @@ export async function exportModeB(
       const msg = `[${ctrl.severity.toUpperCase()}] ${ctrl.label} — écart: ${ecart.toLocaleString('fr-FR')}`
       auditErrors.push(msg)
       if (ctrl.severity === 'bloquant') {
-        console.error('[Audit]', msg)
+        logger.error('[Audit]', msg)
       } else {
-        console.warn('[Audit]', msg)
+        logger.warn('[Audit]', msg)
       }
     }
   }
@@ -623,7 +624,7 @@ export async function exportModeB(
         ? `[AVERTISSEMENT] Compte ${a.compte} (${a.libelle}) : solde créditeur ${a.montant.toLocaleString('fr-FR')} sur un compte d'actif`
         : `[AVERTISSEMENT] Compte ${a.compte} (${a.libelle}) : solde débiteur ${a.montant.toLocaleString('fr-FR')} sur un compte de passif`
       auditErrors.push(msg)
-      console.warn('[Audit anomalie]', msg)
+      logger.warn('[Audit anomalie]', msg)
     }
   }
 
@@ -638,7 +639,7 @@ export async function exportModeB(
         `Export bloqué — Bilan déséquilibré : Total Actif Net (${totalActifNet.toLocaleString('fr-FR')}) ≠ Total Passif (${totalPassif.toLocaleString('fr-FR')}). Écart: ${ecartBilan.toLocaleString('fr-FR')} FCFA. Vérifiez la balance importée.`
       )
     }
-    console.warn(`[Audit] ${bloquants.length} contrôle(s) bloquant(s) — export autorisé (bilan équilibré)`)
+    logger.warn(`[Audit] ${bloquants.length} contrôle(s) bloquant(s) — export autorisé (bilan équilibré)`)
   }
 
   // 3d. Inject enterprise headers into ALL note/sheet headers (rows 3-6)
@@ -1205,7 +1206,7 @@ export async function exportModeB(
     }
   }
 
-  console.log(`[Mode B] ${headerCount} en-têtes, ${noteDetailCount} notes détaillées, ${movementCount} mouvements injectés`)
+  logger.debug(`[Mode B] ${headerCount} en-têtes, ${noteDetailCount} notes détaillées, ${movementCount} mouvements injectés`)
 
   // 4. Inject cell by cell
   const log: InjectionLog[] = []
@@ -1251,10 +1252,10 @@ export async function exportModeB(
   const injected = log.filter(l => l.status === 'injected').length
   const skipped = log.filter(l => l.status === 'skipped_formula').length
   const errors = log.filter(l => l.status === 'error').length
-  console.log(`[Mode B] ${injected} cellules injectées, ${skipped} formules conservées, ${errors} erreurs`)
+  logger.debug(`[Mode B] ${injected} cellules injectées, ${skipped} formules conservées, ${errors} erreurs`)
 
   if (errors > 0) {
-    console.error('[Mode B] Erreurs:', log.filter(l => l.status === 'error'))
+    logger.error('[Mode B] Erreurs:', log.filter(l => l.status === 'error'))
   }
 
   // 6. Write the filled file

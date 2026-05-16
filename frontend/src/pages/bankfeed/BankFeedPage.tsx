@@ -3,6 +3,7 @@
  */
 
 import React, { useState, useEffect, useCallback, useRef } from 'react'
+import { logger } from '@/utils/logger'
 import {
   Box,
   Grid,
@@ -182,7 +183,7 @@ const BankFeedPage: React.FC = () => {
       loadTransactions()
       loadData()
     } catch (err) {
-      console.error('Import error:', err)
+      logger.error('Import error:', err)
     } finally {
       setImporting(false)
       if (fileInputRef.current) fileInputRef.current.value = ''

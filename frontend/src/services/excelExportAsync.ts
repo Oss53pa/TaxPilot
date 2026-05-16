@@ -4,6 +4,7 @@
  * Uses chunked processing with requestIdleCallback for non-blocking export.
  */
 import * as XLSX from 'xlsx'
+import { logger } from '@/utils/logger'
 import type { BalanceEntry, EntrepriseData } from '@/modules/liasse-fiscale/types'
 import type { ExerciceData } from '@/modules/liasse-fiscale/services/liasse-export-excel'
 
@@ -49,7 +50,7 @@ export async function exporterLiasseWithProgress(
         XLSX.utils.book_append_sheet(wb, ws, nom.substring(0, 31))
       }
     } catch (err) {
-      console.error(`[Export] Erreur onglet ${nom}:`, err)
+      logger.error(`[Export] Erreur onglet ${nom}:`, err)
       const ws = XLSX.utils.aoa_to_sheet([['Erreur de génération', String(err)]])
       XLSX.utils.book_append_sheet(wb, ws, nom.substring(0, 31))
     }

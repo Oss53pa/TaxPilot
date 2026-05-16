@@ -3,6 +3,7 @@
  */
 
 import React, { useState } from 'react'
+import { logger } from '@/utils/logger'
 import {
   Box,
   Card,
@@ -68,7 +69,7 @@ const Login: React.FC = () => {
       await login(data.email, data.password)
     } catch (err: any) {
       // L'erreur est déjà gérée dans le store
-      console.error('Erreur de connexion:', err)
+      logger.error('Erreur de connexion:', err)
     }
   }
 

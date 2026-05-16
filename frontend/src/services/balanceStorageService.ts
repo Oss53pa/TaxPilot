@@ -4,6 +4,7 @@
  */
 
 import type { BalanceEntry } from './liasseDataService'
+import { logger } from '@/utils/logger'
 import type { StatutBalance, ExerciceConfig } from '@/types/audit.types'
 
 import { scopeKey } from './dossierScopeService'
@@ -54,7 +55,7 @@ function setItem<T>(key: string, value: T): void {
   try {
     localStorage.setItem(scopeKey(PREFIX + key), JSON.stringify(value))
   } catch (e) {
-    console.error(`[BalanceStorage] Failed to save key "${scopeKey(PREFIX + key)}":`, e)
+    logger.error(`[BalanceStorage] Failed to save key "${scopeKey(PREFIX + key)}":`, e)
     // On quota exceeded, try to free space by trimming the list
     if (e instanceof DOMException && e.name === 'QuotaExceededError') {
       try {

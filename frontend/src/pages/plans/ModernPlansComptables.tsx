@@ -4,6 +4,7 @@
  */
 
 import React, { useState } from 'react'
+import { logger } from '@/utils/logger'
 import {
   Box,
   Grid,
@@ -378,11 +379,11 @@ const ModernPlansComptables: React.FC = () => {
     }
   }
 
-  const exportToExcel = () => console.log('Exporting to Excel...')
-  const exportToPDF = () => console.log('Exporting to PDF...')
-  const exportToXML = () => console.log('Exporting to XML...')
-  const exportToJSON = () => console.log('Exporting to JSON...')
-  const exportToCSV = () => console.log('Exporting to CSV...')
+  const exportToExcel = () => logger.debug('Exporting to Excel...')
+  const exportToPDF = () => logger.debug('Exporting to PDF...')
+  const exportToXML = () => logger.debug('Exporting to XML...')
+  const exportToJSON = () => logger.debug('Exporting to JSON...')
+  const exportToCSV = () => logger.debug('Exporting to CSV...')
 
   // Filtrer les comptes selon la recherche
   const filterAccounts = (accounts: Account[], term: string): Account[] => {

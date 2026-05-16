@@ -3,6 +3,7 @@
  */
 
 import React, { useState, useEffect } from 'react'
+import { logger } from '@/utils/logger'
 import {
   Box,
   Grid,
@@ -53,7 +54,7 @@ const Teledeclaration: React.FC = () => {
   const loadTaxData = async () => {
     try {
       setLoading(true)
-      console.log('🔄 Loading tax declarations from backend...')
+      logger.debug('🔄 Loading tax declarations from backend...')
 
       const [declarationsResponse, obligationsResponse] = await Promise.all([
         taxService.getDeclarations({ page_size: 10 }),
@@ -63,9 +64,9 @@ const Teledeclaration: React.FC = () => {
       setDeclarations((declarationsResponse as any).results || [])
       setObligations((obligationsResponse as any).results || [])
 
-      console.log('✅ Tax data loaded successfully')
+      logger.debug('✅ Tax data loaded successfully')
     } catch (error) {
-      console.error('❌ Error loading tax data:', error)
+      logger.error('❌ Error loading tax data:', error)
     } finally {
       setLoading(false)
     }
@@ -154,7 +155,7 @@ const Teledeclaration: React.FC = () => {
     setEtapeActive(0)
 
     try {
-      console.log('🚀 Starting tax declaration submission...')
+      logger.debug('🚀 Starting tax declaration submission...')
 
       // Simulation de transmission avec vraies étapes
       const interval = setInterval(() => {
@@ -162,7 +163,7 @@ const Teledeclaration: React.FC = () => {
           if (prev >= etapesTransmission.length - 1) {
             clearInterval(interval)
             setTransmissionEnCours(false)
-            console.log('✅ Tax declaration submitted successfully')
+            logger.debug('✅ Tax declaration submitted successfully')
             // Recharger les données
             loadTaxData()
             return prev
@@ -171,7 +172,7 @@ const Teledeclaration: React.FC = () => {
         })
       }, 1500)
     } catch (error) {
-      console.error('❌ Error submitting declaration:', error)
+      logger.error('❌ Error submitting declaration:', error)
       setTransmissionEnCours(false)
     }
   }

@@ -3,12 +3,13 @@
  * Architecture frontend-only : pas de backend propriétaire.
  */
 import { createClient } from '@supabase/supabase-js'
+import { logger } from '@/utils/logger'
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn(
+  logger.warn(
     '[Supabase] Variables VITE_SUPABASE_URL et VITE_SUPABASE_ANON_KEY non configurées. ' +
     'L\'app fonctionne en mode local (localStorage uniquement).'
   )

@@ -1,4 +1,5 @@
 import React, { Suspense, useState, useEffect, useCallback, useMemo } from 'react'
+import { logger } from '@/utils/logger'
 import { createPortal } from 'react-dom'
 import {
   Box, CircularProgress, Typography, Button, Chip, Paper, IconButton, Alert, Menu, MenuItem, ListItemIcon, ListItemText,
@@ -199,7 +200,7 @@ const LiasseFiscaleModule: React.FC = () => {
       // P0-2: Toast notification after Excel export (Mode A)
       enqueueSnackbar('Liasse exportée avec succès', { variant: 'success' })
     } catch (err) {
-      console.error('[Export Excel] Erreur:', err)
+      logger.error('[Export Excel] Erreur:', err)
       enqueueSnackbar('Erreur lors de l\'export Excel.', { variant: 'error' })
     } finally {
       setExportProgress(null)
@@ -213,7 +214,7 @@ const LiasseFiscaleModule: React.FC = () => {
       // P0-3: Toast notification after DGI export (Mode B)
       enqueueSnackbar('Liasse DGI exportée avec succès', { variant: 'success' })
     } catch (err) {
-      console.error('[Mode B] Erreur export:', err)
+      logger.error('[Mode B] Erreur export:', err)
       enqueueSnackbar('Erreur lors de l\'export modèle DGI.', { variant: 'error' })
     }
   }, [balance, balanceN1, entreprise])

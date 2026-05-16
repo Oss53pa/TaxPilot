@@ -3,6 +3,7 @@
  * Enregistre chaque action utilisateur dans Supabase (ou localStorage en fallback).
  */
 import { supabase, isSupabaseEnabled } from '@/lib/supabase'
+import { logger } from '@/utils/logger'
 
 export interface AuditEntry {
   id?: string
@@ -32,7 +33,7 @@ export async function logAuditAction(entry: Omit<AuditEntry, 'id' | 'createdAt'>
       details: entry.details || {},
       created_at: timestamp,
     })
-    if (error) console.error('[Audit] Erreur Supabase:', error)
+    if (error) logger.error('[Audit] Erreur Supabase:', error)
     return
   }
 
@@ -45,7 +46,7 @@ export async function logAuditAction(entry: Omit<AuditEntry, 'id' | 'createdAt'>
     if (entries.length > MAX_LOCAL_ENTRIES) entries.length = MAX_LOCAL_ENTRIES
     localStorage.setItem(scopeKey(BASE_LOCAL_KEY), JSON.stringify(entries))
   } catch {
-    console.error('[Audit] Erreur localStorage')
+    logger.error('[Audit] Erreur localStorage')
   }
 }
 

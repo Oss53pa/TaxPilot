@@ -1,4 +1,5 @@
 import * as XLSX from 'xlsx'
+import { logger } from '@/utils/logger'
 import type { BalanceEntry, EntrepriseData } from '../types'
 import { BUILDERS } from './builders'
 
@@ -122,7 +123,7 @@ export function exporterLiasse(
           ? builder(balance, balanceN1, entreprise, exercice)
           : { rows: [[]] }
       } catch (err) {
-        console.error(`[Liasse Export] Erreur builder "${nom}":`, err)
+        logger.error(`[Liasse Export] Erreur builder "${nom}":`, err)
         data = { rows: [[`ERREUR: ${nom}`]] }
       }
 
@@ -136,7 +137,7 @@ export function exporterLiasse(
     const filename = `Liasse_${denom}_${exercice.annee}.xlsx`
     XLSX.writeFile(wb, filename)
   } catch (err) {
-    console.error('[Liasse Export] Erreur export:', err)
+    logger.error('[Liasse Export] Erreur export:', err)
     alert(`Erreur lors de l'export Excel:\n${err instanceof Error ? err.message : String(err)}`)
   }
 }

@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useCallback, useMemo, useEffect } from 'react'
+import { logger } from '@/utils/logger'
 import { useNavigate } from 'react-router-dom'
 import {
   Box,
@@ -616,7 +617,7 @@ const LiasseControlInterface: React.FC = () => {
       navigate('/liasse-fiscale')
     } catch (err) {
       // Archive may fail if snapshot is missing — still navigate
-      console.warn('Archive failed:', err)
+      logger.warn('Archive failed:', err)
       navigate('/liasse-fiscale')
     } finally {
       setDeploying(false)

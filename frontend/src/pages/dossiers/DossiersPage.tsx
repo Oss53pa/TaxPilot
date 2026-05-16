@@ -3,6 +3,7 @@
  * Lists all dossiers with actions: open, duplicate, delete, create new.
  */
 import { useState } from 'react'
+import { logger } from '@/utils/logger'
 import { useNavigate } from 'react-router-dom'
 import { useSnackbar } from 'notistack'
 import { useQueryClient } from '@tanstack/react-query'
@@ -142,7 +143,7 @@ export default function DossiersPage() {
         // Autre erreur (réseau, RLS, etc.) — log + fallback local-only.
         // Le dossier sera créé localement et resyncé plus tard si possible.
         // eslint-disable-next-line no-console
-        console.warn('[DossiersPage] Supabase upsert failed, falling back to local-only:', err)
+        logger.warn('[DossiersPage] Supabase upsert failed, falling back to local-only:', err)
         remoteOk = false
         enqueueSnackbar(
           'Le dossier sera enregistré localement (synchronisation cloud indisponible).',

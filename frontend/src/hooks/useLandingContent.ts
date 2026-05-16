@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { logger } from '@/utils/logger'
 
 const ATLAS_SUPABASE_URL = 'https://vgtmljfayiysuvrcmunt.supabase.co';
 const ATLAS_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZndG1samZheWl5c3V2cmNtdW50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NzgyMDUsImV4cCI6MjA4NjU1NDIwNX0.a2pyz1up8ZmZk-Tl51B0v6n3eVNkBPG5L_BJAM20qt4';
@@ -19,7 +20,7 @@ export function useLandingContent(appId: string) {
         rows.forEach(r => { map[r.section] = r.data; });
         setContent(map);
       })
-      .catch(err => console.error('useLandingContent error:', err))
+      .catch(err => logger.error('useLandingContent error:', err))
       .finally(() => setLoading(false));
   }, [appId]);
 

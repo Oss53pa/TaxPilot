@@ -3,6 +3,7 @@
  */
 
 import React, { useState, useEffect, Suspense } from 'react'
+import { logger } from '@/utils/logger'
 import {
   Box,
   Typography,
@@ -166,7 +167,7 @@ const ModernLiasseComplete: React.FC = () => {
 
   // Actions pour les boutons
   const handleExportLiasse = () => {
-    console.log('Export de la liasse en cours...')
+    logger.debug('Export de la liasse en cours...')
     // Simulation de l'export
     const exportData = {
       dateExport: new Date().toISOString(),
@@ -192,13 +193,13 @@ const ModernLiasseComplete: React.FC = () => {
   }
 
   const handlePrintSheet = () => {
-    console.log('Impression de la feuille en cours...')
+    logger.debug('Impression de la feuille en cours...')
     // Ouvrir la boîte de dialogue d'impression du navigateur
     window.print()
   }
 
   const handleSaveSheet = () => {
-    console.log('Sauvegarde de la feuille en cours...')
+    logger.debug('Sauvegarde de la feuille en cours...')
     // Simulation de la sauvegarde
     const currentSheet = LIASSE_SHEETS.find(s => s.id === selectedSheet)
     if (currentSheet) {

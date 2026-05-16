@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 /**
  * dossierScopeService.ts — Isolation des données localStorage par dossier client
  *
@@ -72,6 +73,6 @@ export function cleanupDossierData(dossierId: string): void {
   }
   keysToRemove.forEach(k => localStorage.removeItem(k))
   if (keysToRemove.length > 0) {
-    console.log(`[DossierScope] Cleaned up ${keysToRemove.length} keys for dossier ${dossierId}`)
+    logger.debug(`[DossierScope] Cleaned up ${keysToRemove.length} keys for dossier ${dossierId}`)
   }
 }

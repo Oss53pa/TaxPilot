@@ -73,6 +73,20 @@ if (sentryDsn && import.meta.env.MODE === 'production') {
       tracesSampleRate: 0.1,
       replaysSessionSampleRate: 0.1,
       replaysOnErrorSampleRate: 1.0,
+      /**
+       * Drop tous les breadcrumbs 'console' avant qu'ils ne soient envoyés
+       * à Sentry. Le logger central remplace `console.*` partout dans l'app,
+       * mais ce filet de sécurité protège contre :
+       *   - les libs tierces (axios, react-query, supabase-js) qui logguent en console
+       *   - les `console.*` qui auraient échappé à la migration
+       * Conséquence : 0 PII propage à Sentry via breadcrumbs console.
+       * Les erreurs explicitement capturées via `captureSafe` / `captureException`
+       * passent toujours (filtre ciblé sur les breadcrumbs uniquement).
+       */
+      beforeBreadcrumb(breadcrumb) {
+        if (breadcrumb.category === 'console') return null
+        return breadcrumb
+      },
     })
     _sentryReady = Sentry
     // Flush buffered errors capturées avant l'init

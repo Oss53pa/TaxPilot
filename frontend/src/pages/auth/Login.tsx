@@ -3,6 +3,7 @@
  */
 
 import React, { useState, useEffect } from 'react'
+import { logger } from '@/utils/logger'
 import {
   Box,
   Card,
@@ -89,7 +90,7 @@ const Login: React.FC = () => {
       await login(formData.email, formData.password)
       navigate('/dashboard')
     } catch (err) {
-      console.error('Erreur de connexion:', err)
+      logger.error('Erreur de connexion:', err)
     }
   }
 

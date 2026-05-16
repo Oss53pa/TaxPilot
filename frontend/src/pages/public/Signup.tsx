@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { logger } from '@/utils/logger'
 import { Link as RouterLink, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
 import {
@@ -198,7 +199,7 @@ const Signup: React.FC = () => {
       // Redirection vers dashboard avec message de succès
       navigate('/dashboard')
     } catch (err: any) {
-      console.error('❌ Erreur inscription:', err)
+      logger.error('❌ Erreur inscription:', err)
       setError(err.message || 'Une erreur est survenue lors de l\'inscription')
     } finally {
       setLoading(false)

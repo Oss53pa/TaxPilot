@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useCallback } from 'react'
+import { logger } from '@/utils/logger'
 import {
   Box,
   Grid,
@@ -557,7 +558,7 @@ const ModernParametrage: React.FC = () => {
           // Valider la configuration importée
           validateAllFields()
         } catch (error) {
-          console.error('Erreur import:', error)
+          logger.error('Erreur import:', error)
         }
       }
       reader.readAsText(file)
@@ -644,7 +645,7 @@ const ModernParametrage: React.FC = () => {
   const handleAutoSave = useCallback(() => {
     if (autoSaveEnabled) {
       // Sauvegarder la configuration
-      console.log('Auto-save:', companyConfig)
+      logger.debug('Auto-save:', companyConfig)
       setLastSaveTime(new Date())
     }
   }, [autoSaveEnabled, companyConfig])

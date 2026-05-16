@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { logger } from '@/utils/logger'
 import {
   Box,
   Typography,
@@ -407,7 +408,7 @@ const ModernLiasseProduction: React.FC = () => {
   // EX-LIASSE-005: Export multi-format
   const _exportLiasse = (_liasse: LiasseTemplate, _format: 'pdf' | 'excel' | 'xml' | 'json') => {
     // Simulation de l'export
-    console.log(`Export de la liasse ${_liasse.name} au format ${_format}`);
+    logger.debug(`Export de la liasse ${_liasse.name} au format ${_format}`);
   };
   void _exportLiasse;
 

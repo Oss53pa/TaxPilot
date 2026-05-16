@@ -1,4 +1,5 @@
 import React, { Suspense } from 'react'
+import { logger } from '@/utils/logger'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { CircularProgress, Box, Typography, Chip } from '@mui/material'
 import ModernLayout from './components/shared/Layout'
@@ -140,7 +141,7 @@ function purgeSeedData() {
   }
   if (keysToRemove.length > 0) {
     keysToRemove.forEach(k => localStorage.removeItem(k))
-    console.log(`[FiscaSync] Purged ${keysToRemove.length} seed data keys:`, keysToRemove)
+    logger.debug(`[FiscaSync] Purged ${keysToRemove.length} seed data keys:`, keysToRemove)
   }
   localStorage.setItem(PURGED_KEY, new Date().toISOString())
 }
