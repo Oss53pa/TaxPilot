@@ -223,9 +223,38 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       error: null,
     })
     useOrganizationStore.getState().clearOrganization()
-    // Clear any localStorage remnants
-    localStorage.removeItem('fiscasync-auth')
-    localStorage.removeItem('fiscasync-organization')
+
+    // ── Logout sécurisé : purge complète des données métier ──
+    // Avant : seuls `fiscasync-auth` et `fiscasync-organization` étaient
+    // clear. Les balances, liasses, DSF, factures électroniques scopées
+    // par dossier restaient → user suivant sur le même poste pouvait
+    // lire tout le portfolio cabinet (fuite cross-user sur poste partagé).
+    //
+    // Approche : whitelist des clés à PRÉSERVER (préférences UI portables
+    // entre sessions), puis suppression de tout le reste préfixé fiscasync.
+    const PRESERVE_KEYS = new Set([
+      'fiscasync-theme',         // préférence theme light/dark
+      'fiscasync-lang',          // préférence langue
+      'fiscasync_device_id_v1',  // ID device pour secureStorage (lié au poste, pas au user)
+    ])
+    const keysToRemove: string[] = []
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i)
+      if (!key) continue
+      // Patterns à purger : tout ce qui commence par fiscasync ET tout
+      // ce qui commence par dossier_ (scope cabinet)
+      const isFiscasyncKey = key.startsWith('fiscasync-') || key.startsWith('fiscasync_')
+      const isDossierScoped = key.startsWith('dossier_')
+      if ((isFiscasyncKey || isDossierScoped) && !PRESERVE_KEYS.has(key)) {
+        keysToRemove.push(key)
+      }
+    }
+    keysToRemove.forEach(k => localStorage.removeItem(k))
+
+    // Reset secureStorage cache (session secret + dérivation clé maître)
+    try {
+      sessionStorage.removeItem('fiscasync_session_secret_v1')
+    } catch { /* ignore */ }
   },
 
   resetPassword: async (email: string) => {

@@ -26,6 +26,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Lint — bloquant sur erreurs (707 errors + 78 warnings actuels).
+      # TODO : passer à lint:strict (--max-warnings 0) après la PR de
+      # purge any/exhaustive-deps. Pour l'instant on garde lint standard
+      # qui fail déjà sur les errors. La protection forte contre la
+      # régression TS vient du build-with-types ci-dessous.
       - name: Lint
         run: npm run lint
 
@@ -95,5 +100,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build
-        run: npm run build
+      # Build bloquant sur erreurs TS — avant `npm run build` (vite seul)
+      # passait même si `tsc --noEmit` aurait flag 200+ erreurs dans
+      # typescript-errors.log à la racine. Après : `build-with-types`
+      # exécute `tsc && vite build` en série, fail si TS rejette.
+      - name: Build (with TypeScript check)
+        run: npm run build-with-types

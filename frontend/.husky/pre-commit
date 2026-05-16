@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+# Pre-commit hook : ESLint --fix sur les fichiers stagés.
+# Empêche que de nouveaux warnings/errors atterrissent en main.
+# Override : git commit --no-verify (à n'utiliser qu'en cas d'urgence justifiée).
+cd frontend && npx lint-staged

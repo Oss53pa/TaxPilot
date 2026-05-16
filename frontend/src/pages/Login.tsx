@@ -200,20 +200,25 @@ const Login: React.FC = () => {
             </Box>
           </Box>
 
-          <Divider sx={{ my: 3 }} />
-
-          {/* Informations de démo */}
-          <Box sx={{ textAlign: 'center' }}>
-            <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 1 }}>
-              Mode Démonstration
-            </Typography>
-            <Typography variant="caption" color="text.secondary" display="block">
-              Utilisateur : admin
-            </Typography>
-            <Typography variant="caption" color="text.secondary" display="block">
-              Mot de passe : admin123
-            </Typography>
-          </Box>
+          {/* Credentials démo — UNIQUEMENT en dev (import.meta.env.DEV).
+              Avant : affichés en clair sur la page login publique → si la
+              prod réutilisait ces creds, takeover trivial. */}
+          {import.meta.env.DEV && (
+            <>
+              <Divider sx={{ my: 3 }} />
+              <Box sx={{ textAlign: 'center' }}>
+                <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 1 }}>
+                  Mode Démonstration (DEV uniquement)
+                </Typography>
+                <Typography variant="caption" color="text.secondary" display="block">
+                  Utilisateur : admin
+                </Typography>
+                <Typography variant="caption" color="text.secondary" display="block">
+                  Mot de passe : admin123
+                </Typography>
+              </Box>
+            </>
+          )}
         </CardContent>
       </Card>
     </Box>

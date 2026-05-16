@@ -12,7 +12,9 @@ export default defineConfig({
   reporter: 'html',
 
   use: {
-    baseURL: 'http://localhost:5173',
+    // Aligné sur vite.config.ts port: 3006. Avant : 5173 → les e2e ne
+    // tournaient pas en local sans override manuel.
+    baseURL: 'http://localhost:3006',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
@@ -44,7 +46,7 @@ export default defineConfig({
 
   webServer: {
     command: 'npm run dev',
-    url: 'http://localhost:5173',
+    url: 'http://localhost:3006',
     reuseExistingServer: !process.env.CI,
   },
 });
