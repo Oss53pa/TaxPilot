@@ -57,7 +57,7 @@ export interface ReportTemplate {
     nom: string
     ordre: number
     obligatoire: boolean
-    parametres: any
+    parametres: Record<string, unknown>
   }>
   is_public: boolean
   created_by: string
@@ -116,7 +116,7 @@ export interface ReportRequest {
     inclure_graphiques: boolean
     inclure_comparaisons: boolean
     niveau_detail: 'RESUME' | 'STANDARD' | 'DETAILLE'
-    filtres_specifiques?: any
+    filtres_specifiques?: Record<string, unknown>
   }
 }
 
@@ -287,7 +287,7 @@ class ReportingService {
   async scheduleReport(template_id: string, schedule: {
     cron_expression: string
     destinataires: string[]
-    parametres: any
+    parametres: Record<string, unknown>
   }) {
     logger.debug(`⏰ Scheduling report with template ${template_id}...`)
     return apiClient.post(`${this.baseUrl}/schedule/`, {
@@ -301,7 +301,7 @@ class ReportingService {
     return apiClient.get(`${this.baseUrl}/schedule/`)
   }
 
-  async updateScheduledReport(id: string, schedule: Partial<any>) {
+  async updateScheduledReport(id: string, schedule: Partial<Record<string, unknown>>) {
     logger.debug(`Updating scheduled report ${id}...`)
     return apiClient.patch(`${this.baseUrl}/schedule/${id}/`, schedule)
   }
@@ -330,7 +330,7 @@ class ReportingService {
   }
 
   // Validation et qualité - Stub service
-  async validateReportData(data: any) {
+  async validateReportData(data: Record<string, unknown>) {
     logger.debug('Validating report data ...')
     return apiClient.post(`${this.baseUrl}/validate/`, data)
   }
@@ -359,12 +359,12 @@ class ReportingService {
     return apiClient.get(`${this.baseUrl}/kpi-alerts/`, params)
   }
 
-  async createKPI(kpi: any) {
+  async createKPI(kpi: Record<string, unknown>) {
     logger.debug('Creating KPI ...', kpi)
     return apiClient.post(`${this.baseUrl}/kpis/`, kpi)
   }
 
-  async updateKPI(id: string, kpi: any) {
+  async updateKPI(id: string, kpi: Record<string, unknown>) {
     logger.debug(`Updating KPI ${id} ...`)
     return apiClient.patch(`${this.baseUrl}/kpis/${id}/`, kpi)
   }
@@ -385,7 +385,7 @@ class ReportingService {
   }
 
   // Method aliases for compatibility
-  async getDashboardStatistics(params?: any) {
+  async getDashboardStatistics(params?: Parameters<typeof this.getDashboardStats>[0]) {
     return this.getDashboardStats(params)
   }
 

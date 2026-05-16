@@ -67,8 +67,15 @@ export default function DashboardView() {
       // Récupérer l'ID de l'entreprise depuis le contexte ou le store
       const entrepriseId = localStorage.getItem('entreprise_id') || '1'
 
-      const data = await reportingService.getDashboardStatistics(parseInt(entrepriseId))
-      setDashboardData(data as any)
+      // Bug exposé après tightening du type Record<string,unknown> → expects {entreprise?, periode?}
+      // Avant : `parseInt(entrepriseId)` (number) passé à `getDashboardStatistics(any)` qui
+      // chainait vers getDashboardStats({entreprise?: string}). Backend recevait un number
+      // au lieu d'une string, donc la query Django ne matchait jamais → dashboard vide.
+      const data = await reportingService.getDashboardStatistics({ entreprise: entrepriseId })
+      // DashboardStats (service) vs DashboardData (UI) ne s'aligne pas parfaitement.
+      // Cast intermédiaire via `unknown` pour signaler l'écart de type au lieu
+      // d'un `as any` silencieux — TODO: aligner les deux interfaces.
+      setDashboardData(data as unknown as DashboardData)
     } catch (error) {
       logger.error('Erreur lors du chargement du dashboard:', error)
       toast({
