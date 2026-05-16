@@ -38,11 +38,20 @@ export default defineConfig({
       output: {
         /**
          * Split vendor en chunks ciblés.
-         * Avant ce fix : un seul `vendor.js` de 1.67 MB / 527 KB gzip était tiré
-         * dès le premier paint (MUI + xlsx + Sentry + recharts + Stripe…),
-         * peu importe la route. Le manualChunks fonction-style match d'abord
-         * les paquets connus (split déterministe), puis fallback `vendor`
-         * pour le reste.
+         *
+         * ⚠️ IMPORTANT — Ordre d'évaluation React / MUI :
+         * Avant ce fix : React était dans un chunk séparé `react`. Quand MUI
+         * (chunk `mui`) s'évaluait, il pouvait charger AVANT que React soit
+         * disponible globalement → `TypeError: Cannot read properties of
+         * undefined (reading 'createContext')` au premier paint en prod.
+         *
+         * Fix : React + MUI + Emotion sont regroupés dans un chunk unique
+         * `mui` pour garantir que MUI ne s'évalue qu'après React. Ils
+         * partagent le même graphe d'import, donc Rollup peut respecter
+         * l'ordre topologique.
+         *
+         * Les chunks xlsx / sentry / supabase / stripe / charts restent
+         * séparés (ils ne dépendent pas critiquement de l'ordre React).
          */
         manualChunks(id) {
           if (!id.includes('node_modules')) return undefined
@@ -52,8 +61,18 @@ export default defineConfig({
           if (id.includes('@mui/x-')) return 'mui-x'
           // Icons MUI — gros même si tree-shaké, regroupés pour cache long
           if (id.includes('@mui/icons-material')) return 'mui-icons'
-          // MUI core
-          if (id.includes('@mui/') || id.includes('@emotion/')) return 'mui'
+          // MUI core + Emotion + React (groupés pour ordre d'évaluation correct)
+          // Inclut explicitement react, react-dom, react-router pour empêcher
+          // que Rollup les sorte dans un chunk séparé qui pourrait charger après MUI.
+          if (
+            id.includes('@mui/') ||
+            id.includes('@emotion/') ||
+            id.includes('node_modules/react/') ||
+            id.includes('node_modules/react-dom/') ||
+            id.includes('node_modules/react-router') ||
+            id.includes('node_modules/scheduler/') ||
+            id.includes('node_modules/use-sync-external-store/')
+          ) return 'mui'
           // Sentry — observabilité, isolable
           if (id.includes('@sentry/')) return 'sentry'
           // Supabase client
@@ -62,9 +81,7 @@ export default defineConfig({
           if (id.includes('@stripe/')) return 'stripe'
           // Recharts + chart deps
           if (id.includes('recharts') || id.includes('d3-')) return 'charts'
-          // React core
-          if (id.includes('react-dom') || id.includes('react/') || id.includes('react-router')) return 'react'
-          // Reste = vendor
+          // Reste = vendor (notistack, framer-motion, etc.)
           return 'vendor'
         },
       },
