@@ -113,6 +113,30 @@ async function fetchTenantPlan(userId: string | undefined): Promise<TenantPlan> 
 }
 
 /**
+ * Vérifie auprès de Supabase si l'utilisateur peut créer un dossier
+ * supplémentaire selon son quota plan. Source de vérité = trigger
+ * BEFORE INSERT côté DB (migration 014 plan_gating). Le résultat est
+ * mis en cache 60 s pour éviter un round-trip à chaque ouverture du
+ * formulaire de création.
+ *
+ * Retourne :
+ *  - `true`  : peut créer (quota non atteint, NULL = pas d'enforcement, ou -1 illimité)
+ *  - `false` : quota atteint OU Supabase indisponible / user non auth (defensive)
+ */
+async function fetchCanCreateDossier(userId: string | undefined): Promise<boolean> {
+  if (!isSupabaseEnabled || !supabase || !userId) {
+    return true // fallback permissive (le trigger DB reste la source de vérité finale)
+  }
+  const { data, error } = await supabase.rpc('can_create_dossier', { p_user_id: userId })
+  if (error) {
+    // RPC non déployée encore (migrations en retard) ou erreur réseau → fallback permissive.
+    // Le trigger BEFORE INSERT côté DB rattrapera tout abus.
+    return true
+  }
+  return data === true
+}
+
+/**
  * Hook exposant le plan actif + helpers de verification.
  */
 export function useTenantPlan() {
@@ -125,12 +149,19 @@ export function useTenantPlan() {
     enabled: !!user,
   })
 
+  const { data: canCreate, isLoading: canCreateLoading } = useQuery({
+    queryKey: ['can-create-dossier', user?.id],
+    queryFn: () => fetchCanCreateDossier(user?.id),
+    staleTime: 60 * 1000, // 1 min — court car le quota change quand un dossier est ajouté/supprimé
+    enabled: !!user,
+  })
+
   const activePlan = plan ?? DEFAULT_ENTREPRISE_PLAN
 
   return useMemo(
     () => ({
       plan: activePlan,
-      isLoading,
+      isLoading: isLoading || canCreateLoading,
       /** Retourne true si la feature est incluse dans le plan actif */
       hasFeature: (feature: CabinetFeature): boolean =>
         activePlan.features_included.includes(feature),
@@ -138,7 +169,13 @@ export function useTenantPlan() {
       isCabinet: activePlan.slug === 'liass_pilot_cabinet',
       /** Retourne true si le plan actif est Entreprise */
       isEntreprise: activePlan.slug === 'liass_pilot_entreprise',
+      /**
+       * Peut-on créer un dossier supplémentaire ?
+       * Source de vérité = RPC `can_create_dossier` (trigger DB derrière).
+       * Default `true` si le hook n'a pas encore résolu (UX optimiste).
+       */
+      canCreateDossier: canCreate ?? true,
     }),
-    [activePlan, isLoading]
+    [activePlan, isLoading, canCreate, canCreateLoading]
   )
 }

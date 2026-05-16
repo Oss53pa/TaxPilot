@@ -4,6 +4,8 @@
  */
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useSnackbar } from 'notistack'
+import { useQueryClient } from '@tanstack/react-query'
 import {
   Box,
   Typography,
@@ -36,6 +38,8 @@ import {
 } from '@mui/icons-material'
 import { useDossierStore, type Dossier } from '@/store/dossierStore'
 import { useTenantPlan } from '@/hooks/useTenantPlan'
+import { useAuthStore } from '@/store/authStore'
+import { upsertDossier } from '@/services/supabaseDataService'
 // useModeStore available if needed for cabinet-specific features
 
 const REGIME_LABELS: Record<Dossier['regime'], string> = {
@@ -60,11 +64,21 @@ const INITIAL_FORM = {
 
 export default function DossiersPage() {
   const navigate = useNavigate()
+  const { enqueueSnackbar } = useSnackbar()
+  const queryClient = useQueryClient()
+  const { user } = useAuthStore()
   const { dossiers, activeDossierId, addDossier, setActiveDossier, duplicateDossier, deleteDossier } = useDossierStore()
-  const { plan } = useTenantPlan()
-  const dossierLimitReached =
+  const { plan, canCreateDossier } = useTenantPlan()
+  // Source de vérité quota :
+  //   - plan.max_companies (UI hint local — Cabinet illimité vs Entreprise 1)
+  //   - canCreateDossier (RPC Supabase, source de vérité serveur via trigger DB)
+  // On bloque si l'une OU l'autre dit non — défense en profondeur.
+  const localLimitReached =
     plan.max_companies !== null && dossiers.length >= plan.max_companies
-  const upgradeTooltip = 'Passez en plan Cabinet pour gerer un portefeuille illimite'
+  const dossierLimitReached = localLimitReached || !canCreateDossier
+  const upgradeTooltip = !canCreateDossier
+    ? 'Quota de dossiers atteint — passez à un plan supérieur (Cabinet illimité)'
+    : 'Passez en plan Cabinet pour gerer un portefeuille illimite'
   // New dossier dialog
   const [newOpen, setNewOpen] = useState(false)
   const [form, setForm] = useState({ ...INITIAL_FORM })
@@ -85,8 +99,59 @@ export default function DossiersPage() {
     navigate('/dashboard')
   }
 
-  const handleCreateDossier = () => {
+  const handleCreateDossier = async () => {
     if (!form.nomClient.trim()) return
+
+    // 1. Garde-fou côté client (UX rapide — évite un round-trip si on sait déjà)
+    if (!canCreateDossier) {
+      enqueueSnackbar(
+        'Quota de dossiers atteint pour votre plan. Passez à un plan supérieur pour en créer davantage.',
+        { variant: 'warning' }
+      )
+      return
+    }
+
+    // 2. Tentative d'insert côté Supabase (source de vérité serveur via trigger).
+    //    Si Supabase indisponible ou user non auth, fallback Zustand local seul.
+    let remoteOk = true
+    if (user?.id) {
+      try {
+        await upsertDossier({
+          user_id: user.id,
+          nom_client: form.nomClient.trim(),
+          rccm: form.rccm.trim() || undefined,
+          ncc: form.ncc.trim() || undefined,
+          exercice_n: form.exerciceN,
+          exercice_n1: form.exerciceN - 1,
+          regime: form.regime,
+          statut: 'en_cours',
+        })
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err)
+        // Trigger BEFORE INSERT enforce_dossier_quota lève une exception avec
+        // ce libellé. cf migration 014 plan_gating.
+        if (msg.includes('dossiers_quota_exceeded')) {
+          enqueueSnackbar(
+            'Quota atteint — votre plan Liass’Pilot n’autorise pas un dossier supplémentaire. Passez à un plan supérieur.',
+            { variant: 'error', autoHideDuration: 6000 }
+          )
+          // Rafraîchit la cache pour bloquer le bouton "Nouveau" cohéremment
+          queryClient.invalidateQueries({ queryKey: ['can-create-dossier'] })
+          return
+        }
+        // Autre erreur (réseau, RLS, etc.) — log + fallback local-only.
+        // Le dossier sera créé localement et resyncé plus tard si possible.
+        // eslint-disable-next-line no-console
+        console.warn('[DossiersPage] Supabase upsert failed, falling back to local-only:', err)
+        remoteOk = false
+        enqueueSnackbar(
+          'Le dossier sera enregistré localement (synchronisation cloud indisponible).',
+          { variant: 'info' }
+        )
+      }
+    }
+
+    // 3. Persistence locale Zustand (toujours, source de vérité du store React)
     const id = addDossier({
       nomClient: form.nomClient.trim(),
       rccm: form.rccm.trim(),
@@ -98,6 +163,11 @@ export default function DossiersPage() {
     setActiveDossier(id)
     setForm({ ...INITIAL_FORM })
     setNewOpen(false)
+
+    // 4. Invalide la cache canCreateDossier pour resync du compteur
+    if (remoteOk) {
+      queryClient.invalidateQueries({ queryKey: ['can-create-dossier'] })
+    }
   }
 
   const handleDuplicate = () => {
