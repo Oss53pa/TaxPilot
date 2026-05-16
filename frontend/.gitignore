@@ -48,6 +48,11 @@ coverage/
 # nyc test coverage
 .nyc_output
 
+# Playwright artifacts (HTML report, traces, videos) — générés à chaque run
+playwright-report/
+test-results/
+playwright/.cache/
+
 # Local database
 *.sqlite3
 *.db
