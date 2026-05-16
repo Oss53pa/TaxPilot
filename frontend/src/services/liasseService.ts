@@ -20,7 +20,7 @@ export interface LiasseFiscaleDTO {
   date_cloture: string
   statut: 'BROUILLON' | 'EN_COURS' | 'TERMINE' | 'VALIDE' | 'TRANSMIS'
   progression: number
-  donnees_json?: any
+  donnees_json?: Record<string, unknown>
   created_at?: string
   updated_at?: string
 }
@@ -31,9 +31,9 @@ export interface EtatFinancierDTO {
   type_etat: 'BILAN_ACTIF' | 'BILAN_PASSIF' | 'COMPTE_RESULTAT' | 'FLUX_TRESORERIE' | 'NOTE_ANNEXE'
   numero_etat?: string
   libelle: string
-  donnees_json: any
-  calculs_automatiques?: any
-  validations?: any
+  donnees_json: Record<string, unknown>
+  calculs_automatiques?: Record<string, unknown>
+  validations?: Record<string, unknown>
   created_at?: string
   updated_at?: string
 }
@@ -47,7 +47,7 @@ export interface ProcessusGenerationDTO {
   temps_estime?: number
   temps_reel?: number
   erreurs?: string[]
-  logs_json?: any
+  logs_json?: Record<string, unknown>
   date_debut?: string
   date_fin?: string
 }
@@ -260,12 +260,14 @@ class LiasseService {
     liasseId: number,
     typeEtat: EtatFinancierDTO['type_etat'],
     balanceData: BalanceEntry[]
-  ): Promise<any> {
+  ): Promise<EtatFinancierDTO> {
     // Charger la balance
     liasseDataService.loadBalance(balanceData)
 
-    // Générer l'état selon le type
-    let donneesCalculees: any
+    // Générer l'état selon le type — donneesCalculees est une structure liasse
+    // (BilanActifRow[], BilanPassifRow[], CompteResultatData) sérialisée dans
+    // le payload JSON envoyé à l'API. Typé `unknown` pour l'union de retour.
+    let donneesCalculees: unknown
 
     switch (typeEtat) {
       case 'BILAN_ACTIF':
@@ -281,17 +283,18 @@ class LiasseService {
         throw new Error(`Type d'état non supporté: ${typeEtat}`)
     }
 
-    // Sauvegarder l'état
+    // Sauvegarder l'état (cast vers Record<string, unknown> pour matcher
+    // donnees_json typé après tightening du DTO)
     return await this.saveEtatFinancier({
       liasse: liasseId,
       type_etat: typeEtat,
       libelle: this.getLibelleEtat(typeEtat),
-      donnees_json: donneesCalculees,
+      donnees_json: donneesCalculees as Record<string, unknown>,
       calculs_automatiques: {
         date_calcul: new Date().toISOString(),
         source: 'MAPPING_SYSCOHADA',
-        nb_comptes_mappes: balanceData.length
-      }
+        nb_comptes_mappes: balanceData.length,
+      },
     })
   }
 

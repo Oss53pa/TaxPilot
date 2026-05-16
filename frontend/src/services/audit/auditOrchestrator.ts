@@ -13,6 +13,8 @@ import {
 import { BalanceEntry, SYSCOHADA_MAPPING } from '@/services/liasseDataService'
 import { supabase, isSupabaseEnabled } from '@/lib/supabase'
 import { logger } from '@/utils/logger'
+import { getFiscalConfig, type FiscalConfig } from '@/services/fiscalConfigService'
+import { scopeKey } from '@/services/dossierScopeService'
 import { PLAN_SYSCOHADA_REVISE } from '@/data/SYSCOHADARevisePlan'
 import { controlRegistry } from './controlRegistry'
 import { executePhase1, executePhase3, computeResume, generateCorrectionReport } from './auditEngine'
@@ -120,6 +122,23 @@ class AuditOrchestrator {
 
     saveSession(session)
 
+    // Pré-fetch fiscal config par pays — lit `entreprise.pays_code` depuis
+    // localStorage (scopé par dossier), fallback CI si absent. Permet à
+    // level7-fiscal d'utiliser les bons taux IS/IMF/TVA selon le pays
+    // OHADA du dossier (Sénégal, Cameroun, Burkina, etc.).
+    let fiscalConfig: FiscalConfig | undefined
+    let countryCode: string | undefined
+    try {
+      const entRaw = localStorage.getItem(scopeKey('fiscasync_entreprise_settings'))
+      if (entRaw) {
+        const ent = JSON.parse(entRaw)
+        countryCode = String(ent?.pays_code || ent?.country_code || 'CI').toUpperCase()
+        fiscalConfig = await getFiscalConfig(countryCode)
+      }
+    } catch (err) {
+      logger.warn('[Audit] Failed to prefetch fiscalConfig — falling back to CI', err)
+    }
+
     // Contexte d'execution
     const context: AuditContext = {
       balanceN,
@@ -129,6 +148,8 @@ class AuditOrchestrator {
       exercice: session.exercice,
       mappingSyscohada: SYSCOHADA_MAPPING,
       typeLiasse: typeLiasse || 'SN',
+      countryCode,
+      fiscalConfig,
     }
 
     // Wrapping des callbacks pour mettre a jour la progression
@@ -193,12 +214,28 @@ class AuditOrchestrator {
     session.phase = 'PHASE_3'
     session.statut = 'EN_COURS'
 
+    // Pré-fetch fiscal config par pays (idem startPhase1Audit)
+    let fiscalConfigP3: FiscalConfig | undefined
+    let countryCodeP3: string | undefined
+    try {
+      const entRaw = localStorage.getItem(scopeKey('fiscasync_entreprise_settings'))
+      if (entRaw) {
+        const ent = JSON.parse(entRaw)
+        countryCodeP3 = String(ent?.pays_code || ent?.country_code || 'CI').toUpperCase()
+        fiscalConfigP3 = await getFiscalConfig(countryCodeP3)
+      }
+    } catch (err) {
+      logger.warn('[Audit Phase3] Failed to prefetch fiscalConfig — falling back to CI', err)
+    }
+
     const context: AuditContext = {
       balanceN,
       planComptable: PLAN_SYSCOHADA_REVISE,
       liassesArchivees: getAllArchives(),
       exercice: session.exercice,
       mappingSyscohada: SYSCOHADA_MAPPING,
+      countryCode: countryCodeP3,
+      fiscalConfig: fiscalConfigP3,
     }
 
     try {

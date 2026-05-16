@@ -25,8 +25,20 @@ function resolveTaux(ctx: AuditContext): {
   IS: { taux_normal: number }
   IMF: { taux: number; minimum: number; maximum: number }
   TVA: { taux_normal: number }
+  DEDUCTIBILITE: {
+    plafond_cadeaux: number
+    plafond_dons: number
+    plafond_interets_cc: number
+    amort_vehicule_plafond: number
+    plafond_missions: number
+  }
 } {
   const cfg: FiscalConfig | undefined = ctx.fiscalConfig
+  // Fallback CI pour les plafonds DEDUCTIBILITE — pour l'instant ils ne sont
+  // pas exposés dans `fiscal_config` Supabase (seuls giftThresholdRate /
+  // donationThresholdRate / entertainmentThresholdRate sont alignés). Quand
+  // ils le seront, basculer la branche `if (cfg)` ci-dessous.
+  const ciDeductibilite = getTauxFiscaux().DEDUCTIBILITE
   if (cfg) {
     return {
       IS: { taux_normal: cfg.isRate ?? 0.25 },
@@ -36,6 +48,13 @@ function resolveTaux(ctx: AuditContext): {
         maximum: cfg.imfMaximum ?? Number.POSITIVE_INFINITY,
       },
       TVA: { taux_normal: cfg.vatStandardRate ?? 0.18 },
+      DEDUCTIBILITE: {
+        plafond_cadeaux: cfg.giftThresholdRate ?? ciDeductibilite.plafond_cadeaux,
+        plafond_dons: cfg.donationThresholdRate ?? ciDeductibilite.plafond_dons,
+        plafond_interets_cc: ciDeductibilite.plafond_interets_cc,
+        amort_vehicule_plafond: ciDeductibilite.amort_vehicule_plafond,
+        plafond_missions: ciDeductibilite.plafond_missions,
+      },
     }
   }
   // Fallback CI — backward compat pour les audits sans countryCode.
@@ -344,7 +363,7 @@ function FI011(ctx: AuditContext): ResultatControle {
   const ref = 'FI-011', nom = 'Dons excedentaires (658)'
   const dons = absSum(find(ctx.balanceN, '658'))
   const ca = absSum(find(ctx.balanceN, '70'))
-  const taux = getTauxFiscaux()
+  const taux = resolveTaux(ctx)
   const plafond = ca * taux.DEDUCTIBILITE.plafond_dons // 5‰
   if (dons > plafond && plafond > 0) {
     const exces = dons - plafond
@@ -391,7 +410,7 @@ function FI013(ctx: AuditContext): ResultatControle {
   const interetsCC = absSum(find(ctx.balanceN, '672'))
   const ccAssocies = absSum(find(ctx.balanceN, '455'))
   if (interetsCC > 0 && ccAssocies > 0) {
-    const taux = getTauxFiscaux()
+    const taux = resolveTaux(ctx)
     const tauxPlafond = taux.DEDUCTIBILITE.plafond_interets_cc
     const interetsMax = ccAssocies * tauxPlafond
     if (interetsCC > interetsMax) {
@@ -444,7 +463,7 @@ function FI015(ctx: AuditContext): ResultatControle {
   const isComptabilise = absSum(find(ctx.balanceN, '89'))
   if (resultat > 0 && isComptabilise > 0) {
     const tauxEffectif = (isComptabilise / resultat) * 100
-    const taux = getTauxFiscaux()
+    const taux = resolveTaux(ctx)
     const tauxNormal = taux.IS.taux_normal * 100
     if (tauxEffectif > tauxNormal * 1.5) {
       return anomalie(ref, nom, 'INFO',
@@ -507,7 +526,7 @@ function FI017(ctx: AuditContext): ResultatControle {
 function FI018(ctx: AuditContext): ResultatControle {
   const ref = 'FI-018', nom = 'Base IMF coherente'
   const ca = absSum([...find(ctx.balanceN, '70'), ...find(ctx.balanceN, '71')])
-  const taux = getTauxFiscaux()
+  const taux = resolveTaux(ctx)
   if (ca > 0) {
     const imfCalc = Math.max(ca * taux.IMF.taux, taux.IMF.minimum)
     const isCompt = absSum(find(ctx.balanceN, '89'))
@@ -543,7 +562,7 @@ function FI020(ctx: AuditContext): ResultatControle {
   const resultat = find(ctx.balanceN, '13').reduce((s, l) => s + (l.credit - l.debit), 0)
   const isCompt = absSum(find(ctx.balanceN, '89'))
   const ca = absSum([...find(ctx.balanceN, '70'), ...find(ctx.balanceN, '71')])
-  const taux = getTauxFiscaux()
+  const taux = resolveTaux(ctx)
   if (resultat > 0 && ca > 0) {
     const isCalc = resultat * taux.IS.taux_normal
     const imf = Math.max(ca * taux.IMF.taux, taux.IMF.minimum)

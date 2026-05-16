@@ -1,6 +1,5 @@
 import './i18n'
 import { logger } from '@/utils/logger'
-import * as Sentry from '@sentry/react'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
@@ -39,20 +38,54 @@ const StyledMaterialDesignContent = styled(MaterialDesignContent)(() => ({
 }))
 import './styles/contrast-fix.css'
 
-// Initialize Sentry (only in production)
+/**
+ * Sentry — initialisation différée hors du critical path.
+ *
+ * Avant ce fix : `import * as Sentry from '@sentry/react'` en eager + init()
+ * synchrone au boot tirait Sentry (browser tracing + replay integration ≈
+ * 50 KB minifié) dans le bundle main. Ralentit le TTI inutilement, surtout
+ * en dev où tracesSampleRate était 1.0.
+ *
+ * Après : Sentry n'est chargé qu'en production via dynamic import +
+ * requestIdleCallback (ou setTimeout fallback). Les erreurs survenues
+ * pendant la fenêtre d'init différée sont bufferisées via _pendingErrors
+ * et flushées au moment de l'init.
+ */
 const sentryDsn = import.meta.env.VITE_SENTRY_DSN
-if (sentryDsn) {
-  Sentry.init({
-    dsn: sentryDsn,
-    environment: import.meta.env.MODE,
-    integrations: [
-      Sentry.browserTracingIntegration(),
-      Sentry.replayIntegration({ maskAllText: true, blockAllMedia: true }),
-    ],
-    tracesSampleRate: import.meta.env.MODE === 'production' ? 0.1 : 1.0,
-    replaysSessionSampleRate: 0.1,
-    replaysOnErrorSampleRate: 1.0,
-  })
+const _pendingErrors: unknown[] = []
+let _sentryReady: typeof import('@sentry/react') | null = null
+
+function captureSafe(err: unknown) {
+  if (_sentryReady) _sentryReady.captureException(err)
+  else _pendingErrors.push(err)
+}
+
+if (sentryDsn && import.meta.env.MODE === 'production') {
+  const initSentry = async () => {
+    const Sentry = await import('@sentry/react')
+    Sentry.init({
+      dsn: sentryDsn,
+      environment: import.meta.env.MODE,
+      integrations: [
+        Sentry.browserTracingIntegration(),
+        Sentry.replayIntegration({ maskAllText: true, blockAllMedia: true }),
+      ],
+      tracesSampleRate: 0.1,
+      replaysSessionSampleRate: 0.1,
+      replaysOnErrorSampleRate: 1.0,
+    })
+    _sentryReady = Sentry
+    // Flush buffered errors capturées avant l'init
+    for (const err of _pendingErrors) Sentry.captureException(err)
+    _pendingErrors.length = 0
+  }
+
+  const w = window as Window & { requestIdleCallback?: (cb: () => void) => void }
+  if (typeof w.requestIdleCallback === 'function') {
+    w.requestIdleCallback(() => { void initSentry() })
+  } else {
+    setTimeout(() => { void initSentry() }, 2000)
+  }
 }
 
 // Configuration du client React Query
@@ -77,13 +110,13 @@ const queryClient = new QueryClient({
 // Prevents silent failures and logs errors for debugging
 window.addEventListener('unhandledrejection', (event) => {
   logger.error('Unhandled promise rejection:', event.reason)
-  if (sentryDsn) Sentry.captureException(event.reason)
+  if (sentryDsn) captureSafe(event.reason)
   event.preventDefault()
 })
 
 window.addEventListener('error', (event) => {
   logger.error('Global error:', event.error || event.message)
-  if (sentryDsn) Sentry.captureException(event.error)
+  if (sentryDsn) captureSafe(event.error)
 })
 
 function ThemedApp() {

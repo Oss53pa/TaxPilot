@@ -6,7 +6,7 @@
 import { liasseDataService } from './liasseDataService'
 import { arrondiFCFA } from '@/config/taux-fiscaux-ci'
 import type { RegimeFiscal, EntrepriseInfo } from '@/components/liasse/templates/LiassePrintTemplate'
-import type { BilanActifRow, BilanPassifRow, SIGRow } from './liasseDataService'
+import type { BilanActifRow, BilanPassifRow, CompteResultatRow, SIGRow } from './liasseDataService'
 
 // ── Libelles ──
 
@@ -105,8 +105,8 @@ function generateCoverHTML(regime: RegimeFiscal, entreprise: EntrepriseInfo, exe
 
 function generateBilanActifHTML(typeLiasse: 'SN' | 'SMT'): string {
   const actif = liasseDataService.generateBilanActif(typeLiasse)
-  const totalNet = arrondiFCFA(actif.reduce((s: number, r: any) => s + r.net, 0))
-  const totalNetN1 = arrondiFCFA(actif.reduce((s: number, r: any) => s + r.net_n1, 0))
+  const totalNet = arrondiFCFA(actif.reduce((s: number, r: BilanActifRow) => s + r.net, 0))
+  const totalNetN1 = arrondiFCFA(actif.reduce((s: number, r: BilanActifRow) => s + (r.net_n1 ?? 0), 0))
 
   const colHeaders = typeLiasse === 'SN'
     ? '<th>Ref</th><th>ACTIF</th><th class="num">Brut</th><th class="num">Amort./Prov.</th><th class="num">Net N</th><th class="num">Net N-1</th>'
@@ -134,8 +134,8 @@ function generateBilanActifHTML(typeLiasse: 'SN' | 'SMT'): string {
 
 function generateBilanPassifHTML(typeLiasse: 'SN' | 'SMT'): string {
   const passif = liasseDataService.generateBilanPassif(typeLiasse)
-  const totalN = arrondiFCFA(passif.reduce((s: number, r: any) => s + r.montant, 0))
-  const totalN1 = arrondiFCFA(passif.reduce((s: number, r: any) => s + r.montant_n1, 0))
+  const totalN = arrondiFCFA(passif.reduce((s: number, r: BilanPassifRow) => s + r.montant, 0))
+  const totalN1 = arrondiFCFA(passif.reduce((s: number, r: BilanPassifRow) => s + (r.montant_n1 ?? 0), 0))
 
   const rows = passif.map((r: BilanPassifRow) =>
     `<tr><td style="font-weight:600">${r.ref}</td><td>${LIBELLES_PASSIF[r.ref] || r.ref}</td><td class="num">${fmt(r.montant)}</td><td class="num">${fmt(r.montant_n1)}</td></tr>`
@@ -154,15 +154,15 @@ function generateBilanPassifHTML(typeLiasse: 'SN' | 'SMT'): string {
 
 function generateCompteResultatHTML(typeLiasse: 'SN' | 'SMT'): string {
   const cdr = liasseDataService.generateCompteResultat(typeLiasse)
-  const totalCharges = arrondiFCFA(cdr.charges.reduce((s: number, r: any) => s + r.montant, 0))
-  const totalProduits = arrondiFCFA(cdr.produits.reduce((s: number, r: any) => s + r.montant, 0))
+  const totalCharges = arrondiFCFA(cdr.charges.reduce((s: number, r: CompteResultatRow) => s + r.montant, 0))
+  const totalProduits = arrondiFCFA(cdr.produits.reduce((s: number, r: CompteResultatRow) => s + r.montant, 0))
 
-  const chargesRows = cdr.charges.map((r: any) =>
-    `<tr><td>${r.ref}</td><td>${r.ref}</td><td class="num">${fmt(r.montant)}</td><td class="num">${fmt(r.montant_n1)}</td></tr>`
+  const chargesRows = cdr.charges.map((r: CompteResultatRow) =>
+    `<tr><td>${r.ref}</td><td>${r.ref}</td><td class="num">${fmt(r.montant)}</td><td class="num">${fmt(r.montant_n1 ?? 0)}</td></tr>`
   ).join('')
 
-  const produitsRows = cdr.produits.map((r: any) =>
-    `<tr><td>${r.ref}</td><td>${r.ref}</td><td class="num">${fmt(r.montant)}</td><td class="num">${fmt(r.montant_n1)}</td></tr>`
+  const produitsRows = cdr.produits.map((r: CompteResultatRow) =>
+    `<tr><td>${r.ref}</td><td>${r.ref}</td><td class="num">${fmt(r.montant)}</td><td class="num">${fmt(r.montant_n1 ?? 0)}</td></tr>`
   ).join('')
 
   return `
@@ -188,9 +188,9 @@ function generateCompteResultatHTML(typeLiasse: 'SN' | 'SMT'): string {
 
 function generateSIGHTML(): string {
   const sig = liasseDataService.generateSIG()
-  const rows = sig.map((r: any) => {
+  const rows = sig.map((r: SIGRow) => {
     const cls = r.type === 'grandtotal' ? 'grandtotal' : r.type === 'sig' ? 'sig' : ''
-    return `<tr class="${cls}"><td>${r.ref}</td><td>${r.label}</td><td class="num">${fmt(r.montant)}</td><td class="num">${fmt(r.montant_n1)}</td></tr>`
+    return `<tr class="${cls}"><td>${r.ref}</td><td>${r.label}</td><td class="num">${fmt(r.montant)}</td><td class="num">${fmt(r.montant_n1 ?? 0)}</td></tr>`
   }).join('')
 
   return `
@@ -265,14 +265,14 @@ function generatePassageFiscalHTML(): string {
 
 function generateForfaitaireHTML(entreprise: EntrepriseInfo, exercice: string): string {
   const cdr = liasseDataService.generateCompteResultat('SMT')
-  const totalProduits = arrondiFCFA(cdr.produits.reduce((s: number, r: any) => s + r.montant, 0))
-  const totalCharges = arrondiFCFA(cdr.charges.reduce((s: number, r: any) => s + r.montant, 0))
+  const totalProduits = arrondiFCFA(cdr.produits.reduce((s: number, r: CompteResultatRow) => s + r.montant, 0))
+  const totalCharges = arrondiFCFA(cdr.charges.reduce((s: number, r: CompteResultatRow) => s + r.montant, 0))
 
-  const recettesRows = cdr.produits.map((r: any) =>
+  const recettesRows = cdr.produits.map((r: CompteResultatRow) =>
     `<tr><td>${r.ref} — Produit</td><td class="num">${fmt(r.montant)}</td></tr>`
   ).join('')
 
-  const depensesRows = cdr.charges.map((r: any) =>
+  const depensesRows = cdr.charges.map((r: CompteResultatRow) =>
     `<tr><td>${r.ref} — Charge</td><td class="num">${fmt(r.montant)}</td></tr>`
   ).join('')
 
@@ -295,8 +295,8 @@ function generateForfaitaireHTML(entreprise: EntrepriseInfo, exercice: string): 
 
 function generateMicroHTML(entreprise: EntrepriseInfo, exercice: string): string {
   const cdr = liasseDataService.generateCompteResultat('SMT')
-  const chiffreAffaires = arrondiFCFA(cdr.produits.reduce((s: number, r: any) => s + r.montant, 0))
-  const totalCharges = arrondiFCFA(cdr.charges.reduce((s: number, r: any) => s + r.montant, 0))
+  const chiffreAffaires = arrondiFCFA(cdr.produits.reduce((s: number, r: CompteResultatRow) => s + r.montant, 0))
+  const totalCharges = arrondiFCFA(cdr.charges.reduce((s: number, r: CompteResultatRow) => s + r.montant, 0))
 
   return `
     <div>

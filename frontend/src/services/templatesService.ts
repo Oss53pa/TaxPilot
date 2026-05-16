@@ -40,7 +40,7 @@ export interface TemplateVariable {
   libelle: string
   type: 'TEXT' | 'NUMBER' | 'DATE' | 'BOOLEAN' | 'LIST' | 'OBJECT'
   obligatoire: boolean
-  valeur_defaut?: any
+  valeur_defaut?: string | number | boolean | null
   validation_regex?: string
   description?: string
   source_donnees?: string
@@ -55,7 +55,7 @@ export interface TemplateSection {
   contenu_template: string
   conditions_affichage?: string
   style_css?: string
-  parametres?: any
+  parametres?: Record<string, unknown>
 }
 
 export interface TemplateInstance {
@@ -63,8 +63,8 @@ export interface TemplateInstance {
   template: string
   template_detail?: Template
   nom_instance: string
-  parametres: Record<string, any>
-  donnees_source: any
+  parametres: Record<string, unknown>
+  donnees_source: Record<string, unknown>
   fichier_genere?: string
   statut: 'EN_PREPARATION' | 'EN_COURS' | 'TERMINE' | 'ERREUR'
   progression: number
@@ -92,8 +92,8 @@ export interface TemplateLibrary {
 export interface GenerationRequest {
   template_id: string
   nom_instance: string
-  parametres: Record<string, any>
-  donnees_source?: any
+  parametres: Record<string, unknown>
+  donnees_source?: Record<string, unknown>
   format_sortie?: string
   options?: {
     inclure_metadata: boolean
@@ -271,20 +271,24 @@ class TemplatesService {
   }
 
   // Preview et validation - Stub service
-  async previewTemplate(templateId: string, parametres: Record<string, any>, sampleData?: any) {
+  async previewTemplate(
+    templateId: string,
+    parametres: Record<string, unknown>,
+    sampleData?: Record<string, unknown>,
+  ) {
     logger.debug(`Generating template preview for ${templateId}...`)
     return apiClient.post(`${this.baseUrl}/${templateId}/preview/`, {
       parametres,
-      sample_data: sampleData
+      sample_data: sampleData,
     })
   }
 
-  async validateTemplate(templateId: string, testData?: any) {
+  async validateTemplate(templateId: string, testData?: Record<string, unknown>) {
     logger.debug(`Validating template ${templateId} ...`)
     return apiClient.post(`${this.baseUrl}/${templateId}/validate/`, { test_data: testData })
   }
 
-  async testTemplateGeneration(templateId: string, testData: any) {
+  async testTemplateGeneration(templateId: string, testData: Record<string, unknown>) {
     logger.debug(`Testing template generation for ${templateId}...`)
     return apiClient.post(`${this.baseUrl}/${templateId}/test/`, testData)
   }
