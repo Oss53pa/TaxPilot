@@ -27,6 +27,41 @@ import {
 import reportingService from '@/services/reportingService'
 import { useToast } from '@/components/ui/use-toast'
 
+interface KPICritique {
+  kpi__nom?: string
+  nom?: string
+  valeur?: number | string
+  niveau_alerte?: 'NORMAL' | 'ATTENTION' | 'CRITIQUE'
+  valeur_actuelle?: {
+    valeur?: number
+    niveau_alerte?: 'NORMAL' | 'ATTENTION' | 'CRITIQUE'
+  }
+  evolution_recente?: { evolution?: number }
+  unite_affichage?: string
+  id?: number
+}
+
+interface AlerteActive {
+  id?: number
+  type_alerte?: string
+  message?: string
+  niveau?: 'INFO' | 'ATTENTION' | 'CRITIQUE'
+  date_declenchement?: string
+}
+
+interface RapportRecent {
+  id: number | string
+  nom: string
+  date_generation: string
+  type_rapport?: string
+}
+
+interface ExportEnCours {
+  id: number | string
+  type_rapport?: string
+  statut?: 'EN_COURS' | 'TERMINE' | 'ERREUR'
+}
+
 interface DashboardData {
   nb_tableaux_bord: number
   nb_widgets_total: number
@@ -34,10 +69,10 @@ interface DashboardData {
   nb_kpis: number
   nb_exports: number
   derniere_activite: string
-  kpis_critiques: any[]
-  alertes_actives: any[]
-  rapports_recents: any[]
-  exports_en_cours: any[]
+  kpis_critiques: KPICritique[]
+  alertes_actives: AlerteActive[]
+  rapports_recents: RapportRecent[]
+  exports_en_cours: ExportEnCours[]
 }
 
 interface KPIWidget {
@@ -47,6 +82,22 @@ interface KPIWidget {
   evolution: number
   unite: string
   niveau_alerte: 'NORMAL' | 'ATTENTION' | 'CRITIQUE'
+}
+
+// Forme minimale d'un KPI tel que retourné par reportingService.getKPIs
+interface KPIServiceLite {
+  id: number
+  nom: string
+  unite_affichage?: string
+  valeur_actuelle?: { valeur?: number; niveau_alerte?: KPIWidget['niveau_alerte'] }
+  evolution_recente?: { evolution?: number }
+}
+
+// Forme minimale d'un export lancé
+interface ExportLiteDV {
+  id: number | string
+  statut?: 'EN_COURS' | 'TERMINE' | 'ERREUR'
+  fichier_genere?: string
 }
 
 export default function DashboardView() {
@@ -91,12 +142,17 @@ export default function DashboardView() {
   const loadKPIs = async () => {
     try {
       const entrepriseId = localStorage.getItem('entreprise_id') || '1'
-      const kpisData = await reportingService.getKPIs({
+      // Le service expose getKPIs({entreprise?}) avec un type narrow ;
+      // localStorage donne une string id, l'API attend bien une string.
+      const rawData = await reportingService.getKPIs({
         entreprise: entrepriseId
-      } as any) as any[]
+      }) as KPIServiceLite[] | { results?: KPIServiceLite[] }
+      const kpisData: KPIServiceLite[] = Array.isArray(rawData)
+        ? rawData
+        : (rawData.results ?? [])
 
       // Transformer les données pour l'affichage
-      const widgetData = kpisData.slice(0, 4).map((kpi: any) => ({
+      const widgetData: KPIWidget[] = kpisData.slice(0, 4).map((kpi) => ({
         id: kpi.id,
         nom: kpi.nom,
         valeur: kpi.valeur_actuelle?.valeur || 0,
@@ -138,7 +194,7 @@ export default function DashboardView() {
       })
 
       // Vérifier le statut de l'export périodiquement
-      checkExportStatus(exportData.id as any)
+      checkExportStatus(Number((exportData as ExportLiteDV).id))
     } catch (error) {
       logger.error('Erreur lors de l\'export:', error)
       toast({
@@ -152,7 +208,7 @@ export default function DashboardView() {
   const checkExportStatus = async (exportId: number) => {
     const interval = setInterval(async () => {
       try {
-        const status = await reportingService.getExport(exportId as any)
+        const status = await reportingService.getExport(String(exportId)) as ExportLiteDV
 
         if (status.statut === 'TERMINE') {
           clearInterval(interval)
@@ -271,7 +327,7 @@ export default function DashboardView() {
                 <div className="text-sm text-gray-600">
                   Rapports récents:
                 </div>
-                {dashboardData.rapports_recents.slice(0, 3).map((rapport: any) => (
+                {dashboardData.rapports_recents.slice(0, 3).map((rapport) => (
                   <div key={rapport.id} className="flex justify-between text-sm">
                     <span className="truncate">{rapport.nom}</span>
                     <span className="text-gray-500">
@@ -297,7 +353,7 @@ export default function DashboardView() {
             <CardContent>
               <div className="space-y-2">
                 {dashboardData.exports_en_cours.length > 0 ? (
-                  dashboardData.exports_en_cours.map((exp: any) => (
+                  dashboardData.exports_en_cours.map((exp) => (
                     <div key={exp.id} className="flex justify-between text-sm">
                       <span className="truncate">{exp.type_rapport}</span>
                       <span className="text-blue-500">En cours...</span>
@@ -323,7 +379,7 @@ export default function DashboardView() {
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                {dashboardData.kpis_critiques.slice(0, 3).map((kpi: any, index: number) => (
+                {dashboardData.kpis_critiques.slice(0, 3).map((kpi, index) => (
                   <div key={index} className="flex items-center gap-2 text-sm">
                     <div className="h-2 w-2 rounded-full bg-red-500"></div>
                     <span className="truncate">{kpi.kpi__nom}</span>
