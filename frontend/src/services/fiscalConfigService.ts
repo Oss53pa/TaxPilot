@@ -17,6 +17,10 @@ export interface FiscalConfig {
   lossCarryforwardYears: number
   vatStandardRate: number | null
   vatReducedRate: number | null
+  /** Plafond amortissement véhicules de tourisme (FCFA).
+   *  CI = 30M (LF 2024). Autres pays OHADA = 14M (valeur historique table,
+   *  à mettre à jour par juriste OHADA selon LF en vigueur). */
+  vehicleAmortCap: number | null
   notes: string | null
 }
 
@@ -38,6 +42,7 @@ const FALLBACK_CI: FiscalConfig = {
   lossCarryforwardYears: 5,
   vatStandardRate: 0.18,
   vatReducedRate: 0.09,
+  vehicleAmortCap: 30_000_000, // LF 2024 CI
   notes: null,
 }
 
@@ -59,6 +64,7 @@ function mapRow(row: Record<string, unknown>): FiscalConfig {
     lossCarryforwardYears: Number(row.loss_carryforward_years || 5),
     vatStandardRate: row.vat_standard_rate ? Number(row.vat_standard_rate) : null,
     vatReducedRate: row.vat_reduced_rate ? Number(row.vat_reduced_rate) : null,
+    vehicleAmortCap: row.vehicle_amort_cap ? Number(row.vehicle_amort_cap) : null,
     notes: row.notes as string | null,
   }
 }

@@ -62,21 +62,91 @@ function NN001(ctx: AuditContext): ResultatControle {
 }
 
 // NN-002: Soldes ouverture N = soldes cloture N-1
+//
+// Avant fix : la fonction construisait `mapN1` mais ne l'utilisait JAMAIS.
+// Le contrôle se contentait d'une variation globale du total bilan > 100%
+// → erreur de report sur compte spécifique (ex. dette 161 mal reportée)
+// passait silencieusement si compensée par d'autres mouvements.
+//
+// Après fix : itère mapN1 compte par compte, compare au solde N
+// (qui devrait être l'ouverture = solde clôture N-1), liste les écarts
+// au-dessus d'une tolérance configurable, et garde le contrôle global
+// comme defense-in-depth.
 function NN002(ctx: AuditContext): ResultatControle {
   const ref = 'NN-002', nom = 'Ouverture N = Cloture N-1'
   const skip = needsN1(ref, nom, ctx); if (skip) return skip
 
-  // Pour les comptes de bilan (classes 1-5), le solde d'ouverture N doit etre le solde de cloture N-1
+  // 1. Build mapN1 : soldes clôture N-1 par compte (classes 1-5 = bilan)
   const mapN1 = new Map<string, number>()
   for (const l of ctx.balanceN1!) {
     const cl = parseInt(l.compte.charAt(0))
     if (cl >= 1 && cl <= 5) mapN1.set(l.compte, solde(l))
   }
 
-  // Controle simplifie: verifier que le total bilan est coherent
+  // 2. Build mapN : soldes N (premier solde affiché = ouverture en théorie)
+  // Note : pour une vraie validation, on aurait besoin du champ
+  // `solde_debit_n1` / `solde_credit_n1` exposé dans la balance N elle-même
+  // (format unified SYSCOHADA Révisé). On utilise `solde()` à défaut, qui
+  // donne le solde clôture N — ce qui valide la stabilité totale plutôt
+  // que strictement l'ouverture, mais c'est la meilleure approximation
+  // sans accès au champ ouverture séparé.
+  const mapN = new Map<string, number>()
+  for (const l of ctx.balanceN) {
+    const cl = parseInt(l.compte.charAt(0))
+    if (cl >= 1 && cl <= 5) {
+      const s = (l as { solde_debit_n1?: number; solde_credit_n1?: number; debit: number; credit: number; solde_debit: number; solde_credit: number })
+      // Priorité : si la balance N expose un solde ouverture N (= solde N-1
+      // intégré), on l'utilise. Sinon fallback sur solde N qui détecte
+      // au moins les écarts massifs.
+      const soldeN1Embedded = (s.solde_debit_n1 ?? 0) - (s.solde_credit_n1 ?? 0)
+      if (soldeN1Embedded !== 0) {
+        mapN.set(l.compte, soldeN1Embedded)
+      } else {
+        mapN.set(l.compte, solde(l))
+      }
+    }
+  }
+
+  // 3. Diff compte par compte — tolérance 1 FCFA pour les arrondis
+  const TOLERANCE = 1
+  const ecarts: Array<{ compte: string; n1: number; n: number; ecart: number }> = []
+  for (const [compte, soldeN1] of mapN1) {
+    const soldeN = mapN.get(compte) ?? 0
+    const ecart = Math.abs(soldeN - soldeN1)
+    if (ecart > TOLERANCE) {
+      ecarts.push({ compte, n1: soldeN1, n: soldeN, ecart })
+    }
+  }
+
+  // Top 10 écarts les plus importants
+  const topEcarts = ecarts
+    .sort((a, b) => b.ecart - a.ecart)
+    .slice(0, 10)
+
+  // 4. Contrôle global de variation du bilan (defense-in-depth)
   const totalBilanN = ctx.balanceN.filter((l) => { const cl = parseInt(l.compte.charAt(0)); return cl >= 1 && cl <= 5 }).reduce((s, l) => s + Math.abs(solde(l)), 0)
   const totalBilanN1 = ctx.balanceN1!.filter((l) => { const cl = parseInt(l.compte.charAt(0)); return cl >= 1 && cl <= 5 }).reduce((s, l) => s + Math.abs(solde(l)), 0)
   const variation = Math.abs(totalBilanN - totalBilanN1) / Math.max(totalBilanN1, 1) * 100
+
+  // Reporting :
+  //  - si écarts ponctuels >TOLERANCE détectés → anomalie BLOQUANTE avec listing
+  //  - sinon si variation globale >100% → anomalie BLOQUANTE
+  //  - sinon OK
+  if (ecarts.length > 0) {
+    const totalEcart = ecarts.reduce((s, e) => s + e.ecart, 0)
+    return anomalie(ref, nom, 'BLOQUANT',
+      `${ecarts.length} compte(s) avec ouverture N != clôture N-1 (total écart: ${totalEcart.toLocaleString('fr-FR')} FCFA)`,
+      {
+        montants: { nbEcarts: ecarts.length, totalEcart, totalBilanN, totalBilanN1, variationPct: Math.round(variation) },
+        description: `${ecarts.length} compte(s) du bilan présentent un solde d'ouverture N différent du solde de clôture N-1. Top écarts : ${topEcarts.map(e => `${e.compte}: ${e.n1.toLocaleString('fr-FR')} → ${e.n.toLocaleString('fr-FR')} (Δ ${e.ecart.toLocaleString('fr-FR')})`).join(' ; ')}.`,
+        attendu: 'Pour chaque compte de bilan, solde ouverture N = solde clôture N-1 (tolérance 1 FCFA arrondis)',
+        constate: `${ecarts.length} comptes en écart, total écart ${totalEcart.toLocaleString('fr-FR')} FCFA`,
+        impactFiscal: 'Rupture de continuité des exercices = données non fiables, risque de redressement DGI sur incohérence des reports.',
+      },
+      `Rapprocher la balance N-1 et la balance N compte par compte. Re-importer la balance N avec les soldes d'ouverture corrects (champs solde_debit_n1 / solde_credit_n1).`,
+      undefined,
+      'Art. 40 Acte Uniforme OHADA - Continuite des exercices')
+  }
 
   if (variation > 100) {
     return anomalie(ref, nom, 'BLOQUANT',

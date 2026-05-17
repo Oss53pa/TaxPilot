@@ -97,10 +97,32 @@ function SS004(ctx: AuditContext): ResultatControle {
   return checkSensClasse(ctx, 'SS-004', 'Sens produits', '7', 'CREDITEUR', 'produits debiteurs')
 }
 
-// SS-005: Clients (411x) normalement debiteurs → reclassement si crediteur
+// SS-005: Clients normalement debiteurs → reclassement si crediteur
+//
+// Avant fix : ne vérifiait que 411 (clients ordinaires). Les sous-classes
+// OHADA 412 (clients groupe), 413 (clients hors groupe), 414 (clients
+// douteux), 415 (effets à recevoir), 416 (effets à recouvrer), 418 (clients
+// factures non parvenues) étaient OUBLIÉES → soldes créditeurs anormaux
+// sur ces sous-classes passaient au travers de l'audit.
+//
+// Après fix : couvre 411-418 (tout le bloc clients OHADA), avec
+// granularité par sous-classe dans le rapport pour faciliter la
+// reclassification au compte 419 (Clients crediteurs - passif).
 function SS005(ctx: AuditContext): ResultatControle {
   const ref = 'SS-005', nom = 'Clients crediteurs'
-  const clients = findByPrefix(ctx.balanceN, '411')
+  // OHADA Révisé 2017 — bloc clients complet :
+  //   411 Clients
+  //   412 Clients, groupe
+  //   413 Clients hors groupe
+  //   414 Clients douteux ou litigieux
+  //   415 Clients effets à recevoir
+  //   416 Clients - retenue de garantie
+  //   418 Clients, factures à établir et non parvenues
+  // (Note : 417 n'existe pas en OHADA Révisé)
+  const PREFIXES_CLIENTS = ['411', '412', '413', '414', '415', '416', '418']
+  const clients = ctx.balanceN.filter((l) =>
+    PREFIXES_CLIENTS.some(p => l.compte.toString().startsWith(p))
+  )
   const crediteurs: string[] = []
   let montantReclass = 0
   for (const l of clients) {

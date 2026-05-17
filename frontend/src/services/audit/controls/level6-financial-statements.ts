@@ -109,14 +109,53 @@ function calcBilanFromBalance(bal: BalanceEntry[]): { actif: number; passif: num
 }
 
 // EF-001: Bilan equilibre
+//
+// Avant : pour les types sectoriels (BANQUE/ASSURANCE/MICROFINANCE/EBNL),
+// le contrôle court-circuitait avec `return ok(...)` SANS aucune
+// vérification réelle. Le rapport client indiquait "Bilan équilibré ✓"
+// pour une banque sans contrôler → score artificiellement gonflé.
+//
+// Après : implémentation réelle qui vérifie l'équilibre debit/crédit
+// par classe pour les types sectoriels. Le mapping SYSCOHADA Révisé
+// standard ne s'applique pas (banques utilisent BCEAO, assurances CIMA,
+// microfinance SYSCOHADA-MF, EBNL plan associatif), donc on tombe sur
+// un contrôle plus générique : équilibre debit total = crédit total
+// sur les classes de bilan, qui reste valide quel que soit le plan.
 function EF001(ctx: AuditContext): ResultatControle {
   const ref = 'EF-001', nom = 'Bilan equilibre'
   const typeLiasse = ctx.typeLiasse || 'SN'
 
-  // Pour les types sectoriels, certains controles EF sont adaptes
+  // Types sectoriels : contrôle équilibre debit/crédit générique (plans
+  // BCEAO/CIMA/MF/EBNL ont des numérotations différentes, mais l'équilibre
+  // général reste vérifiable)
   if (['BANQUE', 'ASSURANCE', 'MICROFINANCE', 'EBNL'].includes(typeLiasse)) {
-    const totalActifClasses = sumForPrefixes(ctx.balanceN, ['1', '2', '3', '4', '5'])
-    return ok(ref, nom, `Controle adapte au type ${typeLiasse} - balance totale: ${Math.abs(totalActifClasses).toLocaleString('fr-FR')}`)
+    const bilanLignes = ctx.balanceN.filter(l => {
+      const cl = parseInt(l.compte.charAt(0))
+      return cl >= 1 && cl <= 5
+    })
+    const totalDebit = bilanLignes.reduce((s, l) => s + (l.solde_debit || 0), 0)
+    const totalCredit = bilanLignes.reduce((s, l) => s + (l.solde_credit || 0), 0)
+    const ecart = Math.abs(totalDebit - totalCredit)
+    const TOLERANCE = 1 // FCFA arrondis
+
+    if (ecart > TOLERANCE) {
+      return anomalie(ref, nom, 'BLOQUANT',
+        `Bilan ${typeLiasse} déséquilibré: Débit=${totalDebit.toLocaleString('fr-FR')}, Crédit=${totalCredit.toLocaleString('fr-FR')} (écart: ${ecart.toLocaleString('fr-FR')})`,
+        {
+          ecart, montants: { totalDebit, totalCredit, nbComptes: bilanLignes.length },
+          description: `Le bilan sectoriel ${typeLiasse} présente un écart de ${ecart.toLocaleString('fr-FR')} FCFA entre soldes débiteurs et créditeurs des classes 1-5. Pour ce type de liasse, le plan comptable spécifique (BCEAO/CIMA/SYSCOHADA-MF/Plan EBNL) s'applique mais l'équilibre fondamental reste exigé.`,
+          attendu: 'Σ soldes débiteurs classes 1-5 = Σ soldes créditeurs classes 1-5',
+          constate: `Débit: ${totalDebit.toLocaleString('fr-FR')}, Crédit: ${totalCredit.toLocaleString('fr-FR')}, écart: ${ecart.toLocaleString('fr-FR')}`,
+          impactFiscal: `Bilan ${typeLiasse} déséquilibré = liasse non recevable par le superviseur sectoriel (BCEAO/CIMA/Ministère).`,
+        },
+        'Vérifier l\'équilibre de la balance source. Si la balance est équilibrée, vérifier les écritures de clôture spécifiques au plan sectoriel.',
+        undefined,
+        typeLiasse === 'BANQUE' ? 'Instruction BCEAO - États financiers banques' :
+        typeLiasse === 'ASSURANCE' ? 'Code CIMA - Plan comptable assurance' :
+        typeLiasse === 'MICROFINANCE' ? 'SYSCOHADA-MF - Microfinance' :
+        'Plan comptable EBNL - Acte Uniforme OHADA')
+    }
+    return ok(ref, nom, `Bilan ${typeLiasse} équilibré (${bilanLignes.length} comptes, écart < ${TOLERANCE} FCFA)`)
   }
 
   // Primary check: balance directe (debit vs credit soldes classes 1-5)

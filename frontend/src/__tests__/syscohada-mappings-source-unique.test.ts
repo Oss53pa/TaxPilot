@@ -187,12 +187,18 @@ describe('P0-1 : Mappings source unique — Corrections critiques', () => {
     expect(BILAN_PASSIF.DK.comptes).toEqual(['43', '44'])
   })
 
-  // Test 6 : DM correspond aux Autres dettes (421-428)
-  it('DM (Autres dettes) mappe sur 421-428', () => {
+  // Test 6 : DM (Autres dettes passif) = 421-428 + 46 + 47
+  // Le canonique inclut volontairement 46 (comptes courants associés) et
+  // 47 (créditeurs divers) qui ne sont PAS dans BJ actif (cf commentaire
+  // syscohada-mappings.ts:94-98) — sans eux, soldes créditeurs disparaissent
+  // du passif → déséquilibre Actif/Passif sur les bilans avec comptes
+  // courants associés créditeurs.
+  it('DM (Autres dettes) mappe sur 421-428 + 46/47 (comptes courants)', () => {
     expect(BILAN_PASSIF.DM.comptes).toContain('421')
     expect(BILAN_PASSIF.DM.comptes).toContain('428')
-    expect(BILAN_PASSIF.DM.comptes).not.toContain('45')
-    expect(BILAN_PASSIF.DM.comptes).not.toContain('46')
+    expect(BILAN_PASSIF.DM.comptes).toContain('46') // comptes courants associés
+    expect(BILAN_PASSIF.DM.comptes).toContain('47') // créditeurs divers
+    expect(BILAN_PASSIF.DM.comptes).not.toContain('45') // 45x = actif (à inscrire)
   })
 
   // Test 7 : TFT DOTATIONS inclut 687 (dotations financières)

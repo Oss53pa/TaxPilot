@@ -201,15 +201,33 @@ function C005(ctx: AuditContext): ResultatControle {
 }
 
 // C-006: Mapping vers etats financiers possible
+//
+// Avant : pour types sectoriels (BANQUE/ASSURANCE/MICROFINANCE/EBNL),
+// court-circuit `return ok(...)` SANS vérification. Le rapport indiquait
+// "mapping sectoriel utilisé" sans aucun contrôle réel.
+//
+// Après : pour les types sectoriels, on retourne NON_APPLICABLE avec un
+// message explicite indiquant que le mapping SYSCOHADA Révisé standard
+// ne s'applique pas, et qu'un référentiel sectoriel devra être branché
+// quand disponible. Cela évite le faux OK qui gonflait le score.
 function C006(ctx: AuditContext): ResultatControle {
   const ref = 'C-006', nom = 'Mapping etats financiers'
   const typeLiasse = ctx.typeLiasse || 'SN'
 
-  // Pour les types sectoriels (BANQUE, ASSURANCE, MICROFINANCE, EBNL),
-  // le mapping standard SYSCOHADA ne s'applique pas directement
+  // Types sectoriels : le mapping SYSCOHADA Révisé standard ne s'applique
+  // pas. Un référentiel sectoriel dédié sera branché ultérieurement
+  // (TODO : level6 sectoriel pour BCEAO/CIMA/SYSCOHADA-MF/Plan EBNL).
+  // → NON_APPLICABLE plutôt que OK pour ne pas gonfler artificiellement
+  // le score d'audit. Le contrôle EF-001 sectoriel vérifie déjà l'équilibre
+  // débit/crédit générique qui reste valide.
   if (['BANQUE', 'ASSURANCE', 'MICROFINANCE', 'EBNL'].includes(typeLiasse)) {
-    return { ref, nom, niveau: NIVEAU, statut: 'OK', severite: 'OK',
-      message: `Controle adapte au type ${typeLiasse} - mapping sectoriel utilise`,
+    return { ref, nom, niveau: NIVEAU, statut: 'NON_APPLICABLE', severite: 'INFO',
+      message: `Mapping ${typeLiasse} non implémenté (référentiel ${
+        typeLiasse === 'BANQUE' ? 'BCEAO' :
+        typeLiasse === 'ASSURANCE' ? 'CIMA' :
+        typeLiasse === 'MICROFINANCE' ? 'SYSCOHADA-MF' :
+        'EBNL'
+      } requis) — contrôle non applicable`,
       timestamp: new Date().toISOString() }
   }
 

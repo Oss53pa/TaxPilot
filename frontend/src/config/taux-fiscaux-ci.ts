@@ -122,10 +122,15 @@ export const TAUX_FISCAUX_CI = {
 
   // === CHARGES NON DÉDUCTIBLES ===
   DEDUCTIBILITE: {
-    plafond_cadeaux: 0.001,      // 1‰ du CA
-    plafond_dons: 0.005,         // 5‰ du CA
+    plafond_cadeaux: 0.001,      // 1‰ du CA (CGI Art. 18-5)
+    plafond_dons: 0.005,         // 5‰ du CA (CGI Art. 18-5)
     plafond_interets_cc: 0.02,   // Taux max intérêts compte courant associé
-    amort_vehicule_plafond: 14_000_000, // Plafond amortissement VP
+    // Plafond amortissement véhicules de tourisme — CGI Art. 18, LF 2024.
+    // Avant : 14_000_000 (obsolète, LF antérieure). Aligné sur 30_000_000
+    // confirmé par la Loi de Finances 2024 Côte d'Ivoire.
+    // Note : level7-fiscal.ts utilisait 25_000_000 en dur ligne 103 (FI-002)
+    // → corrigé en parallèle.
+    amort_vehicule_plafond: 30_000_000,
     plafond_missions: 50_000,    // Plafond par jour mission interne
   },
 

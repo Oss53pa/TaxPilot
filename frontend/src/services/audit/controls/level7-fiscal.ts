@@ -52,7 +52,8 @@ function resolveTaux(ctx: AuditContext): {
         plafond_cadeaux: cfg.giftThresholdRate ?? ciDeductibilite.plafond_cadeaux,
         plafond_dons: cfg.donationThresholdRate ?? ciDeductibilite.plafond_dons,
         plafond_interets_cc: ciDeductibilite.plafond_interets_cc,
-        amort_vehicule_plafond: ciDeductibilite.amort_vehicule_plafond,
+        // CI = 30M (LF 2024), autres pays = valeur DB ou fallback CI 30M
+        amort_vehicule_plafond: cfg.vehicleAmortCap ?? ciDeductibilite.amort_vehicule_plafond,
         plafond_missions: ciDeductibilite.plafond_missions,
       },
     }
@@ -95,29 +96,38 @@ function FI001(ctx: AuditContext): ResultatControle {
 }
 
 // FI-002: Reintegrations amortissements vehicules (plafond)
+//
+// Avant : plafond hardcodé 25 000 000 (incohérent avec
+// taux-fiscaux-ci.ts:128 qui disait 14M — deux valeurs FAUSSES qui se
+// contredisent). La LF 2024 CI fixe le plafond à 30 000 000 FCFA.
+//
+// Après : utilise resolveTaux(ctx).DEDUCTIBILITE.amort_vehicule_plafond
+// → 30M en fallback CI, dérivé de fiscalConfig.amortVehiclePlafond pour
+// les autres pays OHADA quand peuplé en DB.
 function FI002(ctx: AuditContext): ResultatControle {
   const ref = 'FI-002', nom = 'Amort. vehicules tourisme'
   // Amortissement des vehicules de tourisme (245x) - plafond OHADA
   const valeurVehicules = absSum(find(ctx.balanceN, '245'))
-  // Plafond: amortissement sur base max de 25 000 000 FCFA par vehicule
-  if (valeurVehicules > 25000000) {
-    const exces = valeurVehicules - 25000000
+  const taux = resolveTaux(ctx)
+  const plafond = taux.DEDUCTIBILITE.amort_vehicule_plafond
+  if (valeurVehicules > plafond) {
+    const exces = valeurVehicules - plafond
     return anomalie(ref, nom, 'MINEUR',
-      `Vehicules de tourisme: ${valeurVehicules.toLocaleString('fr-FR')} (plafond fiscal: 25 000 000)`,
+      `Vehicules de tourisme: ${valeurVehicules.toLocaleString('fr-FR')} (plafond fiscal: ${plafond.toLocaleString('fr-FR')})`,
       {
-        montants: { valeurVehicules, plafond: 25000000, excesAReintegrer: exces },
-        description: `La valeur des vehicules de tourisme (${valeurVehicules.toLocaleString('fr-FR')} FCFA) depasse le plafond fiscal de 25 000 000 FCFA. L\'amortissement sur la fraction excedentaire (${exces.toLocaleString('fr-FR')}) n\'est pas deductible fiscalement et doit etre reintegre dans le resultat fiscal.`,
-        attendu: 'Valeur individuelle vehicules tourisme <= 25 000 000 FCFA',
+        montants: { valeurVehicules, plafond, excesAReintegrer: exces },
+        description: `La valeur des vehicules de tourisme (${valeurVehicules.toLocaleString('fr-FR')} FCFA) depasse le plafond fiscal de ${plafond.toLocaleString('fr-FR')} FCFA. L\'amortissement sur la fraction excedentaire (${exces.toLocaleString('fr-FR')}) n\'est pas deductible fiscalement et doit etre reintegre dans le resultat fiscal.`,
+        attendu: `Valeur individuelle vehicules tourisme <= ${plafond.toLocaleString('fr-FR')} FCFA`,
         constate: `Valeur vehicules: ${valeurVehicules.toLocaleString('fr-FR')}, exces: ${exces.toLocaleString('fr-FR')}`,
         impactFiscal: `Reintegration estimee de ${Math.round(exces * 0.2).toLocaleString('fr-FR')} FCFA (amortissement sur base excedentaire).`,
       },
       `Reintegrer dans le tableau de determination du resultat fiscal la fraction d\'amortissement calculee sur l\'exces de ${exces.toLocaleString('fr-FR')} FCFA au-dela du plafond.`,
       [{
         journal: 'FISCAL', date: new Date().toISOString().slice(0, 10),
-        lignes: [{ sens: 'D' as const, compte: 'REINTEG', libelle: 'Reintegration amort. vehicules > 25M', montant: Math.round(exces * 0.2) }],
+        lignes: [{ sens: 'D' as const, compte: 'REINTEG', libelle: `Reintegration amort. vehicules > ${plafond / 1_000_000}M`, montant: Math.round(exces * 0.2) }],
         commentaire: 'Reintegration fiscale estimee (taux 20% sur base excedentaire)'
       }],
-      'Art. 8-1 CGI CEMAC - Plafond amortissement vehicules tourisme')
+      'CGI Art. 18 - Plafond amortissement vehicules tourisme (LF 2024 CI)')
   }
   return ok(ref, nom, 'Vehicules de tourisme dans les limites')
 }
