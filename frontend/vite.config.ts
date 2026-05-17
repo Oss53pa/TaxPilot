@@ -59,70 +59,39 @@ export default defineConfig({
          *   - xlsx, supabase (clients), stripe (loader async), sentry
          *     (lazy via requestIdleCallback), recharts (lazy par route)
          */
+        /**
+         * Split minimal pour stabilité prod :
+         *   - xlsx → chunk dédié (utilisé seulement à l'import/export,
+         *     gain ~140 KB gzip sur le critical path)
+         *   - tout le reste → chunk unique `vendor`
+         *
+         * Pourquoi pas plus de splits ?
+         * Les tentatives de split par lib (react-vendor / mui / mui-icons /
+         * charts / supabase / sentry / stripe) ont produit en cascade :
+         *   - `TypeError: createContext undefined` (notistack/framer-motion
+         *     avant react)
+         *   - `TypeError: jsx undefined` (mui-icons avant react)
+         *   - `TypeError: AsyncMode setter on undefined` (react-is interop
+         *     CommonJS cassé entre chunks)
+         *
+         * Le problème : Rollup ne garantit PAS l'ordre d'évaluation entre
+         * chunks non liés par dépendance directe + l'interop CommonJS/ESM
+         * de certaines libs (react-is, prop-types, hoist-non-react-statics)
+         * casse quand elles sont split de React.
+         *
+         * Trade-off accepté : un seul `vendor` de ~530 KB gzip au premier
+         * paint, identique à l'état d'avant la première PR perf. Les vraies
+         * optimisations bundle viennent du code-splitting par ROUTE (84+
+         * chunks page lazy via React.lazy + Suspense) — chunk vendor
+         * monolithique mais stable, immuable entre versions.
+         */
         manualChunks(id) {
           if (!id.includes('node_modules')) return undefined
-
-          // ────────────────────────────────────────────────────────────
-          // VANILLA JS chunks — pas de React/JSX au module-load → safe.
-          // Ces libs peuvent être chargées dans n'importe quel ordre.
-          // ────────────────────────────────────────────────────────────
-
-          // Excel — gros, utilisé uniquement à l'import/export (lazy par route)
+          // xlsx — seul split SAFE (vanilla JS, parsing Excel, aucune dep React).
+          // Lazy-chargé seulement quand l'utilisateur visite import/export.
           if (id.includes('xlsx') || id.includes('exceljs')) return 'xlsx'
-          // Sentry — lazy import async via requestIdleCallback en main.tsx
-          if (id.includes('@sentry/')) return 'sentry'
-          // Supabase client — SDK pur, pas de JSX
-          if (id.includes('@supabase/')) return 'supabase'
-          // Stripe — script externe chargé via @stripe/stripe-js (vanilla)
-          if (id.includes('@stripe/')) return 'stripe'
-
-          // ────────────────────────────────────────────────────────────
-          // ÉCOSYSTÈME REACT — tout ce qui importe React ou JSX au
-          // module-load doit être dans le même chunk pour garantir
-          // l'ordre d'évaluation Rollup.
-          //
-          // Inclut : core React, MUI (core + X + icons), Emotion,
-          // toutes les libs qui consomment React.createContext() ou
-          // React.jsx (jsx-runtime) au load, plus recharts/d3 et tout
-          // le reste qui dépend de React via peer/runtime.
-          //
-          // Note perf : ce chunk est gros (~700 KB / 220 KB gzip) mais
-          // c'est la seule façon SAFE de déployer en prod sans
-          // `TypeError: Cannot read properties of undefined (reading
-          // 'createContext'|'jsx')`. Les optimisations de cache
-          // viennent du code-splitting par route (lazy pages) — le
-          // chunk react-vendor lui-même est immuable entre versions.
-          // ────────────────────────────────────────────────────────────
-          if (
-            // React core + JSX runtime + scheduler
-            id.includes('node_modules/react/') ||
-            id.includes('node_modules/react-dom/') ||
-            id.includes('node_modules/react-router') ||
-            id.includes('node_modules/scheduler/') ||
-            id.includes('node_modules/use-sync-external-store/') ||
-            // MUI complet (core + X + icons) — TOUT dépend de React/JSX
-            id.includes('@mui/') ||
-            id.includes('@emotion/') ||
-            // Libs qui créent un Context React ou utilisent JSX au module-load
-            id.includes('notistack') ||
-            id.includes('framer-motion') ||
-            id.includes('react-hook-form') ||
-            id.includes('@hookform/') ||
-            id.includes('react-redux') ||
-            id.includes('@reduxjs/toolkit') ||
-            id.includes('@tanstack/react-query') ||
-            id.includes('react-pdf') ||
-            id.includes('react-i18next') ||
-            // Charts (recharts importe React au module-load)
-            id.includes('recharts') ||
-            id.includes('d3-') ||
-            // Filet de sécurité : toute lib `react-XXX` ou `@XXX/react-YYY`
-            id.includes('node_modules/react-') ||
-            /node_modules\/@[^/]+\/react-/.test(id)
-          ) return 'react-vendor'
-
-          // Reste = vendor (decimal.js, yup, dayjs, axios, file-saver, lodash, etc.)
-          // Ces libs sont vanilla JS sans React/JSX → safe à isoler.
+          // Tout le reste dans un seul chunk vendor pour éliminer
+          // les races d'ordre d'évaluation entre libs React-dependent.
           return 'vendor'
         },
       },
