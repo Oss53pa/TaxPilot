@@ -101,6 +101,32 @@ interface AlerteKPI {
   is_resolue: boolean
 }
 
+// Sous-types pour les unions des selects (réutilisés dans les casts `as`).
+type TypeKPI = KPI['type_kpi']
+type PeriodiciteKPI = KPI['periodicite_calcul']
+
+// Forme retournée par le service (peut être array direct ou paginé).
+interface PaginatedKpiResponse<T> {
+  results?: T[]
+  count?: number
+}
+type KpiListResponse<T> = PaginatedKpiResponse<T> | T[]
+const unwrapKpiList = <T,>(data: KpiListResponse<T>): T[] =>
+  Array.isArray(data) ? data : (data.results ?? [])
+
+// Forme minimale d'un export (réponse lancerExport / getExport).
+interface ExportStatusLite {
+  id: number | string
+  statut?: 'EN_COURS' | 'TERMINE' | 'ERREUR'
+  fichier_genere?: string
+}
+
+// Forme minimale d'un KPI créé via createKPI.
+interface KPICreatedLite { id: number; nom: string }
+
+// Forme minimale de l'historique d'un KPI.
+interface KPIHistoryLite { valeurs?: Array<{ date: string; valeur: number }> }
+
 export default function KPIManagementView() {
   const [kpis, setKpis] = useState<KPI[]>([])
   const [alertes, setAlertes] = useState<AlerteKPI[]>([])
@@ -150,15 +176,16 @@ export default function KPIManagementView() {
       const entrepriseId = localStorage.getItem('entreprise_id') || '1'
       const data = await reportingService.getKPIs({
         entreprise: entrepriseId
-      }) as any
+      }) as KpiListResponse<KPI>
+      const kpiList = unwrapKpiList(data)
 
       // Charger l'historique pour chaque KPI
       const kpisWithHistory = await Promise.all(
-        ((data as any[]) ?? []).map(async (kpi: KPI) => {
+        kpiList.map(async (kpi: KPI) => {
           try {
             const history = await reportingService.getKPIHistory(String(kpi.id), {
               periode_debut: selectedPeriod
-            }) as Record<string, any>
+            }) as KPIHistoryLite
             return {
               ...kpi,
               historique: history.valeurs
@@ -188,8 +215,8 @@ export default function KPIManagementView() {
       const data = await reportingService.getKPIAlertes({
         entreprise: entrepriseId,
         active_only: true
-      }) as any
-      setAlertes(data.results || data)
+      }) as KpiListResponse<AlerteKPI>
+      setAlertes(unwrapKpiList(data))
     } catch (error) {
       logger.error('Erreur lors du chargement des alertes:', error)
     }
@@ -201,7 +228,7 @@ export default function KPIManagementView() {
       const created = await reportingService.createKPI({
         ...newKPI,
         entreprise_id: parseInt(entrepriseId)
-      }) as any
+      }) as KPICreatedLite
 
       toast({
         title: "KPI créé",
@@ -282,7 +309,7 @@ export default function KPIManagementView() {
         periode_debut: new Date(new Date().getFullYear(), 0, 1).toISOString().split('T')[0],
         periode_fin: new Date().toISOString().split('T')[0],
         format: 'EXCEL'
-      }) as Record<string, any>
+      }) as ExportStatusLite
 
       toast({
         title: "Export lancé",
@@ -290,7 +317,7 @@ export default function KPIManagementView() {
       })
 
       // Vérifier le statut
-      checkExportStatus(exportData.id)
+      checkExportStatus(Number(exportData.id))
     } catch (error) {
       logger.error('Erreur lors de l\'export:', error)
       toast({
@@ -304,7 +331,7 @@ export default function KPIManagementView() {
   const checkExportStatus = async (exportId: number) => {
     const interval = setInterval(async () => {
       try {
-        const status = await reportingService.getExport(String(exportId)) as Record<string, any>
+        const status = await reportingService.getExport(String(exportId)) as ExportStatusLite
 
         if (status.statut === 'TERMINE') {
           clearInterval(interval)
@@ -682,7 +709,7 @@ export default function KPIManagementView() {
                 <Label>Type</Label>
                 <Select
                   value={newKPI.type_kpi}
-                  onValueChange={(value) => setNewKPI({ ...newKPI, type_kpi: value as any })}
+                  onValueChange={(value) => setNewKPI({ ...newKPI, type_kpi: value as TypeKPI })}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -736,7 +763,7 @@ export default function KPIManagementView() {
                 <Label>Périodicité</Label>
                 <Select
                   value={newKPI.periodicite_calcul}
-                  onValueChange={(value) => setNewKPI({ ...newKPI, periodicite_calcul: value as any })}
+                  onValueChange={(value) => setNewKPI({ ...newKPI, periodicite_calcul: value as PeriodiciteKPI })}
                 >
                   <SelectTrigger>
                     <SelectValue />

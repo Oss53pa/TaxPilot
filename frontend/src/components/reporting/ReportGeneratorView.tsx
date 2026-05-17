@@ -59,32 +59,43 @@ interface Report {
   created_at: string
 }
 
+interface ReportSection {
+  id?: string
+  titre?: string
+  ordre?: number
+  contenu?: unknown
+}
+
 interface ReportTemplate {
   id: string
   nom: string
   description: string
   type_rapport: string
   format_defaut: string
-  sections: any[]
+  sections: ReportSection[]
   usage_count: number
 }
 
+type TypeRapport = 'FINANCIAL' | 'TAX' | 'AUDIT' | 'COMPLIANCE' | 'DASHBOARD'
+type FormatRapport = 'PDF' | 'EXCEL' | 'CSV' | 'JSON'
+type NiveauDetail = 'RESUME' | 'STANDARD' | 'DETAILLE'
+
 interface ReportRequest {
-  type_rapport: 'FINANCIAL' | 'TAX' | 'AUDIT' | 'COMPLIANCE' | 'DASHBOARD'
+  type_rapport: TypeRapport
   nom?: string
   description?: string
   entreprise_id?: string
   exercice_id?: string
   periode_debut: string
   periode_fin: string
-  format: 'PDF' | 'EXCEL' | 'CSV' | 'JSON'
+  format: FormatRapport
   template_id?: string
   parametres?: {
     inclure_details: boolean
     inclure_graphiques: boolean
     inclure_comparaisons: boolean
-    niveau_detail: 'RESUME' | 'STANDARD' | 'DETAILLE'
-    filtres_specifiques?: any
+    niveau_detail: NiveauDetail
+    filtres_specifiques?: Record<string, unknown>
   }
   schedule?: {
     active: boolean
@@ -93,6 +104,15 @@ interface ReportRequest {
     destinataires: string[]
   }
 }
+
+// Forme retournée par le service (peut être array direct ou wrapper paginé)
+interface PaginatedResponse<T> {
+  results?: T[]
+  count?: number
+}
+type ListResponse<T> = PaginatedResponse<T> | T[]
+const unwrapList = <T,>(data: ListResponse<T>): T[] =>
+  Array.isArray(data) ? data : (data.results ?? [])
 
 export default function ReportGeneratorView() {
   const [reports, setReports] = useState<Report[]>([])
@@ -137,8 +157,8 @@ export default function ReportGeneratorView() {
       const entrepriseId = localStorage.getItem('entreprise_id') || '1'
       const data = await reportingService.getReports({
         entreprise: entrepriseId
-      }) as any
-      setReports(data.results || data)
+      }) as ListResponse<Report>
+      setReports(unwrapList(data))
     } catch (error) {
       logger.error('Erreur lors du chargement des rapports:', error)
       toast({
@@ -153,8 +173,8 @@ export default function ReportGeneratorView() {
 
   const loadTemplates = async () => {
     try {
-      const data = await reportingService.getReportTemplates() as any
-      setTemplates(data.results || data)
+      const data = await reportingService.getReportTemplates() as ListResponse<ReportTemplate>
+      setTemplates(unwrapList(data))
     } catch (error) {
       logger.error('Erreur lors du chargement des templates:', error)
     }
@@ -174,7 +194,9 @@ export default function ReportGeneratorView() {
         template_id: selectedTemplate || undefined
       }
 
-      const report = await reportingService.generateReport(request as any)
+      // ReportRequest local du composant est un sous-ensemble compatible avec
+      // celui exposé par le service (mêmes literal types).
+      const report = await reportingService.generateReport(request as Parameters<typeof reportingService.generateReport>[0])
 
       toast({
         title: "Génération lancée",
@@ -418,7 +440,7 @@ export default function ReportGeneratorView() {
                         value={reportRequest.type_rapport}
                         onValueChange={(value) => setReportRequest({
                           ...reportRequest,
-                          type_rapport: value as any
+                          type_rapport: value as TypeRapport
                         })}
                       >
                         <SelectTrigger>
@@ -440,7 +462,7 @@ export default function ReportGeneratorView() {
                         value={reportRequest.format}
                         onValueChange={(value) => setReportRequest({
                           ...reportRequest,
-                          format: value as any
+                          format: value as FormatRapport
                         })}
                       >
                         <SelectTrigger>
@@ -528,7 +550,7 @@ export default function ReportGeneratorView() {
                         ...reportRequest,
                         parametres: {
                           ...reportRequest.parametres!,
-                          niveau_detail: value as any
+                          niveau_detail: value as NiveauDetail
                         }
                       })}
                     >

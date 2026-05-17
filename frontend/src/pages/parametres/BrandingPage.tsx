@@ -29,13 +29,13 @@ const BrandingPage: React.FC = () => {
   const codePays = entreprise.code_pays_iso || 'CI'
   const paysDefault = PAYS_VISUAL_CONFIGS[codePays]?.theme
 
-  const update = (field: keyof Entreprise, value: any) => {
-    updateEntreprise({ [field]: value } as any)
+  const update = <K extends keyof Entreprise>(field: K, value: Entreprise[K]) => {
+    updateEntreprise({ [field]: value } as Partial<Entreprise>)
   }
 
   const updateSurcharge = (key: string, value: string) => {
-    const current = (entreprise.branding_surcharge_theme || {}) as Record<string, any>
-    update('branding_surcharge_theme' as any, { ...current, [key]: value || undefined })
+    const current = (entreprise.branding_surcharge_theme || {}) as Record<string, unknown>
+    update('branding_surcharge_theme', { ...current, [key]: value || undefined })
   }
 
   return (
@@ -61,7 +61,7 @@ const BrandingPage: React.FC = () => {
                 <Select
                   value={codePays}
                   label="Pays"
-                  onChange={e => update('code_pays_iso' as any, e.target.value)}
+                  onChange={e => update('code_pays_iso', e.target.value)}
                 >
                   {COUNTRY_OPTIONS.map(c => (
                     <MenuItem key={c.code} value={c.code}>
@@ -108,7 +108,7 @@ const BrandingPage: React.FC = () => {
             size="small"
             placeholder="https://..."
             value={entreprise.branding_logo_url || ''}
-            onChange={e => update('branding_logo_url' as any, e.target.value)}
+            onChange={e => update('branding_logo_url', e.target.value)}
             helperText="Collez l'URL de votre logo (PNG, SVG). Upload Supabase a venir."
             sx={{ mb: 2 }}
           />
@@ -120,7 +120,7 @@ const BrandingPage: React.FC = () => {
                 size="small"
                 fullWidth
                 value={entreprise.branding_logo_width || 120}
-                onChange={e => update('branding_logo_width' as any, Number(e.target.value))}
+                onChange={e => update('branding_logo_width', Number(e.target.value))}
               />
             </Grid>
             <Grid item xs={6}>
@@ -130,7 +130,7 @@ const BrandingPage: React.FC = () => {
                 size="small"
                 fullWidth
                 value={entreprise.branding_logo_height || 60}
-                onChange={e => update('branding_logo_height' as any, Number(e.target.value))}
+                onChange={e => update('branding_logo_height', Number(e.target.value))}
               />
             </Grid>
           </Grid>
@@ -149,7 +149,7 @@ const BrandingPage: React.FC = () => {
             size="small"
             placeholder="https://..."
             value={entreprise.branding_image_fond_url || ''}
-            onChange={e => update('branding_image_fond_url' as any, e.target.value)}
+            onChange={e => update('branding_image_fond_url', e.target.value)}
             sx={{ mb: 2 }}
           />
           <Box sx={{ px: 1 }}>
@@ -158,7 +158,7 @@ const BrandingPage: React.FC = () => {
             </Typography>
             <Slider
               value={entreprise.branding_image_fond_opacite ?? 10}
-              onChange={(_, v) => update('branding_image_fond_opacite' as any, v as number)}
+              onChange={(_, v) => update('branding_image_fond_opacite', v as number)}
               min={0}
               max={30}
               step={1}
@@ -189,7 +189,7 @@ const BrandingPage: React.FC = () => {
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <input
                     type="color"
-                    value={(entreprise.branding_surcharge_theme as any)?.[c.key] || c.fallback || '#333333'}
+                    value={(entreprise.branding_surcharge_theme as Record<string, string> | undefined)?.[c.key] || c.fallback || '#333333'}
                     onChange={e => updateSurcharge(c.key, e.target.value)}
                     style={{ width: 36, height: 36, border: 'none', cursor: 'pointer', borderRadius: 4 }}
                   />
@@ -212,7 +212,7 @@ const BrandingPage: React.FC = () => {
           <FormControl size="small" sx={{ minWidth: 200 }}>
             <InputLabel>Police des titres</InputLabel>
             <Select
-              value={(entreprise.branding_surcharge_theme as any)?.fonteTitre || 'Arial'}
+              value={(entreprise.branding_surcharge_theme as Record<string, string> | undefined)?.fonteTitre || 'Arial'}
               label="Police des titres"
               onChange={e => updateSurcharge('fonteTitre', e.target.value)}
             >
@@ -236,14 +236,14 @@ const BrandingPage: React.FC = () => {
             size="small"
             placeholder="Ex: Document confidentiel — Ne pas diffuser"
             value={entreprise.branding_pied_page_texte || ''}
-            onChange={e => update('branding_pied_page_texte' as any, e.target.value)}
+            onChange={e => update('branding_pied_page_texte', e.target.value)}
             sx={{ mb: 2 }}
           />
           <FormControlLabel
             control={
               <Switch
                 checked={entreprise.branding_pied_page_logo !== false}
-                onChange={e => update('branding_pied_page_logo' as any, e.target.checked)}
+                onChange={e => update('branding_pied_page_logo', e.target.checked)}
               />
             }
             label="Afficher 'Genere par Liass'Pilot'"

@@ -55,7 +55,15 @@ import {
 import { useForm, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
-import type { EntrepriseFormData, DirigeantEntry, CommissaireEntry, ParticipationEntry } from '@/types'
+import type { EntrepriseFormData, DirigeantEntry, CommissaireEntry, ParticipationEntry, Entreprise } from '@/types'
+import type { Resolver, FieldErrors } from 'react-hook-form'
+
+/**
+ * Forme legacy d'une entreprise persistée localement (avant refactor
+ * adresse_ligne1) où l'adresse était sur un seul champ `adresse`.
+ * Toléré en lecture pour rétrocompatibilité localStorage.
+ */
+type EntrepriseLegacy = Entreprise & { adresse?: string }
 
 // Schéma de validation pour l'entreprise
 const entrepriseSchema = yup.object({
@@ -185,8 +193,8 @@ const EntrepriseSettings: React.FC = () => {
   const [commissaires, setCommissaires] = useState<CommissaireEntry[]>([emptyCommissaire()])
   const [participations, setParticipations] = useState<ParticipationEntry[]>([emptyParticipation()])
 
-  // Récupérer les données de l'entreprise 
-  const { data: entreprises, loading: loadingEntreprises } = useBackendData({
+  // Récupérer les données de l'entreprise
+  const { data: entreprises, loading: loadingEntreprises } = useBackendData<EntrepriseLegacy[]>({
     service: 'entrepriseService',
     method: 'getEntreprises',
     params: { page_size: 10 },
@@ -200,7 +208,8 @@ const EntrepriseSettings: React.FC = () => {
     reset,
     formState: { errors },
   } = useForm<EntrepriseFormData>({
-    resolver: yupResolver(entrepriseSchema) as any,
+    // yup.object<EntrepriseFormData> ne supporte pas tous les champs optionnels du form ; cast resolver
+    resolver: yupResolver(entrepriseSchema) as unknown as Resolver<EntrepriseFormData>,
     defaultValues: {
       raison_sociale: '',
       forme_juridique: 'SARL',
@@ -247,19 +256,19 @@ const EntrepriseSettings: React.FC = () => {
       is_groupe: false,
       code_secteur: '',
       branche_activite: '',
-    } as any,
+    } as Partial<EntrepriseFormData> as EntrepriseFormData,
   })
 
   // Charger les données : priorité service, fallback localStorage
   useEffect(() => {
-    const entreprise = (entreprises && entreprises.length > 0)
+    const entreprise = ((entreprises && entreprises.length > 0)
       ? entreprises[0]
-      : getEntreprise()
+      : getEntreprise()) as EntrepriseLegacy | null
 
     if (!entreprise) return
 
-    if ((entreprises as any)?.[0]?.id) {
-      setEntrepriseId((entreprises as any)[0].id)
+    if (entreprises?.[0]?.id) {
+      setEntrepriseId(entreprises[0].id)
     }
 
     reset({
@@ -267,7 +276,7 @@ const EntrepriseSettings: React.FC = () => {
       forme_juridique: entreprise.forme_juridique || 'SARL',
       numero_contribuable: entreprise.numero_contribuable || '',
       email: entreprise.email || '',
-      adresse_ligne1: entreprise.adresse_ligne1 || (entreprise as any).adresse || '',
+      adresse_ligne1: entreprise.adresse_ligne1 || entreprise.adresse || '',
       ville: entreprise.ville || '',
       pays: entreprise.pays || 'SN',
       nom_dirigeant: entreprise.nom_dirigeant || '',
@@ -298,18 +307,18 @@ const EntrepriseSettings: React.FC = () => {
       expert_nom: entreprise.expert_nom || '',
       expert_adresse: entreprise.expert_adresse || '',
       expert_numero_inscription: entreprise.expert_numero_inscription || '',
-      sigle: (entreprise as any).sigle || '',
-      numero_teledeclarant: (entreprise as any).numero_teledeclarant || '',
-      code_ape: (entreprise as any).code_ape || '',
-      date_creation_entreprise: (entreprise as any).date_creation_entreprise || '',
-      categorie_imposition: (entreprise as any).categorie_imposition || '',
-      has_declaration_301: (entreprise as any).has_declaration_301 || false,
-      has_declaration_302: (entreprise as any).has_declaration_302 || false,
-      effectif_debut: (entreprise as any).effectif_debut || 0,
-      effectif_fin: (entreprise as any).effectif_fin || 0,
-      is_groupe: (entreprise as any).is_groupe || false,
-      code_secteur: (entreprise as any).code_secteur || '',
-      branche_activite: (entreprise as any).branche_activite || '',
+      sigle: entreprise.sigle || '',
+      numero_teledeclarant: entreprise.numero_teledeclarant || '',
+      code_ape: entreprise.code_ape || '',
+      date_creation_entreprise: entreprise.date_creation_entreprise || '',
+      categorie_imposition: entreprise.categorie_imposition || '',
+      has_declaration_301: entreprise.has_declaration_301 || false,
+      has_declaration_302: entreprise.has_declaration_302 || false,
+      effectif_debut: entreprise.effectif_debut || 0,
+      effectif_fin: entreprise.effectif_fin || 0,
+      is_groupe: entreprise.is_groupe || false,
+      code_secteur: entreprise.code_secteur || '',
+      branche_activite: entreprise.branche_activite || '',
     })
 
     // Load array data
@@ -354,13 +363,19 @@ const EntrepriseSettings: React.FC = () => {
       }
 
       // Toujours persister en localStorage (source de vérité locale)
-      saveEntreprise(payload as any)
+      // Le payload contient des champs supplémentaires (dirigeants, commissaires, participations)
+      // qui sont sur l'interface Entreprise (@/types) mais pas sur EntrepriseFormData.
+      // Le service Entreprise (@/services/entrepriseService) a un type plus strict
+      // (type_abonnement = union literal) — cast via unknown pour franchir la frontière.
+      type EntrepriseServiceType = Parameters<typeof entrepriseService.createEntreprise>[0]
+      const payloadService = payload as unknown as EntrepriseServiceType
+      saveEntreprise(payloadService)
 
       try {
         if (entrepriseId) {
-          await entrepriseService.updateEntreprise(entrepriseId, payload as any)
+          await entrepriseService.updateEntreprise(entrepriseId, payloadService)
         } else {
-          const newEntreprise = await entrepriseService.createEntreprise(payload as any)
+          const newEntreprise = await entrepriseService.createEntreprise(payloadService)
           setEntrepriseId(newEntreprise.id)
         }
       } catch {
@@ -377,11 +392,13 @@ const EntrepriseSettings: React.FC = () => {
   }
 
   // Tab error counts
+  const hasError = (e: FieldErrors<EntrepriseFormData>, k: string): boolean =>
+    !!(e as Record<string, unknown>)[k]
   const tabErrors = {
-    0: ['raison_sociale', 'forme_juridique', 'numero_contribuable'].filter(f => !!(errors as any)[f]).length,
-    1: ['regime_imposition', 'secteur_activite', 'chiffre_affaires_annuel', 'devise_principale'].filter(f => !!(errors as any)[f]).length,
-    2: ['adresse_ligne1', 'ville', 'pays'].filter(f => !!(errors as any)[f]).length,
-    3: ['email', 'nom_dirigeant', 'fonction_dirigeant'].filter(f => !!(errors as any)[f]).length,
+    0: ['raison_sociale', 'forme_juridique', 'numero_contribuable'].filter(f => hasError(errors, f)).length,
+    1: ['regime_imposition', 'secteur_activite', 'chiffre_affaires_annuel', 'devise_principale'].filter(f => hasError(errors, f)).length,
+    2: ['adresse_ligne1', 'ville', 'pays'].filter(f => hasError(errors, f)).length,
+    3: ['email', 'nom_dirigeant', 'fonction_dirigeant'].filter(f => hasError(errors, f)).length,
     4: 0, 5: 0, 6: 0,
   }
 
@@ -399,7 +416,7 @@ const EntrepriseSettings: React.FC = () => {
   }
 
   // --- Dirigeant handlers ---
-  const handleDirigeantChange = (id: string, field: keyof DirigeantEntry, value: any) => {
+  const handleDirigeantChange = (id: string, field: keyof DirigeantEntry, value: string | number | boolean) => {
     setDirigeants(prev => prev.map(d => d.id === id ? { ...d, [field]: value } : d))
   }
   const addDirigeant = () => setDirigeants(prev => [...prev, emptyDirigeant()])
@@ -408,7 +425,7 @@ const EntrepriseSettings: React.FC = () => {
   }
 
   // --- Commissaire handlers ---
-  const handleCommissaireChange = (id: string, field: keyof CommissaireEntry, value: any) => {
+  const handleCommissaireChange = (id: string, field: keyof CommissaireEntry, value: string | number | boolean) => {
     setCommissaires(prev => prev.map(c => c.id === id ? { ...c, [field]: value } : c))
   }
   const addCommissaire = () => setCommissaires(prev => [...prev, emptyCommissaire()])
@@ -417,7 +434,7 @@ const EntrepriseSettings: React.FC = () => {
   }
 
   // --- Participation handlers ---
-  const handleParticipationChange = (id: string, field: keyof ParticipationEntry, value: any) => {
+  const handleParticipationChange = (id: string, field: keyof ParticipationEntry, value: string | number | boolean) => {
     setParticipations(prev => prev.map(p => p.id === id ? { ...p, [field]: value } : p))
   }
   const addParticipation = () => setParticipations(prev => [...prev, emptyParticipation()])
