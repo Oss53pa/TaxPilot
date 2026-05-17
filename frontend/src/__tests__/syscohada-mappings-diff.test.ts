@@ -93,17 +93,47 @@ describe('SYSCOHADA mappings — DIVERGENCES CONNUES (baseline verrouillée)', (
   it('TI : canonique = 781 (transferts) / liasseDataService = 791,798,799 (reprises) — DIVERGENT', () => {
     // Le canonique respecte la spec OHADA 2017 (transferts charges).
     // liasseDataService utilise une numérotation décalée où TI = reprises.
-    // Quand l'unification sera faite, ces 2 lignes deviendront égales.
+    // Cette divergence est cohérente avec le UI legacy (libellé TI =
+    // "Reprises amort/prov/déprec"). Unification = refonte UI complète.
     expect(COMPTE_RESULTAT_MAPPING.TI.comptes).toEqual(['781'])
     expect(SYSCOHADA_MAPPING.produits.TI.comptes).toEqual(['791', '798', '799'])
   })
 
-  it('TL : canonique = 797 (reprises fin) / liasseDataService = 787 (transferts fin) — DIVERGENT', () => {
-    expect(COMPTE_RESULTAT_MAPPING.TL.comptes).toEqual(['797'])
-    expect(SYSCOHADA_MAPPING.produits.TL.comptes).toEqual(['787'])
+  // FIX commit b0c739c — TL et TM corrigés pour matcher libellés UI
+  it('TL : aligné sur libellé UI "Reprises prov fin" = [797]', () => {
+    // Avant fix : TL=['787'] (transferts charges) — INVERSÉ avec libellé UI
+    // Après fix : TL=['797'] (reprises) cohérent avec libellé "Reprises prov fin"
+    expect(SYSCOHADA_MAPPING.produits.TL.comptes).toEqual(['797'])
+    expect(COMPTE_RESULTAT_MAPPING.TL.comptes).toEqual(['797']) // CANONICAL ALIGNÉ
+  })
+
+  it('TM : ajouté = [787] pour Transferts charges financières (libellé UI)', () => {
+    // Avant : TM absent en legacy → compte 787 perdu dans le UI
+    // Après : TM=['787'] cohérent avec libellé UI "Transferts charges fin"
+    expect(SYSCOHADA_MAPPING.produits.TM.comptes).toEqual(['787'])
+  })
+
+  it('TK : ajouté = [776,777] pour Gains de change (libellé UI)', () => {
+    // Avant : TK=['797'] (mal aliasé) → libellé UI "Gains de change" avec
+    // les comptes reprises = bug d'affichage. Après : TK=['776','777']
+    // (gains de change), TL prend les reprises (cf test précédent).
+    expect(SYSCOHADA_MAPPING.produits.TK.comptes).toEqual(['776', '777'])
+  })
+
+  it('RO : ajouté = [676,677] pour Pertes de change (libellé UI)', () => {
+    // Avant : RO absent en legacy → libellé UI "Pertes de change" sans comptes
+    // Après : RO=['676','677'] alloué.
+    expect(SYSCOHADA_MAPPING.charges.RO.comptes).toEqual(['676', '677'])
+  })
+
+  it('RP : ajouté = [697] pour Dotations provisions financières (libellé UI)', () => {
+    // Avant : RP absent → 697 perdu. Après : RP=['697'].
+    expect(SYSCOHADA_MAPPING.charges.RP.comptes).toEqual(['697'])
   })
 
   it('TJ : canonique = 791,798,799 (reprises exploit) / liasseDataService = 77 (revenus fin) — DIVERGENT', () => {
+    // Divergence intentionnelle : legacy aligné sur libellé UI "Revenus
+    // financiers et assimilés". Unification = refonte UI structurelle.
     expect(COMPTE_RESULTAT_MAPPING.TJ.comptes).toEqual(['791', '798', '799'])
     expect(SYSCOHADA_MAPPING.produits.TJ.comptes).toEqual(['77'])
   })

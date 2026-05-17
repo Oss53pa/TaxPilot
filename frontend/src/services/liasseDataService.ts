@@ -254,18 +254,33 @@ export const SYSCOHADA_MAPPING = {
     RI: { comptes: ['64'] },
     RJ: { comptes: ['65'] },
     RK: { comptes: ['66'] },
-    RL: { comptes: ['681'] },
-    RM: { comptes: ['691'] },
+    RL: { comptes: ['681'] }, // Dotations aux amortissements (exploitation)
+    RM: { comptes: ['691'] }, // Dotations aux provisions et dépréciations (exploitation)
 
-    // Activité financière (67 = frais financiers, 697 = dotations provisions financières)
+    // ──────── Activité financière ────────
+    // OHADA Révisé 2017 — UI CompteResultatSYSCOHADA attend cette désagrégation :
+    //   RN = (-) Frais financiers et charges assimilées (67 sans 676/677)
+    //   RO = (-) Pertes de change (676/677)
+    //   RP = (-) Dotations aux provisions et dépréciations financières (697)
+    // Avant le fix : RN=['67'] (tout 67 agrégé), RO/RP absents → "Pertes de
+    // change" et "Dotations prov fin" non alloués dans UI. Le 697 était
+    // probablement compté dans RM ou perdu (697 != 691).
+    //
+    // Compromis safe : on garde RN=['67'] pour rétrocompat des balances
+    // agrégées au niveau 67. On ajoute RO et RP qui captureront le détail
+    // sub-compte SI la balance le fournit (sinon 0). Cf TODO unification
+    // structurelle pour éliminer le risque de double-comptage 676/697 dans
+    // RN+RO+RP quand balance détaillée.
     RN: { comptes: ['67'] },
+    RO: { comptes: ['676', '677'] }, // Pertes de change (ajout post-audit)
+    RP: { comptes: ['697'] }, // Dotations provisions financières (ajout post-audit)
 
-    // HAO
-    RQ: { comptes: ['81'] },
-    RR: { comptes: ['83', '85'] },
+    // ──────── HAO ────────
+    RQ: { comptes: ['81'] }, // Valeurs comptables cessions d'immo
+    RR: { comptes: ['83', '85'] }, // Autres charges HAO
 
-    // Participation et Impôt
-    RS: { comptes: ['89'] }
+    // ──────── Participation et Impôt ────────
+    RS: { comptes: ['89'] } // Impôts sur le résultat
   },
 
   // ──────────────── PRODUITS ────────────────
@@ -277,17 +292,34 @@ export const SYSCOHADA_MAPPING = {
     TE: { comptes: ['72'] },
     TF: { comptes: ['707', '708'] },
     TG: { comptes: ['71'] },
-    TH: { comptes: ['75'] },
-    TI: { comptes: ['791', '798', '799'] },
+    TH: { comptes: ['75'] }, // Autres produits exploitation
+    TI: { comptes: ['791', '798', '799'] }, // Reprises amort/prov/déprec exploit
 
-    // Activité financière
-    TJ: { comptes: ['77'] },
-    TK: { comptes: ['797'] },
-    TL: { comptes: ['787'] },
+    // ──────── Activité financière ────────
+    // OHADA Révisé 2017 — UI CompteResultatSYSCOHADA attend :
+    //   TJ = Revenus financiers et assimilés (77 sans 776/777)
+    //   TK = Gains de change (776/777)
+    //   TL = Reprises de provisions et dépréciations financières (797)
+    //   TM = Transferts de charges financières (787)
+    //
+    // Avant le fix critique : TL=['787'] (transferts) et TK=['797'] (reprises)
+    // étaient INVERSÉS par rapport aux libellés UI → le montant affiché
+    // sous "Reprises prov fin" était en fait les transferts charges (vice-
+    // versa). TM était absent → le compte 787 disparaissait du UI.
+    //
+    // Après : TL=['797'] (reprises) cohérent avec libellé UI, TM=['787']
+    // ajouté, TK=['776','777'] alloué aux Gains de change.
+    // TJ conservé à ['77'] (rétrocompat balances agrégées) — double-comptage
+    // mineur si balance détaille 776 (TJ+TK), à éliminer dans la refonte
+    // structurelle complète (TODO).
+    TJ: { comptes: ['77'] }, // Revenus financiers et assimilés
+    TK: { comptes: ['776', '777'] }, // Gains de change (ajout post-audit)
+    TL: { comptes: ['797'] }, // Reprises prov fin (FIX : était ['787'])
+    TM: { comptes: ['787'] }, // Transferts charges fin (ajout post-audit)
 
-    // HAO
-    TN: { comptes: ['82'] },
-    TO: { comptes: ['84', '86', '88'] }
+    // ──────── HAO ────────
+    TN: { comptes: ['82'] }, // Produits cessions immo
+    TO: { comptes: ['84', '86', '88'] } // Autres produits HAO
   }
 }
 
