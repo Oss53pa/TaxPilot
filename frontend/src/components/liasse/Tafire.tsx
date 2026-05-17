@@ -321,7 +321,13 @@ const Tafire: FC<TafireProps> = ({ modeEdition = false }) => {
         default: return item
       }
     }))
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // tafire.* / bal.* / varC / varD sont des helpers stables. On les omet
+    // intentionnellement des deps pour éviter une re-population à chaque
+    // micro-changement de balance (tafire est l'agrégat dérivé, c'est la
+    // seule dep qui doit déclencher la re-population des tableaux UI).
+    // Si tafire ne couvre pas un changement de balance qui devrait re-render,
+    // le hook useBalanceData en amont fera retourner un nouveau `tafire`.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tafire])
 
   const updateEmplois = (code: string, field: 'exerciceN' | 'exerciceN1', value: number) => {

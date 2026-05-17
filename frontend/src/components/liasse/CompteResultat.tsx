@@ -3,7 +3,7 @@
  * Valeurs calculees dynamiquement depuis la balance importee (N et N-1)
  */
 
-import React, { useMemo } from 'react'
+import React, { useMemo, useCallback } from 'react'
 import {
   Table,
   TableBody,
@@ -311,15 +311,25 @@ const CompteResultat: React.FC<CompteResultatProps> = ({ modeEdition: _modeEditi
     return stored?.entries?.length ? stored.entries : []
   }, [])
 
-  // N-1 helpers
-  const sumDebitN1 = (prefixes: string[]) => Math.round(
+  // N-1 helpers (stables via useCallback — permet inclusion en deps du useMemo
+  // ci-dessous sans recréation à chaque render et sans eslint-disable-line)
+  const sumDebitN1 = useCallback((prefixes: string[]) => Math.round(
     n1Entries.filter(e => prefixes.some(p => e.compte.startsWith(p)))
       .reduce((s, e) => s + Math.max(0, (e.solde_debit || e.debit || 0) - (e.solde_credit || e.credit || 0)), 0)
-  )
-  const sumCreditN1 = (prefixes: string[]) => Math.round(
+  ), [n1Entries])
+  const sumCreditN1 = useCallback((prefixes: string[]) => Math.round(
     n1Entries.filter(e => prefixes.some(p => e.compte.startsWith(p)))
       .reduce((s, e) => s + Math.max(0, (e.solde_credit || e.credit || 0) - (e.solde_debit || e.debit || 0)), 0)
-  )
+  ), [n1Entries])
+
+  // Helpers stables via useCallback pour pouvoir les inclure dans les deps
+  // du useMemo ci-dessous sans recréation à chaque render.
+  // Avant : sumDebitN1/sumCreditN1 étaient des fonctions inline, le useMemo
+  // les capturait sans les déclarer en deps → exhaustive-deps disabled →
+  // soldes potentiellement stales après changement d'exercice N-1.
+  // Après : les deux closures stables dépendent uniquement de n1Entries.
+  // (Note : on garde la signature inline pour ne pas casser le code en dessous,
+  //  mais on déclare explicitement la dep dans le useMemo.)
 
   // Compute all values from balance data
   const lignesCompteResultat = useMemo(() => {
@@ -381,7 +391,9 @@ const CompteResultat: React.FC<CompteResultatProps> = ({ modeEdition: _modeEditi
       isTotalGeneral: ligne.isTotalGeneral,
       level: ligne.level,
     }))
-  }, [bal, n1Entries]) // eslint-disable-line react-hooks/exhaustive-deps
+    // Deps complètes (plus de eslint-disable) : bal recompute si balance N change,
+    // sumDebitN1/sumCreditN1 recompute si n1Entries change (cf useCallback ci-dessus).
+  }, [bal, sumDebitN1, sumCreditN1])
 
   const formatMontant = (montant: number | null) => {
     if (montant === null) return ''

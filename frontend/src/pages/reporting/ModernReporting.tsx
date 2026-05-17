@@ -80,11 +80,14 @@ const ModernReporting = () => {
   const bal = useBalanceData()
 
   // Exercise year from imported balance metadata (reactive to exercise changes)
+  // Note : on dépend de bal.version (et non de bal entier) pour ne recalculer
+  // que sur changement réel de balance (import / switch exercice). bal est un
+  // objet recréé à chaque render par useBalanceData mais bal.version reste
+  // stable jusqu'au prochain import.
   const exerciceYear = useMemo(() => {
     const stored = getLatestBalance()
     return stored?.exercice || String(new Date().getFullYear())
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bal])
+  }, [bal.version])
 
   const donneesFinancieres = useMemo(() => {
     const totalActif = bal.d(['2', '3', '4', '5'])

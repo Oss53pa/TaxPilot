@@ -39,6 +39,12 @@ function getAccounts(entries: BalanceEntry[], prefixes: string[]): BalanceEntry[
 export interface BalanceData {
   entries: BalanceEntry[]
   usingImported: boolean
+  /**
+   * Counter incremented on chaque event (import balance / changement exercice / changement dossier).
+   * Utiliser comme primitive stable dans les deps de useMemo/useEffect des consumers,
+   * plutôt que dépendre de l'objet bal entier (recréé à chaque render).
+   */
+  version: number
   d: (prefixes: string[]) => number   // solde débiteur
   c: (prefixes: string[]) => number   // solde créditeur
   accounts: (prefixes: string[]) => BalanceEntry[]
@@ -72,6 +78,7 @@ export function useBalanceData(): BalanceData {
     return {
       entries,
       usingImported,
+      version,
       d: (prefixes: string[]) => sumDebit(entries, prefixes),
       c: (prefixes: string[]) => sumCredit(entries, prefixes),
       accounts: (prefixes: string[]) => getAccounts(entries, prefixes),
