@@ -133,6 +133,31 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     navigate('/dossiers')
   }
 
+  /**
+   * Bouton « Home » du sidebar : navigation contextuelle.
+   *
+   * Bug précédent : navigate('/dashboard') sans condition → en mode Cabinet
+   * sans dossier actif, le DossierGuard interceptait et renvoyait vers
+   * /dossiers, donnant l'impression que le bouton ne fonctionnait pas.
+   *
+   * Désormais on aiguille selon le contexte effectif :
+   *   - Cabinet sans dossier actif    → /dossiers (la « home » du cabinet)
+   *   - Cabinet avec dossier actif    → /dashboard du dossier
+   *   - Entreprise                    → /dashboard
+   *   - Non authentifié (cas limite) → / (Landing publique)
+   */
+  const handleHomeClick = () => {
+    if (!user) {
+      navigate('/')
+      return
+    }
+    if (isCabinet && !activeDossierId) {
+      navigate('/dossiers')
+      return
+    }
+    navigate('/dashboard')
+  }
+
   // ── Menu items ──
   // Cabinet mode without active dossier: show cabinet-level menu
   // Cabinet mode with active dossier: show dossier-level menu (same as entreprise)
@@ -198,35 +223,42 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             Liass'Pilot
           </Typography>
         )}
-        {/* Le bouton « Home » du sidebar in-app ramène au tableau de bord
-            opérationnel (/dashboard), pas à la Landing publique. La Landing
-            reste accessible via /landing (lien public, hors logiciel). */}
-        {isCollapsed ? (
-          <Tooltip title="Tableau de bord" placement="right">
-            <IconButton
-              onClick={() => navigate('/dashboard')}
-              size="small"
-              sx={{
-                color: P.white,
-                '&:hover': { color: P.white, bgcolor: P.primary800 },
-              }}
-            >
-              <HomeIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-        ) : (
-          <IconButton
-            onClick={() => navigate('/dashboard')}
-            size="small"
-            sx={{
-              color: P.primary500,
-              '&:hover': { color: P.white, bgcolor: P.primary800 },
-            }}
-            title="Tableau de bord"
-          >
-            <HomeIcon fontSize="small" />
-          </IconButton>
-        )}
+        {/* Bouton Home contextuel : voir handleHomeClick().
+            Tooltip dynamique selon mode + état dossier. */}
+        {(() => {
+          const homeLabel = isCabinet && !activeDossierId
+            ? 'Mes dossiers'
+            : 'Tableau de bord'
+          return isCollapsed ? (
+            <Tooltip title={homeLabel} placement="right">
+              <IconButton
+                onClick={handleHomeClick}
+                size="small"
+                sx={{
+                  color: P.white,
+                  '&:hover': { color: P.white, bgcolor: P.primary800 },
+                }}
+                aria-label={homeLabel}
+              >
+                <HomeIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          ) : (
+            <Tooltip title={homeLabel} placement="bottom">
+              <IconButton
+                onClick={handleHomeClick}
+                size="small"
+                sx={{
+                  color: P.primary500,
+                  '&:hover': { color: P.white, bgcolor: P.primary800 },
+                }}
+                aria-label={homeLabel}
+              >
+                <HomeIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          )
+        })()}
       </Toolbar>
 
       {/* ── Dossier context (cabinet mode with active dossier, hidden on /dossiers) ── */}
