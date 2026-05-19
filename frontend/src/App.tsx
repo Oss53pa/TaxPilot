@@ -19,7 +19,10 @@ const PageLoader = () => (
 )
 
 // Pages
-const ModernDashboard = React.lazy(() => import('@/pages/dashboard/ModernDashboard'))
+// /dashboard = vrai tableau de bord opérationnel in-app (AppDashboard).
+// La page d'accueil publique reste /landing (Landing.tsx) — distincte du
+// dashboard. Pas de page « Accueil » dans le logiciel : une fois loggé,
+// l'utilisateur arrive directement sur son dashboard métier.
 const AppDashboard = React.lazy(() => import('@/pages/dashboard/AppDashboard'))
 const Parametrage = React.lazy(() => import('@/pages/Parametrage'))
 const ModernImportBalance = React.lazy(() => import('@/pages/import/ModernImportBalance'))
@@ -54,6 +57,7 @@ const OrganizationWrapper = React.lazy(() => import('@/pages/organization/Organi
 const OrganizationMembersPage = React.lazy(() => import('@/pages/organization/OrganizationMembersPage'))
 const SubscriptionPage = React.lazy(() => import('@/pages/organization/SubscriptionPage'))
 const InvitationsPage = React.lazy(() => import('@/pages/organization/InvitationsPage'))
+const AcceptInvitationPage = React.lazy(() => import('@/pages/organization/AcceptInvitationPage'))
 const TeamSettingsPage = React.lazy(() => import('@/pages/settings/TeamSettingsPage'))
 
 // Legal pages
@@ -188,11 +192,20 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/auth" element={<ExternalAuthPage />} />
 
+          {/* Lien d'accès à l'application entreprise via invitation collaborateur.
+              Route publique — la page elle-même affiche le flux signup+password
+              ou auto-accept si l'utilisateur est déjà loggé. */}
+          <Route path="/invitations/accept" element={<AcceptInvitationPage />} />
+          <Route path="/invite/:token" element={<AcceptInvitationPage />} />
+
           {/* P1-1: First launch → mode selection if no mode chosen yet */}
           <Route path="/mode-selection" element={<AuthGuard><ModeSelection /></AuthGuard>} />
           <Route path="/onboarding" element={<AuthGuard><OnboardingWizard /></AuthGuard>} />
 
-          {/* "/" — Landing for visitors, redirect for authenticated users */}
+          {/* "/" — Page d'accueil publique pour les visiteurs (Landing),
+              redirection vers le dashboard métier pour les utilisateurs
+              authentifiés. Pas de page intermédiaire « Accueil » dans
+              le logiciel — accueil = hors logiciel, dashboard = dans logiciel. */}
           <Route path="/" element={
             !isAuthenticated ? <Landing /> :
             !userMode ? <Navigate to="/mode-selection" replace /> :
@@ -200,13 +213,9 @@ function App() {
             userMode === 'cabinet' ? <Navigate to="/dossiers" replace /> :
             <Navigate to="/dashboard" replace />
           } />
-          <Route path="/accueil" element={
-            <AuthGuard>
-              {!userMode ? <Navigate to="/mode-selection" replace /> :
-              !onboardingCompleted ? <Navigate to="/onboarding" replace /> :
-              <ModernDashboard />}
-            </AuthGuard>
-          } />
+          {/* Compat : anciens liens /accueil → renvoie vers / (qui redirige
+              vers Landing public ou /dashboard selon authentification). */}
+          <Route path="/accueil" element={<Navigate to="/" replace />} />
 
           {/* Pages accessibles sans dossier actif (cabinet: liste dossiers, paramètres) */}
           <Route path="/dossiers" element={<S><DossiersPage /></S>} />
@@ -229,11 +238,10 @@ function App() {
           <Route path="/settings/billing" element={<S><AdminPlaceholder title="Facturation" description="Consultez vos factures, votre méthode de paiement et téléchargez vos justificatifs depuis Atlas Studio." icon="subscription" /></S>} />
 
           {/* Pages métier — nécessitent un dossier actif en mode cabinet */}
-          {/* /dashboard = Cockpit Liass'Pilot (KPI cards + sparklines + insight PROPH3T).
-              AppDashboard ancien grayscale conservé sous /dashboard-legacy le temps
-              de valider la transition (retirable en v1.x). */}
-          <Route path="/dashboard" element={<DS><ModernDashboard /></DS>} />
-          <Route path="/dashboard-legacy" element={<DS><AppDashboard /></DS>} />
+          {/* /dashboard = AppDashboard : tableau de bord opérationnel in-app
+              (KPI, dossiers, balances, contrôles). C'est LA page de travail
+              une fois loggé — distincte de la Landing publique (/, /landing). */}
+          <Route path="/dashboard" element={<DS><AppDashboard /></DS>} />
           <Route path="/parametrage/*" element={<DS><Parametrage /></DS>} />
           <Route path="/import-balance" element={<DS><ModernImportBalance /></DS>} />
           <Route path="/import-history" element={<DS><ImportHistoryPage /></DS>} />

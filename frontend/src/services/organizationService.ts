@@ -655,6 +655,33 @@ class OrganizationService {
   }
 
   /**
+   * Récupérer une invitation par son token (lookup public sans auth).
+   * Utilisé par AcceptInvitationPage pour afficher org + rôle avant signup.
+   *
+   * Endpoint backend : GET /api/v1/invitations/lookup/?token=<token>
+   * (le RPC Supabase associé doit être SECURITY DEFINER + sans accès aux
+   * autres champs sensibles que email/organization/role/expires_at).
+   */
+  async getInvitationByToken(token: string): Promise<Invitation> {
+    logger.debug('Looking up invitation by token...')
+    return apiClient.get<Invitation>('/api/v1/invitations/lookup/', { token })
+  }
+
+  /**
+   * Construit l'URL d'acceptation d'invitation à envoyer par email.
+   * Inclut l'origine du déploiement courant pour fonctionner aussi bien
+   * en preview Vercel qu'en prod custom domain.
+   */
+  buildInvitationUrl(token: string): string {
+    const origin =
+      typeof window !== 'undefined' && window.location
+        ? window.location.origin
+        : ''
+    const encodedToken = encodeURIComponent(token)
+    return `${origin}/invitations/accept?token=${encodedToken}`
+  }
+
+  /**
    * Récupérer les invitations en attente
    */
   async getPendingInvitations(): Promise<Invitation[]> {

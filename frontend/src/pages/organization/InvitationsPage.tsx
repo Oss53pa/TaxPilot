@@ -23,10 +23,8 @@ import {
   Tab,
   Alert,
   CircularProgress,
-  // Dialog,
-  // DialogTitle,
-  // DialogContent,
-  // DialogActions,
+  Tooltip,
+  Snackbar,
 } from '@mui/material'
 import {
   Send as SendIcon,
@@ -34,6 +32,7 @@ import {
   Cancel as CancelIcon,
   Check as CheckIcon,
   Schedule as ScheduleIcon,
+  ContentCopy as CopyIcon,
 } from '@mui/icons-material'
 import organizationService, { Invitation } from '../../services/organizationService'
 import InviteMemberDialog from '../../components/organization/InviteMemberDialog'
@@ -55,6 +54,31 @@ const InvitationsPage: React.FC<InvitationsPageProps> = ({ organizationSlug }) =
   const [acceptingInvitation, setAcceptingInvitation] = useState<string | null>(null)
   const [cancellingInvitation, setCancellingInvitation] = useState<string | null>(null)
   const [resendingInvitation, setResendingInvitation] = useState<string | null>(null)
+  const [copiedToken, setCopiedToken] = useState<string | null>(null)
+
+  const handleCopyAccessLink = async (token: string) => {
+    const url = organizationService.buildInvitationUrl(token)
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(url)
+      } else {
+        // Fallback : input éphémère (browsers sans Clipboard API)
+        const ta = document.createElement('textarea')
+        ta.value = url
+        ta.style.position = 'fixed'
+        ta.style.opacity = '0'
+        document.body.appendChild(ta)
+        ta.select()
+        document.execCommand('copy')
+        document.body.removeChild(ta)
+      }
+      setCopiedToken(token)
+      setSuccess('Lien d\'accès copié — collez-le dans votre email')
+    } catch (err) {
+      logger.error('Error copying invitation URL:', err)
+      setError('Impossible de copier le lien — copiez-le manuellement depuis la barre d\'adresse')
+    }
+  }
 
   useEffect(() => {
     loadInvitations()
@@ -253,6 +277,15 @@ const InvitationsPage: React.FC<InvitationsPageProps> = ({ organizationSlug }) =
                         <TableCell align="right">
                           {invitation.status === 'PENDING' && (
                             <>
+                              <Tooltip title="Copier le lien d'accès à envoyer">
+                                <IconButton
+                                  size="small"
+                                  color={copiedToken === invitation.token ? 'success' : 'default'}
+                                  onClick={() => handleCopyAccessLink(invitation.token)}
+                                >
+                                  <CopyIcon fontSize="small" />
+                                </IconButton>
+                              </Tooltip>
                               <IconButton
                                 size="small"
                                 color="primary"
@@ -366,6 +399,15 @@ const InvitationsPage: React.FC<InvitationsPageProps> = ({ organizationSlug }) =
           setSuccess('Invitation envoyée avec succès!')
           loadInvitations()
         }}
+      />
+
+      {/* Toast de confirmation de copie du lien */}
+      <Snackbar
+        open={!!copiedToken}
+        autoHideDuration={2500}
+        onClose={() => setCopiedToken(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        message="Lien d'accès copié dans le presse-papier"
       />
     </Box>
   )

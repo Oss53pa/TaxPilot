@@ -66,6 +66,7 @@ import { HelpOutline as HelpOutlineIcon, Tour as TourIcon } from '@mui/icons-mat
 import GuidedTour from '../onboarding/GuidedTour'
 import { useGuidedTour } from '@/hooks/useGuidedTour'
 import { useTenantPlan } from '@/hooks/useTenantPlan'
+import InstallAppButton from '../pwa/InstallAppButton'
 
 const DRAWER_WIDTH = 270
 const DRAWER_WIDTH_COLLAPSED = 68
@@ -197,10 +198,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             Liass'Pilot
           </Typography>
         )}
+        {/* Le bouton « Home » du sidebar in-app ramène au tableau de bord
+            opérationnel (/dashboard), pas à la Landing publique. La Landing
+            reste accessible via /landing (lien public, hors logiciel). */}
         {isCollapsed ? (
-          <Tooltip title="Liass'Pilot — Accueil" placement="right">
+          <Tooltip title="Tableau de bord" placement="right">
             <IconButton
-              onClick={() => navigate('/accueil')}
+              onClick={() => navigate('/dashboard')}
               size="small"
               sx={{
                 color: P.white,
@@ -212,13 +216,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </Tooltip>
         ) : (
           <IconButton
-            onClick={() => navigate('/accueil')}
+            onClick={() => navigate('/dashboard')}
             size="small"
             sx={{
               color: P.primary500,
               '&:hover': { color: P.white, bgcolor: P.primary800 },
             }}
-            title="Page d'accueil"
+            title="Tableau de bord"
           >
             <HomeIcon fontSize="small" />
           </IconButton>
@@ -494,6 +498,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           >
             {appBarTitle}
           </Typography>
+
+          {/* Install PWA button \u2014 visible uniquement si l'app n'est pas d\u00e9j\u00e0
+              install\u00e9e et que le navigateur supporte beforeinstallprompt
+              (Chrome/Edge/Brave) ou est iOS Safari. Permet \u00e0 l'utilisateur
+              d'\u00e9pingler Liass'Pilot \u00e0 sa barre des t\u00e2ches / \u00e9cran d'accueil. */}
+          <Box sx={{ mr: 1, display: { xs: 'none', sm: 'inline-flex' } }}>
+            <InstallAppButton variant="outlined" size="small" />
+          </Box>
 
           <NotificationCenter />
 

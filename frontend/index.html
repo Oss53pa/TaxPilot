@@ -6,11 +6,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Liass'Pilot - Application de Génération et Édition de Liasse Fiscale SYSCOHADA/IFRS" />
     <title>Liass'Pilot - Solution Fiscale OHADA</title>
-    
+
+    <!-- ────────── PWA / Intégration poste de travail ──────────
+         Le manifest expose name, icônes, shortcuts (épinglage taskbar) et
+         le mode standalone. Combiné au service worker /sw.js, il rend
+         l'application installable comme une app native sur Windows, macOS,
+         Linux, Android et iOS (ajout à l'écran d'accueil).
+         display=standalone : fenêtre dédiée sans chrome navigateur.
+    -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+
+    <!-- Theme color (barre de titre fenêtre installée) -->
+    <meta name="theme-color" content="#171717" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#171717" media="(prefers-color-scheme: dark)" />
+
+    <!-- iOS / Safari add-to-homescreen -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Liass'Pilot" />
+    <link rel="apple-touch-icon" href="/fiscasync-icon.svg" />
+
+    <!-- Windows tile (épinglage barre des tâches Edge / Start menu) -->
+    <meta name="application-name" content="Liass'Pilot" />
+    <meta name="msapplication-TileColor" content="#171717" />
+    <meta name="msapplication-tooltip" content="Liass'Pilot — Solution Fiscale OHADA" />
+
+    <!-- Open Graph / Social share (lien d'invitation partagé sur Slack, WhatsApp…) -->
+    <meta property="og:title" content="Liass'Pilot — Solution Fiscale OHADA" />
+    <meta property="og:description" content="Production, contrôle et télédéclaration de la liasse fiscale SYSCOHADA." />
+    <meta property="og:image" content="/screenshots/dashboard.png" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="fr_FR" />
+
     <!-- Preconnect to optimize font loading -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    
+
     <!--
       Polices premium :
       - Dosis (primary UI, Nordic Slate) — 6 fichiers consommateurs
@@ -33,5 +64,21 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+
+    <!-- Service worker : enregistré au load() pour ne pas bloquer le first paint.
+         L'échec est silencieux (Safari incognito, iframe sandboxed…) pour ne
+         jamais casser l'app si l'environnement refuse les SW. -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker
+            .register('/sw.js', { scope: '/' })
+            .catch(function (err) {
+              // Log local uniquement, pas critique
+              console.warn('[PWA] Service worker registration failed:', err);
+            });
+        });
+      }
+    </script>
   </body>
 </html>

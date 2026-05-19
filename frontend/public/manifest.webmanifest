@@ -1,0 +1,78 @@
+{
+  "name": "Liass'Pilot — Solution Fiscale OHADA",
+  "short_name": "Liass'Pilot",
+  "description": "Production, contrôle et télédéclaration de la liasse fiscale SYSCOHADA/OHADA.",
+  "id": "/?source=pwa",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "browser"],
+  "orientation": "any",
+  "theme_color": "#171717",
+  "background_color": "#fafafa",
+  "lang": "fr",
+  "dir": "ltr",
+  "categories": ["business", "finance", "productivity"],
+  "icons": [
+    {
+      "src": "/fiscasync-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Tableau de bord",
+      "short_name": "Dashboard",
+      "description": "Cockpit Liass'Pilot",
+      "url": "/dashboard?source=pwa_shortcut",
+      "icons": [{ "src": "/fiscasync-icon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "Importer une balance",
+      "short_name": "Import",
+      "description": "Importer une balance comptable SYSCOHADA",
+      "url": "/import-balance?source=pwa_shortcut",
+      "icons": [{ "src": "/fiscasync-icon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "Liasse fiscale",
+      "short_name": "Liasse",
+      "description": "Produire la liasse fiscale",
+      "url": "/liasse-fiscale?source=pwa_shortcut",
+      "icons": [{ "src": "/fiscasync-icon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "Audit & contrôles",
+      "short_name": "Audit",
+      "description": "Lancer un audit qualité",
+      "url": "/audit?source=pwa_shortcut",
+      "icons": [{ "src": "/fiscasync-icon.svg", "sizes": "any" }]
+    }
+  ],
+  "prefer_related_applications": false,
+  "screenshots": [
+    {
+      "src": "/screenshots/dashboard.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Tableau de bord Liass'Pilot"
+    },
+    {
+      "src": "/screenshots/balance.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Import de balance SYSCOHADA"
+    },
+    {
+      "src": "/screenshots/audit.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Contrôles d'audit"
+    }
+  ]
+}
