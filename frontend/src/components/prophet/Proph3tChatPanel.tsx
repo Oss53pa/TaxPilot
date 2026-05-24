@@ -8,6 +8,8 @@ import Proph3tMessageBubble, { TypingIndicator } from './Proph3tMessageBubble'
 import { processQuery } from './Proph3tEngine'
 import { getLatestBalance, getLatestBalanceN1 } from '@/services/balanceStorageService'
 import { getEntreprise } from '@/services/entrepriseStorageService'
+import { askProph3t, isProph3tCoreConfigured } from '@/lib/proph3t'
+import { logger } from '@/utils/logger'
 import type { Balance } from '@/types'
 import type { ChatMessage, ConversationContext } from './types'
 import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
@@ -137,8 +139,8 @@ export default function Proph3tChatPanel({ open, onClose }: Props) {
       entreprise: ent ? {
         nom: ent.raison_sociale,
         regime_imposition: ent.regime_imposition,
-        capital: (ent as any).capital_social,
-        effectifs: (ent as any).effectifs,
+        capital: ent.capital_social,
+        effectifs: ent.effectif_permanent ?? ent.effectif_fin,
         secteur_activite: ent.secteur_activite,
       } : undefined,
     }
@@ -224,12 +226,39 @@ export default function Proph3tChatPanel({ open, onClose }: Props) {
       const { response, newContext } = await processQuery(trimmed, contextRef.current)
       contextRef.current = newContext
 
+      let text = response.text
+      let content = response.content
+      const suggestions = response.suggestions
+
+      // ── Fallback Atlas « Proph3t core » (Mode B, hébergé) ──────────────
+      // Le moteur local est déterministe et rule-based : sur une question
+      // qu'il ne reconnaît pas (intent UNKNOWN), on délègue au core hébergé.
+      // sensitivity:'confidential' → le core route vers Ollama/Claude
+      // uniquement (jamais un tier gratuit). Si le core est indisponible ou
+      // refuse, on conserve la réponse locale : aucune fuite, aucune régression.
+      if (newContext.lastIntent === 'UNKNOWN' && isProph3tCoreConfigured) {
+        try {
+          const ask = await askProph3t({
+            message: trimmed,
+            sensitivity: 'confidential',
+            societyId: getEntreprise()?.id,
+          })
+          if (ask.answer?.trim()) {
+            text = ask.answer + (ask.disclaimer ? `\n\n_${ask.disclaimer}_` : '')
+            text += '\n\n*— via Proph3t core*'
+            content = undefined // la réponse hébergée est en texte/markdown
+          }
+        } catch (err) {
+          logger.warn('[Proph3t core] délégation impossible — réponse locale conservée', err)
+        }
+      }
+
       const assistantMsg: ChatMessage = {
         id: `a-${Date.now()}`,
         role: 'assistant',
-        text: response.text,
-        content: response.content,
-        suggestions: response.suggestions,
+        text,
+        content,
+        suggestions,
         timestamp: Date.now(),
       }
       setMessages(prev => [...prev, assistantMsg])
