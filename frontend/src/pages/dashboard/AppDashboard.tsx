@@ -41,7 +41,7 @@ import {
   SwapHoriz,
 } from '@mui/icons-material'
 import { useNavigate } from 'react-router-dom'
-import { fiscasyncPalette } from '@/theme/fiscasyncTheme'
+import { fiscasyncPalette, gradients, shadows } from '@/theme/fiscasyncTheme'
 import { useEntrepriseData } from '@/hooks/useEntrepriseData'
 import { useBalanceData } from '@/hooks/useBalanceData'
 import { getWorkflowState } from '@/services/workflowStateService'
@@ -70,7 +70,24 @@ const C = {
   error:    fiscasyncPalette.error,
   info:     fiscasyncPalette.info,
   critical: fiscasyncPalette.critical,
+  teal:        fiscasyncPalette.teal,
+  tealLight:   fiscasyncPalette.tealLight,
+  tealBg:      fiscasyncPalette.tealBg,
+  tealBgStrong: fiscasyncPalette.tealBgStrong,
+  successBg:   fiscasyncPalette.successBg,
+  warningBg:   fiscasyncPalette.warningBg,
+  errorBg:     fiscasyncPalette.errorBg,
+  infoBg:      fiscasyncPalette.infoBg,
 }
+
+// ─── Accents sémantiques pour les KPI (icône teintée, valeur en charcoal) ──
+const KPI_ACCENTS = {
+  teal:    { bg: fiscasyncPalette.tealBg,    fg: fiscasyncPalette.teal,    ring: 'rgba(15,118,110,0.18)' },
+  success: { bg: fiscasyncPalette.successBg, fg: fiscasyncPalette.success, ring: 'rgba(21,128,61,0.16)' },
+  warning: { bg: fiscasyncPalette.warningBg, fg: fiscasyncPalette.warning, ring: 'rgba(180,83,9,0.16)' },
+  info:    { bg: fiscasyncPalette.infoBg,    fg: fiscasyncPalette.info,    ring: 'rgba(3,105,161,0.16)' },
+} as const
+type KpiAccent = keyof typeof KPI_ACCENTS
 
 // ─── Types ───────────────────────────────────────────────────────────
 interface KPI {
@@ -80,6 +97,7 @@ interface KPI {
   trend: number
   trendLabel: string
   icon: React.ReactNode
+  accent: KpiAccent
 }
 
 interface Deadline {
@@ -158,6 +176,7 @@ const AppDashboard: React.FC = () => {
       trend: 0,
       trendLabel: '',
       icon: <Assignment sx={{ fontSize: 20 }} />,
+      accent: 'teal',
     },
     {
       label: 'Score Conformite',
@@ -166,6 +185,7 @@ const AppDashboard: React.FC = () => {
       trend: 0,
       trendLabel: '',
       icon: <Security sx={{ fontSize: 20 }} />,
+      accent: 'success',
     },
     {
       label: 'Bloquants',
@@ -174,6 +194,7 @@ const AppDashboard: React.FC = () => {
       trend: 0,
       trendLabel: '',
       icon: <WarningIcon sx={{ fontSize: 20 }} />,
+      accent: 'warning',
     },
     {
       label: 'Comptes Balance',
@@ -182,6 +203,7 @@ const AppDashboard: React.FC = () => {
       trend: 0,
       trendLabel: '',
       icon: <AccountBalance sx={{ fontSize: 20 }} />,
+      accent: 'info',
     },
   ]
 
@@ -194,6 +216,19 @@ const AppDashboard: React.FC = () => {
     { label: 'Liasse Fiscale', status: ws?.generationDone ? 'active' : 'pending', path: '/liasse-fiscale' },
     { label: 'Teledeclaration', status: ws?.teledeclarationStatus === 'submitted' || ws?.teledeclarationStatus === 'accepted' ? 'done' : ws?.generationDone ? 'active' : 'pending', path: '/teledeclaration' },
   ]
+
+  // ── Cohérence du fil d'avancement ──
+  // Un jalon "done" implique forcément que les précédents le sont (on ne peut
+  // pas importer/contrôler sans avoir configuré l'exercice). Sans ça, on voyait
+  // « Configuration » en attente alors qu'« Import » et « Contrôle » étaient
+  // faits — visuellement faux. On force donc la monotonie de gauche à droite.
+  {
+    let lastDoneIdx = -1
+    workflow.forEach((s, i) => { if (s.status === 'done') lastDoneIdx = i })
+    for (let i = 0; i < lastDoneIdx; i++) {
+      if (workflow[i].status !== 'done') workflow[i].status = 'done'
+    }
+  }
 
   // ── Deadlines (fiscal calendar with dynamic daysLeft) ──
   const deadlines: Deadline[] = useMemo(() => {
@@ -370,54 +405,81 @@ const AppDashboard: React.FC = () => {
   return (
     <Box sx={{ maxWidth: 1400, mx: 'auto' }}>
       {/* ── Header ── */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3 }}>
-        <Box>
-          <Typography variant="h4" sx={{ fontWeight: 700, color: C.text, mb: 0.5 }}>
-            Tableau de bord
-          </Typography>
-          <Stack direction="row" spacing={1.5} alignItems="center">
-            <Typography variant="body2" sx={{ color: C.secondary }}>
-              {ent.nom || '\u2014'}
+      <Box
+        sx={{
+          position: 'relative',
+          overflow: 'hidden',
+          borderRadius: 5,
+          mb: 3,
+          p: { xs: 2.5, md: 3.5 },
+          background: gradients.brandPanel,
+          color: C.white,
+          boxShadow: shadows.md,
+        }}
+      >
+        <Box sx={{ position: 'absolute', top: -90, right: -50, width: 340, height: 340, borderRadius: '50%', background: 'radial-gradient(circle, rgba(94,234,212,0.20) 0%, rgba(94,234,212,0) 70%)', pointerEvents: 'none' }} />
+        <Box sx={{ position: 'absolute', inset: 0, opacity: 0.5, pointerEvents: 'none', backgroundImage: 'linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px)', backgroundSize: '40px 40px', maskImage: 'radial-gradient(120% 100% at 80% 0%, #000 20%, transparent 75%)', WebkitMaskImage: 'radial-gradient(120% 100% at 80% 0%, #000 20%, transparent 75%)' }} />
+
+        <Box sx={{ position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 2, flexWrap: 'wrap' }}>
+          <Box sx={{ minWidth: 0 }}>
+            <Typography sx={{ fontSize: '0.78rem', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: C.tealLight }}>
+              {new Date().getHours() < 18 ? 'Bonjour' : 'Bonsoir'} {'\u00b7'} {new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
             </Typography>
-            <Chip
-              label={ent.exerciceFin ? `Exercice ${ent.exerciceFin.substring(0, 4)}` : ent.exerciceDebut ? `Exercice ${ent.exerciceDebut.substring(0, 4)}` : 'Exercice \u2014'}
-              size="small"
-              sx={{ height: 22, fontSize: '0.75rem', fontWeight: 600, bgcolor: C.card, color: C.label, border: `1px solid ${C.border}` }}
-            />
-            {ent.regimeImposition && (
+            <Typography variant="h4" sx={{ fontWeight: 700, color: C.white, letterSpacing: '-0.015em', mt: 0.75, mb: 1.5, lineHeight: 1.15 }}>
+              {ent.nom || 'Tableau de bord'}
+            </Typography>
+            <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
               <Chip
-                label={ent.regimeImposition}
+                label={ent.exerciceFin ? `Exercice ${ent.exerciceFin.substring(0, 4)}` : ent.exerciceDebut ? `Exercice ${ent.exerciceDebut.substring(0, 4)}` : 'Exercice \u2014'}
                 size="small"
-                variant="outlined"
-                sx={{ height: 22, fontSize: '0.75rem', borderColor: C.border, color: C.secondary }}
+                sx={{ height: 24, fontSize: '0.75rem', fontWeight: 600, bgcolor: 'rgba(94,234,212,0.12)', color: C.tealLight, border: '1px solid rgba(94,234,212,0.25)' }}
               />
-            )}
+              {ent.regimeImposition && (
+                <Chip
+                  label={ent.regimeImposition}
+                  size="small"
+                  sx={{ height: 24, fontSize: '0.75rem', bgcolor: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.85)', border: '1px solid rgba(255,255,255,0.12)' }}
+                />
+              )}
+            </Stack>
+          </Box>
+          <Stack direction="row" spacing={1.25} sx={{ flexShrink: 0 }}>
+            <Tooltip title="Actualiser">
+              <IconButton
+                size="small"
+                onClick={() => {
+                  setLoading(true)
+                  // Force aussi le rechargement de la balance (le hook useBalanceData
+                  // se ré-évalue sur cet event) — corrige le cas "Dashboard vide"
+                  // alors que la balance vient d'être importée ailleurs.
+                  window.dispatchEvent(new CustomEvent('fiscasync:balance-imported'))
+                  setTimeout(loadData, 300)
+                }}
+                sx={{ color: C.white, bgcolor: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.14)', '&:hover': { bgcolor: 'rgba(255,255,255,0.16)' } }}
+              >
+                <Refresh fontSize="small" />
+              </IconButton>
+            </Tooltip>
+            <Button
+              variant="contained"
+              size="small"
+              startIcon={<Assignment />}
+              onClick={() => navigate('/liasse-fiscale')}
+              sx={{
+                bgcolor: C.white,
+                color: C.text,
+                textTransform: 'none',
+                fontWeight: 700,
+                borderRadius: 2.5,
+                px: 2,
+                boxShadow: 'none',
+                '&:hover': { bgcolor: C.white, color: C.teal, transform: 'translateY(-1px)', boxShadow: '0 8px 20px rgba(0,0,0,0.25)' },
+              }}
+            >
+              Ouvrir la Liasse
+            </Button>
           </Stack>
         </Box>
-        <Stack direction="row" spacing={1}>
-          <Tooltip title="Actualiser">
-            <IconButton size="small" onClick={() => { setLoading(true); setTimeout(loadData, 300) }} sx={{ bgcolor: C.surface, border: `1px solid ${C.border}` }}>
-              <Refresh fontSize="small" sx={{ color: C.secondary }} />
-            </IconButton>
-          </Tooltip>
-          <Button
-            variant="contained"
-            size="small"
-            startIcon={<Assignment />}
-            onClick={() => navigate('/liasse-fiscale')}
-            sx={{
-              bgcolor: C.text,
-              color: C.white,
-              textTransform: 'none',
-              fontWeight: 600,
-              borderRadius: 3,
-              boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
-              '&:hover': { bgcolor: C.hover, boxShadow: '0 4px 12px rgba(0,0,0,0.08)' },
-            }}
-          >
-            Ouvrir la Liasse
-          </Button>
-        </Stack>
       </Box>
 
       {/* ── Alert Banner ── */}
@@ -426,43 +488,61 @@ const AppDashboard: React.FC = () => {
           sx={{
             display: 'flex',
             alignItems: 'center',
-            gap: 1.5,
-            px: 2.5,
-            py: 1.5,
-            mb: 2.5,
+            gap: 2,
+            p: 2.5,
+            mb: 3,
             borderRadius: 4,
-            bgcolor: 'warning.50',
+            bgcolor: C.warningBg,
             border: '1px solid #fde68a',
           }}
         >
-          <WarningIcon sx={{ color: C.warning, fontSize: 20 }} />
-          <Typography variant="body2" sx={{ color: '#92400e', fontWeight: 500, flex: 1 }}>
-            Aucune balance importée — importez votre balance pour commencer
-          </Typography>
+          <Box sx={{ width: 40, height: 40, borderRadius: 2.5, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: C.white, color: C.warning, boxShadow: shadows.xs }}>
+            <CloudUpload sx={{ fontSize: 20 }} />
+          </Box>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography sx={{ fontWeight: 700, color: '#78350f', fontSize: '0.92rem', lineHeight: 1.3 }}>
+              Aucune balance importée
+            </Typography>
+            <Typography sx={{ color: '#92400e', fontSize: '0.82rem' }}>
+              Importez votre balance pour démarrer la production de la liasse fiscale.
+            </Typography>
+          </Box>
           <Button
+            variant="contained"
             size="small"
+            startIcon={<CloudUpload sx={{ fontSize: 16 }} />}
             onClick={() => navigate('/import-balance')}
-            sx={{ textTransform: 'none', color: '#92400e', fontWeight: 600, fontSize: '0.8rem' }}
+            sx={{ textTransform: 'none', fontWeight: 700, borderRadius: 2.5, background: gradients.teal, color: C.white, boxShadow: shadows.xs, '&:hover': { background: gradients.teal, boxShadow: shadows.tealHalo, transform: 'translateY(-1px)' } }}
           >
-            Importer
+            Importer la balance
           </Button>
         </Box>
       )}
 
       {/* ── KPI Cards ── */}
       <Grid container spacing={2.5} sx={{ mb: 3 }}>
-        {kpis.map((kpi) => (
+        {kpis.map((kpi) => {
+          const a = KPI_ACCENTS[kpi.accent]
+          return (
           <Grid item xs={12} sm={6} md={3} key={kpi.label}>
             <Card
               elevation={0}
               sx={{
+                position: 'relative',
+                overflow: 'hidden',
                 borderRadius: 4,
                 border: `1px solid ${C.border}`,
                 bgcolor: C.surface,
                 height: '100%',
-                boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
-                transition: 'box-shadow 0.2s',
-                '&:hover': { boxShadow: '0 4px 12px rgba(0,0,0,0.08)' },
+                boxShadow: shadows.sm,
+                transition: 'box-shadow 0.2s, transform 0.2s, border-color 0.2s',
+                '&:hover': { boxShadow: shadows.md, transform: 'translateY(-2px)', borderColor: C.subtle },
+                // Liseré d'accent supérieur révélé au survol
+                '&::before': {
+                  content: '""', position: 'absolute', top: 0, left: 0, right: 0, height: 3,
+                  background: a.fg, opacity: 0, transition: 'opacity 0.2s',
+                },
+                '&:hover::before': { opacity: 1 },
               }}
             >
               <CardContent sx={{ p: 2.5, '&:last-child': { pb: 2.5 } }}>
@@ -470,11 +550,18 @@ const AppDashboard: React.FC = () => {
                   <Typography variant="body2" sx={{ color: C.secondary, fontWeight: 500, fontSize: '0.8rem' }}>
                     {kpi.label}
                   </Typography>
-                  <Avatar sx={{ width: 36, height: 36, bgcolor: C.card, color: C.label }}>
+                  <Box
+                    sx={{
+                      width: 40, height: 40, borderRadius: 2.5, flexShrink: 0,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      bgcolor: a.bg, color: a.fg,
+                      boxShadow: `inset 0 0 0 1px ${a.ring}`,
+                    }}
+                  >
                     {kpi.icon}
-                  </Avatar>
+                  </Box>
                 </Stack>
-                <Typography variant="h4" sx={{ fontWeight: 700, color: C.text, mb: 0.5, lineHeight: 1.1 }}>
+                <Typography className="tnum" variant="h4" sx={{ fontWeight: 700, color: C.text, mb: 0.5, lineHeight: 1.1 }}>
                   {kpi.value}
                 </Typography>
                 <Typography variant="caption" sx={{ color: C.placeholder, display: 'block', mb: 1 }}>
@@ -498,14 +585,15 @@ const AppDashboard: React.FC = () => {
               </CardContent>
             </Card>
           </Grid>
-        ))}
+          )
+        })}
       </Grid>
 
       {/* ── Workflow + Échéancier ── */}
       <Grid container spacing={2.5} sx={{ mb: 3 }}>
         {/* Workflow Progress */}
         <Grid item xs={12} md={8}>
-          <Card elevation={0} sx={{ borderRadius: 4, border: `1px solid ${C.border}`, bgcolor: C.surface, height: '100%', boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
+          <Card elevation={0} sx={{ borderRadius: 4, border: `1px solid ${C.border}`, bgcolor: C.surface, height: '100%', boxShadow: shadows.sm }}>
             <CardContent sx={{ p: 2.5 }}>
               <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2.5 }}>
                 <Box>
@@ -519,7 +607,7 @@ const AppDashboard: React.FC = () => {
                 <Chip
                   label={`${workflow.filter(s => s.status === 'done').length}/${workflow.length} étapes`}
                   size="small"
-                  sx={{ bgcolor: 'warning.50', color: '#92400e', fontWeight: 600, fontSize: '0.75rem', border: '1px solid #fde68a' }}
+                  sx={{ bgcolor: C.tealBg, color: C.teal, fontWeight: 700, fontSize: '0.75rem', border: `1px solid ${C.tealBgStrong}` }}
                 />
               </Stack>
 
@@ -533,7 +621,7 @@ const AppDashboard: React.FC = () => {
                   bgcolor: C.border,
                   '& .MuiLinearProgress-bar': {
                     borderRadius: 3,
-                    bgcolor: C.text,
+                    background: gradients.teal,
                   },
                 }}
               />
@@ -558,7 +646,7 @@ const AppDashboard: React.FC = () => {
                       <Box
                         sx={{
                           position: 'absolute', top: 16, left: 0, right: '50%', height: 2,
-                          bgcolor: step.status === 'done' || step.status === 'active' ? C.text : C.border,
+                          bgcolor: step.status === 'done' || step.status === 'active' ? C.teal : C.border,
                         }}
                       />
                     )}
@@ -566,7 +654,7 @@ const AppDashboard: React.FC = () => {
                       <Box
                         sx={{
                           position: 'absolute', top: 16, left: '50%', right: 0, height: 2,
-                          bgcolor: step.status === 'done' ? C.text : C.border,
+                          bgcolor: step.status === 'done' ? C.teal : C.border,
                         }}
                       />
                     )}
@@ -576,9 +664,10 @@ const AppDashboard: React.FC = () => {
                       sx={{
                         width: 32, height: 32, borderRadius: '50%',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        mb: 1, zIndex: 1, transition: 'transform 0.2s',
-                        bgcolor: step.status === 'done' ? C.text : step.status === 'active' ? C.warning : C.border,
+                        mb: 1, zIndex: 1, transition: 'transform 0.2s, box-shadow 0.2s',
+                        bgcolor: step.status === 'done' ? C.teal : step.status === 'active' ? C.warning : C.border,
                         color: step.status === 'pending' ? C.secondary : C.white,
+                        boxShadow: step.status === 'active' ? `0 0 0 4px ${C.warningBg}` : step.status === 'done' ? `0 0 0 4px ${C.tealBg}` : 'none',
                       }}
                     >
                       {step.status === 'done' ? (
@@ -612,7 +701,7 @@ const AppDashboard: React.FC = () => {
 
         {/* Échéancier fiscal */}
         <Grid item xs={12} md={4}>
-          <Card elevation={0} sx={{ borderRadius: 4, border: `1px solid ${C.border}`, bgcolor: C.surface, height: '100%', boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
+          <Card elevation={0} sx={{ borderRadius: 4, border: `1px solid ${C.border}`, bgcolor: C.surface, height: '100%', boxShadow: shadows.sm }}>
             <CardContent sx={{ p: 2.5 }}>
               <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
                 <Typography variant="h6" sx={{ fontWeight: 700, color: C.text }}>
@@ -671,7 +760,7 @@ const AppDashboard: React.FC = () => {
       <Grid container spacing={2.5} sx={{ mb: 3 }}>
         {/* Balance Summary */}
         <Grid item xs={12} md={5}>
-          <Card elevation={0} sx={{ borderRadius: 4, border: `1px solid ${C.border}`, bgcolor: C.surface, height: '100%', boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
+          <Card elevation={0} sx={{ borderRadius: 4, border: `1px solid ${C.border}`, bgcolor: C.surface, height: '100%', boxShadow: shadows.sm }}>
             <CardContent sx={{ p: 2.5 }}>
               <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2.5 }}>
                 <Typography variant="h6" sx={{ fontWeight: 700, color: C.text }}>
@@ -753,7 +842,7 @@ const AppDashboard: React.FC = () => {
 
         {/* Recent Activity */}
         <Grid item xs={12} md={7}>
-          <Card elevation={0} sx={{ borderRadius: 4, border: `1px solid ${C.border}`, bgcolor: C.surface, height: '100%', boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
+          <Card elevation={0} sx={{ borderRadius: 4, border: `1px solid ${C.border}`, bgcolor: C.surface, height: '100%', boxShadow: shadows.sm }}>
             <CardContent sx={{ p: 2.5 }}>
               <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
                 <Typography variant="h6" sx={{ fontWeight: 700, color: C.text }}>
@@ -808,7 +897,7 @@ const AppDashboard: React.FC = () => {
       </Grid>
 
       {/* ── Quick Access ── */}
-      <Card elevation={0} sx={{ borderRadius: 4, border: `1px solid ${C.border}`, bgcolor: C.surface, boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
+      <Card elevation={0} sx={{ borderRadius: 4, border: `1px solid ${C.border}`, bgcolor: C.surface, boxShadow: shadows.sm }}>
         <CardContent sx={{ p: 2.5 }}>
           <Typography variant="h6" sx={{ fontWeight: 700, color: C.text, mb: 2 }}>
             Accès rapide
@@ -830,15 +919,18 @@ const AppDashboard: React.FC = () => {
                   sx={{
                     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.75,
                     p: 1.5, borderRadius: 3, cursor: 'pointer', transition: 'all 0.2s',
-                    '&:hover': { bgcolor: C.card, transform: 'translateY(-2px)', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' },
+                    '&:hover': { bgcolor: C.tealBg, transform: 'translateY(-2px)', boxShadow: shadows.md },
+                    '&:hover .qa-avatar': { bgcolor: C.teal, color: C.white, borderColor: C.teal },
+                    '&:hover .qa-label': { color: C.teal },
                   }}
                 >
-                  <Avatar sx={{ width: 40, height: 40, bgcolor: C.card, color: C.label, border: `1px solid ${C.border}` }}>
+                  <Avatar className="qa-avatar" sx={{ width: 40, height: 40, bgcolor: C.card, color: C.label, border: `1px solid ${C.border}`, transition: 'all 0.2s' }}>
                     {m.icon}
                   </Avatar>
                   <Typography
+                    className="qa-label"
                     variant="caption"
-                    sx={{ fontWeight: 500, fontSize: '0.7rem', textAlign: 'center', lineHeight: 1.2, color: C.label }}
+                    sx={{ fontWeight: 500, fontSize: '0.7rem', textAlign: 'center', lineHeight: 1.2, color: C.label, transition: 'color 0.2s' }}
                   >
                     {m.label}
                   </Typography>

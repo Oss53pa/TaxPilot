@@ -1,12 +1,16 @@
 /**
  * LoginPage.tsx — Page de connexion Liass'Pilot (Nordic Slate)
+ *
+ * Layout vitrine en deux volets :
+ *  - Volet de marque (gauche, md+) : dégradé charcoal→teal, wordmark Grand Hotel,
+ *    promesse produit + preuves chiffrées, halos décoratifs.
+ *  - Volet formulaire (droite) : connexion épurée, accent teal, focus rings.
+ * Sur mobile, le volet de marque se replie en en-tête compact.
  */
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Box,
-  Card,
-  CardContent,
   TextField,
   Button,
   Typography,
@@ -14,11 +18,19 @@ import {
   Link,
   CircularProgress,
 } from '@mui/material'
+import { CheckRounded, AutoAwesome } from '@mui/icons-material'
 import { useAuth } from '@/hooks/useAuth'
-import { fiscasyncPalette as P } from '@/theme/fiscasyncTheme'
+import { fiscasyncPalette as P, gradients, shadows } from '@/theme/fiscasyncTheme'
 
 const FONT_BRAND = '"Grand Hotel", cursive'
 const FONT_BODY = '"Dosis", "Inter", "Exo 2", sans-serif'
+
+const PROOFS = [
+  'Liasse SYSCOHADA complète en quelques minutes',
+  '169 contrôles de cohérence automatiques',
+  'Export Excel conforme DGI — 84 onglets',
+  'Pensé pour les 17 pays de l’espace OHADA',
+]
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate()
@@ -40,63 +52,168 @@ const LoginPage: React.FC = () => {
     }
   }
 
+  const fieldSx = {
+    mb: 2.5,
+    '& .MuiOutlinedInput-root': {
+      borderRadius: 2.5,
+      bgcolor: P.white,
+      '& fieldset': { borderColor: P.primary200 },
+      '&:hover fieldset': { borderColor: P.primary300 },
+      '&.Mui-focused fieldset': { borderColor: P.teal, borderWidth: 1.5 },
+    },
+    '& .MuiInputLabel-root.Mui-focused': { color: P.teal },
+  }
+
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        bgcolor: P.primary50,
-        fontFamily: FONT_BODY,
-        p: 2,
-      }}
-    >
-      <Card
+    <Box sx={{ minHeight: '100vh', display: 'flex', fontFamily: FONT_BODY }}>
+      {/* ── Volet de marque (gauche) — md+ ── */}
+      <Box
         sx={{
-          maxWidth: 440,
-          width: '100%',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.06)',
-          border: `1px solid ${P.primary200}`,
-          borderRadius: 3,
-          bgcolor: '#ffffff',
+          display: { xs: 'none', md: 'flex' },
+          flex: '1 1 52%',
+          position: 'relative',
+          overflow: 'hidden',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          background: gradients.brandPanel,
+          color: P.white,
+          px: 7,
+          py: 6,
         }}
       >
-        <CardContent sx={{ p: { xs: 4, sm: 5 } }}>
-          {/* Logo / Brand */}
-          <Box sx={{ textAlign: 'center', mb: 4 }}>
-            <Typography
-              sx={{
-                fontFamily: FONT_BRAND,
-                fontSize: '2.4rem',
-                color: P.primary900,
-                lineHeight: 1,
-                mb: 0.75,
-              }}
-            >
-              Liass'Pilot
-            </Typography>
-            <Typography
-              sx={{
-                fontFamily: FONT_BODY,
-                fontSize: '0.85rem',
-                color: P.primary500,
-                fontWeight: 500,
-                letterSpacing: '0.02em',
-              }}
-            >
+        {/* Halos décoratifs */}
+        <Box
+          sx={{
+            position: 'absolute', top: '-12%', right: '-8%',
+            width: 460, height: 460, borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(94,234,212,0.16) 0%, rgba(94,234,212,0) 70%)',
+            pointerEvents: 'none',
+          }}
+        />
+        <Box
+          sx={{
+            position: 'absolute', bottom: '-18%', left: '-10%',
+            width: 520, height: 520, borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(15,118,110,0.28) 0%, rgba(15,118,110,0) 70%)',
+            pointerEvents: 'none',
+          }}
+        />
+        {/* Grille fine */}
+        <Box
+          sx={{
+            position: 'absolute', inset: 0, opacity: 0.5, pointerEvents: 'none',
+            backgroundImage:
+              'linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px)',
+            backgroundSize: '44px 44px',
+            maskImage: 'radial-gradient(120% 100% at 30% 20%, #000 30%, transparent 80%)',
+            WebkitMaskImage: 'radial-gradient(120% 100% at 30% 20%, #000 30%, transparent 80%)',
+          }}
+        />
+
+        {/* Haut : wordmark */}
+        <Box sx={{ position: 'relative', zIndex: 1 }}>
+          <Typography sx={{ fontFamily: FONT_BRAND, fontSize: '2.6rem', lineHeight: 1, color: P.white }}>
+            Liass'Pilot
+          </Typography>
+          <Box
+            sx={{
+              display: 'inline-flex', alignItems: 'center', gap: 0.7, mt: 1.5,
+              px: 1.5, py: 0.5, borderRadius: 999,
+              bgcolor: 'rgba(94,234,212,0.10)', border: '1px solid rgba(94,234,212,0.25)',
+            }}
+          >
+            <AutoAwesome sx={{ fontSize: 14, color: P.tealLight }} />
+            <Typography sx={{ fontSize: '0.74rem', fontWeight: 600, letterSpacing: '0.08em', color: P.tealLight, textTransform: 'uppercase' }}>
               Solution Fiscale OHADA
             </Typography>
           </Box>
+        </Box>
 
-          {/* Error */}
+        {/* Milieu : promesse + preuves */}
+        <Box sx={{ position: 'relative', zIndex: 1 }}>
+          <Typography
+            sx={{
+              fontFamily: FONT_BODY, fontWeight: 700, lineHeight: 1.2,
+              fontSize: { md: '2rem', lg: '2.4rem' }, color: P.white, mb: 1,
+            }}
+          >
+            Votre balance entre.
+            <br />
+            <Box
+              component="span"
+              sx={{
+                background: gradients.tealText,
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                fontStyle: 'italic',
+                fontWeight: 600,
+              }}
+            >
+              Votre liasse sort.
+            </Box>
+          </Typography>
+          <Typography sx={{ fontSize: '0.95rem', color: 'rgba(255,255,255,0.62)', maxWidth: 420, mb: 4 }}>
+            La production, le contrôle et la télédéclaration de votre liasse fiscale,
+            réunis dans un seul outil.
+          </Typography>
+
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.6 }}>
+            {PROOFS.map((p) => (
+              <Box key={p} sx={{ display: 'flex', alignItems: 'center', gap: 1.4 }}>
+                <Box
+                  sx={{
+                    width: 26, height: 26, borderRadius: '50%', flexShrink: 0,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    bgcolor: 'rgba(94,234,212,0.14)', border: '1px solid rgba(94,234,212,0.3)',
+                  }}
+                >
+                  <CheckRounded sx={{ fontSize: 15, color: P.tealLight }} />
+                </Box>
+                <Typography sx={{ fontSize: '0.92rem', color: 'rgba(255,255,255,0.86)' }}>{p}</Typography>
+              </Box>
+            ))}
+          </Box>
+        </Box>
+
+        {/* Bas : preuve sociale */}
+        <Typography sx={{ position: 'relative', zIndex: 1, fontSize: '0.8rem', color: 'rgba(255,255,255,0.45)' }}>
+          Rejoint par 500+ entreprises en Afrique · Archivage SHA-256
+        </Typography>
+      </Box>
+
+      {/* ── Volet formulaire (droite) ── */}
+      <Box
+        sx={{
+          flex: '1 1 48%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          px: { xs: 3, sm: 6 },
+          py: 6,
+          bgcolor: P.primary50,
+        }}
+      >
+        <Box sx={{ width: '100%', maxWidth: 400 }}>
+          {/* Wordmark mobile (volet de marque masqué) */}
+          <Box sx={{ display: { xs: 'block', md: 'none' }, textAlign: 'center', mb: 4 }}>
+            <Typography sx={{ fontFamily: FONT_BRAND, fontSize: '2.4rem', color: P.primary900, lineHeight: 1 }}>
+              Liass'Pilot
+            </Typography>
+          </Box>
+
+          <Typography sx={{ fontFamily: FONT_BODY, fontSize: '1.6rem', fontWeight: 700, color: P.primary900, mb: 0.5 }}>
+            Bon retour
+          </Typography>
+          <Typography sx={{ fontFamily: FONT_BODY, fontSize: '0.92rem', color: P.primary500, mb: 4 }}>
+            Connectez-vous pour reprendre votre liasse.
+          </Typography>
+
           {error && (
             <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
               {error}
             </Alert>
           )}
 
-          {/* Form */}
           <Box component="form" onSubmit={handleSubmit}>
             <TextField
               fullWidth
@@ -105,16 +222,8 @@ const LoginPage: React.FC = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              sx={{
-                mb: 2.5,
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 2,
-                  '& fieldset': { borderColor: P.primary200 },
-                  '&:hover fieldset': { borderColor: P.primary300 },
-                  '&.Mui-focused fieldset': { borderColor: P.teal, borderWidth: 1.5 },
-                },
-                '& .MuiInputLabel-root.Mui-focused': { color: P.teal },
-              }}
+              autoComplete="email"
+              sx={fieldSx}
             />
             <TextField
               fullWidth
@@ -123,17 +232,23 @@ const LoginPage: React.FC = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              sx={{
-                mb: 3,
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 2,
-                  '& fieldset': { borderColor: P.primary200 },
-                  '&:hover fieldset': { borderColor: P.primary300 },
-                  '&.Mui-focused fieldset': { borderColor: P.teal, borderWidth: 1.5 },
-                },
-                '& .MuiInputLabel-root.Mui-focused': { color: P.teal },
-              }}
+              autoComplete="current-password"
+              sx={{ ...fieldSx, mb: 1.5 }}
             />
+
+            <Box sx={{ textAlign: 'right', mb: 3 }}>
+              <Link
+                component="button"
+                type="button"
+                onClick={() => navigate('/forgot-password')}
+                sx={{
+                  fontFamily: FONT_BODY, fontSize: '0.84rem', color: P.primary600,
+                  textDecoration: 'none', '&:hover': { color: P.teal, textDecoration: 'underline' },
+                }}
+              >
+                Mot de passe oublié ?
+              </Link>
+            </Box>
 
             <Button
               type="submit"
@@ -142,61 +257,38 @@ const LoginPage: React.FC = () => {
               size="large"
               disabled={isLoading}
               sx={{
-                mb: 2.5,
-                height: 48,
-                fontSize: '0.95rem',
+                mb: 3,
+                height: 50,
+                fontSize: '0.98rem',
                 fontWeight: 600,
                 fontFamily: FONT_BODY,
                 letterSpacing: '0.02em',
                 textTransform: 'none',
-                bgcolor: P.teal,
+                background: gradients.teal,
                 color: '#ffffff',
-                borderRadius: 2,
-                boxShadow: '0 1px 2px rgba(15,118,110,0.15)',
+                borderRadius: 2.5,
+                boxShadow: shadows.xs,
                 '&:hover': {
-                  bgcolor: P.tealDark,
-                  boxShadow: '0 4px 12px rgba(15,118,110,0.25)',
+                  background: gradients.teal,
+                  boxShadow: shadows.tealHalo,
+                  transform: 'translateY(-1px)',
                 },
-                '&.Mui-disabled': { bgcolor: P.primary300, color: '#ffffff' },
+                '&.Mui-disabled': { background: P.primary300, color: '#ffffff' },
               }}
             >
-              {isLoading ? (
-                <CircularProgress size={22} sx={{ color: '#ffffff' }} />
-              ) : (
-                'Se connecter'
-              )}
+              {isLoading ? <CircularProgress size={22} sx={{ color: '#ffffff' }} /> : 'Se connecter'}
             </Button>
 
-            <Box sx={{ textAlign: 'center', mb: 1.5 }}>
-              <Link
-                component="button"
-                type="button"
-                onClick={() => navigate('/forgot-password')}
-                sx={{
-                  fontFamily: FONT_BODY,
-                  fontSize: '0.85rem',
-                  color: P.primary600,
-                  textDecoration: 'none',
-                  '&:hover': { color: P.teal, textDecoration: 'underline' },
-                }}
-              >
-                Mot de passe oublié ?
-              </Link>
-            </Box>
-
             <Box sx={{ textAlign: 'center' }}>
-              <Typography sx={{ fontFamily: FONT_BODY, fontSize: '0.85rem', color: P.primary500 }}>
+              <Typography sx={{ fontFamily: FONT_BODY, fontSize: '0.88rem', color: P.primary500 }}>
                 Pas de compte ?{' '}
                 <Link
                   component="button"
                   type="button"
                   onClick={() => navigate('/register')}
                   sx={{
-                    fontFamily: FONT_BODY,
-                    color: P.teal,
-                    fontWeight: 600,
-                    textDecoration: 'none',
-                    '&:hover': { textDecoration: 'underline' },
+                    fontFamily: FONT_BODY, color: P.teal, fontWeight: 600,
+                    textDecoration: 'none', '&:hover': { textDecoration: 'underline' },
                   }}
                 >
                   S'inscrire
@@ -204,8 +296,8 @@ const LoginPage: React.FC = () => {
               </Typography>
             </Box>
           </Box>
-        </CardContent>
-      </Card>
+        </Box>
+      </Box>
     </Box>
   )
 }

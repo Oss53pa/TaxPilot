@@ -177,13 +177,16 @@ const ModernBalance: React.FC = () => {
     <Box sx={{ p: 3, backgroundColor: 'background.default', minHeight: '100vh' }}>
       {/* Header */}
       <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <Box>
-          <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
-            Balance comptable
-          </Typography>
-          <Typography variant="body1" color="text.secondary">
-            Balance générale SYSCOHADA — Exercice N / N-1
-          </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'stretch', gap: 1.75 }}>
+          <Box sx={{ width: 4, borderRadius: 2, flexShrink: 0, background: 'linear-gradient(135deg, #14b8a6 0%, #0f766e 55%, #115e59 100%)' }} />
+          <Box>
+            <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, letterSpacing: '-0.01em' }}>
+              Balance comptable
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
+              Balance générale SYSCOHADA — Exercice N / N-1
+            </Typography>
+          </Box>
         </Box>
         <Stack direction="row" spacing={2}>
           <Button variant="outlined" startIcon={<RefreshIcon />} onClick={loadBalanceData}>

@@ -40,8 +40,14 @@ function totalBilan(bal: BalanceEntry[]): number {
 
 // --- Controles de sens SS-001 a SS-010 ---
 
-function checkSensClasse(ctx: AuditContext, ref: string, nom: string, prefix: string, sensAttendu: 'DEBITEUR' | 'CREDITEUR', description: string): ResultatControle {
-  const entries = findByPrefix(ctx.balanceN, prefix)
+function checkSensClasse(ctx: AuditContext, ref: string, nom: string, prefix: string, sensAttendu: 'DEBITEUR' | 'CREDITEUR', description: string, excludePrefixes: string[] = []): ResultatControle {
+  // Exclut les sous-classes "contra" de sens oppose a la classe (ex: 28/29
+  // amortissements & depreciations dans la classe 2, 39 dans la classe 3).
+  // Sans cette exclusion, ces comptes crediteurs par nature etaient signales a
+  // tort comme "sens inverse" — et de facon contradictoire avec SS-008/SS-009.
+  const entries = findByPrefix(ctx.balanceN, prefix).filter(
+    (l) => !excludePrefixes.some((p) => l.compte.toString().startsWith(p))
+  )
   const inverses: string[] = []
   let totalInverse = 0
   let totalClasse = 0
@@ -78,13 +84,16 @@ function checkSensClasse(ctx: AuditContext, ref: string, nom: string, prefix: st
 }
 
 // SS-001: Immobilisations (classe 2) normalement debitrices
+// On exclut 28x (amortissements) et 29x (depreciations), crediteurs par nature
+// et controles separement par SS-008 / SS-009.
 function SS001(ctx: AuditContext): ResultatControle {
-  return checkSensClasse(ctx, 'SS-001', 'Sens immobilisations', '2', 'DEBITEUR', 'immobilisations creditrices')
+  return checkSensClasse(ctx, 'SS-001', 'Sens immobilisations', '2', 'DEBITEUR', 'immobilisations creditrices', ['28', '29'])
 }
 
 // SS-002: Stocks (classe 3) normalement debiteurs
+// On exclut 39x (depreciations des stocks), crediteur par nature (cf. SS-009).
 function SS002(ctx: AuditContext): ResultatControle {
-  return checkSensClasse(ctx, 'SS-002', 'Sens stocks', '3', 'DEBITEUR', 'stocks crediteurs')
+  return checkSensClasse(ctx, 'SS-002', 'Sens stocks', '3', 'DEBITEUR', 'stocks crediteurs', ['39'])
 }
 
 // SS-003: Charges (classe 6) normalement debitrices

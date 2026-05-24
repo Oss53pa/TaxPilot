@@ -120,7 +120,13 @@ function F003(ctx: AuditContext): ResultatControle {
   const resultatComptabilise = comptes13.reduce((s, l) => s + (l.credit - l.debit), 0)
 
   const ecart = Math.abs(resultatCalcule - resultatComptabilise)
-  if (ecart > 1 && comptes13.length > 0) {
+  // CORRECTIF (balance réelle EMERGENCE) : ne déclencher le BLOQUANT que si le
+  // compte 13x porte RÉELLEMENT un résultat (solde non nul). Un 13x présent mais
+  // à solde nul (ligne 131000 = débit 463M = crédit 463M → net 0) = résultat non
+  // encore affecté = balance PRÉ-CLÔTURE normale → INFO, pas BLOQUANT. L'ancienne
+  // condition `comptes13.length > 0` testait l'existence de la LIGNE, pas du solde.
+  const resultatAffecte = Math.abs(resultatComptabilise) > 1
+  if (ecart > 1 && resultatAffecte) {
     return anomalie(ref, nom, 'BLOQUANT',
       `Ecart de ${ecart.toLocaleString('fr-FR')} entre resultat calcule et compte 13x`,
       {
@@ -142,12 +148,12 @@ function F003(ctx: AuditContext): ResultatControle {
       }] : undefined,
       'Art. 34 Acte Uniforme OHADA')
   }
-  if (comptes13.length === 0) {
+  if (!resultatAffecte) {
     return anomalie(ref, nom, 'INFO',
-      `Resultat calcule: ${resultatCalcule.toLocaleString('fr-FR')} (pas de compte 13x - balance pre-cloture)`,
+      `Resultat calcule: ${resultatCalcule.toLocaleString('fr-FR')} (compte 13x non affecte - balance pre-cloture)`,
       {
-        montants: { resultatCalcule, produits: totalProduits, charges: totalCharges, haoNet, impot: impot89 },
-        description: 'Aucun compte de resultat (13x) n\'est present dans la balance. Pour une balance pre-cloture (en cours d\'exercice), c\'est normal car le resultat n\'est pas encore affecte. Pour une balance de cloture, le compte 13x est obligatoire.',
+        montants: { resultatCalcule, resultatComptabilise, produits: totalProduits, charges: totalCharges, haoNet, impot: impot89 },
+        description: 'Le compte de resultat (13x) est absent ou a solde nul : le resultat de l\'exercice n\'est pas encore affecte (balance pre-cloture / pre-affectation, en cours d\'exercice). C\'est normal — le resultat reste porte par les classes 6/7. Pour une balance de cloture definitive, le compte 131 (benefice) ou 139 (perte) doit etre renseigne.',
         attendu: 'Resultat calcule coherent avec produits - charges + HAO - IS',
         constate: `Resultat calcule: ${resultatCalcule.toLocaleString('fr-FR')} (pas de compte 13x)`,
         impactFiscal: 'Aucun impact si balance pre-cloture - sinon resultat non affecte',
@@ -158,44 +164,56 @@ function F003(ctx: AuditContext): ResultatControle {
 }
 
 // F-004: Total bilan equilibre
+//
+// CORRECTIF : l'ancienne version comparait Actif (soldes debiteurs) vs Passif
+// (soldes crediteurs) des classes 1-5 SANS tenir compte du resultat de
+// l'exercice. Or l'equation du bilan est : Actif = Passif (capitaux + dettes)
+// + Resultat. Tant que le resultat n'est pas affecte au 13x (balance
+// pre-cloture, classes 6/7 encore mouvementees), netSolde(1-5) vaut exactement
+// le resultat → l'ancien controle declarait un FAUX desequilibre bloquant egal
+// au resultat. On integre desormais le resultat en formation (classes 6/7/8).
+//
+// Identite : netSolde(1-5) = -netSolde(6,7,8) = resultat. Le bilan est donc
+// equilibre ssi (Actif - Passif) - resultat ≈ 0, soit |netSolde(1-8)| ≈ 0.
 function F004(ctx: AuditContext): ResultatControle {
   const ref = 'F-004', nom = 'Total bilan equilibre'
-  // Actif: classes 1(debiteur) + 2 + 3 + 4(debiteur) + 5(debiteur)
-  const actifEntries = ctx.balanceN.filter((l) => {
-    const cl = parseInt(l.compte.toString().charAt(0))
-    return cl >= 1 && cl <= 5
-  })
-  // Actif = somme des soldes debiteurs
   let totalActif = 0
   let totalPassif = 0
-  for (const l of actifEntries) {
-    const s = solde(l)
-    if (s > 0) totalActif += s
-    else totalPassif += Math.abs(s)
-  }
-  // Calculer la repartition par classe pour le detail
+  let netResult68 = 0 // somme des soldes (SD-SC) des classes 6,7,8 (resultat en formation)
   const parClasse: Record<string, number> = {}
-  for (const l of actifEntries) {
-    const cl = l.compte.toString().charAt(0)
-    parClasse[`classe${cl}`] = (parClasse[`classe${cl}`] || 0) + Math.abs(solde(l))
+  for (const l of ctx.balanceN) {
+    const cl = parseInt(l.compte.toString().charAt(0))
+    const s = solde(l)
+    if (cl >= 1 && cl <= 5) {
+      if (s > 0) totalActif += s
+      else totalPassif += Math.abs(s)
+      parClasse[`classe${cl}`] = (parClasse[`classe${cl}`] || 0) + Math.abs(s)
+    } else if (cl >= 6 && cl <= 8) {
+      netResult68 += s
+    }
   }
-
-  const ecart = Math.abs(totalActif - totalPassif)
+  // Resultat net (benefice > 0). Charges (classe 6) debitrices → s>0 ;
+  // produits (classe 7) crediteurs → s<0. netResult68 = charges - produits + …
+  // donc resultat = -netResult68.
+  const resultat = -netResult68
+  // Cote passif "complet" = capitaux/dettes crediteurs + benefice (resultat>0).
+  const passifAvecResultat = totalPassif + resultat
+  const ecart = Math.abs(totalActif - passifAvecResultat)
   if (ecart > 1) {
     return anomalie(ref, nom, 'BLOQUANT',
-      `Desequilibre bilan: Actif=${totalActif.toLocaleString('fr-FR')}, Passif=${totalPassif.toLocaleString('fr-FR')} (ecart: ${ecart.toLocaleString('fr-FR')})`,
+      `Desequilibre bilan: Actif=${totalActif.toLocaleString('fr-FR')}, Passif+Resultat=${passifAvecResultat.toLocaleString('fr-FR')} (ecart: ${ecart.toLocaleString('fr-FR')})`,
       {
-        ecart, montants: { totalActif, totalPassif, ...parClasse },
-        description: `Le bilan est desequilibre de ${ecart.toLocaleString('fr-FR')} FCFA. L\'actif (soldes debiteurs) et le passif (soldes crediteurs) des classes 1 a 5 doivent etre egaux. Ce desequilibre peut provenir d\'une erreur d\'affectation du resultat, de comptes mal classes, ou d\'ecritures incompletes.`,
-        attendu: 'Actif (soldes debiteurs) = Passif (soldes crediteurs)',
-        constate: `Actif: ${totalActif.toLocaleString('fr-FR')}, Passif: ${totalPassif.toLocaleString('fr-FR')} (ecart: ${ecart.toLocaleString('fr-FR')})`,
+        ecart, montants: { totalActif, totalPassif, resultat, passifAvecResultat, ...parClasse },
+        description: `Le bilan est desequilibre de ${ecart.toLocaleString('fr-FR')} FCFA, resultat de l\'exercice inclus. L\'equation Actif = Passif (capitaux + dettes) + Resultat n\'est pas verifiee. Ce desequilibre peut provenir de comptes mal classes, d\'ecritures incompletes, ou d\'un solde d\'ouverture mal reporte. (Le resultat en formation des classes 6/7/8 est deja pris en compte : ${resultat.toLocaleString('fr-FR')} FCFA.)`,
+        attendu: 'Actif (soldes debiteurs) = Passif (soldes crediteurs) + Resultat',
+        constate: `Actif: ${totalActif.toLocaleString('fr-FR')}, Passif: ${totalPassif.toLocaleString('fr-FR')}, Resultat: ${resultat.toLocaleString('fr-FR')} (ecart: ${ecart.toLocaleString('fr-FR')})`,
         impactFiscal: 'Bilan desequilibre rendant la liasse fiscale non deposable',
       },
-      'Verifier l\'affectation du resultat (compte 13x), le classement des comptes de bilan, et les ecritures de regularisation.',
+      'Verifier le classement des comptes de bilan et les ecritures de regularisation. Si la balance est pre-cloture, le resultat des classes 6/7/8 equilibre le bilan (deja pris en compte ici).',
       undefined,
       'Art. 29 Acte Uniforme OHADA')
   }
-  return ok(ref, nom, `Bilan equilibre: ${totalActif.toLocaleString('fr-FR')}`)
+  return ok(ref, nom, `Bilan equilibre (resultat inclus): Actif=${totalActif.toLocaleString('fr-FR')}, Passif+Resultat=${passifAvecResultat.toLocaleString('fr-FR')}`)
 }
 
 // F-005: Presence classes essentielles

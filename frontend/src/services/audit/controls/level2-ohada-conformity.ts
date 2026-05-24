@@ -141,15 +141,24 @@ function C003(ctx: AuditContext): ResultatControle {
 }
 
 // C-004: Comptes obsoletes ancien SYSCOA
+//
+// CORRECTIF : l'ancienne liste codee en dur etait FAUSSE — elle signalait comme
+// "obsoletes" des comptes parfaitement valides du SYSCOHADA Revise 2017,
+// confirmes par le referentiel du projet (data/syscohada) :
+//   - 195 Provisions pour impots          → classe1.ts (valide)
+//   - 196 Provisions pour pensions         → classe1.ts (valide)
+//   - 471 Compte d'attente / Debiteurs div.→ classe4.ts (valide ; utilise par
+//         l'ecriture d'equilibrage de F-001 !)
+//   - 694 Dotations depreciations stocks   → fonctionnement/classe6.ts (valide ;
+//         n'est PAS un compte TAFIRE)
+// Ces 4 entrees generaient des anomalies MAJEUR a tort. La detection des
+// comptes reellement interdits/supprimes est deja assuree par C-009 via le
+// flag `utilisation === 'INTERDIT'` du plan (source de verite). On vide donc
+// cette liste codee en dur ; la repeupler uniquement avec des comptes verifies
+// comme retires par la reforme 2017.
 function C004(ctx: AuditContext): ResultatControle {
   const ref = 'C-004', nom = 'Comptes obsoletes SYSCOA'
-  // Comptes qui existaient dans l'ancien SYSCOA mais supprimes dans le revise
-  const obsoletes: Record<string, string> = {
-    '195': 'Provisions pour impots (remplace par 441x)',
-    '196': 'Provisions pour pensions (remplace par 198x)',
-    '471': 'Compte d\'attente (remplace par 47x specifiques)',
-    '694': 'TAFIRE - supprime dans SYSCOHADA Revise',
-  }
+  const obsoletes: Record<string, string> = {}
   const trouves: string[] = []
   for (const line of ctx.balanceN) {
     const num = line.compte.toString().trim()
@@ -179,9 +188,13 @@ function C004(ctx: AuditContext): ResultatControle {
 // C-005: Comptes TAFIRE supprimes
 function C005(ctx: AuditContext): ResultatControle {
   const ref = 'C-005', nom = 'Comptes TAFIRE supprimes'
+  // 694 RETIRE de la liste : c'est "Dotations aux depreciations des stocks"
+  // (compte valide du SYSCOHADA Revise, cf. fonctionnement/classe6.ts), pas un
+  // compte TAFIRE. On ne conserve que 884/894 (anciens comptes TAFIRE, absents
+  // du referentiel revise).
   const tafire = ctx.balanceN.filter((l) => {
     const num = l.compte.toString().trim()
-    return num.startsWith('694') || num.startsWith('884') || num.startsWith('894')
+    return num.startsWith('884') || num.startsWith('894')
   })
   if (tafire.length > 0) {
     return anomalie(ref, nom, 'MAJEUR',

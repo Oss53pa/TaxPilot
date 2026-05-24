@@ -26,10 +26,15 @@ const SupportPage: React.FC = () => {
 
   return (
     <Box sx={{ maxWidth: 720, mx: 'auto', py: 4, px: 3 }}>
-      <Typography variant="h4" sx={{ fontWeight: 700, mb: 0.5 }}>Support LiassPilot</Typography>
-      <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-        Notre équipe répond sous 24h (jours ouvrés). Pour les urgences fiscales, indiquez la priorité "Haute".
-      </Typography>
+      <Box sx={{ display: 'flex', alignItems: 'stretch', gap: 1.75, mb: 4 }}>
+        <Box sx={{ width: 4, borderRadius: 2, flexShrink: 0, background: 'linear-gradient(135deg, #14b8a6 0%, #0f766e 55%, #115e59 100%)' }} />
+        <Box>
+          <Typography variant="h4" sx={{ fontWeight: 700, mb: 0.5, letterSpacing: '-0.01em' }}>Support LiassPilot</Typography>
+          <Typography variant="body1" color="text.secondary">
+            Notre équipe répond sous 24h (jours ouvrés). Pour les urgences fiscales, indiquez la priorité "Haute".
+          </Typography>
+        </Box>
+      </Box>
 
       {sent ? (
         <Paper sx={{ p: 5, textAlign: 'center', border: '1px solid', borderColor: 'success.light' }}>

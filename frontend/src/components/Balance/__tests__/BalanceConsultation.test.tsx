@@ -137,6 +137,8 @@ describe('BalanceConsultation', () => {
     expect(screen.getByText('Détails du Compte')).toBeInTheDocument()
   })
 
+  // Timeout élargi : userEvent + render jsdom sont lents au premier déclenchement
+  // (coût d'init unique), le défaut de 5s flake en CI à froid.
   it('ouvre la modal d\'édition', async () => {
     const user = userEvent.setup()
     renderComponent()
@@ -145,7 +147,7 @@ describe('BalanceConsultation', () => {
     await user.click(editButtons[0])
 
     expect(screen.getByText('Modifier le Compte')).toBeInTheDocument()
-  })
+  }, 15000)
 
   it('affiche les libellés des comptes', () => {
     renderComponent()
@@ -179,11 +181,30 @@ describe('BalanceConsultation', () => {
     expect(screen.getByText('Équilibrée')).toBeInTheDocument()
   })
 
-  it('performe bien avec de gros datasets', () => {
-    const startTime = performance.now()
-    renderComponent()
-    const endTime = performance.now()
+  it('reste performant avec de gros datasets (rendu borné par la pagination)', () => {
+    // On vérifie l'INVARIANT de performance plutôt qu'un temps d'horloge
+    // (fragile et dépendant de la machine/CI) : le composant pagine via slice(),
+    // donc le coût de rendu est O(rowsPerPage), pas O(n). On le prouve en
+    // s'assurant que les comptes au-delà de la première page ne sont PAS dans le DOM.
+    const bigDataset = Array.from({ length: 1000 }, (_, i) => ({
+      id: String(i),
+      exercice: '2024',
+      compte: String(100000 + i),
+      libelle_compte: `Compte ${i}`,
+      debit: i * 1000,
+      credit: 0,
+      solde: i * 1000,
+      created_at: '',
+      updated_at: '',
+      is_active: true,
+    }))
 
-    expect(endTime - startTime).toBeLessThan(500)
+    renderComponent(bigDataset)
+
+    // Le premier compte est rendu…
+    expect(screen.getByText('100000')).toBeInTheDocument()
+    // …mais pas le dernier : la pagination borne le nombre de lignes montées,
+    // garantissant un rendu performant quelle que soit la taille du dataset.
+    expect(screen.queryByText('100999')).not.toBeInTheDocument()
   })
 })

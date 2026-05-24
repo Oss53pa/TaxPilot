@@ -159,8 +159,17 @@ function EF001(ctx: AuditContext): ResultatControle {
   }
 
   // Primary check: balance directe (debit vs credit soldes classes 1-5)
+  // CORRECTIF (cf. F-004) : on integre le resultat en formation (classes 6/7/8)
+  // pour ne pas declarer un FAUX desequilibre sur une balance pre-cloture
+  // (resultat pas encore affecte au 13x). Le bilan est equilibre ssi
+  // Actif = Passif (capitaux + dettes) + Resultat.
   const balDirect = calcBilanFromBalance(ctx.balanceN)
-  const ecartDirect = Math.abs(balDirect.actif - balDirect.passif)
+  const netResult68_ef = ctx.balanceN.reduce((s, l) => {
+    const cl = parseInt(l.compte.toString().charAt(0))
+    return (cl >= 6 && cl <= 8) ? s + solde(l) : s
+  }, 0)
+  const resultatEF = -netResult68_ef
+  const ecartDirect = Math.abs((balDirect.actif - balDirect.passif) - resultatEF)
 
   // Secondary check: mapping-based
   const { actif, passif } = calcBilanFromMapping(ctx.balanceN)
@@ -171,8 +180,8 @@ function EF001(ctx: AuditContext): ResultatControle {
     return anomalie(ref, nom, 'BLOQUANT',
       `Bilan desequilibre: Actif=${balDirect.actif.toLocaleString('fr-FR')}, Passif=${balDirect.passif.toLocaleString('fr-FR')} (ecart: ${ecartDirect.toLocaleString('fr-FR')})`,
       {
-        ecart: ecartDirect, montants: { actif: balDirect.actif, passif: balDirect.passif, actifMapping: actif, passifMapping: passif },
-        description: `Le bilan est desequilibre de ${ecartDirect.toLocaleString('fr-FR')} FCFA. L'actif (soldes debiteurs classes 1-5 = ${balDirect.actif.toLocaleString('fr-FR')}) ne correspond pas au passif (soldes crediteurs classes 1-5 = ${balDirect.passif.toLocaleString('fr-FR')}). Cela peut provenir d'un desequilibre dans la balance source ou d'ecritures de cloture incompletes.`,
+        ecart: ecartDirect, montants: { actif: balDirect.actif, passif: balDirect.passif, resultat: resultatEF, actifMapping: actif, passifMapping: passif },
+        description: `Le bilan est desequilibre de ${ecartDirect.toLocaleString('fr-FR')} FCFA, resultat de l'exercice inclus (${resultatEF.toLocaleString('fr-FR')}). L'actif (soldes debiteurs classes 1-5 = ${balDirect.actif.toLocaleString('fr-FR')}) ne correspond pas au passif + resultat (soldes crediteurs classes 1-5 = ${balDirect.passif.toLocaleString('fr-FR')}). Cela peut provenir d'un desequilibre dans la balance source ou de comptes mal classes.`,
         attendu: 'Actif = Passif (ecart = 0)',
         constate: `Actif: ${balDirect.actif.toLocaleString('fr-FR')}, Passif: ${balDirect.passif.toLocaleString('fr-FR')}, ecart: ${ecartDirect.toLocaleString('fr-FR')}`,
         impactFiscal: 'Bilan desequilibre = liasse fiscale non deposable = rejet par l\'administration fiscale.',
@@ -289,7 +298,10 @@ function EF005(ctx: AuditContext): ResultatControle {
   const resultatCdR = produits - charges + haoNet - impot89
   const resultatBilan = find(ctx.balanceN, '13').reduce((s, l) => s + (l.credit - l.debit), 0)
   const ecart = Math.abs(resultatCdR - resultatBilan)
-  if (ecart > 1 && find(ctx.balanceN, '13').length > 0) {
+  // CORRECTIF (idem F-003) : BLOQUANT seulement si le 13x porte un résultat
+  // non nul. Un 13x présent mais à solde nul = pré-clôture (résultat non affecté)
+  // → pas un déséquilibre. Évite le faux BLOQUANT sur balance pré-affectation.
+  if (ecart > 1 && Math.abs(resultatBilan) > 1) {
     return anomalie(ref, nom, 'BLOQUANT',
       `Resultat CdR (${resultatCdR.toLocaleString('fr-FR')}) != Resultat bilan (${resultatBilan.toLocaleString('fr-FR')})`,
       {
@@ -823,18 +835,29 @@ function EF028(ctx: AuditContext): ResultatControle {
   for (const l of ctx.balanceN1) {
     n1Map.set(l.compte, solde(l))
   }
+  // CORRECTIF : comparer l'OUVERTURE N (champs solde_debit_n1 / solde_credit_n1)
+  // a la CLOTURE N-1 — et NON la cloture N a la cloture N-1, qui different
+  // normalement pour tout compte ayant bouge dans l'annee (faux MAJEUR sur une
+  // entreprise en croissance). Si la balance N n'expose pas les soldes
+  // d'ouverture, le controle n'est pas calculable → NON_APPLICABLE.
+  let hasOpening = false
   const ecarts: string[] = []
   for (const l of ctx.balanceN) {
     if (!l.compte.match(/^[1-5]/)) continue
     const n1Solde = n1Map.get(l.compte)
-    if (n1Solde !== undefined) {
-      // Check if there's a significant discrepancy in permanent accounts
-      // (opening balance of N should match closing of N-1 for bilan accounts)
-      const ecart = Math.abs(solde(l) - n1Solde)
-      if (ecart > Math.abs(n1Solde) * 0.5 && ecart > 10000) {
-        ecarts.push(`${l.compte}: N-1=${n1Solde.toLocaleString('fr-FR')}, N=${solde(l).toLocaleString('fr-FR')}`)
-      }
+    if (n1Solde === undefined) continue
+    const s = (l as { solde_debit_n1?: number; solde_credit_n1?: number })
+    if ((s.solde_debit_n1 ?? 0) === 0 && (s.solde_credit_n1 ?? 0) === 0) continue
+    hasOpening = true
+    const ouvN = (s.solde_debit_n1 ?? 0) - (s.solde_credit_n1 ?? 0)
+    const ecart = Math.abs(ouvN - n1Solde)
+    if (ecart > Math.abs(n1Solde) * 0.5 && ecart > 10000) {
+      ecarts.push(`${l.compte}: cloture N-1=${n1Solde.toLocaleString('fr-FR')}, ouverture N=${ouvN.toLocaleString('fr-FR')}`)
     }
+  }
+  if (!hasOpening) {
+    return { ref, nom, niveau: NIVEAU, statut: 'NON_APPLICABLE', severite: 'OK',
+      message: 'Soldes d\'ouverture N non exposes par la balance — controle non applicable', timestamp: new Date().toISOString() }
   }
   if (ecarts.length > 5) {
     return anomalie(ref, nom, 'MAJEUR',
@@ -963,7 +986,9 @@ function EF035(ctx: AuditContext): ResultatControle {
 function EF036(ctx: AuditContext): ResultatControle {
   const ref = 'EF-036', nom = 'Ecart de conversion actif'
   const ecaActif = sumForPrefixes(ctx.balanceN, ['478'])
-  const provEcart = sumForPrefixes(ctx.balanceN, ['4768'])
+  // CORRECTIF : la provision pour perte de change est le compte 194
+  // (Provisions pour pertes de change), pas 4768 (inexistant) — cf. IC-025.
+  const provEcart = sumForPrefixes(ctx.balanceN, ['194'])
   if (ecaActif > 0 && provEcart === 0) {
     return anomalie(ref, nom, 'MAJEUR',
       `Ecart de conversion actif (${ecaActif.toLocaleString('fr-FR')}) sans provision correspondante`,

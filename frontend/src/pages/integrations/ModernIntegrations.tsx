@@ -712,12 +712,17 @@ const ModernIntegrations: React.FC = () => {
     <Box sx={{ p: 3 }}>
       {/* En-tête */}
       <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" gutterBottom sx={{ fontWeight: 600 }}>
-          APIs & Intégrations
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          Gestion des connecteurs et APIs avec synchronisation temps réel
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'stretch', gap: 1.75 }}>
+          <Box sx={{ width: 4, borderRadius: 2, flexShrink: 0, background: 'linear-gradient(135deg, #14b8a6 0%, #0f766e 55%, #115e59 100%)' }} />
+          <Box>
+            <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, letterSpacing: '-0.01em' }}>
+              APIs & Intégrations
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
+              Gestion des connecteurs et APIs avec synchronisation temps réel
+            </Typography>
+          </Box>
+        </Box>
         
         {/* Alerte de performance */}
         <Alert severity="info" sx={{ mt: 2 }}>

@@ -330,3 +330,59 @@ describe('LiasseDataService - Mapping SYSCOHADA', () => {
     })
   })
 })
+
+/**
+ * Régression : non double-comptage des écarts de change dans le compte de
+ * résultat. Le mapping a des préfixes qui se chevauchent (RN=67 ⊃ 676/677=RO,
+ * TJ=77 ⊃ 776/777=TK). Avant correctif, RN reprenait 676/677 et TJ reprenait
+ * 776/777 → résultat net faux et incohérent avec la cascade SIG.
+ */
+describe('LiasseDataService - Écarts de change (non double-comptage)', () => {
+  const balanceFX: BalanceEntry[] = [
+    { compte: '701', intitule: 'Ventes', debit: 0, credit: 1_000_000, solde_debit: 0, solde_credit: 1_000_000 },
+    { compte: '601', intitule: 'Achats', debit: 400_000, credit: 0, solde_debit: 400_000, solde_credit: 0 },
+    { compte: '671', intitule: 'Intérêts des emprunts', debit: 50_000, credit: 0, solde_debit: 50_000, solde_credit: 0 },
+    { compte: '676', intitule: 'Pertes de change', debit: 30_000, credit: 0, solde_debit: 30_000, solde_credit: 0 },
+    { compte: '776', intitule: 'Gains de change', debit: 0, credit: 20_000, solde_debit: 0, solde_credit: 20_000 },
+  ]
+
+  beforeEach(() => {
+    liasseDataService.loadBalance(balanceFX)
+  })
+
+  it('RN exclut 676/677 (alloués à RO) — pas de double-comptage des pertes de change', () => {
+    const { charges } = liasseDataService.generateCompteResultat()
+    const rn = charges.find(c => c.ref === 'RN')!.montant
+    const ro = charges.find(c => c.ref === 'RO')!.montant
+    expect(rn).toBe(50_000)        // 671 seulement, 676 exclu
+    expect(ro).toBe(30_000)        // 676
+    expect(rn + ro).toBe(80_000)   // total classe 67 compté UNE fois
+  })
+
+  it('TJ exclut 776/777 (alloués à TK) — pas de double-comptage des gains de change', () => {
+    const { produits } = liasseDataService.generateCompteResultat()
+    const tj = produits.find(p => p.ref === 'TJ')!.montant
+    const tk = produits.find(p => p.ref === 'TK')!.montant
+    expect(tj).toBe(0)             // pas de 77 hors 776
+    expect(tk).toBe(20_000)        // 776
+  })
+
+  it('résultat net = identité disjointe = somme des postes CR (cohérence)', () => {
+    const resultat = liasseDataService.getResultatFromCompteResultat()
+    // Produits 1 020 000 - Charges 480 000 = 540 000
+    expect(resultat).toBe(540_000)
+
+    // Le résultat doit aussi égaler la somme des postes affichés du CR
+    // (preuve qu'aucun poste n'est double-compté).
+    const { charges, produits } = liasseDataService.generateCompteResultat()
+    const totalCharges = charges.reduce((s, r) => s + r.montant, 0)
+    const totalProduits = produits.reduce((s, r) => s + r.montant, 0)
+    expect(totalProduits - totalCharges).toBe(540_000)
+  })
+
+  it('résultat CR cohérent avec la cascade SIG (SIG9)', () => {
+    const sig = liasseDataService.generateSIG()
+    const sig9 = sig.find(r => r.ref === 'SIG9')!.montant
+    expect(liasseDataService.getResultatFromCompteResultat()).toBe(sig9)
+  })
+})

@@ -164,7 +164,12 @@ export const SYSCOHADA_MAPPING = {
     AJ: { comptes: ['22'], amortComptes: ['282', '292'] },
     AK: { comptes: ['231', '232', '233', '234'], amortComptes: ['2831', '2832', '2833', '2834', '2931', '2932', '2933', '2934'] },
     AL: { comptes: ['235', '237', '238'], amortComptes: ['2835', '2837', '2838', '2935', '2937', '2938'] },
-    AM: { comptes: ['241', '242', '243', '244'], amortComptes: ['2841', '2842', '2843', '2844', '2941', '2942', '2943', '2944'] },
+    // CORRECTIF (validation balance réelle EMERGENCE) : 246/247/248 (autres
+    // matériels, ex. "Mobilier Food Court" 248801) et leurs amortissements
+    // 2846/2847/2848 étaient OUBLIÉS → comptes débiteurs/amort exclus du bilan
+    // → Total Actif ≠ Total Passif. On couvre désormais tout le matériel 24x
+    // (hors 245 = transport, poste AN).
+    AM: { comptes: ['241', '242', '243', '244', '246', '247', '248'], amortComptes: ['2841', '2842', '2843', '2844', '2846', '2847', '2848', '2941', '2942', '2943', '2944', '2946', '2947', '2948'] },
     AN: { comptes: ['245'], amortComptes: ['2845', '2945'] },
 
     // Avances et acomptes
@@ -271,7 +276,10 @@ export const SYSCOHADA_MAPPING = {
     // sub-compte SI la balance le fournit (sinon 0). Cf TODO unification
     // structurelle pour éliminer le risque de double-comptage 676/697 dans
     // RN+RO+RP quand balance détaillée.
-    RN: { comptes: ['67'] },
+    // RN exclut 676/677 (alloués à RO) → plus de double-comptage des pertes
+    // de change quand la balance est détaillée. RN + RO = total classe 67 une
+    // seule fois.
+    RN: { comptes: ['67'], exclure: ['676', '677'] },
     RO: { comptes: ['676', '677'] }, // Pertes de change (ajout post-audit)
     RP: { comptes: ['697'] }, // Dotations provisions financières (ajout post-audit)
 
@@ -312,7 +320,9 @@ export const SYSCOHADA_MAPPING = {
     // TJ conservé à ['77'] (rétrocompat balances agrégées) — double-comptage
     // mineur si balance détaille 776 (TJ+TK), à éliminer dans la refonte
     // structurelle complète (TODO).
-    TJ: { comptes: ['77'] }, // Revenus financiers et assimilés
+    // TJ exclut 776/777 (alloués à TK) → plus de double-comptage des gains
+    // de change. TJ + TK = total classe 77 une seule fois.
+    TJ: { comptes: ['77'], exclure: ['776', '777'] }, // Revenus financiers et assimilés
     TK: { comptes: ['776', '777'] }, // Gains de change (ajout post-audit)
     TL: { comptes: ['797'] }, // Reprises prov fin (FIX : était ['787'])
     TM: { comptes: ['787'] }, // Transferts charges fin (ajout post-audit)
@@ -460,13 +470,22 @@ export class LiasseDataService {
   }
 
   /**
+   * Teste si un compte doit être exclu d'un poste (préfixes alloués à un autre
+   * poste, ex. 676/677 retirés de RN car affectés à RO). Évite le
+   * double-comptage quand des postes partagent une racine commune.
+   */
+  private isExcluded(key: string, exclure: string[]): boolean {
+    return exclure.some(e => key === e || key.startsWith(e))
+  }
+
+  /**
    * Pour les CHARGES: prend les soldes débiteurs
    */
-  private calculateCharges(comptes: string[]): number {
+  private calculateCharges(comptes: string[], exclure: string[] = []): number {
     let total = 0
     comptes.forEach(prefix => {
       this.mappingCache.forEach((value, key) => {
-        if (key === prefix || key.startsWith(prefix)) {
+        if ((key === prefix || key.startsWith(prefix)) && !this.isExcluded(key, exclure)) {
           // Charges normalement débitrices
           if (value > 0) total += value
         }
@@ -478,11 +497,11 @@ export class LiasseDataService {
   /**
    * Pour les PRODUITS: prend les soldes créditeurs (valeur absolue)
    */
-  private calculateProduits(comptes: string[]): number {
+  private calculateProduits(comptes: string[], exclure: string[] = []): number {
     let total = 0
     comptes.forEach(prefix => {
       this.mappingCache.forEach((value, key) => {
-        if (key === prefix || key.startsWith(prefix)) {
+        if ((key === prefix || key.startsWith(prefix)) && !this.isExcluded(key, exclure)) {
           // Produits normalement créditeurs
           if (value < 0) total += Math.abs(value)
         }
@@ -574,21 +593,21 @@ export class LiasseDataService {
     return total
   }
 
-  private calculateChargesN1(comptes: string[]): number {
+  private calculateChargesN1(comptes: string[], exclure: string[] = []): number {
     let total = 0
     comptes.forEach(prefix => {
       this.mappingCacheN1.forEach((value, key) => {
-        if ((key === prefix || key.startsWith(prefix)) && value > 0) total += value
+        if ((key === prefix || key.startsWith(prefix)) && !this.isExcluded(key, exclure) && value > 0) total += value
       })
     })
     return total
   }
 
-  private calculateProduitsN1(comptes: string[]): number {
+  private calculateProduitsN1(comptes: string[], exclure: string[] = []): number {
     let total = 0
     comptes.forEach(prefix => {
       this.mappingCacheN1.forEach((value, key) => {
-        if ((key === prefix || key.startsWith(prefix)) && value < 0) total += Math.abs(value)
+        if ((key === prefix || key.startsWith(prefix)) && !this.isExcluded(key, exclure) && value < 0) total += Math.abs(value)
       })
     })
     return total
@@ -747,11 +766,12 @@ export class LiasseDataService {
     const variationRefs = ['RB', 'RD', 'RF']
 
     Object.entries(SYSCOHADA_MAPPING.charges).forEach(([ref, mapping]) => {
+      const exclure = (mapping as { exclure?: string[] }).exclure ?? []
       const montant = variationRefs.includes(ref)
         ? this.calculateVariation(mapping.comptes)
-        : this.calculateCharges(mapping.comptes)
+        : this.calculateCharges(mapping.comptes, exclure)
       const montant_n1 = this.hasN1
-        ? (variationRefs.includes(ref) ? this.sumSoldesN1(mapping.comptes) : this.calculateChargesN1(mapping.comptes))
+        ? (variationRefs.includes(ref) ? this.sumSoldesN1(mapping.comptes) : this.calculateChargesN1(mapping.comptes, exclure))
         : 0
       charges.push({ ref, montant, montant_n1 })
     })
@@ -760,11 +780,12 @@ export class LiasseDataService {
     const produitVariationRefs = ['TD']
 
     Object.entries(SYSCOHADA_MAPPING.produits).forEach(([ref, mapping]) => {
+      const exclure = (mapping as { exclure?: string[] }).exclure ?? []
       const montant = produitVariationRefs.includes(ref)
         ? -this.sumSoldes(mapping.comptes)  // Classe 7 variation: crédit=positif, débit=négatif
-        : this.calculateProduits(mapping.comptes)
+        : this.calculateProduits(mapping.comptes, exclure)
       const montant_n1 = this.hasN1
-        ? (produitVariationRefs.includes(ref) ? -this.sumSoldesN1(mapping.comptes) : this.calculateProduitsN1(mapping.comptes))
+        ? (produitVariationRefs.includes(ref) ? -this.sumSoldesN1(mapping.comptes) : this.calculateProduitsN1(mapping.comptes, exclure))
         : 0
       produits.push({ ref, montant, montant_n1 })
     })
@@ -946,18 +967,28 @@ export class LiasseDataService {
     return -this.sumSoldes(SYSCOHADA_MAPPING.passif.CH.comptes)
   }
 
+  /**
+   * Résultat net de l'exercice.
+   *
+   * CORRECTIF MÉTIER : auparavant on sommait les postes du compte de résultat
+   * (RN, RO, RP, TJ, TK, TL, TM…). Or le mapping comporte des préfixes qui se
+   * chevauchent — RN=['67'] englobe déjà 676/677 que RO=['676','677'] reprend,
+   * et TJ=['77'] englobe 776/777 repris par TK=['776','777']. Sommer ces postes
+   * double-comptait les pertes/gains de change → résultat net FAUX dès qu'une
+   * balance détaille 676/677/776/777, et incohérent avec la cascade SIG (SIG9).
+   *
+   * On calcule désormais le résultat sur des classes DISJOINTES, identité
+   * comptable robuste (= SIG9 = F-003/EF-005) :
+   *   Résultat net = Produits(7) - Charges(6) + HAO net(8 hors 89) - IS(89)
+   *               = -(Σ soldes signés des classes 6, 7 et 8)
+   * (charges classe 6 débit > 0, produits classe 7 crédit < 0, etc.)
+   */
   getResultatFromCompteResultat(): number {
-    const { charges, produits } = this.generateCompteResultat()
-    const totalCharges = charges.reduce((sum: number, row: CompteResultatRow) => sum + row.montant, 0)
-    const totalProduits = produits.reduce((sum: number, row: CompteResultatRow) => sum + row.montant, 0)
-    return totalProduits - totalCharges
+    return -this.sumSoldes(['6', '7', '8'])
   }
 
   private getResultatFromCompteResultatN1(): number {
-    const { charges, produits } = this.generateCompteResultat()
-    const totalCharges = charges.reduce((sum: number, row: CompteResultatRow) => sum + (row.montant_n1 || 0), 0)
-    const totalProduits = produits.reduce((sum: number, row: CompteResultatRow) => sum + (row.montant_n1 || 0), 0)
-    return totalProduits - totalCharges
+    return -this.sumSoldesN1(['6', '7', '8'])
   }
 
   // ────────── Génération SIG (Soldes Intermédiaires de Gestion) ──────────

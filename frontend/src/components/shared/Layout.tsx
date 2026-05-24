@@ -28,6 +28,7 @@ import {
   Tooltip,
   Chip,
   Badge,
+  Collapse,
 } from '@mui/material'
 import {
   Menu as MenuIcon,
@@ -38,21 +39,19 @@ import {
   AccountBalance,
   Assignment,
   Security,
-  Description,
   CloudUpload,
   Analytics,
-  Flag as FlagIcon,
   Home as HomeIcon,
-  History as HistoryIcon,
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon,
-  Archive as ArchiveIcon,
   Folder as FolderIcon,
   Add as AddIcon,
   Business as BusinessIcon,
   ArrowBack as ArrowBackIcon,
   SupportAgent as SupportIcon,
   School as SchoolIcon,
+  ExpandMore as ExpandMoreIcon,
+  ExpandLess as ExpandLessIcon,
 } from '@mui/icons-material'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
@@ -180,24 +179,22 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const dossierItems = [
     { text: 'Tableau de bord', icon: <DashboardIcon />, path: '/dashboard' },
 
+    // « Config. Fiscale » retiré de la sidebar : c'était un DOUBLON exact du
+    // panneau « Config. Fiscale » de la page Configuration (même <FiscalConfigPage/>).
+    // On y accède désormais via l'onglet dédié dans Configuration.
     { text: 'Configuration', icon: <Settings />, path: '/parametrage', divider: 'Configuration' },
-    { text: 'Config. Fiscale', icon: <FlagIcon />, path: '/parametrage/fiscal-config' },
     { text: 'Plans Comptables', icon: <AccountBalance />, path: '/plans-comptables' },
     { text: 'Points de Contrôle IA', icon: <Security />, path: '/control-points' },
 
-    { text: 'Import Balance', icon: <CloudUpload />, path: '/import-balance', divider: 'Import & Contrôle' },
-    { text: 'Journal des Imports', icon: <HistoryIcon />, path: '/import-history' },
-    { text: 'Consultation Balance', icon: <AccountBalance />, path: '/balance' },
-    { text: 'Audit & Corrections', icon: <Security />, path: '/audit' },
+    // Module unique « Import & Contrôle » à onglets (Import / Journal /
+    // Consultation / Audit) — voir pages/import/ImportControle.tsx.
+    { text: 'Import & Contrôle', icon: <CloudUpload />, path: '/import-controle', divider: 'Import & Contrôle' },
 
-    { text: 'Liasse Fiscale', icon: <Assignment />, path: '/liasse-fiscale', divider: 'Production Liasse' },
-    { text: 'Controle de Liasse', icon: <Security />, path: '/validation-liasse' },
-    { text: 'Generation Auto', icon: <Description />, path: '/generation' },
-    { text: 'Templates Export', icon: <CloudUpload />, path: '/templates' },
+    // Module unique « Production Liasse » à onglets (Liasse / Contrôle / Génération / Templates)
+    { text: 'Production Liasse', icon: <Assignment />, path: '/production-liasse', divider: 'Production Liasse' },
 
-    { text: 'Télédéclaration', icon: <Analytics />, path: '/teledeclaration', divider: 'Finalisation' },
-    { text: 'Reporting', icon: <Analytics />, path: '/reporting' },
-    { text: 'Archives', icon: <ArchiveIcon />, path: '/archives' },
+    // Module unique « Finalisation » à onglets (Télédéclaration / Reporting / Archives)
+    { text: 'Finalisation', icon: <Analytics />, path: '/finalisation', divider: 'Finalisation' },
 
     { text: 'Support', icon: <SupportIcon />, path: '/support', divider: 'Aide' },
   ]
@@ -205,19 +202,107 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const onDossiersPage = location.pathname === '/dossiers'
   const menuItems = (isCabinet && (!activeDossierId || onDossiersPage)) ? cabinetGlobalItems : dossierItems
 
+  // ── Regroupement de la navigation en MODULES repliables ──
+  // La liste plate (marquée par `divider`) devient des groupes-modules. Les
+  // items avant le 1er divider (Tableau de bord) restent hors groupe (toujours
+  // visibles). Le module contenant la route active est déplié par défaut.
+  type NavItem = { text: string; icon: React.ReactNode; path: string; divider?: string }
+  const navGroups = React.useMemo(() => {
+    const groups: { label: string | null; items: NavItem[] }[] = []
+    let current: { label: string | null; items: NavItem[] } = { label: null, items: [] }
+    for (const it of menuItems as NavItem[]) {
+      if (it.divider) {
+        if (current.items.length) groups.push(current)
+        current = { label: it.divider, items: [] }
+      }
+      current.items.push(it)
+    }
+    if (current.items.length) groups.push(current)
+    return groups
+  }, [menuItems])
+
+  const isActivePath = (path: string) =>
+    location.pathname === path || (path !== '/dashboard' && location.pathname.startsWith(path))
+
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({})
+  const groupOpen = (label: string | null, items: NavItem[]) => {
+    if (label === null) return true
+    if (label in openGroups) return openGroups[label]
+    return items.some((it) => isActivePath(it.path))
+  }
+
+  const renderNavItem = (item: NavItem, isCollapsed: boolean) => (
+    <ListItem disablePadding key={item.text}>
+      <Tooltip title={isCollapsed ? item.text : ''} placement="right" arrow>
+        <ListItemButton
+          selected={isActivePath(item.path)}
+          onClick={() => { navigate(item.path); if (isMobile) setMobileOpen(false) }}
+          sx={{
+            position: 'relative',
+            borderRadius: 3,
+            mx: isCollapsed ? 0.5 : 1,
+            my: 0.25,
+            py: 0.75,
+            px: isCollapsed ? 1.5 : 2,
+            justifyContent: isCollapsed ? 'center' : 'flex-start',
+            color: P.primary300,
+            transition: 'background-color 180ms cubic-bezier(0.4, 0, 0.2, 1), color 180ms cubic-bezier(0.4, 0, 0.2, 1)',
+            '&::before': {
+              content: '""', position: 'absolute', left: 0, top: 8, bottom: 8, width: 3,
+              borderRadius: 2, backgroundColor: 'transparent',
+              transition: 'background-color 180ms cubic-bezier(0.4, 0, 0.2, 1)',
+            },
+            '&:hover': {
+              backgroundColor: 'rgba(15, 118, 110, 0.12)',
+              color: P.white,
+              '& .MuiListItemIcon-root': { color: P.tealLight },
+              '& .MuiListItemText-primary': { color: P.white },
+            },
+            '&.Mui-selected': {
+              backgroundColor: 'rgba(15, 118, 110, 0.20)',
+              color: P.white,
+              '&::before': { backgroundColor: P.teal },
+              '& .MuiListItemIcon-root': { color: P.tealLight },
+              '& .MuiListItemText-primary': { color: P.white, fontWeight: 600 },
+              '&:hover': { backgroundColor: 'rgba(15, 118, 110, 0.28)' },
+            },
+            '& .MuiListItemIcon-root': {
+              color: P.primary400,
+              minWidth: isCollapsed ? 0 : 40,
+              transition: 'color 180ms cubic-bezier(0.4, 0, 0.2, 1)',
+            },
+            '& .MuiListItemText-primary': { color: P.primary300 },
+          }}
+        >
+          <ListItemIcon>{item.icon}</ListItemIcon>
+          {!isCollapsed && (
+            <ListItemText
+              primary={item.text}
+              sx={{ '& .MuiTypography-root': { fontSize: '0.85rem', fontWeight: 500 } }}
+            />
+          )}
+        </ListItemButton>
+      </Tooltip>
+    </ListItem>
+  )
+
   const renderDrawerContent = (isCollapsed: boolean) => (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
       {/* Logo + Accueil */}
-      <Toolbar sx={{ px: isCollapsed ? 1 : 2.5, py: 1, display: 'flex', justifyContent: isCollapsed ? 'center' : 'space-between', alignItems: 'center', flexShrink: 0, minHeight: '56px !important' }}>
+      <Toolbar sx={{ bgcolor: 'transparent', px: isCollapsed ? 1 : 2.5, py: 1, display: 'flex', justifyContent: isCollapsed ? 'center' : 'space-between', alignItems: 'center', flexShrink: 0, minHeight: '56px !important' }}>
         {!isCollapsed && (
           <Typography
             variant="h6"
+            onClick={handleHomeClick}
             sx={{
               fontFamily: "'Grand Hotel', cursive",
               fontSize: '1.6rem',
               fontWeight: 400,
               color: P.white,
               letterSpacing: 0.5,
+              cursor: 'pointer',
+              transition: 'opacity 0.15s',
+              '&:hover': { opacity: 0.8 },
             }}
           >
             Liass'Pilot
@@ -249,8 +334,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 onClick={handleHomeClick}
                 size="small"
                 sx={{
-                  color: P.primary500,
-                  '&:hover': { color: P.white, bgcolor: P.primary800 },
+                  color: P.tealLight,
+                  bgcolor: 'rgba(94,234,212,0.10)',
+                  '&:hover': { color: P.white, bgcolor: P.teal },
                 }}
                 aria-label={homeLabel}
               >
@@ -374,101 +460,48 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       {!onDossiersPage && <ExerciceSelector collapsed={isCollapsed} />}
 
       <List sx={{ px: isCollapsed ? 0.25 : 0.5, overflowY: 'auto', flexGrow: 1 }}>
-        {menuItems.map((item, index) => (
-          <React.Fragment key={item.text}>
-            {item.divider && index > 0 && !isCollapsed && (
-              <>
-                <Divider sx={{ my: 1.5, mx: 2, borderColor: P.primary700, opacity: 0.5 }} />
-                <ListItem sx={{ py: 0.5, px: 2 }}>
-                  <Typography
-                    variant="caption"
+        {isCollapsed
+          ? menuItems.map((item, index) => (
+              <React.Fragment key={item.text}>
+                {(item as NavItem).divider && index > 0 && (
+                  <Divider sx={{ my: 1, mx: 1, borderColor: P.primary700, opacity: 0.5 }} />
+                )}
+                {renderNavItem(item as NavItem, true)}
+              </React.Fragment>
+            ))
+          : navGroups.map((g) => {
+              if (g.label === null) {
+                return <React.Fragment key="__top">{g.items.map((it) => renderNavItem(it, false))}</React.Fragment>
+              }
+              // Module à item unique (ex. « Import & Contrôle » à onglets) :
+              // rendu comme un lien simple, sans en-tête repliable.
+              if (g.items.length === 1) {
+                return <React.Fragment key={g.label}>{renderNavItem(g.items[0], false)}</React.Fragment>
+              }
+              const open = groupOpen(g.label, g.items)
+              return (
+                <Box key={g.label} sx={{ mt: 1 }}>
+                  <ListItemButton
+                    onClick={() => setOpenGroups((p) => ({ ...p, [g.label as string]: !open }))}
                     sx={{
-                      fontWeight: 700,
-                      color: P.primary500,
-                      textTransform: 'uppercase',
-                      letterSpacing: 1.5,
-                      fontSize: '0.65rem',
+                      borderRadius: 2, mx: 1, py: 0.5, px: 2,
+                      '&:hover': { backgroundColor: 'rgba(255,255,255,0.04)' },
                     }}
                   >
-                    {item.divider}
-                  </Typography>
-                </ListItem>
-              </>
-            )}
-            {item.divider && index > 0 && isCollapsed && (
-              <Divider sx={{ my: 1, mx: 1, borderColor: P.primary700, opacity: 0.5 }} />
-            )}
-
-            <ListItem disablePadding>
-              <Tooltip title={isCollapsed ? item.text : ''} placement="right" arrow>
-                <ListItemButton
-                  selected={location.pathname === item.path || (item.path !== '/dashboard' && location.pathname.startsWith(item.path))}
-                  onClick={() => {
-                    navigate(item.path)
-                    if (isMobile) setMobileOpen(false)
-                  }}
-                  sx={{
-                    position: 'relative',
-                    borderRadius: 3,
-                    mx: isCollapsed ? 0.5 : 1,
-                    my: 0.25,
-                    py: 0.75,
-                    px: isCollapsed ? 1.5 : 2,
-                    justifyContent: isCollapsed ? 'center' : 'flex-start',
-                    color: P.primary300,
-                    transition: 'background-color 180ms cubic-bezier(0.4, 0, 0.2, 1), color 180ms cubic-bezier(0.4, 0, 0.2, 1)',
-                    // Bord vertical d'accent teal (révélé sur selected)
-                    '&::before': {
-                      content: '""',
-                      position: 'absolute',
-                      left: 0,
-                      top: 8,
-                      bottom: 8,
-                      width: 3,
-                      borderRadius: 2,
-                      backgroundColor: 'transparent',
-                      transition: 'background-color 180ms cubic-bezier(0.4, 0, 0.2, 1)',
-                    },
-                    '&:hover': {
-                      backgroundColor: 'rgba(15, 118, 110, 0.12)',
-                      color: P.white,
-                      '& .MuiListItemIcon-root': { color: P.tealLight },
-                      '& .MuiListItemText-primary': { color: P.white },
-                    },
-                    // ── État sélectionné = ACCENT TEAL Nordic Slate ──
-                    '&.Mui-selected': {
-                      backgroundColor: 'rgba(15, 118, 110, 0.20)',
-                      color: P.white,
-                      '&::before': { backgroundColor: P.teal },
-                      '& .MuiListItemIcon-root': { color: P.tealLight },
-                      '& .MuiListItemText-primary': { color: P.white, fontWeight: 600 },
-                      '&:hover': { backgroundColor: 'rgba(15, 118, 110, 0.28)' },
-                    },
-                    '& .MuiListItemIcon-root': {
-                      color: P.primary400,
-                      minWidth: isCollapsed ? 0 : 40,
-                      transition: 'color 180ms cubic-bezier(0.4, 0, 0.2, 1)',
-                    },
-                    '& .MuiListItemText-primary': { color: P.primary300 },
-                  }}
-                >
-                  <ListItemIcon>{item.icon}</ListItemIcon>
-                  {!isCollapsed && (
                     <ListItemText
-                      primary={item.text}
-                      sx={{
-                        '& .MuiTypography-root': {
-                          fontSize: '0.85rem',
-                          fontWeight: 500,
-                        }
-                      }}
+                      primary={g.label}
+                      sx={{ '& .MuiTypography-root': { fontWeight: 700, color: P.primary500, textTransform: 'uppercase', letterSpacing: '1.5px', fontSize: '0.65rem' } }}
                     />
-                  )}
-                </ListItemButton>
-              </Tooltip>
-            </ListItem>
-          </React.Fragment>
-        ))}
+                    {open
+                      ? <ExpandLessIcon sx={{ fontSize: 16, color: P.primary500 }} />
+                      : <ExpandMoreIcon sx={{ fontSize: 16, color: P.primary500 }} />}
+                  </ListItemButton>
+                  <Collapse in={open} timeout="auto" unmountOnExit>
+                    {g.items.map((it) => renderNavItem(it, false))}
+                  </Collapse>
+                </Box>
+              )
+            })}
       </List>
 
       {/* Collapse toggle button — desktop only */}
@@ -504,14 +537,18 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         sx={{
           width: { md: `calc(100% - ${drawerWidth}px)` },
           ml: { md: `${drawerWidth}px` },
-          bgcolor: 'background.paper',
+          // Surface PLEINE et nette (le glass translucide rendait un gris sale
+          // car le flou échantillonnait le contenu gris derrière).
+          bgcolor: '#ffffff',
+          backgroundImage: 'none',
           color: 'text.primary',
           borderBottom: `1px solid ${P.primary200}`,
+          boxShadow: '0 1px 3px rgba(28,25,23,0.04)',
           zIndex: theme.zIndex.drawer + 1,
           transition: 'width 0.25s ease, margin-left 0.25s ease',
         }}
       >
-        <Toolbar sx={{ bgcolor: 'background.paper', color: 'text.primary' }}>
+        <Toolbar sx={{ bgcolor: '#ffffff', color: 'text.primary' }}>
           <IconButton
             color="inherit"
             aria-label="open drawer"
@@ -623,6 +660,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               boxSizing: 'border-box',
               width: DRAWER_WIDTH,
               backgroundColor: P.primary900,
+              backgroundImage:
+                'radial-gradient(120% 55% at 50% 0%, rgba(15,118,110,0.14) 0%, rgba(15,118,110,0) 55%), linear-gradient(180deg, #211d1b 0%, #1c1917 45%, #0e0c0b 100%)',
               borderRight: 'none',
             },
           }}
@@ -639,8 +678,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               width: drawerWidth,
               position: 'relative',
               backgroundColor: P.primary900,
+              backgroundImage:
+                'radial-gradient(120% 55% at 50% 0%, rgba(15,118,110,0.14) 0%, rgba(15,118,110,0) 55%), linear-gradient(180deg, #211d1b 0%, #1c1917 45%, #0e0c0b 100%)',
               height: '100vh',
-              borderRight: 'none',
+              borderRight: `1px solid ${P.primary800}`,
               transition: 'width 0.25s ease',
               overflowX: 'hidden',
             },
@@ -661,6 +702,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           display: 'flex',
           flexDirection: 'column',
           bgcolor: 'grey.50',
+          // Voile d'ambiance teal en tête du canvas de travail — profondeur
+          // subtile plutôt qu'un aplat gris « mort ».
+          backgroundImage:
+            'radial-gradient(90% 60% at 50% 0%, rgba(15,118,110,0.05) 0%, rgba(15,118,110,0) 55%)',
           overflow: 'hidden',
           transition: 'width 0.25s ease',
         }}

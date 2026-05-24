@@ -219,13 +219,18 @@ const FiscalConfigPage: React.FC = () => {
   return (
     <RequirePermission permission="manage:subscription">
       <Box sx={{ p: 3 }}>
-        <Typography variant="h5" fontWeight={700} gutterBottom>
-          Configuration fiscale par pays
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-          Parametrez les taux d'imposition, seuils de deductibilite et regles fiscales pour chaque pays OHADA.
-          Les modifications prennent effet immediatement pour toutes les nouvelles generations de liasses.
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'stretch', gap: 1.75, mb: 3 }}>
+          <Box sx={{ width: 4, borderRadius: 2, flexShrink: 0, background: 'linear-gradient(135deg, #14b8a6 0%, #0f766e 55%, #115e59 100%)' }} />
+          <Box>
+            <Typography variant="h5" fontWeight={700} gutterBottom sx={{ letterSpacing: '-0.01em' }}>
+              Configuration fiscale par pays
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Parametrez les taux d'imposition, seuils de deductibilite et regles fiscales pour chaque pays OHADA.
+              Les modifications prennent effet immediatement pour toutes les nouvelles generations de liasses.
+            </Typography>
+          </Box>
+        </Box>
 
         <Alert severity="info" sx={{ mb: 3 }}>
           <AlertTitle>Verification des taux</AlertTitle>

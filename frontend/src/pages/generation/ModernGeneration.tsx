@@ -162,12 +162,17 @@ const ModernGeneration: React.FC = () => {
         >
           Retour au menu principal
         </Button>
-        <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
-          Generation de la liasse fiscale
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          Verification des prerequis et lancement de la generation SYSCOHADA
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'stretch', gap: 1.75 }}>
+          <Box sx={{ width: 4, borderRadius: 2, flexShrink: 0, background: 'linear-gradient(135deg, #14b8a6 0%, #0f766e 55%, #115e59 100%)' }} />
+          <Box>
+            <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, letterSpacing: '-0.01em' }}>
+              Generation de la liasse fiscale
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
+              Verification des prerequis et lancement de la generation SYSCOHADA
+            </Typography>
+          </Box>
+        </Box>
       </Box>
 
       <Grid container spacing={3}>

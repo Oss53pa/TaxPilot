@@ -314,9 +314,12 @@ export default function DossiersPage() {
     <Box sx={{ p: 3 }}>
       {/* Header */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h5" sx={{ fontWeight: 700, color: '#212121' }}>
-          Portefeuille Clients
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <Box sx={{ width: 4, height: 30, borderRadius: 2, flexShrink: 0, background: 'linear-gradient(135deg, #14b8a6 0%, #0f766e 55%, #115e59 100%)' }} />
+          <Typography variant="h5" sx={{ fontWeight: 700, color: '#212121', letterSpacing: '-0.01em' }}>
+            Portefeuille Clients
+          </Typography>
+        </Box>
         <Tooltip title={dossierLimitReached ? upgradeTooltip : ''}>
           <span>
             <Button

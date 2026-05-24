@@ -10,6 +10,12 @@ export default defineConfig({
     setupFiles: './src/test/setup.ts',
     css: true,
     exclude: ['e2e/**', 'node_modules/**'],
+    // L'environnement jsdom + MUI + userEvent est lourd à froid (collect ~6 min,
+    // transform ~70 s sur cette base). Le défaut de 5 s faisait flaker le PREMIER
+    // test d'interaction de chaque fichier (init unique des lazy imports/thème).
+    // On élargit globalement : les tests sont corrects, c'est l'infra qui est lente.
+    testTimeout: 20000,
+    hookTimeout: 20000,
   },
   resolve: {
     alias: {

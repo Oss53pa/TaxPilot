@@ -249,13 +249,16 @@ const EInvoicingPage: React.FC = () => {
       {/* Header */}
       <Box sx={{ mb: 4 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-          <Box>
-            <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
-              Facturation Electronique
-            </Typography>
-            <Typography variant="body1" color="text.secondary">
-              Creation de factures, export UBL/CII/PEPPOL et suivi des paiements
-            </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'stretch', gap: 1.75 }}>
+            <Box sx={{ width: 4, borderRadius: 2, flexShrink: 0, background: 'linear-gradient(135deg, #14b8a6 0%, #0f766e 55%, #115e59 100%)' }} />
+            <Box>
+              <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, letterSpacing: '-0.01em' }}>
+                Facturation Electronique
+              </Typography>
+              <Typography variant="body1" color="text.secondary">
+                Creation de factures, export UBL/CII/PEPPOL et suivi des paiements
+              </Typography>
+            </Box>
           </Box>
           <Stack direction="row" spacing={2}>
             <Button variant="outlined" startIcon={<ClientIcon />} onClick={() => setClientDialog(true)}>

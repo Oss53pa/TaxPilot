@@ -647,13 +647,16 @@ const ModernImportBalance: React.FC = () => {
       {/* Header */}
       <Box sx={{ mb: 4 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-          <Box>
-            <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
-              Import Balance Avancé
-            </Typography>
-            <Typography variant="body1" color="text.secondary">
-              Import multi-formats avec détection automatique et mapping intelligent
-            </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'stretch', gap: 1.75 }}>
+            <Box sx={{ width: 4, borderRadius: 2, flexShrink: 0, background: 'linear-gradient(135deg, #14b8a6 0%, #0f766e 55%, #115e59 100%)' }} />
+            <Box>
+              <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, letterSpacing: '-0.01em' }}>
+                Import Balance Avancé
+              </Typography>
+              <Typography variant="body1" color="text.secondary">
+                Import multi-formats avec détection automatique et mapping intelligent
+              </Typography>
+            </Box>
           </Box>
           
           <Stack direction="row" spacing={2}>
@@ -682,7 +685,6 @@ const ModernImportBalance: React.FC = () => {
             <Button
               variant="contained"
               startIcon={<UploadIcon />}
-              sx={{ backgroundColor: theme.palette.primary.main }}
             >
               Nouvel import
             </Button>

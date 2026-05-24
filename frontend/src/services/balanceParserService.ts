@@ -82,13 +82,44 @@ export function readFileAsText(file: File, encoding = 'UTF-8'): Promise<string> 
 
 // ────────── Parsing ──────────
 
+/**
+ * Localise la ligne d'EN-TÊTE dans une grille brute.
+ *
+ * De nombreux exports comptables réels placent des lignes de titre / logo /
+ * dénomination / dates AU-DESSUS de la vraie ligne d'en-tête (ex. balance
+ * EMERGENCE : en-tête réel ~ligne 13). L'ancien code supposait toujours la
+ * ligne 0 → en-têtes vides → auto-détection des colonnes en échec.
+ *
+ * On scanne les ~40 premières lignes et on retient celle qui matche le plus de
+ * motifs de colonnes (compte / libellé / débit|solde-débit / crédit|solde-crédit).
+ * Fallback : ligne 0 si aucune ligne crédible (fichier sans en-tête → mapping
+ * manuel requis côté UI).
+ */
+function findHeaderRowIndex(json: (string | number)[][]): number {
+  const maxScan = Math.min(json.length, 40)
+  let best = 0
+  let bestScore = 0
+  for (let i = 0; i < maxScan; i++) {
+    const cells = (json[i] || []).map(c => norm(String(c)))
+    let score = 0
+    if (cells.some(c => PATTERNS.compte.test(c))) score++
+    if (cells.some(c => PATTERNS.libelle.test(c))) score++
+    if (cells.some(c => PATTERNS.debit.test(c) || PATTERNS.soldeDebit.test(c))) score++
+    if (cells.some(c => PATTERNS.credit.test(c) || PATTERNS.soldeCredit.test(c))) score++
+    if (score > bestScore) { bestScore = score; best = i }
+  }
+  // Au moins compte + un montant pour considérer que c'est une vraie ligne d'en-tête
+  return bestScore >= 2 ? best : 0
+}
+
 export function parseExcelFile(buffer: ArrayBuffer): ParsedSheet[] {
   const workbook = XLSX.read(buffer, { type: 'array' })
   return workbook.SheetNames.map(name => {
     const sheet = workbook.Sheets[name]
     const json: (string | number)[][] = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' })
-    const headers = json.length > 0 ? json[0].map(String) : []
-    const rows = json.slice(1)
+    const hIdx = findHeaderRowIndex(json)
+    const headers = json.length > hIdx ? json[hIdx].map(String) : []
+    const rows = json.slice(hIdx + 1)
     return { name, headers, rows, rawSheet: sheet }
   })
 }
@@ -211,6 +242,39 @@ export function detectStructure(sheet: ParsedSheet): DetectionResult {
     })
   }
 
+  // ── Fallback CONTENU : compte / libellé non détectés par en-tête ──
+  // Beaucoup de balances réelles n'étiquettent pas la colonne "Compte" (ou la
+  // mettent en cellule fusionnée). On déduit alors du CONTENU des lignes :
+  //   - compte  = colonne où la majorité des valeurs sont des n° de compte (\d{3,10})
+  //   - libellé = colonne la plus textuelle
+  if (mapping.compte === undefined || mapping.libelle === undefined) {
+    const sample = rows.slice(0, 60)
+    const ncols = sample.reduce((m, r) => Math.max(m, r.length), 0)
+    let bestCompteCol = -1, bestCompteScore = 0
+    let bestLibCol = -1, bestLibScore = 0
+    for (let c = 0; c < ncols; c++) {
+      let acct = 0, text = 0, tot = 0
+      for (const r of sample) {
+        const v = r[c]
+        if (v === '' || v === null || v === undefined) continue
+        tot++
+        const s = String(v).trim()
+        if (/^\d{3,10}$/.test(s)) acct++
+        else if (/[A-Za-zÀ-ÿ]{3,}/.test(s)) text++
+      }
+      if (tot < 5) continue
+      const aScore = acct / tot, tScore = text / tot
+      if (aScore > bestCompteScore) { bestCompteScore = aScore; bestCompteCol = c }
+      if (tScore > bestLibScore) { bestLibScore = tScore; bestLibCol = c }
+    }
+    if (mapping.compte === undefined && bestCompteCol >= 0 && bestCompteScore >= 0.6) {
+      mapping.compte = bestCompteCol; matchCount++
+    }
+    if (mapping.libelle === undefined && bestLibCol >= 0 && bestLibCol !== mapping.compte && bestLibScore >= 0.6) {
+      mapping.libelle = bestLibCol
+    }
+  }
+
   // Minimal requirement: at least compte + amount columns
   const hasCompte = mapping.compte !== undefined
   const hasAmounts = (mapping.debit !== undefined && mapping.credit !== undefined) ||
@@ -234,6 +298,36 @@ export function detectStructure(sheet: ParsedSheet): DetectionResult {
   // Fill N-1 defaults from solde columns
   if (mapping.debitN1 === undefined && mapping.soldeDebitN1 !== undefined) mapping.debitN1 = mapping.soldeDebitN1
   if (mapping.creditN1 === undefined && mapping.soldeCreditN1 !== undefined) mapping.creditN1 = mapping.soldeCreditN1
+
+  // ── Garde-fou anti "mapping confiant mais faux" ──
+  // Cas réel (balance EMERGENCE) : en-tête fusionné "Crédit" décalé d'une colonne
+  // par rapport aux valeurs → la colonne crédit détectée est VIDE alors que la
+  // colonne débit est remplie → import silencieux erroné (passif négatif, écart
+  // bilan énorme). On vérifie sur un échantillon que les DEUX colonnes montant N
+  // (débit/crédit ou solde débit/crédit) contiennent réellement des données. Si
+  // l'une est quasi vide alors que l'autre est remplie → décalage probable →
+  // on REFUSE l'auto-mapping (mapping=null) pour forcer le mapping manuel (UI).
+  const sample = rows.slice(0, 80)
+  const filledFrac = (c: number | undefined): number => {
+    if (c === undefined || c < 0) return 1 // colonne non utilisée → neutre
+    const nonEmpty = sample.filter(r => { const v = r[c]; return v !== '' && v !== null && v !== undefined }).length
+    return sample.length ? nonEmpty / sample.length : 0
+  }
+  const dCol = mapping.soldeDebit ?? mapping.debit
+  const cCol = mapping.soldeCredit ?? mapping.credit
+  const dFrac = filledFrac(dCol)
+  const cFrac = filledFrac(cCol)
+  const misaligned = sample.length >= 10 &&
+    ((dFrac > 0.5 && cFrac < 0.1) || (cFrac > 0.5 && dFrac < 0.1))
+  if (misaligned) {
+    return {
+      mapping: null,
+      headers,
+      sampleData: rows.slice(0, 5),
+      confidence: Math.min(40, Math.round((matchCount / 4) * 100)),
+      rowCount: rows.length,
+    }
+  }
 
   const confidence = Math.min(100, Math.round((matchCount / 4) * 100))
 
