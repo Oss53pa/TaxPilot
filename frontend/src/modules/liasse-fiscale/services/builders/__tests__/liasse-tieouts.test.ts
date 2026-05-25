@@ -1,0 +1,220 @@
+import { describe, it, expect } from 'vitest'
+import { buildBilan } from '../build-09-bilan'
+import { buildResultat } from '../build-11-passif-resultat'
+import { getBalanceSolde, getProduits, getCharges } from '../../liasse-calculs'
+import { buildCompChargesRows, buildNoteRows, NOTE08_LINES, NOTE17_LINES } from '../../noteBalanceMapping'
+import type { BalanceEntry, EntrepriseData } from '../../../types'
+import type { ExerciceData } from '../../liasse-export-excel'
+import type { Row } from '../helpers'
+
+/**
+ * TIE-OUTS du moteur de génération de la liasse fiscale SYSCOHADA.
+ *
+ * Premier harnais de test du moteur des 84 feuillets (builders/build-*.ts),
+ * jusqu'ici NON couvert. On pilote les vrais builders avec une balance
+ * SYSCOHADA réaliste et on assert les IDENTITÉS COMPTABLES DURES :
+ *
+ *   1. Équilibre du bilan : Total Actif (BZ) = Total Passif (DZ).
+ *   2. Cohérence du résultat : Résultat net CdR (XI) = −Σ soldes(classes 6,7,8)
+ *      (identité robuste indépendante du découpage des postes — détecte tout
+ *       trou de mapping ou double comptage).
+ *   3. Chiffre d'affaires (XB) = total des ventes (classe 70).
+ *   4. Total des charges ordinaires (COMP-CHARGES) = Σ charges classe 6.
+ *
+ * Ces assertions sont en grande partie MAPPING-AGNOSTIQUES : si un compte
+ * standard n'est pas affecté (ou l'est deux fois), elles cassent → bug révélé.
+ */
+
+const TOL = 1 // tolérance 1 FCFA
+
+/** Construit une entrée de balance à partir d'un solde net signé (débit > 0). */
+function e(compte: string, solde: number): BalanceEntry {
+  const sd = solde > 0 ? solde : 0
+  const sc = solde < 0 ? -solde : 0
+  return { compte, libelle: compte, debit: sd, credit: sc, solde_debit: sd, solde_credit: sc }
+}
+
+const ENT = {
+  denomination: 'SOCIETE TEST SA',
+  sigle: 'STEST',
+  adresse: 'Abidjan',
+  ncc: 'CI-TEST-001',
+  ntd: '',
+  exercice_clos: '2024-12-31',
+  exercice_precedent_fin: '2023-12-31',
+} as unknown as EntrepriseData
+
+const EX = {
+  dateDebut: '2024-01-01',
+  dateFin: '2024-12-31',
+} as unknown as ExerciceData
+
+const EMPTY: BalanceEntry[] = []
+
+/** Cherche une ligne par sa valeur de référence dans une colonne donnée. */
+function findByRef(rows: Row[], refCol: number, ref: string): Row | undefined {
+  return rows.find((r) => r[refCol] === ref)
+}
+
+function num(v: unknown): number {
+  return typeof v === 'number' ? v : 0
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// FIXTURE A — Balance POST-CLÔTURE équilibrée (résultat affecté au compte 13).
+//   Σ débit = Σ crédit ; le bilan doit s'équilibrer (BZ = DZ).
+// ════════════════════════════════════════════════════════════════════════════
+
+const BALANCE_A: BalanceEntry[] = [
+  // ACTIF immobilisé
+  e('2151', 1_000_000),   // Logiciels (incorporel)      → AF brut
+  e('28151', -200_000),   // Amort. logiciels            → AF amort (réduit le net)
+  e('2441', 5_000_000),   // Matériel et mobilier        → AM brut
+  e('28441', -1_000_000), // Amort. matériel             → AM amort
+  // ACTIF circulant
+  e('3111', 2_000_000),   // Stock marchandises          → BB
+  e('4111', 3_000_000),   // Clients                     → BI
+  // Trésorerie-actif
+  e('5211', 1_500_000),   // Banque                      → BS
+  e('5711', 200_000),     // Caisse                      → BS
+  // PASSIF
+  e('1011', -5_000_000),  // Capital social              → CA
+  e('1621', -1_000_000),  // Emprunts ets de crédit      → DA
+  e('4011', -2_500_000),  // Fournisseurs                → DJ
+  e('131', -3_000_000),   // Résultat net (bénéfice)     → CJ
+]
+// Actif net attendu = (1 000 000 − 200 000) + (5 000 000 − 1 000 000)
+//                   + 2 000 000 + 3 000 000 + 1 500 000 + 200 000 = 11 500 000
+// Passif attendu    = 5 000 000 + 1 000 000 + 2 500 000 + 3 000 000 = 11 500 000
+const TOTAL_BILAN_ATTENDU = 11_500_000
+
+describe('Liasse — équilibre du Bilan (build-09)', () => {
+  const { rows } = buildBilan(BALANCE_A, EMPTY, ENT, EX)
+  const bz = findByRef(rows, 0, 'BZ') // Total général ACTIF (ref col 0, net col 7)
+  const dz = findByRef(rows, 9, 'DZ') // Total général PASSIF (ref col 9, net col 12)
+
+  it('produit bien les lignes de total BZ et DZ', () => {
+    expect(bz).toBeDefined()
+    expect(dz).toBeDefined()
+  })
+
+  it('BZ (Total Actif) = DZ (Total Passif) — bilan équilibré', () => {
+    expect(Math.abs(num(bz?.[7]) - num(dz?.[12]))).toBeLessThanOrEqual(TOL)
+  })
+
+  it('BZ = montant attendu (11 500 000) — pas de compte standard perdu', () => {
+    expect(Math.abs(num(bz?.[7]) - TOTAL_BILAN_ATTENDU)).toBeLessThanOrEqual(TOL)
+  })
+
+  it('CJ (résultat au passif) = 3 000 000 (compte 13)', () => {
+    const cj = findByRef(rows, 9, 'CJ')
+    expect(Math.abs(num(cj?.[12]) - 3_000_000)).toBeLessThanOrEqual(TOL)
+  })
+})
+
+// ════════════════════════════════════════════════════════════════════════════
+// FIXTURE B — Comptes de gestion (classes 6/7/8) pour le Compte de Résultat.
+//   Comptes à 4 chiffres (granularité réelle d'une balance).
+// ════════════════════════════════════════════════════════════════════════════
+
+const BALANCE_B: BalanceEntry[] = [
+  // Charges (classe 6) — soldes débiteurs
+  e('6011', 4_000_000),  // Achats de marchandises          → RA
+  e('6041', 500_000),    // Matières consommables (autres achats) → RE
+  e('6111', 300_000),    // Transports sur achats           → RG
+  e('6221', 800_000),    // Locations                       → RH
+  e('6411', 200_000),    // Impôts fonciers                 → RI
+  e('6611', 2_000_000),  // Salaires                        → RK
+  e('6811', 600_000),    // Dotations amort. exploitation   → RL
+  e('6711', 150_000),    // Intérêts des emprunts           → RM
+  // Impôt sur le résultat (classe 8)
+  e('8911', 400_000),    // Impôt sur les bénéfices         → RS
+  // Produits (classe 7) — soldes créditeurs
+  e('7011', -9_000_000), // Ventes de marchandises          → TA (CA)
+  e('7061', -1_200_000), // Services vendus                 → TC (CA)
+  e('7071', -300_000),   // Produits accessoires            → TD (CA)
+  e('7111', -200_000),   // Subventions d'exploitation      → TG
+  e('7711', -100_000),   // Revenus financiers              → TK
+  e('7811', -50_000),    // Transferts de charges           → TI
+]
+// Résultat net canonique = −Σ soldes(6,7,8)
+//   Σ classe 6 = 8 550 000 ; Σ classe 7 = −10 850 000 ; Σ classe 8 = 400 000
+//   Σ = −1 900 000 → résultat net = +1 900 000
+const RESULTAT_NET_ATTENDU = 1_900_000
+const CA_ATTENDU = 10_500_000 // ventes classe 70 : 9 000 000 + 1 200 000 + 300 000
+
+describe('Liasse — cohérence du Compte de Résultat (build-11)', () => {
+  const { rows } = buildResultat(BALANCE_B, EMPTY, ENT, EX)
+  const xi = findByRef(rows, 0, 'XI') // Résultat net (net col 8)
+  const xb = findByRef(rows, 0, 'XB') // Chiffre d'affaires (net col 8)
+
+  const canonique = -getBalanceSolde(BALANCE_B, ['6', '7', '8'])
+
+  it('produit les lignes XI (résultat net) et XB (CA)', () => {
+    expect(xi).toBeDefined()
+    expect(xb).toBeDefined()
+  })
+
+  it('XI (résultat net CdR) = −Σ soldes(6,7,8) — aucune fuite ni double comptage', () => {
+    expect(Math.abs(num(xi?.[8]) - canonique)).toBeLessThanOrEqual(TOL)
+  })
+
+  it('XI = montant attendu (1 900 000)', () => {
+    expect(Math.abs(num(xi?.[8]) - RESULTAT_NET_ATTENDU)).toBeLessThanOrEqual(TOL)
+  })
+
+  it('XB (Chiffre d\'affaires) = total des ventes (classe 70)', () => {
+    expect(Math.abs(num(xb?.[8]) - getProduits(BALANCE_B, ['70']))).toBeLessThanOrEqual(TOL)
+    expect(Math.abs(num(xb?.[8]) - CA_ATTENDU)).toBeLessThanOrEqual(TOL)
+  })
+})
+
+describe('Liasse — COMP-CHARGES (détail des charges)', () => {
+  const rows = buildCompChargesRows(BALANCE_B, EMPTY)
+  const totalRow = rows.find((r) => r.isTotal)
+  const totalCharges6 = getCharges(BALANCE_B, ['6'])
+
+  it('produit une ligne de total des charges ordinaires', () => {
+    expect(totalRow).toBeDefined()
+  })
+
+  it('Total charges ordinaires = Σ charges classe 6', () => {
+    const montant = num((totalRow?.cells as Record<string, unknown> | undefined)?.montant_n)
+    expect(Math.abs(montant - totalCharges6)).toBeLessThanOrEqual(TOL)
+  })
+})
+
+// ════════════════════════════════════════════════════════════════════════════
+// Bouclages Note → État (les notes détaillent une ligne du Bilan / du CdR).
+// ════════════════════════════════════════════════════════════════════════════
+
+function cellN(row: { cells: Record<string, unknown> } | undefined): number {
+  return num(row?.cells?.montant_n)
+}
+
+describe('Liasse — Note 17 (produits) boucle avec les produits d\'exploitation', () => {
+  const rows = buildNoteRows(BALANCE_B, NOTE17_LINES)
+  const total = rows.find((r) => r.isTotal)
+
+  // Produits d'exploitation = ventes (70) + subventions (71) + production immo (72) + autres (75)
+  const attendu = getProduits(BALANCE_B, ['70', '71', '72', '75'])
+
+  it('Total Note 17 = Σ produits exploitation (70+71+72+75)', () => {
+    expect(Math.abs(cellN(total) - attendu)).toBeLessThanOrEqual(TOL)
+    expect(Math.abs(cellN(total) - 10_700_000)).toBeLessThanOrEqual(TOL)
+  })
+})
+
+describe('Liasse — Note 8 (trésorerie) boucle avec le Bilan (BT)', () => {
+  const noteRows = buildNoteRows(BALANCE_A, NOTE08_LINES)
+  const sousTotalActif = noteRows.find(
+    (r) => (r.cells as Record<string, unknown>).designation === 'SOUS-TOTAL TRESORERIE ACTIF',
+  )
+  const { rows: bilanRows } = buildBilan(BALANCE_A, EMPTY, ENT, EX)
+  const bt = findByRef(bilanRows, 0, 'BT') // Total trésorerie-actif (net col 7)
+
+  it('Sous-total trésorerie-actif Note 8 = Bilan BT', () => {
+    expect(Math.abs(cellN(sousTotalActif) - num(bt?.[7]))).toBeLessThanOrEqual(TOL)
+    expect(Math.abs(cellN(sousTotalActif) - 1_700_000)).toBeLessThanOrEqual(TOL)
+  })
+})

@@ -1,6 +1,6 @@
 import { SheetData, Row, emptyRow, rowAt, m, headerRows } from './helpers'
 import type { EntrepriseData, ExerciceData, BalanceEntry } from './helpers'
-import { getActifBrut, getAmortProv, getBalanceSolde } from './helpers'
+import { getActifBrut, getAmortProv, getBalanceSolde, getPassif } from './helpers'
 import { BILAN_ACTIF, BILAN_PASSIF } from '@/constants/syscohada-mappings'
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -336,8 +336,13 @@ function buildPassifRows(
 ): Row[] {
   const rows: Row[] = []
 
+  // Capitaux propres : solde NET (report à nouveau / résultat déficitaire en négatif).
   const pv = (pfx: readonly string[]) => computePassifVal(bal, pfx)
   const pvN1 = (pfx: readonly string[]) => computePassifVal(balN1, pfx)
+  // Dettes : soldes CRÉDITEURS uniquement (une dette à solde débiteur appartient
+  // à l'actif — sinon le bilan se déséquilibre, cf. banque avoir = trésorerie-actif).
+  const pvc = (pfx: readonly string[]) => getPassif(bal, pfx)
+  const pvcN1 = (pfx: readonly string[]) => getPassif(balN1, pfx)
 
   const makeRow = (
     ref: string, label: string, note: string | number | null,
@@ -369,8 +374,8 @@ function buildPassifRows(
   // ── DETTES FINANCIERES (DD = sum DA+DB+DC) ──
   let DD_net = 0, DD_netN1 = 0
   for (const line of PASSIF_LINES_DF) {
-    const net = pv(line.prefixes)
-    const n1 = pvN1(line.prefixes)
+    const net = pvc(line.prefixes)
+    const n1 = pvcN1(line.prefixes)
     DD_net += net
     DD_netN1 += n1
     rows.push(makeRow(line.ref, line.label, line.note, net, n1))
@@ -385,8 +390,8 @@ function buildPassifRows(
   // ── PASSIF CIRCULANT (DP = sum DH..DN) ──
   let DP_net = 0, DP_netN1 = 0
   for (const line of PASSIF_LINES_CIRC) {
-    const net = pv(line.prefixes)
-    const n1 = pvN1(line.prefixes)
+    const net = pvc(line.prefixes)
+    const n1 = pvcN1(line.prefixes)
     DP_net += net
     DP_netN1 += n1
     rows.push(makeRow(line.ref, line.label, line.note, net, n1))
@@ -399,8 +404,8 @@ function buildPassifRows(
   // ── TRESORERIE-PASSIF (DT = sum DQ+DR) ──
   let DT_net = 0, DT_netN1 = 0
   for (const line of PASSIF_LINES_TRESO) {
-    const net = pv(line.prefixes)
-    const n1 = pvN1(line.prefixes)
+    const net = pvc(line.prefixes)
+    const n1 = pvcN1(line.prefixes)
     DT_net += net
     DT_netN1 += n1
     rows.push(makeRow(line.ref, line.label, line.note, net, n1))
@@ -408,8 +413,8 @@ function buildPassifRows(
   rows.push(makeRow('DT', 'TOTAL TRESORERIE-PASSIF', null, DT_net, DT_netN1))
 
   // ── ECART DE CONVERSION-PASSIF (DV) ──
-  const DV_net = pv(BILAN_PASSIF.DV.comptes)
-  const DV_netN1 = pvN1(BILAN_PASSIF.DV.comptes)
+  const DV_net = pvc(BILAN_PASSIF.DV.comptes)
+  const DV_netN1 = pvcN1(BILAN_PASSIF.DV.comptes)
   rows.push(makeRow('DV', 'Ecart de conversion-Passif', 12, DV_net, DV_netN1))
 
   // ── TOTAL GENERAL (DZ = DF + DP + DT + DV) ──
