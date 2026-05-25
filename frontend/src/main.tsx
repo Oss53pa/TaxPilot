@@ -133,6 +133,26 @@ window.addEventListener('error', (event) => {
   if (sentryDsn) captureSafe(event.error)
 })
 
+// Reprise automatique après un déploiement : Vite émet `vite:preloadError`
+// quand un chunk importé dynamiquement (React.lazy) n'est plus disponible —
+// typiquement un onglet resté ouvert qui référence d'anciens fichiers hashés
+// supprimés par le nouveau build. On recharge alors la page UNE fois (anti-
+// boucle 10 s) pour récupérer l'index.html à jour (SW navigation = network-first)
+// et les bons hash. Filet en amont de l'ErrorBoundary (qui gère aussi ce cas).
+window.addEventListener('vite:preloadError', ((event: Event) => {
+  const KEY = 'liasspilot:chunk-reload-ts'
+  try {
+    const last = Number(sessionStorage.getItem(KEY) || 0)
+    if (Date.now() - last > 10000) {
+      sessionStorage.setItem(KEY, String(Date.now()))
+      event.preventDefault()
+      window.location.reload()
+    }
+  } catch {
+    window.location.reload()
+  }
+}) as EventListener)
+
 function ThemedApp() {
   const { resolvedMode } = useThemeStore()
   const theme = React.useMemo(() => createFiscaSyncTheme(resolvedMode), [resolvedMode])
