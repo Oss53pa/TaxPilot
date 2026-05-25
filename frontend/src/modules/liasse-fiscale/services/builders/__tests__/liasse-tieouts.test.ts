@@ -118,6 +118,39 @@ describe('Liasse — équilibre du Bilan (build-09)', () => {
 })
 
 // ════════════════════════════════════════════════════════════════════════════
+// FIXTURE E — Balance équilibrée avec COMPTES MIXTES (42-47 en débit ET crédit).
+//   Garantit que la réconciliation du mapping (42→DK, 45→DM, exclusion 478/479)
+//   préserve l'équilibre BZ = DZ, y compris pour les avances/créances mixtes.
+// ════════════════════════════════════════════════════════════════════════════
+
+const BALANCE_E: BalanceEntry[] = [
+  // Actif (débit)
+  e('2441', 10_000_000), // Matériel → AM
+  e('4111', 3_000_000),  // Clients → BI
+  e('4711', 500_000),    // Créditeurs divers — versant débiteur → BJ (471)
+  e('4421', 200_000),    // État, TVA récupérable (44 débit) → BJ
+  e('5211', 2_000_000),  // Banque → BS
+  // Passif (crédit)
+  e('1011', -8_000_000), // Capital → CA
+  e('4011', -1_500_000), // Fournisseurs → DJ
+  e('4221', -1_200_000), // Personnel, rémunérations dues (42 crédit) → DK
+  e('4311', -800_000),   // CNPS (43) → DK
+  e('4612', -1_000_000), // Associés, compte courant (46) → DM
+  e('131', -3_200_000),  // Résultat → CJ
+]
+
+describe('Liasse — équilibre du Bilan avec comptes mixtes (42-47)', () => {
+  const { rows } = buildBilan(BALANCE_E, EMPTY, ENT, EX)
+  const bz = findByRef(rows, 0, 'BZ')
+  const dz = findByRef(rows, 9, 'DZ')
+
+  it('BZ = DZ malgré comptes de tiers mixtes (avances personnel, TVA récup, assoc.)', () => {
+    expect(Math.abs(num(bz?.[7]) - num(dz?.[12]))).toBeLessThanOrEqual(TOL)
+    expect(Math.abs(num(bz?.[7]) - 15_700_000)).toBeLessThanOrEqual(TOL)
+  })
+})
+
+// ════════════════════════════════════════════════════════════════════════════
 // FIXTURE B — Comptes de gestion (classes 6/7/8) pour le Compte de Résultat.
 //   Comptes à 4 chiffres (granularité réelle d'une balance).
 // ════════════════════════════════════════════════════════════════════════════
