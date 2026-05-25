@@ -10,7 +10,7 @@
  *   - Sheet 45: NOTE 19      (11 cols) - Autres dettes et provisions CT
  */
 
-import { SheetData, Row, emptyRow, rowAt, m, headerRows, variationPct } from './helpers'
+import { SheetData, Row, emptyRow, rowAt, m, headerRows, variationPct, getPassif, getActifBrut } from './helpers'
 import type { EntrepriseData, ExerciceData, BalanceEntry } from './helpers'
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -569,8 +569,8 @@ function buildNote16C(
 // ────────────────────────────────────────────────────────────────────────────
 
 function buildNote17(
-  _bal: BalanceEntry[],
-  _balN1: BalanceEntry[],
+  bal: BalanceEntry[],
+  balN1: BalanceEntry[],
   ent: EntrepriseData,
   ex: ExerciceData,
 ): SheetData {
@@ -643,13 +643,24 @@ function buildNote17(
     'Fournisseurs, factures non parvenues (groupe)',
   ]
 
-  for (const label of fournCredLabels) {
-    rows.push(dataRow(label, 0, 0))
+  // Mappings comptables (crédit-only) alignés sur le Bilan DJ (401-408) :
+  // la somme des lignes boucle exactement avec « Fournisseurs d'exploitation ».
+  const fournCredPfx: readonly string[][] = [
+    ['401'], [], [], ['403'], ['402'], [], ['404', '405'], ['408'], [],
+  ]
+  let totCredN = 0, totCredN1 = 0
+  fournCredLabels.forEach((label, idx) => {
+    const pfx = fournCredPfx[idx] ?? []
+    const n = pfx.length ? getPassif(bal, pfx) : 0
+    const n1 = pfx.length ? getPassif(balN1, pfx) : 0
+    totCredN += n
+    totCredN1 += n1
+    rows.push(dataRow(label, n, n1))
     addLabelMerge(rows.length - 1)
-  }
+  })
 
   // Row 17 (L18): TOTAL FOURNISSEURS
-  rows.push(dataRow('TOTAL FOURNISSEURS CREDITEURS', 0, 0))
+  rows.push(dataRow('TOTAL FOURNISSEURS CREDITEURS', totCredN, totCredN1))
   addLabelMerge(rows.length - 1)
 
   // ════════════════════════════════════════════════════════════════════════
@@ -662,13 +673,21 @@ function buildNote17(
     'Autres fournisseurs d\u00e9biteurs',
   ]
 
-  for (const label of fournDebLabels) {
-    rows.push(dataRow(label, 0, 0))
+  // Avances et acomptes versés sur commandes (solde débiteur) — compte 409.
+  const fournDebPfx: readonly string[][] = [['409'], [], []]
+  let totDebN = 0, totDebN1 = 0
+  fournDebLabels.forEach((label, idx) => {
+    const pfx = fournDebPfx[idx] ?? []
+    const n = pfx.length ? getActifBrut(bal, pfx) : 0
+    const n1 = pfx.length ? getActifBrut(balN1, pfx) : 0
+    totDebN += n
+    totDebN1 += n1
+    rows.push(dataRow(label, n, n1))
     addLabelMerge(rows.length - 1)
-  }
+  })
 
   // Row 21 (L22): TOTAL FOURNISSEURS DEBITEURS
-  rows.push(dataRow('TOTAL FOURNISSEURS DEBITEURS', 0, 0))
+  rows.push(dataRow('TOTAL FOURNISSEURS DEBITEURS', totDebN, totDebN1))
   addLabelMerge(rows.length - 1)
 
   return { rows, merges }
