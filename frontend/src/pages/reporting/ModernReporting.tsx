@@ -1014,13 +1014,16 @@ const ModernReporting = () => {
       {/* En-tete */}
       <Box sx={{ mb: 4 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Box>
-            <Typography variant="h4" gutterBottom sx={{ fontWeight: 600 }}>
-              Reporting & Analytics
-            </Typography>
-            <Typography variant="body1" color="text.secondary">
-              Calcul des ratios financiers, seuils standards et interpretation des resultats
-            </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'stretch', gap: 1.75 }}>
+            <Box sx={{ width: 4, borderRadius: 2, flexShrink: 0, background: 'linear-gradient(135deg, #14b8a6 0%, #0f766e 55%, #115e59 100%)' }} />
+            <Box>
+              <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, letterSpacing: '-0.01em' }}>
+                Reporting & Analytics
+              </Typography>
+              <Typography variant="body1" color="text.secondary">
+                Calcul des ratios financiers, seuils standards et interpretation des resultats
+              </Typography>
+            </Box>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <Typography variant="caption" color="text.secondary">

@@ -83,38 +83,40 @@ function NN002(ctx: AuditContext): ResultatControle {
     if (cl >= 1 && cl <= 5) mapN1.set(l.compte, solde(l))
   }
 
-  // 2. Build mapN : soldes N (premier solde affiché = ouverture en théorie)
-  // Note : pour une vraie validation, on aurait besoin du champ
-  // `solde_debit_n1` / `solde_credit_n1` exposé dans la balance N elle-même
-  // (format unified SYSCOHADA Révisé). On utilise `solde()` à défaut, qui
-  // donne le solde clôture N — ce qui valide la stabilité totale plutôt
-  // que strictement l'ouverture, mais c'est la meilleure approximation
-  // sans accès au champ ouverture séparé.
-  const mapN = new Map<string, number>()
+  // 2. Build mapOuvN : soldes d'OUVERTURE N par compte, UNIQUEMENT s'ils sont
+  // reellement exposes par la balance N (champs solde_debit_n1 /
+  // solde_credit_n1 du format unified SYSCOHADA Revise).
+  //
+  // CORRECTIF MAJEUR : l'ancienne version retombait sur `solde(l)` (= solde de
+  // CLOTURE N) quand l'ouverture n'etait pas exposee, puis comparait cloture N
+  // vs cloture N-1. Or ces deux soldes DIFFERENT pour tout compte ayant
+  // bouge dans l'annee → faux BLOQUANT massif (quasi tous les comptes actifs).
+  // Desormais : la comparaison compte par compte n'a lieu QUE si la balance N
+  // porte de vrais soldes d'ouverture ; sinon on se limite au controle global.
+  const mapOuvN = new Map<string, number>()
+  let hasEmbeddedN1 = false
   for (const l of ctx.balanceN) {
     const cl = parseInt(l.compte.charAt(0))
-    if (cl >= 1 && cl <= 5) {
-      const s = (l as { solde_debit_n1?: number; solde_credit_n1?: number; debit: number; credit: number; solde_debit: number; solde_credit: number })
-      // Priorité : si la balance N expose un solde ouverture N (= solde N-1
-      // intégré), on l'utilise. Sinon fallback sur solde N qui détecte
-      // au moins les écarts massifs.
-      const soldeN1Embedded = (s.solde_debit_n1 ?? 0) - (s.solde_credit_n1 ?? 0)
-      if (soldeN1Embedded !== 0) {
-        mapN.set(l.compte, soldeN1Embedded)
-      } else {
-        mapN.set(l.compte, solde(l))
-      }
+    if (cl < 1 || cl > 5) continue
+    const s = (l as { solde_debit_n1?: number; solde_credit_n1?: number })
+    const sdN1 = s.solde_debit_n1 ?? 0
+    const scN1 = s.solde_credit_n1 ?? 0
+    if (sdN1 !== 0 || scN1 !== 0) {
+      hasEmbeddedN1 = true
+      mapOuvN.set(l.compte, sdN1 - scN1)
     }
   }
 
-  // 3. Diff compte par compte — tolérance 1 FCFA pour les arrondis
+  // 3. Diff compte par compte — seulement si ouvertures N disponibles
   const TOLERANCE = 1
   const ecarts: Array<{ compte: string; n1: number; n: number; ecart: number }> = []
-  for (const [compte, soldeN1] of mapN1) {
-    const soldeN = mapN.get(compte) ?? 0
-    const ecart = Math.abs(soldeN - soldeN1)
-    if (ecart > TOLERANCE) {
-      ecarts.push({ compte, n1: soldeN1, n: soldeN, ecart })
+  if (hasEmbeddedN1) {
+    for (const [compte, soldeN1] of mapN1) {
+      const soldeOuvN = mapOuvN.get(compte) ?? 0
+      const ecart = Math.abs(soldeOuvN - soldeN1)
+      if (ecart > TOLERANCE) {
+        ecarts.push({ compte, n1: soldeN1, n: soldeOuvN, ecart })
+      }
     }
   }
 
@@ -123,14 +125,14 @@ function NN002(ctx: AuditContext): ResultatControle {
     .sort((a, b) => b.ecart - a.ecart)
     .slice(0, 10)
 
-  // 4. Contrôle global de variation du bilan (defense-in-depth)
+  // 4. Contrôle global de variation du bilan (defense-in-depth, toujours calculable)
   const totalBilanN = ctx.balanceN.filter((l) => { const cl = parseInt(l.compte.charAt(0)); return cl >= 1 && cl <= 5 }).reduce((s, l) => s + Math.abs(solde(l)), 0)
   const totalBilanN1 = ctx.balanceN1!.filter((l) => { const cl = parseInt(l.compte.charAt(0)); return cl >= 1 && cl <= 5 }).reduce((s, l) => s + Math.abs(solde(l)), 0)
   const variation = Math.abs(totalBilanN - totalBilanN1) / Math.max(totalBilanN1, 1) * 100
 
   // Reporting :
-  //  - si écarts ponctuels >TOLERANCE détectés → anomalie BLOQUANTE avec listing
-  //  - sinon si variation globale >100% → anomalie BLOQUANTE
+  //  - écarts ponctuels d'ouverture (seulement si ouvertures exposées) → BLOQUANT
+  //  - sinon variation globale >100% → BLOQUANT
   //  - sinon OK
   if (ecarts.length > 0) {
     const totalEcart = ecarts.reduce((s, e) => s + e.ecart, 0)

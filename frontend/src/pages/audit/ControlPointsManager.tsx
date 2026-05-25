@@ -1539,13 +1539,17 @@ const ControlPointsManager: React.FC = () => {
 
   return (
     <Box sx={{ p: 3 }}>
-      <Typography variant="h4" gutterBottom sx={{ color: 'text.primary' }}>
-        🤖 Points de Contrôle IA - OHADA/IFRS
-      </Typography>
-      
-      <Typography variant="h6" color="text.secondary" gutterBottom sx={{ color: 'text.secondary' }}>
-        {registryControls.length} Controles Moteur + {controlPoints.length} Regles Legacy • {registryControls.filter(c => c.actif).length} Actifs • SYSCOHADA Revise
-      </Typography>
+      <Box sx={{ display: 'flex', alignItems: 'stretch', gap: 1.75, mb: 1 }}>
+        <Box sx={{ width: 4, borderRadius: 2, flexShrink: 0, background: 'linear-gradient(135deg, #14b8a6 0%, #0f766e 55%, #115e59 100%)' }} />
+        <Box>
+          <Typography variant="h4" gutterBottom sx={{ color: 'text.primary', fontWeight: 700, letterSpacing: '-0.01em' }}>
+            🤖 Points de Contrôle IA - OHADA/IFRS
+          </Typography>
+          <Typography variant="h6" gutterBottom sx={{ color: 'text.secondary' }}>
+            {registryControls.length} Controles Moteur + {controlPoints.length} Regles Legacy • {registryControls.filter(c => c.actif).length} Actifs • SYSCOHADA Revise
+          </Typography>
+        </Box>
+      </Box>
 
       <Paper 
         sx={{ 

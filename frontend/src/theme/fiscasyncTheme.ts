@@ -68,22 +68,42 @@ export const fiscasyncPalette = {
   black: '#000000',
 }
 
-// ── Premium 4-layer shadow system ──
+// ── Premium layered shadow system ──
+// Ombres teintées warm-stone (rgba 28,25,23) plutôt que noir pur : cohérence
+// chromatique avec les neutres → profondeur "douce", jamais grise/sale.
+// Chaque niveau combine une ombre de contact nette + une ombre d'ambiance diffuse.
 export const shadows = {
-  /** Hover subtil sur une carte au repos */
-  xs: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-  /** Card par défaut */
-  sm: '0 1px 3px 0 rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.04)',
-  /** Card hover, popover */
-  md: '0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.04)',
-  /** Modal, drawer */
-  lg: '0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.05)',
-  /** Highlights premium — accent teal */
+  /** Hairline — séparation minimale (chips, inputs au repos) */
+  xs: '0 1px 2px 0 rgba(28, 25, 23, 0.04)',
+  /** Card par défaut — contact + ambiance légère */
+  sm: '0 1px 2px -1px rgba(28, 25, 23, 0.06), 0 2px 6px -1px rgba(28, 25, 23, 0.05)',
+  /** Card hover, popover — élévation perceptible */
+  md: '0 2px 4px -1px rgba(28, 25, 23, 0.05), 0 10px 24px -4px rgba(28, 25, 23, 0.10)',
+  /** Modal, drawer, menus flottants */
+  lg: '0 4px 8px -2px rgba(28, 25, 23, 0.06), 0 20px 44px -8px rgba(28, 25, 23, 0.14)',
+  /** Hero / éléments survolés premium — profondeur maximale */
+  xl: '0 8px 16px -4px rgba(28, 25, 23, 0.08), 0 36px 72px -12px rgba(28, 25, 23, 0.20)',
+  /** Halo accent teal (cartes mises en avant, plan populaire) */
+  tealHalo: '0 0 0 1px rgba(15, 118, 110, 0.20), 0 12px 32px -8px rgba(15, 118, 110, 0.28)',
+  /** Highlights premium — accent teal (focus ring coloré) */
   tealGlow: '0 0 0 3px rgba(15, 118, 110, 0.15)',
   /** Focus ring neutre */
   focusRing: '0 0 0 3px rgba(28, 25, 23, 0.08)',
   /** Backwards compat */
   goldGlow: '0 0 0 3px rgba(15, 118, 110, 0.15)',
+}
+
+// ── Dégradés signature "Nordic Slate" ──
+// Réutilisables sur les surfaces vitrines (hero, panneaux de marque, CTA).
+export const gradients = {
+  /** Accent teal — boutons/CTA premium, barres d'accent */
+  teal: 'linear-gradient(135deg, #14b8a6 0%, #0f766e 55%, #115e59 100%)',
+  /** Panneau de marque sombre (login, hero) — charcoal warm + voile teal */
+  brandPanel: 'linear-gradient(150deg, #1c1917 0%, #0f1f1d 55%, #0c2a27 100%)',
+  /** Voile lumineux radial pour fonds de section (très subtil) */
+  ambientTeal: 'radial-gradient(120% 120% at 50% 0%, rgba(15,118,110,0.06) 0%, rgba(15,118,110,0) 60%)',
+  /** Texte dégradé teal (titres signature) */
+  tealText: 'linear-gradient(90deg, #14b8a6 0%, #0f766e 60%, #115e59 100%)',
 }
 
 // ── Transitions premium ──
@@ -104,15 +124,15 @@ export const fiscasyncTheme = createTheme({
   palette: {
     mode: 'light',
     primary: {
-      main: fiscasyncPalette.primary900,
-      light: fiscasyncPalette.primary500,
-      dark: fiscasyncPalette.primary950,
+      main: fiscasyncPalette.teal,        // Teal = couleur d'action primaire
+      light: fiscasyncPalette.tealLight,
+      dark: fiscasyncPalette.tealDark,
       contrastText: fiscasyncPalette.white,
     },
     secondary: {
-      main: fiscasyncPalette.teal,        // Teal accent (Nordic Slate)
-      light: fiscasyncPalette.tealLight,
-      dark: fiscasyncPalette.tealDark,
+      main: fiscasyncPalette.primary900,  // Charcoal warm (action neutre)
+      light: fiscasyncPalette.primary600,
+      dark: fiscasyncPalette.primary950,
       contrastText: fiscasyncPalette.white,
     },
     background: {
@@ -272,6 +292,7 @@ export const fiscasyncTheme = createTheme({
           '&:hover': {
             boxShadow: shadows.md,
             borderColor: fiscasyncPalette.primary300,
+            transform: 'translateY(-2px)',
           },
         },
       },
@@ -310,18 +331,26 @@ export const fiscasyncTheme = createTheme({
         sizeMedium: { padding: '7px 16px', fontSize: '0.875rem' },
         sizeLarge: { padding: '10px 22px', fontSize: '0.95rem' },
         containedPrimary: {
+          background: gradients.teal,
+          color: '#ffffff !important',
+          boxShadow: shadows.xs,
+          '&:hover': {
+            background: gradients.teal,
+            color: '#ffffff !important',
+            boxShadow: shadows.tealHalo,
+            transform: 'translateY(-1px)',
+          },
+        },
+        containedSecondary: {
           backgroundColor: fiscasyncPalette.primary900,
           color: `${fiscasyncPalette.white} !important`,
           boxShadow: shadows.xs,
           '&:hover': {
             backgroundColor: fiscasyncPalette.primary800,
             color: `${fiscasyncPalette.white} !important`,
-            boxShadow: shadows.sm,
+            boxShadow: shadows.md,
+            transform: 'translateY(-1px)',
           },
-        },
-        containedSecondary: {
-          color: `${fiscasyncPalette.white} !important`,
-          '&:hover': { color: `${fiscasyncPalette.white} !important` },
         },
         outlined: {
           borderColor: fiscasyncPalette.primary200,
@@ -347,7 +376,12 @@ export const fiscasyncTheme = createTheme({
       styleOverrides: {
         root: {
           '& .MuiTableCell-head': {
-            fontWeight: 600,
+            fontWeight: 700,
+            fontSize: '0.78rem',
+            letterSpacing: '0.02em',
+            color: fiscasyncPalette.primary600,
+            backgroundColor: fiscasyncPalette.primary50,
+            borderBottom: `1px solid ${fiscasyncPalette.primary300}`,
           },
         },
       },
@@ -695,17 +729,24 @@ export function createFiscaSyncTheme(mode: 'light' | 'dark') {
   return createTheme({
     palette: {
       mode,
+      // ── Teal = couleur d'ACTION primaire (Nordic Slate) ──
+      // Bascule clé : auparavant primary = charcoal → toute l'app rendait en
+      // noir/gris (boutons, KPI, tints alpha(primary)). En passant primary au
+      // teal, chaque `color="primary"`, `variant="contained"`, KPI et tint
+      // s'illumine en teal d'un coup, sur les ~70 pages. Le charcoal reste
+      // disponible via text.primary, grey.900 et color="secondary".
       primary: {
-        main: c.primaryMain,
-        light: fiscasyncPalette.primary500,
-        dark: c.primaryDark,
-        contrastText: c.primaryContrast,
-      },
-      secondary: {
         main: fiscasyncPalette.teal,
         light: fiscasyncPalette.tealLight,
         dark: fiscasyncPalette.tealDark,
         contrastText: fiscasyncPalette.white,
+      },
+      // Charcoal warm conservé en secondary (boutons/accents neutres explicites)
+      secondary: {
+        main: c.primaryMain,
+        light: fiscasyncPalette.primary600,
+        dark: c.primaryDark,
+        contrastText: c.primaryContrast,
       },
       background: { default: c.bgDefault, paper: c.bgPaper },
       text: { primary: c.textPrimary, secondary: c.textSecondary },
@@ -851,7 +892,7 @@ export function createFiscaSyncTheme(mode: 'light' | 'dark') {
             boxShadow: shadows.sm,
             border: `1px solid ${c.border}`,
             transition: `box-shadow ${transitions.base}, transform ${transitions.base}, border-color ${transitions.base}`,
-            '&:hover': { boxShadow: shadows.md, borderColor: c.borderHover },
+            '&:hover': { boxShadow: shadows.md, borderColor: c.borderHover, transform: 'translateY(-2px)' },
           },
         },
       },
@@ -882,18 +923,26 @@ export function createFiscaSyncTheme(mode: 'light' | 'dark') {
           sizeMedium: { padding: '7px 16px', fontSize: '0.875rem' },
           sizeLarge:  { padding: '10px 22px', fontSize: '0.95rem' },
           containedPrimary: {
+            background: gradients.teal,
+            color: '#ffffff !important',
+            boxShadow: shadows.xs,
+            '&:hover': {
+              background: gradients.teal,
+              color: '#ffffff !important',
+              boxShadow: shadows.tealHalo,
+              transform: 'translateY(-1px)',
+            },
+          },
+          containedSecondary: {
             backgroundColor: c.primaryMain,
             color: `${c.primaryContrast} !important`,
             boxShadow: shadows.xs,
             '&:hover': {
               backgroundColor: c.btnPrimaryHover,
               color: `${c.primaryContrast} !important`,
-              boxShadow: shadows.sm,
+              boxShadow: shadows.md,
+              transform: 'translateY(-1px)',
             },
-          },
-          containedSecondary: {
-            color: `${fiscasyncPalette.white} !important`,
-            '&:hover': { color: `${fiscasyncPalette.white} !important` },
           },
           outlined: {
             borderColor: c.border,
@@ -912,7 +961,18 @@ export function createFiscaSyncTheme(mode: 'light' | 'dark') {
       },
 
       MuiTableHead: {
-        styleOverrides: { root: { '& .MuiTableCell-head': { fontWeight: 600 } } },
+        styleOverrides: {
+          root: {
+            '& .MuiTableCell-head': {
+              fontWeight: 700,
+              fontSize: '0.78rem',
+              letterSpacing: '0.02em',
+              color: isDark ? '#d6d3d1' : fiscasyncPalette.primary600,
+              backgroundColor: c.surfaceAlt,
+              borderBottom: `1px solid ${c.borderHover}`,
+            },
+          },
+        },
       },
 
       MuiTableBody: {

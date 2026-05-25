@@ -60,6 +60,8 @@ describe('LiasseTableauGenerique', () => {
     vi.clearAllMocks()
   })
 
+  // Timeout élargi : premier rendu du fichier → absorbe le coût d'init unique
+  // (lazy imports, thème) qui dépassait le défaut 5s en CI à froid.
   it('affiche le titre et les colonnes correctement', () => {
     renderComponent()
 
@@ -67,7 +69,7 @@ describe('LiasseTableauGenerique', () => {
     expect(screen.getByText('Référence')).toBeInTheDocument()
     expect(screen.getByText('Libellé')).toBeInTheDocument()
     expect(screen.getByText('Montant')).toBeInTheDocument()
-  })
+  }, 15000)
 
   it('formate les montants correctement', () => {
     renderComponent()

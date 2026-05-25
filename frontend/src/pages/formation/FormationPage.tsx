@@ -54,14 +54,17 @@ const FormationPage: React.FC = () => {
     <Box sx={{ maxWidth: 1100, mx: 'auto', py: 4, px: 3 }}>
       {/* Header */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 4 }}>
-        <Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-            <SchoolIcon color="primary" />
-            <Typography variant="h4" sx={{ fontWeight: 700 }}>Centre de Formation</Typography>
+        <Box sx={{ display: 'flex', alignItems: 'stretch', gap: 1.75 }}>
+          <Box sx={{ width: 4, borderRadius: 2, flexShrink: 0, background: 'linear-gradient(135deg, #14b8a6 0%, #0f766e 55%, #115e59 100%)' }} />
+          <Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+              <SchoolIcon color="primary" />
+              <Typography variant="h4" sx={{ fontWeight: 700, letterSpacing: '-0.01em' }}>Centre de Formation</Typography>
+            </Box>
+            <Typography variant="body1" color="text.secondary">
+              {MODULES_FORMATION.length} modules — Maîtrisez LiassPilot et SYSCOHADA
+            </Typography>
           </Box>
-          <Typography variant="body1" color="text.secondary">
-            {MODULES_FORMATION.length} modules — Maîtrisez LiassPilot et SYSCOHADA
-          </Typography>
         </Box>
         <Paper sx={{ p: 2, minWidth: 200, textAlign: 'right' }}>
           <Typography variant="body2" color="text.secondary">

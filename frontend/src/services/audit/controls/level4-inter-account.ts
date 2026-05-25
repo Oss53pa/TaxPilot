@@ -237,8 +237,10 @@ function IC007(ctx: AuditContext): ResultatControle {
 function IC008(ctx: AuditContext): ResultatControle {
   const ref = 'IC-008', nom = 'Variation stocks coherente'
   if (!ctx.balanceN1 || ctx.balanceN1.length === 0) return na(ref, nom, 'Balance N-1 absente')
-  const stocksN = absSum(find(ctx.balanceN, '3'))
-  const stocksN1 = absSum(find(ctx.balanceN1, '3'))
+  // Stocks BRUTS uniquement : on exclut 39x (depreciations, crediteur) qui
+  // n'entrent pas dans la variation de stocks rapprochee du compte 603.
+  const stocksN = absSum(find(ctx.balanceN, '3').filter((l) => !l.compte.toString().startsWith('39')))
+  const stocksN1 = absSum(find(ctx.balanceN1, '3').filter((l) => !l.compte.toString().startsWith('39')))
   const variationBilan = stocksN - stocksN1
   const var603 = find(ctx.balanceN, '603').reduce((s, l) => s + (l.debit - l.credit), 0)
   const ecart = Math.abs(variationBilan + var603) // 603 est en sens inverse

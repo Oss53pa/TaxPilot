@@ -126,12 +126,17 @@ const ArchivesPage: React.FC = () => {
 
   return (
     <Box>
-      <Typography variant="h5" fontWeight={700} gutterBottom>
-        Archives des exercices
-      </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-        Historique des exercices fiscaux, comparaison N/N-1, et gestion des archives.
-      </Typography>
+      <Box sx={{ display: 'flex', alignItems: 'stretch', gap: 1.75, mb: 3 }}>
+        <Box sx={{ width: 4, borderRadius: 2, flexShrink: 0, background: 'linear-gradient(135deg, #14b8a6 0%, #0f766e 55%, #115e59 100%)' }} />
+        <Box>
+          <Typography variant="h5" fontWeight={700} gutterBottom sx={{ letterSpacing: '-0.01em' }}>
+            Archives des exercices
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Historique des exercices fiscaux, comparaison N/N-1, et gestion des archives.
+          </Typography>
+        </Box>
+      </Box>
 
       {/* Section 1: Grille des exercices */}
       <Grid container spacing={2} sx={{ mb: 3 }}>

@@ -4,7 +4,7 @@ import { Box, Avatar, AvatarGroup, keyframes } from '@mui/material'
 import { AutoAwesome, ArrowForward } from '@mui/icons-material'
 import PublicLayout from './PublicLayout'
 import { useLandingContent } from '../../hooks/useLandingContent'
-import { DARK, DARK_SURFACE, GOLD, GOLD_RGB, GOLD_MUTED, TEXT_PRIMARY, TEXT_SECONDARY, BORDER, HEADING, BODY } from './theme'
+import { DARK, DARK_SURFACE, GOLD, GOLD_RGB, GOLD_MUTED, TEXT_PRIMARY, TEXT_SECONDARY, BORDER, BORDER_STRONG, BG_PAGE, HEADING, BODY } from './theme'
 
 // ─── Keyframe animations ─────────────────────────────────────
 const fadeUp = keyframes`
@@ -113,8 +113,27 @@ const Landing: React.FC = () => {
   return (
   <PublicLayout>
     {/* ─── Hero Section ───────────────────────────────── */}
-    <Box sx={{ pt: { xs: 10, md: 14 }, pb: { xs: 6, md: 10 }, textAlign: 'center', overflow: 'hidden' }}>
-      <Box sx={{ maxWidth: 780, mx: 'auto', px: 3 }}>
+    <Box sx={{ pt: { xs: 10, md: 14 }, pb: { xs: 6, md: 10 }, textAlign: 'center', overflow: 'hidden', position: 'relative' }}>
+      {/* Halo d'ambiance teal — profondeur subtile derrière le hero */}
+      <Box
+        sx={{
+          position: 'absolute', top: -120, left: '50%', transform: 'translateX(-50%)',
+          width: 'min(900px, 120%)', height: 520, pointerEvents: 'none', zIndex: 0,
+          background: `radial-gradient(circle, rgba(${GOLD_RGB},0.10) 0%, rgba(${GOLD_RGB},0.04) 35%, rgba(${GOLD_RGB},0) 70%)`,
+        }}
+      />
+      {/* Grille fine en arrière-plan, masquée en fondu */}
+      <Box
+        sx={{
+          position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none', opacity: 0.6,
+          backgroundImage:
+            'linear-gradient(rgba(28,25,23,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(28,25,23,0.035) 1px, transparent 1px)',
+          backgroundSize: '48px 48px',
+          maskImage: 'radial-gradient(70% 60% at 50% 10%, #000 0%, transparent 75%)',
+          WebkitMaskImage: 'radial-gradient(70% 60% at 50% 10%, #000 0%, transparent 75%)',
+        }}
+      />
+      <Box sx={{ maxWidth: 780, mx: 'auto', px: 3, position: 'relative', zIndex: 1 }}>
         {/* Badges — staggered fade in */}
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, justifyContent: 'center', mb: 5 }}>
           {['SYSCOHADA natif', 'Proph3t IA', 'Économisez 50 %+'].map((badge, i) => (
@@ -480,9 +499,10 @@ const Landing: React.FC = () => {
             <Box
               sx={{
                 width: '100%', maxWidth: 360, p: 3.5, borderRadius: '14px',
-                border: `1px solid ${BORDER}`, bgcolor: '#111111', textAlign: 'left',
+                border: `1px solid ${BORDER_STRONG}`, bgcolor: BG_PAGE, textAlign: 'left',
+                boxShadow: '0 1px 2px rgba(28,25,23,0.04), 0 8px 24px rgba(28,25,23,0.06)',
                 transition: 'all 0.35s',
-                '&:hover': { borderColor: 'rgba(0,0,0,0.15)', transform: 'translateY(-4px)', boxShadow: '0 8px 30px rgba(0,0,0,0.3)' },
+                '&:hover': { borderColor: GOLD, transform: 'translateY(-4px)', boxShadow: '0 16px 40px rgba(28,25,23,0.12)' },
               }}
             >
               <Box sx={{ fontFamily: HEADING, fontWeight: 600, fontSize: '1.1rem', color: TEXT_PRIMARY, mb: 0.5 }}>Entreprise · 1 société</Box>
@@ -510,9 +530,10 @@ const Landing: React.FC = () => {
             <Box
               sx={{
                 width: '100%', maxWidth: 360, p: 3.5, borderRadius: '14px',
-                border: `2px solid ${GOLD}`, bgcolor: '#111111', textAlign: 'left', position: 'relative',
+                border: `2px solid ${GOLD}`, bgcolor: BG_PAGE, textAlign: 'left', position: 'relative',
+                boxShadow: '0 0 0 1px rgba(15,118,110,0.10), 0 12px 32px -8px rgba(15,118,110,0.22)',
                 transition: 'all 0.35s',
-                '&:hover': { transform: 'translateY(-6px)', boxShadow: `0 8px 30px rgba(15,118,110,0.15)` },
+                '&:hover': { transform: 'translateY(-6px)', boxShadow: '0 20px 48px -10px rgba(15,118,110,0.30)' },
               }}
             >
               <Box sx={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', display: 'inline-flex', alignItems: 'center', gap: 0.5, bgcolor: GOLD, color: '#ffffff', fontFamily: BODY, fontSize: '0.72rem', fontWeight: 600, px: 1.8, py: 0.35, borderRadius: '999px' }}>
@@ -542,9 +563,10 @@ const Landing: React.FC = () => {
             <Box
               sx={{
                 width: '100%', maxWidth: 360, p: 3.5, borderRadius: '14px',
-                border: `1px solid ${BORDER}`, bgcolor: '#111111', textAlign: 'left',
+                border: `1px solid ${BORDER_STRONG}`, bgcolor: BG_PAGE, textAlign: 'left',
+                boxShadow: '0 1px 2px rgba(28,25,23,0.04), 0 8px 24px rgba(28,25,23,0.06)',
                 transition: 'all 0.35s',
-                '&:hover': { borderColor: 'rgba(0,0,0,0.15)', transform: 'translateY(-4px)', boxShadow: '0 8px 30px rgba(0,0,0,0.3)' },
+                '&:hover': { borderColor: GOLD, transform: 'translateY(-4px)', boxShadow: '0 16px 40px rgba(28,25,23,0.12)' },
               }}
             >
               <Box sx={{ fontFamily: HEADING, fontWeight: 600, fontSize: '1.1rem', color: TEXT_PRIMARY, mb: 0.5 }}>Cabinet · illimité</Box>

@@ -26,6 +26,9 @@ const PageLoader = () => (
 const AppDashboard = React.lazy(() => import('@/pages/dashboard/AppDashboard'))
 const Parametrage = React.lazy(() => import('@/pages/Parametrage'))
 const ModernImportBalance = React.lazy(() => import('@/pages/import/ModernImportBalance'))
+const ImportControle = React.lazy(() => import('@/pages/import/ImportControle'))
+const ProductionLiasse = React.lazy(() => import('@/pages/liasse/ProductionLiasse'))
+const Finalisation = React.lazy(() => import('@/pages/finalisation/Finalisation'))
 const ImportHistoryPage = React.lazy(() => import('@/pages/import/ImportHistoryPage'))
 const ModernBalance = React.lazy(() => import('@/pages/balance/ModernBalance'))
 const PlanSYSCOHADARevise = React.lazy(() => import('@/pages/plans/PlanSYSCOHADARevise'))
@@ -243,6 +246,9 @@ function App() {
               une fois loggé — distincte de la Landing publique (/, /landing). */}
           <Route path="/dashboard" element={<DS><AppDashboard /></DS>} />
           <Route path="/parametrage/*" element={<DS><Parametrage /></DS>} />
+          {/* Module à onglets « Import & Contrôle » (Import / Journal / Consultation / Audit) */}
+          <Route path="/import-controle/*" element={<DS><ImportControle /></DS>} />
+          {/* Routes historiques conservées (liens profonds Dashboard / accès rapide) */}
           <Route path="/import-balance" element={<DS><ModernImportBalance /></DS>} />
           <Route path="/import-history" element={<DS><ImportHistoryPage /></DS>} />
           <Route path="/balance" element={<DS><ModernBalance /></DS>} />
@@ -251,7 +257,9 @@ function App() {
           <Route path="/operations-syscohada" element={<DS><OperationsSpecifiques /></DS>} />
 
           <Route path="/liasse" element={<Navigate to="/liasse-fiscale" replace />} />
-          <Route path="/production-liasse" element={<Navigate to="/liasse-fiscale" replace />} />
+          {/* Modules à onglets « Production Liasse » et « Finalisation » */}
+          <Route path="/production-liasse/*" element={<DS><ProductionLiasse /></DS>} />
+          <Route path="/finalisation/*" element={<DS><Finalisation /></DS>} />
           <Route path="/liasse-complete" element={<Navigate to="/liasse-fiscale" replace />} />
           <Route path="/direct-liasse" element={<Navigate to="/liasse-fiscale" replace />} />
           <Route path="/liasse-fiscale" element={<DS><LiasseFiscale /></DS>} />
