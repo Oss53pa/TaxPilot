@@ -31,14 +31,20 @@ const TabbedModule: React.FC<TabbedModuleProps> = ({ basePath, tabs }) => {
   const seg = rest.split('/')[0] || tabs[0]?.key
   const current = Math.max(0, tabs.findIndex((t) => t.key === seg))
 
+  // Colonne flex BORNÉE en hauteur : la barre d'onglets reste fixe en haut
+  // (flexShrink:0), et le contenu de l'onglet occupe le reste (flexGrow:1) avec
+  // son propre défilement. Ainsi :
+  //  - un onglet « atelier » à hauteur bornée (ex. Liasse Fiscale, dont la racine
+  //    est height:100% + overflow:hidden) reçoit enfin une hauteur définie → ses
+  //    sous-panneaux (sidebars fixes, centre scrollable) fonctionnent ;
+  //  - un onglet « page normale » plus haute que la zone défile dans cette zone
+  //    (overflow:auto), exactement comme une page classique — zéro régression.
   return (
-    <Box>
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
       <Paper
         elevation={0}
         sx={{
-          position: 'sticky',
-          top: 0,
-          zIndex: 3,
+          flexShrink: 0,
           mb: 1.5,
           borderRadius: 3,
           border: '1px solid',
@@ -66,7 +72,9 @@ const TabbedModule: React.FC<TabbedModuleProps> = ({ basePath, tabs }) => {
         </Tabs>
       </Paper>
 
-      {tabs[current]?.element}
+      <Box sx={{ flexGrow: 1, minHeight: 0, overflow: 'auto' }}>
+        {tabs[current]?.element}
+      </Box>
     </Box>
   )
 }
