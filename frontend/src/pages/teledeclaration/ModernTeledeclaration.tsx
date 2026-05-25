@@ -53,11 +53,10 @@ import {
   CheckCircle as CheckIcon,
   Error as ErrorIcon,
   Schedule as ScheduleIcon,
-  Security as SecurityIcon,
   Visibility as ViewIcon,
   GetApp as DownloadIcon,
   Send as SendIcon,
-  Refresh as RefreshIcon,
+  OpenInNew as OpenInNewIcon,
   AccountBalance as TaxIcon,
   CalendarToday as CalendarIcon,
   MonetizationOn as MoneyIcon,
@@ -113,9 +112,8 @@ interface GovernmentService {
   id: string
   name: string
   code: string
-  status: 'online' | 'offline' | 'maintenance'
-  lastCheck: string
-  responseTime: number
+  /** Portail officiel pour le dépôt manuel (si disponible). */
+  url?: string
 }
 
 const ModernTeledeclaration: React.FC = () => {
@@ -283,42 +281,46 @@ const ModernTeledeclaration: React.FC = () => {
     }
   }
 
+  // Portails officiels de dépôt. Liass'Pilot NE transmet PAS directement à ces
+  // administrations (pas d'API publique + accréditation et certificat officiels
+  // requis). Le dépôt s'effectue manuellement sur le portail : on affiche donc
+  // des liens, et non un faux statut « en ligne » / « temps de réponse ».
   const governmentServices: GovernmentService[] = [
-    { id: 'dgi', name: 'Direction Generale des Impots', code: 'DGI-CI', status: 'online', lastCheck: new Date().toLocaleTimeString(), responseTime: 0.4 },
-    { id: 'ohada', name: 'OHADA - Greffe RCCM', code: 'OHADA', status: 'online', lastCheck: new Date().toLocaleTimeString(), responseTime: 0.6 },
-    { id: 'cnps', name: 'Caisse Nationale Prevoyance Sociale', code: 'CNPS', status: 'maintenance', lastCheck: new Date().toLocaleTimeString(), responseTime: 0 },
+    { id: 'dgi', name: 'Direction Générale des Impôts', code: 'DGI-CI', url: 'https://www.dgi.gouv.ci' },
+    { id: 'ohada', name: 'OHADA — Greffe du RCCM', code: 'RCCM' },
+    { id: 'cnps', name: 'Caisse Nationale de Prévoyance Sociale', code: 'CNPS' },
   ]
 
   const [transmissionSteps, setTransmissionSteps] = useState<TransmissionStep[]>([
     {
       id: '1',
-      name: 'Validation des donnees',
+      name: 'Validation des données',
       status: 'pending',
-      description: 'Verification de la coherence des donnees',
+      description: 'Vérification de la cohérence de la déclaration',
     },
     {
       id: '2',
-      name: 'Chiffrement des fichiers',
+      name: 'Génération du fichier (format DGI)',
       status: 'pending',
-      description: 'Securisation des donnees sensibles',
+      description: 'Production du XML à déposer',
     },
     {
       id: '3',
-      name: 'Transmission au service',
+      name: 'Scellement local (empreinte SHA-256)',
       status: 'pending',
-      description: 'Envoi vers le service fiscal',
+      description: 'Calcul de l\'empreinte d\'intégrité du dossier',
     },
     {
       id: '4',
-      name: 'Accuse de reception',
+      name: 'Accusé de préparation',
       status: 'pending',
-      description: 'Attente de confirmation',
+      description: 'Émission d\'une référence interne (≠ accusé de l\'administration)',
     },
     {
       id: '5',
-      name: 'Archivage securise',
+      name: 'Archivage du dossier',
       status: 'pending',
-      description: 'Sauvegarde des preuves de depot',
+      description: 'Sauvegarde locale des pièces préparées',
     }
   ])
 
@@ -346,21 +348,12 @@ const ModernTeledeclaration: React.FC = () => {
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'accepted': return 'Acceptée'
-      case 'submitted': return 'Transmise'
+      case 'accepted': return 'Déposée'
+      case 'submitted': return 'Préparée'
       case 'ready': return 'Prête'
       case 'rejected': return 'Rejetée'
       case 'draft': return 'Brouillon'
       default: return status
-    }
-  }
-
-  const getServiceStatusColor = (status: string) => {
-    switch (status) {
-      case 'online': return theme.palette.success.main
-      case 'offline': return theme.palette.error.main
-      case 'maintenance': return theme.palette.warning.main
-      default: return theme.palette.grey[500]
     }
   }
 
@@ -427,16 +420,23 @@ const ModernTeledeclaration: React.FC = () => {
     const decl = declarations.find(d => d.id === selectedDeclaration)
 
     if (decl?.dgiDeclarationId) {
-      // Route through DGI filing service
+      // Prépare le dossier via le service de dépôt local (scellement + accusé interne).
       const receipt = await submitDeclaration(decl.dgiDeclarationId)
       if (receipt) {
-        // Also update workflow state for consistency
+        // Marque le dossier comme « préparé » (statut interne, pas « transmis à la DGI »).
         const { updateWorkflowState } = await import('@/services/workflowStateService')
         updateWorkflowState({
           teledeclarationStatus: 'submitted',
           teledeclarationDate: new Date().toISOString(),
           teledeclarationReference: receipt.referenceDepot,
         })
+        // Recentrage « dépôt manuel » : on remet immédiatement le fichier XML
+        // à l'utilisateur pour qu'il le dépose sur le portail officiel.
+        const dgi = dgiDeclarations.find(d => d.id === decl.dgiDeclarationId)
+        if (dgi) {
+          const xml = generateXmlForDeclaration(dgi)
+          if (xml) downloadXml(xml, `${dgi.type}_${dgi.exercice}_${dgi.entreprise}.xml`)
+        }
       }
     } else {
       // Legacy workflow-only transmission
@@ -536,11 +536,21 @@ const ModernTeledeclaration: React.FC = () => {
               onClick={handleTransmit}
               sx={{ backgroundColor: theme.palette.primary.main }}
             >
-              Transmettre
+              Préparer le dépôt
             </Button>
           </Stack>
         </Box>
       </Box>
+
+      {/* Bandeau d'honnêteté — pas de transmission directe à l'administration */}
+      <Alert severity="warning" sx={{ mb: 4, borderRadius: 2 }}>
+        <AlertTitle sx={{ fontWeight: 700 }}>Mode démonstration — préparation du dépôt</AlertTitle>
+        Liass'Pilot <strong>prépare et scelle votre dossier localement</strong> (fichier XML au format
+        DGI + empreinte SHA-256) mais ne le <strong>transmet pas</strong> directement à l'administration.
+        Le dépôt effectif s'effectue <strong>manuellement</strong> sur le portail officiel (
+        <a href="https://www.dgi.gouv.ci" target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', fontWeight: 700 }}>dgi.gouv.ci</a>
+        ). Tant que vous n'avez pas déposé sur ce portail, la déclaration <strong>n'est pas considérée comme transmise</strong> par la DGI.
+      </Alert>
 
       {/* Statistiques rapides */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
@@ -556,7 +566,7 @@ const ModernTeledeclaration: React.FC = () => {
                       {declarations.filter(d => d.status === 'submitted' || d.status === 'accepted').length + filingStats.soumises}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      Declarations transmises
+                      Dossiers préparés
                     </Typography>
                   </Box>
                   <Avatar
@@ -614,7 +624,7 @@ const ModernTeledeclaration: React.FC = () => {
                       {filingStats.totalReceipts}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      Recepissss de depot
+                      Accusés de préparation
                     </Typography>
                   </Box>
                   <Avatar
@@ -669,7 +679,7 @@ const ModernTeledeclaration: React.FC = () => {
               <Tabs value={activeTab} onChange={(_, newValue) => setActiveTab(newValue)}>
                 <Tab label="Toutes les déclarations" />
                 <Tab label="En attente" />
-                <Tab label="Transmises" />
+                <Tab label="Préparées" />
               </Tabs>
             </Box>
 
@@ -765,7 +775,7 @@ const ModernTeledeclaration: React.FC = () => {
                                 </IconButton>
                               </Tooltip>
                               {declaration.dgiDeclarationId && declaration.status === 'draft' && (
-                                <Tooltip title="Valider et soumettre">
+                                <Tooltip title="Valider et préparer">
                                   <IconButton size="small" color="primary" onClick={() => handleSubmitDGIDeclaration(declaration.dgiDeclarationId!)}>
                                     <SendIcon fontSize="small" />
                                   </IconButton>
@@ -779,7 +789,7 @@ const ModernTeledeclaration: React.FC = () => {
                                 </Tooltip>
                               )}
                               {declaration.status === 'ready' && !declaration.dgiDeclarationId && (
-                                <Tooltip title="Transmettre">
+                                <Tooltip title="Préparer le dépôt">
                                   <IconButton size="small" color="primary" onClick={() => { setSelectedDeclaration(declaration.id); handleTransmit() }}>
                                     <SendIcon fontSize="small" />
                                   </IconButton>
@@ -845,14 +855,14 @@ const ModernTeledeclaration: React.FC = () => {
                             <TableCell>
                               <Stack direction="row" spacing={1}>
                                 {d.dgiDeclarationId && (
-                                  <Tooltip title="Valider et soumettre">
+                                  <Tooltip title="Valider et préparer">
                                     <IconButton size="small" color="primary" onClick={() => handleSubmitDGIDeclaration(d.dgiDeclarationId!)}>
                                       <SendIcon fontSize="small" />
                                     </IconButton>
                                   </Tooltip>
                                 )}
                                 {d.status === 'ready' && (
-                                  <Tooltip title="Transmettre">
+                                  <Tooltip title="Préparer le dépôt">
                                     <IconButton size="small" color="primary" onClick={() => { setSelectedDeclaration(d.id); handleTransmit() }}>
                                       <SendIcon fontSize="small" />
                                     </IconButton>
@@ -875,7 +885,7 @@ const ModernTeledeclaration: React.FC = () => {
                 if (transmitted.length === 0) return (
                   <CardContent>
                     <Typography variant="body1" color="text.secondary" align="center" sx={{ py: 4 }}>
-                      Aucune declaration transmise
+                      Aucun dossier préparé
                     </Typography>
                   </CardContent>
                 )
@@ -888,7 +898,7 @@ const ModernTeledeclaration: React.FC = () => {
                           <TableCell sx={{ fontWeight: 600 }}>Periode</TableCell>
                           <TableCell sx={{ fontWeight: 600 }}>Entreprise</TableCell>
                           <TableCell sx={{ fontWeight: 600 }}>Statut</TableCell>
-                          <TableCell sx={{ fontWeight: 600 }}>Date transmission</TableCell>
+                          <TableCell sx={{ fontWeight: 600 }}>Date préparation</TableCell>
                           <TableCell sx={{ fontWeight: 600 }}>Reference</TableCell>
                           <TableCell sx={{ fontWeight: 600 }}>Montant</TableCell>
                         </TableRow>
@@ -921,66 +931,62 @@ const ModernTeledeclaration: React.FC = () => {
         {/* État des services et suivi */}
         <Grid item xs={12} lg={4}>
           <Stack spacing={3}>
-            {/* État des services gouvernementaux */}
+            {/* Portails officiels — dépôt manuel */}
             <Card elevation={0} sx={{ border: `1px solid ${alpha(theme.palette.divider, 0.08)}` }}>
               <CardContent sx={{ p: 3 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                    Services gouvernementaux
-                  </Typography>
-                  <IconButton size="small">
-                    <RefreshIcon fontSize="small" />
-                  </IconButton>
-                </Box>
+                <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>
+                  Portails officiels
+                </Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
+                  Le dépôt s'effectue directement sur le site de chaque administration. Liass'Pilot
+                  prépare le fichier et l'accusé de préparation à y déposer.
+                </Typography>
 
                 <List disablePadding>
                   {governmentServices.map((service, index) => (
                     <React.Fragment key={service.id}>
-                      <ListItem sx={{ px: 0, py: 2 }}>
+                      <ListItem
+                        sx={{ px: 0, py: 2 }}
+                        secondaryAction={
+                          service.url ? (
+                            <Button
+                              size="small"
+                              variant="outlined"
+                              endIcon={<OpenInNewIcon sx={{ fontSize: 14 }} />}
+                              component="a"
+                              href={service.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              Ouvrir
+                            </Button>
+                          ) : (
+                            <Chip label="Portail officiel" size="small" variant="outlined" sx={{ height: 22, fontSize: '0.7rem' }} />
+                          )
+                        }
+                      >
                         <ListItemIcon>
                           <Avatar
                             sx={{
                               width: 32,
                               height: 32,
-                              backgroundColor: alpha(getServiceStatusColor(service.status), 0.1),
-                              color: getServiceStatusColor(service.status),
+                              backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                              color: theme.palette.primary.main,
                             }}
                           >
-                            <SecurityIcon fontSize="small" />
+                            <TaxIcon fontSize="small" />
                           </Avatar>
                         </ListItemIcon>
                         <ListItemText
                           primary={
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                                {service.name}
-                              </Typography>
-                              <Chip
-                                label={
-                                  service.status === 'online' ? 'En ligne' :
-                                  service.status === 'offline' ? 'Hors ligne' : 'Maintenance'
-                                }
-                                size="small"
-                                sx={{
-                                  backgroundColor: alpha(getServiceStatusColor(service.status), 0.1),
-                                  color: getServiceStatusColor(service.status),
-                                  height: 20,
-                                  fontSize: '0.75rem'
-                                }}
-                              />
-                            </Box>
+                            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                              {service.name}
+                            </Typography>
                           }
                           secondary={
-                            <Box>
-                              <Typography variant="caption" color="text.secondary">
-                                {service.code} • Dernière vérif: {service.lastCheck}
-                              </Typography>
-                              {service.status === 'online' && (
-                                <Typography variant="caption" color="success.main" sx={{ display: 'block' }}>
-                                  Temps de réponse: {service.responseTime}s
-                                </Typography>
-                              )}
-                            </Box>
+                            <Typography variant="caption" color="text.secondary">
+                              {service.code}
+                            </Typography>
                           }
                         />
                       </ListItem>
@@ -995,7 +1001,7 @@ const ModernTeledeclaration: React.FC = () => {
             <Card elevation={0} sx={{ border: `1px solid ${alpha(theme.palette.divider, 0.08)}` }}>
               <CardContent sx={{ p: 3 }}>
                 <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
-                  Transmission en cours
+                  Préparation du dossier
                 </Typography>
 
                 <List disablePadding>
@@ -1051,7 +1057,7 @@ const ModernTeledeclaration: React.FC = () => {
                       }}
                     />
                     <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                      Transmission en cours...
+                      Préparation en cours...
                     </Typography>
                   </Box>
                 )}
@@ -1063,15 +1069,15 @@ const ModernTeledeclaration: React.FC = () => {
 
       {/* Dialog transmission */}
       <Dialog open={transmissionDialog} onClose={() => setTransmissionDialog(false)} maxWidth="md" fullWidth>
-        <DialogTitle>Transmettre une déclaration</DialogTitle>
+        <DialogTitle>Préparer le dossier de dépôt</DialogTitle>
         <DialogContent>
           <Grid container spacing={3} sx={{ mt: 1 }}>
             <Grid item xs={12}>
               <FormControl fullWidth>
-                <InputLabel>Déclaration à transmettre</InputLabel>
+                <InputLabel>Déclaration à préparer</InputLabel>
                 <Select
                   value={selectedDeclaration}
-                  label="Déclaration à transmettre"
+                  label="Déclaration à préparer"
                   onChange={(e) => setSelectedDeclaration(e.target.value)}
                 >
                   {getTransmittableDeclarations().map((declaration) => (
@@ -1090,21 +1096,23 @@ const ModernTeledeclaration: React.FC = () => {
               </FormControl>
             </Grid>
             <Grid item xs={12}>
-              <Alert severity="info">
-                <AlertTitle>Information importante</AlertTitle>
-                La transmission sera effectuée de manière sécurisée avec chiffrement des données.
-                Vous recevrez un accusé de réception automatiquement.
+              <Alert severity="warning">
+                <AlertTitle>Préparation locale — pas de transmission directe</AlertTitle>
+                Cette étape génère le fichier XML (format DGI) et un accusé de préparation
+                scellé localement (empreinte SHA-256). <strong>Aucune donnée n'est envoyée à
+                l'administration.</strong> Le XML sera téléchargé : déposez-le ensuite sur le
+                portail officiel pour que la déclaration soit réellement transmise.
               </Alert>
             </Grid>
             <Grid item xs={12}>
               <FormGroup>
                 <FormControlLabel
                   control={<Checkbox defaultChecked />}
-                  label="J'accepte les conditions de transmission électronique"
+                  label="Je comprends que le dépôt final s'effectue manuellement sur le portail officiel"
                 />
                 <FormControlLabel
                   control={<Checkbox />}
-                  label="Archiver automatiquement après transmission"
+                  label="Archiver automatiquement le dossier préparé"
                 />
               </FormGroup>
             </Grid>
@@ -1120,29 +1128,30 @@ const ModernTeledeclaration: React.FC = () => {
             disabled={!selectedDeclaration || transmitting}
             onClick={handleStartTransmission}
           >
-            Transmettre
+            Générer le dossier
           </Button>
         </DialogActions>
       </Dialog>
 
       {/* Dialog certificats */}
       <Dialog open={certificateDialog} onClose={() => setCertificateDialog(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Gestion des certificats</DialogTitle>
+        <DialogTitle>Signature & certificat</DialogTitle>
         <DialogContent>
-          <Alert severity="success" sx={{ mb: 2 }}>
-            <AlertTitle>Certificat valide</AlertTitle>
-            Votre certificat de signature électronique est valide jusqu'au 15/12/2025.
+          <Alert severity="info" sx={{ mb: 2 }}>
+            <AlertTitle>Certificat de signature non configuré</AlertTitle>
+            La signature électronique officielle nécessite un certificat délivré dans le cadre de
+            l'accréditation auprès de l'administration. Elle n'est pas encore activée.
           </Alert>
           <Typography variant="body2" color="text.secondary">
-            Le certificat permet de signer électroniquement vos déclarations et garantit leur authenticité.
+            En attendant, chaque dossier préparé est <strong>scellé localement par une empreinte
+            SHA-256</strong> qui garantit son intégrité (toute modification ultérieure du fichier
+            change l'empreinte). Le dépôt et la signature officiels s'effectuent sur le portail de
+            l'administration.
           </Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setCertificateDialog(false)}>
             Fermer
-          </Button>
-          <Button variant="outlined">
-            Renouveler
           </Button>
         </DialogActions>
       </Dialog>
