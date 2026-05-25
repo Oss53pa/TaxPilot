@@ -3,7 +3,8 @@ import { buildBilan } from '../build-09-bilan'
 import { buildResultat } from '../build-11-passif-resultat'
 import { buildNote7 } from '../build-26-notes-7to8c'
 import { buildNote17, buildNote18, buildNote19 } from '../build-39-notes-16to19'
-import { buildNote21, buildNote23, buildNote24 } from '../build-46-notes-20to24'
+import { buildNote21, buildNote22, buildNote23, buildNote24 } from '../build-46-notes-20to24'
+import { buildNote27A } from '../build-51-notes-25to28'
 import { getPassif, getChargesNettes } from '../../liasse-calculs'
 import { buildNote9, buildNote10, buildNote11 } from '../build-31-notes-9to12'
 import { buildNote3A, buildNote3C, buildNote6 } from '../build-15-notes-1to6'
@@ -231,6 +232,21 @@ describe('Liasse — Notes de charges/produits (module) calculent depuis la bala
     const tot = noteVal(n24, 'TOTAL')
     expect(Math.abs(tot - getChargesNettes(BALANCE_B, ['62', '63']))).toBeLessThanOrEqual(TOL)
     expect(Math.abs(tot - 800_000)).toBeLessThanOrEqual(TOL)
+  })
+
+  it('Note 22 — sous-totaux achats = classes 601 / 602 / 604+605+608 (= CdR RA/RC/RE)', () => {
+    const n22 = buildNote22(BALANCE_B, EMPTY, ENT, EX)
+    expect(Math.abs(noteVal(n22, 'TOTAL : ACHATS DE MARCHANDISES') - getCharges(BALANCE_B, ['601']))).toBeLessThanOrEqual(TOL)
+    expect(Math.abs(noteVal(n22, 'TOTAL : ACHATS DE MARCHANDISES') - 4_000_000)).toBeLessThanOrEqual(TOL)
+    expect(Math.abs(noteVal(n22, 'TOTAL : AUTRES ACHATS') - getCharges(BALANCE_B, ['604', '605', '608']))).toBeLessThanOrEqual(TOL)
+    expect(Math.abs(noteVal(n22, 'TOTAL : AUTRES ACHATS') - 500_000)).toBeLessThanOrEqual(TOL)
+  })
+
+  it('Note 27A — TOTAL Charges de personnel = classe 66 (= CdR RK)', () => {
+    const n27 = buildNote27A(BALANCE_B, EMPTY, ENT, EX)
+    const tot = noteVal(n27, 'TOTAL')
+    expect(Math.abs(tot - getChargesNettes(BALANCE_B, ['66']))).toBeLessThanOrEqual(TOL)
+    expect(Math.abs(tot - 2_000_000)).toBeLessThanOrEqual(TOL)
   })
 })
 

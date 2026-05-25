@@ -8,7 +8,7 @@
  *   - Sheet 50: NOTE 24 (8 cols)  - Services exterieurs
  */
 
-import { SheetData, Row, emptyRow, rowAt, m, headerRows, variationPct, getChargesNettes, getProduits } from './helpers'
+import { SheetData, Row, emptyRow, rowAt, m, headerRows, variationPct, getChargesNettes, getProduits, getCharges, getBalanceSolde } from './helpers'
 import type { EntrepriseData, ExerciceData, BalanceEntry } from './helpers'
 
 // ── EUR conversion rate ──
@@ -315,12 +315,16 @@ function buildNote21(
 // ────────────────────────────────────────────────────────────────────────────
 
 function buildNote22(
-  _bal: BalanceEntry[],
-  _balN1: BalanceEntry[],
+  bal: BalanceEntry[],
+  balN1: BalanceEntry[],
   ent: EntrepriseData,
   ex: ExerciceData,
 ): SheetData {
   const C = 8
+  // Achats BRUTS (débit) → bouclent avec RA/RC/RE du CdR. Les RRR obtenus
+  // (crédit) et les variations de stocks (603x, net) sont des lignes distinctes.
+  const gc = (pfx: readonly string[]): number => getCharges(bal, pfx)
+  const gcN1 = (pfx: readonly string[]): number => getCharges(balN1, pfx)
   const merges: ReturnType<typeof m>[] = []
   const rows: Row[] = []
 
@@ -374,13 +378,17 @@ function buildNote22(
     'Achats de marchandises groupe',
   ]
 
-  for (const label of achatsMarLabels) {
-    rows.push(dataRow(label, 0, 0))
+  // Ventilation géographique = saisie (sous-comptes spécifiques à l'entité) ;
+  // 1re ligne porte le total classe 601 → le sous-total boucle avec le CdR (RA).
+  const achatsMarPfx: readonly string[][] = [['601'], [], [], []]
+  achatsMarLabels.forEach((label, idx) => {
+    const pfx = achatsMarPfx[idx] ?? []
+    rows.push(dataRow(label, pfx.length ? gc(pfx) : 0, pfx.length ? gcN1(pfx) : 0))
     addLabelMerge(rows.length - 1)
-  }
+  })
 
   // Row 12 (L13): TOTAL ACHATS DE MARCHANDISES
-  rows.push(dataRow('TOTAL : ACHATS DE MARCHANDISES', 0, 0))
+  rows.push(dataRow('TOTAL : ACHATS DE MARCHANDISES', gc(['601']), gcN1(['601'])))
   addLabelMerge(rows.length - 1)
 
   // ════════════════════════════════════════════════════════════════════════
@@ -394,13 +402,15 @@ function buildNote22(
     'Achats de mati\u00e8res premi\u00e8res groupe',
   ]
 
-  for (const label of achatsMatLabels) {
-    rows.push(dataRow(label, 0, 0))
+  const achatsMatPfx: readonly string[][] = [['602'], [], [], []]
+  achatsMatLabels.forEach((label, idx) => {
+    const pfx = achatsMatPfx[idx] ?? []
+    rows.push(dataRow(label, pfx.length ? gc(pfx) : 0, pfx.length ? gcN1(pfx) : 0))
     addLabelMerge(rows.length - 1)
-  }
+  })
 
   // Row 17 (L18): TOTAL ACHATS DE MATIERES PREMIERES
-  rows.push(dataRow('TOTAL : ACHATS DE MATIERES PREMIERES', 0, 0))
+  rows.push(dataRow('TOTAL : ACHATS DE MATIERES PREMIERES', gc(['602']), gcN1(['602'])))
   addLabelMerge(rows.length - 1)
 
   // ════════════════════════════════════════════════════════════════════════
@@ -424,13 +434,26 @@ function buildNote22(
     'Variation de stocks d\'emballages',
   ]
 
-  for (const label of autresAchatsLabels) {
-    rows.push(dataRow(label, 0, 0))
+  // 0-2 : autres achats (604 consommables, 608 emballages, 605 non stockés) ;
+  // 3-8 : ventilation fine = saisie ; 9 : RRR obtenus (crédit, getProduits) ;
+  // 10-13 : variations de stocks (603x, solde net via getBalanceSolde).
+  const RRR_OBTENUS = ['6019', '6029', '6039', '6049', '6059', '6089']
+  autresAchatsLabels.forEach((label, idx) => {
+    let n = 0, n1 = 0
+    if (idx === 0) { n = gc(['604']); n1 = gcN1(['604']) }
+    else if (idx === 1) { n = gc(['608']); n1 = gcN1(['608']) }
+    else if (idx === 2) { n = gc(['605']); n1 = gcN1(['605']) }
+    else if (idx === 9) { n = getProduits(bal, RRR_OBTENUS); n1 = getProduits(balN1, RRR_OBTENUS) }
+    else if (idx === 10) { n = getBalanceSolde(bal, ['6031']); n1 = getBalanceSolde(balN1, ['6031']) }
+    else if (idx === 11) { n = getBalanceSolde(bal, ['6032']); n1 = getBalanceSolde(balN1, ['6032']) }
+    else if (idx === 12) { n = getBalanceSolde(bal, ['6033']); n1 = getBalanceSolde(balN1, ['6033']) }
+    else if (idx === 13) { n = getBalanceSolde(bal, ['6038']); n1 = getBalanceSolde(balN1, ['6038']) }
+    rows.push(dataRow(label, n, n1))
     addLabelMerge(rows.length - 1)
-  }
+  })
 
-  // Row 32 (L33): TOTAL AUTRES ACHATS
-  rows.push(dataRow('TOTAL : AUTRES ACHATS', 0, 0))
+  // Row 32 (L33): TOTAL AUTRES ACHATS = achats nets classes 604+605+608 (= poste RE du CdR)
+  rows.push(dataRow('TOTAL : AUTRES ACHATS', gc(['604', '605', '608']), gcN1(['604', '605', '608'])))
   addLabelMerge(rows.length - 1)
 
   // ── Rows 33-38 (L34-L39): comment rows ──
