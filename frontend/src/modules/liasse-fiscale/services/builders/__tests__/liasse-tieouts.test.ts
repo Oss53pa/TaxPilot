@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { buildBilan } from '../build-09-bilan'
 import { buildResultat } from '../build-11-passif-resultat'
 import { buildNote7 } from '../build-26-notes-7to8c'
+import { buildNote17 } from '../build-39-notes-16to19'
 import { buildNote9, buildNote10, buildNote11 } from '../build-31-notes-9to12'
 import { buildNote3A, buildNote3C } from '../build-15-notes-1to6'
 import { getBalanceSolde, getProduits, getCharges } from '../../liasse-calculs'
@@ -238,6 +239,18 @@ describe('Liasse — Notes d\'actif (module) bouclent avec le Bilan', () => {
     const n11 = buildNote11(BALANCE_A, EMPTY, ENT, EX)
     expect(Math.abs(noteTotalNet(n11) - bilanNet('BS'))).toBeLessThanOrEqual(TOL)
     expect(Math.abs(noteTotalNet(n11) - 1_700_000)).toBeLessThanOrEqual(TOL)
+  })
+})
+
+describe('Liasse — Note 17 (Fournisseurs) boucle avec le Bilan (DJ)', () => {
+  const { rows: bilan } = buildBilan(BALANCE_A, EMPTY, ENT, EX)
+  const dj = num(findByRef(bilan, 9, 'DJ')?.[12]) // Fournisseurs d'exploitation (passif net col 12)
+
+  it('Note 17 — TOTAL FOURNISSEURS CREDITEURS = Bilan DJ', () => {
+    const n17 = buildNote17(BALANCE_A, EMPTY, ENT, EX)
+    const totalCred = n17.rows.find((r) => r[0] === 'TOTAL FOURNISSEURS CREDITEURS')
+    expect(Math.abs(num(totalCred?.[5]) - dj)).toBeLessThanOrEqual(TOL)
+    expect(Math.abs(num(totalCred?.[5]) - 2_500_000)).toBeLessThanOrEqual(TOL)
   })
 })
 
