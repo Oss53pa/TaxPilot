@@ -1,6 +1,9 @@
 import { describe, it, expect } from 'vitest'
 import { buildBilan } from '../build-09-bilan'
 import { buildResultat } from '../build-11-passif-resultat'
+import { buildNote7 } from '../build-26-notes-7to8c'
+import { buildNote9, buildNote10, buildNote11 } from '../build-31-notes-9to12'
+import { buildNote3A, buildNote3C } from '../build-15-notes-1to6'
 import { getBalanceSolde, getProduits, getCharges } from '../../liasse-calculs'
 import { buildCompChargesRows, buildNoteRows, NOTE08_LINES, NOTE17_LINES } from '../../noteBalanceMapping'
 import type { BalanceEntry, EntrepriseData } from '../../../types'
@@ -202,6 +205,65 @@ describe('Liasse — Note 17 (produits) boucle avec les produits d\'exploitation
   it('Total Note 17 = Σ produits exploitation (70+71+72+75)', () => {
     expect(Math.abs(cellN(total) - attendu)).toBeLessThanOrEqual(TOL)
     expect(Math.abs(cellN(total) - 10_700_000)).toBeLessThanOrEqual(TOL)
+  })
+})
+
+describe('Liasse — Notes d\'actif (module) bouclent avec le Bilan', () => {
+  const { rows: bilan } = buildBilan(BALANCE_A, EMPTY, ENT, EX)
+  const bilanNet = (ref: string) => num(findByRef(bilan, 0, ref)?.[7])
+
+  // Dans les builders module, le « TOTAL NET » est en colonne 4 (libellé en col 0).
+  const noteTotalNet = (sheet: { rows: Row[] }): number => {
+    const r = sheet.rows.find((row) => row[0] === 'TOTAL NET')
+    return num(r?.[4])
+  }
+
+  it('Note 7 (Clients) TOTAL NET = Bilan BI (Clients)', () => {
+    const n7 = buildNote7(BALANCE_A, EMPTY, ENT, EX)
+    expect(Math.abs(noteTotalNet(n7) - bilanNet('BI'))).toBeLessThanOrEqual(TOL)
+    expect(Math.abs(noteTotalNet(n7) - 3_000_000)).toBeLessThanOrEqual(TOL)
+  })
+
+  it('Note 9 (Titres de placement) TOTAL NET = Bilan BQ', () => {
+    const n9 = buildNote9(BALANCE_A, EMPTY, ENT, EX)
+    expect(Math.abs(noteTotalNet(n9) - bilanNet('BQ'))).toBeLessThanOrEqual(TOL)
+  })
+
+  it('Note 10 (Valeurs à encaisser) TOTAL NET = Bilan BR', () => {
+    const n10 = buildNote10(BALANCE_A, EMPTY, ENT, EX)
+    expect(Math.abs(noteTotalNet(n10) - bilanNet('BR'))).toBeLessThanOrEqual(TOL)
+  })
+
+  it('Note 11 (Disponibilités) TOTAL NET = Bilan BS (banques, caisse)', () => {
+    const n11 = buildNote11(BALANCE_A, EMPTY, ENT, EX)
+    expect(Math.abs(noteTotalNet(n11) - bilanNet('BS'))).toBeLessThanOrEqual(TOL)
+    expect(Math.abs(noteTotalNet(n11) - 1_700_000)).toBeLessThanOrEqual(TOL)
+  })
+})
+
+describe('Liasse — Notes 3 (immobilisations) bouclent avec le Bilan', () => {
+  // N-1 vide → ouverture = 0, clôture = soldes N. Le total de clôture des notes
+  // de mouvements doit égaler le brut / l'amortissement de l'actif immobilisé.
+  const { rows: bilan } = buildBilan(BALANCE_A, EMPTY, ENT, EX)
+  const az = findByRef(bilan, 0, 'AZ') // Total actif immobilisé : brut col 5, amort col 6
+  const azBrut = num(az?.[5])
+  const azAmort = num(az?.[6])
+
+  const totalGeneral = (sheet: { rows: Row[] }): Row | undefined =>
+    sheet.rows.find((row) => row[0] === 'TOTAL GENERAL')
+
+  it('Note 3A — clôture brute (TOTAL GENERAL) = Bilan AZ brut', () => {
+    const n3a = buildNote3A(BALANCE_A, EMPTY, ENT, EX)
+    const closingBrut = num(totalGeneral(n3a)?.[9]) // col J = montant brut à la clôture
+    expect(Math.abs(closingBrut - azBrut)).toBeLessThanOrEqual(TOL)
+    expect(Math.abs(closingBrut - 6_000_000)).toBeLessThanOrEqual(TOL)
+  })
+
+  it('Note 3C — amortissements cumulés clôture (TOTAL GENERAL) = Bilan AZ amort', () => {
+    const n3c = buildNote3C(BALANCE_A, EMPTY, ENT, EX)
+    const closingAmort = num(totalGeneral(n3c)?.[13]) // col N = amort cumulés à la clôture
+    expect(Math.abs(closingAmort - azAmort)).toBeLessThanOrEqual(TOL)
+    expect(Math.abs(closingAmort - 1_200_000)).toBeLessThanOrEqual(TOL)
   })
 })
 
