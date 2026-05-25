@@ -179,22 +179,22 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const dossierItems = [
     { text: 'Tableau de bord', icon: <DashboardIcon />, path: '/dashboard' },
 
+    // ── Groupe « Traitement » : la chaîne fiscale complète, en modules à onglets ──
+    // Import & Contrôle (Import / Journal / Consultation / Audit) → Production Liasse
+    // (Liasse / Contrôle / Génération / Templates) → Finalisation (Télédéclaration /
+    // Reporting / Archives). Regroupés sous un en-tête commun pour la cohérence avec
+    // le groupe « Configuration » (sinon ils flottaient à plat, isolés).
+    { text: 'Import & Contrôle', icon: <CloudUpload />, path: '/import-controle', divider: 'Traitement' },
+    { text: 'Production Liasse', icon: <Assignment />, path: '/production-liasse' },
+    { text: 'Finalisation', icon: <Analytics />, path: '/finalisation' },
+
+    // ── Groupe « Configuration » ──
     // « Config. Fiscale » retiré de la sidebar : c'était un DOUBLON exact du
     // panneau « Config. Fiscale » de la page Configuration (même <FiscalConfigPage/>).
     // On y accède désormais via l'onglet dédié dans Configuration.
     { text: 'Configuration', icon: <Settings />, path: '/parametrage', divider: 'Configuration' },
     { text: 'Plans Comptables', icon: <AccountBalance />, path: '/plans-comptables' },
     { text: 'Points de Contrôle IA', icon: <Security />, path: '/control-points' },
-
-    // Module unique « Import & Contrôle » à onglets (Import / Journal /
-    // Consultation / Audit) — voir pages/import/ImportControle.tsx.
-    { text: 'Import & Contrôle', icon: <CloudUpload />, path: '/import-controle', divider: 'Import & Contrôle' },
-
-    // Module unique « Production Liasse » à onglets (Liasse / Contrôle / Génération / Templates)
-    { text: 'Production Liasse', icon: <Assignment />, path: '/production-liasse', divider: 'Production Liasse' },
-
-    // Module unique « Finalisation » à onglets (Télédéclaration / Reporting / Archives)
-    { text: 'Finalisation', icon: <Analytics />, path: '/finalisation', divider: 'Finalisation' },
 
     { text: 'Support', icon: <SupportIcon />, path: '/support', divider: 'Aide' },
   ]
