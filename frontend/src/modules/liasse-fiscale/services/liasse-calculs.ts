@@ -108,6 +108,16 @@ export const getCharges = (balance: BalanceEntry[], prefixes: readonly string[])
   return total
 }
 
+/**
+ * Charges NETTES = solde net (débit − crédit) sur les comptes de charges.
+ * Contrairement à getCharges (débit only), intègre les RRR obtenus (comptes
+ * x019/x029… créditeurs) et corrections, qui viennent en déduction des achats.
+ * À utiliser pour les lignes d'achats/charges où les rabais, remises et
+ * ristournes obtenus doivent réduire le montant brut.
+ */
+export const getChargesNettes = (balance: BalanceEntry[], prefixes: readonly string[]): number =>
+  getBalanceSolde(balance, prefixes)
+
 /** Produits = soldes crediteurs (abs) */
 export const getProduits = (balance: BalanceEntry[], prefixes: readonly string[]): number => {
   let total = 0

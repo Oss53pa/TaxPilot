@@ -8,7 +8,7 @@
  *   - Sheet 50: NOTE 24 (8 cols)  - Services exterieurs
  */
 
-import { SheetData, Row, emptyRow, rowAt, m, headerRows, variationPct } from './helpers'
+import { SheetData, Row, emptyRow, rowAt, m, headerRows, variationPct, getChargesNettes, getProduits } from './helpers'
 import type { EntrepriseData, ExerciceData, BalanceEntry } from './helpers'
 
 // ── EUR conversion rate ──
@@ -130,12 +130,15 @@ function buildNote20(
 // ────────────────────────────────────────────────────────────────────────────
 
 function buildNote21(
-  _bal: BalanceEntry[],
-  _balN1: BalanceEntry[],
+  bal: BalanceEntry[],
+  balN1: BalanceEntry[],
   ent: EntrepriseData,
   ex: ExerciceData,
 ): SheetData {
   const C = 12
+  // Produits (crédit). Les totaux par poste bouclent avec le CdR (XB = CA classe 70).
+  const gp = (pfx: readonly string[]): number => getProduits(bal, pfx)
+  const gpN1 = (pfx: readonly string[]): number => getProduits(balN1, pfx)
   const merges: ReturnType<typeof m>[] = []
   const rows: Row[] = []
 
@@ -208,7 +211,7 @@ function buildNote21(
   }
 
   // Row 13 (L14): TOTAL VENTES MARCHANDISES
-  rows.push(dataRow('TOTAL : VENTES MARCHANDISES', 0, 0))
+  rows.push(dataRow('TOTAL : VENTES MARCHANDISES', gp(['701']), gpN1(['701'])))
   addLabelMerge(rows.length - 1)
 
   // ════════════════════════════════════════════════════════════════════════
@@ -229,7 +232,7 @@ function buildNote21(
   }
 
   // Row 19 (L20): TOTAL VENTES PRODUITS FABRIQUES
-  rows.push(dataRow('TOTAL : VENTES PRODUITS FABRIQUES', 0, 0))
+  rows.push(dataRow('TOTAL : VENTES PRODUITS FABRIQUES', gp(['702', '703']), gpN1(['702', '703'])))
   addLabelMerge(rows.length - 1)
 
   // ════════════════════════════════════════════════════════════════════════
@@ -250,7 +253,7 @@ function buildNote21(
   }
 
   // Row 25 (L26): TOTAL VENTES TRAVAUX ET SERVICES
-  rows.push(dataRow('TOTAL : VENTES TRAVAUX ET SERVICES', 0, 0))
+  rows.push(dataRow('TOTAL : VENTES TRAVAUX ET SERVICES', gp(['704', '705', '706']), gpN1(['704', '705', '706'])))
   addLabelMerge(rows.length - 1)
 
   // ════════════════════════════════════════════════════════════════════════
@@ -258,7 +261,7 @@ function buildNote21(
   // ════════════════════════════════════════════════════════════════════════
 
   // Row 26 (L27): Produits accessoires label
-  rows.push(dataRow('Produits accessoires', 0, 0))
+  rows.push(dataRow('Produits accessoires', gp(['707']), gpN1(['707'])))
   addLabelMerge(rows.length - 1)
 
   // Rows 27-34 (L28-L35): blank detail rows
@@ -271,28 +274,36 @@ function buildNote21(
   // Section 5: Totals (rows 35-40, L36-L41)
   // ════════════════════════════════════════════════════════════════════════
 
-  // Row 35 (L36): TOTAL CHIFFRES D'AFFAIRES
-  rows.push(dataRow('TOTAL : CHIFFRES D\'AFFAIRES', 0, 0))
+  // Row 35 (L36): TOTAL CHIFFRES D'AFFAIRES = classe 70 (= poste XB du CdR)
+  const caN = gp(['70'])
+  const caN1 = gpN1(['70'])
+  rows.push(dataRow('TOTAL : CHIFFRES D\'AFFAIRES', caN, caN1))
   addLabelMerge(rows.length - 1)
 
-  // Row 36 (L37): Production immobilisee
-  rows.push(dataRow('Production immobilis\u00e9e', 0, 0))
+  // Row 36 (L37): Production immobilisee (72)
+  const prodImmoN = gp(['72'])
+  const prodImmoN1 = gpN1(['72'])
+  rows.push(dataRow('Production immobilis\u00e9e', prodImmoN, prodImmoN1))
   addLabelMerge(rows.length - 1)
 
-  // Row 37 (L38): Subventions d'exploitation
-  rows.push(dataRow('Subventions d\'exploitation', 0, 0))
+  // Row 37 (L38): Subventions d'exploitation (71)
+  const subvN = gp(['71'])
+  const subvN1 = gpN1(['71'])
+  rows.push(dataRow('Subventions d\'exploitation', subvN, subvN1))
   addLabelMerge(rows.length - 1)
 
-  // Row 38 (L39): Autres produits
-  rows.push(dataRow('Autres produits (1)', 0, 0))
+  // Row 38 (L39): Autres produits (75)
+  const autresN = gp(['75'])
+  const autresN1 = gpN1(['75'])
+  rows.push(dataRow('Autres produits (1)', autresN, autresN1))
   addLabelMerge(rows.length - 1)
 
-  // Row 39 (L40): TOTAL AUTRES PRODUITS
-  rows.push(dataRow('TOTAL : AUTRES PRODUITS', 0, 0))
+  // Row 39 (L40): TOTAL AUTRES PRODUITS = production immo + subventions + autres
+  rows.push(dataRow('TOTAL : AUTRES PRODUITS', prodImmoN + subvN + autresN, prodImmoN1 + subvN1 + autresN1))
   addLabelMerge(rows.length - 1)
 
-  // Row 40 (L41): TOTAL
-  rows.push(dataRow('TOTAL', 0, 0))
+  // Row 40 (L41): TOTAL = CA + autres produits d'exploitation
+  rows.push(dataRow('TOTAL', caN + prodImmoN + subvN + autresN, caN1 + prodImmoN1 + subvN1 + autresN1))
   addLabelMerge(rows.length - 1)
 
   return { rows, merges }
@@ -436,8 +447,8 @@ function buildNote22(
 // ────────────────────────────────────────────────────────────────────────────
 
 function buildNote23(
-  _bal: BalanceEntry[],
-  _balN1: BalanceEntry[],
+  bal: BalanceEntry[],
+  balN1: BalanceEntry[],
   ent: EntrepriseData,
   ex: ExerciceData,
 ): SheetData {
@@ -498,13 +509,25 @@ function buildNote23(
     'Transports administratifs',
   ]
 
-  for (const label of transportsLabels) {
-    rows.push(dataRow(label, 0, 0))
+  // Transports : classe 61 (charges nettes). Préfixes disjoints couvrant tout 61
+  // → le TOTAL boucle avec le poste RG du Compte de Résultat (Transports).
+  const transportsPfx: readonly string[][] = [
+    ['612'], ['613'], ['614'], ['616'], ['6181'], ['6182'],
+    ['611', '615', '617', '6183', '6184', '6185', '6186', '6187', '6188', '619'],
+  ]
+  let totN = 0, totN1 = 0
+  transportsLabels.forEach((label, idx) => {
+    const pfx = transportsPfx[idx] ?? []
+    const n = pfx.length ? getChargesNettes(bal, pfx) : 0
+    const n1 = pfx.length ? getChargesNettes(balN1, pfx) : 0
+    totN += n
+    totN1 += n1
+    rows.push(dataRow(label, n, n1))
     addLabelMerge(rows.length - 1)
-  }
+  })
 
   // Row 15 (L16): TOTAL
-  rows.push(dataRow('TOTAL', 0, 0))
+  rows.push(dataRow('TOTAL', totN, totN1))
   addLabelMerge(rows.length - 1)
 
   // ── Rows 16-19 (L17-L20): comment rows ──
@@ -521,8 +544,8 @@ function buildNote23(
 // ────────────────────────────────────────────────────────────────────────────
 
 function buildNote24(
-  _bal: BalanceEntry[],
-  _balN1: BalanceEntry[],
+  bal: BalanceEntry[],
+  balN1: BalanceEntry[],
   ent: EntrepriseData,
   ex: ExerciceData,
 ): SheetData {
@@ -591,13 +614,26 @@ function buildNote24(
     'Autres charges externes',
   ]
 
-  for (const label of servicesLabels) {
-    rows.push(dataRow(label, 0, 0))
+  // Services extérieurs : classes 62 et 63 (charges nettes, débit−crédit).
+  // L'union des préfixes couvre exactement 62+63 → le TOTAL boucle avec le
+  // poste RH du Compte de Résultat (Services extérieurs).
+  const servicesPfx: readonly string[][] = [
+    ['621'], ['622'], ['623'], ['624'], ['625'], ['626'], ['627'], ['628'],
+    ['631'], ['632'], ['633'], ['634'], ['635'], ['637'], ['636', '638'],
+  ]
+  let totN = 0, totN1 = 0
+  servicesLabels.forEach((label, idx) => {
+    const pfx = servicesPfx[idx] ?? []
+    const n = pfx.length ? getChargesNettes(bal, pfx) : 0
+    const n1 = pfx.length ? getChargesNettes(balN1, pfx) : 0
+    totN += n
+    totN1 += n1
+    rows.push(dataRow(label, n, n1))
     addLabelMerge(rows.length - 1)
-  }
+  })
 
   // Row 23 (L24): TOTAL
-  rows.push(dataRow('TOTAL', 0, 0))
+  rows.push(dataRow('TOTAL', totN, totN1))
   addLabelMerge(rows.length - 1)
 
   // ── Rows 24-27 (L25-L28): comment rows ──

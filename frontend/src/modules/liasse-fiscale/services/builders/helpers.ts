@@ -3,7 +3,7 @@ import type { EntrepriseData, BalanceEntry } from '../../types'
 import type { ExerciceData } from '../liasse-export-excel'
 import {
   getActifBrut, getAmortProv, getPassif,
-  getCharges, getProduits, getBalanceSolde,
+  getCharges, getChargesNettes, getProduits, getBalanceSolde,
 } from '../liasse-calculs'
 
 export type CellValue = string | number | null
@@ -121,6 +121,6 @@ export function variationPct(n: number, n1: number): number {
 // ── Re-exports for convenience ──
 export {
   getActifBrut, getAmortProv, getPassif,
-  getCharges, getProduits, getBalanceSolde,
+  getCharges, getChargesNettes, getProduits, getBalanceSolde,
 }
 export type { EntrepriseData, BalanceEntry, ExerciceData }
