@@ -2,9 +2,9 @@ import { describe, it, expect } from 'vitest'
 import { buildBilan } from '../build-09-bilan'
 import { buildResultat } from '../build-11-passif-resultat'
 import { buildNote7 } from '../build-26-notes-7to8c'
-import { buildNote17, buildNote18, buildNote19 } from '../build-39-notes-16to19'
+import { buildNote16A, buildNote17, buildNote18, buildNote19 } from '../build-39-notes-16to19'
 import { buildNote21, buildNote22, buildNote23, buildNote24 } from '../build-46-notes-20to24'
-import { buildNote27A } from '../build-51-notes-25to28'
+import { buildNote25, buildNote26, buildNote27A } from '../build-51-notes-25to28'
 import { getPassif, getChargesNettes } from '../../liasse-calculs'
 import { buildNote9, buildNote10, buildNote11 } from '../build-31-notes-9to12'
 import { buildNote3A, buildNote3C, buildNote6 } from '../build-15-notes-1to6'
@@ -247,6 +247,28 @@ describe('Liasse — Notes de charges/produits (module) calculent depuis la bala
     const tot = noteVal(n27, 'TOTAL')
     expect(Math.abs(tot - getChargesNettes(BALANCE_B, ['66']))).toBeLessThanOrEqual(TOL)
     expect(Math.abs(tot - 2_000_000)).toBeLessThanOrEqual(TOL)
+  })
+
+  it('Note 25 — TOTAL Impôts et taxes = classe 64 (= CdR RI)', () => {
+    const n25 = buildNote25(BALANCE_B, EMPTY, ENT, EX)
+    const tot = noteVal(n25, 'TOTAL')
+    expect(Math.abs(tot - getChargesNettes(BALANCE_B, ['64']))).toBeLessThanOrEqual(TOL)
+    expect(Math.abs(tot - 200_000)).toBeLessThanOrEqual(TOL)
+  })
+
+  it('Note 26 — TOTAL Autres charges = classe 65 (= CdR RJ)', () => {
+    const n26 = buildNote26(BALANCE_B, EMPTY, ENT, EX)
+    const tot = noteVal(n26, 'TOTAL')
+    expect(Math.abs(tot - getChargesNettes(BALANCE_B, ['65']))).toBeLessThanOrEqual(TOL)
+  })
+})
+
+describe('Liasse — Note 16A (dettes financières) boucle avec le Bilan (DA)', () => {
+  it('Note 16A — TOTAL EMPRUNTS = classe 16 (= Bilan DA)', () => {
+    const n16a = buildNote16A(BALANCE_A, EMPTY, ENT, EX)
+    const tot = num(n16a.rows.find((r) => r[0] === 'TOTAL EMPRUNTS ET DETTES FINANCIERES')?.[4])
+    expect(Math.abs(tot - getPassif(BALANCE_A, ['16']))).toBeLessThanOrEqual(TOL)
+    expect(Math.abs(tot - 1_000_000)).toBeLessThanOrEqual(TOL)
   })
 })
 

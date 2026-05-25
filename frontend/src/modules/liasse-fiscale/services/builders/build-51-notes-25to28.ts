@@ -17,8 +17,8 @@ import type { EntrepriseData, ExerciceData, BalanceEntry } from './helpers'
 // ────────────────────────────────────────────────────────────────────────────
 
 function buildNote25(
-  _bal: BalanceEntry[],
-  _balN1: BalanceEntry[],
+  bal: BalanceEntry[],
+  balN1: BalanceEntry[],
   ent: EntrepriseData,
   ex: ExerciceData,
 ): SheetData {
@@ -78,13 +78,24 @@ function buildNote25(
     'Autres impôts et taxes',
   ]
 
-  for (const label of labels) {
-    rows.push(dataRow(label, 0, 0))
+  // Impôts et taxes : classe 64 (charges nettes), préfixes disjoints couvrant 64
+  // → le TOTAL boucle avec le poste RI du Compte de Résultat.
+  const impotsPfx: readonly string[][] = [
+    ['641'], ['645'], ['646'], ['647'], ['642', '643', '644', '648', '649'],
+  ]
+  let totN = 0, totN1 = 0
+  labels.forEach((label, idx) => {
+    const pfx = impotsPfx[idx] ?? []
+    const n = pfx.length ? getChargesNettes(bal, pfx) : 0
+    const n1 = pfx.length ? getChargesNettes(balN1, pfx) : 0
+    totN += n
+    totN1 += n1
+    rows.push(dataRow(label, n, n1))
     addLabelMerge(rows.length - 1)
-  }
+  })
 
-  // ── Row 13 (L14): TOTAL → SUM(F9:F13) ──
-  rows.push(dataRow('TOTAL', 0, 0))
+  // ── Row 13 (L14): TOTAL = classe 64 = poste RI ──
+  rows.push(dataRow('TOTAL', totN, totN1))
   addLabelMerge(rows.length - 1)
 
   // ── Commentaires (L15-L19) ──
@@ -107,8 +118,8 @@ function buildNote25(
 // ────────────────────────────────────────────────────────────────────────────
 
 function buildNote26(
-  _bal: BalanceEntry[],
-  _balN1: BalanceEntry[],
+  bal: BalanceEntry[],
+  balN1: BalanceEntry[],
   ent: EntrepriseData,
   ex: ExerciceData,
 ): SheetData {
@@ -173,13 +184,24 @@ function buildNote26(
     'Charges pour dépréciations et provisions pour risques à court terme d\'exploitation',
   ]
 
-  for (const label of labels) {
-    rows.push(dataRow(label, 0, 0))
+  // Autres charges : classe 65 (charges nettes), préfixes disjoints couvrant 65
+  // → le TOTAL boucle avec le poste RJ du Compte de Résultat.
+  const autresChargesPfx: readonly string[][] = [
+    ['651'], [], ['652'], ['654'], ['656'], [], ['653'], [], ['655', '657', '658'], ['659'],
+  ]
+  let totN = 0, totN1 = 0
+  labels.forEach((label, idx) => {
+    const pfx = autresChargesPfx[idx] ?? []
+    const n = pfx.length ? getChargesNettes(bal, pfx) : 0
+    const n1 = pfx.length ? getChargesNettes(balN1, pfx) : 0
+    totN += n
+    totN1 += n1
+    rows.push(dataRow(label, n, n1))
     addLabelMerge(rows.length - 1)
-  }
+  })
 
-  // ── Row 18 (L19): TOTAL → SUM(F9:F18) ──
-  rows.push(dataRow('TOTAL', 0, 0))
+  // ── Row 18 (L19): TOTAL = classe 65 = poste RJ ──
+  rows.push(dataRow('TOTAL', totN, totN1))
   addLabelMerge(rows.length - 1)
 
   // ── Commentaires (L20-L25) ──
