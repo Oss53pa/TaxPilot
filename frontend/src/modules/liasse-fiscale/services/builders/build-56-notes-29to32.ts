@@ -7,7 +7,7 @@
  *   - Sheet 59: NOTE 32 (16 cols) - Production de l'exercice
  */
 
-import { SheetData, Row, emptyRow, rowAt, m, headerRows, variationPct } from './helpers'
+import { SheetData, Row, emptyRow, rowAt, m, headerRows, variationPct, getCharges, getProduits } from './helpers'
 import type { EntrepriseData, ExerciceData, BalanceEntry } from './helpers'
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -16,8 +16,8 @@ import type { EntrepriseData, ExerciceData, BalanceEntry } from './helpers'
 // ────────────────────────────────────────────────────────────────────────────
 
 function buildNote29(
-  _bal: BalanceEntry[],
-  _balN1: BalanceEntry[],
+  bal: BalanceEntry[],
+  balN1: BalanceEntry[],
   ent: EntrepriseData,
   ex: ExerciceData,
 ): SheetData {
@@ -80,13 +80,20 @@ function buildNote29(
     'Charges pour dépréciation et provisions à court terme à caractère financier',
   ]
 
-  for (const label of fraisLabels) {
-    rows.push(dataRow(label, 0, 0))
+  // Frais financiers : classe 67 + dotations provisions financières 697 (débit).
+  const fraisPfx: readonly string[][] = [
+    ['671'], ['672'], ['673'], ['674'], [], ['676'], ['677'], ['678'], [], ['679', '697'],
+  ]
+  fraisLabels.forEach((label, idx) => {
+    const pfx = fraisPfx[idx] ?? []
+    rows.push(dataRow(label, pfx.length ? getCharges(bal, pfx) : 0, pfx.length ? getCharges(balN1, pfx) : 0))
     addLabelMerge(rows.length - 1)
-  }
+  })
 
-  // Row 18 (L19): SOUS TOTAL : FRAIS FINANCIERS (A) → SUM(F9:F18)
-  rows.push(dataRow('SOUS TOTAL : FRAIS FINANCIERS (A)', 0, 0))
+  // Row 18 (L19): SOUS TOTAL : FRAIS FINANCIERS (A) = classes 67 + 697 (= RM + RN du CdR)
+  const fraisN = getCharges(bal, ['67', '697'])
+  const fraisN1 = getCharges(balN1, ['67', '697'])
+  rows.push(dataRow('SOUS TOTAL : FRAIS FINANCIERS (A)', fraisN, fraisN1))
   addLabelMerge(rows.length - 1)
 
   // ════════════════════════════════════════════════════════════════════════
@@ -105,17 +112,24 @@ function buildNote29(
     'Reprises de charges pour dépréciation et provisions à court terme à caractère financier',
   ]
 
-  for (const label of revenusLabels) {
-    rows.push(dataRow(label, 0, 0))
+  // Revenus financiers : classe 77 + reprises provisions financières 797/798 (crédit).
+  const revenusPfx: readonly string[][] = [
+    ['771'], ['772'], ['773'], ['774'], ['775'], ['776'], ['777'], [], ['797', '798'],
+  ]
+  revenusLabels.forEach((label, idx) => {
+    const pfx = revenusPfx[idx] ?? []
+    rows.push(dataRow(label, pfx.length ? getProduits(bal, pfx) : 0, pfx.length ? getProduits(balN1, pfx) : 0))
     addLabelMerge(rows.length - 1)
-  }
+  })
 
-  // Row 28 (L29): SOUS TOTAL : REVENUS FINANCIERS (B) → SUM(F20:F28)
-  rows.push(dataRow('SOUS TOTAL : REVENUS FINANCIERS (B)', 0, 0))
+  // Row 28 (L29): SOUS TOTAL : REVENUS FINANCIERS (B) = classes 77 + 797/798 (= TK + TL du CdR)
+  const revenusN = getProduits(bal, ['77', '797', '798'])
+  const revenusN1 = getProduits(balN1, ['77', '797', '798'])
+  rows.push(dataRow('SOUS TOTAL : REVENUS FINANCIERS (B)', revenusN, revenusN1))
   addLabelMerge(rows.length - 1)
 
-  // ── Row 29 (L30): RESULTAT FINANCIER (B) - (A) → F29-F19 ──
-  rows.push(dataRow('SOUS TOTAL (contrôle) : RESULTAT FINANCIER (B) - (A)', 0, 0))
+  // ── Row 29 (L30): RESULTAT FINANCIER (B) - (A) ──
+  rows.push(dataRow('SOUS TOTAL (contrôle) : RESULTAT FINANCIER (B) - (A)', revenusN - fraisN, revenusN1 - fraisN1))
   addLabelMerge(rows.length - 1)
 
   // ── Comments L31-L40 (rows 30-39) ──
@@ -138,8 +152,8 @@ function buildNote29(
 // ────────────────────────────────────────────────────────────────────────────
 
 function buildNote30(
-  _bal: BalanceEntry[],
-  _balN1: BalanceEntry[],
+  bal: BalanceEntry[],
+  balN1: BalanceEntry[],
   ent: EntrepriseData,
   ex: ExerciceData,
 ): SheetData {
@@ -190,7 +204,7 @@ function buildNote30(
   // ════════════════════════════════════════════════════════════════════════
 
   // Row 8 (L9): Charges HAO constatées header
-  rows.push(dataRow('Charges HAO constatées (compte 831) à détailler :', 0, 0))
+  rows.push(dataRow('Charges HAO constatées (compte 831) à détailler :', getCharges(bal, ['83']), getCharges(balN1, ['83'])))
   addLabelMerge(rows.length - 1)
 
   // Rows 9-14 (L10-L15): 6 blank detail lines
@@ -210,13 +224,17 @@ function buildNote30(
     'Participation des travailleurs',
   ]
 
-  for (const label of chargesHaoLabels) {
-    rows.push(dataRow(label, 0, 0))
+  // Index 5 = « Dotations hors activités ordinaires » → classe 85 (dotations HAO).
+  // Les autres lignes = ventilation manuelle (le détail de 831 est saisi ci-dessus).
+  chargesHaoLabels.forEach((label, idx) => {
+    const v = idx === 5 ? getCharges(bal, ['85']) : 0
+    const v1 = idx === 5 ? getCharges(balN1, ['85']) : 0
+    rows.push(dataRow(label, v, v1))
     addLabelMerge(rows.length - 1)
-  }
+  })
 
-  // Row 22 (L23): SOUS TOTAL : AUTRES CHARGES HAO → SUM(F9:F22)
-  rows.push(dataRow('SOUS TOTAL : AUTRES CHARGES HAO', 0, 0))
+  // Row 22 (L23): SOUS TOTAL : AUTRES CHARGES HAO = classes 83 + 85 (= poste RP du CdR)
+  rows.push(dataRow('SOUS TOTAL : AUTRES CHARGES HAO', getCharges(bal, ['83', '85']), getCharges(balN1, ['83', '85'])))
   addLabelMerge(rows.length - 1)
 
   // ════════════════════════════════════════════════════════════════════════
@@ -224,7 +242,7 @@ function buildNote30(
   // ════════════════════════════════════════════════════════════════════════
 
   // Row 23 (L24): Produits HAO constatés header
-  rows.push(dataRow('Produits HAO constatés (compte 841) à détailler :', 0, 0))
+  rows.push(dataRow('Produits HAO constatés (compte 841) à détailler :', getProduits(bal, ['84']), getProduits(balN1, ['84'])))
   addLabelMerge(rows.length - 1)
 
   // Rows 24-29 (L25-L30): 6 blank detail lines
@@ -245,13 +263,17 @@ function buildNote30(
     'Subventions d\'équilibre',
   ]
 
-  for (const label of produitsHaoLabels) {
-    rows.push(dataRow(label, 0, 0))
+  // Index 6 = reprises HAO → classe 86 ; index 7 = subventions d'équilibre → 88.
+  produitsHaoLabels.forEach((label, idx) => {
+    let v = 0, v1 = 0
+    if (idx === 6) { v = getProduits(bal, ['86']); v1 = getProduits(balN1, ['86']) }
+    else if (idx === 7) { v = getProduits(bal, ['88']); v1 = getProduits(balN1, ['88']) }
+    rows.push(dataRow(label, v, v1))
     addLabelMerge(rows.length - 1)
-  }
+  })
 
-  // Row 38 (L39): SOUS TOTAL : AUTRES PRODUITS HAO → SUM(F24:F38)
-  rows.push(dataRow('SOUS TOTAL : AUTRES PRODUITS HAO', 0, 0))
+  // Row 38 (L39): SOUS TOTAL : AUTRES PRODUITS HAO = classes 84 + 86 + 88 (= poste TO du CdR)
+  rows.push(dataRow('SOUS TOTAL : AUTRES PRODUITS HAO', getProduits(bal, ['84', '86', '88']), getProduits(balN1, ['84', '86', '88'])))
   addLabelMerge(rows.length - 1)
 
   // ── Comments L40-L43 (rows 39-42) ──
