@@ -15,24 +15,74 @@ interface State {
   hasError: boolean
   error: Error | null
   errorInfo: ErrorInfo | null
+  reloading: boolean
+}
+
+/**
+ * Détecte une erreur de chargement de chunk périmé. Survient quand un onglet
+ * resté ouvert pointe vers d'anciens fichiers hashés (`*-XXXX.js`) qui n'existent
+ * plus après un nouveau déploiement → l'import dynamique (React.lazy) échoue.
+ * Messages selon le navigateur : Chrome « Failed to fetch dynamically imported
+ * module », Firefox « error loading dynamically imported module », Safari
+ * « Importing a module script failed ».
+ */
+function isChunkLoadError(error: Error | null): boolean {
+  if (!error) return false
+  if (error.name === 'ChunkLoadError') return true
+  const msg = `${error.name}: ${error.message}`.toLowerCase()
+  return (
+    msg.includes('dynamically imported module') ||
+    msg.includes('importing a module script failed') ||
+    msg.includes('failed to fetch dynamically imported module') ||
+    msg.includes('error loading dynamically imported module')
+  )
+}
+
+const RELOAD_TS_KEY = 'liasspilot:chunk-reload-ts'
+
+/** Recharge la page au plus une fois par fenêtre de 10 s (anti-boucle). */
+function reloadOnceForStaleChunk(): boolean {
+  try {
+    const last = Number(sessionStorage.getItem(RELOAD_TS_KEY) || 0)
+    if (Date.now() - last > 10000) {
+      sessionStorage.setItem(RELOAD_TS_KEY, String(Date.now()))
+      window.location.reload()
+      return true
+    }
+  } catch {
+    // sessionStorage indisponible (mode privé strict) → recharge quand même une fois
+    window.location.reload()
+    return true
+  }
+  return false
 }
 
 export class ErrorBoundary extends Component<Props, State> {
   public state: State = {
     hasError: false,
     error: null,
-    errorInfo: null
+    errorInfo: null,
+    reloading: false
   }
 
   public static getDerivedStateFromError(error: Error): State {
     return {
       hasError: true,
       error,
-      errorInfo: null
+      errorInfo: null,
+      // Chunk périmé → on affichera un écran « mise à jour » (pas l'erreur), le
+      // rechargement est déclenché dans componentDidCatch.
+      reloading: isChunkLoadError(error)
     }
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    // Reprise automatique après déploiement : recharger pour récupérer le nouvel
+    // index.html (SW navigation = network-first) et les bons fichiers hashés.
+    if (isChunkLoadError(error) && reloadOnceForStaleChunk()) {
+      return
+    }
+
     Sentry.captureException(error, { extra: { componentStack: errorInfo.componentStack } })
     logger.error('ErrorBoundary caught an error:', error, errorInfo)
 
@@ -46,12 +96,32 @@ export class ErrorBoundary extends Component<Props, State> {
     this.setState({
       hasError: false,
       error: null,
-      errorInfo: null
+      errorInfo: null,
+      reloading: false
     })
   }
 
   public render() {
     if (this.state.hasError) {
+      // Chunk périmé après déploiement : écran neutre de rechargement plutôt que
+      // l'UI d'erreur (le reload est déjà déclenché dans componentDidCatch).
+      if (this.state.reloading) {
+        return (
+          <div className="min-h-screen flex items-center justify-center bg-gray-50">
+            <div className="text-center">
+              <div
+                style={{
+                  width: 28, height: 28, border: '3px solid #e5e5e5', borderTopColor: '#0f766e',
+                  borderRadius: '50%', margin: '0 auto 12px', animation: 'liasspilot-spin 0.8s linear infinite',
+                }}
+              />
+              <p className="text-sm text-gray-600">Nouvelle version disponible — mise à jour…</p>
+              <style>{'@keyframes liasspilot-spin{to{transform:rotate(360deg)}}'}</style>
+            </div>
+          </div>
+        )
+      }
+
       // Fallback UI personnalisé si fourni
       if (this.props.fallback) {
         return this.props.fallback

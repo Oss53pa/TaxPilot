@@ -21,7 +21,7 @@
  * (Safari iOS strict, mode incognito, etc.) l'app reste 100 % fonctionnelle.
  */
 
-const SW_VERSION = 'v1'
+const SW_VERSION = 'v2'
 const SHELL_CACHE = `liasspilot-shell-${SW_VERSION}`
 const SHELL_ASSETS = ['/', '/index.html', '/fiscasync-icon.svg', '/manifest.webmanifest']
 
