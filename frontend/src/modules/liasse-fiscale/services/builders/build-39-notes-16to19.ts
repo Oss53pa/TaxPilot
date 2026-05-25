@@ -19,8 +19,8 @@ import type { EntrepriseData, ExerciceData, BalanceEntry } from './helpers'
 // ────────────────────────────────────────────────────────────────────────────
 
 function buildNote16A(
-  _bal: BalanceEntry[],
-  _balN1: BalanceEntry[],
+  bal: BalanceEntry[],
+  balN1: BalanceEntry[],
   ent: EntrepriseData,
   ex: ExerciceData,
 ): SheetData {
@@ -96,13 +96,18 @@ function buildNote16A(
     'Comptes permanents bloqu\u00e9s',
   ]
 
-  for (const label of empruntsLabels) {
-    rows.push(dataRow(label, 0, 0))
+  // Emprunts et dettes financières : classe 16 (crédit). → poste DA du Bilan.
+  const empruntsPfx: readonly string[][] = [
+    ['161'], ['162'], ['163'], ['164'], ['165'], ['166'], ['167'], ['168'], [], [],
+  ]
+  empruntsLabels.forEach((label, idx) => {
+    const pfx = empruntsPfx[idx] ?? []
+    rows.push(dataRow(label, pfx.length ? getPassif(bal, pfx) : 0, pfx.length ? getPassif(balN1, pfx) : 0))
     addLabelMerge(rows.length - 1)
-  }
+  })
 
-  // Row 18 (L19): TOTAL EMPRUNTS
-  rows.push(dataRow('TOTAL EMPRUNTS ET DETTES FINANCIERES', 0, 0))
+  // Row 18 (L19): TOTAL EMPRUNTS = classe 16 = poste DA
+  rows.push(dataRow('TOTAL EMPRUNTS ET DETTES FINANCIERES', getPassif(bal, ['16']), getPassif(balN1, ['16'])))
   addLabelMerge(rows.length - 1)
 
   // ════════════════════════════════════════════════════════════════════════
@@ -117,13 +122,16 @@ function buildNote16A(
     'Autres dettes de location-acquisition',
   ]
 
-  for (const label of locationLabels) {
-    rows.push(dataRow(label, 0, 0))
+  // Dettes de location-acquisition : classe 17 (crédit). → poste DB du Bilan.
+  const locationPfx: readonly string[][] = [['172'], ['173'], ['176'], ['1763', '1764'], ['178']]
+  locationLabels.forEach((label, idx) => {
+    const pfx = locationPfx[idx] ?? []
+    rows.push(dataRow(label, pfx.length ? getPassif(bal, pfx) : 0, pfx.length ? getPassif(balN1, pfx) : 0))
     addLabelMerge(rows.length - 1)
-  }
+  })
 
-  // Row 24 (L25): TOTAL LOCATION
-  rows.push(dataRow('TOTAL DETTES DE LOCATION-ACQUISITION', 0, 0))
+  // Row 24 (L25): TOTAL LOCATION = classe 17 = poste DB
+  rows.push(dataRow('TOTAL DETTES DE LOCATION-ACQUISITION', getPassif(bal, ['17']), getPassif(balN1, ['17'])))
   addLabelMerge(rows.length - 1)
 
   // ════════════════════════════════════════════════════════════════════════
@@ -146,13 +154,20 @@ function buildNote16A(
     'Autres provisions pour risques et charges',
   ]
 
-  for (const label of provisionsLabels) {
-    rows.push(dataRow(label, 0, 0))
+  // Provisions pour risques et charges : classe 19 (crédit). → poste DC du Bilan.
+  // Première ligne porte le total classe 19 ; ventilation par nature = saisie.
+  const provisionsPfx: readonly string[][] = [
+    ['191'], ['192'], ['193'], ['194'], ['195'], ['196'], ['197'], ['198'],
+    [], [], [], [], [],
+  ]
+  provisionsLabels.forEach((label, idx) => {
+    const pfx = provisionsPfx[idx] ?? []
+    rows.push(dataRow(label, pfx.length ? getPassif(bal, pfx) : 0, pfx.length ? getPassif(balN1, pfx) : 0))
     addLabelMerge(rows.length - 1)
-  }
+  })
 
-  // Row 38 (L39): TOTAL PROVISIONS
-  rows.push(dataRow('TOTAL PROVISIONS POUR RISQUES ET CHARGES', 0, 0))
+  // Row 38 (L39): TOTAL PROVISIONS = classe 19 = poste DC
+  rows.push(dataRow('TOTAL PROVISIONS POUR RISQUES ET CHARGES', getPassif(bal, ['19']), getPassif(balN1, ['19'])))
   addLabelMerge(rows.length - 1)
 
   // ── Row 39 (L40): footnote ──

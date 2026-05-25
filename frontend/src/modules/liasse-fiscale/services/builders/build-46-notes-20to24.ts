@@ -8,7 +8,7 @@
  *   - Sheet 50: NOTE 24 (8 cols)  - Services exterieurs
  */
 
-import { SheetData, Row, emptyRow, rowAt, m, headerRows, variationPct, getChargesNettes, getProduits, getCharges, getBalanceSolde } from './helpers'
+import { SheetData, Row, emptyRow, rowAt, m, headerRows, variationPct, getChargesNettes, getProduits, getCharges, getBalanceSolde, getPassif } from './helpers'
 import type { EntrepriseData, ExerciceData, BalanceEntry } from './helpers'
 
 // ── EUR conversion rate ──
@@ -20,12 +20,15 @@ const EUR_RATE = 655.957
 // ────────────────────────────────────────────────────────────────────────────
 
 function buildNote20(
-  _bal: BalanceEntry[],
-  _balN1: BalanceEntry[],
+  bal: BalanceEntry[],
+  balN1: BalanceEntry[],
   ent: EntrepriseData,
   ex: ExerciceData,
 ): SheetData {
   const C = 8
+  // Trésorerie-passif (soldes créditeurs). DQ = 565 (escompte) ; DR = 52/561/564.
+  const pv = (pfx: readonly string[]): number => getPassif(bal, pfx)
+  const pvN1 = (pfx: readonly string[]): number => getPassif(balN1, pfx)
   const merges: ReturnType<typeof m>[] = []
   const rows: Row[] = []
 
@@ -73,15 +76,15 @@ function buildNote20(
   // ════════════════════════════════════════════════════════════════════════
 
   // Row 8 (L9)
-  rows.push(dataRow('Escomptes de cr\u00e9dit de campagne', 0, 0))
+  rows.push(dataRow('Escomptes de cr\u00e9dit de campagne', pv(['5651']), pvN1(['5651'])))
   addLabelMerge(rows.length - 1)
 
   // Row 9 (L10)
-  rows.push(dataRow('Escomptes de cr\u00e9dit ordinaires', 0, 0))
+  rows.push(dataRow('Escomptes de cr\u00e9dit ordinaires', pv(['5652', '5653']), pvN1(['5652', '5653'])))
   addLabelMerge(rows.length - 1)
 
-  // Row 10 (L11): TOTAL ESCOMPTE
-  rows.push(dataRow('TOTAL: BANQUES, CREDITS D\'ESCOMPTE ET DE TRESORERIE', 0, 0))
+  // Row 10 (L11): TOTAL ESCOMPTE = compte 565 (= poste DQ)
+  rows.push(dataRow('TOTAL: BANQUES, CREDITS D\'ESCOMPTE ET DE TRESORERIE', pv(['565']), pvN1(['565'])))
   addLabelMerge(rows.length - 1)
 
   // ════════════════════════════════════════════════════════════════════════
@@ -89,31 +92,31 @@ function buildNote20(
   // ════════════════════════════════════════════════════════════════════════
 
   // Row 11 (L12)
-  rows.push(dataRow('Banques locales', 0, 0))
+  rows.push(dataRow('Banques locales', pv(['521']), pvN1(['521'])))
   addLabelMerge(rows.length - 1)
 
   // Row 12 (L13)
-  rows.push(dataRow('Banques autres \u00e9tats r\u00e9gion', 0, 0))
+  rows.push(dataRow('Banques autres \u00e9tats r\u00e9gion', pv(['522', '526']), pvN1(['522', '526'])))
   addLabelMerge(rows.length - 1)
 
   // Row 13 (L14)
-  rows.push(dataRow('Autres Banques', 0, 0))
+  rows.push(dataRow('Autres Banques', pv(['523', '524']), pvN1(['523', '524'])))
   addLabelMerge(rows.length - 1)
 
   // Row 14 (L15)
-  rows.push(dataRow('Banques int\u00e9r\u00eats courus', 0, 0))
+  rows.push(dataRow('Banques int\u00e9r\u00eats courus', pv(['527']), pvN1(['527'])))
   addLabelMerge(rows.length - 1)
 
   // Row 15 (L16)
-  rows.push(dataRow('Cr\u00e9dit de tr\u00e9sorerie', 0, 0))
+  rows.push(dataRow('Cr\u00e9dit de tr\u00e9sorerie', pv(['561', '564']), pvN1(['561', '564'])))
   addLabelMerge(rows.length - 1)
 
   // Row 16 (L17): TOTAL TRESORERIE
-  rows.push(dataRow('TOTAL: BANQUES, CREDITS DE TRESORERIE', 0, 0))
+  rows.push(dataRow('TOTAL: BANQUES, CREDITS DE TRESORERIE', pv(['52', '561', '564']), pvN1(['52', '561', '564'])))
   addLabelMerge(rows.length - 1)
 
   // ── Row 17 (L18): TOTAL GENERAL ──
-  rows.push(dataRow('TOTAL GENERAL', 0, 0))
+  rows.push(dataRow('TOTAL GENERAL', pv(['565', '52', '561', '564']), pvN1(['565', '52', '561', '564'])))
   addLabelMerge(rows.length - 1)
 
   // ── Rows 18-22 (L19-L23): comment rows ──
