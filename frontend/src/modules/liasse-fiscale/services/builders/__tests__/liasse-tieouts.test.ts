@@ -3,7 +3,8 @@ import { buildBilan } from '../build-09-bilan'
 import { buildResultat } from '../build-11-passif-resultat'
 import { buildNote7 } from '../build-26-notes-7to8c'
 import { buildNote17, buildNote18, buildNote19 } from '../build-39-notes-16to19'
-import { getPassif } from '../../liasse-calculs'
+import { buildNote21, buildNote23, buildNote24 } from '../build-46-notes-20to24'
+import { getPassif, getChargesNettes } from '../../liasse-calculs'
 import { buildNote9, buildNote10, buildNote11 } from '../build-31-notes-9to12'
 import { buildNote3A, buildNote3C, buildNote6 } from '../build-15-notes-1to6'
 import { getBalanceSolde, getProduits, getCharges } from '../../liasse-calculs'
@@ -204,6 +205,32 @@ describe('Liasse — cohérence du Compte de Résultat (build-11)', () => {
   it('XB (Chiffre d\'affaires) = total des ventes (classe 70)', () => {
     expect(Math.abs(num(xb?.[8]) - getProduits(BALANCE_B, ['70']))).toBeLessThanOrEqual(TOL)
     expect(Math.abs(num(xb?.[8]) - CA_ATTENDU)).toBeLessThanOrEqual(TOL)
+  })
+})
+
+describe('Liasse — Notes de charges/produits (module) calculent depuis la balance', () => {
+  const noteVal = (sheet: { rows: Row[] }, label: string): number =>
+    num(sheet.rows.find((r) => r[0] === label)?.[5])
+
+  it('Note 21 — TOTAL CHIFFRES D\'AFFAIRES = ventes classe 70 (= CdR XB)', () => {
+    const n21 = buildNote21(BALANCE_B, EMPTY, ENT, EX)
+    const ca = noteVal(n21, 'TOTAL : CHIFFRES D\'AFFAIRES')
+    expect(Math.abs(ca - getProduits(BALANCE_B, ['70']))).toBeLessThanOrEqual(TOL)
+    expect(Math.abs(ca - 10_500_000)).toBeLessThanOrEqual(TOL)
+  })
+
+  it('Note 23 — TOTAL Transports = classe 61 (= CdR RG)', () => {
+    const n23 = buildNote23(BALANCE_B, EMPTY, ENT, EX)
+    const tot = noteVal(n23, 'TOTAL')
+    expect(Math.abs(tot - getChargesNettes(BALANCE_B, ['61']))).toBeLessThanOrEqual(TOL)
+    expect(Math.abs(tot - 300_000)).toBeLessThanOrEqual(TOL)
+  })
+
+  it('Note 24 — TOTAL Services extérieurs = classes 62+63 (= CdR RH)', () => {
+    const n24 = buildNote24(BALANCE_B, EMPTY, ENT, EX)
+    const tot = noteVal(n24, 'TOTAL')
+    expect(Math.abs(tot - getChargesNettes(BALANCE_B, ['62', '63']))).toBeLessThanOrEqual(TOL)
+    expect(Math.abs(tot - 800_000)).toBeLessThanOrEqual(TOL)
   })
 })
 
