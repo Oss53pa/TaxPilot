@@ -4,7 +4,7 @@ import { buildResultat } from '../build-11-passif-resultat'
 import { buildNote7 } from '../build-26-notes-7to8c'
 import { buildNote16A, buildNote17, buildNote18, buildNote19 } from '../build-39-notes-16to19'
 import { buildNote21, buildNote22, buildNote23, buildNote24 } from '../build-46-notes-20to24'
-import { buildNote25, buildNote26, buildNote27A } from '../build-51-notes-25to28'
+import { buildNote25, buildNote26, buildNote27A, buildNote28 } from '../build-51-notes-25to28'
 import { buildNote29, buildNote30 } from '../build-56-notes-29to32'
 import { getPassif, getChargesNettes } from '../../liasse-calculs'
 import { buildNote9, buildNote10, buildNote11 } from '../build-31-notes-9to12'
@@ -277,6 +277,28 @@ describe('Liasse — Notes de charges/produits (module) calculent depuis la bala
     const n30 = buildNote30(BALANCE_B, EMPTY, ENT, EX)
     expect(Math.abs(noteVal(n30, 'SOUS TOTAL : AUTRES CHARGES HAO') - getCharges(BALANCE_B, ['83', '85']))).toBeLessThanOrEqual(TOL)
     expect(Math.abs(noteVal(n30, 'SOUS TOTAL : AUTRES PRODUITS HAO') - getProduits(BALANCE_B, ['84', '86', '88']))).toBeLessThanOrEqual(TOL)
+  })
+})
+
+// Fixture provisions/dépréciations pour la Note 28 (mouvements).
+const BALANCE_P: BalanceEntry[] = [
+  e('3911', -500_000), // dépréciation des stocks (39)
+  e('4911', -300_000), // dépréciation des clients (49)
+  e('1971', -800_000), // provisions financières pour risques et charges (19)
+]
+
+describe('Liasse — Note 28 (mouvements de provisions) cohérente', () => {
+  it('clôture = provisions au bilan ; ligne TOTAL équilibrée (D = A + B − C)', () => {
+    const n28 = buildNote28(BALANCE_P, EMPTY, ENT, EX)
+    const total = n28.rows.find((r) => r[0] === 'TOTAL')
+    const ouv = num(total?.[4])
+    const dot = num(total?.[5]) + num(total?.[6]) + num(total?.[7])
+    const repr = num(total?.[8]) + num(total?.[9]) + num(total?.[10])
+    const clot = num(total?.[11])
+    expect(Math.abs(clot - getPassif(BALANCE_P, ['15', '19', '29', '39', '49', '59', '499']))).toBeLessThanOrEqual(TOL)
+    expect(Math.abs(clot - 1_600_000)).toBeLessThanOrEqual(TOL)
+    // Invariant du tableau de mouvements : Clôture = Ouverture + Dotations − Reprises
+    expect(Math.abs(clot - (ouv + dot - repr))).toBeLessThanOrEqual(TOL)
   })
 })
 

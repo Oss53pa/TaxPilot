@@ -8,7 +8,7 @@
  *   - Sheet 55: NOTE 28  (12 cols) - Dotations et charges pour provisions et depreciations
  */
 
-import { SheetData, Row, emptyRow, rowAt, m, headerRows, variationPct, getChargesNettes } from './helpers'
+import { SheetData, Row, emptyRow, rowAt, m, headerRows, variationPct, getChargesNettes, getPassif } from './helpers'
 import type { EntrepriseData, ExerciceData, BalanceEntry } from './helpers'
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -518,9 +518,11 @@ function buildNote27B(
 //   12 columns (A=0 to L=11)
 // ────────────────────────────────────────────────────────────────────────────
 
+type ProvDim = 'expl' | 'fin' | 'hao'
+
 function buildNote28(
-  _bal: BalanceEntry[],
-  _balN1: BalanceEntry[],
+  bal: BalanceEntry[],
+  balN1: BalanceEntry[],
   ent: EntrepriseData,
   ex: ExerciceData,
 ): SheetData {
@@ -601,6 +603,34 @@ function buildNote28(
     merges.push(m(rowIdx, 0, rowIdx, 3)) // A:D merge for nature labels
   }
 
+  // Colonnes : 4=ouverture, 5/6/7=dotations (exploit/fin/HAO), 8/9/10=reprises
+  // (exploit/fin/HAO), 11=clôture. On lit le solde créditeur de la provision à
+  // l'ouverture (N-1) et à la clôture (N) ; le MOUVEMENT NET est porté en dotation
+  // (si la provision augmente) ou en reprise (si elle diminue), dans la dimension
+  // du poste → chaque ligne vérifie D = A + B − C par construction (zéro incohérence).
+  const DOT_COL: Record<ProvDim, number> = { expl: 5, fin: 6, hao: 7 }
+  const REPR_COL: Record<ProvDim, number> = { expl: 8, fin: 9, hao: 10 }
+  const colTotal = (): Record<number, number> => ({ 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0 })
+  const sumInto = (acc: Record<number, number>, row: Row): void => {
+    for (const c of [4, 5, 6, 7, 8, 9, 10, 11]) acc[c] += typeof row[c] === 'number' ? (row[c] as number) : 0
+  }
+  const provRow = (label: string, comptes: readonly string[], dim: ProvDim): Row => {
+    const ouv = getPassif(balN1, comptes)
+    const clot = getPassif(bal, comptes)
+    const net = clot - ouv
+    const row = mvtRow(label)
+    row[4] = ouv
+    row[11] = clot
+    if (net >= 0) row[DOT_COL[dim]] = net
+    else row[REPR_COL[dim]] = -net
+    return row
+  }
+  const totalRowFrom = (label: string, acc: Record<number, number>): Row => {
+    const row = mvtRow(label)
+    for (const c of [4, 5, 6, 7, 8, 9, 10, 11]) row[c] = acc[c]
+    return row
+  }
+
   // ════════════════════════════════════════════════════════════════════════
   // Section 1: Dotations (rows 10-13, L11-L14)
   // ════════════════════════════════════════════════════════════════════════
@@ -611,13 +641,21 @@ function buildNote28(
     'Dépréciations des immobilisations',
   ]
 
-  for (const label of dotationsLabels) {
-    rows.push(mvtRow(label))
+  const dotationsMap: { comptes: readonly string[]; dim: ProvDim }[] = [
+    { comptes: ['15'], dim: 'hao' },   // Provisions réglementées
+    { comptes: ['19'], dim: 'fin' },   // Provisions financières pour risques et charges
+    { comptes: ['29'], dim: 'expl' },  // Dépréciations des immobilisations
+  ]
+  const totDot = colTotal()
+  dotationsLabels.forEach((label, idx) => {
+    const r = provRow(label, dotationsMap[idx].comptes, dotationsMap[idx].dim)
+    rows.push(r)
     addNatureMerge(rows.length - 1)
-  }
+    sumInto(totDot, r)
+  })
 
   // ── Row 13 (L14): TOTAL DOTATIONS → column sums of L11:L13 ──
-  rows.push(mvtRow('TOTAL DOTATIONS'))
+  rows.push(totalRowFrom('TOTAL DOTATIONS', totDot))
   addNatureMerge(rows.length - 1)
 
   // ════════════════════════════════════════════════════════════════════════
@@ -641,17 +679,39 @@ function buildNote28(
     'Autres provisions et dépréciations à court terme',
   ]
 
-  for (const label of chargesLabels) {
-    rows.push(mvtRow(label))
+  // Dépréciations (39 stocks, 49x tiers, 590 titres) détaillées ; provisions CT
+  // (499) + autres dépréc. trésorerie regroupées sur la dernière ligne « Autres ».
+  const chargesMap: { comptes: readonly string[]; dim: ProvDim }[] = [
+    { comptes: ['39'], dim: 'expl' },                                              // stocks
+    { comptes: ['490'], dim: 'expl' },                                             // fournisseurs avances
+    { comptes: ['491'], dim: 'expl' },                                             // clients
+    { comptes: ['492', '493', '494', '495', '496', '497', '498'], dim: 'expl' },   // autres créances
+    { comptes: ['590'], dim: 'fin' },                                              // titres de placement
+    { comptes: [], dim: 'expl' },  // litiges (ventilation manuelle des provisions CT)
+    { comptes: [], dim: 'expl' },  // garanties
+    { comptes: [], dim: 'expl' },  // marchés à achèvement futur
+    { comptes: [], dim: 'expl' },  // pertes de change
+    { comptes: [], dim: 'expl' },  // amendes et pénalités
+    { comptes: [], dim: 'expl' },  // renouvellement
+    { comptes: [], dim: 'expl' },  // gros entretien
+    { comptes: ['499', '591', '592', '593', '594'], dim: 'expl' }, // autres provisions/dépréc. CT
+  ]
+  const totCharges = colTotal()
+  chargesLabels.forEach((label, idx) => {
+    const r = provRow(label, chargesMap[idx].comptes, chargesMap[idx].dim)
+    rows.push(r)
     addNatureMerge(rows.length - 1)
-  }
+    sumInto(totCharges, r)
+  })
 
   // ── Row 27 (L28): TOTAL CHARGES → column sums of L15:L27 ──
-  rows.push(mvtRow('TOTAL CHARGES'))
+  rows.push(totalRowFrom('TOTAL CHARGES', totCharges))
   addNatureMerge(rows.length - 1)
 
   // ── Row 28 (L29): TOTAL → L14 + L28 ──
-  rows.push(mvtRow('TOTAL'))
+  const totGen = colTotal()
+  for (const c of [4, 5, 6, 7, 8, 9, 10, 11]) totGen[c] = totDot[c] + totCharges[c]
+  rows.push(totalRowFrom('TOTAL', totGen))
   addNatureMerge(rows.length - 1)
 
   // ── Comments (L30-L33) ──
