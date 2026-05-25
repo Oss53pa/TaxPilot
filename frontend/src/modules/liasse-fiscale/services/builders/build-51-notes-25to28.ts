@@ -8,7 +8,7 @@
  *   - Sheet 55: NOTE 28  (12 cols) - Dotations et charges pour provisions et depreciations
  */
 
-import { SheetData, Row, emptyRow, rowAt, m, headerRows, variationPct } from './helpers'
+import { SheetData, Row, emptyRow, rowAt, m, headerRows, variationPct, getChargesNettes } from './helpers'
 import type { EntrepriseData, ExerciceData, BalanceEntry } from './helpers'
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -203,8 +203,8 @@ function buildNote26(
 // ────────────────────────────────────────────────────────────────────────────
 
 function buildNote27A(
-  _bal: BalanceEntry[],
-  _balN1: BalanceEntry[],
+  bal: BalanceEntry[],
+  balN1: BalanceEntry[],
   ent: EntrepriseData,
   ex: ExerciceData,
 ): SheetData {
@@ -267,13 +267,25 @@ function buildNote27A(
     'Autres charges sociales',
   ]
 
-  for (const label of labels) {
-    rows.push(dataRow(label, 0, 0))
+  // Charges de personnel : classe 66 (charges nettes). Préfixes disjoints
+  // couvrant tout 66 → le TOTAL boucle avec le poste RK du Compte de Résultat.
+  const personnelPfx: readonly string[][] = [
+    ['661'], ['662'], ['663'], ['6641'], ['6642'], ['665'], ['666', '667'],
+    ['668', '669', '6643', '6644', '6645', '6646', '6647', '6648'],
+  ]
+  let totN = 0, totN1 = 0
+  labels.forEach((label, idx) => {
+    const pfx = personnelPfx[idx] ?? []
+    const n = pfx.length ? getChargesNettes(bal, pfx) : 0
+    const n1 = pfx.length ? getChargesNettes(balN1, pfx) : 0
+    totN += n
+    totN1 += n1
+    rows.push(dataRow(label, n, n1))
     addLabelMerge(rows.length - 1)
-  }
+  })
 
   // ── Row 16 (L17): TOTAL → SUM(F9:F16) ──
-  rows.push(dataRow('TOTAL', 0, 0))
+  rows.push(dataRow('TOTAL', totN, totN1))
   addLabelMerge(rows.length - 1)
 
   // ── Commentaires (L18-L22) ──
