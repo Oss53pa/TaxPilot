@@ -5,7 +5,7 @@ import { buildNote7 } from '../build-26-notes-7to8c'
 import { buildNote17, buildNote18, buildNote19 } from '../build-39-notes-16to19'
 import { getPassif } from '../../liasse-calculs'
 import { buildNote9, buildNote10, buildNote11 } from '../build-31-notes-9to12'
-import { buildNote3A, buildNote3C } from '../build-15-notes-1to6'
+import { buildNote3A, buildNote3C, buildNote6 } from '../build-15-notes-1to6'
 import { getBalanceSolde, getProduits, getCharges } from '../../liasse-calculs'
 import { buildCompChargesRows, buildNoteRows, NOTE08_LINES, NOTE17_LINES } from '../../noteBalanceMapping'
 import type { BalanceEntry, EntrepriseData } from '../../../types'
@@ -252,6 +252,12 @@ describe('Liasse — Notes d\'actif (module) bouclent avec le Bilan', () => {
     const r = sheet.rows.find((row) => row[0] === 'TOTAL NET')
     return num(r?.[4])
   }
+
+  it('Note 6 (Stocks) TOTAL NET = Bilan BB (Stocks et en-cours)', () => {
+    const n6 = buildNote6(BALANCE_A, EMPTY, ENT, EX)
+    expect(Math.abs(noteTotalNet(n6) - bilanNet('BB'))).toBeLessThanOrEqual(TOL)
+    expect(Math.abs(noteTotalNet(n6) - 2_000_000)).toBeLessThanOrEqual(TOL)
+  })
 
   it('Note 7 (Clients) TOTAL NET = Bilan BI (Clients)', () => {
     const n7 = buildNote7(BALANCE_A, EMPTY, ENT, EX)
