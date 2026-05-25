@@ -5,6 +5,7 @@ import { buildNote7 } from '../build-26-notes-7to8c'
 import { buildNote16A, buildNote17, buildNote18, buildNote19 } from '../build-39-notes-16to19'
 import { buildNote21, buildNote22, buildNote23, buildNote24 } from '../build-46-notes-20to24'
 import { buildNote25, buildNote26, buildNote27A } from '../build-51-notes-25to28'
+import { buildNote29, buildNote30 } from '../build-56-notes-29to32'
 import { getPassif, getChargesNettes } from '../../liasse-calculs'
 import { buildNote9, buildNote10, buildNote11 } from '../build-31-notes-9to12'
 import { buildNote3A, buildNote3C, buildNote6 } from '../build-15-notes-1to6'
@@ -260,6 +261,22 @@ describe('Liasse — Notes de charges/produits (module) calculent depuis la bala
     const n26 = buildNote26(BALANCE_B, EMPTY, ENT, EX)
     const tot = noteVal(n26, 'TOTAL')
     expect(Math.abs(tot - getChargesNettes(BALANCE_B, ['65']))).toBeLessThanOrEqual(TOL)
+  })
+
+  it('Note 29 — Frais financiers (A)=67+697 ; Revenus (B)=77+797 (= section fin. CdR)', () => {
+    const n29 = buildNote29(BALANCE_B, EMPTY, ENT, EX)
+    const frais = noteVal(n29, 'SOUS TOTAL : FRAIS FINANCIERS (A)')
+    const revenus = noteVal(n29, 'SOUS TOTAL : REVENUS FINANCIERS (B)')
+    expect(Math.abs(frais - getCharges(BALANCE_B, ['67', '697']))).toBeLessThanOrEqual(TOL)
+    expect(Math.abs(frais - 150_000)).toBeLessThanOrEqual(TOL)
+    expect(Math.abs(revenus - getProduits(BALANCE_B, ['77', '797', '798']))).toBeLessThanOrEqual(TOL)
+    expect(Math.abs(revenus - 100_000)).toBeLessThanOrEqual(TOL)
+  })
+
+  it('Note 30 — charges HAO=83+85 ; produits HAO=84+86+88', () => {
+    const n30 = buildNote30(BALANCE_B, EMPTY, ENT, EX)
+    expect(Math.abs(noteVal(n30, 'SOUS TOTAL : AUTRES CHARGES HAO') - getCharges(BALANCE_B, ['83', '85']))).toBeLessThanOrEqual(TOL)
+    expect(Math.abs(noteVal(n30, 'SOUS TOTAL : AUTRES PRODUITS HAO') - getProduits(BALANCE_B, ['84', '86', '88']))).toBeLessThanOrEqual(TOL)
   })
 })
 
