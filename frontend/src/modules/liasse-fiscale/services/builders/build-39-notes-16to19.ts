@@ -699,8 +699,8 @@ function buildNote17(
 // ────────────────────────────────────────────────────────────────────────────
 
 function buildNote18(
-  _bal: BalanceEntry[],
-  _balN1: BalanceEntry[],
+  bal: BalanceEntry[],
+  balN1: BalanceEntry[],
   ent: EntrepriseData,
   ex: ExerciceData,
 ): SheetData {
@@ -776,13 +776,23 @@ function buildNote18(
     'Autres cotisations sociales',
   ]
 
-  for (const label of dettesSocLabels) {
-    rows.push(dataRow(label, 0, 0))
+  // Dettes sociales : personnel (42) + organismes sociaux (43), crédit-only.
+  const dettesSocPfx: readonly string[][] = [
+    ['42'], [], [], [], ['431'], ['432'], ['433'], [], ['438'], ['434', '435', '436', '437'],
+  ]
+  let totSocN = 0, totSocN1 = 0
+  dettesSocLabels.forEach((label, idx) => {
+    const pfx = dettesSocPfx[idx] ?? []
+    const n = pfx.length ? getPassif(bal, pfx) : 0
+    const n1 = pfx.length ? getPassif(balN1, pfx) : 0
+    totSocN += n
+    totSocN1 += n1
+    rows.push(dataRow(label, n, n1))
     addLabelMerge(rows.length - 1)
-  }
+  })
 
   // Row 18 (L19): TOTAL DETTES SOCIALES
-  rows.push(dataRow('TOTAL DETTES SOCIALES', 0, 0))
+  rows.push(dataRow('TOTAL DETTES SOCIALES', totSocN, totSocN1))
   addLabelMerge(rows.length - 1)
 
   // ════════════════════════════════════════════════════════════════════════
@@ -797,17 +807,27 @@ function buildNote18(
     'Autres dettes envers l\'Etat',
   ]
 
-  for (const label of dettesFiscLabels) {
-    rows.push(dataRow(label, 0, 0))
+  // Dettes fiscales : État (44), crédit-only. (445 TVA récupérable = débit → 0.)
+  const dettesFiscPfx: readonly string[][] = [
+    ['441'], ['442', '446', '448'], ['443', '444'], ['447'], ['449'],
+  ]
+  let totFiscN = 0, totFiscN1 = 0
+  dettesFiscLabels.forEach((label, idx) => {
+    const pfx = dettesFiscPfx[idx] ?? []
+    const n = pfx.length ? getPassif(bal, pfx) : 0
+    const n1 = pfx.length ? getPassif(balN1, pfx) : 0
+    totFiscN += n
+    totFiscN1 += n1
+    rows.push(dataRow(label, n, n1))
     addLabelMerge(rows.length - 1)
-  }
+  })
 
   // Row 24 (L25): TOTAL DETTES FISCALES
-  rows.push(dataRow('TOTAL DETTES FISCALES', 0, 0))
+  rows.push(dataRow('TOTAL DETTES FISCALES', totFiscN, totFiscN1))
   addLabelMerge(rows.length - 1)
 
   // ── Row 25 (L26): TOTAL GENERAL ──
-  rows.push(dataRow('TOTAL DETTES FISCALES ET SOCIALES', 0, 0))
+  rows.push(dataRow('TOTAL DETTES FISCALES ET SOCIALES', totSocN + totFiscN, totSocN1 + totFiscN1))
   addLabelMerge(rows.length - 1)
 
   return { rows, merges }
@@ -819,8 +839,8 @@ function buildNote18(
 // ────────────────────────────────────────────────────────────────────────────
 
 function buildNote19(
-  _bal: BalanceEntry[],
-  _balN1: BalanceEntry[],
+  bal: BalanceEntry[],
+  balN1: BalanceEntry[],
   ent: EntrepriseData,
   ex: ExerciceData,
 ): SheetData {
@@ -892,13 +912,23 @@ function buildNote19(
     'Autres dettes envers les associ\u00e9s',
   ]
 
-  for (const label of dettesAssocLabels) {
-    rows.push(dataRow(label, 0, 0))
+  // Associés et groupe (46) + organismes internationaux (45), crédit-only.
+  const dettesAssocPfx: readonly string[][] = [
+    ['45'], ['461'], ['462', '463'], ['465'], ['466'], ['464', '467', '468'],
+  ]
+  let totAssocN = 0, totAssocN1 = 0
+  dettesAssocLabels.forEach((label, idx) => {
+    const pfx = dettesAssocPfx[idx] ?? []
+    const n = pfx.length ? getPassif(bal, pfx) : 0
+    const n1 = pfx.length ? getPassif(balN1, pfx) : 0
+    totAssocN += n
+    totAssocN1 += n1
+    rows.push(dataRow(label, n, n1))
     addLabelMerge(rows.length - 1)
-  }
+  })
 
   // Row 14 (L15): TOTAL DETTES ASSOCIES
-  rows.push(dataRow('TOTAL DETTES ASSOCIES', 0, 0))
+  rows.push(dataRow('TOTAL DETTES ASSOCIES', totAssocN, totAssocN1))
   addLabelMerge(rows.length - 1)
 
   // ════════════════════════════════════════════════════════════════════════
@@ -915,13 +945,24 @@ function buildNote19(
     'Autres cr\u00e9diteurs divers',
   ]
 
-  for (const label of crediteursDivLabels) {
-    rows.push(dataRow(label, 0, 0))
+  // Créditeurs divers (471-477), crédit-only. (478/479 = écarts de conversion,
+  // portés séparément au bilan BU/DV — exclus ici pour éviter le double comptage.)
+  const crediteursDivPfx: readonly string[][] = [
+    ['471', '472'], ['473'], ['474'], ['475'], ['476'], ['477'], [],
+  ]
+  let totCredDivN = 0, totCredDivN1 = 0
+  crediteursDivLabels.forEach((label, idx) => {
+    const pfx = crediteursDivPfx[idx] ?? []
+    const n = pfx.length ? getPassif(bal, pfx) : 0
+    const n1 = pfx.length ? getPassif(balN1, pfx) : 0
+    totCredDivN += n
+    totCredDivN1 += n1
+    rows.push(dataRow(label, n, n1))
     addLabelMerge(rows.length - 1)
-  }
+  })
 
   // Row 22 (L23): TOTAL CREDITEURS DIVERS
-  rows.push(dataRow('TOTAL CREDITEURS DIVERS', 0, 0))
+  rows.push(dataRow('TOTAL CREDITEURS DIVERS', totCredDivN, totCredDivN1))
   addLabelMerge(rows.length - 1)
 
   // ════════════════════════════════════════════════════════════════════════
@@ -934,17 +975,27 @@ function buildNote19(
     'Comptes de liaison des soci\u00e9t\u00e9s en participation',
   ]
 
-  for (const label of comptesLiaisonLabels) {
-    rows.push(dataRow(label, 0, 0))
+  // Comptes de liaison (18), crédit-only.
+  const comptesLiaisonPfx: readonly string[][] = [
+    ['181', '182'], ['186', '187'], ['188'],
+  ]
+  let totLiaisonN = 0, totLiaisonN1 = 0
+  comptesLiaisonLabels.forEach((label, idx) => {
+    const pfx = comptesLiaisonPfx[idx] ?? []
+    const n = pfx.length ? getPassif(bal, pfx) : 0
+    const n1 = pfx.length ? getPassif(balN1, pfx) : 0
+    totLiaisonN += n
+    totLiaisonN1 += n1
+    rows.push(dataRow(label, n, n1))
     addLabelMerge(rows.length - 1)
-  }
+  })
 
   // Row 26 (L27): TOTAL COMPTES DE LIAISON
-  rows.push(dataRow('TOTAL COMPTES DE LIAISON', 0, 0))
+  rows.push(dataRow('TOTAL COMPTES DE LIAISON', totLiaisonN, totLiaisonN1))
   addLabelMerge(rows.length - 1)
 
   // ── Row 27 (L28): TOTAL AUTRES DETTES ──
-  rows.push(dataRow('TOTAL AUTRES DETTES', 0, 0))
+  rows.push(dataRow('TOTAL AUTRES DETTES', totAssocN + totCredDivN + totLiaisonN, totAssocN1 + totCredDivN1 + totLiaisonN1))
   addLabelMerge(rows.length - 1)
 
   // ── Row 28 (L29): Provisions risques charges court terme ──

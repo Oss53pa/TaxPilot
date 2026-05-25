@@ -2,7 +2,8 @@ import { describe, it, expect } from 'vitest'
 import { buildBilan } from '../build-09-bilan'
 import { buildResultat } from '../build-11-passif-resultat'
 import { buildNote7 } from '../build-26-notes-7to8c'
-import { buildNote17 } from '../build-39-notes-16to19'
+import { buildNote17, buildNote18, buildNote19 } from '../build-39-notes-16to19'
+import { getPassif } from '../../liasse-calculs'
 import { buildNote9, buildNote10, buildNote11 } from '../build-31-notes-9to12'
 import { buildNote3A, buildNote3C } from '../build-15-notes-1to6'
 import { getBalanceSolde, getProduits, getCharges } from '../../liasse-calculs'
@@ -239,6 +240,34 @@ describe('Liasse — Notes d\'actif (module) bouclent avec le Bilan', () => {
     const n11 = buildNote11(BALANCE_A, EMPTY, ENT, EX)
     expect(Math.abs(noteTotalNet(n11) - bilanNet('BS'))).toBeLessThanOrEqual(TOL)
     expect(Math.abs(noteTotalNet(n11) - 1_700_000)).toBeLessThanOrEqual(TOL)
+  })
+})
+
+// Fixture dédiée aux dettes du passif (classes 42/43/44/46/47, soldes créditeurs).
+const BALANCE_D: BalanceEntry[] = [
+  e('4221', -800_000), // Personnel, rémunérations dues (42)
+  e('4311', -300_000), // CNPS — organismes sociaux (43)
+  e('4441', -500_000), // État, TVA due (44)
+  e('4621', -400_000), // Associés, compte courant (46)
+  e('4711', -200_000), // Créditeurs divers (47)
+]
+
+describe('Liasse — Notes 18 & 19 (dettes) calculent depuis la balance', () => {
+  const noteTotal = (sheet: { rows: Row[] }, label: string): number =>
+    num(sheet.rows.find((r) => r[0] === label)?.[4])
+
+  it('Note 18 — TOTAL DETTES FISCALES ET SOCIALES = Σ classes 42+43+44 (crédit)', () => {
+    const n18 = buildNote18(BALANCE_D, EMPTY, ENT, EX)
+    const total = noteTotal(n18, 'TOTAL DETTES FISCALES ET SOCIALES')
+    expect(Math.abs(total - getPassif(BALANCE_D, ['42', '43', '44']))).toBeLessThanOrEqual(TOL)
+    expect(Math.abs(total - 1_600_000)).toBeLessThanOrEqual(TOL)
+  })
+
+  it('Note 19 — TOTAL AUTRES DETTES = Σ classes 45+46+47+18 (crédit)', () => {
+    const n19 = buildNote19(BALANCE_D, EMPTY, ENT, EX)
+    const total = noteTotal(n19, 'TOTAL AUTRES DETTES')
+    expect(Math.abs(total - getPassif(BALANCE_D, ['45', '46', '47', '18']))).toBeLessThanOrEqual(TOL)
+    expect(Math.abs(total - 600_000)).toBeLessThanOrEqual(TOL)
   })
 })
 
