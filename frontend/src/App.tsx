@@ -195,9 +195,10 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/auth" element={<ExternalAuthPage />} />
 
-          {/* Lien d'accès à l'application entreprise via invitation collaborateur.
-              Route publique — la page elle-même affiche le flux signup+password
-              ou auto-accept si l'utilisateur est déjà loggé. */}
+          {/* Activation d'un compte collaborateur invité.
+              Route publique — la page vérifie le token_hash (verifyOtp), confirme
+              l'email puis fait définir le mot de passe. */}
+          <Route path="/auth/accept-invite" element={<AcceptInvitationPage />} />
           <Route path="/invitations/accept" element={<AcceptInvitationPage />} />
           <Route path="/invite/:token" element={<AcceptInvitationPage />} />
 
