@@ -1,24 +1,24 @@
 /**
- * Edge Function: invite-user
+ * Edge Function: liasspilot-invite-user
  * ---------------------------------------------------------------------------
  * Invitation d'un collaborateur par un administrateur Liass'Pilot.
  *
  * Adapté du système « Cockpit FnA » (cockpit-invite-user) au stack réel de
- * Liass'Pilot : table public.organization_members (modèle self-org, voir
- * migration 015) + Resend pour l'email HTML.
+ * Liass'Pilot : tables lp_organizations / lp_user_orgs / lp_org_members
+ * (modèle self-org, voir migration 015) + Resend pour l'email HTML.
  *
  * Flux :
  *   1. SEC-01 — authentifie l'appelant via son JWT (Authorization: Bearer).
- *   2. Autorisation — l'appelant doit être admin/owner de son org. L'acheteur
- *      Atlas Studio (aucune ligne membership) est admin par défaut : on
- *      « bootstrap » alors sa ligne owner (org_id = son uid).
+ *   2. Autorisation — l'appelant doit être admin de son org. L'acheteur
+ *      Atlas Studio (aucune appartenance) est admin par défaut : on
+ *      « bootstrap » alors son org self (id = son uid) en admin.
  *   3. Crée (ou retrouve) l'utilisateur invité côté auth.
  *   4. Génère un lien Supabase :
  *        - type 'invite'   pour un nouvel utilisateur,
  *        - type 'recovery' si l'utilisateur existe déjà (renvoi).
  *      On extrait le token_hash (anti-prefetch) et on construit un lien
  *      propre vers /auth/accept-invite.
- *   5. Upsert profiles + organization_members (status='invited').
+ *   5. Upsert roster lp_org_members + appartenance lp_user_orgs.
  *   6. Envoie l'email HTML via Resend avec le lien d'action injecté.
  *
  * Secrets requis (Supabase → Edge Functions → Secrets) :
@@ -30,7 +30,25 @@
  *   - APP_URL (optionnel)          ex: "https://liasspilot.atlas-studio.org"
  */
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { getCorsHeaders } from '../_shared/cors.ts';
+// CORS inline (fonction auto-suffisante — pas de dépendance _shared pour un
+// déploiement mono-fichier robuste).
+const CORS_ALLOWED_ORIGINS = [
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'http://localhost:3006',
+  'https://liasspilot.atlasstudio.app',
+  'https://liasspilot.atlas-studio.org',
+  'https://liasspilot.app',
+  'https://atlas-studio.org',
+];
+function getCorsHeaders(origin: string): Record<string, string> {
+  const allowed = CORS_ALLOWED_ORIGINS.includes(origin) ? origin : CORS_ALLOWED_ORIGINS[0];
+  return {
+    'Access-Control-Allow-Origin': allowed,
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  };
+}
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;

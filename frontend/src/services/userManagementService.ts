@@ -8,7 +8,7 @@
  *                      avant même d'avoir accepté).
  *
  * S'appuie sur :
- *   - l'edge function Supabase `invite-user` (création utilisateur + email HTML Resend),
+ *   - l'edge function Supabase `liasspilot-invite-user` (création utilisateur + email HTML Resend),
  *   - les RPC SECURITY DEFINER (lp_get_my_role / lp_ensure_org / lp_set_member_*).
  *
  * Si Supabase n'est pas configuré (mode local pur), les méthodes renvoient un
@@ -148,7 +148,7 @@ export const userManagementService = {
     if (!supabase) {
       throw new Error('Supabase non configuré : invitation indisponible en mode local.')
     }
-    const { data, error } = await supabase.functions.invoke('invite-user', {
+    const { data, error } = await supabase.functions.invoke('liasspilot-invite-user', {
       body: {
         email: payload.email,
         fullName: payload.fullName,
