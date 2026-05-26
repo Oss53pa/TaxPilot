@@ -57,6 +57,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
 import { useModeStore } from '../../store/modeStore'
 import { useDossierStore } from '../../store/dossierStore'
+import { useUserRole } from '../../hooks/useUserRole'
 import NotificationCenter from '../notifications/NotificationCenter'
 import ExerciceSelector from '../exercice/ExerciceSelector'
 import UsageAssistant from '../assistant/UsageAssistant'
@@ -83,6 +84,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { user, logout } = useAuthStore()
   const { userMode, nomCabinet } = useModeStore()
   const { activeDossierId, getActiveDossier, deactivateDossier } = useDossierStore()
+  // Gating rôle : seul un admin voit/accède au module Configuration (Paramètres).
+  const { isAdmin } = useUserRole()
 
   const isCabinet = userMode === 'cabinet'
   const activeDossier = isCabinet ? getActiveDossier() : null
@@ -192,7 +195,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     // « Config. Fiscale » retiré de la sidebar : c'était un DOUBLON exact du
     // panneau « Config. Fiscale » de la page Configuration (même <FiscalConfigPage/>).
     // On y accède désormais via l'onglet dédié dans Configuration.
-    { text: 'Configuration', icon: <Settings />, path: '/parametrage', divider: 'Configuration' },
+    { text: 'Configuration', icon: <Settings />, path: '/parametrage', divider: 'Configuration', requiresAdmin: true },
     { text: 'Plans Comptables', icon: <AccountBalance />, path: '/plans-comptables' },
     { text: 'Points de Contrôle IA', icon: <Security />, path: '/control-points' },
 
@@ -206,11 +209,29 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   // La liste plate (marquée par `divider`) devient des groupes-modules. Les
   // items avant le 1er divider (Tableau de bord) restent hors groupe (toujours
   // visibles). Le module contenant la route active est déplié par défaut.
-  type NavItem = { text: string; icon: React.ReactNode; path: string; divider?: string }
+  type NavItem = { text: string; icon: React.ReactNode; path: string; divider?: string; requiresAdmin?: boolean }
   const navGroups = React.useMemo(() => {
+    // Filtrage rôle : on retire les items `requiresAdmin` aux non-admins. Si un
+    // item retiré portait un `divider` (label de groupe), on le reporte sur le
+    // prochain item visible afin de ne pas casser le regroupement.
+    const visible: NavItem[] = []
+    let pendingDivider: string | undefined
+    for (const it of menuItems as NavItem[]) {
+      if (it.requiresAdmin && !isAdmin) {
+        if (it.divider) pendingDivider = it.divider
+        continue
+      }
+      if (pendingDivider && !it.divider) {
+        visible.push({ ...it, divider: pendingDivider })
+      } else {
+        visible.push(it)
+      }
+      pendingDivider = undefined
+    }
+
     const groups: { label: string | null; items: NavItem[] }[] = []
     let current: { label: string | null; items: NavItem[] } = { label: null, items: [] }
-    for (const it of menuItems as NavItem[]) {
+    for (const it of visible) {
       if (it.divider) {
         if (current.items.length) groups.push(current)
         current = { label: it.divider, items: [] }
@@ -219,7 +240,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     }
     if (current.items.length) groups.push(current)
     return groups
-  }, [menuItems])
+  }, [menuItems, isAdmin])
 
   const isActivePath = (path: string) =>
     location.pathname === path || (path !== '/dashboard' && location.pathname.startsWith(path))

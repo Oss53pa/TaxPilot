@@ -11,7 +11,10 @@ import {
   Tab,
   Paper,
   Alert,
+  CircularProgress,
 } from '@mui/material'
+import { Navigate } from 'react-router-dom'
+import { useUserRole } from '@/hooks/useUserRole'
 import {
   Business,
   People,
@@ -51,6 +54,8 @@ const Parametrage: React.FC = () => {
   const { hasFeature } = useTenantPlan()
   const hasBranding = hasFeature('branding_cabinet')
   const hasTeamMgmt = hasFeature('gestion_equipe_cabinet')
+  // Gating rôle : le module Paramètres est réservé aux admins.
+  const { isAdmin, loading: roleLoading } = useUserRole()
   
   // Déterminer l'onglet actif basé sur l'URL
   const getActiveTab = () => {
@@ -98,6 +103,18 @@ const Parametrage: React.FC = () => {
   React.useEffect(() => {
     setActiveTab(getActiveTab())
   }, [location.pathname])
+
+  // Garde d'accès : seuls les admins accèdent au module Paramètres.
+  if (roleLoading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
+        <CircularProgress />
+      </Box>
+    )
+  }
+  if (!isAdmin) {
+    return <Navigate to="/dashboard" replace />
+  }
 
   return (
     <Box sx={{ width: '100%', height: '100%', px: 3, py: 2 }}>
