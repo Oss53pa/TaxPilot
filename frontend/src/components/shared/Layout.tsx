@@ -560,16 +560,19 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           ml: { md: `${drawerWidth}px` },
           // Surface PLEINE et nette (le glass translucide rendait un gris sale
           // car le flou échantillonnait le contenu gris derrière).
-          bgcolor: '#ffffff',
+          // Theme-aware : blanc en light, charcoal en dark — sinon le texte
+          // text.primary (blanc en dark) devenait invisible sur un fond blanc figé.
+          bgcolor: 'background.paper',
           backgroundImage: 'none',
           color: 'text.primary',
-          borderBottom: `1px solid ${P.primary200}`,
+          borderBottom: '1px solid',
+          borderColor: 'divider',
           boxShadow: '0 1px 3px rgba(28,25,23,0.04)',
           zIndex: theme.zIndex.drawer + 1,
           transition: 'width 0.25s ease, margin-left 0.25s ease',
         }}
       >
-        <Toolbar sx={{ bgcolor: '#ffffff', color: 'text.primary' }}>
+        <Toolbar sx={{ bgcolor: 'background.paper', color: 'text.primary' }}>
           <IconButton
             color="inherit"
             aria-label="open drawer"
@@ -610,12 +613,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <Badge
                 variant="dot"
                 invisible={!hasSupport}
-                sx={{
+                sx={(t) => ({
                   '& .MuiBadge-badge': {
                     backgroundColor: '#EF9F27',
-                    boxShadow: '0 0 0 2px #fff',
+                    boxShadow: `0 0 0 2px ${t.palette.background.paper}`,
                   },
-                }}
+                })}
               >
                 <HelpOutlineIcon />
               </Badge>
@@ -631,7 +634,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             color="inherit"
           >
             <Avatar
-              sx={{ width: 32, height: 32, bgcolor: 'text.primary', color: P.white, fontSize: '0.85rem', fontWeight: 600 }}
+              sx={{ width: 32, height: 32, bgcolor: P.teal, color: P.white, fontSize: '0.85rem', fontWeight: 600 }}
             >
               {user?.firstName?.[0] || user?.email?.[0] || <AccountCircle />}
             </Avatar>
