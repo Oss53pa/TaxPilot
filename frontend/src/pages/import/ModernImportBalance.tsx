@@ -930,6 +930,25 @@ const ModernImportBalance: React.FC = () => {
                   </Alert>
                 )}
 
+                {/* Modèle d'import — disponible dès la configuration pour que
+                    l'utilisateur sache exactement quel format préparer. */}
+                <Alert severity="info" sx={{ mt: 3 }}>
+                  <AlertTitle>Modèle de fichier d'import</AlertTitle>
+                  Votre balance doit contenir ces colonnes : <strong>Compte</strong> · <strong>Description</strong> ·
+                  Solde Débit N-1 · Solde Crédit N-1 · Mouvement Débit N · Mouvement Crédit N ·
+                  Solde Débit N · Solde Crédit N. Les colonnes N-1 sont facultatives (comparatif).
+                  <Box sx={{ mt: 1.5 }}>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      startIcon={<DownloadIcon />}
+                      onClick={() => downloadBalanceTemplate()}
+                    >
+                      Télécharger le modèle Excel
+                    </Button>
+                  </Box>
+                </Alert>
+
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
                   <Button
                     variant="contained"
