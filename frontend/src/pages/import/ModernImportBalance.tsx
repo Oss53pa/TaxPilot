@@ -670,6 +670,13 @@ const ModernImportBalance: React.FC = () => {
             )}
             <Button
               variant="outlined"
+              startIcon={<DownloadIcon />}
+              onClick={() => downloadBalanceTemplate()}
+            >
+              Modèle Excel
+            </Button>
+            <Button
+              variant="outlined"
               startIcon={<HistoryIcon />}
               onClick={() => navigate('/import-history')}
             >
