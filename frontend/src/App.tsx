@@ -56,10 +56,6 @@ const ModernVeilleReglementaire = React.lazy(() => import('@/pages/veille/Modern
 const ModernCollaboration = React.lazy(() => import('@/pages/collaboration/ModernCollaboration'))
 const ModernIntegrations = React.lazy(() => import('@/pages/integrations/ModernIntegrations'))
 const ModernSecurity = React.lazy(() => import('@/pages/security/ModernSecurity'))
-const OrganizationWrapper = React.lazy(() => import('@/pages/organization/OrganizationWrapper'))
-const OrganizationMembersPage = React.lazy(() => import('@/pages/organization/OrganizationMembersPage'))
-const SubscriptionPage = React.lazy(() => import('@/pages/organization/SubscriptionPage'))
-const InvitationsPage = React.lazy(() => import('@/pages/organization/InvitationsPage'))
 const AcceptInvitationPage = React.lazy(() => import('@/pages/organization/AcceptInvitationPage'))
 const TeamSettingsPage = React.lazy(() => import('@/pages/settings/TeamSettingsPage'))
 
@@ -228,9 +224,6 @@ function App() {
           <Route path="/integrations" element={<S><ModernIntegrations /></S>} />
           <Route path="/settings/team" element={<S><TeamSettingsPage /></S>} />
           <Route path="/security" element={<S><ModernSecurity /></S>} />
-          <Route path="/organization/:slug/members" element={<S><OrganizationWrapper>{(slug) => <OrganizationMembersPage organizationSlug={slug} />}</OrganizationWrapper></S>} />
-          <Route path="/organization/:slug/subscription" element={<S><OrganizationWrapper>{(slug) => <SubscriptionPage organizationSlug={slug} />}</OrganizationWrapper></S>} />
-          <Route path="/organization/:slug/invitations" element={<S><OrganizationWrapper>{(slug) => <InvitationsPage organizationSlug={slug} />}</OrganizationWrapper></S>} />
           <Route path="/settings/members" element={<S><AdminPlaceholder title="Membres & Rôles" description="Gérez les collaborateurs de votre cabinet, attribuez des rôles (administrateur, collaborateur, observateur) et contrôlez les accès." icon="people" /></S>} />
           <Route path="/settings/subscription" element={<S><AdminPlaceholder title="Abonnement" description="Consultez votre plan actuel, suivez vos quotas (liasses, stockage) et gérez la facturation." icon="subscription" /></S>} />
           <Route path="/settings/invitations" element={<S><AdminPlaceholder title="Invitations" description="Envoyez des invitations par email à vos collaborateurs pour rejoindre le cabinet." icon="invite" /></S>} />

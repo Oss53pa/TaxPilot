@@ -4,7 +4,6 @@
  */
 
 export { apiClient } from './apiClient'
-export { default as authService } from './authService'
 export { default as balanceService } from './balanceService'
 export { default as entrepriseService } from './entrepriseService'
 export { default as generationService } from './generationService'
