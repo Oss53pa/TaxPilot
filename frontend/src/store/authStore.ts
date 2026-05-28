@@ -5,6 +5,7 @@ import { create } from 'zustand'
 import { supabase, isSupabaseEnabled } from '@/lib/supabase'
 import { useOrganizationStore } from './organizationStore'
 import { hydrateEntrepriseFromCloud } from '@/services/entrepriseStorageService'
+import { hydrateAllFromCloud, pushAllToCloud } from '@/services/cloudStateService'
 import type { User as SupabaseUser, Session } from '@supabase/supabase-js'
 
 export interface AppUser {
@@ -100,6 +101,10 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
 
       if (session?.user) {
         const baseUser = mapSupabaseUser(session.user)
+        // Réhydrate le cloud → localStorage AVANT de débloquer l'UI (fill-absent,
+        // strictement additif) : balance, dossiers, saisies, stores… sont frais
+        // dès le 1er rendu, même après un vidage de cache / changement d'appareil.
+        try { await hydrateAllFromCloud() } catch { /* additif, ne bloque pas */ }
         set({
           user: baseUser,
           session,
@@ -107,9 +112,9 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
           isLoading: false,
           initialized: true,
         })
-        // Réhydrate la config entreprise depuis Supabase → cache localStorage frais
-        // pour tous les consommateurs (liasse, page de garde…) dès le démarrage.
+        // Config entreprise (table dédiée) + snapshot complet du local vers cloud.
         void hydrateEntrepriseFromCloud()
+        void pushAllToCloud()
         // Enrichissement async depuis profiles.account_type si user_metadata ne le porte pas
         if (!session.user.user_metadata?.account_type && supabase) {
           hydrateAccountTypeFromProfile(baseUser, supabase).then((enriched) => {
@@ -129,7 +134,9 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
             session,
             isAuthenticated: true,
           })
+          void hydrateAllFromCloud()
           void hydrateEntrepriseFromCloud()
+          void pushAllToCloud()
           if (!session.user.user_metadata?.account_type && supabase) {
             hydrateAccountTypeFromProfile(baseUser, supabase).then((enriched) => {
               if (enriched.userType !== baseUser.userType) set({ user: enriched })
