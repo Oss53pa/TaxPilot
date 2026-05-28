@@ -3,11 +3,34 @@
  * Toutes les requêtes renvoient des données vides.
  */
 
-import axios, { AxiosInstance } from 'axios'
 import { STORAGE_KEYS } from '@/constants/storage'
 import { logger } from '@/utils/logger'
 
 logger.debug('Mode frontend-only — les requêtes API renvoient des données vides')
+
+/**
+ * Stub HTTP — Liass'Pilot n'a AUCUN backend REST (100% Supabase + local).
+ * Remplace l'ancienne instance axios. Les anciennes méthodes export/download
+ * qui appelaient `apiClient.client.get(...)` rejettent désormais proprement
+ * (comme l'ancien 404), sans dépendance réseau ni axios. Les exports réels
+ * passent par le moteur client-side (exportService / balanceTemplateService).
+ */
+interface StubHttpClient {
+  // `data: any` reproduit le comportement de l'ancien AxiosResponse pour que les
+  // anciennes méthodes export (response.data → Blob) compilent sans modification.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  get(url: string, config?: unknown): Promise<{ data: any; headers: Record<string, string> }>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  post(url: string, data?: unknown, config?: unknown): Promise<{ data: any; headers: Record<string, string> }>
+}
+
+const NO_BACKEND_MSG =
+  "Aucun backend REST — Liass'Pilot fonctionne en Supabase + local. Utilisez l'export client-side."
+
+const stubHttpClient: StubHttpClient = {
+  get: () => Promise.reject(new Error(NO_BACKEND_MSG)),
+  post: () => Promise.reject(new Error(NO_BACKEND_MSG)),
+}
 
 // Types pour l'authentification
 export interface LoginCredentials {
@@ -113,16 +136,6 @@ const USER_KEY = STORAGE_KEYS.USER
  * Client API stub — toutes les méthodes renvoient des données vides
  */
 class ApiClient {
-  private api: AxiosInstance
-
-  constructor() {
-    this.api = axios.create({
-      baseURL: '',
-      timeout: 10000,
-      headers: { 'Content-Type': 'application/json' },
-    })
-  }
-
   public getAccessToken(): string | null {
     return null
   }
@@ -154,8 +167,8 @@ class ApiClient {
     return false
   }
 
-  public get client(): AxiosInstance {
-    return this.api
+  public get client(): StubHttpClient {
+    return stubHttpClient
   }
 
   public async get<T>(_url: string, _params?: object): Promise<T> {
@@ -184,4 +197,4 @@ class ApiClient {
 }
 
 export const apiClient = new ApiClient()
-export default apiClient.client
+export default apiClient

@@ -216,31 +216,44 @@ class BalanceService {
       includeGraphiques?: boolean
     }
   ): Promise<Blob> {
-    logger.debug(`Exporting balance ${balanceId} with advanced options...`, options)
+    logger.debug(`Export client-side balance ${balanceId} (${format})...`, options)
 
-    const params = {
-      balance_id: balanceId,
-      format,
-      ...options,
+    // 100% client-side : lecture de la balance locale (cache Supabase) + génération
+    // du fichier sans aucun backend. Remplace l'ancien endpoint Django (404).
+    const { getAllBalances, getLatestBalance } = await import('./balanceStorageService')
+    const balance =
+      getAllBalances().find((b) => b.id === balanceId) || getLatestBalance()
+    if (!balance) throw new Error('Balance introuvable pour cet export.')
+
+    const baseName = `balance_${balance.exercice || balanceId}`
+
+    if (format === 'PDF') {
+      throw new Error('Export PDF de la balance non disponible — choisissez XLSX ou CSV.')
     }
 
-    const response = await apiClient.client.get(
-      `${this.baseUrl}/export-balance/`,
-      {
-        params,
-        responseType: 'blob'
+    if (format === 'CSV') {
+      const { BALANCE_HEADERS } = await import('./balanceTemplateService')
+      const esc = (v: unknown) => {
+        const s = String(v ?? '')
+        return /[",;\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s
       }
-    )
+      const csv = [
+        BALANCE_HEADERS.join(';'),
+        ...balance.entries.map((e) =>
+          [e.compte, e.intitule, e.solde_debit_n1 ?? 0, e.solde_credit_n1 ?? 0,
+            e.debit, e.credit, e.solde_debit, e.solde_credit].map(esc).join(';')
+        ),
+      ].join('\n')
+      const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' })
+      const { saveAs } = await import('file-saver')
+      saveAs(blob, `${baseName}.csv`)
+      return blob
+    }
 
-    // Télécharger automatiquement le fichier
-    const url = window.URL.createObjectURL(response.data)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `balance_${balanceId}.${format.toLowerCase()}`
-    link.click()
-    window.URL.revokeObjectURL(url)
-
-    return response.data
+    // XLSX (défaut) — réutilise le moteur d'export Excel client-side.
+    const { exportBalanceToExcel } = await import('./balanceTemplateService')
+    exportBalanceToExcel(balance.entries, `${baseName}.xlsx`)
+    return new Blob()
   }
 
   // Mapping intelligent (IA) - Stub service
