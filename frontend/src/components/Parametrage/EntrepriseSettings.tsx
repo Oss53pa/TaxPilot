@@ -6,9 +6,7 @@ import { logger } from '@/utils/logger'
  */
 
 import React, { useState, useEffect } from 'react'
-import { entrepriseService } from '@/services'
-import { useBackendData } from '@/hooks/useBackendData'
-import { saveEntreprise, getEntreprise } from '@/services/entrepriseStorageService'
+import { saveEntreprise, hydrateEntrepriseFromCloud } from '@/services/entrepriseStorageService'
 import {
   Box,
   Grid,
@@ -185,21 +183,14 @@ function emptyParticipation(): ParticipationEntry {
 const EntrepriseSettings: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [success, setSuccess] = useState(false)
-  const [entrepriseId, setEntrepriseId] = useState<string | null>(null)
+  const [loadingEntreprises, setLoadingEntreprises] = useState(true)
+  const [loadedEntreprise, setLoadedEntreprise] = useState<EntrepriseLegacy | null>(null)
   const [activeTab, setActiveTab] = useState(0)
 
   // State for array data (R2/R3)
   const [dirigeants, setDirigeants] = useState<DirigeantEntry[]>([emptyDirigeant()])
   const [commissaires, setCommissaires] = useState<CommissaireEntry[]>([emptyCommissaire()])
   const [participations, setParticipations] = useState<ParticipationEntry[]>([emptyParticipation()])
-
-  // Récupérer les données de l'entreprise
-  const { data: entreprises, loading: loadingEntreprises } = useBackendData<EntrepriseLegacy[]>({
-    service: 'entrepriseService',
-    method: 'getEntreprises',
-    params: { page_size: 10 },
-    defaultData: []
-  })
 
   const {
     control,
@@ -259,17 +250,21 @@ const EntrepriseSettings: React.FC = () => {
     } as Partial<EntrepriseFormData> as EntrepriseFormData,
   })
 
-  // Charger les données : priorité service, fallback localStorage
+  // Réhydrate la config depuis Supabase au montage (cache local en fallback).
   useEffect(() => {
-    const entreprise = ((entreprises && entreprises.length > 0)
-      ? entreprises[0]
-      : getEntreprise()) as EntrepriseLegacy | null
+    let cancelled = false
+    void hydrateEntrepriseFromCloud().then((e) => {
+      if (cancelled) return
+      setLoadedEntreprise(e as EntrepriseLegacy | null)
+      setLoadingEntreprises(false)
+    })
+    return () => { cancelled = true }
+  }, [])
 
+  // Applique la config chargée au formulaire.
+  useEffect(() => {
+    const entreprise = loadedEntreprise
     if (!entreprise) return
-
-    if (entreprises?.[0]?.id) {
-      setEntrepriseId(entreprises[0].id)
-    }
 
     reset({
       raison_sociale: entreprise.raison_sociale || '',
@@ -325,7 +320,7 @@ const EntrepriseSettings: React.FC = () => {
     if (entreprise.dirigeants?.length) setDirigeants(entreprise.dirigeants)
     if (entreprise.commissaires_comptes?.length) setCommissaires(entreprise.commissaires_comptes)
     if (entreprise.participations_filiales?.length) setParticipations(entreprise.participations_filiales)
-  }, [entreprises, reset])
+  }, [loadedEntreprise, reset])
 
   const chiffre_affaires = watch('chiffre_affaires_annuel')
   const secteur = watch('secteur_activite')
@@ -362,25 +357,12 @@ const EntrepriseSettings: React.FC = () => {
         participations_filiales: participations,
       }
 
-      // Toujours persister en localStorage (source de vérité locale)
-      // Le payload contient des champs supplémentaires (dirigeants, commissaires, participations)
-      // qui sont sur l'interface Entreprise (@/types) mais pas sur EntrepriseFormData.
-      // Le service Entreprise (@/services/entrepriseService) a un type plus strict
-      // (type_abonnement = union literal) — cast via unknown pour franchir la frontière.
-      type EntrepriseServiceType = Parameters<typeof entrepriseService.createEntreprise>[0]
-      const payloadService = payload as unknown as EntrepriseServiceType
-      saveEntreprise(payloadService)
-
-      try {
-        if (entrepriseId) {
-          await entrepriseService.updateEntreprise(entrepriseId, payloadService)
-        } else {
-          const newEntreprise = await entrepriseService.createEntreprise(payloadService)
-          setEntrepriseId(newEntreprise.id)
-        }
-      } catch {
-        // Backend indisponible — données sauvées en localStorage
-      }
+      // Persistance Supabase (table entreprise_settings) + cache localStorage.
+      // saveEntreprise écrit le cache immédiatement puis upsert Supabase en
+      // arrière-plan → la config survit aux mises à jour / vidages de cache.
+      // Le payload contient des champs supplémentaires (dirigeants, commissaires,
+      // participations) — cast via unknown pour franchir la frontière de type.
+      saveEntreprise(payload as unknown as Parameters<typeof saveEntreprise>[0])
 
       setSuccess(true)
       setTimeout(() => setSuccess(false), 5000)
