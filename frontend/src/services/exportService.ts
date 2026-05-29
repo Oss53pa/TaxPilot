@@ -14,6 +14,7 @@ import { createLiasseArchive, type LiasseArchiveRecord } from './archiveService'
 import { getLatestBalance, type StoredBalance } from './balanceStorageService'
 import type { SessionAudit, RapportPartie2 } from '@/types/audit.types'
 import { calculerPassageFiscal } from './passageFiscalService'
+import { recordLiasseExport } from './liasseHistoryService'
 
 // ============================================================
 // Libellés SYSCOHADA pour les références
@@ -203,6 +204,15 @@ export async function exportLiasseExcel(
   const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' })
   saveAs(new Blob([wbout], { type: 'application/octet-stream' }), filename)
 
+  // Journal Supabase (append-only) : trace + empreinte SHA-256 de la liasse.
+  void recordLiasseExport({
+    exercice,
+    typeLiasse,
+    format: 'XLSX',
+    entreprise: entreprise.raison_sociale,
+    snapshot: actif,
+  })
+
   return filename
 }
 
@@ -316,6 +326,15 @@ export function exportLiassePDF(
     w.document.write(html)
     w.document.close()
   }
+
+  // Journal Supabase (append-only) : trace + empreinte SHA-256 de la liasse.
+  void recordLiasseExport({
+    exercice,
+    typeLiasse,
+    format: 'PDF',
+    entreprise: entreprise.raison_sociale,
+    snapshot: { actif, passif, cdr },
+  })
 }
 
 // ============================================================
