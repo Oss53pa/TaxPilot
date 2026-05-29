@@ -258,17 +258,22 @@ export function useLiasseFiscaleData(): LiasseFiscaleData {
     refresh()
   }, [refresh])
 
-  // React to exercise changes and enterprise settings updates
+  // React to exercise changes, enterprise settings, dossier switch, balance
+  // import et hydratation cloud. Sans `dossier-changed`, changer de dossier
+  // (Cabinet) gardait la balance du dossier précédent ; sans `cloud-hydrated`,
+  // la liasse montée avant l'hydratation async restait vide.
   useEffect(() => {
     const handler = () => refresh()
-    window.addEventListener('fiscasync:exercice-changed', handler)
-    window.addEventListener('fiscasync:entreprise-saved', handler)
-    window.addEventListener('focus', handler)
-    return () => {
-      window.removeEventListener('fiscasync:exercice-changed', handler)
-      window.removeEventListener('fiscasync:entreprise-saved', handler)
-      window.removeEventListener('focus', handler)
-    }
+    const events = [
+      'fiscasync:exercice-changed',
+      'fiscasync:entreprise-saved',
+      'fiscasync:dossier-changed',
+      'fiscasync:balance-imported',
+      'fiscasync:cloud-hydrated',
+      'focus',
+    ]
+    events.forEach((e) => window.addEventListener(e, handler))
+    return () => events.forEach((e) => window.removeEventListener(e, handler))
   }, [refresh])
 
   return { entreprise, balance, balanceN1, regime, setRegime, refresh }

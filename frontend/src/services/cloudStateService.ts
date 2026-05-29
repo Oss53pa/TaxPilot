@@ -179,7 +179,16 @@ export async function hydrateAllFromCloud(): Promise<void> {
         filled++
       }
     }
-    if (filled > 0) await rehydratePersistedStores()
+    if (filled > 0) {
+      await rehydratePersistedStores()
+      // Notifie les vues réactives (liasse, etc.) que des données cloud viennent
+      // d'arriver dans le localStorage → elles se rafraîchissent (anti-course).
+      try {
+        window.dispatchEvent(new Event('fiscasync:cloud-hydrated'))
+      } catch {
+        /* SSR / pas de window */
+      }
+    }
   } catch (e) {
     logger.warn('[cloudState] hydrate failed:', e instanceof Error ? e.message : e)
   }
