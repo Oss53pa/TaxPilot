@@ -44,6 +44,7 @@ import { getAllExercices, updateExercice, deleteExercice, type ExerciceRecord, t
 import { getBalancesForExercice } from '../../services/balanceStorageService'
 import { runComparison, getComparisonReport, canCompare, type ComparisonReport } from '../../services/comparisonService'
 import type { ResultatControle } from '@/types/audit.types'
+import LiasseExportsJournal from '@/components/archives/LiasseExportsJournal'
 
 const statutColors: Record<StatutExercice, string> = {
   en_cours: '#3b82f6',
@@ -383,6 +384,9 @@ const ArchivesPage: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Journal Supabase des liasses générées (traçabilité OHADA) */}
+      <LiasseExportsJournal />
     </Box>
   )
 }
