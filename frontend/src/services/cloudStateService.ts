@@ -43,6 +43,13 @@ function shouldSync(key: string | null): boolean {
   return SYNC_PREFIXES.some((p) => key.startsWith(p))
 }
 
+// Garde-fou : on ne réplique pas les valeurs anormalement grosses (≈ 3 Mo) pour
+// éviter des uploads coûteux à chaque écriture. Elles restent en local.
+const MAX_VALUE_LEN = 3_000_000
+function syncable(key: string | null, value: string | null): boolean {
+  return shouldSync(key) && typeof value === 'string' && value.length <= MAX_VALUE_LEN
+}
+
 const IS_TEST =
   (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.MODE === 'test') ||
   (typeof process !== 'undefined' && !!process.env?.VITEST)
@@ -106,7 +113,7 @@ export function installCloudMirror(): void {
   localStorage.setItem = function patchedSetItem(key: string, value: string): void {
     nativeSetItem(key, value)
     try {
-      if (shouldSync(key)) {
+      if (syncable(key, value)) {
         pending.set(key, value)
         scheduleFlush()
       }
@@ -135,7 +142,7 @@ export async function pushAllToCloud(): Promise<void> {
     const key = localStorage.key(i)
     if (!shouldSync(key)) continue
     const value = nativeGetItem(key as string)
-    if (value == null) continue
+    if (value == null || !syncable(key, value)) continue
     rows.push({ user_id: uid, key: key as string, value, updated_at: now })
   }
   if (rows.length === 0) return

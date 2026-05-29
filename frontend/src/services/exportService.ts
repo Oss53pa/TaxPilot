@@ -232,6 +232,13 @@ export function exportLiassePDF(
   const tft = liasseDataService.generateTFT()
 
   const fmt = (n: number) => arrondiFCFA(n).toLocaleString('fr-FR')
+  // Échappement HTML des champs libres (anti-XSS dans la fenêtre d'impression).
+  const esc = (v: unknown) =>
+    String(v ?? '').replace(/[&<>"']/g, (c) =>
+      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string))
+  const rs = esc(entreprise.raison_sociale)
+  const nc = esc(entreprise.numero_contribuable)
+  const exq = esc(exercice)
   const totalActifNet = arrondiFCFA(actif.reduce((s: number, r: BilanActifRow) => s + r.net, 0))
   const totalPassif = arrondiFCFA(passif.reduce((s: number, r: BilanPassifRow) => s + r.montant, 0))
   const totalCharges = arrondiFCFA(cdr.charges.reduce((s: number, r: CompteResultatRow) => s + r.montant, 0))
@@ -240,7 +247,7 @@ export function exportLiassePDF(
   const html = `<!DOCTYPE html>
 <html><head>
 <meta charset="utf-8">
-<title>Liasse Fiscale ${typeLiasse} — ${entreprise.raison_sociale}</title>
+<title>Liasse Fiscale ${typeLiasse} — ${rs}</title>
 <style>
   body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 10px; margin: 20px; color: #333; }
   h1 { font-size: 16px; text-align: center; margin-bottom: 5px; }
@@ -260,8 +267,8 @@ export function exportLiassePDF(
 </head><body>
 <div class="header">
   <h1>LIASSE FISCALE SYSCOHADA — ${typeLiasse}</h1>
-  <p><strong>${entreprise.raison_sociale}</strong> — N° Contribuable: ${entreprise.numero_contribuable}</p>
-  <p>Exercice clos le ${exercice}</p>
+  <p><strong>${rs}</strong> — N° Contribuable: ${nc}</p>
+  <p>Exercice clos le ${exq}</p>
 </div>
 
 <h2>BILAN ACTIF</h2>

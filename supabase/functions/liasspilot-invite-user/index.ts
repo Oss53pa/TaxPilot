@@ -115,7 +115,14 @@ function buildInvitationEmail(params: {
   actionLink: string;
   inviterName: string;
 }): string {
-  const { fullName, roleLabel, actionLink, inviterName } = params;
+  // Échappement HTML des champs libres (anti-injection dans l'email).
+  const esc = (v: string) =>
+    (v ?? '').replace(/[&<>"']/g, (c) =>
+      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string));
+  const fullName = esc(params.fullName);
+  const inviterName = esc(params.inviterName);
+  const roleLabel = esc(params.roleLabel);
+  const { actionLink } = params;
   const greeting = fullName ? `Bonjour ${fullName},` : 'Bonjour,';
   return `<!DOCTYPE html>
 <html lang="fr">
