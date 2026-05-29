@@ -6,6 +6,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { cleanupDossierData, scopeKey } from '@/services/dossierScopeService'
+import { pushDossier } from '@/services/dossierSyncService'
 
 export interface Dossier {
   id: string
@@ -38,9 +39,19 @@ interface DossierState {
   setActiveDossier: (id: string | null) => void
   deactivateDossier: () => void
   duplicateDossier: (id: string, newExerciceN: number) => string
+  /** Fusionne les dossiers venant de Supabase (ajoute ceux absents en local). */
+  mergeCloudDossiers: (cloud: Dossier[]) => void
 }
 
 function generateId(): string {
+  // UUID v4 → compatible avec la table Supabase `dossiers` (id uuid).
+  try {
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+      return crypto.randomUUID()
+    }
+  } catch {
+    /* fallback */
+  }
   return Date.now().toString(36) + Math.random().toString(36).substring(2, 8)
 }
 
@@ -91,15 +102,20 @@ export const useDossierStore = create<DossierState>()(
           balanceN1Key: `fiscasync_balance_n1_${id}`,
         }
         set(state => ({ dossiers: [...state.dossiers, dossier] }))
+        void pushDossier(dossier)
         return id
       },
 
       updateDossier: (id, updates) => {
+        let updated: Dossier | undefined
         set(state => ({
-          dossiers: state.dossiers.map(d =>
-            d.id === id ? { ...d, ...updates, dateDerniereModification: new Date().toISOString() } : d
-          ),
+          dossiers: state.dossiers.map(d => {
+            if (d.id !== id) return d
+            updated = { ...d, ...updates, dateDerniereModification: new Date().toISOString() }
+            return updated
+          }),
         }))
+        if (updated) void pushDossier(updated)
       },
 
       deleteDossier: (id) => {
@@ -150,7 +166,17 @@ export const useDossierStore = create<DossierState>()(
           balanceN1Key: `fiscasync_balance_n1_${newId}`,
         }
         set(state => ({ dossiers: [...state.dossiers, duplicate] }))
+        void pushDossier(duplicate)
         return newId
+      },
+
+      mergeCloudDossiers: (cloud) => {
+        if (!cloud?.length) return
+        set(state => {
+          const existing = new Set(state.dossiers.map(d => d.id))
+          const toAdd = cloud.filter(c => !existing.has(c.id))
+          return toAdd.length ? { dossiers: [...state.dossiers, ...toAdd] } : state
+        })
       },
     }),
     { name: 'fiscasync-dossiers' }

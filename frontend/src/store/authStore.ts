@@ -6,6 +6,8 @@ import { supabase, isSupabaseEnabled } from '@/lib/supabase'
 import { useOrganizationStore } from './organizationStore'
 import { hydrateEntrepriseFromCloud } from '@/services/entrepriseStorageService'
 import { hydrateAllFromCloud, pushAllToCloud } from '@/services/cloudStateService'
+import { hydrateDossiersFromCloud } from '@/services/dossierSyncService'
+import { useDossierStore } from './dossierStore'
 import type { User as SupabaseUser, Session } from '@supabase/supabase-js'
 
 export interface AppUser {
@@ -115,6 +117,10 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
         // Config entreprise (table dédiée) + snapshot complet du local vers cloud.
         void hydrateEntrepriseFromCloud()
         void pushAllToCloud()
+        // Dossiers structurés (table Supabase `dossiers`) → fusion en local.
+        void hydrateDossiersFromCloud().then((ds) => {
+          if (ds.length) useDossierStore.getState().mergeCloudDossiers(ds)
+        })
         // Enrichissement async depuis profiles.account_type si user_metadata ne le porte pas
         if (!session.user.user_metadata?.account_type && supabase) {
           hydrateAccountTypeFromProfile(baseUser, supabase).then((enriched) => {
@@ -137,6 +143,9 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
           void hydrateAllFromCloud()
           void hydrateEntrepriseFromCloud()
           void pushAllToCloud()
+          void hydrateDossiersFromCloud().then((ds) => {
+            if (ds.length) useDossierStore.getState().mergeCloudDossiers(ds)
+          })
           if (!session.user.user_metadata?.account_type && supabase) {
             hydrateAccountTypeFromProfile(baseUser, supabase).then((enriched) => {
               if (enriched.userType !== baseUser.userType) set({ user: enriched })
