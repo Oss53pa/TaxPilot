@@ -24,7 +24,10 @@ export interface ActifPosteMapping extends PosteMapping {
 
 export const BILAN_ACTIF = {
   // Immobilisations incorporelles
-  AE: { comptes: ['211', '212'], amort: ['2811', '2812', '2911', '2912'], libelle: 'Frais de développement et de prospection' },
+  // '2810'/'2910' : capte l'amort/dépréciation incorporel SAISI AU NIVEAU PARENT
+  // (compte 281000/291000 global) sans collision avec les sous-comptes 2811-2819
+  // ventilés en AF/AG/AH (4e caractère distinct). Sinon orphelin → bilan déséquilibré.
+  AE: { comptes: ['211', '212'], amort: ['2810', '2811', '2812', '2910', '2911', '2912'], libelle: 'Frais de développement et de prospection' },
   AF: { comptes: ['213', '214', '215'], amort: ['2813', '2814', '2815', '2913', '2914', '2915'], libelle: 'Brevets, licences, logiciels, et droits similaires' },
   AG: { comptes: ['216'], amort: ['2816', '2916'], libelle: 'Fonds commercial et droit au bail' },
   AH: { comptes: ['217', '218', '219'], amort: ['2817', '2818', '2819', '2917', '2918', '2919'], libelle: 'Autres immobilisations incorporelles' },
@@ -32,7 +35,9 @@ export const BILAN_ACTIF = {
   AJ: { comptes: ['22'], amort: ['282', '292'], libelle: 'Terrains' },
   AK: { comptes: ['231', '232', '233', '234'], amort: ['2831', '2832', '2833', '2834', '2931', '2932', '2933', '2934'], libelle: 'Bâtiments' },
   AL: { comptes: ['235', '237', '238'], amort: ['2835', '2837', '2838', '2935', '2937', '2938'], libelle: 'Aménagements, agencements et installations' },
-  AM: { comptes: ['241', '242', '243', '244'], amort: ['2841', '2842', '2843', '2844', '2941', '2942', '2943', '2944'], libelle: 'Matériel, mobilier et actifs biologiques' },
+  // Tout le matériel 24x SAUF 245 (transport → AN). 246/247/248 inclus pour
+  // parité avec le moteur écran (sinon "Mobilier Food Court" 248x & co orphelins).
+  AM: { comptes: ['241', '242', '243', '244', '246', '247', '248'], amort: ['2841', '2842', '2843', '2844', '2846', '2847', '2848', '2941', '2942', '2943', '2944', '2946', '2947', '2948'], libelle: 'Matériel, mobilier et actifs biologiques' },
   AN: { comptes: ['245'], amort: ['2845', '2945'], libelle: 'Matériel de transport' },
   // Avances et acomptes
   AP: { comptes: ['251', '252'], amort: [], libelle: 'Avances et acomptes versés sur immobilisations' },
@@ -46,7 +51,11 @@ export const BILAN_ACTIF = {
   // Créances
   BH: { comptes: ['409'], amort: ['490'], libelle: 'Fournisseurs avances versées' },
   BI: { comptes: ['411', '412', '413', '414', '415', '416', '418'], amort: ['491'], libelle: 'Clients' },
-  BJ: { comptes: ['43', '44', '45', '46', '47'], amort: ['492', '493', '494', '495', '496', '497'], libelle: 'Autres créances' },
+  // '42' inclus : un solde DÉBITEUR sur la classe 42 (ex. 422 avance/trop-versé au
+  // personnel) est une créance → actif. Symétrique du passif DM (42 créditeur).
+  // getActifBrut ne retient que les soldes débiteurs → pas de double-comptage.
+  // Sans '42' ici, ces avances disparaissaient de l'actif export (≠ écran).
+  BJ: { comptes: ['42', '43', '44', '45', '46', '47'], amort: ['492', '493', '494', '495', '496', '497'], libelle: 'Autres créances' },
   // Trésorerie actif
   BQ: { comptes: ['50'], amort: ['590'], libelle: 'Titres de placement' },
   BR: { comptes: ['51'], amort: ['591'], libelle: 'Valeurs à encaisser' },
@@ -100,7 +109,11 @@ export const BILAN_PASSIF = {
   DN: { comptes: ['499'], libelle: 'Provisions pour risques et charges à court terme' },
   // Trésorerie passif
   DQ: { comptes: ['565'], libelle: 'Banques, crédits d\'escompte' },
-  DR: { comptes: ['52', '561', '564'], libelle: 'Banques, établissements financiers et crédits de trésorerie' },
+  // 53/54/55/57/58 : comptes de trésorerie à double nature, portés en BS côté
+  // ACTIF quand débiteurs. Leur solde CRÉDITEUR (ex. carte 554 à découvert)
+  // n'avait aucune ligne passif → perdu → bilan déséquilibré. getPassif ne retient
+  // que les soldes créditeurs → pas de double-comptage avec BS (sens opposé).
+  DR: { comptes: ['52', '53', '54', '55', '561', '564', '57', '58'], libelle: 'Banques, établissements financiers et crédits de trésorerie' },
   // Ecart de conversion
   DV: { comptes: ['479'], libelle: 'Ecart de conversion-Passif' },
 } as const
