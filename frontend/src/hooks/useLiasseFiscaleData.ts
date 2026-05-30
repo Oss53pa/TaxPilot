@@ -150,6 +150,31 @@ export const loadBalanceN1 = (): BalanceEntry[] => {
     }
   } catch { /* try next */ }
 
+  // N-1 embarqué dans les lignes de la balance N (format unifié solde_*_n1) —
+  // cas standard d'un import unique avec colonnes N-1. Sans ce bloc, parseEntries
+  // jetait ces champs → la liasse affichait des colonnes N-1 VIDES.
+  try {
+    const raw = localStorage.getItem(scopeKey('fiscasync_balance_latest'))
+    if (raw) {
+      const stored = JSON.parse(raw)
+      const rows = Array.isArray(stored?.entries) ? (stored.entries as Record<string, unknown>[]) : []
+      const hasN1 = rows.some(
+        (e) => (Number(e.solde_debit_n1) || 0) !== 0 || (Number(e.solde_credit_n1) || 0) !== 0,
+      )
+      if (hasN1) {
+        logger.debug(`[Liasse] Balance N-1 reconstruite depuis solde_*_n1 unifiés: ${rows.length} comptes`)
+        return rows.map((e) => ({
+          compte: String(e.compte || ''),
+          libelle: String(e.intitule || e.libelle || ''),
+          debit: 0,
+          credit: 0,
+          solde_debit: Number(e.solde_debit_n1) || 0,
+          solde_credit: Number(e.solde_credit_n1) || 0,
+        }))
+      }
+    }
+  } catch { /* try next */ }
+
   try {
     const raw = localStorage.getItem(scopeKey('fiscasync_balance_list'))
     if (raw) {
