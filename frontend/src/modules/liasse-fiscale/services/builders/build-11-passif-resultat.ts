@@ -56,6 +56,21 @@ function computePassifVal(bal: BalanceEntry[], pfx: readonly string[]): number {
   return -getBalanceSolde(bal, pfx)
 }
 
+/**
+ * Résultat net « pré-affectation » calculé depuis la balance (classes 6/7/8).
+ * Convention SYSCOHADA : Résultat = Produits − Charges = −(solde(6) + solde(7) + solde(8))
+ *  - classe 6 (charges) → solde débiteur positif → réduit le résultat
+ *  - classe 7 (produits) → solde créditeur négatif → augmente le résultat
+ *  - classe 8 (HAO)     → mixte, intégré algébriquement
+ * Utilisé pour injecter le résultat dans le poste bilan CJ quand le compte 13
+ * (résultat affecté) est vide — cas standard d'une liasse pré-affectation
+ * (avant AG d'affectation). Sans cette injection, CJ = 0 et le bilan ne boucle
+ * pas (écart = montant du résultat).
+ */
+function computeResultatNet(bal: BalanceEntry[]): number {
+  return -(getBalanceSolde(bal, ['6']) + getBalanceSolde(bal, ['7']) + getBalanceSolde(bal, ['8']))
+}
+
 // ────────────────────────────────────────────────────────────────────────────
 // Sheet 11: PASSIF (9 columns A=0 to I=8, ~39 rows)
 // ────────────────────────────────────────────────────────────────────────────
@@ -148,8 +163,21 @@ function buildPassif(
   // ── Row 10-19: CAPITAUX PROPRES (CA through CM) ──
   let CP_net = 0, CP_netN1 = 0
   for (const line of PASSIF_LINES_CP) {
-    const net = pv(line.prefixes)
-    const n1 = pvN1(line.prefixes)
+    let net = pv(line.prefixes)
+    let n1 = pvN1(line.prefixes)
+    // Pré-affectation (CJ) : si le compte 13 est vide ET la balance contient
+    // des classes 6/7 → on injecte le résultat calculé. Sinon CJ=0 et le bilan
+    // ne boucle pas (bug observé sur EPL SA : écart = 61,6 M = exactement le
+    // résultat manquant). Le cas post-affectation (compte 13 rempli) garde le
+    // comportement d'origine.
+    if (line.ref === 'CJ') {
+      if (Math.abs(net) < 0.5 && bal.some((e) => /^[67]/.test(e.compte))) {
+        net = computeResultatNet(bal)
+      }
+      if (Math.abs(n1) < 0.5 && balN1.some((e) => /^[67]/.test(e.compte))) {
+        n1 = computeResultatNet(balN1)
+      }
+    }
     CP_net += net
     CP_netN1 += n1
     rows.push(makeRow(line.ref, line.label, line.note, net, n1))
