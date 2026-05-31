@@ -155,13 +155,22 @@ export const SYSCOHADA_MAPPING = {
     AS: { comptes: ['206'], amortComptes: ['2806', '2906'] },
 
     // Immobilisations incorporelles
+    // '2810'/'2910' : capte l'amortissement/dépréciation incorporel SAISI AU
+    // NIVEAU PARENT (ex. compte 281000 « Amort. immob. incorporelles » global),
+    // sans collision avec les sous-comptes 2811-2819/2911-2919 ventilés en
+    // AE/AF/AG (le 4e caractère diffère). Sans ça, un amort posté en 281000
+    // n'était capté par aucune ligne → actif net surévalué → bilan déséquilibré.
     AD: { comptes: ['211', '212'], amortComptes: ['2811', '2812', '2911', '2912'] },
     AE: { comptes: ['213', '214', '215'], amortComptes: ['2813', '2814', '2815', '2913', '2914', '2915'] },
     AF: { comptes: ['216', '217'], amortComptes: ['2816', '2817', '2916', '2917'] },
     AG: { comptes: ['218', '219'], amortComptes: ['2818', '2819', '2918', '2919'] },
 
     // Immobilisations corporelles
-    AJ: { comptes: ['22'], amortComptes: ['282', '292'] },
+    // '2810'/'2910' (amort incorporel GÉNÉRIQUE 281000) rattachés au groupe corporel :
+    // ce sont des amortissements globaux non ventilés. Ils alimentent le pool
+    // corporel réparti au prorata du brut (redistributeAmortByBrut), évitant de
+    // sur-amortir les incorporels (qui gardent leurs amort spécifiques 2811-2819).
+    AJ: { comptes: ['22'], amortComptes: ['282', '292', '2810', '2910'] },
     AK: { comptes: ['231', '232', '233', '234'], amortComptes: ['2831', '2832', '2833', '2834', '2931', '2932', '2933', '2934'] },
     AL: { comptes: ['235', '237', '238'], amortComptes: ['2835', '2837', '2838', '2935', '2937', '2938'] },
     // CORRECTIF (validation balance réelle EMERGENCE) : 246/247/248 (autres
@@ -239,7 +248,13 @@ export const SYSCOHADA_MAPPING = {
     DM: { comptes: ['499'] },
 
     // Trésorerie passif
-    DQ: { comptes: ['52', '561', '564'] },
+    // Comptes de trésorerie à double nature (53 caisses, 54 régies/cartes,
+    // 55 instruments de monnaie électronique, 57, 58) : portés en BS côté ACTIF
+    // quand débiteurs, mais AUCUNE ligne passif ne captait leur solde CRÉDITEUR
+    // (ex. 554500 « NSIA carte » à découvert) → solde créditeur perdu → passif
+    // sous-évalué → bilan déséquilibré. calculatePassif ne retient que les
+    // soldes créditeurs, donc pas de double-comptage avec BS (sens opposé).
+    DQ: { comptes: ['52', '53', '54', '55', '561', '564', '57', '58'] },
     DR: { comptes: ['565'] },
 
     // Écart de conversion passif
@@ -479,15 +494,19 @@ export class LiasseDataService {
   }
 
   /**
-   * Pour les CHARGES: prend les soldes débiteurs
+   * Pour les CHARGES: solde NET (débit − crédit) des comptes correspondants.
+   * On somme les soldes signés (débit normal positif) SANS filtrer le signe :
+   * un éventuel solde créditeur (ex. RRR obtenus 6019/6029/6039, rétrocessions)
+   * vient DÉDUIRE la charge — comportement OHADA correct. Le filtre "débit
+   * uniquement" précédent ignorait ces contre-écritures et brisait l'identité
+   * Résultat = Produits − Charges (cohérence SIG ⇄ CdR).
    */
   private calculateCharges(comptes: string[], exclure: string[] = []): number {
     let total = 0
     comptes.forEach(prefix => {
       this.mappingCache.forEach((value, key) => {
         if ((key === prefix || key.startsWith(prefix)) && !this.isExcluded(key, exclure)) {
-          // Charges normalement débitrices
-          if (value > 0) total += value
+          total += value
         }
       })
     })
@@ -495,19 +514,23 @@ export class LiasseDataService {
   }
 
   /**
-   * Pour les PRODUITS: prend les soldes créditeurs (valeur absolue)
+   * Pour les PRODUITS: solde NET (crédit − débit) des comptes correspondants.
+   * On somme les soldes signés puis on inverse (produit normal créditeur → positif)
+   * SANS filtrer le signe : un solde débiteur (ex. RRR accordés 7019/7029/7069)
+   * vient DÉDUIRE le produit — traitement OHADA correct du chiffre d'affaires net.
+   * Le filtre "crédit uniquement" précédent ignorait ces contre-écritures →
+   * écart entre SIG et CdR (ex. 706900 RRR accordés).
    */
   private calculateProduits(comptes: string[], exclure: string[] = []): number {
     let total = 0
     comptes.forEach(prefix => {
       this.mappingCache.forEach((value, key) => {
         if ((key === prefix || key.startsWith(prefix)) && !this.isExcluded(key, exclure)) {
-          // Produits normalement créditeurs
-          if (value < 0) total += Math.abs(value)
+          total += value
         }
       })
     })
-    return total
+    return -total || 0 // normalise -0 → 0
   }
 
   /**
@@ -597,7 +620,7 @@ export class LiasseDataService {
     let total = 0
     comptes.forEach(prefix => {
       this.mappingCacheN1.forEach((value, key) => {
-        if ((key === prefix || key.startsWith(prefix)) && !this.isExcluded(key, exclure) && value > 0) total += value
+        if ((key === prefix || key.startsWith(prefix)) && !this.isExcluded(key, exclure)) total += value
       })
     })
     return total
@@ -607,10 +630,10 @@ export class LiasseDataService {
     let total = 0
     comptes.forEach(prefix => {
       this.mappingCacheN1.forEach((value, key) => {
-        if ((key === prefix || key.startsWith(prefix)) && !this.isExcluded(key, exclure) && value < 0) total += Math.abs(value)
+        if ((key === prefix || key.startsWith(prefix)) && !this.isExcluded(key, exclure)) total += value
       })
     })
-    return total
+    return -total || 0 // normalise -0 → 0
   }
 
   private calculatePassifReciprocalN1(comptes: string[]): number {
@@ -655,27 +678,81 @@ export class LiasseDataService {
 
   // ────────── Génération Bilan Actif ──────────
 
+  /**
+   * Groupes d'immobilisations pour la ventilation au prorata du brut d'un
+   * amortissement générique non ventilé (ex. 282100 « amort corporels » global).
+   */
+  private static readonly AMORT_GROUPS: string[][] = [
+    ['AD', 'AE', 'AF', 'AG'],        // Immobilisations incorporelles
+    ['AJ', 'AK', 'AL', 'AM', 'AN'],  // Immobilisations corporelles
+  ]
+
+  /**
+   * Réétale l'amortissement d'un groupe AU PRORATA DU BRUT de chaque poste,
+   * DÉCLENCHÉ uniquement si un poste ressort en net négatif (amort > brut) — signe
+   * qu'un amortissement générique a été imputé au mauvais poste. Préserve le total
+   * d'amort du groupe (donc le net total et l'équilibre du bilan). Sans anomalie,
+   * les amortissements spécifiques sont laissés intacts.
+   */
+  /**
+   * Cœur de ventilation : pour UNE liste de postes (un groupe homogène), si un
+   * poste ressort net < 0 (amort > brut → amort générique mal imputé), réétale
+   * l'amortissement total du groupe au prorata du brut. Préserve le total d'amort.
+   */
+  private redistributeByBrut(items: Array<{ brut: number; amort: number }>): void {
+    if (items.length === 0) return
+    if (!items.some(i => i.brut - i.amort < -0.5)) return
+    const groupBrut = items.reduce((s, i) => s + i.brut, 0)
+    const groupAmort = items.reduce((s, i) => s + i.amort, 0)
+    if (groupBrut <= 0) return
+    // PAS de plafonnement : préserve exactement le total d'amort (donc l'équilibre).
+    const rate = groupAmort / groupBrut
+    for (const i of items) i.amort = i.brut * rate
+  }
+
+  private redistributeAmortByBrut(
+    items: Array<{ ref: string; brut: number; amort: number }>,
+  ): void {
+    for (const group of LiasseDataService.AMORT_GROUPS) {
+      this.redistributeByBrut(items.filter(i => group.includes(i.ref)))
+    }
+  }
+
   generateBilanActif(typeLiasse: TypeLiasse = 'SN'): BilanActifRow[] {
     if (typeLiasse === 'SMT') return this.generateBilanActifSMT()
 
-    const rows: BilanActifRow[] = []
+    // 1) Brut / amort par poste (N et N-1)
+    const calc = Object.entries(SYSCOHADA_MAPPING.actif).map(([ref, mapping]) => ({
+      ref,
+      brut: this.calculateActifBrut(mapping.comptes),
+      amort: this.calculateAmortProv(mapping.amortComptes || []),
+      brutN1: this.hasN1 ? this.calculateActifBrutN1(mapping.comptes) : 0,
+      amortN1: this.hasN1 ? this.calculateAmortProvN1(mapping.amortComptes || []) : 0,
+    }))
 
-    Object.entries(SYSCOHADA_MAPPING.actif).forEach(([ref, mapping]) => {
-      const brut = this.calculateActifBrut(mapping.comptes)
-      const amortProv = this.calculateAmortProv(mapping.amortComptes || [])
-      const net = brut - amortProv
+    // 2) Ventilation au prorata du brut si amortissement générique mal imputé (N)
+    const adjN = calc.map(c => ({ ref: c.ref, brut: c.brut, amort: c.amort }))
+    this.redistributeAmortByBrut(adjN)
+    // ... et N-1
+    const amortN1ByRef = new Map<string, number>()
+    if (this.hasN1) {
+      const adjN1 = calc.map(c => ({ ref: c.ref, brut: c.brutN1, amort: c.amortN1 }))
+      this.redistributeAmortByBrut(adjN1)
+      adjN1.forEach(c => amortN1ByRef.set(c.ref, c.amort))
+    }
 
-      let net_n1 = 0
-      if (this.hasN1) {
-        const brutN1 = this.calculateActifBrutN1(mapping.comptes)
-        const amortN1 = this.calculateAmortProvN1(mapping.amortComptes || [])
-        net_n1 = brutN1 - amortN1
+    // 3) Lignes finales
+    return calc.map((c, i) => {
+      const amort = adjN[i].amort
+      const amortN1 = this.hasN1 ? (amortN1ByRef.get(c.ref) ?? c.amortN1) : 0
+      return {
+        ref: c.ref,
+        brut: c.brut,
+        amortProv: amort,
+        net: c.brut - amort,
+        net_n1: c.brutN1 - amortN1,
       }
-
-      rows.push({ ref, brut, amortProv, net, net_n1 })
     })
-
-    return rows
   }
 
   // ────────── Génération Bilan Passif ──────────
@@ -689,7 +766,10 @@ export class LiasseDataService {
     const reciprocalRefs = ['DH', 'DL', 'DQ', 'DR']
     // Comptes signés : peuvent avoir un solde débiteur légitime dans le passif
     // CG (12) = Report à nouveau (+/-)
-    const signedRefs = ['CG']
+    // DD (17) = Emprunts et dettes financières — un sous-compte débiteur (ex. 176300
+    //   "intérêts courus remboursés > reconnus") réduit la dette nette au passif.
+    //   calculatePassif (créditeur uniquement) l'ignorait → passif surévalué de ce montant.
+    const signedRefs = ['CG', 'DD']
     // Contre-compte débiteur : toujours débiteur, présenté en déduction
     const debitContraRefs = ['CB']
     // Détecter si la balance est pré-clôture (comptes classes 6/7 présents)
@@ -1390,24 +1470,35 @@ export class LiasseDataService {
       'brevets': { label: 'Brevets, licences, logiciels', categorie: 'incorporelles', prefixes: ['212', '213', '214'], amortPrefixes: ['2812', '2813', '2814'] },
       'fonds_commercial': { label: 'Fonds commercial', categorie: 'incorporelles', prefixes: ['215', '216'], amortPrefixes: ['2815', '2816'] },
       'autres_incorp': { label: 'Autres immobilisations incorporelles', categorie: 'incorporelles', prefixes: ['211', '217', '218', '219'], amortPrefixes: ['2811', '2817', '2818', '2819'] },
-      'terrains': { label: 'Terrains', categorie: 'corporelles', prefixes: ['22'], amortPrefixes: ['282'] },
+      'terrains': { label: 'Terrains', categorie: 'corporelles', prefixes: ['22'], amortPrefixes: ['282', '2810', '2910'] },
       'constructions': { label: 'Bâtiments, constructions', categorie: 'corporelles', prefixes: ['231', '232', '233', '234'], amortPrefixes: ['2831', '2832', '2833', '2834'] },
       'installations': { label: 'Installations techniques', categorie: 'corporelles', prefixes: ['235', '237', '238'], amortPrefixes: ['2835', '2837', '2838'] },
-      'materiel': { label: 'Matériel et outillage', categorie: 'corporelles', prefixes: ['241', '242', '243', '244'], amortPrefixes: ['2841', '2842', '2843', '2844'] },
+      'materiel': { label: 'Matériel et outillage', categorie: 'corporelles', prefixes: ['241', '242', '243', '244', '246', '247', '248'], amortPrefixes: ['2841', '2842', '2843', '2844', '2846', '2847', '2848'] },
       'transport': { label: 'Matériel de transport', categorie: 'corporelles', prefixes: ['245'], amortPrefixes: ['2845'] },
       'titres_participation': { label: 'Titres de participation', categorie: 'financieres', prefixes: ['26'], amortPrefixes: ['296'] },
       'autres_financieres': { label: 'Autres immobilisations financières', categorie: 'financieres', prefixes: ['271', '272', '273', '274', '275', '276', '277'], amortPrefixes: ['297'] },
       'avances': { label: 'Avances et acomptes', categorie: 'avances', prefixes: ['251', '252'], amortPrefixes: [] },
     }
 
-    const lines: Record<string, unknown>[] = []
-    Object.entries(IMMO_MAP).forEach(([key, { label, categorie, prefixes, amortPrefixes }]) => {
-      const brut = this.sumDebit(prefixes)
-      const amort = amortPrefixes.length > 0 ? this.sumCredit(amortPrefixes) : 0
-      if (brut === 0 && amort === 0) return
-      lines.push({ id: key, categorie, designation: label, valeurBrute: brut, amortissements: amort, valeurNette: brut - amort })
-    })
-    return lines
+    // 1) Brut / amort par poste
+    const calc = Object.entries(IMMO_MAP).map(([key, m]) => ({
+      key, categorie: m.categorie, label: m.label,
+      brut: this.sumDebit(m.prefixes),
+      amort: m.amortPrefixes.length > 0 ? this.sumCredit(m.amortPrefixes) : 0,
+    })).filter(c => c.brut !== 0 || c.amort !== 0)
+
+    // 2) Ventilation amort générique au prorata du brut, PAR CATÉGORIE (incorporelles,
+    //    corporelles, financières) — cohérent avec le Bilan (redistributeAmortByBrut).
+    //    Ex. 282100 (amort corporel global) sur-amortissait les Terrains → net négatif.
+    for (const cat of ['incorporelles', 'corporelles', 'financieres']) {
+      this.redistributeByBrut(calc.filter(c => c.categorie === cat))
+    }
+
+    // 3) Lignes finales
+    return calc.map(c => ({
+      id: c.key, categorie: c.categorie, designation: c.label,
+      valeurBrute: c.brut, amortissements: c.amort, valeurNette: c.brut - c.amort,
+    }))
   }
 
   // ────────── Génération Note 3C - Amortissements ──────────
@@ -1456,21 +1547,24 @@ export class LiasseDataService {
 
   generateNote6(): Record<string, unknown>[] {
     const CORP_MAP: Record<string, { label: string; categorie: string; prefixes: string[]; amortPrefixes: string[] }> = {
-      'terrains': { label: 'Terrains', categorie: 'terrains', prefixes: ['22'], amortPrefixes: ['282', '292'] },
+      'terrains': { label: 'Terrains', categorie: 'terrains', prefixes: ['22'], amortPrefixes: ['282', '292', '2810', '2910'] },
       'constructions': { label: 'Bâtiments, constructions', categorie: 'constructions', prefixes: ['231', '232', '233', '234'], amortPrefixes: ['2831', '2832', '2833', '2834'] },
       'installations': { label: 'Installations techniques', categorie: 'installations', prefixes: ['235', '237', '238'], amortPrefixes: ['2835', '2837', '2838'] },
-      'materiel_outillage': { label: 'Matériel et outillage', categorie: 'materiel_outillage', prefixes: ['241', '242', '243', '244'], amortPrefixes: ['2841', '2842', '2843', '2844'] },
+      'materiel_outillage': { label: 'Matériel et outillage', categorie: 'materiel_outillage', prefixes: ['241', '242', '243', '244', '246', '247', '248'], amortPrefixes: ['2841', '2842', '2843', '2844', '2846', '2847', '2848'] },
       'materiel_transport': { label: 'Matériel de transport', categorie: 'materiel_transport', prefixes: ['245'], amortPrefixes: ['2845', '2945'] },
     }
 
-    const lines: Record<string, unknown>[] = []
-    Object.entries(CORP_MAP).forEach(([key, { label, categorie, prefixes, amortPrefixes }]) => {
-      const brut = this.sumDebit(prefixes)
-      const amort = this.sumCredit(amortPrefixes)
-      if (brut === 0 && amort === 0) return
-      lines.push({ id: key, categorie, label, valeurBrute: brut, amortissements: amort, valeurNette: brut - amort })
-    })
-    return lines
+    // Brut/amort par poste puis ventilation au prorata du brut (cohérence Bilan/Note3),
+    // sinon l'amort générique 282100 sur-amortit les Terrains (net -122M).
+    const calc = Object.entries(CORP_MAP).map(([key, m]) => ({
+      key, categorie: m.categorie, label: m.label,
+      brut: this.sumDebit(m.prefixes), amort: this.sumCredit(m.amortPrefixes),
+    })).filter(c => c.brut !== 0 || c.amort !== 0)
+    this.redistributeByBrut(calc) // toutes corporelles = un seul groupe homogène
+    return calc.map(c => ({
+      id: c.key, categorie: c.categorie, label: c.label,
+      valeurBrute: c.brut, amortissements: c.amort, valeurNette: c.brut - c.amort,
+    }))
   }
 
   // ────────── Génération Note 8 - Stocks ──────────
@@ -1497,27 +1591,37 @@ export class LiasseDataService {
   // ────────── Génération Note 11 - Capitaux propres ──────────
 
   generateNote11(): Record<string, unknown>[] {
-    const CAPITAUX_MAP: Record<string, { label: string; prefixes: string[] }> = {
-      'capital': { label: 'Capital social', prefixes: ['101', '102', '103', '104'] },
-      'primes': { label: 'Primes liées au capital', prefixes: ['105'] },
-      'reserves': { label: 'Réserves', prefixes: ['106'] },
-      'capital_non_appele': { label: 'Capital non appelé (-)', prefixes: ['109'] },
-      'ecart_reevaluation': { label: 'Écart de réévaluation', prefixes: ['111', '112', '113', '118'] },
-      'report_nouveau': { label: 'Report à nouveau', prefixes: ['12'] },
-      'resultat_net': { label: 'Résultat net de l\'exercice', prefixes: ['13'] },
-      'subventions': { label: 'Subventions d\'investissement', prefixes: ['14'] },
-      'provisions_reglementees': { label: 'Provisions réglementées', prefixes: ['15'] },
-    }
+    // CORRECTIF libellés OHADA : 101-103 capital, 104-105 primes, 106 écart de
+    // réévaluation, 111-118 réserves (111 légale, 112 statutaires, 113 réglementées,
+    // 118 autres). Avant : 104 rangé en capital, 106 nommé "réserves", 111-118
+    // nommés "écart de réévaluation" → libellés inversés.
+    const CAPITAUX_MAP: Array<{ key: string; label: string; prefixes: string[]; kind?: 'debit' | 'net' | 'resultat' }> = [
+      { key: 'capital', label: 'Capital social', prefixes: ['101', '102', '103'] },
+      { key: 'capital_non_appele', label: 'Capital non appelé (-)', prefixes: ['109'], kind: 'debit' },
+      { key: 'primes', label: 'Primes liées au capital', prefixes: ['104', '105'] },
+      { key: 'ecart_reevaluation', label: 'Écart de réévaluation', prefixes: ['106'] },
+      { key: 'reserves', label: 'Réserves', prefixes: ['111', '112', '113', '118'] },
+      { key: 'report_nouveau', label: 'Report à nouveau (+/-)', prefixes: ['12'], kind: 'net' },
+      { key: 'resultat_net', label: 'Résultat net de l\'exercice', prefixes: ['13'], kind: 'resultat' },
+      { key: 'subventions', label: 'Subventions d\'investissement', prefixes: ['14'] },
+      { key: 'provisions_reglementees', label: 'Provisions réglementées', prefixes: ['15'] },
+    ]
+    const hasClassesPL = Array.from(this.mappingCache.keys()).some(k => k.startsWith('6') || k.startsWith('7'))
 
     const lines: Record<string, unknown>[] = []
-    Object.entries(CAPITAUX_MAP).forEach(([key, { label, prefixes }]) => {
-      // Most capital accounts are credit-balance
-      const debit = this.sumDebit(prefixes)
-      const credit = this.sumCredit(prefixes)
-      const montant = key === 'capital_non_appele' ? debit : credit
-      if (montant === 0 && debit === 0) return
+    CAPITAUX_MAP.forEach(({ key, label, prefixes, kind }) => {
+      let montant: number
+      if (kind === 'debit') montant = this.sumDebit(prefixes)              // capital non appelé (déduction)
+      else if (kind === 'net') montant = -this.sumSoldes(prefixes)         // report à nouveau (+/-)
+      else if (kind === 'resultat') {                                      // résultat : 13 si servi, sinon CdR
+        const c13 = -this.sumSoldes(prefixes)
+        montant = c13 !== 0 ? c13 : (hasClassesPL ? this.getResultatFromCompteResultat() : 0)
+      } else montant = this.sumCredit(prefixes)
+      if (montant === 0) return
       const montantN1 = this.hasN1
-        ? (key === 'capital_non_appele' ? this.calculateActifBrutN1(prefixes) : this.calculatePassifN1(prefixes))
+        ? (kind === 'debit' ? this.calculateActifBrutN1(prefixes)
+          : kind === 'net' ? -this.sumSoldesN1(prefixes)
+          : this.calculatePassifN1(prefixes))
         : 0
       lines.push({ id: key, designation: label, montantN: montant, montantN1 })
     })
@@ -1530,7 +1634,7 @@ export class LiasseDataService {
     const DETTES_MAP: Record<string, { label: string; categorie: string; prefixes: string[] }> = {
       'emprunts_obligataires': { label: 'Emprunts obligataires', categorie: 'long_terme', prefixes: ['161'] },
       'emprunts_creditbail': { label: 'Emprunts et dettes de crédit-bail', categorie: 'long_terme', prefixes: ['162', '163', '164'] },
-      'emprunts_autres': { label: 'Autres emprunts et dettes', categorie: 'long_terme', prefixes: ['165', '166', '168'] },
+      'emprunts_autres': { label: 'Autres emprunts et dettes', categorie: 'long_terme', prefixes: ['165', '166', '167', '168'] },
       'dettes_credit': { label: 'Dettes de crédit-bail immobilier', categorie: 'moyen_terme', prefixes: ['17'] },
       'dettes_diverses': { label: 'Dettes financières diverses', categorie: 'court_terme', prefixes: ['181', '182', '183', '184', '185', '186'] },
       'provisions': { label: 'Provisions pour risques et charges', categorie: 'provisions', prefixes: ['19'] },
@@ -1561,8 +1665,8 @@ export class LiasseDataService {
 
     const lines: Record<string, unknown>[] = []
     Object.entries(CA_MAP).forEach(([key, { label, categorie, prefixes }]) => {
-      // Revenue accounts have credit balance
-      const montant = this.sumCredit(prefixes)
+      // Produits NETS (RRR accordés déduits) — cohérent avec le compte de résultat.
+      const montant = this.calculateProduits(prefixes)
       if (montant === 0) return
       const montantN1 = this.hasN1 ? this.calculateProduitsN1(prefixes) : 0
       lines.push({ id: key, categorie, designation: label, montantN: montant, montantN1 })
@@ -1573,16 +1677,19 @@ export class LiasseDataService {
   // ────────── Génération Note 19 - Charges de personnel ──────────
 
   generateNote19(): Record<string, unknown>[] {
+    // CORRECTIF : les charges de personnel sont en classe 66 (PAS 64 = impôts/taxes).
+    // 661/662 rémunérations directes, 663 indemnités, 664 charges sociales,
+    // 666 exploitant, 667 personnel extérieur, 668 autres charges sociales.
     const PERSONNEL_MAP: Record<string, { label: string; prefixes: string[] }> = {
-      'salaires': { label: 'Salaires et traitements', prefixes: ['641', '642'] },
-      'charges_sociales': { label: 'Charges sociales', prefixes: ['643', '644', '645', '646'] },
-      'autres_charges': { label: 'Autres charges de personnel', prefixes: ['647', '648'] },
-      'impots_salaires': { label: 'Impôts sur salaires', prefixes: ['637'] },
+      'salaires': { label: 'Rémunérations directes (salaires)', prefixes: ['661', '662'] },
+      'indemnites': { label: 'Indemnités et avantages', prefixes: ['663'] },
+      'charges_sociales': { label: 'Charges sociales', prefixes: ['664', '668'] },
+      'autres_charges': { label: 'Autres charges de personnel', prefixes: ['666', '667'] },
     }
 
     const lines: Record<string, unknown>[] = []
     Object.entries(PERSONNEL_MAP).forEach(([key, { label, prefixes }]) => {
-      const montant = this.sumDebit(prefixes)
+      const montant = this.calculateCharges(prefixes) // net (débit normal)
       if (montant === 0) return
       const montantN1 = this.hasN1 ? this.calculateChargesN1(prefixes) : 0
       lines.push({ id: key, designation: label, montantN: montant, montantN1 })
