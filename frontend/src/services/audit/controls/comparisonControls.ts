@@ -50,13 +50,14 @@ function COMP001(balanceN: BalanceEntry[], balanceN1?: BalanceEntry[]): Resultat
   for (const l of balanceN) {
     const cl = parseInt(l.compte.charAt(0))
     if (cl < 1 || cl > 5) continue
-    const soldeN1 = mapN1.get(l.compte) || 0
-    const soldeN = solde(l)
-    const ecart = Math.abs(soldeN - soldeN1)
+    const soldeN1Externe = mapN1.get(l.compte) || 0
+    // Ouverture N = colonnes N-1 embarquées dans la balance N (= fermeture N-1)
+    const ouvertureN = (l.solde_debit_n1 || 0) - (l.solde_credit_n1 || 0)
+    const ecart = Math.abs(ouvertureN - soldeN1Externe)
     if (ecart > 1) {
       totalEcart += ecart
       if (comptesEcart.length < 10) {
-        comptesEcart.push(`${l.compte}: N-1=${soldeN1.toLocaleString('fr-FR')} vs N=${soldeN.toLocaleString('fr-FR')}`)
+        comptesEcart.push(`${l.compte}: fermeture N-1=${soldeN1Externe.toLocaleString('fr-FR')} vs ouverture N=${ouvertureN.toLocaleString('fr-FR')}`)
       }
     }
   }

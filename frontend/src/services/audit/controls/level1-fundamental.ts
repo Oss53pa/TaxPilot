@@ -120,13 +120,17 @@ function F003(ctx: AuditContext): ResultatControle {
   const resultatComptabilise = comptes13.reduce((s, l) => s + (l.credit - l.debit), 0)
 
   const ecart = Math.abs(resultatCalcule - resultatComptabilise)
-  // CORRECTIF (balance réelle EMERGENCE) : ne déclencher le BLOQUANT que si le
-  // compte 13x porte RÉELLEMENT un résultat (solde non nul). Un 13x présent mais
-  // à solde nul (ligne 131000 = débit 463M = crédit 463M → net 0) = résultat non
-  // encore affecté = balance PRÉ-CLÔTURE normale → INFO, pas BLOQUANT. L'ancienne
-  // condition `comptes13.length > 0` testait l'existence de la LIGNE, pas du solde.
   const resultatAffecte = Math.abs(resultatComptabilise) > 1
-  if (ecart > 1 && resultatAffecte) {
+
+  // Balance "avant clôture" : classes 6/7 encore actives → le 13x est le RAN
+  // de l'exercice précédent (pas le résultat N). L'écart est alors NORMAL.
+  // Un 13x absent/nul = pré-affectation classique (INFO). Un 13x ≠ résultat N
+  // alors que 6/7 sont actifs = balance avant = INFO. BLOQUANT uniquement si
+  // 13x ≠ résultat et que 6/7 sont clos (balance post-clôture).
+  const activite67 = totalProduits + totalCharges
+  const balanceAvant = activite67 > 1000 // classes 6/7 non clôturées
+
+  if (ecart > 1 && resultatAffecte && !balanceAvant) {
     return anomalie(ref, nom, 'BLOQUANT',
       `Ecart de ${ecart.toLocaleString('fr-FR')} entre resultat calcule et compte 13x`,
       {
@@ -147,6 +151,18 @@ function F003(ctx: AuditContext): ResultatControle {
         commentaire: 'Ecriture corrective pour aligner le resultat'
       }] : undefined,
       'Art. 34 Acte Uniforme OHADA')
+  }
+  if (balanceAvant && resultatAffecte && ecart > 1) {
+    return anomalie(ref, nom, 'INFO',
+      `Balance avant cloture: compte 13x (${resultatComptabilise.toLocaleString('fr-FR')}) = RAN exercice precedent, resultat N = ${resultatCalcule.toLocaleString('fr-FR')}`,
+      {
+        montants: { resultatCalcule, resultatComptabilise, produits: totalProduits, charges: totalCharges, haoNet, impot: impot89 },
+        description: `Les classes 6/7 sont actives (activite ${activite67.toLocaleString('fr-FR')}) : il s'agit d'une balance avant cloture. Le compte 13x porte le report a nouveau de l'exercice precedent (${resultatComptabilise.toLocaleString('fr-FR')}), pas le resultat N (${resultatCalcule.toLocaleString('fr-FR')}). L'ecart de ${ecart.toLocaleString('fr-FR')} est donc normal.`,
+        attendu: 'Balance avant cloture : 13x = RAN N-1, resultat N dans les classes 6/7',
+        constate: `Resultat calcule N: ${resultatCalcule.toLocaleString('fr-FR')}, Compte 13x (RAN): ${resultatComptabilise.toLocaleString('fr-FR')}`,
+        impactFiscal: 'Aucun impact - balance avant cloture normale',
+      },
+      'Normal pour une balance avant cloture. Apres affectation du resultat, le compte 131 ou 139 devra correspondre au resultat N.')
   }
   if (!resultatAffecte) {
     return anomalie(ref, nom, 'INFO',

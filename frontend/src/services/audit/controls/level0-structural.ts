@@ -205,7 +205,7 @@ function S007(ctx: AuditContext): ResultatControle {
   const problemes: string[] = []
   for (const line of ctx.balanceN) {
     const lib = line.intitule || ''
-    if (/[ï¿½Ã©Ã¨Ã ]|\\u00/.test(lib)) {
+    if (/ï¿½|Ã©|Ã¨|Ã |Ã«|Ã¯|Ã®|\\u00/.test(lib)) {
       problemes.push(line.compte)
     }
   }
