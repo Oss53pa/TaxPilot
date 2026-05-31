@@ -77,6 +77,31 @@ function sumCreditSoldes(bal: BalanceEntry[], prefixes: string[]): number {
   return total
 }
 
+/**
+ * Résultat net de l'exercice, robuste au contexte balance avant/après clôture.
+ *
+ * - Balance avant clôture (classes 6/7 actives) : résultat = produits − charges + HAO − IS
+ *   depuis les classes 6/7/8. Le 13x contient le RAN exercice précédent → inutilisable.
+ * - Balance après clôture (classes 6/7 à zéro) : résultat = solde net du compte 13x.
+ *
+ * Utiliser cette fonction dans tous les contrôles qui ont besoin du résultat N
+ * pour éviter les faux positifs/négatifs sur balance pré-clôture.
+ */
+function getResultatNet(bal: BalanceEntry[]): number {
+  const produits = find(bal, '7').reduce((s, l) => s + (l.credit - l.debit), 0)
+  const charges  = find(bal, '6').reduce((s, l) => s + (l.debit - l.credit), 0)
+  const hao8     = bal.filter(l => l.compte.toString().startsWith('8') && !l.compte.toString().startsWith('89'))
+  const haoNet   = hao8.reduce((s, l) => s + (l.credit - l.debit), 0)
+  const impot89  = find(bal, '89').reduce((s, l) => s + (l.debit - l.credit), 0)
+  const activite67 = produits + charges
+  if (activite67 > 1000) {
+    // Balance avant clôture : résultat dans les classes 6/7
+    return produits - charges + haoNet - impot89
+  }
+  // Balance après clôture : résultat dans le 13x
+  return find(bal, '13').reduce((s, l) => s + (l.credit - l.debit), 0)
+}
+
 // Helper: calcule actif et passif a partir du mapping (sign-aware)
 // Uses debit/credit sense to properly handle dual-nature accounts (e.g. bank 52x)
 function calcBilanFromMapping(bal: BalanceEntry[]): { actif: number; passif: number } {
@@ -298,9 +323,11 @@ function EF005(ctx: AuditContext): ResultatControle {
   const resultatCdR = produits - charges + haoNet - impot89
   const resultatBilan = find(ctx.balanceN, '13').reduce((s, l) => s + (l.credit - l.debit), 0)
   const ecart = Math.abs(resultatCdR - resultatBilan)
-  // CORRECTIF (idem F-003) : BLOQUANT seulement si le 13x porte un résultat
-  // non nul. Un 13x présent mais à solde nul = pré-clôture (résultat non affecté)
-  // → pas un déséquilibre. Évite le faux BLOQUANT sur balance pré-affectation.
+  // Balance avant clôture : classes 6/7 actives → 13x = RAN exercice précédent,
+  // pas le résultat N. Comparer les deux n'a aucun sens → OK sans anomalie.
+  const activite67 = produits + charges
+  const balanceAvant = activite67 > 1000
+  if (balanceAvant) return ok(ref, nom, `Balance avant cloture - resultat N = ${resultatCdR.toLocaleString('fr-FR')} (classes 6/7)`)
   if (ecart > 1 && Math.abs(resultatBilan) > 1) {
     return anomalie(ref, nom, 'BLOQUANT',
       `Resultat CdR (${resultatCdR.toLocaleString('fr-FR')}) != Resultat bilan (${resultatBilan.toLocaleString('fr-FR')})`,
@@ -393,6 +420,10 @@ function EF008(ctx: AuditContext): ResultatControle {
   const resultatNet = rao + hao - impot
   const resultat13 = find(ctx.balanceN, '13').reduce((s, l) => s + (l.credit - l.debit), 0)
   const ecart = Math.abs(resultatNet - resultat13)
+  // Balance avant clôture : classes 6/7 actives → 13x = RAN, pas résultat N → OK
+  const activite67ef8 = find(ctx.balanceN, '6').reduce((s, l) => s + Math.abs(l.debit - l.credit), 0)
+    + find(ctx.balanceN, '7').reduce((s, l) => s + Math.abs(l.debit - l.credit), 0)
+  if (activite67ef8 > 1000) return ok(ref, nom, `Balance avant cloture - cascade resultat N = ${resultatNet.toLocaleString('fr-FR')}`)
   if (ecart > 1 && find(ctx.balanceN, '13').length > 0) {
     return anomalie(ref, nom, 'BLOQUANT',
       `Cascade: RAO(${rao.toLocaleString('fr-FR')}) + HAO(${hao.toLocaleString('fr-FR')}) - IS(${impot.toLocaleString('fr-FR')}) = ${resultatNet.toLocaleString('fr-FR')} != 13x(${resultat13.toLocaleString('fr-FR')})`,
@@ -415,7 +446,7 @@ function EF008(ctx: AuditContext): ResultatControle {
 function EF009(ctx: AuditContext): ResultatControle {
   const ref = 'EF-009', nom = 'CAF coherente'
   // CAF additive: Resultat + Dotations - Reprises + VNC cessions - Produits cessions
-  const resultat = find(ctx.balanceN, '13').reduce((s, l) => s + (l.credit - l.debit), 0)
+  const resultat = getResultatNet(ctx.balanceN)
   const dotations = sumForPrefixes(ctx.balanceN, ['681', '682', '691', '697', '687'])
   const reprises = sumForPrefixes(ctx.balanceN, ['791', '797', '787', '798'])
   const vncCessions = sumForPrefixes(ctx.balanceN, ['81'])
@@ -483,7 +514,7 @@ function EF010(ctx: AuditContext): ResultatControle {
 function EF011(ctx: AuditContext): ResultatControle {
   const ref = 'EF-011', nom = 'TFT - Flux exploitation'
   // Estimation simplifiee des flux d'exploitation: CAF - variation BFR
-  const resultat = find(ctx.balanceN, '13').reduce((s, l) => s + (l.credit - l.debit), 0)
+  const resultat = getResultatNet(ctx.balanceN)
   const dotations = sumForPrefixes(ctx.balanceN, ['681', '682', '691', '697'])
   const reprises = sumForPrefixes(ctx.balanceN, ['791', '797'])
   const cafEstimee = resultat + dotations - reprises
@@ -541,7 +572,7 @@ function EF013(ctx: AuditContext): ResultatControle {
   const cpN = -sumSoldeForPrefixes(ctx.balanceN, ['10', '11', '12', '13', '14'])
   const cpN1 = -sumSoldeForPrefixes(ctx.balanceN1, ['10', '11', '12', '13', '14'])
   const variation = cpN - cpN1
-  const resultatN = find(ctx.balanceN, '13').reduce((s, l) => s + (l.credit - l.debit), 0)
+  const resultatN = getResultatNet(ctx.balanceN)
   const ecart = Math.abs(variation - resultatN)
   if (ecart > Math.abs(resultatN) * 0.2 && ecart > 10000) {
     return anomalie(ref, nom, 'MINEUR',
