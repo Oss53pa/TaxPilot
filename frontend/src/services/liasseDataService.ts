@@ -763,13 +763,41 @@ export class LiasseDataService {
     const rows: BilanPassifRow[] = []
 
     // Comptes réciproques pour le passif (42x côté créditeur, 48x côté créditeur, 52x côté créditeur)
+    // Ces comptes sont à DOUBLE NATURE : même préfixe peut être actif (débiteur) ou passif
+    // (créditeur) selon les entités. On prend créditeur ici, débiteur est capté côté actif.
     const reciprocalRefs = ['DH', 'DL', 'DQ', 'DR']
-    // Comptes signés : peuvent avoir un solde débiteur légitime dans le passif
-    // CG (12) = Report à nouveau (+/-)
-    // DD (17) = Emprunts et dettes financières — un sous-compte débiteur (ex. 176300
-    //   "intérêts courus remboursés > reconnus") réduit la dette nette au passif.
-    //   calculatePassif (créditeur uniquement) l'ignorait → passif surévalué de ce montant.
-    const signedRefs = ['CG', 'DD']
+
+    // Comptes à traitement ALGÉBRIQUE (-sumSoldes) :
+    //
+    // Règle OHADA : tout compte d'instrument financier (dettes, provisions, subventions)
+    // peut légitimement présenter un solde DÉBITEUR — remboursement anticipé, reprise
+    // supérieure à la dotation, trop-versé, intérêts courus > reconnus, etc.
+    // calculatePassif (filtre créditeur uniquement) ignorerait silencieusement ces montants
+    // → passif surévalué → écart bilan sans avertissement.
+    //
+    // Le traitement algébrique -sumSoldes() est correct : un sous-compte débiteur RÉDUIT
+    // la ligne passif (la dette nette est moindre), ce qui maintient l'identité Actif = Passif.
+    //
+    // Comptes concernés par classe :
+    //   CG  (12)  Report à nouveau          : peut être + ou − par définition
+    //   CI  (14)  Subventions d'investissement : remboursement partiel → débiteur possible
+    //   CJ  (15)  Provisions réglementées   : reprise > dotation → débiteur possible
+    //   DA  (161) Emprunts obligataires      : remboursement anticipé → débiteur possible
+    //   DB  (162-164) Emprunts établissements : idem
+    //   DC  (165-168) Dettes de crédit-bail  : idem
+    //   DD  (17)  Dettes financières diverses : intérêts courus débiteurs (ex. 176300)
+    //   DE  (18)  Comptes de liaison         : solde algébrique par nature
+    //   DF  (19)  Provisions financières     : reprise > dotation → débiteur possible
+    //   DK  (431-449) Dettes fiscales/sociales : trop-versé → MAIS 43/44/45 débiteurs
+    //       déjà capturés par BK (actif brut). DK reste 'normal' (créditeur seulement)
+    //       pour éviter le double-comptage. La couverture actif/passif est assurée par
+    //       la complémentarité BK (débiteur) + DK (créditeur).
+    //
+    // Règle : signedRefs uniquement pour les comptes SANS couverture actif du côté
+    // débiteur (aucun poste actif ne capte leur solde débiteur). Pour les autres,
+    // le pattern reciprocal actif/passif suffit et évite tout double-comptage.
+    const signedRefs = ['CG', 'CI', 'CJ', 'DA', 'DB', 'DC', 'DD', 'DE', 'DF']
+
     // Contre-compte débiteur : toujours débiteur, présenté en déduction
     const debitContraRefs = ['CB']
     // Détecter si la balance est pré-clôture (comptes classes 6/7 présents)
