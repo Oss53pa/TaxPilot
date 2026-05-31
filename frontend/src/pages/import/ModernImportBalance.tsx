@@ -1251,10 +1251,10 @@ const ModernImportBalance: React.FC = () => {
                                     <Typography variant="body2" sx={{ fontFamily: 'monospace', fontWeight: 600 }}>{fmt(opt.p.resultat)}</Typography>
                                   </Box>
                                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <Typography variant="body2" color="text.secondary">Équilibre bilan</Typography>
+                                    <Typography variant="body2" color="text.secondary">Couverture liasse</Typography>
                                     {opt.p.equilibre
-                                      ? <Chip size="small" color="success" label="Équilibré" />
-                                      : <Chip size="small" color="warning" label={`écart ${fmt(opt.p.ecartBilan)}`} />}
+                                      ? <Chip size="small" color="success" label="Tous comptes mappés" />
+                                      : <Chip size="small" color="default" label={`${fmt(opt.p.ecartBilan)} non mappés`} sx={{ opacity: 0.7 }} />}
                                   </Box>
                                 </Stack>
                               </Paper>
@@ -1262,19 +1262,19 @@ const ModernImportBalance: React.FC = () => {
                           )
                         })}
                       </Grid>
-                      {/* Garde-fous sur la colonne choisie */}
+                      {/* Info comptes orphelins — severity info, pas warning, car la balance elle-même est OK */}
                       {!chosen.equilibre && (
-                        <Alert severity="warning" sx={{ mt: 2 }}>
-                          <AlertTitle>Bilan déséquilibré de {fmt(chosen.ecartBilan)} FCFA</AlertTitle>
-                          La balance est équilibrée (Σdébit = Σcrédit) mais le bilan généré ne boucle pas :
-                          un ou plusieurs comptes ne sont pas rattachés à une ligne de la liasse. Vérifiez le mapping avant de générer.
+                        <Alert severity="info" sx={{ mt: 2 }}>
+                          <AlertTitle>{fmt(chosen.ecartBilan)} FCFA dans des comptes non rattachés à la liasse</AlertTitle>
+                          La balance est équilibrée (Σdébit = Σcrédit). Certains comptes ne correspondent à aucune
+                          ligne SYSCOHADA connue — ils n'affectent pas l'équilibre de votre balance mais seront
+                          absents de la liasse générée. Vous pouvez importer et compléter le mapping manuellement.
                         </Alert>
                       )}
-                      {chosen.equilibre && Math.abs(chosen.resultat) < 1 && (
+                      {Math.abs(chosen.resultat) < 1 && (
                         <Alert severity="info" sx={{ mt: 2 }}>
-                          Résultat net ≈ 0 sur ce jeu de colonnes : il s'agit probablement de soldes de clôture
-                          sans compte de résultat (classes 6/7 soldées). Si vous attendez un résultat non nul,
-                          l'autre jeu de colonnes est sans doute le bon.
+                          Résultat net ≈ 0 sur ce jeu de colonnes — exercice précédent (classes 6/7 déjà soldées).
+                          Si vous déclarez {year}, choisissez plutôt les <strong>Colonnes « Solde N »</strong>.
                         </Alert>
                       )}
                     </Paper>
