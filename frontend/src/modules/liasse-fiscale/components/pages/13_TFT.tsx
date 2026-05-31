@@ -4,7 +4,7 @@ import { ExpandMore as ExpandMoreIcon, ExpandLess as ExpandLessIcon, Save as Sav
 import LiasseHeader from '../LiasseHeader'
 import LiasseTable from '../LiasseTable'
 import type { PageProps, BalanceEntry } from '../../types'
-import { getActifBrut, getPassif, getCharges, getProduits } from '../../services/liasse-calculs'
+import { getActifBrut, getPassif, getCharges, getProduits, getBalanceSolde } from '../../services/liasse-calculs'
 import type { Column, Row } from '../LiasseTable'
 
 /* ── Account prefix groups matching Bilan Actif / Passif definitions ── */
@@ -34,7 +34,9 @@ const IMMO_FIN = ['26', '271', '272', '273', '274', '275', '276', '277']
 const CAPITAL = ['101', '102', '103']
 // Subventions d'investissement (CI)
 const SUBV_INVEST = ['14']
-// Emprunts et autres dettes financières — désormais en saisie manuelle (FO/FP/FQ)
+// Emprunts et dettes financières — calculables par variation N/N-1 si N-1 disponible
+const EMPRUNTS_16 = ['161', '162', '163', '164', '165', '166', '167', '168']
+const DETTES_17   = ['17']
 
 const v = (n: number | null | undefined): number | null =>
   n == null || n === 0 ? null : n
@@ -145,24 +147,37 @@ function computeTFT(bal: BalanceEntry[], balN1: BalanceEntry[], manual: TFTManua
   // FL: Subventions d'investissement reçues = increase in CI
   const FL = hasN1 ? Math.max(getPassif(bal, SUBV_INVEST) - getPassif(balN1, SUBV_INVEST), 0) : 0
 
-  // FM: Prélèvements sur le capital (saisie manuelle, négatif)
-  const FM = manual.FM
+  // FM: Prélèvements sur le capital = max(0, capital N-1 - capital N)
+  // Si l'utilisateur a saisi une valeur manuelle, elle prend la priorité.
+  const capitalN   = hasN1 ? getPassif(bal,   CAPITAL) : 0
+  const capitalN1  = hasN1 ? getPassif(balN1, CAPITAL) : 0
+  const autoFM = hasN1 ? -Math.max(0, capitalN1 - capitalN) : 0  // négatif = sortie
+  const FM = manual.FM !== 0 ? manual.FM : autoFM
 
-  // FN: Dividendes versés (saisie manuelle, négatif)
+  // FN: Dividendes versés — non dérivable de la balance (saisie manuelle)
   const FN = manual.FN
 
   // ── ZD: Flux capitaux propres = FK+FL+FM+FN ──
   const ZD = FK + FL + FM + FN
 
   // ── Financing flows - capitaux étrangers ──
-  // FO: Emprunts nouveaux (saisie manuelle — la balance ne distingue pas emprunts vs remboursements)
-  const FO = manual.FO
+  // FO: Emprunts nouveaux = max(0, emprunts16_N - emprunts16_N1)
+  const emprunts16N  = hasN1 ? getPassif(bal,   EMPRUNTS_16) : 0
+  const emprunts16N1 = hasN1 ? getPassif(balN1, EMPRUNTS_16) : 0
+  const deltaEmprunts16 = emprunts16N - emprunts16N1
+  const autoFO = hasN1 ? Math.max(0,  deltaEmprunts16) : 0  // augmentation = entrée
+  const autoFQ = hasN1 ? Math.max(0, -deltaEmprunts16) : 0  // diminution = sortie (rendu positif, signe géré à l'affichage)
+  const FO = manual.FO !== 0 ? manual.FO : autoFO
 
-  // FP: Autres dettes financières diverses (saisie manuelle)
-  const FP = manual.FP
+  // FP: Autres dettes financières diverses = variation algébrique 17x
+  // getBalanceSolde = debit - credit ; pour passif 17x (créditeur normal) → valeur négative → negate = montant passif
+  const dettes17N  = hasN1 ? -getBalanceSolde(bal,   DETTES_17) : 0
+  const dettes17N1 = hasN1 ? -getBalanceSolde(balN1, DETTES_17) : 0
+  const autoFP = hasN1 ? dettes17N - dettes17N1 : 0  // variation (+ = nouvel emprunt, - = remboursement)
+  const FP = manual.FP !== 0 ? manual.FP : autoFP
 
-  // FQ: Remboursements des emprunts (saisie manuelle, négatif)
-  const FQ = manual.FQ
+  // FQ: Remboursements des emprunts = max(0, emprunts16_N1 - emprunts16_N)
+  const FQ = manual.FQ !== 0 ? manual.FQ : -autoFQ  // négatif dans le TFT (sortie de trésorerie)
 
   // ── ZE: Flux capitaux étrangers = FO+FP+FQ ──
   const ZE = FO + FP + FQ
@@ -281,10 +296,18 @@ const TFT: React.FC<PageProps> = ({ entreprise, balance, balanceN1, onNoteClick 
         TABLEAU DES FLUX DE TRÉSORERIE
       </Typography>
 
-      {/* P0-2: Alert when TFT manual entries are missing */}
-      {balance.length > 0 && (['FO', 'FP', 'FQ', 'FM', 'FN', 'FJ'] as const).some(k => manual[k] === 0) && (
-        <Alert severity="warning" sx={{ mb: 1.5, '@media print': { display: 'none' } }}>
-          6 lignes du TFT nécessitent une saisie manuelle (FM, FN, FJ, FO, FP, FQ). Le tableau des flux sera incomplet sans ces valeurs.
+      {/* Alerte saisie manuelle — uniquement pour FN (dividendes) et FJ (cessions immo fin),
+          les seules lignes qui ne peuvent pas être dérivées d'une balance N-1.
+          FM/FO/FP/FQ sont auto-calculées si N-1 disponible. */}
+      {balance.length > 0 && !hasN1 && (
+        <Alert severity="info" sx={{ mb: 1.5, '@media print': { display: 'none' } }}>
+          Importez la balance N-1 pour calculer automatiquement FM, FO, FP, FQ (emprunts, capital).
+          FN (dividendes) et FJ (cessions immo financières) restent à saisir manuellement.
+        </Alert>
+      )}
+      {balance.length > 0 && hasN1 && (['FN', 'FJ'] as const).some(k => manual[k] === 0) && (
+        <Alert severity="info" sx={{ mb: 1.5, '@media print': { display: 'none' } }}>
+          2 lignes restent à saisir : FN (dividendes versés) et FJ (encaissements cessions immo financières).
         </Alert>
       )}
 

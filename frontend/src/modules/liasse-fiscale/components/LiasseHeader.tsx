@@ -36,9 +36,10 @@ const LiasseHeader: React.FC<LiasseHeaderProps> = ({
     if (!iso) return '____/____/________'
     try {
       const d = new Date(iso)
+      if (isNaN(d.getTime())) return iso || '____/____/________'
       return d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' })
     } catch {
-      return iso
+      return iso || '____/____/________'
     }
   }
 
