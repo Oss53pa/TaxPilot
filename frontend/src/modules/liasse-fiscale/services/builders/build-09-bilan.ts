@@ -97,6 +97,49 @@ function computePassifVal(bal: BalanceEntry[], pfx: readonly string[]): number {
   return -getBalanceSolde(bal, pfx)
 }
 
+/**
+ * Ventilation au prorata du brut quand un amortissement générique est mal
+ * imputé (ex. amort total du parc corporel saisi sur le compte 282xxx →
+ * imputé par préfixe à AJ "Terrains" → net AJ négatif absurde).
+ *
+ * Si AU MOINS un poste du groupe ressort net < 0 (amort > brut), on réétale
+ * l'amort total du groupe au prorata du brut de chaque poste. Préserve le
+ * total d'amort du groupe → l'équilibre du bilan reste inchangé.
+ *
+ * Miroir de LiasseDataService.redistributeByBrut (cohérence écran ↔ builder).
+ */
+function redistributeByBrut(items: Array<{ brut: number; amort: number }>): void {
+  if (items.length === 0) return
+  if (!items.some((i) => i.brut - i.amort < -0.5)) return
+  const groupBrut = items.reduce((s, i) => s + i.brut, 0)
+  const groupAmort = items.reduce((s, i) => s + i.amort, 0)
+  if (groupBrut <= 0) return
+  const rate = groupAmort / groupBrut
+  for (const i of items) i.amort = i.brut * rate
+}
+
+/**
+ * Calcule les valeurs (brut, amort, net, netN1) d'un groupe de postes immo
+ * avec ventilation au prorata du brut si nécessaire (N et N-1 indépendants).
+ */
+function computeGroupVals(
+  lines: ActifLine[],
+  bal: BalanceEntry[],
+  balN1: BalanceEntry[],
+): Array<[number, number, number, number]> {
+  const raw = lines.map((line) => ({
+    brut: computeActifBrut(bal, line.brutPfx),
+    amort: computeAmort(bal, line.amortPfx),
+    brutN1: computeActifBrut(balN1, line.brutPfx),
+    amortN1: computeAmort(balN1, line.amortPfx),
+  }))
+  const adjN = raw.map((r) => ({ brut: r.brut, amort: r.amort }))
+  redistributeByBrut(adjN)
+  const adjN1 = raw.map((r) => ({ brut: r.brutN1, amort: r.amortN1 }))
+  redistributeByBrut(adjN1)
+  return raw.map((r, i) => [r.brut, adjN[i].amort, r.brut - adjN[i].amort, r.brutN1 - adjN1[i].amort])
+}
+
 // ────────────────────────────────────────────────────────────────────────────
 // Build the ACTIF data rows (shared between Sheet 9 and Sheet 10)
 // Returns { rows, values } where values contains named totals
@@ -119,16 +162,8 @@ function buildActifRows(
 ): { rows: Row[]; values: ActifValues } {
   const rows: Row[] = []
 
-  // Helper to compute a single actif line
-  const actifRow = (line: ActifLine): [number, number, number, number] => {
-    const brut = computeActifBrut(bal, line.brutPfx)
-    const amort = computeAmort(bal, line.amortPfx)
-    const net = brut - amort
-    const brutN1 = computeActifBrut(balN1, line.brutPfx)
-    const amortN1 = computeAmort(balN1, line.amortPfx)
-    const netN1 = brutN1 - amortN1
-    return [brut, amort, net, netN1]
-  }
+  // (helper actifRow remplacé par computeGroupVals — qui ajoute la ventilation
+  //  au prorata du brut nécessaire pour éviter les nets négatifs absurdes.)
 
   // Helper to make a data row
   const makeRow = (
@@ -147,13 +182,10 @@ function buildActifRows(
   }
 
   // ── IMMOBILISATIONS INCORPORELLES (AD = sum AE..AH) ──
+  // Ventilation au prorata du brut si amort générique mal imputé (cf. helper).
+  const incorpVals = computeGroupVals(ACTIF_LINES, bal, balN1)
   let AD_brut = 0, AD_amort = 0, AD_net = 0, AD_netN1 = 0
-  const incorpVals: [number, number, number, number][] = []
-  for (const line of ACTIF_LINES) {
-    const v = actifRow(line)
-    incorpVals.push(v)
-    AD_brut += v[0]; AD_amort += v[1]; AD_net += v[2]; AD_netN1 += v[3]
-  }
+  for (const v of incorpVals) { AD_brut += v[0]; AD_amort += v[1]; AD_net += v[2]; AD_netN1 += v[3] }
   rows.push(makeRow('AD', 'IMMOBILISATIONS INCORPORELLES', 3, AD_brut, AD_amort, AD_net, AD_netN1))
   for (let i = 0; i < ACTIF_LINES.length; i++) {
     const [brut, amort, net, netN1] = incorpVals[i]
@@ -161,13 +193,13 @@ function buildActifRows(
   }
 
   // ── IMMOBILISATIONS CORPORELLES (AI = sum AJ..AN) ──
+  // Ventilation au prorata du brut : sur EPL SA, un amort terrains saisi à
+  // 125 M (réellement amort bâtiments mal classé en 282) faisait ressortir
+  // AJ Terrains net = -122 M. Le réétalement corrige cette absurdité tout en
+  // préservant le total d'amort du groupe → bilan toujours équilibré.
+  const corpoVals = computeGroupVals(ACTIF_CORPO_LINES, bal, balN1)
   let AI_brut = 0, AI_amort = 0, AI_net = 0, AI_netN1 = 0
-  const corpoVals: [number, number, number, number][] = []
-  for (const line of ACTIF_CORPO_LINES) {
-    const v = actifRow(line)
-    corpoVals.push(v)
-    AI_brut += v[0]; AI_amort += v[1]; AI_net += v[2]; AI_netN1 += v[3]
-  }
+  for (const v of corpoVals) { AI_brut += v[0]; AI_amort += v[1]; AI_net += v[2]; AI_netN1 += v[3] }
   rows.push(makeRow('AI', 'IMMOBILISATIONS CORPORELLES', 3, AI_brut, AI_amort, AI_net, AI_netN1))
   for (let i = 0; i < ACTIF_CORPO_LINES.length; i++) {
     const [brut, amort, net, netN1] = corpoVals[i]
