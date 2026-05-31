@@ -220,16 +220,29 @@ async function buildPageAnalysis(
     const generalResp = handlePredictionGeneral(balN, balN1.length > 0 ? balN1 : undefined)
     const generalCard = generalResp.content?.find(c => c.type === 'prediction') as PredictionCard | undefined
 
+    // Fallback sur la balance si les paramètres entreprise ne sont pas renseignés
+    // Balance type: solde = net signé (positif = débiteur, négatif = créditeur)
+    const capitalBalance = balN
+      .filter(l => l.compte.startsWith('101') || l.compte.startsWith('102') || l.compte.startsWith('103'))
+      .reduce((s, l) => s + Math.abs(l.solde || 0), 0)
+    const masseSalBalance = balN
+      .filter(l => l.compte.startsWith('66'))
+      .reduce((s, l) => s + Math.abs(l.solde || 0), 0)
+
+    const capitalSocial   = entreprise.capital_social   > 0 ? entreprise.capital_social   : capitalBalance
+    const masseSalariale  = entreprise.masse_salariale  > 0 ? entreprise.masse_salariale  : masseSalBalance
+    const effectifPerm    = entreprise.effectif_permanent
+
     const entCard: PredictionCard = {
       type: 'prediction',
       title: 'Fiche Entreprise',
       indicators: [
-        { label: 'Capital social', value: `${fmt(entreprise.capital_social)} FCFA`, status: entreprise.capital_social > 0 ? 'bon' : 'acceptable' },
-        { label: 'Effectif permanent', value: `${entreprise.effectif_permanent}`, status: entreprise.effectif_permanent > 0 ? 'bon' : 'acceptable' },
-        { label: 'Masse salariale', value: `${fmt(entreprise.masse_salariale)} FCFA`, status: 'bon' },
+        { label: 'Capital social', value: `${fmt(capitalSocial)} FCFA`, status: capitalSocial > 0 ? 'bon' : 'acceptable' },
+        { label: 'Effectif permanent', value: effectifPerm > 0 ? `${effectifPerm}` : '— (à renseigner)', status: effectifPerm > 0 ? 'bon' : 'acceptable' },
+        { label: 'Masse salariale', value: `${fmt(masseSalariale)} FCFA`, status: masseSalariale > 0 ? 'bon' : 'acceptable' },
         {
           label: 'Cout moyen / employe',
-          value: entreprise.effectif_permanent > 0 ? `${fmt(entreprise.masse_salariale / entreprise.effectif_permanent)} FCFA` : 'N/A',
+          value: effectifPerm > 0 && masseSalariale > 0 ? `${fmt(masseSalariale / effectifPerm)} FCFA` : 'N/A',
           status: 'bon',
         },
       ],
