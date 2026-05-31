@@ -152,17 +152,11 @@ function F003(ctx: AuditContext): ResultatControle {
       }] : undefined,
       'Art. 34 Acte Uniforme OHADA')
   }
-  if (balanceAvant && resultatAffecte && ecart > 1) {
-    return anomalie(ref, nom, 'INFO',
-      `Balance avant cloture: compte 13x (${resultatComptabilise.toLocaleString('fr-FR')}) = RAN exercice precedent, resultat N = ${resultatCalcule.toLocaleString('fr-FR')}`,
-      {
-        montants: { resultatCalcule, resultatComptabilise, produits: totalProduits, charges: totalCharges, haoNet, impot: impot89 },
-        description: `Les classes 6/7 sont actives (activite ${activite67.toLocaleString('fr-FR')}) : il s'agit d'une balance avant cloture. Le compte 13x porte le report a nouveau de l'exercice precedent (${resultatComptabilise.toLocaleString('fr-FR')}), pas le resultat N (${resultatCalcule.toLocaleString('fr-FR')}). L'ecart de ${ecart.toLocaleString('fr-FR')} est donc normal.`,
-        attendu: 'Balance avant cloture : 13x = RAN N-1, resultat N dans les classes 6/7',
-        constate: `Resultat calcule N: ${resultatCalcule.toLocaleString('fr-FR')}, Compte 13x (RAN): ${resultatComptabilise.toLocaleString('fr-FR')}`,
-        impactFiscal: 'Aucun impact - balance avant cloture normale',
-      },
-      'Normal pour une balance avant cloture. Apres affectation du resultat, le compte 131 ou 139 devra correspondre au resultat N.')
+  // Balance avant clôture : 13x = RAN N-1, résultat N dans les 6/7 → état NORMAL, OK vert.
+  // L'INFO précédente était du bruit : c'est le cas standard de tout cabinet qui travaille
+  // sur une balance pré-clôture. Pas d'anomalie, pas de message.
+  if (balanceAvant) {
+    return ok(ref, nom, `Balance avant cloture: resultat N = ${resultatCalcule.toLocaleString('fr-FR')} (classes 6/7), 13x = RAN ${resultatComptabilise.toLocaleString('fr-FR')}`)
   }
   if (!resultatAffecte) {
     return anomalie(ref, nom, 'INFO',
