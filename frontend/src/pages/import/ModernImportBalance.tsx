@@ -4,19 +4,19 @@ import { logger } from '@/utils/logger'
  * Conforme aux exigences EX-IMPORT-001 à EX-IMPORT-010
  */
 
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { balanceService } from '@/services'
 import { useBackendData } from '@/hooks/useBackendData'
 import { importBalanceFile } from '@/services/balanceParserService'
 import type { ImportPipelineResult } from '@/services/balanceParserService'
-import { saveImportedBalance, saveImportRecord, hasExistingBalance, getBalancesForExercice } from '@/services/balanceStorageService'
+import { saveImportedBalance, saveImportedBalanceN1, saveImportRecord, hasExistingBalance, getBalancesForExercice } from '@/services/balanceStorageService'
 import { getOrCreateExercice, markExerciceHasBalance } from '@/services/exerciceStorageService'
 import { runComparison, type ComparisonReport } from '@/services/comparisonService'
 import ComparisonResultModal from '@/components/comparison/ComparisonResultModal'
 import { FeatureGate } from '@/components/gating'
 import { useNavigate } from 'react-router-dom'
 import type { ExerciceConfig } from '@/types/audit.types'
-import { liasseDataService } from '@/services/liasseDataService'
+import { liasseDataService, LiasseDataService } from '@/services/liasseDataService'
 import { downloadBalanceTemplate } from '@/services/balanceTemplateService'
 import {
   Box,
@@ -211,6 +211,14 @@ const ModernImportBalance: React.FC = () => {
   const [exerciceConfigured, setExerciceConfigured] = useState(false)
   const [reimportInfo, setReimportInfo] = useState<{ exists: boolean; version: number }>({ exists: false, version: 0 })
 
+  // ── Sélecteur d'exercice à l'import ──
+  // Une balance peut contenir DEUX jeux de colonnes de soldes ("Solde N" et
+  // "Solde N-1"). Selon le cadrage du fichier, l'exercice à déclarer peut être
+  // dans l'un OU l'autre (ex. fichier cadré 2026 dont la clôture 2025 auditée
+  // est en colonne "N-1"). On NE suppose plus : l'utilisateur choisit, avec un
+  // aperçu chiffré (total bilan, résultat, équilibre) calculé par colonne.
+  const [declaredColumnSet, setDeclaredColumnSet] = useState<'N' | 'N1'>('N')
+
   // État erreurs/warnings visibles
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [warningMessages, setWarningMessages] = useState<string[]>([])
@@ -378,6 +386,55 @@ const ModernImportBalance: React.FC = () => {
     // Re-run the full pipeline with current config
     await detectFileStructure(file)
   }
+
+  // Construit les BalanceEntry[] depuis le jeu de colonnes choisi (N ou N-1).
+  // Pour N-1 : le solde déclaré devient la clôture N-1, les mouvements et le
+  // N-1-du-N-1 (= N-2, inconnu) sont mis à 0.
+  const buildEntriesForColumn = useCallback(
+    (accounts: BalanceAccount[], col: 'N' | 'N1') =>
+      accounts.map(a => ({
+        compte: a.accountNumber,
+        intitule: a.accountName,
+        debit: col === 'N1' ? 0 : a.debitMovements || 0,
+        credit: col === 'N1' ? 0 : a.creditMovements || 0,
+        solde_debit: col === 'N1' ? a.soldeDebitN1 || 0 : a.debitClosing || 0,
+        solde_credit: col === 'N1' ? a.soldeCreditN1 || 0 : a.creditClosing || 0,
+        solde_debit_n1: col === 'N1' ? 0 : a.soldeDebitN1 || 0,
+        solde_credit_n1: col === 'N1' ? 0 : a.soldeCreditN1 || 0,
+      })),
+    [],
+  )
+
+  // Y a-t-il un second jeu de colonnes (N-1) exploitable ?
+  const hasN1Columns = useMemo(
+    () => importedData.some(a => (a.soldeDebitN1 || 0) !== 0 || (a.soldeCreditN1 || 0) !== 0),
+    [importedData],
+  )
+
+  // Aperçu chiffré par jeu de colonnes : total bilan, résultat, équilibre.
+  // Sert à guider le choix de l'exercice à déclarer (zéro hypothèse silencieuse).
+  const columnPreviews = useMemo(() => {
+    const compute = (col: 'N' | 'N1') => {
+      const entries = buildEntriesForColumn(importedData, col)
+      const svc = new LiasseDataService()
+      svc.loadBalance(entries)
+      const d = svc.validateCoherenceDetailed()
+      const sumD = entries.reduce((s, e) => s + (e.solde_debit || 0), 0)
+      const sumC = entries.reduce((s, e) => s + (e.solde_credit || 0), 0)
+      return {
+        totalActif: d.checks[0]?.valeurA ?? 0,
+        totalPassif: d.checks[0]?.valeurB ?? 0,
+        ecartBilan: d.checks[0]?.ecart ?? 0,
+        equilibre: (d.checks[0]?.ecart ?? 0) <= 1,
+        resultat: svc.getResultatFromCompteResultat(),
+        sumDebit: sumD,
+        sumCredit: sumC,
+        balanceEquilibree: Math.abs(sumD - sumC) <= 1,
+        hasData: sumD !== 0 || sumC !== 0,
+      }
+    }
+    return { N: compute('N'), N1: compute('N1') }
+  }, [importedData, buildEntriesForColumn])
 
   // EX-IMPORT-003: Validation équilibre avec tolérance
   const validateBalance = (accounts: BalanceAccount[]) => {
@@ -1147,6 +1204,83 @@ const ModernImportBalance: React.FC = () => {
             {importStep === 3 && (
               /* Étape 3: Mapping et validation */
               <CardContent sx={{ p: 3 }}>
+                {/* ── Sélecteur d'exercice (deux jeux de colonnes détectés) ── */}
+                {hasN1Columns && (() => {
+                  const fmt = (n: number) => Math.round(n).toLocaleString('fr-FR')
+                  const year = exerciceConfigured ? exerciceConfig.year : currentYear
+                  const sel = declaredColumnSet
+                  const chosen = sel === 'N1' ? columnPreviews.N1 : columnPreviews.N
+                  const options: Array<{ key: 'N' | 'N1'; title: string; sub: string; p: typeof columnPreviews.N }> = [
+                    { key: 'N', title: 'Colonnes « Solde N »', sub: 'Soldes de clôture (colonnes de droite)', p: columnPreviews.N },
+                    { key: 'N1', title: 'Colonnes « Solde N-1 »', sub: 'Clôture précédente (colonnes de gauche)', p: columnPreviews.N1 },
+                  ]
+                  return (
+                    <Paper variant="outlined" sx={{ p: 2.5, mb: 3, borderColor: alpha(theme.palette.primary.main, 0.3) }}>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 0.5 }}>
+                        Quel jeu de colonnes correspond à l'exercice {year} à déclarer ?
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                        Ce fichier contient deux exercices. Choisissez celui qui équilibre et dont le résultat est cohérent.
+                      </Typography>
+                      <Grid container spacing={2}>
+                        {options.map(opt => {
+                          const isSel = sel === opt.key
+                          return (
+                            <Grid item xs={12} md={6} key={opt.key}>
+                              <Paper
+                                onClick={() => setDeclaredColumnSet(opt.key)}
+                                sx={{
+                                  p: 2, cursor: 'pointer', height: '100%',
+                                  border: `2px solid ${isSel ? theme.palette.primary.main : alpha(theme.palette.divider, 0.4)}`,
+                                  backgroundColor: isSel ? alpha(theme.palette.primary.main, 0.04) : 'transparent',
+                                  transition: 'all .15s',
+                                }}
+                              >
+                                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+                                  <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{opt.title}</Typography>
+                                  {isSel && <CheckIcon color="primary" fontSize="small" />}
+                                </Box>
+                                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1.5 }}>{opt.sub}</Typography>
+                                <Stack spacing={0.5}>
+                                  <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                    <Typography variant="body2" color="text.secondary">Total Bilan</Typography>
+                                    <Typography variant="body2" sx={{ fontFamily: 'monospace', fontWeight: 600 }}>{fmt(opt.p.totalActif)}</Typography>
+                                  </Box>
+                                  <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                    <Typography variant="body2" color="text.secondary">Résultat net</Typography>
+                                    <Typography variant="body2" sx={{ fontFamily: 'monospace', fontWeight: 600 }}>{fmt(opt.p.resultat)}</Typography>
+                                  </Box>
+                                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <Typography variant="body2" color="text.secondary">Équilibre bilan</Typography>
+                                    {opt.p.equilibre
+                                      ? <Chip size="small" color="success" label="Équilibré" />
+                                      : <Chip size="small" color="warning" label={`écart ${fmt(opt.p.ecartBilan)}`} />}
+                                  </Box>
+                                </Stack>
+                              </Paper>
+                            </Grid>
+                          )
+                        })}
+                      </Grid>
+                      {/* Garde-fous sur la colonne choisie */}
+                      {!chosen.equilibre && (
+                        <Alert severity="warning" sx={{ mt: 2 }}>
+                          <AlertTitle>Bilan déséquilibré de {fmt(chosen.ecartBilan)} FCFA</AlertTitle>
+                          La balance est équilibrée (Σdébit = Σcrédit) mais le bilan généré ne boucle pas :
+                          un ou plusieurs comptes ne sont pas rattachés à une ligne de la liasse. Vérifiez le mapping avant de générer.
+                        </Alert>
+                      )}
+                      {chosen.equilibre && Math.abs(chosen.resultat) < 1 && (
+                        <Alert severity="info" sx={{ mt: 2 }}>
+                          Résultat net ≈ 0 sur ce jeu de colonnes : il s'agit probablement de soldes de clôture
+                          sans compte de résultat (classes 6/7 soldées). Si vous attendez un résultat non nul,
+                          l'autre jeu de colonnes est sans doute le bon.
+                        </Alert>
+                      )}
+                    </Paper>
+                  )
+                })()}
+
                 <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
                   <Tabs value={activeTab} onChange={(_, newValue) => setActiveTab(newValue)}>
                     <Tab label={`Données importées (${importedData.length})`} />
@@ -1591,17 +1725,9 @@ const ModernImportBalance: React.FC = () => {
                           fullWidth
                           onClick={async () => {
                             try {
-                              // Convert to unified BalanceEntry[] (N + N-1 in each entry)
-                              const entries = importedData.map(acc => ({
-                                compte: acc.accountNumber,
-                                intitule: acc.accountName,
-                                debit: acc.debitMovements || 0,
-                                credit: acc.creditMovements || 0,
-                                solde_debit: acc.debitClosing || 0,
-                                solde_credit: acc.creditClosing || 0,
-                                solde_debit_n1: acc.soldeDebitN1 || 0,
-                                solde_credit_n1: acc.soldeCreditN1 || 0,
-                              }))
+                              // Convert to unified BalanceEntry[] selon le jeu de
+                              // colonnes choisi par l'utilisateur (exercice déclaré).
+                              const entries = buildEntriesForColumn(importedData, declaredColumnSet)
 
                               // Save unified balance (N + N-1 together)
                               const savedBalance = saveImportedBalance(
@@ -1615,6 +1741,25 @@ const ModernImportBalance: React.FC = () => {
 
                               const hasN1 = entries.some(e => (e.solde_debit_n1 || 0) !== 0 || (e.solde_credit_n1 || 0) !== 0)
                               logger.debug('[Import] Saved', entries.length, 'unified entries, hasN1:', hasN1)
+
+                              // Si le fichier contient des colonnes N-1, les sauvegarder
+                              // comme balance N-1 indépendante pour l'audit et les contrôles.
+                              if (hasN1) {
+                                const n1Entries = entries.map(e => ({
+                                  ...e,
+                                  debit: 0,
+                                  credit: 0,
+                                  solde_debit: e.solde_debit_n1 || 0,
+                                  solde_credit: e.solde_credit_n1 || 0,
+                                  solde_debit_n1: 0,
+                                  solde_credit_n1: 0,
+                                }))
+                                const n1Year = exerciceConfigured
+                                  ? String(exerciceConfig.year - 1)
+                                  : String(new Date().getFullYear() - 1)
+                                saveImportedBalanceN1(n1Entries, importReport?.fileName || 'Import balance N-1', n1Year)
+                                logger.debug('[Import] Saved N-1 balance:', n1Entries.length, 'entries, exercice:', n1Year)
+                              }
 
                               // P0-1: Toast notification after successful import
                               enqueueSnackbar(`Balance importée avec succès (${entries.length} comptes chargés)`, { variant: 'success' })
