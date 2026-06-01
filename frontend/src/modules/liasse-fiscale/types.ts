@@ -122,6 +122,11 @@ export interface BalanceEntry {
   credit: number
   solde_debit: number
   solde_credit: number
+  // Champs N-1 embarqués (format 8 colonnes) — optionnels, présents si balance
+  // importée avec colonnes N-1. Utilisés par liasseDataService.loadBalance()
+  // pour auto-construire le cache N-1 (hasN1 = true).
+  solde_debit_n1?: number
+  solde_credit_n1?: number
 }
 
 export type SectionKey = PageDef['section']
