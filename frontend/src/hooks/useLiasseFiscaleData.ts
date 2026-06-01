@@ -124,6 +124,12 @@ export const parseEntries = (entries: unknown[]): BalanceEntry[] =>
       credit: Number(e.credit) || 0,
       solde_debit: Number(e.solde_debit) || 0,
       solde_credit: Number(e.solde_credit) || 0,
+      // Champs N-1 embarqués (format unifié 8 colonnes) — DOIVENT être préservés
+      // pour que liasseDataService.loadBalance() auto-détecte hasN1 = true.
+      // Sans ça, TFT/Bilan N-1 sont vides même quand l'import avait les colonnes.
+      ...(Number(e.solde_debit_n1) || Number(e.solde_credit_n1)
+        ? { solde_debit_n1: Number(e.solde_debit_n1) || 0, solde_credit_n1: Number(e.solde_credit_n1) || 0 }
+        : {}),
     }
   })
 
