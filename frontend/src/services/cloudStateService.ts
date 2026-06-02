@@ -28,8 +28,16 @@ import { logger } from '@/utils/logger'
 
 const SYNC_PREFIXES = ['fiscasync-', 'fiscasync_', 'dossier_']
 
-/** Clés à NE PAS synchroniser : préférences par appareil, secrets, et la
- *  config entreprise (chemin dédié entreprise_settings). */
+/** Clés à NE PAS synchroniser : préférences par appareil + secrets uniquement.
+ *
+ *  HISTORIQUE : on excluait aussi `fiscasync_entreprise_settings` (« chemin
+ *  dédié table entreprise_settings »). Problème : si l'utilisateur n'a pas
+ *  encore cliqué Sauvegarder dans Paramètres (ou si le path dédié échoue
+ *  silencieusement), la config entreprise n'était NULLE PART en cloud → perdue
+ *  au vidage de cache. Désormais on l'inclut dans le miroir aussi (ceinture +
+ *  bretelles : table dédiée pour les requêtes relationnelles + miroir pour la
+ *  survie pure des données).
+ */
 const EXCLUDE_EXACT = new Set<string>([
   'fiscasync-theme',
   'fiscasync-lang',
@@ -39,7 +47,6 @@ function shouldSync(key: string | null): boolean {
   if (!key) return false
   if (EXCLUDE_EXACT.has(key)) return false
   if (key.includes('session_secret')) return false
-  if (key.includes('fiscasync_entreprise_settings')) return false // chemin dédié
   return SYNC_PREFIXES.some((p) => key.startsWith(p))
 }
 
