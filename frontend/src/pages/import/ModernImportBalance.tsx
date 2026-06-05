@@ -1284,8 +1284,9 @@ const ModernImportBalance: React.FC = () => {
                           Ce jeu de colonnes ne contient pas de compte de résultat (classes 6/7 déjà soldées) :
                           le résultat de l'exercice a été <strong>affecté au report à nouveau</strong>, il n'y est
                           donc plus isolable (c'est normal pour une clôture). Le bilan, lui, est complet.
-                          Pour déclarer <strong>{year}</strong> avec son résultat, utilisez les <strong>Colonnes « Solde N »</strong> ;
-                          le comparatif N-1 (compte de résultat) nécessite d'importer aussi la balance de l'exercice précédent.
+                          Pour déclarer <strong>{year}</strong> avec son résultat, utilisez les <strong>Colonnes « Solde N »</strong>.
+                          Le comparatif N-1 du compte de résultat (charges, produits, résultat) est repris de la
+                          <strong> balance de l'exercice précédent</strong> si elle est importée dans l'app — pas de cette colonne (qui n'a que le bilan).
                         </Alert>
                       )}
                     </Paper>

@@ -12,6 +12,7 @@ import { logger } from '@/utils/logger'
 import type { EntrepriseData, BalanceEntry, RegimeImposition } from '@/modules/liasse-fiscale/types'
 import { scopeKey } from '@/services/dossierScopeService'
 import { liasseDataService } from '@/services/liasseDataService'
+import { getBalancesForExercice } from '@/services/balanceStorageService'
 
 // ── EMPTY_ENTREPRISE ──
 
@@ -152,6 +153,29 @@ export const loadBalanceN1 = (): BalanceEntry[] => {
       if (Array.isArray(stored?.entriesN1) && stored.entriesN1.length > 0) {
         logger.debug(`[Liasse] Balance N-1 loaded from "fiscasync_balance_latest.entriesN1": ${stored.entriesN1.length} comptes`)
         return parseEntries(stored.entriesN1)
+      }
+    }
+  } catch { /* try next */ }
+
+  // Exercice N-1 importé SÉPARÉMENT (ex. balance 2024) : il contient son propre
+  // COMPTE DE RÉSULTAT (classes 6/7), contrairement aux colonnes "Solde N-1" du
+  // fichier 8 colonnes qui ne portent que le BILAN (P&L déjà soldé → résultat 0).
+  // On le préfère donc dès qu'il existe avec un P&L, pour que le comparatif N-1
+  // (résultat, charges, produits) reflète l'exercice précédent réel.
+  try {
+    const rawN = localStorage.getItem(scopeKey('fiscasync_balance_latest'))
+    const storedN = rawN ? JSON.parse(rawN) : null
+    const anneeN = parseInt(String(storedN?.exercice ?? ''), 10)
+    if (!Number.isNaN(anneeN)) {
+      const balsN1 = getBalancesForExercice(String(anneeN - 1))
+      const balN1 = Array.isArray(balsN1) && balsN1.length > 0 ? balsN1[0] : null
+      const entriesN1 = balN1?.entries
+      if (Array.isArray(entriesN1) && entriesN1.length > 0) {
+        const hasPL = entriesN1.some((e) => /^[67]/.test(String((e as { compte?: unknown }).compte ?? '')))
+        if (hasPL) {
+          logger.debug(`[Liasse] Balance N-1 depuis l'exercice ${anneeN - 1} importé (avec P&L): ${entriesN1.length} comptes`)
+          return parseEntries(entriesN1)
+        }
       }
     }
   } catch { /* try next */ }
