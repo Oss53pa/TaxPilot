@@ -1,0 +1,3394 @@
+[
+ {
+  "sheet": "NOTE 4",
+  "note_title": "NOTE 4 : IMMOBILISATIONS FINANCIERES",
+  "injectable": true,
+  "headerNote": "En-tête ligne 8 : col A = \"Libellés\", col F = \"Année N\", col G = \"Année N-1\", col H = \"Variation en %\", cols I/J/K = ventilation des créances par échéance. Les montants en valeur BRUTE débitrice vont en F (N) et G (N-1). Lignes 9-17 = postes de détail. Ligne 18 (TOTAL BRUT), 19-20 (dépréciations) et 21 (TOTAL NET) sont des totaux/formules non injectées. Mapping aligné sur la nomenclature SYSCOHADA révisé 2017 (271 Prêts et créances, 272 Prêts au personnel, 273 Créances sur l'État, 274 Titres immobilisés, 275 Dépôts et cautionnements, 276 Intérêts courus, 277 Créances rattachées/diverses, 278 Immo. financières diverses).",
+  "rows": [
+   {
+    "row": 9,
+    "label": "Titres de participation",
+    "comptes": [
+     "26"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "actif"
+   },
+   {
+    "row": 10,
+    "label": "Prêts et créances",
+    "comptes": [
+     "271"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "actif"
+   },
+   {
+    "row": 11,
+    "label": "Prêt au personnel",
+    "comptes": [
+     "272"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "actif"
+   },
+   {
+    "row": 12,
+    "label": "Créances sur l'état",
+    "comptes": [
+     "273"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "actif"
+   },
+   {
+    "row": 13,
+    "label": "Titres immobilisés",
+    "comptes": [
+     "274"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "actif"
+   },
+   {
+    "row": 14,
+    "label": "Dépôts et cautionnements",
+    "comptes": [
+     "275"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "actif"
+   },
+   {
+    "row": 15,
+    "label": "Intérêts courus",
+    "comptes": [
+     "276"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "actif"
+   },
+   {
+    "row": 16,
+    "label": "Créances rattachées à des avances et participations à des GIE",
+    "comptes": [
+     "277"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "actif"
+   },
+   {
+    "row": 17,
+    "label": "Immobilisations financières diverses",
+    "comptes": [
+     "278"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "actif"
+   }
+  ]
+ },
+ {
+  "sheet": "NOTE 5",
+  "note_title": "NOTE 5 : ACTIF CIRCULANT ET DETTES CIRCULANTES HAO",
+  "injectable": true,
+  "headerNote": "Section ACTIF CIRCULANT HAO (lignes 9-14) et DETTES CIRCULANTES HAO (lignes 19-26). En-têtes identiques sur lignes 9 et 21 : colonne E = \"Année N\", colonne G = \"Année N-1\" (col F et H vides, col I = Variation %). Lignes TOTAL (12, 14, 26) et dépréciations agrégées sont des formules / calculées ; non injectées sauf la ligne dépréciation détail (13).",
+  "rows": [
+   {
+    "row": 10,
+    "label": "Créances sur cessions d'immobilisations",
+    "comptes": [
+     "485"
+    ],
+    "colN": "E",
+    "colN1": "G",
+    "type": "actif"
+   },
+   {
+    "row": 11,
+    "label": "Autres créances hors activités ordinaires",
+    "comptes": [
+     "486",
+     "488"
+    ],
+    "colN": "E",
+    "colN1": "G",
+    "type": "actif"
+   },
+   {
+    "row": 13,
+    "label": "Dépréciations des créances HAO",
+    "comptes": [
+     "498"
+    ],
+    "colN": "E",
+    "colN1": "G",
+    "type": "actif"
+   },
+   {
+    "row": 22,
+    "label": "Fournisseurs d'investissements",
+    "comptes": [
+     "481"
+    ],
+    "colN": "E",
+    "colN1": "G",
+    "type": "passif"
+   },
+   {
+    "row": 23,
+    "label": "Fournisseurs d'investissements effets à payer",
+    "comptes": [
+     "482"
+    ],
+    "colN": "E",
+    "colN1": "G",
+    "type": "passif"
+   },
+   {
+    "row": 24,
+    "label": "Versements restant à effectuer sur titres de participation et titres immobilisés non libérés",
+    "comptes": [
+     "4726",
+     "4727"
+    ],
+    "colN": "E",
+    "colN1": "G",
+    "type": "passif"
+   },
+   {
+    "row": 25,
+    "label": "Autres dettes hors activités ordinaires",
+    "comptes": [
+     "484"
+    ],
+    "colN": "E",
+    "colN1": "G",
+    "type": "passif"
+   }
+  ]
+ },
+ {
+  "sheet": "NOTE 6",
+  "note_title": "NOTE 6 : STOCKS ET EN COURS",
+  "injectable": true,
+  "headerNote": "Colonne E = \"Année N\" (montant brut débiteur de l'exercice), colonne G = \"Année N-1\". Colonnes I (Variation de stock en valeur) et J (Variation en %) sont des formules Excel. Libellés en colonne A.",
+  "rows": [
+   {
+    "row": 9,
+    "label": "Marchandises",
+    "comptes": [
+     "31"
+    ],
+    "colN": "E",
+    "colN1": "G",
+    "type": "actif"
+   },
+   {
+    "row": 10,
+    "label": "Matières premières et fournitures liées",
+    "comptes": [
+     "32"
+    ],
+    "colN": "E",
+    "colN1": "G",
+    "type": "actif"
+   },
+   {
+    "row": 11,
+    "label": "Autres approvisionnements",
+    "comptes": [
+     "33"
+    ],
+    "colN": "E",
+    "colN1": "G",
+    "type": "actif"
+   },
+   {
+    "row": 12,
+    "label": "Produits en cours",
+    "comptes": [
+     "34"
+    ],
+    "colN": "E",
+    "colN1": "G",
+    "type": "actif"
+   },
+   {
+    "row": 13,
+    "label": "Services en cours",
+    "comptes": [
+     "35"
+    ],
+    "colN": "E",
+    "colN1": "G",
+    "type": "actif"
+   },
+   {
+    "row": 14,
+    "label": "Produits finis",
+    "comptes": [
+     "36"
+    ],
+    "colN": "E",
+    "colN1": "G",
+    "type": "actif"
+   },
+   {
+    "row": 15,
+    "label": "Produits intermédiaires",
+    "comptes": [
+     "37"
+    ],
+    "colN": "E",
+    "colN1": "G",
+    "type": "actif"
+   },
+   {
+    "row": 16,
+    "label": "Stocks en cours de route, en consignation ou en dépôt",
+    "comptes": [
+     "38"
+    ],
+    "colN": "E",
+    "colN1": "G",
+    "type": "actif"
+   },
+   {
+    "row": 18,
+    "label": "Dépréciations des stocks",
+    "comptes": [
+     "39"
+    ],
+    "colN": "E",
+    "colN1": "G",
+    "type": "passif"
+   }
+  ]
+ },
+ {
+  "sheet": "NOTE 7",
+  "note_title": "NOTE 7 : CLIENTS",
+  "injectable": true,
+  "headerNote": "Colonne E = en-tete \"Annee N\" (montant brut exercice N) ; Colonne F = \"Annee N-1\". Les colonnes G (Variation en %), H/I/J (echeancier creances) sont des formules / ventilations non injectees. Lignes 17/19/23 = TOTAUX (formules Excel) non injectees.",
+  "rows": [
+   {
+    "row": 9,
+    "label": "Clients (hors réserves de propriété et Groupe)",
+    "comptes": [
+     "411",
+     "412"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "actif"
+   },
+   {
+    "row": 10,
+    "label": "Clients effets à recevoir (hors réserves de propriété et groupe)",
+    "comptes": [
+     "413"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "actif"
+   },
+   {
+    "row": 11,
+    "label": "Clients avec réserves de propriété",
+    "comptes": [
+     "4194"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "actif"
+   },
+   {
+    "row": 12,
+    "label": "Clients et effets à recevoir Groupe",
+    "comptes": [
+     "4191"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "actif"
+   },
+   {
+    "row": 13,
+    "label": "Créances sur cession d'immobilisations",
+    "comptes": [
+     "414"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "actif"
+   },
+   {
+    "row": 14,
+    "label": "Clients effets escomptés et non échus",
+    "comptes": [
+     "415"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "actif"
+   },
+   {
+    "row": 15,
+    "label": "Créances litigieuses ou douteuses",
+    "comptes": [
+     "416"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "actif"
+   },
+   {
+    "row": 16,
+    "label": "Clients produits à recevoir",
+    "comptes": [
+     "418"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "actif"
+   },
+   {
+    "row": 18,
+    "label": "Dépréciations des comptes clients",
+    "comptes": [
+     "491"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 20,
+    "label": "Clients, avances reçues hors groupe",
+    "comptes": [
+     "4191"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 21,
+    "label": "Clients, avances reçues groupe",
+    "comptes": [
+     "4192"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 22,
+    "label": "Autres clients créditeurs",
+    "comptes": [
+     "4198",
+     "4199"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   }
+  ]
+ },
+ {
+  "sheet": "NOTE 8",
+  "note_title": "NOTE 8 : AUTRES CREANCES",
+  "injectable": true,
+  "headerNote": "Ligne 8 en-têtes : col E = \"Année N\", col F = \"Année N-1\" (col G = Variation %, cols H/I/J = ventilation par échéance — non injectées). Libellés de postes en col A (lignes 9 à 18). Lignes 19 (TOTAL BRUT), 20 (Dépréciations) et 21 (TOTAL NET) sont des totaux/formules non injectés.",
+  "rows": [
+   {
+    "row": 9,
+    "label": "Personnel",
+    "comptes": [
+     "421",
+     "422",
+     "423",
+     "424",
+     "425",
+     "426",
+     "4271",
+     "4287"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "actif"
+   },
+   {
+    "row": 10,
+    "label": "Organismes sociaux",
+    "comptes": [
+     "431",
+     "432",
+     "433",
+     "4387"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "actif"
+   },
+   {
+    "row": 11,
+    "label": "Etat et Collectivités publiques",
+    "comptes": [
+     "441",
+     "442",
+     "443",
+     "444",
+     "445",
+     "446",
+     "447",
+     "448",
+     "4493",
+     "4499"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "actif"
+   },
+   {
+    "row": 12,
+    "label": "Organismes internationaux",
+    "comptes": [
+     "451",
+     "452",
+     "453",
+     "454",
+     "455",
+     "456",
+     "457",
+     "458"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "actif"
+   },
+   {
+    "row": 13,
+    "label": "Apporteurs, associés et groupe",
+    "comptes": [
+     "462",
+     "465",
+     "467",
+     "4619"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "actif"
+   },
+   {
+    "row": 14,
+    "label": "Compte transitoire ajustement spécial lié à la révision du SYSCOHADA (Voir Notes 8A & 8C)",
+    "comptes": [
+     "475"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "actif"
+   },
+   {
+    "row": 15,
+    "label": "Autres débiteurs divers",
+    "comptes": [
+     "471",
+     "472",
+     "473",
+     "474",
+     "476",
+     "477",
+     "478"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "actif"
+   },
+   {
+    "row": 16,
+    "label": "Comptes permanents non bloqués des établissements et des succursales",
+    "comptes": [
+     "181",
+     "185"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "actif"
+   },
+   {
+    "row": 17,
+    "label": "Comptes de liaison charges et produits",
+    "comptes": [
+     "186",
+     "187"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "actif"
+   },
+   {
+    "row": 18,
+    "label": "Comptes de liaison des sociétés en participation",
+    "comptes": [
+     "188"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "actif"
+   }
+  ]
+ },
+ {
+  "sheet": "NOTE 9",
+  "note_title": "NOTE 9 : TITRES DE PLACEMENT",
+  "injectable": true,
+  "headerNote": "En-tête ligne 8 : col A:D = \"Libellés\", col E (merge E8:F8) = \"Année N\", col G (merge G8:H8) = \"Année N-1\", col I = \"Variation en %\". Montant Année N => colonne E, Année N-1 => colonne G. Lignes détail 9-15 (titres bruts par catégorie) + ligne 17 (dépréciations). Lignes 16 (TOTAL BRUT, =SUM(E9:F15)) et 18 (TOTAL NET, =E16-E17) sont des formules Excel, non injectées.",
+  "rows": [
+   {
+    "row": 9,
+    "label": "Titres de trésor et bons de caisse à court terme",
+    "comptes": [
+     "501"
+    ],
+    "colN": "E",
+    "colN1": "G",
+    "type": "actif"
+   },
+   {
+    "row": 10,
+    "label": "Actions",
+    "comptes": [
+     "502"
+    ],
+    "colN": "E",
+    "colN1": "G",
+    "type": "actif"
+   },
+   {
+    "row": 11,
+    "label": "Obligations",
+    "comptes": [
+     "503"
+    ],
+    "colN": "E",
+    "colN1": "G",
+    "type": "actif"
+   },
+   {
+    "row": 12,
+    "label": "Bons de souscription",
+    "comptes": [
+     "504"
+    ],
+    "colN": "E",
+    "colN1": "G",
+    "type": "actif"
+   },
+   {
+    "row": 13,
+    "label": "Titres négociables hors régions",
+    "comptes": [
+     "505"
+    ],
+    "colN": "E",
+    "colN1": "G",
+    "type": "actif"
+   },
+   {
+    "row": 14,
+    "label": "Intérêts courus",
+    "comptes": [
+     "506"
+    ],
+    "colN": "E",
+    "colN1": "G",
+    "type": "actif"
+   },
+   {
+    "row": 15,
+    "label": "Autres valeurs assimilées",
+    "comptes": [
+     "508"
+    ],
+    "colN": "E",
+    "colN1": "G",
+    "type": "actif"
+   },
+   {
+    "row": 17,
+    "label": "Dépréciations des titres",
+    "comptes": [
+     "590"
+    ],
+    "colN": "E",
+    "colN1": "G",
+    "type": "passif"
+   }
+  ]
+ },
+ {
+  "sheet": "NOTE 10",
+  "note_title": "NOTE 10 : VALEURS A ENCAISSER",
+  "injectable": true,
+  "headerNote": "En-têtes ligne 8 : col E = \"Année N\", col G = \"Année N-1\" (col I = \"Variation en %\", formule, non injectée). Lignes 9 à 14 = postes de détail (brut débiteur 51x). Ligne 15 \"TOTAL BRUT\" et ligne 17 \"TOTAL NET\" = formules Excel (non injectées). Ligne 16 = dépréciations (591, solde créditeur).",
+  "rows": [
+   {
+    "row": 9,
+    "label": "Effets à encaisser",
+    "comptes": [
+     "511"
+    ],
+    "colN": "E",
+    "colN1": "G",
+    "type": "actif"
+   },
+   {
+    "row": 10,
+    "label": "Effets à l'encaissement",
+    "comptes": [
+     "512"
+    ],
+    "colN": "E",
+    "colN1": "G",
+    "type": "actif"
+   },
+   {
+    "row": 11,
+    "label": "Chèques à encaisser",
+    "comptes": [
+     "513"
+    ],
+    "colN": "E",
+    "colN1": "G",
+    "type": "actif"
+   },
+   {
+    "row": 12,
+    "label": "Chèques à l'encaissement",
+    "comptes": [
+     "514"
+    ],
+    "colN": "E",
+    "colN1": "G",
+    "type": "actif"
+   },
+   {
+    "row": 13,
+    "label": "Cartes de crédit à encaisser",
+    "comptes": [
+     "515"
+    ],
+    "colN": "E",
+    "colN1": "G",
+    "type": "actif"
+   },
+   {
+    "row": 14,
+    "label": "Autres valeurs à encaisser",
+    "comptes": [
+     "516",
+     "517",
+     "518"
+    ],
+    "colN": "E",
+    "colN1": "G",
+    "type": "actif"
+   },
+   {
+    "row": 16,
+    "label": "Dépréciations des valeurs à encaisser",
+    "comptes": [
+     "591"
+    ],
+    "colN": "E",
+    "colN1": "G",
+    "type": "passif"
+   }
+  ]
+ },
+ {
+  "sheet": "NOTE 11",
+  "note_title": "NOTE 11 : DISPONIBILITES",
+  "injectable": true,
+  "headerNote": "Ligne 7 = titre 'NOTE 11 : DISPONIBILITES'. Ligne 8 en-têtes: col A 'Libellés', col E 'Année N', col G 'Année N-1', col I 'Variation en %'. Lignes de détail 9-20 (postes). Lignes 21-23 (TOTAL BRUT, Dépréciations, TOTAL NET) = formules/total, non injectées.",
+  "rows": [
+   {
+    "row": 9,
+    "label": "Banques locales",
+    "comptes": [
+     "521"
+    ],
+    "colN": "E",
+    "colN1": "G",
+    "type": "actif"
+   },
+   {
+    "row": 10,
+    "label": "Banques autres états région",
+    "comptes": [
+     "522"
+    ],
+    "colN": "E",
+    "colN1": "G",
+    "type": "actif"
+   },
+   {
+    "row": 11,
+    "label": "Banques, dépôt à terme",
+    "comptes": [
+     "523",
+     "524"
+    ],
+    "colN": "E",
+    "colN1": "G",
+    "type": "actif"
+   },
+   {
+    "row": 12,
+    "label": "Autres Banques",
+    "comptes": [
+     "525"
+    ],
+    "colN": "E",
+    "colN1": "G",
+    "type": "actif"
+   },
+   {
+    "row": 13,
+    "label": "Banques intérêts courus",
+    "comptes": [
+     "526"
+    ],
+    "colN": "E",
+    "colN1": "G",
+    "type": "actif"
+   },
+   {
+    "row": 14,
+    "label": "Chèques postaux",
+    "comptes": [
+     "531",
+     "532",
+     "533"
+    ],
+    "colN": "E",
+    "colN1": "G",
+    "type": "actif"
+   },
+   {
+    "row": 15,
+    "label": "Autres établissement financiers",
+    "comptes": [
+     "534",
+     "535",
+     "536",
+     "537",
+     "538"
+    ],
+    "colN": "E",
+    "colN1": "G",
+    "type": "actif"
+   },
+   {
+    "row": 16,
+    "label": "Etablissement financiers intérêts courus",
+    "comptes": [
+     "539"
+    ],
+    "colN": "E",
+    "colN1": "G",
+    "type": "actif"
+   },
+   {
+    "row": 17,
+    "label": "Instruments de trésorerie",
+    "comptes": [
+     "54"
+    ],
+    "colN": "E",
+    "colN1": "G",
+    "type": "actif"
+   },
+   {
+    "row": 18,
+    "label": "Instruments de monnaie électronique",
+    "comptes": [
+     "55"
+    ],
+    "colN": "E",
+    "colN1": "G",
+    "type": "actif"
+   },
+   {
+    "row": 19,
+    "label": "Caisse",
+    "comptes": [
+     "57"
+    ],
+    "colN": "E",
+    "colN1": "G",
+    "type": "actif"
+   },
+   {
+    "row": 20,
+    "label": "Régies d'avances et virements accréditifs",
+    "comptes": [
+     "58"
+    ],
+    "colN": "E",
+    "colN1": "G",
+    "type": "actif"
+   }
+  ]
+ },
+ {
+  "sheet": "NOTE 12",
+  "note_title": "NOTE 12 : ECARTS DE CONVERSION ET TRANSFERTS DE CHARGES",
+  "injectable": true,
+  "headerNote": "Section TRANSFERTS DE CHARGES (lignes 26-40): en-têtes 'Année N' = colonne G, 'Année N-1' = colonne H. Sous-bloc 781 (Transferts de charges d'exploitation, en-tête ligne 28, détail 29-33) ; sous-bloc 787 (Transferts de charges financières, en-tête ligne 35, détail 36-40). La section ECARTS DE CONVERSION (lignes 8-25) est une table de détail par devise (colonnes Devises/Montant en devises/Cours UML/Variation) — structure actuarielle non injectable par solde de compte, donc exclue.",
+  "rows": [
+   {
+    "row": 29,
+    "label": "Transferts de charges d'exploitation",
+    "comptes": [
+     "781"
+    ],
+    "colN": "G",
+    "colN1": "H",
+    "type": "credit"
+   },
+   {
+    "row": 36,
+    "label": "Transferts de charges financières",
+    "comptes": [
+     "787"
+    ],
+    "colN": "G",
+    "colN1": "H",
+    "type": "credit"
+   }
+  ]
+ },
+ {
+  "sheet": "NOTE 13",
+  "note_title": "NOTE 13 : CAPITAL",
+  "injectable": false,
+  "headerNote": "Feuille « NOTE 13 : CAPITAL » : tableau d'identification des actionnaires/associés. En-têtes (ligne 9) : « Nom et prénoms ou raison sociale » (col A), « N° de compte contribuable » (col E), « Nationalité » (col F), « Pays de résidence » (col H), « Nature des actions ou parts » (col I), « Nombre » (col J), « Montant total » (col K). Les lignes de détail (10-24) sont des lignes nominatives par actionnaire (ex. EMERGENCE PLAZA LTD, HC CAPITAL MANAGEMENT) ; la ligne 25 « Apporteurs, capital non appelé » et la ligne 26 « TOTAL » (formule). Aucune ligne n'est alimentable par solde de compte SYSCOHADA : la note exige des données d'identité par actionnaire (raison sociale, nationalité, nombre de titres) absentes de la balance, et le montant par actionnaire n'est pas dérivable d'un compte 101/102/103. Note non injectable depuis la balance.",
+  "rows": []
+ },
+ {
+  "sheet": "NOTE 14",
+  "note_title": "NOTE 14 : PRIMES ET RESERVES",
+  "injectable": true,
+  "headerNote": "Ligne 8 en-têtes : col F = \"Année N\", col G = \"Année N-1\", col H = \"Variation en valeur\" (formule, non injectée). Libellés des postes en colonne A. Lignes 14 (TOTAL PRIMES), 20 (TOTAL RESERVES INDISPONIBLES) sont des totaux formules, non injectées.",
+  "rows": [
+   {
+    "row": 9,
+    "label": "Primes d'émission",
+    "comptes": [
+     "1051"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "passif"
+   },
+   {
+    "row": 10,
+    "label": "Prime d'apport",
+    "comptes": [
+     "1052"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "passif"
+   },
+   {
+    "row": 11,
+    "label": "Prime de fusion",
+    "comptes": [
+     "1053"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "passif"
+   },
+   {
+    "row": 12,
+    "label": "Prime de conversion",
+    "comptes": [
+     "1054"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "passif"
+   },
+   {
+    "row": 13,
+    "label": "Autres primes",
+    "comptes": [
+     "1058"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "passif"
+   },
+   {
+    "row": 15,
+    "label": "Réserves légales",
+    "comptes": [
+     "111"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "passif"
+   },
+   {
+    "row": 16,
+    "label": "Réserves statutaires",
+    "comptes": [
+     "112"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "passif"
+   },
+   {
+    "row": 17,
+    "label": "Réserves de plus-values nettes à long terme",
+    "comptes": [
+     "1131"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "passif"
+   },
+   {
+    "row": 18,
+    "label": "Réserves d'attribution gratuite d'actions au personnel salarié et aux dirigeants",
+    "comptes": [
+     "1133"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "passif"
+   },
+   {
+    "row": 19,
+    "label": "Autres réserves réglementées",
+    "comptes": [
+     "1132",
+     "1134",
+     "1138"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "passif"
+   },
+   {
+    "row": 21,
+    "label": "Réserves libres",
+    "comptes": [
+     "118"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "passif"
+   },
+   {
+    "row": 22,
+    "label": "Report à nouveau",
+    "comptes": [
+     "12"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "signed"
+   }
+  ]
+ },
+ {
+  "sheet": "NOTE 15A",
+  "note_title": "NOTE 15A : SUBVENTIONS D'INVESTISSEMENT ET PROVISIONS REGLEMENTEES",
+  "injectable": true,
+  "headerNote": "En-tête ligne 8 : colonne E = \"Année N\", colonne F = \"Année N-1\". Lignes de détail subventions 9-16 (classe 14), provisions réglementées 18-24 (classe 15). Lignes 17 (=SUM(E9:E16)), 25 (=SUM(E18:E24)) et 26 (=E17+E25) sont des totaux à formule Excel, non injectés. Les lignes 9-16 ventilent les subventions par TYPE D'ORGANISME donateur (État, Régions, Départements, etc.), distinction non disponible dans une balance comptable : toute la classe 14 est donc affectée à la ligne catch-all \"Autres\" (row 16) pour éviter toute ventilation arbitraire et tout double-comptage. Postes créditeurs (passif/capitaux propres) => type 'passif'.",
+  "rows": [
+   {
+    "row": 16,
+    "label": "Autres",
+    "comptes": [
+     "141",
+     "142",
+     "148"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 18,
+    "label": "Amortissements dérogatoires",
+    "comptes": [
+     "151"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 19,
+    "label": "Plus-value de cession à réinvestir",
+    "comptes": [
+     "152"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 20,
+    "label": "Provisions spéciales de réévaluation",
+    "comptes": [
+     "154"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 21,
+    "label": "Provisions réglementées relatives aux immobilisations",
+    "comptes": [
+     "155"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 22,
+    "label": "Provisions réglementés relatives aux stocks",
+    "comptes": [
+     "156"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 23,
+    "label": "Provisions pour investissement",
+    "comptes": [
+     "157"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 24,
+    "label": "Autres provisions et fonds réglementées",
+    "comptes": [
+     "153",
+     "158"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   }
+  ]
+ },
+ {
+  "sheet": "NOTE 15B",
+  "note_title": "NOTE 15B : AUTRES FONDS PROPRES",
+  "injectable": true,
+  "headerNote": "Ligne 8 = en-têtes : col A \"Libellés\", col F \"NOTE\", col G \"Année N\", col H \"Année N-1\", col I \"Variation en valeur\", col J \"Variation en %\", col K \"Echéances\". Montant Exercice N = colonne G ; Exercice N-1 = colonne H. Lignes de détail 9-13 ; ligne 14 = TOTAL (formule, non injectée). Postes du passif à solde créditeur.",
+  "rows": [
+   {
+    "row": 9,
+    "label": "Titres participatifs",
+    "comptes": [
+     "167"
+    ],
+    "colN": "G",
+    "colN1": "H",
+    "type": "passif"
+   },
+   {
+    "row": 10,
+    "label": "Avances conditionnées",
+    "comptes": [
+     "168"
+    ],
+    "colN": "G",
+    "colN1": "H",
+    "type": "passif"
+   },
+   {
+    "row": 11,
+    "label": "Titres subordonnés à durée indéterminée (T.S.D.I.)",
+    "comptes": [
+     "1661"
+    ],
+    "colN": "G",
+    "colN1": "H",
+    "type": "passif"
+   },
+   {
+    "row": 12,
+    "label": "Obligations remboursables en actions (O.R.A.)",
+    "comptes": [
+     "1662"
+    ],
+    "colN": "G",
+    "colN1": "H",
+    "type": "passif"
+   },
+   {
+    "row": 13,
+    "label": " Autres avances et dettes assorties de conditions particulières",
+    "comptes": [
+     "1663",
+     "1664",
+     "1665",
+     "1666",
+     "1667",
+     "1668",
+     "1669",
+     "169"
+    ],
+    "colN": "G",
+    "colN1": "H",
+    "type": "passif"
+   }
+  ]
+ },
+ {
+  "sheet": "NOTE 16A",
+  "note_title": "NOTE 16A : DETTES FINANCIERES ET RESSOURCES ASSIMILEES",
+  "injectable": true,
+  "headerNote": "Ligne 8 en-têtes : colonne E = \"Année N\", colonne F = \"Année N-1\" (colonnes G/H = variation, I/J/K = ventilation des échéances, non injectées). Lignes de détail = 9-18 (emprunts/dettes financières classe 16+18), 20-24 (location-acquisition classe 17), 26-38 (provisions risques et charges classe 19). Lignes 19, 25, 39 = TOTAL (formules Excel), non injectées. Toutes lignes créditeur (passif).",
+  "rows": [
+   {
+    "row": 9,
+    "label": "Emprunts obligataires",
+    "comptes": [
+     "161"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 10,
+    "label": "Emprunts et dettes auprès des établissements de crédit",
+    "comptes": [
+     "162",
+     "163",
+     "164"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 11,
+    "label": "Avances reçues de l'Etat",
+    "comptes": [
+     "181"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 12,
+    "label": "Avances reçues et comptes courants bloqués",
+    "comptes": [
+     "165"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 13,
+    "label": "Dépôts et cautionnements reçus",
+    "comptes": [
+     "183"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 14,
+    "label": "Intérêts courus",
+    "comptes": [
+     "166"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 15,
+    "label": "Avances et dettes assorties de conditions particulières",
+    "comptes": [
+     "167",
+     "182"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 16,
+    "label": "Autres emprunts et dettes",
+    "comptes": [
+     "168",
+     "184",
+     "185",
+     "186"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 17,
+    "label": "Dettes liées à des participations et sociétés en participation",
+    "comptes": [
+     "187",
+     "188"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 18,
+    "label": "Comptes permanents bloqués des établissements et succursales",
+    "comptes": [
+     "189"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 20,
+    "label": "Crédit bail immobilier",
+    "comptes": [
+     "171"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 21,
+    "label": "Crédit bail mobilier",
+    "comptes": [
+     "172"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 22,
+    "label": "Location vente",
+    "comptes": [
+     "173"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 23,
+    "label": "Intérêts courus",
+    "comptes": [
+     "176"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 24,
+    "label": "Autres dettes de location acquisition",
+    "comptes": [
+     "174",
+     "175",
+     "177",
+     "178"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 26,
+    "label": "Provisions pour litiges",
+    "comptes": [
+     "191"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 27,
+    "label": "Provisions pour garantie donnés aux clients",
+    "comptes": [
+     "192"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 28,
+    "label": "Provisions pour pertes sur marchés à achèvement futur",
+    "comptes": [
+     "193"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 29,
+    "label": "Provisions pour pertes de change",
+    "comptes": [
+     "194"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 30,
+    "label": "Provisions pour impôts",
+    "comptes": [
+     "195"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 31,
+    "label": "Provisions pour pensions et obligations assimilées - engagements de retraite",
+    "comptes": [
+     "196"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 33,
+    "label": "Provisions pour restructuration",
+    "comptes": [
+     "197"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 38,
+    "label": "Autres provisions",
+    "comptes": [
+     "198"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   }
+  ]
+ },
+ {
+  "sheet": "NOTE 17",
+  "note_title": "NOTE 17 : FOURNISSEURS D'EXPLOITATION",
+  "injectable": true,
+  "headerNote": "Ligne d'en-tête = ligne 8 : col A « Libellés », col F « Année N », col G « Année N-1 », col H « Variation en % » (formule), col I « Dettes à un an au plus », col J/K = ventilation par échéance. Colonne montant Exercice N = F ; Exercice N-1 = G. Lignes 18 (TOTAL FOURNISSEURS) et 22 (TOTAL FOURNISSEURS DEBITEURS) sont des formules de total -> exclues. Lignes 9-17 = fournisseurs créditeurs (passif), lignes 19-21 = fournisseurs débiteurs avances/acomptes (actif). Prefixes 4 chiffres uniquement pour éviter tout double-comptage (le préfixe 401 engloberait 4011..4019).",
+  "rows": [
+   {
+    "row": 9,
+    "label": "Fournisseurs dettes en compte (hors groupe)",
+    "comptes": [
+     "4011"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "passif"
+   },
+   {
+    "row": 10,
+    "label": "Fournisseurs, sous-traitants",
+    "comptes": [
+     "4013",
+     "403"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "passif"
+   },
+   {
+    "row": 11,
+    "label": "Fournisseurs, réserve de propriété",
+    "comptes": [
+     "4016"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "passif"
+   },
+   {
+    "row": 12,
+    "label": "Fournisseurs, retenue de garantie",
+    "comptes": [
+     "4017"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "passif"
+   },
+   {
+    "row": 13,
+    "label": "Fournisseurs effets à payer (hors groupe)",
+    "comptes": [
+     "4021"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "passif"
+   },
+   {
+    "row": 14,
+    "label": "Fournisseurs, dettes et effets à payer groupe",
+    "comptes": [
+     "4012",
+     "4022"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "passif"
+   },
+   {
+    "row": 15,
+    "label": "Fournisseurs, acquisitions courantes d'immobilisations",
+    "comptes": [
+     "404",
+     "405"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "passif"
+   },
+   {
+    "row": 16,
+    "label": "Fournisseurs factures non parvenues (hors groupe)",
+    "comptes": [
+     "4081"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "passif"
+   },
+   {
+    "row": 17,
+    "label": "Fournisseurs factures non parvenues groupe",
+    "comptes": [
+     "4086"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "passif"
+   },
+   {
+    "row": 19,
+    "label": "Fournisseurs, avances et acomptes (hors groupe)",
+    "comptes": [
+     "4091"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "actif"
+   },
+   {
+    "row": 20,
+    "label": "Fournisseurs, avances et acomptes groupe",
+    "comptes": [
+     "4092"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "actif"
+   },
+   {
+    "row": 21,
+    "label": "Autres fournisseurs débiteurs",
+    "comptes": [
+     "4098",
+     "4019"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "actif"
+   }
+  ]
+ },
+ {
+  "sheet": "NOTE 18",
+  "note_title": "DETTES FISCALES ET SOCIALES",
+  "injectable": true,
+  "headerNote": "Ligne d'en-tête 8 : libellé col A « Libellés » ; col E = « Année N » -> Exercice N ; col F = « Année N-1 » -> Exercice N-1. Les colonnes G/H (Variation valeur/%) et I/J/K (échéancier dettes) sont des formules dérivées, non injectées.",
+  "rows": [
+   {
+    "row": 9,
+    "label": "Personnel rémunérations dues",
+    "comptes": [
+     "422"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 10,
+    "label": "Personnel, congés à payer",
+    "comptes": [
+     "428"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 11,
+    "label": "Charges sociales sur congés à payer",
+    "comptes": [
+     "4386"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 12,
+    "label": "Autres personnel",
+    "comptes": [
+     "421",
+     "423",
+     "424",
+     "425",
+     "426",
+     "427"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 13,
+    "label": "Caisse de sécurité sociale",
+    "comptes": [
+     "431"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 14,
+    "label": "Caisse de retraite",
+    "comptes": [
+     "432"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 15,
+    "label": "Mutuelle de santé",
+    "comptes": [
+     "433"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 16,
+    "label": "Assurance Retraite",
+    "comptes": [
+     "434"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 17,
+    "label": "Autres charges sociales à payer",
+    "comptes": [
+     "4381",
+     "4382",
+     "4387",
+     "4388"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 18,
+    "label": "Autres cotisations et organismes sociaux",
+    "comptes": [
+     "435",
+     "436",
+     "437"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 20,
+    "label": "Etat, impôts sur les bénéfices",
+    "comptes": [
+     "441"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 21,
+    "label": "Etat, impôts et taxes",
+    "comptes": [
+     "442"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 22,
+    "label": "Etat, TVA",
+    "comptes": [
+     "443",
+     "444",
+     "445"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 23,
+    "label": "Etat, impôts retenus à la source",
+    "comptes": [
+     "447"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 24,
+    "label": "Autres dettes Etat",
+    "comptes": [
+     "446",
+     "448",
+     "449"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   }
+  ]
+ },
+ {
+  "sheet": "NOTE 19",
+  "note_title": "NOTE 19 : AUTRES DETTES ET PROVISIONS POUR RISQUES ET CHARGES A COURT TERME",
+  "injectable": true,
+  "headerNote": "En-tête ligne 8 : col E = \"Année N\", col F = \"Année N-1\" (les colonnes G..K sont des variations/ventilations par échéance = formules, non injectées). Libellés à partir de la colonne A. Les lignes TOTAL (15, 23, 27, 28) sont des formules Excel et ne sont pas injectées.",
+  "rows": [
+   {
+    "row": 9,
+    "label": "Organismes internationaux",
+    "comptes": [
+     "461"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 10,
+    "label": "Apporteurs, opérations sur le capital",
+    "comptes": [
+     "462",
+     "463",
+     "467"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 12,
+    "label": "Associés dividendes à payer",
+    "comptes": [
+     "465"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 13,
+    "label": "Groupe, comptes courants",
+    "comptes": [
+     "451"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 14,
+    "label": "Autres dettes associés",
+    "comptes": [
+     "464",
+     "466",
+     "468"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 16,
+    "label": "Créditeurs divers",
+    "comptes": [
+     "471",
+     "472"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 17,
+    "label": "Obligataires",
+    "comptes": [
+     "473"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 18,
+    "label": "Rémunérations d'administrateurs",
+    "comptes": [
+     "474"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 19,
+    "label": "Compte d'affacturage et de titrisation",
+    "comptes": [
+     "475"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 20,
+    "label": "Versements restant à effectuer sur titres de placement non libérés",
+    "comptes": [
+     "477"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 21,
+    "label": "Compte transitoire ajustement spécial lié à la révision du SYSCOHADA (Voir Note 8B)",
+    "comptes": [
+     "476"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 24,
+    "label": "Comptes permanents non bloqués des établissements et des succursales",
+    "comptes": [
+     "181"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 25,
+    "label": "Comptes de liaison charges et produits",
+    "comptes": [
+     "185",
+     "186",
+     "187",
+     "188"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 26,
+    "label": "Comptes de liaison des sociétés en participation",
+    "comptes": [
+     "183"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   },
+   {
+    "row": 29,
+    "label": "Provisions pour risques et charges à court terme (voir note 28)",
+    "comptes": [
+     "499"
+    ],
+    "colN": "E",
+    "colN1": "F",
+    "type": "passif"
+   }
+  ]
+ },
+ {
+  "sheet": "NOTE 20",
+  "note_title": "BANQUES, CREDIT D'ESCOMPTE ET DE TRESORERIE",
+  "injectable": true,
+  "headerNote": "Col A = Libellés ; Col F = \"Année N\" (montant Exercice N) ; Col G = \"Année N-1\" ; Col H = Variation en % (formule). Lignes 11, 17, 18 sont des TOTAUX (formules Excel) — non injectées. Postes de passif (soldes créditeurs des comptes 56 et 52 créditeurs).",
+  "rows": [
+   {
+    "row": 9,
+    "label": "Escomptes de crédit de campagne",
+    "comptes": [
+     "565"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "passif"
+   },
+   {
+    "row": 10,
+    "label": "Escomptes de crédit ordinaires",
+    "comptes": [
+     "566"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "passif"
+   },
+   {
+    "row": 12,
+    "label": "Banques locales",
+    "comptes": [
+     "521"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "passif"
+   },
+   {
+    "row": 13,
+    "label": "Banques autres états région",
+    "comptes": [
+     "522"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "passif"
+   },
+   {
+    "row": 14,
+    "label": "Autres Banques",
+    "comptes": [
+     "523",
+     "524"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "passif"
+   },
+   {
+    "row": 15,
+    "label": "Banques intérêts courus",
+    "comptes": [
+     "526"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "passif"
+   },
+   {
+    "row": 16,
+    "label": "Crédit de trésorerie",
+    "comptes": [
+     "561",
+     "564"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "passif"
+   }
+  ]
+ },
+ {
+  "sheet": "NOTE 21",
+  "note_title": "NOTE 21 : CHIFFRE D'AFFAIRES ET AUTRES PRODUITS",
+  "injectable": true,
+  "headerNote": "Colonne F = \"Année N\", colonne G = \"Année N-1\" (ligne 8). Libellés en colonne A. Lignes de TOTAL (14,20,26,36,40,41) = formules Excel, non injectées. Lignes 28-35 vides (saisie libre) non mappées.",
+  "rows": [
+   {
+    "row": 9,
+    "label": "Ventes de marchandises dans l'Etat partie",
+    "comptes": [
+     "7011"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "credit"
+   },
+   {
+    "row": 10,
+    "label": "Ventes de marchandises dans les autres Etats parties de la Région (2)",
+    "comptes": [
+     "7012"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "credit"
+   },
+   {
+    "row": 11,
+    "label": "Ventes de marchandises hors Région (2)",
+    "comptes": [
+     "7013"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "credit"
+   },
+   {
+    "row": 12,
+    "label": "Ventes de marchandises groupe",
+    "comptes": [
+     "7016"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "credit"
+   },
+   {
+    "row": 13,
+    "label": "Ventes de marchandises sur internet",
+    "comptes": [
+     "7018"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "credit"
+   },
+   {
+    "row": 15,
+    "label": "Ventes de produits fabriqués dans l'Etat partie",
+    "comptes": [
+     "7021"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "credit"
+   },
+   {
+    "row": 16,
+    "label": "Ventes de produits fabriqués dans les autres Etats parties de la Région (2)",
+    "comptes": [
+     "7022"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "credit"
+   },
+   {
+    "row": 17,
+    "label": "Ventes de produits fabriqués hors Région (2)",
+    "comptes": [
+     "7023"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "credit"
+   },
+   {
+    "row": 18,
+    "label": "Ventes de produits fabriqués groupe",
+    "comptes": [
+     "7026"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "credit"
+   },
+   {
+    "row": 19,
+    "label": "Ventes de produits fabriqués sur internet",
+    "comptes": [
+     "7028"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "credit"
+   },
+   {
+    "row": 21,
+    "label": "Ventes  de travaux et services dans l'Etat partie",
+    "comptes": [
+     "7031",
+     "7041",
+     "7051",
+     "7061"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "credit"
+   },
+   {
+    "row": 22,
+    "label": "Ventes  de travaux et services dans les autres Etats parties de la Région (2)",
+    "comptes": [
+     "7032",
+     "7042",
+     "7052",
+     "7062"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "credit"
+   },
+   {
+    "row": 23,
+    "label": "Ventes de travaux et services hors Région (2)",
+    "comptes": [
+     "7033",
+     "7043",
+     "7053",
+     "7063"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "credit"
+   },
+   {
+    "row": 24,
+    "label": "Ventes de travaux et services  groupe",
+    "comptes": [
+     "7036",
+     "7046",
+     "7056",
+     "7066"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "credit"
+   },
+   {
+    "row": 25,
+    "label": "Ventes de travaux et services  sur internet",
+    "comptes": [
+     "7038",
+     "7048",
+     "7058",
+     "7068"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "credit"
+   },
+   {
+    "row": 27,
+    "label": "Produits accessoires à détailler par nature d'activité économique (dont détail rubrique \"Divers\" Fiche R2)",
+    "comptes": [
+     "707"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "credit"
+   },
+   {
+    "row": 37,
+    "label": "Production immobilisée",
+    "comptes": [
+     "72"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "credit"
+   },
+   {
+    "row": 38,
+    "label": "Subventions d'exploitation",
+    "comptes": [
+     "71"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "credit"
+   },
+   {
+    "row": 39,
+    "label": "Autres produits (1)",
+    "comptes": [
+     "75"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "credit"
+   }
+  ]
+ },
+ {
+  "sheet": "NOTE 22",
+  "note_title": "NOTE 22 : ACHATS",
+  "injectable": true,
+  "headerNote": "Ligne 8 d'en-tête : colonne F = « Année N », colonne G = « Année N-1 » (colonne H = Variation en %, formule, ignorée). Colonnes A-E = libellés fusionnés. Lignes 13, 18, 33 sont des TOTAUX (formules Excel) -> non remplies.",
+  "rows": [
+   {
+    "row": 9,
+    "label": "Achats de marchandises dans l'Etat partie",
+    "comptes": [
+     "601"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 10,
+    "label": "Achats de marchandises dans les autres Etats parties de la Région (1)",
+    "comptes": [],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 11,
+    "label": "Achats de marchandises hors Région (1)",
+    "comptes": [],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 12,
+    "label": "Achats de marchandises groupe",
+    "comptes": [],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 14,
+    "label": "Achats de matières premières et fournitures liées dans l'Etat partie",
+    "comptes": [
+     "602"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 15,
+    "label": "Achats de matières premières et fournitures liées dans les autres Etats parties de la Région (2)",
+    "comptes": [],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 16,
+    "label": "Achats matières premières et fournitures liées hors Région (2)",
+    "comptes": [],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 17,
+    "label": "Achats matières premières et fournitures liées groupe",
+    "comptes": [],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 19,
+    "label": "Matières consommables",
+    "comptes": [
+     "6041"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 20,
+    "label": "Matières combustibles",
+    "comptes": [
+     "6042"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 21,
+    "label": "Produits d'entretien",
+    "comptes": [
+     "6043"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 22,
+    "label": "Fournitures d'atelier, d'usine et de magasin",
+    "comptes": [
+     "6044",
+     "6046"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 23,
+    "label": "Eau",
+    "comptes": [
+     "6051"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 24,
+    "label": "Electricité",
+    "comptes": [
+     "6052"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 25,
+    "label": "Autres énergies",
+    "comptes": [
+     "6053"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 26,
+    "label": "Fourniture d'entretien",
+    "comptes": [
+     "6054"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 27,
+    "label": "Fourniture de bureau",
+    "comptes": [
+     "6047",
+     "6055"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 28,
+    "label": "Petit matériel et outillages",
+    "comptes": [
+     "6056"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 29,
+    "label": "Achats études, prestations de services, de travaux matériels et équipements",
+    "comptes": [
+     "6057",
+     "6058"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 30,
+    "label": "Achats d'emballages",
+    "comptes": [
+     "608"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 31,
+    "label": "Frais sur achats (1)",
+    "comptes": [
+     "6011",
+     "6021"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 32,
+    "label": "Remises rabais, remises et ristournes (non ventilés)",
+    "comptes": [
+     "6019",
+     "6029",
+     "6049",
+     "6059",
+     "6089"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "credit"
+   }
+  ]
+ },
+ {
+  "sheet": "NOTE 23",
+  "note_title": "NOTE 23 : TRANSPORTS",
+  "injectable": true,
+  "headerNote": "Col F = en-tete \"Annee N\" (montant net charge exercice N), Col G = en-tete \"Annee N-1\". Col H = \"Variation en %\" (formule, ignoree). Lignes 9 a 15 = postes de detail (libelles), ligne 16 = TOTAL (formule Excel).",
+  "rows": [
+   {
+    "row": 9,
+    "label": "Transports sur ventes",
+    "comptes": [
+     "611",
+     "612"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 10,
+    "label": "Transports pour le compte de tiers",
+    "comptes": [
+     "613"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 11,
+    "label": "Transport du personnel",
+    "comptes": [
+     "614"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 12,
+    "label": "Transports de plis",
+    "comptes": [
+     "615"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 13,
+    "label": "Voyage deplacement (transport)",
+    "comptes": [
+     "618"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 14,
+    "label": "Transport entre etablissements ou chantiers",
+    "comptes": [
+     "617"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 15,
+    "label": "Transports administratifs",
+    "comptes": [
+     "616"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   }
+  ]
+ },
+ {
+  "sheet": "NOTE 24",
+  "note_title": "NOTE 24 : SERVICES EXTERIEURS",
+  "injectable": true,
+  "headerNote": "Ligne d'en-tete 8 : colonne F = \"Annee N\", colonne G = \"Annee N-1\", colonne H = \"Variation en %\" (formule). Libelles en colonne A. Lignes 9 a 23 = postes de detail (charges classe 62 et 63). Ligne 24 = TOTAL (formule Excel, non injectee).",
+  "rows": [
+   {
+    "row": 9,
+    "label": "Sous-traitance générale",
+    "comptes": [
+     "621"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 10,
+    "label": "Locations et charges locatives",
+    "comptes": [
+     "622"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 11,
+    "label": "Redevances de location acquisition",
+    "comptes": [
+     "623"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 12,
+    "label": "Entretien, réparations et maintenance",
+    "comptes": [
+     "624"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 13,
+    "label": "Primes d'assurance",
+    "comptes": [
+     "625"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 14,
+    "label": "Etudes, recherches et documentation",
+    "comptes": [
+     "626"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 15,
+    "label": "Publicité, publications, relations publiques",
+    "comptes": [
+     "627"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 16,
+    "label": "Frais de télécommunications",
+    "comptes": [
+     "628"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 17,
+    "label": "Frais bancaires",
+    "comptes": [
+     "631"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 18,
+    "label": "Rémunérations d'intermédiaires et de conseils",
+    "comptes": [
+     "632"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 19,
+    "label": "Frais de formation du personnel",
+    "comptes": [
+     "633"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 20,
+    "label": "Redevances pour brevets, licences, logiciels, concession et droits similaires",
+    "comptes": [
+     "634"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 21,
+    "label": "Cotisations",
+    "comptes": [
+     "635"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 22,
+    "label": "Rémunérations de personnel extérieur à l'entité",
+    "comptes": [
+     "637"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 23,
+    "label": "Autres charges externes",
+    "comptes": [
+     "638",
+     "636"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   }
+  ]
+ },
+ {
+  "sheet": "NOTE 25",
+  "note_title": "NOTE 25 : IMPOTS ET TAXES",
+  "injectable": true,
+  "headerNote": "En-tetes ligne 8 : colonne A 'Libelles', colonne F 'Annee N', colonne G 'Annee N-1', colonne H 'Variation en %'. Detail rows 9-13 ; ligne 14 'TOTAL' = formule Excel (non injectee). La note couvre le compte SYSCOHADA 64 'Impots et taxes' (RI). Toutes des charges nettes debitrices.",
+  "rows": [
+   {
+    "row": 9,
+    "label": "Impôts et taxes directs",
+    "comptes": [
+     "641"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 10,
+    "label": "Impôts et taxes indirects",
+    "comptes": [
+     "645"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 11,
+    "label": "Droits d'enregistrement",
+    "comptes": [
+     "646"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 12,
+    "label": "Pénalités et amendes fiscales",
+    "comptes": [
+     "647"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 13,
+    "label": "Autres impôts et taxes",
+    "comptes": [
+     "648"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   }
+  ]
+ },
+ {
+  "sheet": "NOTE 26",
+  "note_title": "NOTE 26 : AUTRES CHARGES",
+  "injectable": true,
+  "headerNote": "Ligne 8 = en-têtes : col A 'Libellés', col F 'Année N', col G 'Année N-1', col H 'Variation en %'. Montants détail en lignes 9-18 (col F=Exercice N, col G=Exercice N-1). Ligne 19 'TOTAL' est une formule Excel (exclue). Comptes de la classe 65 (Autres charges) ventilés sans recouvrement.",
+  "rows": [
+   {
+    "row": 9,
+    "label": "Pertes sur créances clients",
+    "comptes": [
+     "6511",
+     "6512",
+     "6513",
+     "6514"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 10,
+    "label": "Pertes sur autres débiteurs",
+    "comptes": [
+     "6515",
+     "6516",
+     "6517",
+     "6518"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 11,
+    "label": "Quote-part de résultat sur opérations faites en commun",
+    "comptes": [
+     "655"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 12,
+    "label": "Valeur comptable des cessions courantes d'immobilisations",
+    "comptes": [
+     "654"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 13,
+    "label": "Perte de change sur créances et dettes commerciales",
+    "comptes": [
+     "656"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 14,
+    "label": "Pénalités et amendes pénales",
+    "comptes": [
+     "6581",
+     "6582"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 15,
+    "label": "Indemnités de fonction et autres rémunérations d'administrateurs",
+    "comptes": [
+     "6583"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 16,
+    "label": "Dons et mécénat",
+    "comptes": [
+     "6586"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 17,
+    "label": "Autres charges diverses",
+    "comptes": [
+     "6584",
+     "6585",
+     "6588",
+     "652",
+     "653",
+     "657"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 18,
+    "label": "Charges pour dépréciations et provisions pour risques à court terme d'exploitation (voir note 28)",
+    "comptes": [
+     "659"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   }
+  ]
+ },
+ {
+  "sheet": "NOTE 27A",
+  "note_title": "NOTE 27A : CHARGES DE PERSONNEL",
+  "injectable": true,
+  "headerNote": "Ligne 8 d'en-tete : libelle 'Libelles' (col A), 'Annee N' en col F, 'Annee N-1' en col G, 'Variation en %' en col H (formule). Donc colN=F, colN1=G. Lignes detail 9-16, TOTAL en ligne 17 (formule Excel, non injectee).",
+  "rows": [
+   {
+    "row": 9,
+    "label": "Rémunérations directes versées au personnel national",
+    "comptes": [
+     "661"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 10,
+    "label": "Rémunérations directes versées au personnel non national",
+    "comptes": [
+     "662"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 11,
+    "label": "Indemnités forfaitaires versées au personnel",
+    "comptes": [
+     "663"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 12,
+    "label": "Charges sociales (personnel national)",
+    "comptes": [
+     "664"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 13,
+    "label": "Charges sociales (personnel non national)",
+    "comptes": [
+     "665"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 14,
+    "label": "Rémunérations et charges sociales de l'exploitant individuel",
+    "comptes": [
+     "666"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 15,
+    "label": "Rémunération transférée de personnel extérieur",
+    "comptes": [
+     "667"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 16,
+    "label": "Autres charges sociales",
+    "comptes": [
+     "668"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   }
+  ]
+ },
+ {
+  "sheet": "NOTE 29",
+  "note_title": "NOTE 29 : CHARGES ET REVENUS FINANCIERS",
+  "injectable": true,
+  "headerNote": "En-tête ligne 8 : col A 'Libellés', col F 'Année N', col G 'Année N-1', col H 'Variation en %'. Donc Exercice N = colonne F, Exercice N-1 = colonne G. Lignes de détail charges (classe 67) = rangs 9-18 ; revenus (classe 77) = rangs 20-28. Rangs 19 (SOUS TOTAL FRAIS FINANCIERS =SUM(F9:F18)), 29 (SOUS TOTAL REVENUS =SUM(F20:F28)) et 30 (RESULTAT FINANCIER =F29-F19) sont des formules Excel, non injectés.",
+  "rows": [
+   {
+    "row": 9,
+    "label": "Intérêts des emprunts",
+    "comptes": [
+     "671"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 10,
+    "label": "Intérêts dans loyers de locations acquisition",
+    "comptes": [
+     "672"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 11,
+    "label": "Escomptes accordés",
+    "comptes": [
+     "673"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 12,
+    "label": "Autres intérêts",
+    "comptes": [
+     "674"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 13,
+    "label": "Escomptes des effets de commerce",
+    "comptes": [
+     "675"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 14,
+    "label": "Pertes de change financières",
+    "comptes": [
+     "676"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 15,
+    "label": "Pertes sur cessions de titres de placement",
+    "comptes": [
+     "677"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 16,
+    "label": "Malis provenant d'attribution gratuite d'actions au personnel salarié et aux dirigeants",
+    "comptes": [
+     "678"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 17,
+    "label": "Pertes et charges sur risques financiers",
+    "comptes": [
+     "679"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 18,
+    "label": "Charges pour dépréciation et provisions à court terme à caractère financier (voir note 28)",
+    "comptes": [
+     "6597",
+     "6798"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 20,
+    "label": "Intérêts de prêts et créances diverses",
+    "comptes": [
+     "771"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "credit"
+   },
+   {
+    "row": 21,
+    "label": "Revenus de participations et autres titres immobilisés",
+    "comptes": [
+     "772"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "credit"
+   },
+   {
+    "row": 22,
+    "label": "Escomptes obtenus",
+    "comptes": [
+     "773"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "credit"
+   },
+   {
+    "row": 23,
+    "label": "Revenus de placement",
+    "comptes": [
+     "774"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "credit"
+   },
+   {
+    "row": 24,
+    "label": "Intérêts dans loyers de location-financement",
+    "comptes": [
+     "775"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "credit"
+   },
+   {
+    "row": 25,
+    "label": "Gains de change financiers",
+    "comptes": [
+     "776"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "credit"
+   },
+   {
+    "row": 26,
+    "label": "Gains sur cessions de titres de placement",
+    "comptes": [
+     "777"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "credit"
+   },
+   {
+    "row": 27,
+    "label": "Gains sur risques financiers",
+    "comptes": [
+     "779"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "credit"
+   },
+   {
+    "row": 28,
+    "label": "Reprises de charges pour dépréciation et provisions à court terme à caractère financier (voir note 28)",
+    "comptes": [
+     "7597",
+     "7798"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "credit"
+   }
+  ]
+ },
+ {
+  "sheet": "NOTE 30",
+  "note_title": "NOTE 30 : AUTRES CHARGES ET PRODUITS HAO",
+  "injectable": true,
+  "headerNote": "En-têtes ligne 8 : col A \"Libellés\", col F \"Année N\", col G \"Année N-1\", col H \"Variation en %\" (formule). Le montant Exercice N est en colonne F, le N-1 en colonne G. Lignes 23 et 39 = SOUS TOTAL (formules =SUM, exclues). Lignes 10-15 et 25-30 = lignes vides \"à détailler\" sans compte fixe (exclues).",
+  "rows": [
+   {
+    "row": 9,
+    "label": "Charges HAO constatées (compte 831) à détailler :",
+    "comptes": [
+     "831"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 16,
+    "label": "Charges liées aux opéations de restructuration",
+    "comptes": [
+     "832"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 17,
+    "label": "Pertes sur créances HAO",
+    "comptes": [
+     "834"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 18,
+    "label": "Dons et libéralités accordés",
+    "comptes": [
+     "836"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 19,
+    "label": "Abandons de créances consentis",
+    "comptes": [
+     "835"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 20,
+    "label": "Charges pour dépréciations et provisions pour risques à court terme HAO",
+    "comptes": [
+     "839",
+     "859"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 21,
+    "label": "Dotations hors activités ordinaires",
+    "comptes": [
+     "851",
+     "852",
+     "853",
+     "854",
+     "858"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 22,
+    "label": "Participation des travailleurs",
+    "comptes": [
+     "87"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "debit"
+   },
+   {
+    "row": 24,
+    "label": "Produits HAO constatés (compte 841) à détailler :",
+    "comptes": [
+     "841"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "credit"
+   },
+   {
+    "row": 31,
+    "label": "Produits liés aux opérations de restructuration",
+    "comptes": [
+     "842"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "credit"
+   },
+   {
+    "row": 32,
+    "label": "Indemnités et subventions HAO (entité agricole)",
+    "comptes": [
+     "843",
+     "844"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "credit"
+   },
+   {
+    "row": 33,
+    "label": "Dons et libéralités obtenus",
+    "comptes": [
+     "845"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "credit"
+   },
+   {
+    "row": 34,
+    "label": "Abandons de créances obtenus",
+    "comptes": [
+     "846"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "credit"
+   },
+   {
+    "row": 35,
+    "label": "Transfert de charges H.A.O",
+    "comptes": [
+     "848"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "credit"
+   },
+   {
+    "row": 36,
+    "label": "Reprises de charges pour dépréciations et provisions pour risques à court terme HAO",
+    "comptes": [
+     "849",
+     "869"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "credit"
+   },
+   {
+    "row": 37,
+    "label": "Reprises des charges, provisions et dépréciations H.A.O",
+    "comptes": [
+     "861",
+     "862",
+     "863",
+     "864",
+     "865",
+     "868"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "credit"
+   },
+   {
+    "row": 38,
+    "label": "Subventions d'équilibre",
+    "comptes": [
+     "88"
+    ],
+    "colN": "F",
+    "colN1": "G",
+    "type": "credit"
+   }
+  ]
+ },
+ {
+  "sheet": "NOTE 32",
+  "note_title": "NOTE 32 : PRODUCTION DE L'EXERCICE",
+  "injectable": false,
+  "headerNote": "En-têtes lus: ligne 8 = \"DESIGNATION DU PRODUIT\" (A), \"UNITE DE QUANTITE CHOISIE\" (D), \"PRODUCTION VENDUE DANS LE PAYS\" (E-F), \"...AUTRES PAYS DE L'OHADA\" (G-H), \"...HORS OHADA\" (I-J), \"PRODUCTION IMMOBILISEE\" (K-L), \"STOCK OUVERTURE DE L'EXERCICE\" (M-N), \"STOCK CLOTURE DE L'EXERCICE\" (O-P) ; ligne 10 = sous-en-têtes \"Quantité\"/\"Valeur\" pour chaque bloc. Aucune colonne \"Exercice N\" / \"Exercice N-1\" à montant net par compte : c'est un tableau d'analyse physique de la production par produit (quantités/valeurs par marché et par produit), avec lignes de détail à libellé LIBRE (rows 11-27) et une ligne résiduelle \"NON VENTILE (1)\" (row 29) plafonnée à 1% des produits, plus \"TOTAL\" (row 30). Cette note n'est pas alimentable par mapping de comptes SYSCOHADA (pas de ligne de poste à comptes).",
+  "rows": []
+ },
+ {
+  "sheet": "NOTE 33",
+  "note_title": "NOTE 33 : ACHATS DESTINES A LA PRODUCTION",
+  "injectable": false,
+  "headerNote": "En-têtes lus: A8 \"DESIGNATION DES MATIERES ET PRODUITS\"; E8 \"UNITE DE QUANTITE CHOISIE\"; bloc F8:K11 \"ACHATS EFFECTUES AU COURS DE L'EXERCICE\" sous-divisé en \"PRODUITS DE L'ETAT\" (F=Quantité, G=Valeur), \"PRODUITS IMPORTES / ACHETES DANS L'ETAT\" (H=Quantité, I=Valeur) et \"ACHETES HORS DE L'ETAT\" (J=Quantité, K=Valeur). Lignes de détail 12-28 = libellés de produits à saisir librement, ligne 30 \"NON VENTILES\", ligne 31 \"TOTAL\" (formules).",
+  "rows": []
+ },
+ {
+  "sheet": "NOTE 31",
+  "note_title": "Répartition du résultat et autres éléments caractéristiques des cinq derniers exercices",
+  "injectable": true,
+  "headerNote": "Note 31 = tableau 5 exercices (N, N-1, N-2, N-3, N-4 en colonnes G,H,I,J,K). Seules les colonnes N (G) et N-1 (H) sont alimentables depuis la balance courante + son comparatif. N-2/N-3/N-4 (I,J,K) sont des données HISTORIQUES non présentes dans une balance unique -> saisie manuelle / report d'archives. Plusieurs lignes restent DÉCLARATIVES (structure du capital par catégorie d'actions, résultat/dividende distribué = décision de l'AG, effectifs moyens = données RH, RAO hors dotations/reprises = sous-total calculé). Les comptes (7),(8),(9) du pied de page confirment le mapping personnel. Lignes 10/17/23/26 = sous-totaux (formules), non injectées.",
+  "reason": "Note partiellement injectable. Injectables (col N=G, N-1=H seulement) : Capital social (101/102/103), CA HT (70), Impôt sur le résultat (89), Masse salariale 661/662/663, Avantages sociaux 664/668, Personnel extérieur facturé 667. NON injectables : colonnes N-2/N-3/N-4 (historique hors balance), ventilation du capital par type d'actions, résultat/dividende distribués (décision AG), effectifs moyens (RH), RAO hors dotations/reprises et tous les sous-totaux (formules). Pas de double comptage : 70 capte tout le CA ; le personnel est scindé 661-663 / 664-668 / 667 sans recouvrement.",
+  "rows": [
+   {
+    "row": 11,
+    "label": "Capital social",
+    "comptes": [
+     "101",
+     "102",
+     "103"
+    ],
+    "colN": "G",
+    "colN1": "H",
+    "type": "passif"
+   },
+   {
+    "row": 18,
+    "label": "Chiffre d'affaires hors taxes",
+    "comptes": [
+     "70"
+    ],
+    "colN": "G",
+    "colN1": "H",
+    "type": "credit"
+   },
+   {
+    "row": 21,
+    "label": "Impôt sur le résultat",
+    "comptes": [
+     "89"
+    ],
+    "colN": "G",
+    "colN1": "H",
+    "type": "debit"
+   },
+   {
+    "row": 29,
+    "label": "Masse salariale distribuée au cours de l'exercice (7) = 661+662+663",
+    "comptes": [
+     "661",
+     "662",
+     "663"
+    ],
+    "colN": "G",
+    "colN1": "H",
+    "type": "debit"
+   },
+   {
+    "row": 30,
+    "label": "Avantages sociaux versés au cours de l'exercice (8) = 664+668",
+    "comptes": [
+     "664",
+     "668"
+    ],
+    "colN": "G",
+    "colN1": "H",
+    "type": "debit"
+   },
+   {
+    "row": 31,
+    "label": "Personnel extérieur facturé à l'entité (9) = 667",
+    "comptes": [
+     "667"
+    ],
+    "colN": "G",
+    "colN1": "H",
+    "type": "debit"
+   }
+  ]
+ }
+]

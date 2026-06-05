@@ -406,23 +406,11 @@ export const CELL_MAP: CellTarget[] = [
   { sheet: 'TFT', ref: 'FQ', field: 'valN',  cell: 'I36', hasFormula: false },
   { sheet: 'TFT', ref: 'FQ', field: 'valN1', cell: 'J36', hasFormula: false },
 
-  // ── NOTE 1 — Dettes garanties (onglet 15) ──
-  { sheet: 'NOTE 1', ref: 'N1_F11', field: 'val', cell: 'F11', hasFormula: false },
-  { sheet: 'NOTE 1', ref: 'N1_F12', field: 'val', cell: 'F12', hasFormula: false },
-  { sheet: 'NOTE 1', ref: 'N1_F13', field: 'val', cell: 'F13', hasFormula: false },
-  { sheet: 'NOTE 1', ref: 'N1_F14', field: 'val', cell: 'F14', hasFormula: false },
-  { sheet: 'NOTE 1', ref: 'N1_F17', field: 'val', cell: 'F17', hasFormula: false },
-  { sheet: 'NOTE 1', ref: 'N1_F18', field: 'val', cell: 'F18', hasFormula: false },
-  { sheet: 'NOTE 1', ref: 'N1_F19', field: 'val', cell: 'F19', hasFormula: false },
-  { sheet: 'NOTE 1', ref: 'N1_F20', field: 'val', cell: 'F20', hasFormula: false },
-  { sheet: 'NOTE 1', ref: 'N1_F23', field: 'val', cell: 'F23', hasFormula: false },
-  { sheet: 'NOTE 1', ref: 'N1_F24', field: 'val', cell: 'F24', hasFormula: false },
-  { sheet: 'NOTE 1', ref: 'N1_F25', field: 'val', cell: 'F25', hasFormula: false },
-  { sheet: 'NOTE 1', ref: 'N1_F26', field: 'val', cell: 'F26', hasFormula: false },
-  { sheet: 'NOTE 1', ref: 'N1_F27', field: 'val', cell: 'F27', hasFormula: false },
-  { sheet: 'NOTE 1', ref: 'N1_F28', field: 'val', cell: 'F28', hasFormula: false },
-  { sheet: 'NOTE 1', ref: 'N1_F29', field: 'val', cell: 'F29', hasFormula: false },
-  { sheet: 'NOTE 1', ref: 'N1_F30', field: 'val', cell: 'F30', hasFormula: false },
+  // NOTE 1 (Dettes GARANTIES par des sûretés réelles) : DÉCLARATIVE — saisie manuelle.
+  // Le sous-ensemble "garanti" des dettes n'est PAS dérivable de la balance (une
+  // dette n'est pas marquée "garantie" au niveau du compte). L'ancienne injection
+  // remplissait la note avec TOUTES les dettes (= tout garanti), ce qui est faux par
+  // défaut. Retirée → la note reste à 0/saisie manuelle (cohérent avec la pratique cabinet).
 
   // ── NOTE 3A — Immobilisations brutes: mouvements (onglet 17) ──
   // Col D=ouverture, E=acquisitions, H=cessions (J=formule)
@@ -499,33 +487,10 @@ export const CELL_MAP: CellTarget[] = [
   { sheet: 'NOTE 3C', ref: 'N3C_20_E', field: 'val', cell: 'E20', hasFormula: false },
   { sheet: 'NOTE 3C', ref: 'N3C_20_H', field: 'val', cell: 'H20', hasFormula: false },
 
-  // ── NOTE 10 — Emprunts et dettes financières (onglet 32) ──
-  { sheet: 'NOTE 10', ref: 'N10_F9',  field: 'val', cell: 'F9',  hasFormula: false },
-  { sheet: 'NOTE 10', ref: 'N10_G9',  field: 'val', cell: 'G9',  hasFormula: false },
-  { sheet: 'NOTE 10', ref: 'N10_F10', field: 'val', cell: 'F10', hasFormula: false },
-  { sheet: 'NOTE 10', ref: 'N10_G10', field: 'val', cell: 'G10', hasFormula: false },
-  { sheet: 'NOTE 10', ref: 'N10_F11', field: 'val', cell: 'F11', hasFormula: false },
-  { sheet: 'NOTE 10', ref: 'N10_G11', field: 'val', cell: 'G11', hasFormula: false },
-  { sheet: 'NOTE 10', ref: 'N10_F12', field: 'val', cell: 'F12', hasFormula: false },
-  { sheet: 'NOTE 10', ref: 'N10_G12', field: 'val', cell: 'G12', hasFormula: false },
-  { sheet: 'NOTE 10', ref: 'N10_F14', field: 'val', cell: 'F14', hasFormula: false },
-  { sheet: 'NOTE 10', ref: 'N10_G14', field: 'val', cell: 'G14', hasFormula: false },
-  { sheet: 'NOTE 10', ref: 'N10_F15', field: 'val', cell: 'F15', hasFormula: false },
-  { sheet: 'NOTE 10', ref: 'N10_G15', field: 'val', cell: 'G15', hasFormula: false },
-  { sheet: 'NOTE 10', ref: 'N10_F16', field: 'val', cell: 'F16', hasFormula: false },
-  { sheet: 'NOTE 10', ref: 'N10_G16', field: 'val', cell: 'G16', hasFormula: false },
-
-  // ── NOTE 14 — Résultat financier détail (onglet 36) ──
-  { sheet: 'NOTE 14', ref: 'N14_F9',  field: 'val', cell: 'F9',  hasFormula: false },
-  { sheet: 'NOTE 14', ref: 'N14_G9',  field: 'val', cell: 'G9',  hasFormula: false },
-  { sheet: 'NOTE 14', ref: 'N14_F10', field: 'val', cell: 'F10', hasFormula: false },
-  { sheet: 'NOTE 14', ref: 'N14_G10', field: 'val', cell: 'G10', hasFormula: false },
-  { sheet: 'NOTE 14', ref: 'N14_F11', field: 'val', cell: 'F11', hasFormula: false },
-  { sheet: 'NOTE 14', ref: 'N14_G11', field: 'val', cell: 'G11', hasFormula: false },
-  { sheet: 'NOTE 14', ref: 'N14_F15', field: 'val', cell: 'F15', hasFormula: false },
-  { sheet: 'NOTE 14', ref: 'N14_G15', field: 'val', cell: 'G15', hasFormula: false },
-  { sheet: 'NOTE 14', ref: 'N14_F16', field: 'val', cell: 'F16', hasFormula: false },
-  { sheet: 'NOTE 14', ref: 'N14_G16', field: 'val', cell: 'G16', hasFormula: false },
+  // NOTE 10 (Valeurs à encaisser) et NOTE 14 (Primes et réserves) sont désormais
+  // injectées via noteDetailMappings (remap template). Les anciens blocs N10_*
+  // (emprunts) et N14_* (résultat financier) étaient mal assignés (emprunts →
+  // NOTE 16A, résultat financier → NOTE 29) et ont été supprimés.
 ]
 
 // ══════════════════════════════════════════════════════════════

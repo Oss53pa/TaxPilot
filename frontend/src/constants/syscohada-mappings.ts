@@ -27,12 +27,15 @@ export const BILAN_ACTIF = {
   // '2810'/'2910' : capte l'amort/dépréciation incorporel SAISI AU NIVEAU PARENT
   // (compte 281000/291000 global) sans collision avec les sous-comptes 2811-2819
   // ventilés en AF/AG/AH (4e caractère distinct). Sinon orphelin → bilan déséquilibré.
-  AE: { comptes: ['211', '212'], amort: ['2810', '2811', '2812', '2910', '2911', '2912'], libelle: 'Frais de développement et de prospection' },
+  AE: { comptes: ['211', '212'], amort: ['2811', '2812', '2911', '2912'], libelle: 'Frais de développement et de prospection' },
   AF: { comptes: ['213', '214', '215'], amort: ['2813', '2814', '2815', '2913', '2914', '2915'], libelle: 'Brevets, licences, logiciels, et droits similaires' },
   AG: { comptes: ['216'], amort: ['2816', '2916'], libelle: 'Fonds commercial et droit au bail' },
   AH: { comptes: ['217', '218', '219'], amort: ['2817', '2818', '2819', '2917', '2918', '2919'], libelle: 'Autres immobilisations incorporelles' },
   // Immobilisations corporelles
-  AJ: { comptes: ['22'], amort: ['282', '292'], libelle: 'Terrains' },
+  // '2810'/'2910' (amort incorporel GÉNÉRIQUE 281000, non ventilé) rattachés au
+  // pool corporel : ils sont réétalés au prorata du brut (cf computeAllValues),
+  // évitant de sur-amortir les incorporels qui gardent leurs amort spécifiques.
+  AJ: { comptes: ['22'], amort: ['282', '292', '2810', '2910'], libelle: 'Terrains' },
   AK: { comptes: ['231', '232', '233', '234'], amort: ['2831', '2832', '2833', '2834', '2931', '2932', '2933', '2934'], libelle: 'Bâtiments' },
   AL: { comptes: ['235', '237', '238'], amort: ['2835', '2837', '2838', '2935', '2937', '2938'], libelle: 'Aménagements, agencements et installations' },
   // Tout le matériel 24x SAUF 245 (transport → AN). 246/247/248 inclus pour
