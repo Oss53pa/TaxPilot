@@ -421,17 +421,22 @@ const ModernImportBalance: React.FC = () => {
       const d = svc.validateCoherenceDetailed()
       const sumD = entries.reduce((s, e) => s + (e.solde_debit || 0), 0)
       const sumC = entries.reduce((s, e) => s + (e.solde_credit || 0), 0)
-      // P&L présent dans cette colonne ? (classes 6/7 avec solde). Une colonne de
-      // CLÔTURE a son P&L déjà soldé (résultat affecté au report à nouveau) → 0 normal.
-      const hasPL = entries.some(e => /^[67]/.test(e.compte) && ((e.solde_debit || 0) !== 0 || (e.solde_credit || 0) !== 0))
-      const resultatRaw = svc.getResultatFromCompteResultat()
+      // Résultat = poste bilan CH (compte 13) : c'est là qu'est le résultat net,
+      // y compris en clôture (P&L des classes 6/7 déjà soldé → la valeur est virée
+      // au compte 13). On lit donc le résultat comme la liasse (générateur bilan),
+      // pas depuis les classes 6/7 — sinon une colonne de clôture affichait 0 à tort
+      // alors que le compte 13 est bien renseigné (ex. RÉSULTAT NET : PERTE en N-1).
+      const passif = svc.generateBilanPassif()
+      const chRow = passif.find(r => r.ref === 'CH') as { montant?: number } | undefined
+      const resultatRaw = (chRow?.montant ?? svc.getResultatFromCompteResultat()) || 0
+      const hasResultat = Math.abs(resultatRaw) >= 1
       return {
         totalActif: d.checks[0]?.valeurA ?? 0,
         totalPassif: d.checks[0]?.valeurB ?? 0,
         ecartBilan: d.checks[0]?.ecart ?? 0,
         equilibre: (d.checks[0]?.ecart ?? 0) <= 1,
-        resultat: resultatRaw || 0, // normalise -0 → 0
-        hasPL,
+        resultat: resultatRaw, // normalisé (-0 → 0)
+        hasResultat,
         sumDebit: sumD,
         sumCredit: sumC,
         balanceEquilibree: Math.abs(sumD - sumC) <= 1,
@@ -1253,9 +1258,9 @@ const ModernImportBalance: React.FC = () => {
                                   </Box>
                                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                     <Typography variant="body2" color="text.secondary">Résultat net</Typography>
-                                    {opt.p.hasPL
+                                    {opt.p.hasResultat
                                       ? <Typography variant="body2" sx={{ fontFamily: 'monospace', fontWeight: 600 }}>{fmt(opt.p.resultat)}</Typography>
-                                      : <Typography variant="caption" sx={{ fontStyle: 'italic', color: 'text.disabled' }}>clôturé — affecté au report à nouveau</Typography>}
+                                      : <Typography variant="caption" sx={{ fontStyle: 'italic', color: 'text.disabled' }}>—</Typography>}
                                   </Box>
                                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                     <Typography variant="body2" color="text.secondary">Couverture liasse</Typography>
@@ -1278,16 +1283,12 @@ const ModernImportBalance: React.FC = () => {
                           absents de la liasse générée. Vous pouvez importer et compléter le mapping manuellement.
                         </Alert>
                       )}
-                      {!chosen.hasPL && chosen.hasData && (
+                      {!chosen.hasResultat && chosen.hasData && (
                         <Alert severity="info" sx={{ mt: 2 }}>
-                          <AlertTitle>Colonne de clôture — résultat normalement nul</AlertTitle>
-                          Ce jeu de colonnes ne contient pas de compte de résultat (classes 6/7 déjà soldées) :
-                          le résultat de l'exercice a été <strong>affecté au report à nouveau</strong>, il n'y est
-                          donc plus isolable (c'est normal pour une clôture). Le bilan, lui, est complet.
-                          Pour déclarer <strong>{year}</strong> avec son résultat, utilisez les <strong>Colonnes « Solde N »</strong>.
-                          À noter : une balance 8 colonnes ne contient que le <strong>bilan</strong> de l'exercice précédent
-                          (colonnes « Solde N-1 »), pas son <strong>compte de résultat</strong> — le comparatif N-1 du compte de
-                          résultat (charges, produits, résultat) ne peut donc pas être chiffré depuis ce fichier.
+                          <AlertTitle>Résultat nul sur ce jeu de colonnes</AlertTitle>
+                          Ni compte de résultat (classes 6/7), ni résultat net (compte 13) renseigné sur ces
+                          colonnes : le résultat affiché est donc 0. Vérifiez que vous avez choisi le bon
+                          jeu de colonnes pour l'exercice <strong>{year}</strong>.
                         </Alert>
                       )}
                     </Paper>
