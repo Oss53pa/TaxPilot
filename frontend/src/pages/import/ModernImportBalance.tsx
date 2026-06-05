@@ -421,12 +421,17 @@ const ModernImportBalance: React.FC = () => {
       const d = svc.validateCoherenceDetailed()
       const sumD = entries.reduce((s, e) => s + (e.solde_debit || 0), 0)
       const sumC = entries.reduce((s, e) => s + (e.solde_credit || 0), 0)
+      // P&L présent dans cette colonne ? (classes 6/7 avec solde). Une colonne de
+      // CLÔTURE a son P&L déjà soldé (résultat affecté au report à nouveau) → 0 normal.
+      const hasPL = entries.some(e => /^[67]/.test(e.compte) && ((e.solde_debit || 0) !== 0 || (e.solde_credit || 0) !== 0))
+      const resultatRaw = svc.getResultatFromCompteResultat()
       return {
         totalActif: d.checks[0]?.valeurA ?? 0,
         totalPassif: d.checks[0]?.valeurB ?? 0,
         ecartBilan: d.checks[0]?.ecart ?? 0,
         equilibre: (d.checks[0]?.ecart ?? 0) <= 1,
-        resultat: svc.getResultatFromCompteResultat(),
+        resultat: resultatRaw || 0, // normalise -0 → 0
+        hasPL,
         sumDebit: sumD,
         sumCredit: sumC,
         balanceEquilibree: Math.abs(sumD - sumC) <= 1,
@@ -1246,9 +1251,11 @@ const ModernImportBalance: React.FC = () => {
                                     <Typography variant="body2" color="text.secondary">Total Bilan</Typography>
                                     <Typography variant="body2" sx={{ fontFamily: 'monospace', fontWeight: 600 }}>{fmt(opt.p.totalActif)}</Typography>
                                   </Box>
-                                  <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                     <Typography variant="body2" color="text.secondary">Résultat net</Typography>
-                                    <Typography variant="body2" sx={{ fontFamily: 'monospace', fontWeight: 600 }}>{fmt(opt.p.resultat)}</Typography>
+                                    {opt.p.hasPL
+                                      ? <Typography variant="body2" sx={{ fontFamily: 'monospace', fontWeight: 600 }}>{fmt(opt.p.resultat)}</Typography>
+                                      : <Typography variant="caption" sx={{ fontStyle: 'italic', color: 'text.disabled' }}>clôturé — affecté au report à nouveau</Typography>}
                                   </Box>
                                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                     <Typography variant="body2" color="text.secondary">Couverture liasse</Typography>
@@ -1271,10 +1278,14 @@ const ModernImportBalance: React.FC = () => {
                           absents de la liasse générée. Vous pouvez importer et compléter le mapping manuellement.
                         </Alert>
                       )}
-                      {Math.abs(chosen.resultat) < 1 && (
+                      {!chosen.hasPL && chosen.hasData && (
                         <Alert severity="info" sx={{ mt: 2 }}>
-                          Résultat net ≈ 0 sur ce jeu de colonnes — exercice précédent (classes 6/7 déjà soldées).
-                          Si vous déclarez {year}, choisissez plutôt les <strong>Colonnes « Solde N »</strong>.
+                          <AlertTitle>Colonne de clôture — résultat normalement nul</AlertTitle>
+                          Ce jeu de colonnes ne contient pas de compte de résultat (classes 6/7 déjà soldées) :
+                          le résultat de l'exercice a été <strong>affecté au report à nouveau</strong>, il n'y est
+                          donc plus isolable (c'est normal pour une clôture). Le bilan, lui, est complet.
+                          Pour déclarer <strong>{year}</strong> avec son résultat, utilisez les <strong>Colonnes « Solde N »</strong> ;
+                          le comparatif N-1 (compte de résultat) nécessite d'importer aussi la balance de l'exercice précédent.
                         </Alert>
                       )}
                     </Paper>
