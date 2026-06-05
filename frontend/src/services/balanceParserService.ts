@@ -433,8 +433,19 @@ export function parseBalanceData(sheet: ParsedSheet, mapping: ColumnMapping): Pa
       continue
     }
 
-    if (debit < 0 || credit < 0) {
-      warnings.push(`Ligne ${lineNum} : montant négatif détecté pour le compte ${compte}`)
+    // Un montant négatif (solde de sens inverse) est NORMAL et fréquent : comptes
+    // contra/d'avoir comme RRR accordés (7_9, ex. 706900), RRR obtenus (6_9),
+    // avances/acomptes (409/419), avoirs sur charges/produits, comptes à double sens.
+    // Le moteur les traite correctement via le solde signé → ce ne sont PAS des erreurs.
+    // On n'alerte donc QUE sur un négatif structurellement IMPOSSIBLE : capitaux propres
+    // qui ne peuvent être que créditeurs (capital, primes, réserves, écart de
+    // réévaluation, subventions d'investissement, provisions réglementées). On EXCLUT
+    // 109 (capital non appelé, débiteur normal), 12 (report à nouveau) et 13 (résultat)
+    // qui peuvent légitimement être négatifs.
+    const negatif = debit < 0 || credit < 0 || solde_debit < 0 || solde_credit < 0
+    const negatifImpossible = /^(10[1-6]|11[1-8]|1[45])/.test(compte)
+    if (negatif && negatifImpossible) {
+      warnings.push(`Ligne ${lineNum} : solde négatif anormal sur capitaux propres (compte ${compte})`)
     }
 
     entries.push({
