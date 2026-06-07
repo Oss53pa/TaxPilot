@@ -145,7 +145,10 @@ function computeAllValues(
     CL: { comptes: [...BILAN_PASSIF.CL.comptes] },
     CM: { comptes: [...BILAN_PASSIF.CM.comptes] },
     DA: { comptes: [...BILAN_PASSIF.DA.comptes] },
-    DB: { comptes: [...BILAN_PASSIF.DB.comptes] },
+    // 'signed' : dettes de location-acquisition (17) en NET — un solde débiteur
+    // (ex. 176 intérêts courus débiteurs) RÉDUIT la dette au lieu d'être orphelin
+    // (sinon bilan déséquilibré de ce montant). Conforme à la présentation cabinet.
+    DB: { comptes: [...BILAN_PASSIF.DB.comptes], special: 'signed' },
     DC: { comptes: [...BILAN_PASSIF.DC.comptes] },
     DH: { comptes: [...BILAN_PASSIF.DH.comptes] },
     DI: { comptes: [...BILAN_PASSIF.DI.comptes] },
@@ -282,6 +285,16 @@ function computeAllValues(
     const hasClass13N1 = Math.abs(getBalanceSolde(balanceN1, ['13'])) > 0.5
     const hasPLN1 = balanceN1.some(e => e.compte.startsWith('6') || e.compte.startsWith('7'))
     if (!hasClass13N1 && hasPLN1) vals['CJ.netN1'] = n('XI.netN1')
+  }
+  // IMPORTANT : recalculer les totaux passif qui DÉPENDENT de CJ après l'injection
+  // du résultat, sinon CP/DF/DZ restent calculés avec CJ=0 → l'audit voit un faux
+  // déséquilibre (Total Passif amputé du résultat) et BLOQUE un export pourtant valide.
+  for (const sfx of ['netN', 'netN1'] as const) {
+    if (sfx === 'netN1' && balanceN1.length === 0) continue
+    const m = (ref: string) => Number(vals[`${ref}.${sfx}`]) || 0
+    vals[`CP.${sfx}`] = m('CA') - m('CB') + m('CD') + m('CE') + m('CF') + m('CG') + m('CH') + m('CJ') + m('CL') + m('CM')
+    vals[`DF.${sfx}`] = m('CP') + m('DD')
+    vals[`DZ.${sfx}`] = m('DF') + m('DP') + m('DT') + m('DV')
   }
 
   // ── TFT — Tableau des Flux de Trésorerie ──
@@ -1353,6 +1366,48 @@ export async function exportModeB(
 
   if (errors > 0) {
     logger.error('[Mode B] Erreurs:', log.filter(l => l.status === 'error'))
+  }
+
+  // 5b. VÉRIFICATION "EXPORT CALCULÉ" — relit le classeur généré (wb) et confirme
+  // qu'il porte bien des données chiffrées, pas un modèle vide.
+  //  - compte les cellules VALEUR (détail injecté) et FORMULE (totaux) des feuilles
+  //    financières clés ;
+  //  - recontrôle l'équilibre du bilan (BZ = DZ) sur les valeurs calculées ;
+  //  - BLOQUE l'export s'il n'est pas calculé (aucune valeur) → jamais de fichier vide.
+  const FIN_SHEETS = ['BILAN', 'ACTIF', 'PASSIF', 'RESULTAT', 'TFT']
+  let nbValeurs = 0
+  let nbFormules = 0
+  for (const sh of FIN_SHEETS) {
+    const ws = wb.Sheets[sh]
+    if (!ws) continue
+    for (const k of Object.keys(ws)) {
+      if (k[0] === '!') continue
+      const cell = ws[k] as { v?: unknown; f?: unknown }
+      if (cell?.f) nbFormules++
+      else if (typeof cell?.v === 'number' && cell.v !== 0) nbValeurs++
+    }
+  }
+  const bzNet = (Number(vals['BZ.brut']) || 0) - (Number(vals['BZ.amort']) || 0)
+  const dzNet = Number(vals['DZ.netN']) || 0
+  const xiNet = Number(vals['XI.netN']) || 0
+  const ecartBilan = Math.round(bzNet - dzNet)
+
+  // Détection "export non calculé" : on s'appuie sur les TOTAUX CALCULÉS (vals),
+  // pas sur le comptage de cellules (le modèle garde des valeurs résiduelles non
+  // écrasées). Un bilan dont l'actif ET le passif calculés sont ~0 = rien de calculé.
+  if (injected === 0 || (Math.abs(bzNet) < 1 && Math.abs(dzNet) < 1)) {
+    throw new Error(
+      "Export non calculé : le bilan calculé est vide (balance non chargée, vide, ou "
+      + "mapping rompu). Le fichier n'a pas été généré.",
+    )
+  }
+  logger.debug(
+    `[Mode B] Export CALCULÉ ✓ — ${nbValeurs} valeurs + ${nbFormules} formules (états financiers) | `
+    + `Bilan: BZ=${Math.round(bzNet).toLocaleString('fr-FR')} DZ=${Math.round(dzNet).toLocaleString('fr-FR')} `
+    + `écart=${ecartBilan} | Résultat XI=${Math.round(xiNet).toLocaleString('fr-FR')}`,
+  )
+  if (Math.abs(ecartBilan) > 1) {
+    logger.warn(`[Mode B] ⚠️ Bilan exporté NON équilibré (BZ−DZ=${ecartBilan}) — vérifier le mapping/la balance.`)
   }
 
   // 6. Write the filled file
