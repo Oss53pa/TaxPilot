@@ -109,10 +109,20 @@ function IC002(ctx: AuditContext): ResultatControle {
 function IC003(ctx: AuditContext): ResultatControle {
   const ref = 'IC-003', nom = 'Amortissement sans immobilisation'
   const orphelins: string[] = []
+  // Matching corrigé : 28Xyz → brut 2Xyz (préfixe 2 + 3e caractère = 2 chars)
+  // Ex: 281200 → cherche brut commençant par '21' (incorporels)
+  //     282610 → '22' (terrains/corporels)
+  //     283530 → '23' (matériel)
+  // L'ancienne logique prenait 3 chars ('212' pour 281200) ce qui excluait
+  // les bruts à granularité '211xxx' → faux orphelin.
   const amort28 = find(ctx.balanceN, '28')
   for (const a of amort28) {
-    const immobPrefix = '2' + a.compte.substring(2)
-    const immob = ctx.balanceN.find((l) => l.compte.startsWith(immobPrefix.substring(0, 3)) && !l.compte.startsWith('28') && !l.compte.startsWith('29'))
+    const brutPrefix = '2' + a.compte[2]  // '28x...' → '2x'
+    const immob = ctx.balanceN.find((l) =>
+      l.compte.startsWith(brutPrefix) &&
+      !l.compte.startsWith('28') &&
+      !l.compte.startsWith('29')
+    )
     if (!immob && Math.abs(solde(a)) > 0) {
       orphelins.push(`${a.compte}: ${Math.abs(solde(a)).toLocaleString('fr-FR')}`)
     }
