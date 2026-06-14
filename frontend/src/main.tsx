@@ -12,6 +12,7 @@ import { store } from './store/index.ts'
 import { fiscasyncPalette, createFiscaSyncTheme } from './theme/fiscasyncTheme.ts'
 import { useThemeStore } from './store/themeStore.ts'
 import './index.css'
+import { initAtlasErrorMonitor } from './lib/atlasErrorMonitor'
 
 // Notistack styled snackbar variants - prevent white-on-white from MuiPaper override
 const StyledMaterialDesignContent = styled(MaterialDesignContent)(() => ({
@@ -132,6 +133,9 @@ window.addEventListener('error', (event) => {
   logger.error('Global error:', event.error || event.message)
   if (sentryDsn) captureSafe(event.error)
 })
+
+// + remontée vers la console Atlas Studio (Error Monitor + Bug-Triage ASVC).
+initAtlasErrorMonitor('taxpilot')
 
 // Reprise automatique après un déploiement : Vite émet `vite:preloadError`
 // quand un chunk importé dynamiquement (React.lazy) n'est plus disponible —
